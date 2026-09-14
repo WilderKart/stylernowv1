@@ -1,12 +1,32 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { headers } from "next/headers";
 
-export async function enviarCodigo(email: string) {
+/**
+ * Dominio de la request actual, no un valor fijo de env: Vercel sirve este proyecto
+ * bajo más de un alias (el corto y el largo con el hash del team), y el link del
+ * correo tiene que volver exactamente por donde entró el usuario. Cualquier alias
+ * que se use acá debe estar en Supabase → Authentication → URL Configuration →
+ * Redirect URLs, si no Supabase rechaza el `emailRedirectTo`.
+ */
+async function origenActual() {
+  const h = await headers();
+  const host = h.get("host");
+  const proto = h.get("x-forwarded-proto") ?? (host?.startsWith("localhost") ? "http" : "https");
+  return `${proto}://${host}`;
+}
+
+export async function enviarCodigo(email: string, siguiente: string) {
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { shouldCreateUser: true },
+    options: {
+      shouldCreateUser: true,
+      // El link "Iniciar sesión" del correo vuelve acá en vez de a la home directo,
+      // para que el intercambio de código realmente cree la sesión (src/app/auth/callback).
+      emailRedirectTo: `${await origenActual()}/auth/callback?next=${encodeURIComponent(siguiente)}`,
+    },
   });
   if (error) return { ok: false as const, error: error.message };
   return { ok: true as const };

@@ -3,8 +3,17 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { enviarCodigo, verificarCodigo } from "./actions";
+
+/**
+ * Clave de sessionStorage para sobrevivir al paso "codigo" si el usuario cambia de
+ * pestaña a revisar el correo y la vuelve a abrir, o la refresca sin querer — sin
+ * esto, todo el estado vivía solo en memoria de React y un refresh lo mandaba de
+ * nuevo a pedir el correo desde cero, incluso con la sesión de a medio camino.
+ * Se limpia sola al confirmar o al tocar "Cambiar correo".
+ */
+const CLAVE_PASO = "stylernow_login_paso";
 
 export function FormularioLogin({ siguiente }: { siguiente: string }) {
   const router = useRouter();
@@ -14,6 +23,43 @@ export function FormularioLogin({ siguiente }: { siguiente: string }) {
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [, iniciarHidratacion] = useTransition();
+
+  useEffect(() => {
+    iniciarHidratacion(() => {
+      try {
+        const guardado = sessionStorage.getItem(CLAVE_PASO);
+        if (!guardado) return;
+        const datos = JSON.parse(guardado) as { email?: string };
+        if (datos.email) {
+          setEmail(datos.email);
+          setStep("codigo");
+        }
+      } catch {
+        // localStorage/sessionStorage puede fallar (navegación privada, cuota) —
+        // el usuario simplemente vuelve a pedir el código, no rompe nada.
+      }
+    });
+  }, [iniciarHidratacion]);
+
+  function avanzarAPasoCodigo(correo: string) {
+    setStep("codigo");
+    try {
+      sessionStorage.setItem(CLAVE_PASO, JSON.stringify({ email: correo }));
+    } catch {
+      /* no crítico */
+    }
+  }
+
+  function volverAPasoEmail() {
+    setStep("email");
+    setCodigo("");
+    try {
+      sessionStorage.removeItem(CLAVE_PASO);
+    } catch {
+      /* no crítico */
+    }
+  }
 
   async function onEnviarCodigo(e: React.FormEvent) {
     e.preventDefault();
@@ -23,13 +69,13 @@ export function FormularioLogin({ siguiente }: { siguiente: string }) {
     }
     setLoading(true);
     setError(null);
-    const res = await enviarCodigo(email);
+    const res = await enviarCodigo(email, siguiente);
     setLoading(false);
     if (!res.ok) {
       setError(res.error);
       return;
     }
-    setStep("codigo");
+    avanzarAPasoCodigo(email);
   }
 
   async function onVerificarCodigo(e: React.FormEvent) {
@@ -41,6 +87,11 @@ export function FormularioLogin({ siguiente }: { siguiente: string }) {
     if (!res.ok) {
       setError(res.error);
       return;
+    }
+    try {
+      sessionStorage.removeItem(CLAVE_PASO);
+    } catch {
+      /* no crítico */
     }
     router.replace(siguiente);
     router.refresh();
@@ -95,11 +146,11 @@ export function FormularioLogin({ siguiente }: { siguiente: string }) {
         ) : (
           <form onSubmit={onVerificarCodigo} className="flex flex-col gap-5">
             <Input
-              label="Código de 6 dígitos"
+              label="Código de acceso"
               inputMode="numeric"
-              maxLength={6}
+              maxLength={8}
               required
-              placeholder="000000"
+              placeholder="00000000"
               value={codigo}
               onChange={(e) => setCodigo(e.target.value)}
               className="tracking-[0.4em]"
@@ -108,9 +159,13 @@ export function FormularioLogin({ siguiente }: { siguiente: string }) {
             <Button type="submit" size="lg" loading={loading} className="w-full">
               CONFIRMAR
             </Button>
+            <p className="text-center text-[11.5px] leading-relaxed text-text-faint">
+              También podés entrar con un solo click desde el botón “Iniciar sesión” que
+              te llegó en el mismo correo — no hace falta tipear el código.
+            </p>
             <button
               type="button"
-              onClick={() => setStep("email")}
+              onClick={volverAPasoEmail}
               className="text-center text-[12.5px] font-semibold text-accent"
             >
               Cambiar correo
