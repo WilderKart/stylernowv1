@@ -37,15 +37,27 @@ export async function verificarCodigo(email: string, token: string) {
   const { data, error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
   if (error) return { ok: false as const, error: error.message };
 
-  // 06-Security/04_Compliance_Colombia.md: registrar timestamp de aceptación del
-  // consentimiento (el checkbox ya fue exigido en el paso anterior del formulario).
+  let faltaTelefono = false;
+
   if (data.user) {
+    // 06-Security/04_Compliance_Colombia.md: registrar timestamp de aceptación del
+    // consentimiento (el checkbox ya fue exigido en el paso anterior del formulario).
     await supabase
       .from("perfil")
       .update({ consentimiento_datos_at: new Date().toISOString() })
       .eq("id", data.user.id)
       .is("consentimiento_datos_at", null);
+
+    // handle_new_user() (migración 007) crea el perfil con el prefijo del email como
+    // nombre provisorio y sin teléfono. Se usa "sin teléfono" como señal de que es el
+    // primer login, para pedirle una sola vez sus datos reales (02-UX/02_Onboarding.md).
+    const { data: perfil } = await supabase
+      .from("perfil")
+      .select("telefono")
+      .eq("id", data.user.id)
+      .single();
+    faltaTelefono = !perfil?.telefono;
   }
 
-  return { ok: true as const };
+  return { ok: true as const, faltaTelefono };
 }

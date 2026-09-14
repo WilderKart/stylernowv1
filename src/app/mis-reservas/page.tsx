@@ -1,3 +1,4 @@
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/card";
 import { fechaHoraLarga } from "@/lib/formato";
@@ -150,6 +151,8 @@ export default async function MisReservasPage() {
           </>
         )}
       </main>
+
+      <BottomNav />
     </div>
   );
 }

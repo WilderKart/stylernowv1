@@ -1,3 +1,4 @@
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
 import { Filtros } from "@/components/marketplace/filtros";
 import { NegocioCard } from "@/components/marketplace/negocio-card";
@@ -92,6 +93,8 @@ export default async function HomePage(props: PageProps<"/">) {
           </div>
         )}
       </main>
+
+      <BottomNav />
     </div>
   );
 }

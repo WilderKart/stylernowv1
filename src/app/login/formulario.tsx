@@ -93,7 +93,9 @@ export function FormularioLogin({ siguiente }: { siguiente: string }) {
     } catch {
       /* no crítico */
     }
-    router.replace(siguiente);
+    // Primer login (sin teléfono todavía): un solo desvío a completar el perfil
+    // antes de seguir a donde iba (02-UX/02_Onboarding.md).
+    router.replace(res.faltaTelefono ? "/perfil?bienvenida=1" : siguiente);
     router.refresh();
   }
 

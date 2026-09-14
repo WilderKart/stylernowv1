@@ -24,9 +24,18 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      // Mismo desvío de una sola vez que el flujo de código tipeado: sin teléfono
+      // todavía, primero completa el perfil (02-UX/02_Onboarding.md).
+      const { data: perfil } = await supabase
+        .from("perfil")
+        .select("telefono")
+        .eq("id", data.user.id)
+        .single();
+
+      const destino = perfil?.telefono ? next : "/perfil?bienvenida=1";
+      return NextResponse.redirect(`${origin}${destino}`);
     }
   }
 
