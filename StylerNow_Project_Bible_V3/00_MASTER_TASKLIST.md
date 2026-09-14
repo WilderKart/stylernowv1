@@ -6,7 +6,7 @@
 > Convención: `[x]` construido y verificado · `[~]` construido parcialmente ·
 > `[ ]` no empezado.
 >
-> **Última actualización:** 2026-09-14 · commit `pendiente` (perfil + bottom nav)
+> **Última actualización:** 2026-09-14 · commit `e1c3b49`
 
 ## Cómo leer esto
 
