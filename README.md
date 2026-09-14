@@ -45,6 +45,30 @@ supabase gen types typescript --db-url "$DATABASE_URL" > src/types/database.ts
 `src/types/database.ts` es generado: no se edita a mano, se regenera después de cada
 migración.
 
+## Desplegar en Vercel
+
+`.env.local` nunca se sube (está en `.gitignore`), así que Vercel no tiene tus variables
+por más que el repo esté conectado. Sin ellas, el proxy (`src/proxy.ts`, corre en casi
+toda ruta) no puede crear el cliente de Supabase y el sitio entero cae con
+`Internal Server Error`.
+
+1. **Project Settings → Environment Variables** — agregar las mismas claves que
+   `.env.example`, con los valores reales (Production, y Preview si lo usás):
+   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SECRET_KEY`
+   - `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY`, `MERCADOPAGO_ACCESS_TOKEN`, `MERCADOPAGO_WEBHOOK_SECRET`
+   - `NEXT_PUBLIC_SITE_URL` — la URL real del deploy (`https://tu-proyecto.vercel.app`),
+     **no** `http://localhost:3000`: la usan `back_urls` y `notification_url` de Mercado Pago.
+   - `DATABASE_URL` no hace falta en Vercel — las migraciones se corren desde tu máquina.
+2. **Supabase → Authentication → URL Configuration** — agregar la URL de Vercel a
+   *Redirect URLs* (y como *Site URL* si es el dominio principal). Sin esto el enlace
+   del código OTP por email vuelve a `localhost`.
+3. **Mercado Pago → Tus integraciones → Webhooks** — registrar
+   `https://tu-proyecto.vercel.app/api/webhooks/pasarela/mercadopago` y copiar el
+   secreto a `MERCADOPAGO_WEBHOOK_SECRET` en Vercel.
+4. Agregar variables a un deployment ya creado no lo redespliega solo: hacer
+   **Redeploy** desde la pestaña Deployments (sin "Use existing Build Cache" si el
+   cambio afecta variables `NEXT_PUBLIC_*`, porque esas se inyectan en build time).
+
 ## Estructura
 
 ```
