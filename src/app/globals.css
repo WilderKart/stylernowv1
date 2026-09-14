@@ -1,26 +1,48 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* StylerNow — Design tokens. Fuente: mockups aprobados (dark premium + acento ámbar). */
+@theme {
+  --font-display: var(--font-oswald), sans-serif;
+  --font-sans: var(--font-inter), sans-serif;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-bg: #0a0a0a;
+  --color-surface: #141210;
+  --color-surface-2: #1b1815;
+  --color-border: #232220;
+  --color-border-subtle: #1a1815;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-text: #f5f1ea;
+  --color-text-muted: #9c9690;
+  --color-text-faint: #6b6862;
+
+  --color-accent: #e8a23c;
+  --color-accent-soft: rgb(232 162 60 / 0.12);
+  --color-accent-hover: #f5b65c;
+
+  --color-success: #6fcf97;
+  --color-success-soft: rgb(111 207 151 / 0.14);
+  --color-danger: #e5584d;
+  --color-danger-soft: rgb(229 88 77 / 0.14);
+
+  --radius-card: 16px;
+  --radius-control: 13px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 99px;
 }
