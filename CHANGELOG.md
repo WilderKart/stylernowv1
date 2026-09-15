@@ -16,7 +16,7 @@ manual ("reserva telefónica"), reprogramar y reasignar Staff reutilizan
 sin atajos. Cancelar reutiliza `cancelar_reserva()` tal cual (ya
 soportaba reembolso 100% desde el Negocio). Bloquear horario no necesitó
 ninguna RPC nueva — su RLS ya estaba completo. Verificado: 15/15 casos
-reales.
+reales. `13c37af`
 
 ### Añadido — Fase 2, Módulo 2.5: Servicios
 CRUD completo (duración con rango 5-480 min, precio, categoría de puntaje,
