@@ -17,7 +17,7 @@ ahí crea el `staff` y el `vinculo_staff_negocio` reales. Corrige además el
 alcance de Guardian sobre `vinculo_staff_negocio`, que hasta ahora era el
 negocio completo en vez de solo su sede. Verificado: 44/44 casos reales
 contra la base, incluyendo el tope duro de Staff por plan y ADL-009 (un
-Staff nunca tiene dos vínculos activos a la vez).
+Staff nunca tiene dos vínculos activos a la vez). `36b3a3d`
 
 ### Añadido — ADR-006: Guardian comparte el Panel Negocio con permisos dinámicos
 Decisión de arquitectura del fundador: en vez de esperar a Fase 4 (App
