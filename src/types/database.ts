@@ -2044,6 +2044,47 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      crear_reserva_manual: {
+        Args: {
+          p_cliente_id: string
+          p_hora_inicio: string
+          p_sede_id: string
+          p_servicio_ids: string[]
+          p_staff_id?: string
+        }
+        Returns: {
+          bloqueo_fin: string | null
+          bloqueo_inicio: string | null
+          buffer_posterior_minutos: number
+          buffer_previo_minutos: number
+          cancelado_motivo: string | null
+          cancelado_por: string | null
+          checkin_at: string | null
+          checkout_at: string | null
+          cliente_id: string
+          created_at: string
+          estado: Database["public"]["Enums"]["reserva_estado"]
+          expira_at: string | null
+          hora_fin: string
+          hora_inicio: string
+          id: string
+          idempotency_key: string | null
+          monto_sena: number
+          monto_total: number
+          negocio_id: string
+          rango: unknown
+          recurso_id: string | null
+          sede_id: string
+          staff_id: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reserva"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       crear_sede: {
         Args: {
           p_ciudad: string
@@ -2303,6 +2344,45 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      reasignar_staff_reserva: {
+        Args: {
+          p_motivo?: string
+          p_nuevo_staff_id: string
+          p_reserva_id: string
+        }
+        Returns: {
+          bloqueo_fin: string | null
+          bloqueo_inicio: string | null
+          buffer_posterior_minutos: number
+          buffer_previo_minutos: number
+          cancelado_motivo: string | null
+          cancelado_por: string | null
+          checkin_at: string | null
+          checkout_at: string | null
+          cliente_id: string
+          created_at: string
+          estado: Database["public"]["Enums"]["reserva_estado"]
+          expira_at: string | null
+          hora_fin: string
+          hora_inicio: string
+          id: string
+          idempotency_key: string | null
+          monto_sena: number
+          monto_total: number
+          negocio_id: string
+          rango: unknown
+          recurso_id: string | null
+          sede_id: string
+          staff_id: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reserva"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reenviar_invitacion: {
         Args: { p_invitacion_id: string }
         Returns: {
@@ -2322,6 +2402,45 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "invitacion_staff"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      reprogramar_reserva: {
+        Args: {
+          p_motivo?: string
+          p_nueva_hora_inicio: string
+          p_reserva_id: string
+        }
+        Returns: {
+          bloqueo_fin: string | null
+          bloqueo_inicio: string | null
+          buffer_posterior_minutos: number
+          buffer_previo_minutos: number
+          cancelado_motivo: string | null
+          cancelado_por: string | null
+          checkin_at: string | null
+          checkout_at: string | null
+          cliente_id: string
+          created_at: string
+          estado: Database["public"]["Enums"]["reserva_estado"]
+          expira_at: string | null
+          hora_fin: string
+          hora_inicio: string
+          id: string
+          idempotency_key: string | null
+          monto_sena: number
+          monto_total: number
+          negocio_id: string
+          rango: unknown
+          recurso_id: string | null
+          sede_id: string
+          staff_id: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reserva"
           isOneToOne: true
           isSetofReturn: false
         }

@@ -7,6 +7,17 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 2, Módulo 2.6: Agenda
+Vista Día (columnas por Staff, cuadrícula real según el horario de la
+Sede, drag & drop para reasignar Staff) y Vista Semana (columnas por
+Staff, una fila por día — el mockup exacto de la Biblia). Crear cita
+manual ("reserva telefónica"), reprogramar y reasignar Staff reutilizan
+`slots_disponibles()` — las mismas 7 validaciones que el flujo online,
+sin atajos. Cancelar reutiliza `cancelar_reserva()` tal cual (ya
+soportaba reembolso 100% desde el Negocio). Bloquear horario no necesitó
+ninguna RPC nueva — su RLS ya estaba completo. Verificado: 15/15 casos
+reales.
+
 ### Añadido — Fase 2, Módulo 2.5: Servicios
 CRUD completo (duración con rango 5-480 min, precio, categoría de puntaje,
 buffers), Combos (agrupan servicios con nombre propio, conectados de

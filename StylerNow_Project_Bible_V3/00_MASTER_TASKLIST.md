@@ -59,8 +59,8 @@ verificados, no solo "no lanza error en el camino feliz".
 | 2.4 Gestión de Staff | ✅ | ✅ | ✅ | ✅ | Cerrado |
 | ADR-006 Panel compartido Guardian | ✅ | ✅ | ✅ | ✅ | Cerrado |
 | 2.5 Servicios | ✅ | ✅ | ✅ | ✅ | Cerrado |
-| 2.6 Agenda | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
-| 2.7 CRM | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| 2.6 Agenda | ✅ | ✅ | ✅ | ✅ | Cerrado |
+| 2.7 CRM | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
 | 2.8 POS | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | 2.9 Inventario | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | 2.10 Reportes | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
@@ -154,7 +154,7 @@ sin este dominio, el Marketplace de Cliente se ve vacío en producción.
 - [x] **2.3 Gestión de Sedes** — dominio completo, ver detalle abajo
 - [x] **2.4 Gestión de Staff** — dominio completo, ver detalle abajo
 - [x] **2.5 Servicios** — dominio completo, ver detalle abajo
-- [ ] 2.6 Agenda (día/semana/Staff, drag & drop, bloqueos, conflictos)
+- [x] **2.6 Agenda** — dominio completo, ver detalle abajo
 - [ ] 2.7 CRM (historial, notas, etiquetas, LTV, riesgo de abandono)
 - [ ] 2.8 POS (venta rápida, productos, propinas, saldo pendiente, recibos)
 - [ ] 2.9 Inventario (entradas/salidas, consumo automático, alertas)
@@ -544,7 +544,76 @@ combo no conectado al motor de disponibilidad).
 
 ---
 
-**Próximo módulo a ejecutar: 2.6 — Agenda.**
+## Módulo 2.6 — detalle de lo construido
+
+Migración 018 · `src/app/panel/agenda/`. `slots_disponibles()`,
+`crear_reserva()` y `cancelar_reserva()` (migración 008/009, ya
+verificadas dos veces en sesiones anteriores) **no se tocaron** — son la
+autoridad de disponibilidad; este módulo agrega lo que faltaba para que
+el Panel pueda operar sobre ellas.
+
+- **Vista Día**: columnas por Staff de la sede activa, cuadrícula de 30
+  minutos calculada desde el `horario_base` real de la Sede para ese día
+  (min/max de sus ventanas; sin ventanas configuradas, fallback 07:00-21:00
+  para no dejar la pantalla vacía). Citas coloreadas por estado, bloqueos
+  de ausencia como región rayada. **Drag & drop real**: arrastrar una cita
+  a la columna de otro Staff dispara `reasignar_staff_reserva` (mismo
+  horario, valida las 7 reglas para el Staff destino). Cambiar el
+  horario usa un selector explícito de horarios reales (`slots_
+  disponibles`), no arrastre libre de píxeles — una decisión deliberada
+  para no construir una interacción de tiempo-exacto poco confiable sin
+  una librería de calendario dedicada.
+- **Vista Semana**: columnas por Staff, una fila por día — el mockup
+  exacto de `02-UX/09_Business_Panel.md` ("Vista semanal por Staff,
+  columnas"). Tocar un día lleva a la Vista Día para la interacción
+  completa.
+- **Crear cita manual ("reserva telefónica")**: `crear_reserva_manual()`
+  reutiliza `slots_disponibles()` — **las mismas 7 validaciones, sin
+  atajos** (`02-UX/09_Business_Panel.md` lo exige explícitamente). Busca
+  el Cliente entre quienes ya tuvieron una Reserva con el negocio (RLS
+  `perfil_select_crm_negocio`, ya existente) — un Cliente genuinamente
+  nuevo todavía no es buscable por este camino (ver `docs/PENDING_
+  DECISIONS.md`, no bloqueante). `expira_at` se extiende a 24 h (vs. 10
+  min del flujo online) porque acá no hay un Cliente completando el pago
+  en el momento.
+- **Reprogramar** (`reprogramar_reserva()`): mismas 7 validaciones sobre
+  el nuevo horario, conserva `id`/Seña/historial. Cliente dentro de la
+  ventana de reembolso parcial, o Negocio sin restricción de ventana
+  (indisponibilidad sobrevenida del Staff, `03-Business-Rules/02_Booking_
+  Rules.md`).
+- **Reasignar Staff** (`reasignar_staff_reserva()`): exclusivo Barbería/
+  Guardian de la Sede, valida que el nuevo Staff cumpla las 7 reglas para
+  ese mismo horario (incluida su propia `staff_servicio`).
+- **Cancelar**: reutiliza `cancelar_reserva()` tal cual — ya soportaba
+  cancelación iniciada por el Negocio con reembolso 100%, no hizo falta
+  ningún cambio.
+- **Bloquear horario**: sin RPC nueva — `bloqueo_ausencia` ya tenía RLS
+  completo (`bloqueo_ausencia_write_propio`/`_write_barberia_guardian`,
+  migración 006) que ya permitía exactamente el INSERT/DELETE que la UI
+  necesita.
+- **Conflictos**: no se construyó un mecanismo nuevo de detección — los
+  tres RPCs re-validan contra `slots_disponibles()` en el momento, y el
+  índice de exclusión GIST de `reserva.rango` (migración 003) sigue
+  siendo el lock real a nivel de base contra condiciones de carrera.
+
+### Verificado end-to-end contra la base real (15/15)
+Un tercero rechazado en las 3 RPCs nuevas · cliente inexistente rechazado
+al crear una cita manual · el mismo horario ocupado es rechazado en un
+segundo intento · el Cliente reprograma dentro de su ventana (conserva
+`id`) pero es rechazado fuera de ella · el Negocio reprograma sin esa
+restricción · reasignar a un Staff sin `staff_servicio` para ese Servicio
+es rechazado, habilitarlo lo permite · cancelar desde el Negocio siempre
+reembolsa 100% · un tercero no puede bloquear la agenda ajena, la
+Barbería sí · las 3 acciones nuevas quedan en `evento_auditoria`.
+
+### Documentación actualizada con este módulo
+Este archivo, `CHANGELOG.md`, `docs/PENDING_DECISIONS.md` (Cliente
+genuinamente nuevo en una reserva manual, y si un Negocio debería poder
+confirmar una cita manual sin cobrar Seña en el momento).
+
+---
+
+**Próximo módulo a ejecutar: 2.7 — CRM.**
 
 ---
 
