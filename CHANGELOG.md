@@ -7,6 +7,21 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 2, Módulo 2.7: CRM
+Listado (foto, nombre, visitas, LTV, última visita, etiquetas) con
+búsqueda/filtro/orden/paginación real. `vista_crm_cliente` calcula LTV =
+Ticket promedio × frecuencia anual × 2 (`01-PRD/05_KPIs.md`) en un único
+lugar. Etiqueta "VIP" dinámica (nunca guardada, así nunca queda "pegada"
+tras un reembolso). Ficha de Cliente completa: resumen, Puntos de
+fidelización reales, servicio favorito/Staff preferido, historial con
+reseñas, notas privadas, fotos con consentimiento — `reserva_foto` tiene
+un `CHECK` real que hace imposible guardar una foto sin consentimiento
+explícito, no es solo una casilla de UI. Segmentación con las 4
+plantillas de la Biblia + constructor personalizado, exportación CSV
+exclusiva de Barbería. Riesgo de abandono se muestra honesto como "no
+disponible" (depende de IA de Fase 6) en vez de un número inventado.
+Verificado: 14/14 casos reales, incluyendo el aislamiento entre negocios.
+
 ### Añadido — Fase 2, Módulo 2.6: Agenda
 Vista Día (columnas por Staff, cuadrícula real según el horario de la
 Sede, drag & drop para reasignar Staff) y Vista Semana (columnas por

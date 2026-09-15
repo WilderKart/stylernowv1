@@ -57,6 +57,10 @@ export interface PermisosPanel {
   // servicio_combo_write_barberia / staff_servicio_write_barberia en RLS).
   gestionarCombos: boolean;
   asignarStaffServicio: boolean;
+  // Módulo 2.7 — CRM. Ver/agregar notas/etiquetar son 🏢 Guardian y 🌐
+  // Barbería por igual (sin distinción de UI); "Exportar clientes" es
+  // exclusivo de Barbería (03-Business-Rules/01_Roles.md).
+  exportarClientes: boolean;
 }
 
 export interface ContextoUsuario {
@@ -98,6 +102,7 @@ const PERMISOS_NINGUNO: PermisosPanel = {
   activarDesactivarServicio: false,
   gestionarCombos: false,
   asignarStaffServicio: false,
+  exportarClientes: false,
 };
 
 const CONTEXTO_NINGUNO: ContextoUsuario = {
@@ -159,6 +164,7 @@ export async function resolverContexto(): Promise<ContextoUsuario> {
         activarDesactivarServicio: true,
         gestionarCombos: true,
         asignarStaffServicio: true,
+        exportarClientes: true,
       },
     };
   }
@@ -210,6 +216,7 @@ export async function resolverContexto(): Promise<ContextoUsuario> {
           activarDesactivarServicio: true,
           gestionarCombos: false,
           asignarStaffServicio: false,
+          exportarClientes: false,
         },
       };
     }

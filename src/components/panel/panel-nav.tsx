@@ -26,6 +26,7 @@ export function PanelNav({ rol }: { rol: RolPanel }) {
     // (ADR-006) — el alcance lo resuelve la propia pantalla vía `permisos`,
     // nunca un ítem de nav distinto por rol.
     { href: "/panel/agenda", etiqueta: "Agenda" },
+    { href: "/panel/crm", etiqueta: "Clientes" },
     { href: "/panel/staff", etiqueta: "Staff" },
     { href: "/panel/servicios", etiqueta: "Servicios" },
   ];

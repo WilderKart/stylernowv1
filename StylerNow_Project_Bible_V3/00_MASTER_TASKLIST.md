@@ -60,8 +60,8 @@ verificados, no solo "no lanza error en el camino feliz".
 | ADR-006 Panel compartido Guardian | ✅ | ✅ | ✅ | ✅ | Cerrado |
 | 2.5 Servicios | ✅ | ✅ | ✅ | ✅ | Cerrado |
 | 2.6 Agenda | ✅ | ✅ | ✅ | ✅ | Cerrado |
-| 2.7 CRM | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
-| 2.8 POS | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| 2.7 CRM | ✅ | ✅ | ✅ | ✅ | Cerrado |
+| 2.8 POS | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
 | 2.9 Inventario | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | 2.10 Reportes | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | Fase 3 — SuperSU CMS | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
@@ -155,7 +155,7 @@ sin este dominio, el Marketplace de Cliente se ve vacío en producción.
 - [x] **2.4 Gestión de Staff** — dominio completo, ver detalle abajo
 - [x] **2.5 Servicios** — dominio completo, ver detalle abajo
 - [x] **2.6 Agenda** — dominio completo, ver detalle abajo
-- [ ] 2.7 CRM (historial, notas, etiquetas, LTV, riesgo de abandono)
+- [x] **2.7 CRM** — dominio completo, ver detalle abajo
 - [ ] 2.8 POS (venta rápida, productos, propinas, saldo pendiente, recibos)
 - [ ] 2.9 Inventario (entradas/salidas, consumo automático, alertas)
 - [ ] 2.10 Reportes (ventas, Staff, servicios, ocupación, exportaciones)
@@ -613,7 +613,79 @@ confirmar una cita manual sin cobrar Seña en el momento).
 
 ---
 
-**Próximo módulo a ejecutar: 2.7 — CRM.**
+## Módulo 2.7 — detalle de lo construido
+
+Migraciones 019-020 · `src/app/panel/crm/`. El bucket de Storage
+`crm-fotos` y su RLS ya existían desde la migración 007 (previstos, nunca
+usados hasta ahora) — esta es la primera vez que algo los consume de
+verdad.
+
+- **Listado** (`/panel/crm`): foto, nombre, visitas, LTV, última visita,
+  etiquetas — búsqueda por nombre/teléfono, orden, "Solo VIP", paginación
+  incremental. Filtros que no son columnas directas de la vista (sede,
+  etiqueta, consentimiento de marketing) se resuelven ANTES como listas de
+  `cliente_id` intersecadas, nunca después de paginar — evita el bug de
+  "página vacía con resultados reales más adelante" que un filtro post-
+  paginación produciría.
+- **`vista_crm_cliente`** (`security_invoker=true`, hereda RLS real de
+  `reserva`/`perfil`): agrega visitas, ticket promedio, última/primera
+  visita y **LTV = Ticket promedio × frecuencia anual × 2**
+  (`01-PRD/05_KPIs.md`, "LTV de Cliente (aproximado)") — un único lugar
+  que lo calcula, nadie más lo recalcula distinto. Un Cliente que solo
+  canceló o tuvo No-show sigue apareciendo (fila con visitas=0), tal cual
+  exige `01_CRM_Complete.md`.
+- **VIP dinámico, nunca guardado**: se calcula en cada lectura
+  (`ltv >= $500.000`, el mismo número que la Biblia da como *ejemplo* de
+  regla — no hay un umbral de plataforma fijo documentado). Esto es
+  exactamente lo que pide el caso límite de `07_CRM.md`: la etiqueta no
+  puede quedar "pegada" tras un reembolso que baje el LTV, y al no
+  guardarse nunca, no hay nada que recalcular.
+- **Detalle** (`/panel/crm/[clienteId]`): resumen (LTV, visitas, última
+  visita, Puntos de fidelización reales vía `punto_fidelizacion`, servicio
+  favorito y Staff preferido calculados por frecuencia), historial
+  completo con reseña si la dejó, notas privadas (nunca visibles al
+  Cliente — verificado), etiquetas manuales, galería de fotos.
+- **Riesgo de abandono**: NO se inventa un score. `07_CRM.md` lo define
+  como dependiente de `09-CRM-Intelligence/04_AI_Business.md` (IA de
+  Fase 6) — la ficha lo muestra como "no disponible todavía", nunca un
+  número falso.
+- **Fotos con consentimiento real, no una casilla decorativa**:
+  `reserva_foto.consentimiento` tiene `check (consentimiento = true)` —
+  es **imposible** insertar una fila sin consentimiento explícito,
+  verificado con un intento directo que la base rechaza.
+- **Segmentación** (`/panel/crm/segmentos`): las 4 plantillas sugeridas
+  por `01_CRM_Complete.md` (inactivos 45+ días, VIP sin visita reciente,
+  cumpleañeros del mes, primera visita hace 7 días) más un constructor
+  personalizado (etiqueta + LTV + última visita). Excluye automáticamente
+  a quien retiró el consentimiento de marketing — no es una opción
+  desactivable por defecto, tal cual exige el caso límite de
+  `01_CRM_Complete.md`. Sin campañas todavía (Fase 6): el segmento hoy es
+  una lista de Clientes real y útil por sí sola, no un catálogo colgado
+  de una función que no existe.
+- **Exportar clientes**: CSV real generado del listado completo (hasta
+  5.000 filas), exclusivo de Barbería (`exportarClientes`, nuevo en
+  `PermisosPanel`) — matriz de Roles.
+- **Aislamiento entre negocios, verificado**: un Cliente que nunca
+  reservó con un Negocio no aparece en su CRM ni con `service_role`
+  suplantado por otro dueño — es la propiedad más importante de este
+  módulo y la que más se probó.
+
+### Verificado end-to-end contra la base real (14/14)
+LTV calculado correctamente (2 Reservas de $40.000/$60.000 → ticket
+promedio $50.000 → LTV $200.000) · aislamiento entre negocios (el Cliente
+no aparece en el CRM de un negocio donde nunca reservó) · un tercero sin
+vínculo no lee nada · las notas nunca son visibles al propio Cliente · un
+tercero no puede escribir notas/fotos en un negocio ajeno · etiqueta
+duplicada rechazada por constraint único · **una foto sin consentimiento
+es rechazada por un `CHECK` real de la base** · una foto no puede
+asociarse a un cliente que no es el de esa Reserva.
+
+### Documentación actualizada con este módulo
+Este archivo, `CHANGELOG.md`.
+
+---
+
+**Próximo módulo a ejecutar: 2.8 — POS.**
 
 ---
 

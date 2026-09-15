@@ -158,6 +158,90 @@ export type Database = {
           },
         ]
       }
+      cliente_etiqueta: {
+        Row: {
+          cliente_id: string
+          creado_por: string
+          created_at: string
+          etiqueta: string
+          id: string
+          negocio_id: string
+        }
+        Insert: {
+          cliente_id: string
+          creado_por: string
+          created_at?: string
+          etiqueta: string
+          id?: string
+          negocio_id: string
+        }
+        Update: {
+          cliente_id?: string
+          creado_por?: string
+          created_at?: string
+          etiqueta?: string
+          id?: string
+          negocio_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cliente_etiqueta_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cliente_etiqueta_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cliente_nota: {
+        Row: {
+          autor_id: string
+          cliente_id: string
+          created_at: string
+          id: string
+          negocio_id: string
+          texto: string
+        }
+        Insert: {
+          autor_id: string
+          cliente_id: string
+          created_at?: string
+          id?: string
+          negocio_id: string
+          texto: string
+        }
+        Update: {
+          autor_id?: string
+          cliente_id?: string
+          created_at?: string
+          id?: string
+          negocio_id?: string
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cliente_nota_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cliente_nota_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credito_ia_consumo: {
         Row: {
           created_at: string
@@ -1238,6 +1322,61 @@ export type Database = {
           },
         ]
       }
+      reserva_foto: {
+        Row: {
+          cliente_id: string
+          consentimiento: boolean
+          created_at: string
+          id: string
+          negocio_id: string
+          reserva_id: string
+          subido_por: string
+          url: string
+        }
+        Insert: {
+          cliente_id: string
+          consentimiento: boolean
+          created_at?: string
+          id?: string
+          negocio_id: string
+          reserva_id: string
+          subido_por: string
+          url: string
+        }
+        Update: {
+          cliente_id?: string
+          consentimiento?: boolean
+          created_at?: string
+          id?: string
+          negocio_id?: string
+          reserva_id?: string
+          subido_por?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reserva_foto_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reserva_foto_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reserva_foto_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reserva"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reserva_servicio: {
         Row: {
           precio_congelado_unitario: number
@@ -1855,6 +1994,37 @@ export type Database = {
       }
     }
     Views: {
+      vista_crm_cliente: {
+        Row: {
+          cliente_foto_url: string | null
+          cliente_id: string | null
+          cliente_nombre: string | null
+          cliente_telefono: string | null
+          ltv: number | null
+          negocio_id: string | null
+          primera_visita: string | null
+          ticket_promedio: number | null
+          ultima_visita: string | null
+          visitas: number | null
+          visitas_ultimo_anio: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reserva_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reserva_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vista_staff_negocio: {
         Row: {
           comision_pct: number | null
