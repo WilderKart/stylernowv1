@@ -17,7 +17,7 @@ tenía tabla y RLS desde el Módulo 1 pero nunca otorgaba Puntos — esta es
 la primera vez que se activa de verdad. `cierre_caja_dia()` da el
 resumen efectivo/digital/total del día. Catálogo de Productos simple
 (`/panel/pos/productos`). Verificado: 14/14 casos reales, incluyendo el
-canje FIFO exacto y que el saldo nunca queda negativo.
+canje FIFO exacto y que el saldo nunca queda negativo. `5d2c07e`
 
 ### Añadido — Fase 2, Módulo 2.7: CRM
 Listado (foto, nombre, visitas, LTV, última visita, etiquetas) con
