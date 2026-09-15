@@ -1,5 +1,7 @@
+import { PanelNav } from "@/components/panel/panel-nav";
 import { Badge, Card } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export const metadata = { title: "Panel" };
@@ -43,35 +45,64 @@ export default async function PanelPage() {
   if (!negocio.onboarding_completo) redirect("/panel/onboarding");
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-2xl flex-col px-5 py-8 sm:px-10">
-      <h1 className="font-display mb-6 text-[24px] font-bold uppercase text-text">
-        {negocio.nombre}
-      </h1>
+    <div className="flex min-h-dvh flex-col bg-bg">
+      <PanelNav />
+      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 py-8 sm:px-10">
+        <h1 className="font-display mb-6 text-[24px] font-bold uppercase text-text">
+          {negocio.nombre}
+        </h1>
 
-      <Card className="mb-6 flex items-center justify-between">
-        <div>
-          <p className="text-[11.5px] font-bold uppercase tracking-wide text-text-muted">Estado</p>
-          <p className="mt-1 text-[15px] font-semibold text-text">
-            {ESTADO_TEXTO[negocio.estado]}
-          </p>
-        </div>
-        <Badge tone={ESTADO_TONO[negocio.estado]}>{negocio.estado}</Badge>
-      </Card>
-
-      {negocio.estado === "PENDIENTE_APROBACION" ? (
-        <Card className="border-accent/30 bg-accent-soft">
-          <p className="text-[13px] font-bold text-text">Tu negocio está en revisión</p>
-          <p className="mt-1.5 text-[12.5px] leading-relaxed text-text-muted">
-            El equipo de StylerNow revisa los datos que cargaste y lo activa — normalmente
-            en menos de 24 horas hábiles. Te avisamos por correo apenas quede activo.
-          </p>
+        <Card className="mb-6 flex items-center justify-between">
+          <div>
+            <p className="text-[11.5px] font-bold uppercase tracking-wide text-text-muted">Estado</p>
+            <p className="mt-1 text-[15px] font-semibold text-text">
+              {ESTADO_TEXTO[negocio.estado]}
+            </p>
+          </div>
+          <Badge tone={ESTADO_TONO[negocio.estado]}>{negocio.estado}</Badge>
         </Card>
-      ) : null}
 
-      <p className="mt-8 rounded-2xl border border-dashed border-border px-4 py-6 text-center text-[12.5px] text-text-faint">
-        El Dashboard completo (ingresos, ocupación, próximas citas — Módulo 2.2) todavía no
-        está construido. Esta pantalla es el punto de llegada mínimo del registro.
-      </p>
+        {negocio.estado === "PENDIENTE_APROBACION" ? (
+          <Card className="mb-6 border-accent/30 bg-accent-soft">
+            <p className="text-[13px] font-bold text-text">Tu negocio está en revisión</p>
+            <p className="mt-1.5 text-[12.5px] leading-relaxed text-text-muted">
+              El equipo de StylerNow revisa los datos que cargaste y lo activa — normalmente
+              en menos de 24 horas hábiles. Te avisamos por correo apenas quede activo.
+            </p>
+          </Card>
+        ) : null}
+
+        <Link
+          href="/panel/sedes"
+          className="mb-3 flex items-center justify-between rounded-2xl border border-border-subtle bg-surface p-4 transition-colors hover:border-accent/40"
+        >
+          <div>
+            <p className="text-[13.5px] font-bold text-text">Gestionar sedes</p>
+            <p className="text-[12px] text-text-faint">
+              Horarios, ubicación, cierres, staff por sede
+            </p>
+          </div>
+          <svg
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="shrink-0 text-text-faint"
+            aria-hidden="true"
+          >
+            <path d="M9 6l6 6-6 6" />
+          </svg>
+        </Link>
+
+        <p className="mt-4 rounded-2xl border border-dashed border-border px-4 py-6 text-center text-[12.5px] text-text-faint">
+          El Dashboard completo (ingresos, ocupación, próximas citas — Módulo 2.2) todavía no
+          está construido. Esta pantalla es el punto de llegada mínimo del registro.
+        </p>
+      </div>
     </div>
   );
 }

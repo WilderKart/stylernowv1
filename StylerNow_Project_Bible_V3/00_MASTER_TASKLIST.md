@@ -119,7 +119,7 @@ sin este dominio, el Marketplace de Cliente se ve vacío en producción.
       vía las tablas reales (sin tabla de "progreso" temporal — migración
       `011_registro_negocio.sql`, `src/app/panel/onboarding/`)
 - [ ] 2.2 Dashboard (ingresos, ocupación, próximas citas, plan, alertas)
-- [ ] 2.3 Gestión de Sedes (crear/editar/cerrar/reactivar/trasladar)
+- [x] **2.3 Gestión de Sedes** — dominio completo, ver detalle abajo
 - [ ] 2.4 Gestión de Staff (listado, detalle, CRUD, Guardian, matriz de roles)
 - [ ] 2.5 Servicios (CRUD, categorías, combos, asignación a Staff)
 - [ ] 2.6 Agenda (día/semana/Staff, drag & drop, bloqueos, conflictos)
@@ -175,10 +175,73 @@ encadenado — nunca pide `RETURNING`, así que el problema no aplica.
 Diagnosticado con una conexión directa a Postgres (no solo supabase-js)
 para descartar causas alternativas antes de tocar código.
 
-**Próximo módulo a ejecutar: 2.2 Dashboard** o **2.3 Gestión de Sedes**
-— cualquiera de los dos es razonable a continuación; 2.4 (Staff) tiene
-sentido justo después para completar la aceptación de invitaciones que
-quedó pendiente de 2.1.
+## Módulo 2.3 — detalle de lo construido
+
+Migraciones 013 y 014 · `src/app/panel/sedes/`, `src/components/negocio/
+formulario-sede.tsx`, `src/components/panel/panel-nav.tsx`.
+
+- **CRUD completo**: listado (`/panel/sedes`), crear (`/panel/sedes/nueva`),
+  editar/detalle (`/panel/sedes/[id]`), cerrar temporal, reabrir, eliminar
+  (soft delete = `cerrada_permanente`, nunca borrado físico)
+- **Multi-sede real desde el día uno**: `crear_sede()` RPC enforza
+  `plan.limite_sedes` (Raven/Jarl tope 1, Valhalla tope 5, Allfather sin
+  tope) con `403 PLAN_LIMIT_EXCEEDED` — no una validación solo de UI
+- **Sede principal**: columna `es_principal` con índice único parcial (una
+  sola por negocio); la primera sede creada la hereda automático;
+  `establecer_sede_principal()` para cambiarla. El Marketplace
+  (`marketplace_buscar`) ahora muestra la sede PRINCIPAL en la tarjeta, no
+  "la primera creada por fecha" como antes
+- **Reglas de negocio protegidas server-side, no solo en la UI**:
+  `cerrar_sede()` rechaza cerrar la única sede operativa
+  (`ULTIMA_SEDE_OPERATIVA`) y rechaza cerrar una sede con Reservas activas
+  futuras (`SEDE_CON_RESERVAS_ACTIVAS`) — nunca se puede dejar una cita
+  huérfana ni un negocio sin dónde recibir reservas
+- **Traslado de Staff completo** (`trasladar_staff()`, exclusivo de
+  Barbería per `03-Business-Rules/01_Roles.md`): cambia `sede_activa_id`,
+  audita antes/después en `evento_auditoria`. El historial y el Nivel
+  PRO/EXPERT/MASTER se conservan gratis porque están indexados por
+  `vinculo_id`, que no cambia en un traslado. El alcance de Guardian se
+  recalcula solo — `is_guardian_de_sede()` ya evalúa `sede_activa_id` en
+  vivo, así que mover la sede activa ES lo que cambia su alcance, sin un
+  paso adicional
+- **Horarios — excepciones, festivos, horario especial**: tabla
+  `sede_horario_excepcion` nueva; `slots_disponibles()` la respeta (un
+  festivo corta toda la sede ese día, un horario especial reemplaza el
+  semanal solo para esa fecha) — sin esto la disponibilidad real nunca
+  hubiera podido reflejar un cierre puntual
+- **Ubicación**: dirección/ciudad/lat-lng ya se completan (por
+  geolocalización del navegador, sin selector de mapa interactivo) — listo
+  para MapLibre/OSM cuando llegue Fase 5, sin bloquear nada ahora
+- **Reutilización**: `FormularioSede` es un componente nuevo, único lugar
+  donde vive el formulario de sede (nombre/dirección/horario/ubicación) —
+  antes vivía duplicado dentro del wizard de onboarding; ahora el wizard
+  también lo usa
+
+## Bugs reales encontrados y corregidos durante la verificación
+
+1. **`max(uuid)` reintroducido** — al reescribir `slots_disponibles()` para
+   soportar excepciones (migración 013), se copió una versión vieja de la
+   función que todavía tenía el bug de `max(uuid)` ya corregido una vez en
+   la migración 009. Encontrado por la prueba real (no a simple vista),
+   corregido en la migración 014.
+2. **`found` pisado entre dos SELECT** — la variable plpgsql `found` que
+   marcaba "hay una excepción de horario ese día" quedaba sobreescrita por
+   el SELECT de conteo de Servicios que corría después, antes de llegar al
+   CTE que la necesitaba. Corregido capturando el valor en una variable
+   propia (`v_hay_excepcion`) apenas se conoce.
+
+Ambos se encontraron con pruebas reales contra la base (no revisión de
+código a ojo) — exactamente la disciplina que pidió el fundador.
+
+**Regresión verificada**: las 25 pruebas originales del motor de reservas
+(Módulo 1, sesión anterior) se re-ejecutaron completas después de reescribir
+`slots_disponibles()` — 25/25 siguen pasando. El cambio para soportar
+excepciones de horario no rompió nada del flujo de reserva/pago existente.
+
+**Próximo módulo a ejecutar: 2.4 — Gestión de Staff.** Tiene prioridad
+sobre 2.2 (Dashboard) porque cierra un pendiente ya abierto en 2.1 (la
+aceptación de invitaciones de Staff) y en 2.3 (el traslado ya existe a
+nivel de RPC, falta la pantalla completa de listado/detalle/CRUD).
 
 ---
 

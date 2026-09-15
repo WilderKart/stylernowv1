@@ -1228,6 +1228,7 @@ export type Database = {
           ciudad: string
           created_at: string
           direccion: string
+          es_principal: boolean
           horario_base: Json
           id: string
           latitud: number | null
@@ -1243,6 +1244,7 @@ export type Database = {
           ciudad: string
           created_at?: string
           direccion: string
+          es_principal?: boolean
           horario_base?: Json
           id?: string
           latitud?: number | null
@@ -1258,6 +1260,7 @@ export type Database = {
           ciudad?: string
           created_at?: string
           direccion?: string
+          es_principal?: boolean
           horario_base?: Json
           id?: string
           latitud?: number | null
@@ -1273,6 +1276,47 @@ export type Database = {
             columns: ["negocio_id"]
             isOneToOne: false
             referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sede_horario_excepcion: {
+        Row: {
+          cerrado: boolean
+          created_at: string
+          fecha: string
+          hora_fin_especial: string | null
+          hora_inicio_especial: string | null
+          id: string
+          motivo: string | null
+          sede_id: string
+        }
+        Insert: {
+          cerrado?: boolean
+          created_at?: string
+          fecha: string
+          hora_fin_especial?: string | null
+          hora_inicio_especial?: string | null
+          id?: string
+          motivo?: string | null
+          sede_id: string
+        }
+        Update: {
+          cerrado?: boolean
+          created_at?: string
+          fecha?: string
+          hora_fin_especial?: string | null
+          hora_inicio_especial?: string | null
+          id?: string
+          motivo?: string | null
+          sede_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sede_horario_excepcion_sede_id_fkey"
+            columns: ["sede_id"]
+            isOneToOne: false
+            referencedRelation: "sede"
             referencedColumns: ["id"]
           },
         ]
@@ -1707,6 +1751,31 @@ export type Database = {
         Args: { p_motivo?: string; p_reserva_id: string }
         Returns: Json
       }
+      cerrar_sede: {
+        Args: { p_motivo?: string; p_permanente: boolean; p_sede_id: string }
+        Returns: {
+          cerrada_permanente: boolean
+          cerrada_temporalmente: boolean
+          ciudad: string
+          created_at: string
+          direccion: string
+          es_principal: boolean
+          horario_base: Json
+          id: string
+          latitud: number | null
+          longitud: number | null
+          negocio_id: string
+          nombre: string
+          updated_at: string
+          zona_horaria: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "sede"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       crear_pago_sena: {
         Args: { p_reserva_id: string }
         Returns: {
@@ -1777,6 +1846,39 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      crear_sede: {
+        Args: {
+          p_ciudad: string
+          p_direccion: string
+          p_horario_base: Json
+          p_latitud?: number
+          p_longitud?: number
+          p_negocio_id: string
+          p_nombre: string
+        }
+        Returns: {
+          cerrada_permanente: boolean
+          cerrada_temporalmente: boolean
+          ciudad: string
+          created_at: string
+          direccion: string
+          es_principal: boolean
+          horario_base: Json
+          id: string
+          latitud: number | null
+          longitud: number | null
+          negocio_id: string
+          nombre: string
+          updated_at: string
+          zona_horaria: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "sede"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       crear_suscripcion_inicial: {
         Args: {
           p_negocio_id: string
@@ -1839,6 +1941,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      establecer_sede_principal: {
+        Args: { p_sede_id: string }
+        Returns: undefined
       }
       expirar_reservas_vencidas: { Args: never; Returns: number }
       is_barberia_de: { Args: { p_negocio_id: string }; Returns: boolean }
@@ -1917,6 +2023,31 @@ export type Database = {
           staff_id: string
         }[]
       }
+      reabrir_sede: {
+        Args: { p_sede_id: string }
+        Returns: {
+          cerrada_permanente: boolean
+          cerrada_temporalmente: boolean
+          ciudad: string
+          created_at: string
+          direccion: string
+          es_principal: boolean
+          horario_base: Json
+          id: string
+          latitud: number | null
+          longitud: number | null
+          negocio_id: string
+          nombre: string
+          updated_at: string
+          zona_horaria: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "sede"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       slots_disponibles: {
@@ -1935,7 +2066,40 @@ export type Database = {
           staff_id: string
         }[]
       }
+      staff_de_sede: {
+        Args: { p_sede_id: string }
+        Returns: {
+          es_guardian: boolean
+          especialidad: string
+          foto_url: string
+          nivel: Database["public"]["Enums"]["nivel_staff"]
+          nombre: string
+          staff_id: string
+          vinculo_id: string
+        }[]
+      }
       tiene_acceso_interno: { Args: { p_negocio_id: string }; Returns: boolean }
+      trasladar_staff: {
+        Args: { p_nueva_sede_id: string; p_vinculo_id: string }
+        Returns: {
+          comision_pct: number | null
+          created_at: string
+          es_guardian: boolean
+          estado: Database["public"]["Enums"]["vinculo_estado"]
+          fecha_ingreso: string | null
+          id: string
+          negocio_id: string
+          sede_activa_id: string | null
+          staff_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vinculo_staff_negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       campana_estado:
