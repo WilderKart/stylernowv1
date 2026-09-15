@@ -26,7 +26,7 @@ prueba end-to-end**: extender una función con un parámetro nuevo no
 reemplaza la sobrecarga vieja en Postgres (rompía
 `dashboard_ranking_staff_semana`), y un segundo check-out pisaba
 `checkout_at` en silencio — ambos corregidos en una migración nueva.
-Verificado: 23/23 casos reales. `PENDIENTE_HASH`
+Verificado: 23/23 casos reales. `ace5b3d`
 
 ### Añadido — Fase 3, Módulo 3.3: SuperSU — Soporte + Auditoría (cierra la Fase 3)
 Tickets de soporte (`ticket_soporte`/`ticket_mensaje`, nuevos): crear/ver/
