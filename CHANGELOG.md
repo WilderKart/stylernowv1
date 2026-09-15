@@ -21,7 +21,7 @@ por consumo automático configurado por Servicio
 (`servicio_producto_consumo`) — se re-verificó la suite completa de POS
 (14/14) tras el cambio. Solicitud de reposición, stock mínimo con alerta
 en tiempo real, "Configurar reglas" exclusivo de Barbería. Verificado:
-20/20 casos reales.
+20/20 casos reales. `19c609e`
 
 ### Añadido — Fase 2, Módulo 2.8: POS
 `completar_venta_pos()`: registra Productos vendidos durante la atención,
