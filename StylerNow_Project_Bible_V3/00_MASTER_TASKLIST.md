@@ -66,7 +66,7 @@ verificados, no solo "no lanza error en el camino feliz".
 | 2.10 Reportes | ✅ | ✅ | ✅ | ✅ | Cerrado — **Fase 2 completa** |
 | Fase 3.1 — SuperSU: Dashboard + Negocios | ✅ | ✅ | ✅ | ✅ | Cerrado |
 | Fase 3.2 — SuperSU: Configuración global | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
-| Fase 3.3 — SuperSU: Soporte + Auditoría | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
+| Fase 3.3 — SuperSU: Soporte + Auditoría | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
 | Fase 4 — App Staff | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | Fase 5 — Marketplace Premium | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | Fase 6 — Growth Engine | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente (ADR-008 deja el diseño de Objetivos de Staff listo) |
@@ -872,9 +872,19 @@ reutiliza `resolverContexto()`, que es para los roles del lado Negocio).
       faltaba: reportar una reseña desde `/panel/reportes`
 - [ ] Marketplace (destacados, anuncios, categorías) — depende de
       `08-Growth-Monetization/06_Advertising_System.md`, Fase 6
-- [ ] Soporte (tickets, conversaciones, prioridades, SLA)
-- [ ] Auditoría (logs, eventos, exportaciones) — visor de
-      `evento_auditoria`, ya poblada desde la Fase 1
+- [x] **Soporte** (tickets Abierto/En proceso/Resuelto, hilo de mensajes) —
+      ver detalle del Módulo 3.3 abajo. Prioridades/SLA de
+      `02-UX/10_Super_Admin.md` no se construyeron: la Biblia los nombra
+      pero no define ningún valor concreto (qué prioridades existen, qué
+      SLA en horas) — sin esa definición, construirlos sería inventar una
+      regla de negocio no escrita
+- [x] **Auditoría** — visor de `evento_auditoria` (ya poblada desde la
+      Fase 1, nunca antes tuvo pantalla) en `/admin/auditoria`
+      (completo, filtrable por actor) y en `/panel/auditoria` (Panel
+      Negocio, solo Barbería, filtrable por entidad) — ver detalle del
+      Módulo 3.3 abajo. Exportaciones no se construyeron: sin caso de uso
+      real identificado todavía, se prioriza si un Negocio o SuperSU lo
+      pide
 - [x] **Configuración global** — comisión de plataforma, ciudades
       habilitadas, banners del Home, edición de Planes SaaS, textos
       legales versionados. Ver detalle del Módulo 3.2 abajo. Créditos IA,
@@ -1010,7 +1020,57 @@ Fase 6, sin consumidor real todavía).
 
 ---
 
-**Próximo módulo a ejecutar: Fase 3.3 — Soporte + Auditoría.**
+## Módulo 3.3 — detalle de lo construido
+
+Migración 029 · `src/app/panel/soporte/`, `src/app/panel/auditoria/`,
+`src/app/admin/soporte/`, `src/app/admin/auditoria/`.
+
+- **Soporte**: nuevas tablas `ticket_soporte`/`ticket_mensaje`. Crear,
+  ver y responder un ticket propio es 🔒 para cualquier rol
+  (`03-Business-Rules/01_Roles.md`, matriz "Soporte") — implementado hoy
+  para Barbería (Panel Negocio → Soporte) y SuperSU (`/admin/soporte`,
+  cola completa con cambio de estado); Guardian/Staff/Cliente quedan con
+  la misma RLS lista para cuando tengan su propia superficie (Fase 4/5).
+  "Gestionar todos los tickets" es exclusivo SuperSU — todo write pasa
+  por una RPC `SECURITY DEFINER` (nunca INSERT/UPDATE directo), así el
+  `actor_tipo` de cada mensaje siempre se resuelve en servidor
+  (`actor_tipo_soporte()`), nunca lo manda el cliente. Responder un
+  ticket ya `RESUELTO` lo reabre automáticamente a `ABIERTO` — evita que
+  una novedad real quede archivada en silencio.
+- **Auditoría**: `evento_auditoria` existe y se puebla desde la Fase 1,
+  pero nunca tuvo una pantalla — la RLS que la scopea (`auditoria_select_
+  negocio` con `is_barberia_de()`, `auditoria_select_supersu`) también
+  existía sin usar desde la migración 006. No se necesitó ninguna
+  migración nueva para esto: solo construir el visor. Panel Negocio →
+  Auditoría (exclusivo Barbería, filtrable por entidad) y `/admin/
+  auditoria` (SuperSU, log completo de la plataforma, filtrable por
+  actor) — el hallazgo de Fase 1 ("no existe un visor de auditoría")
+  queda cerrado.
+
+### Verificado end-to-end contra la base real (17/17)
+Crear un ticket sin asunto es rechazado · el primer mensaje y las
+respuestas quedan con el `actor_tipo` correcto resuelto en servidor · un
+Negocio ajeno no puede ver ni responder un ticket que no creó · la propia
+Barbería no puede cambiar el estado de su ticket (exclusivo SuperSU) ·
+SuperSU responde y cambia el estado, quedando auditado en
+`evento_auditoria` · responder un ticket `RESUELTO` lo reabre · una
+Barbería lee el log de auditoría de su propio negocio · un Negocio ajeno
+no ve ningún evento de un negocio que no es el suyo · SuperSU ve el log
+completo.
+
+### Documentación actualizada con este módulo
+Este archivo (Coverage Matrix + detalle), `CHANGELOG.md`.
+
+**Con este módulo, la Fase 3 — SuperSU CMS queda cerrada** en todo lo que
+no depende de una fase posterior: Dashboard, Gestión de Negocios,
+Moderación, Configuración global, Soporte y Auditoría están completos y
+verificados. Solo queda pendiente "Marketplace (destacados/anuncios)",
+explícitamente diferido a `08-Growth-Monetization/06_Advertising_System.md`
+(Fase 6) por depender de un sistema de publicidad que todavía no existe.
+
+---
+
+**Próximo módulo a ejecutar: Fase 4 — App Staff.**
 
 ---
 

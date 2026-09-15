@@ -158,6 +158,13 @@ Cada decisión tiene: **Fecha, Decisión, Motivo, Impacto, Estado** (`Activa` / 
 **Impacto:** `src/lib/auth/aceptacion-legal.ts` (reescrito), `src/app/legal/aceptar/*` (nuevo), `src/app/login/actions.ts`, `src/app/login/formulario.tsx`, `src/app/auth/callback/route.ts`.
 **Estado:** Activa.
 
+### ADL-018 — Auditoría: visor nuevo, cero migraciones — la RLS ya existía sin usar desde la migración 006
+**Fecha:** 2026-09-15
+**Decisión:** `/panel/auditoria` y `/admin/auditoria` (Módulo 3.3) se construyeron sin ninguna migración nueva. `evento_auditoria` ya tenía RLS completa (`auditoria_select_negocio` con `is_barberia_de()`, `auditoria_select_actor`, `auditoria_select_supersu`) desde la migración 006, y la tabla se puebla desde la Fase 1 — solo faltaba la pantalla.
+**Motivo:** Consistente con el patrón ya repetido varias veces esta sesión (`texto_legal`, `punto_fidelizacion`, la aprobación de Negocio): la arquitectura de datos y autorización a menudo se adelanta correctamente en fases tempranas, pero queda inerte hasta que un módulo posterior construye la interfaz que la usa. Se documenta explícitamente para que quede claro que esto fue intencional (leer la RLS existente antes de escribir una migración nueva), no un descuido.
+**Impacto:** `src/app/panel/auditoria/`, `src/app/admin/auditoria/`. Cierra el ítem de deuda técnica abierto desde la Fase 1 ("no existe un visor de auditoría").
+**Estado:** Activa.
+
 ## Checklist
 - [x] Completo (vivo — se agregan entradas nuevas conforme surgen decisiones)
 - [ ] Revisado

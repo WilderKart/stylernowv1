@@ -7,6 +7,21 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 3, Módulo 3.3: SuperSU — Soporte + Auditoría (cierra la Fase 3)
+Tickets de soporte (`ticket_soporte`/`ticket_mensaje`, nuevos): crear/ver/
+responder un ticket propio para Barbería (`/panel/soporte`) y gestión
+completa de la cola con cambio de estado para SuperSU (`/admin/soporte`).
+Todo write pasa por una RPC `SECURITY DEFINER` — el `actor_tipo` de cada
+mensaje se resuelve siempre en servidor, nunca lo manda el cliente.
+Responder un ticket ya resuelto lo reabre automáticamente. Visor de
+Auditoría (`/panel/auditoria` para Barbería, `/admin/auditoria` para
+SuperSU): `evento_auditoria` se puebla desde la Fase 1 pero nunca tuvo
+pantalla — tampoco se necesitó ninguna migración para leerla, la RLS que
+la scopea ya existía sin usar desde la migración 006. **Con este módulo,
+la Fase 3 — SuperSU CMS queda cerrada** (salvo Marketplace/anuncios,
+diferido a Fase 6). Verificado: 17/17 casos reales, sin bugs encontrados.
+`PENDIENTE_HASH`
+
 ### Añadido — Fase 3, Módulo 3.2: SuperSU — Configuración global
 Comisión de plataforma (antes una columna por Negocio que en la práctica
 actuaba como constante fija, ahora un valor global real que

@@ -2162,6 +2162,79 @@ export type Database = {
         }
         Relationships: []
       }
+      ticket_mensaje: {
+        Row: {
+          actor_tipo: string
+          autor_id: string
+          created_at: string
+          id: string
+          mensaje: string
+          ticket_id: string
+        }
+        Insert: {
+          actor_tipo: string
+          autor_id: string
+          created_at?: string
+          id?: string
+          mensaje: string
+          ticket_id: string
+        }
+        Update: {
+          actor_tipo?: string
+          autor_id?: string
+          created_at?: string
+          id?: string
+          mensaje?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_mensaje_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_soporte"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_soporte: {
+        Row: {
+          asunto: string
+          creado_por: string
+          created_at: string
+          estado: Database["public"]["Enums"]["ticket_soporte_estado"]
+          id: string
+          negocio_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          asunto: string
+          creado_por: string
+          created_at?: string
+          estado?: Database["public"]["Enums"]["ticket_soporte_estado"]
+          id?: string
+          negocio_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          asunto?: string
+          creado_por?: string
+          created_at?: string
+          estado?: Database["public"]["Enums"]["ticket_soporte_estado"]
+          id?: string
+          negocio_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_soporte_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       venta_producto: {
         Row: {
           cantidad: number
@@ -2464,6 +2537,7 @@ export type Database = {
       }
     }
     Functions: {
+      actor_tipo_soporte: { Args: { p_negocio_id: string }; Returns: string }
       actualizar_banner_home: {
         Args: {
           p_activo?: boolean
@@ -2521,6 +2595,27 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "configuracion_plataforma"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      actualizar_estado_ticket: {
+        Args: {
+          p_estado: Database["public"]["Enums"]["ticket_soporte_estado"]
+          p_ticket_id: string
+        }
+        Returns: {
+          asunto: string
+          creado_por: string
+          created_at: string
+          estado: Database["public"]["Enums"]["ticket_soporte_estado"]
+          id: string
+          negocio_id: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ticket_soporte"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -2991,6 +3086,24 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "suscripcion"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      crear_ticket_soporte: {
+        Args: { p_asunto: string; p_mensaje: string; p_negocio_id?: string }
+        Returns: {
+          asunto: string
+          creado_por: string
+          created_at: string
+          estado: Database["public"]["Enums"]["ticket_soporte_estado"]
+          id: string
+          negocio_id: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ticket_soporte"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -3530,6 +3643,23 @@ export type Database = {
         Args: { p_aceptar: boolean; p_invitacion_id: string }
         Returns: Json
       }
+      responder_ticket_soporte: {
+        Args: { p_mensaje: string; p_ticket_id: string }
+        Returns: {
+          actor_tipo: string
+          autor_id: string
+          created_at: string
+          id: string
+          mensaje: string
+          ticket_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ticket_mensaje"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       retirar_staff: {
         Args: { p_motivo?: string; p_vinculo_id: string }
         Returns: {
@@ -3749,6 +3879,7 @@ export type Database = {
       solicitud_reposicion_estado: "PENDIENTE" | "ATENDIDA" | "CANCELADA"
       suscripcion_estado: "ACTIVA" | "EN_MORA" | "SUSPENDIDA" | "CANCELADA"
       temporada_estado: "EN_CURSO" | "CERRADA" | "CONSOLIDADA"
+      ticket_soporte_estado: "ABIERTO" | "EN_PROCESO" | "RESUELTO"
       vinculo_estado: "INVITADO" | "ACTIVO" | "SUSPENDIDO" | "RETIRADO"
     }
     CompositeTypes: {
@@ -3949,6 +4080,7 @@ export const Constants = {
       solicitud_reposicion_estado: ["PENDIENTE", "ATENDIDA", "CANCELADA"],
       suscripcion_estado: ["ACTIVA", "EN_MORA", "SUSPENDIDA", "CANCELADA"],
       temporada_estado: ["EN_CURSO", "CERRADA", "CONSOLIDADA"],
+      ticket_soporte_estado: ["ABIERTO", "EN_PROCESO", "RESUELTO"],
       vinculo_estado: ["INVITADO", "ACTIVO", "SUSPENDIDO", "RETIRADO"],
     },
   },
