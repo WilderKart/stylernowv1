@@ -115,7 +115,9 @@ Fuente: `02-UX/02_Onboarding.md` (wizard), `02-UX/09_Business_Panel.md`,
 Monetization.md` (planes). **Hoy ningún negocio puede existir realmente** —
 sin este dominio, el Marketplace de Cliente se ve vacío en producción.
 
-- [ ] 2.1 Registro de Barbería (wizard completo, progreso persistente)
+- [x] **2.1 Registro de Barbería** — wizard de 4 pasos, progreso persistente
+      vía las tablas reales (sin tabla de "progreso" temporal — migración
+      `011_registro_negocio.sql`, `src/app/panel/onboarding/`)
 - [ ] 2.2 Dashboard (ingresos, ocupación, próximas citas, plan, alertas)
 - [ ] 2.3 Gestión de Sedes (crear/editar/cerrar/reactivar/trasladar)
 - [ ] 2.4 Gestión de Staff (listado, detalle, CRUD, Guardian, matriz de roles)
@@ -129,9 +131,54 @@ sin este dominio, el Marketplace de Cliente se ve vacío en producción.
 **Criterio de cierre de Fase 2** (orden oficial): una Barbería puede operar
 todo su negocio sin herramientas externas.
 
-**Próximo módulo a ejecutar: 2.1 Registro de Barbería** — es el que
-desbloquea todo lo demás (sin un negocio dado de alta, ninguno de los
-módulos 2.2-2.10 tiene datos reales sobre los que operar).
+## Módulo 2.1 — detalle de lo construido
+
+- Wizard de 4 pasos en `/panel/onboarding`: Datos+Plan → Sede → Servicios →
+  Invitar Staff (opcional) → Enviar a aprobación
+- Migración 011: columnas `negocio.telefono_contacto`/`email_contacto`/
+  `onboarding_completo`; RPC `crear_suscripcion_inicial` (único puente
+  válido para escribir en `suscripcion`, que solo admite SuperSU por RLS) y
+  `enviar_negocio_a_aprobacion` (exige ≥1 Sede y ≥1 Servicio, server-side,
+  no solo deshabilitando el botón); tabla `invitacion_staff` con RLS propia
+- Plan: solo Raven/Jarl/Valhalla por autoservicio — Allfather se rechaza
+  explícitamente con `ALLFATHER_REQUIERE_COTIZACION` (`01-PRD/03_
+  Monetization.md`: "no existe un flujo de autoservicio para Allfather")
+- Ubicación: geolocalización del navegador (botón "Usar mi ubicación"),
+  sin mapa interactivo todavía — ese llega con MapLibre en Fase 5
+- Logo: subida real a Storage (`negocio-media`, bucket ya existía desde
+  migración 007)
+- **Invitar Staff — alcance parcial, documentado, no un botón falso:** se
+  crea una fila real en `invitacion_staff` y se envía un correo real vía
+  Resend. La ACEPTACIÓN (crear el `vinculo_staff_negocio` real cuando la
+  persona invitada inicia sesión) se construye en el **Módulo 2.4**, no acá
+  — es explícitamente un paso opcional del wizard (02-UX/02_Onboarding.md)
+- `/panel` — página raíz mínima (estado del negocio, mensaje de "en
+  revisión"). **No es el Dashboard del Módulo 2.2** — es solo el destino
+  necesario para que el wizard tenga a dónde llevar al negocio recién
+  enviado a aprobación, sin inventar métricas falsas
+
+## Bug real encontrado y corregido durante la verificación
+
+`INSERT ... RETURNING` sobre `negocio` fallaba con "new row violates
+row-level security policy" — **no por la política en sí** (se comprobó
+directo contra Postgres que hasta una política trivial `with check (true)`
+fallaba igual). Causa raíz: la política de SELECT que autoriza el
+`RETURNING` depende de `is_barberia_de()`, que vuelve a consultar la MISMA
+fila que se está insertando dentro del mismo comando — Postgres no logra
+resolver esa visibilidad en el mismo `INSERT...RETURNING`. Sedes y
+Servicios no tienen este problema porque su política de SELECT depende de
+`negocio` (una tabla distinta, ya committeada), no de sí mismos.
+
+**Corrección:** `crearOActualizarNegocio()` genera el `id` con
+`crypto.randomUUID()` en el servidor y hace el INSERT sin `.select()`
+encadenado — nunca pide `RETURNING`, así que el problema no aplica.
+Diagnosticado con una conexión directa a Postgres (no solo supabase-js)
+para descartar causas alternativas antes de tocar código.
+
+**Próximo módulo a ejecutar: 2.2 Dashboard** o **2.3 Gestión de Sedes**
+— cualquiera de los dos es razonable a continuación; 2.4 (Staff) tiene
+sentido justo después para completar la aceptación de invitaciones que
+quedó pendiente de 2.1.
 
 ---
 

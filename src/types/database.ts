@@ -358,6 +358,44 @@ export type Database = {
         }
         Relationships: []
       }
+      invitacion_staff: {
+        Row: {
+          created_at: string
+          email: string
+          estado: Database["public"]["Enums"]["invitacion_staff_estado"]
+          expira_at: string
+          id: string
+          invitado_por: string
+          negocio_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          estado?: Database["public"]["Enums"]["invitacion_staff_estado"]
+          expira_at?: string
+          id?: string
+          invitado_por: string
+          negocio_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          estado?: Database["public"]["Enums"]["invitacion_staff_estado"]
+          expira_at?: string
+          id?: string
+          invitado_por?: string
+          negocio_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitacion_staff_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lista_espera: {
         Row: {
           cliente_id: string
@@ -440,6 +478,7 @@ export type Database = {
           created_at: string
           descripcion: string | null
           elegibilidad_marketplace: boolean
+          email_contacto: string | null
           estado: Database["public"]["Enums"]["negocio_estado"]
           id: string
           identificacion_fiscal: string | null
@@ -447,6 +486,7 @@ export type Database = {
           max_anticipacion_dias: number
           min_anticipacion_minutos: number
           nombre: string
+          onboarding_completo: boolean
           owner_user_id: string
           pago_completo_en_app: boolean
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
@@ -456,6 +496,7 @@ export type Database = {
           sena_monto_fijo: number | null
           sena_pct: number | null
           slug: string
+          telefono_contacto: string | null
           updated_at: string
           ventana_reembolso_parcial_horas: number
           ventana_reembolso_total_horas: number
@@ -467,6 +508,7 @@ export type Database = {
           created_at?: string
           descripcion?: string | null
           elegibilidad_marketplace?: boolean
+          email_contacto?: string | null
           estado?: Database["public"]["Enums"]["negocio_estado"]
           id?: string
           identificacion_fiscal?: string | null
@@ -474,6 +516,7 @@ export type Database = {
           max_anticipacion_dias?: number
           min_anticipacion_minutos?: number
           nombre: string
+          onboarding_completo?: boolean
           owner_user_id: string
           pago_completo_en_app?: boolean
           plan_codigo?: Database["public"]["Enums"]["plan_codigo"]
@@ -483,6 +526,7 @@ export type Database = {
           sena_monto_fijo?: number | null
           sena_pct?: number | null
           slug: string
+          telefono_contacto?: string | null
           updated_at?: string
           ventana_reembolso_parcial_horas?: number
           ventana_reembolso_total_horas?: number
@@ -494,6 +538,7 @@ export type Database = {
           created_at?: string
           descripcion?: string | null
           elegibilidad_marketplace?: boolean
+          email_contacto?: string | null
           estado?: Database["public"]["Enums"]["negocio_estado"]
           id?: string
           identificacion_fiscal?: string | null
@@ -501,6 +546,7 @@ export type Database = {
           max_anticipacion_dias?: number
           min_anticipacion_minutos?: number
           nombre?: string
+          onboarding_completo?: boolean
           owner_user_id?: string
           pago_completo_en_app?: boolean
           plan_codigo?: Database["public"]["Enums"]["plan_codigo"]
@@ -510,6 +556,7 @@ export type Database = {
           sena_monto_fijo?: number | null
           sena_pct?: number | null
           slug?: string
+          telefono_contacto?: string | null
           updated_at?: string
           ventana_reembolso_parcial_horas?: number
           ventana_reembolso_total_horas?: number
@@ -1727,6 +1774,69 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      crear_suscripcion_inicial: {
+        Args: {
+          p_negocio_id: string
+          p_plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+        }
+        Returns: {
+          created_at: string
+          estado: Database["public"]["Enums"]["suscripcion_estado"]
+          fecha_inicio_ciclo: string
+          fecha_proximo_cobro: string
+          id: string
+          negocio_id: string
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"] | null
+          reintentos_fallo_count: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "suscripcion"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      enviar_negocio_a_aprobacion: {
+        Args: { p_negocio_id: string }
+        Returns: {
+          categoria: string[]
+          ciudad: string
+          comision_plataforma_pct: number
+          created_at: string
+          descripcion: string | null
+          elegibilidad_marketplace: boolean
+          email_contacto: string | null
+          estado: Database["public"]["Enums"]["negocio_estado"]
+          id: string
+          identificacion_fiscal: string | null
+          logo_url: string | null
+          max_anticipacion_dias: number
+          min_anticipacion_minutos: number
+          nombre: string
+          onboarding_completo: boolean
+          owner_user_id: string
+          pago_completo_en_app: boolean
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          reembolso_parcial_pct: number
+          sena_maximo: number
+          sena_minimo: number
+          sena_monto_fijo: number | null
+          sena_pct: number | null
+          slug: string
+          telefono_contacto: string | null
+          updated_at: string
+          ventana_reembolso_parcial_horas: number
+          ventana_reembolso_total_horas: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       expirar_reservas_vencidas: { Args: never; Returns: number }
       is_barberia_de: { Args: { p_negocio_id: string }; Returns: boolean }
       is_guardian_de_negocio: {
@@ -1832,6 +1942,11 @@ export type Database = {
         | "AGOTADA"
         | "FINALIZADA"
       categoria_puntaje: "ESTANDAR" | "PREMIUM" | "COMPLEMENTARIO"
+      invitacion_staff_estado:
+        | "PENDIENTE"
+        | "ACEPTADA"
+        | "EXPIRADA"
+        | "CANCELADA"
       lista_espera_estado:
         | "ACTIVA"
         | "NOTIFICADA"
@@ -2013,6 +2128,12 @@ export const Constants = {
         "FINALIZADA",
       ],
       categoria_puntaje: ["ESTANDAR", "PREMIUM", "COMPLEMENTARIO"],
+      invitacion_staff_estado: [
+        "PENDIENTE",
+        "ACEPTADA",
+        "EXPIRADA",
+        "CANCELADA",
+      ],
       lista_espera_estado: [
         "ACTIVA",
         "NOTIFICADA",
