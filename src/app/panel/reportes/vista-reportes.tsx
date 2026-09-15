@@ -7,6 +7,7 @@ import { useState } from "react";
 import {
   obtenerIngresosPeriodo,
   obtenerRankingStaffPeriodo,
+  reportarResena,
   responderResena,
   type PuntoIngreso,
   type RankingStaffReporte,
@@ -195,6 +196,15 @@ function SeccionResenas({ resenasIniciales }: { resenasIniciales: ResenaRecibida
     setTexto("");
   }
 
+  async function onReportar(resenaId: string) {
+    const motivo = prompt("¿Por qué querés reportar esta reseña? (lenguaje abusivo, contenido falso, etc.)");
+    if (!motivo) return;
+    setError(null);
+    const res = await reportarResena(resenaId, motivo);
+    if (!res.ok) return setError(res.error);
+    setResenas((prev) => prev.filter((r) => r.id !== resenaId));
+  }
+
   return (
     <section>
       <h2 className="font-display mb-3 text-[13px] font-bold uppercase text-text">Reseñas recibidas</h2>
@@ -235,16 +245,21 @@ function SeccionResenas({ resenasIniciales }: { resenasIniciales: ResenaRecibida
                   </div>
                 </div>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRespondiendo(r.id);
-                    setTexto("");
-                  }}
-                  className="mt-2 text-[11.5px] font-semibold text-accent"
-                >
-                  Responder públicamente
-                </button>
+                <div className="mt-2 flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRespondiendo(r.id);
+                      setTexto("");
+                    }}
+                    className="text-[11.5px] font-semibold text-accent"
+                  >
+                    Responder públicamente
+                  </button>
+                  <button type="button" onClick={() => onReportar(r.id)} className="text-[11.5px] font-semibold text-text-faint">
+                    Reportar
+                  </button>
+                </div>
               )}
             </li>
           ))}

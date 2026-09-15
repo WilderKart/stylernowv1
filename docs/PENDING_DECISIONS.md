@@ -47,6 +47,13 @@ bloquea, el desarrollo sigue avanzando en paralelo sin esperar respuesta.
 - **Recomendación:** definir si Barbería puede marcar una cita manual como `CONFIRMADA` sin pasar por Mercado Pago (confianza del negocio) — y si eso debería vivir acá o esperar al módulo de POS (2.8), que es quien maneja pagos en efectivo/en sede.
 - **Bloquea:** No — la cita ya aparece en la Agenda en `PENDIENTE_PAGO`, útil para planificación aunque el pago no esté resuelto todavía.
 
+## SuperSU: ¿cambiar el Plan de un Negocio a la fuerza?
+
+- **Contexto:** `02-UX/10_Super_Admin.md` lista "cambiar plan" como acción de Gestión de Negocios, junto a aprobar/rechazar/suspender/reactivar. Hoy el Plan lo elige exclusivamente la propia Barbería en el wizard de registro (Módulo 2.1) y en su facturación.
+- **Impacto:** sin esto, SuperSU no puede forzar un cambio de Plan (por ejemplo, degradar por impago, o subir manualmente como cortesía). No se construyó en el Módulo 3.1 porque no había un caso de uso concreto documentado ni claridad sobre si debe ser inmediato o al cierre del ciclo de facturación.
+- **Recomendación:** definir junto con Configuración global (Módulo 3.2, gestión de Planes SaaS) si el cambio forzado de Plan es inmediato o nunca retroactivo a mitad de ciclo — igual que la regla ya definida para el Plan en sí.
+- **Bloquea:** No — Aprobar/Rechazar/Suspender/Reactivar/Dar de baja ya cubren el ciclo de vida completo de un Negocio sin esta acción.
+
 ## Cómo agregar una entrada
 Si te encontrás con algo que de verdad no podés resolver sin que el
 fundador decida (falta una API key, hay una contradicción real en la

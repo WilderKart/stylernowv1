@@ -64,7 +64,9 @@ verificados, no solo "no lanza error en el camino feliz".
 | 2.8 POS | ✅ | ✅ | ✅ | ✅ | Cerrado |
 | 2.9 Inventario | ✅ | ✅ | ✅ | ✅ | Cerrado |
 | 2.10 Reportes | ✅ | ✅ | ✅ | ✅ | Cerrado — **Fase 2 completa** |
-| Fase 3 — SuperSU CMS | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
+| Fase 3.1 — SuperSU: Dashboard + Negocios | ✅ | ✅ | ✅ | ✅ | Cerrado |
+| Fase 3.2 — SuperSU: Configuración global | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
+| Fase 3.3 — SuperSU: Soporte + Auditoría | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | Fase 4 — App Staff | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | Fase 5 — Marketplace Premium | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | Fase 6 — Growth Engine | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente (ADR-008 deja el diseño de Objetivos de Staff listo) |
@@ -854,16 +856,84 @@ la Fase, cumplido.
 
 # FASE 3 — SuperSU CMS (completo, sin código, no una pantalla de aprobación)
 
-Fuente: `02-UX/10_Super_Admin.md`.
+Fuente: `02-UX/10_Super_Admin.md`. Superficie completamente separada del
+Panel Negocio (`/admin`, guarda propia `requireSuperSU()` — nunca
+reutiliza `resolverContexto()`, que es para los roles del lado Negocio).
 
-- [ ] Dashboard global (negocios, usuarios, ingresos, actividad, salud)
-- [ ] Gestión de Negocios (aprobar/rechazar/suspender/reactivar/cambiar plan)
-- [ ] Marketplace (moderación, destacados, anuncios, categorías)
+- [x] **Dashboard global** (negocios activos/pendientes, MRR, citas del
+      mes, ciudades activas) — ver detalle del Módulo 3.1 abajo
+- [x] **Gestión de Negocios** (aprobar/rechazar/suspender/reactivar/dar de
+      baja) — ver detalle del Módulo 3.1 abajo. "Cambiar plan" no se
+      construyó en este módulo — hoy el Plan lo elige la propia Barbería
+      en el wizard (2.1); un cambio forzado por SuperSU no tenía caso de
+      uso identificado, queda en `docs/PENDING_DECISIONS.md`
+- [x] **Moderación de reseñas reportadas** (Eliminar/Mantener) — ver
+      detalle del Módulo 3.1 abajo. Incluye el camino de entrada que
+      faltaba: reportar una reseña desde `/panel/reportes`
+- [ ] Marketplace (destacados, anuncios, categorías) — depende de
+      `08-Growth-Monetization/06_Advertising_System.md`, Fase 6
 - [ ] Soporte (tickets, conversaciones, prioridades, SLA)
-- [ ] Auditoría (logs, eventos, exportaciones)
+- [ ] Auditoría (logs, eventos, exportaciones) — visor de
+      `evento_auditoria`, ya poblada desde la Fase 1
 - [ ] Configuración global (planes Raven/Jarl/Valhalla/Allfather, créditos
-      IA, WhatsApp, Feature Flags) — todo editable desde interfaz, nunca
-      SQL manual
+      IA, WhatsApp, Feature Flags, ciudades habilitadas, banners del
+      Home, textos legales versionados) — todo editable desde interfaz,
+      nunca SQL manual
+
+## Módulo 3.1 — detalle de lo construido
+
+Migraciones 024-025 · `src/app/admin/`, `src/lib/auth/require-supersu.ts`.
+
+- **Hallazgo crítico, más grave que cualquier otro de esta sesión**: no
+  existía NINGUNA forma de que un Negocio pasara de `PENDIENTE_
+  APROBACION` a `ACTIVO`. El Panel Negocio (Módulo 2.1) ya le mostraba al
+  dueño "tu negocio está en revisión", pero nadie del lado de StylerNow
+  tenía cómo aprobarlo — la política RLS `negocio_update_barberia` ya
+  permitía `is_supersu()` desde la migración 006, pero ninguna pantalla
+  ni RPC auditado la usaba. **Todo negocio registrado en producción
+  quedaría atascado para siempre sin este módulo.**
+- **Transiciones de estado** siguiendo exactamente la máquina de
+  `04-Data-Model/03_State_Machines.md`: `aprobar_negocio()`,
+  `rechazar_negocio()` (requiere motivo), `suspender_negocio()`,
+  `reactivar_negocio_supersu()`, `cancelar_negocio_supersu()` (terminal).
+  Cada transición inválida (ej. aprobar un negocio ya `ACTIVO`) se
+  rechaza explícitamente, no silenciosamente.
+- **Suspender/cancelar reutiliza `cancelar_reserva()` tal cual** para
+  cancelar en cascada las Reservas futuras confirmadas con reembolso 100%
+  (QA-BIZ-102) — nunca se duplicó la lógica de reembolso ya verificada en
+  el Módulo 1.
+- **`admin_dashboard_resumen()`**: negocios activos/pendientes, MRR real
+  (suma de `plan.precio_mensual` de suscripciones `ACTIVA`), ciudades
+  activas, citas completadas del mes.
+- **Moderación de reseñas**: `resena_estado` ya tenía el valor
+  `REPORTADA` desde el Módulo 1, pero nada lo usaba — `reportar_resena()`
+  (Barbería/Guardian, nuevo, conectado desde `/panel/reportes`) y
+  `moderar_resena()` (SuperSU, Mantener/Eliminar) cierran el ciclo
+  completo por primera vez.
+- **Bug real encontrado por la prueba end-to-end** (no a simple vista):
+  `moderar_resena()` intentaba asignar un `CASE` de texto plano a una
+  columna `resena_estado` (enum) — Postgres no lo castea automático en un
+  `UPDATE`. Corregido en la migración 025 (`013`→`014` fue el mismo
+  patrón en la Fase 2: nunca se edita una migración ya aplicada, se
+  corrige con una nueva).
+
+### Verificado end-to-end contra la base real (18/18)
+Un usuario que no es SuperSU rechazado en las 6 RPCs (aprobar, rechazar,
+suspender, dashboard, reportar-ajeno, moderar) · el hallazgo crítico en
+sí: un negocio pasa de `PENDIENTE_APROBACION` a `ACTIVO` · no se puede
+aprobar dos veces · rechazar sin motivo rechazado · **suspender cancela
+en cascada una Reserva futura confirmada con reembolso 100% real** ·
+reactivar funciona · `CANCELADO` es terminal (no se puede reactivar) ·
+Barbería reporta una reseña, SuperSU la modera y elimina.
+
+### Documentación actualizada con este módulo
+Este archivo, `CHANGELOG.md`, `docs/TECH_DEBT_REGISTER.md` (impersonación
+auditada, diferida), `docs/PENDING_DECISIONS.md` (cambio de Plan forzado
+por SuperSU).
+
+---
+
+**Próximo módulo a ejecutar: Fase 3.2 — Configuración global.**
 
 ---
 

@@ -137,6 +137,13 @@ Cada decisión tiene: **Fecha, Decisión, Motivo, Impacto, Estado** (`Activa` / 
 **Impacto:** Documento nuevo `ADR_009_Inventario_Stock_Por_Sede.md`, migración 022, `completar_venta_pos()` extendida (migración 021 → 022, misma función).
 **Estado:** Activa.
 
+### ADL-015 — SuperSU es una superficie propia (`/admin`), nunca una extensión de `resolverContexto()`
+**Fecha:** 2026-09-15
+**Decisión:** `/admin` tiene su propia guarda (`requireSuperSU()`, verifica `perfil.es_supersu` directo) en vez de sumar un cuarto rol a `resolverContexto()`. Las transiciones de estado de Negocio (`aprobar/rechazar/suspender/reactivar/cancelar`) reutilizan `cancelar_reserva()` para el reembolso en cascada — nunca se duplicó esa lógica ya verificada en el Módulo 1.
+**Motivo:** La Biblia (`02-UX/10_Super_Admin.md`) es explícita: "ninguna acción de este CMS es accesible desde ninguna otra superficie" — mezclarlo con `resolverContexto()` (que resuelve el contexto de un usuario *dentro* de un Negocio) habría sido conceptualmente incorrecto, SuperSU no pertenece a ningún Negocio.
+**Impacto:** Descubrió y cerró un hallazgo crítico: ningún Negocio podía pasar de `PENDIENTE_APROBACION` a `ACTIVO` — la política RLS ya lo permitía desde la migración 006 pero nada la usaba. `src/lib/auth/require-supersu.ts`, `src/app/admin/*`, migraciones 024-025.
+**Estado:** Activa.
+
 ## Checklist
 - [x] Completo (vivo — se agregan entradas nuevas conforme surgen decisiones)
 - [ ] Revisado

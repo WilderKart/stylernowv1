@@ -7,6 +7,22 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 3, Módulo 3.1: SuperSU — Dashboard global + Gestión de Negocios
+Nueva superficie `/admin`, completamente separada del Panel Negocio (guarda
+propia `requireSuperSU()`, nunca pasa por `resolverContexto()`).
+**Hallazgo crítico**: no existía ninguna forma de aprobar un Negocio — todo
+registro quedaba atascado en `PENDIENTE_APROBACION` para siempre. Se
+construyeron las transiciones completas de la máquina de estados
+(`aprobar_negocio`, `rechazar_negocio`, `suspender_negocio`,
+`reactivar_negocio_supersu`, `cancelar_negocio_supersu`), reutilizando
+`cancelar_reserva()` para el reembolso 100% en cascada al suspender/cancelar,
+sin duplicar esa lógica. También se cerró el ciclo de moderación de reseñas
+reportadas (`reportar_resena()` desde `/panel/reportes`, `moderar_resena()`
+desde `/admin/moderacion`) — un bug real de tipos (CASE sin castear al enum
+`resena_estado`) se encontró con la prueba end-to-end y se corrigió en una
+migración nueva (025), nunca editando la 024 ya aplicada. Verificado: 18/18
+casos reales. `PENDIENTE_HASH`
+
 ### Añadido — Fase 2, Módulo 2.10: Reportes (cierra la Fase 2)
 Ingresos por semana/mes (gráfico de barras real), servicios más vendidos,
 ranking de Staff con rango de fechas real, reseñas recibidas con

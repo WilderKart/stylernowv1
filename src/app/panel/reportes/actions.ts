@@ -153,6 +153,19 @@ export async function listarResenas(negocioId: string): Promise<Resultado<Resena
   }
 }
 
+export async function reportarResena(resenaId: string, motivo: string): Promise<Resultado> {
+  try {
+    const { supabase } = await usuarioActual();
+    if (!motivo.trim()) return { ok: false, error: "Contanos el motivo del reporte." };
+    const { error } = await supabase.rpc("reportar_resena", { p_resena_id: resenaId, p_motivo: motivo.trim() });
+    if (error) return { ok: false, error: error.message };
+    revalidatePath("/panel/reportes");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
 export async function responderResena(resenaId: string, respuesta: string): Promise<Resultado> {
   try {
     const { supabase } = await usuarioActual();

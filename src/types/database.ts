@@ -2380,6 +2380,7 @@ export type Database = {
       }
     }
     Functions: {
+      admin_dashboard_resumen: { Args: never; Returns: Json }
       ajustar_stock: {
         Args: {
           p_motivo?: string
@@ -2412,6 +2413,47 @@ export type Database = {
         }
         Returns: Json
       }
+      aprobar_negocio: {
+        Args: { p_negocio_id: string }
+        Returns: {
+          categoria: string[]
+          ciudad: string
+          comision_plataforma_pct: number
+          created_at: string
+          descripcion: string | null
+          elegibilidad_marketplace: boolean
+          email_contacto: string | null
+          estado: Database["public"]["Enums"]["negocio_estado"]
+          id: string
+          identificacion_fiscal: string | null
+          logo_url: string | null
+          max_anticipacion_dias: number
+          min_anticipacion_minutos: number
+          nombre: string
+          onboarding_completo: boolean
+          owner_user_id: string
+          pago_completo_en_app: boolean
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          puntos_expiracion_meses: number
+          puntos_valor_100_cop: number
+          reembolso_parcial_pct: number
+          sena_maximo: number
+          sena_minimo: number
+          sena_monto_fijo: number | null
+          sena_pct: number | null
+          slug: string
+          telefono_contacto: string | null
+          updated_at: string
+          ventana_reembolso_parcial_horas: number
+          ventana_reembolso_total_horas: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       atender_solicitud_reposicion: {
         Args: { p_cantidad_recibida?: number; p_solicitud_id: string }
         Returns: {
@@ -2440,6 +2482,47 @@ export type Database = {
       cancelar_invitacion: {
         Args: { p_invitacion_id: string }
         Returns: undefined
+      }
+      cancelar_negocio_supersu: {
+        Args: { p_motivo: string; p_negocio_id: string }
+        Returns: {
+          categoria: string[]
+          ciudad: string
+          comision_plataforma_pct: number
+          created_at: string
+          descripcion: string | null
+          elegibilidad_marketplace: boolean
+          email_contacto: string | null
+          estado: Database["public"]["Enums"]["negocio_estado"]
+          id: string
+          identificacion_fiscal: string | null
+          logo_url: string | null
+          max_anticipacion_dias: number
+          min_anticipacion_minutos: number
+          nombre: string
+          onboarding_completo: boolean
+          owner_user_id: string
+          pago_completo_en_app: boolean
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          puntos_expiracion_meses: number
+          puntos_valor_100_cop: number
+          reembolso_parcial_pct: number
+          sena_maximo: number
+          sena_minimo: number
+          sena_monto_fijo: number | null
+          sena_pct: number | null
+          slug: string
+          telefono_contacto: string | null
+          updated_at: string
+          ventana_reembolso_parcial_horas: number
+          ventana_reembolso_total_horas: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       cancelar_reserva: {
         Args: { p_motivo?: string; p_reserva_id: string }
@@ -2817,6 +2900,30 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      moderar_resena: {
+        Args: { p_accion: string; p_motivo?: string; p_resena_id: string }
+        Returns: {
+          calificacion: number
+          cliente_id: string
+          comentario: string | null
+          created_at: string
+          estado: Database["public"]["Enums"]["resena_estado"]
+          id: string
+          moderado_motivo: string | null
+          moderado_por: string | null
+          negocio_id: string
+          reserva_id: string
+          respuesta_negocio: string | null
+          staff_id: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "resena"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       negocio_resenas_publicas: {
         Args: { p_limite?: number; p_negocio_id: string }
         Returns: {
@@ -2886,6 +2993,47 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      reactivar_negocio_supersu: {
+        Args: { p_negocio_id: string }
+        Returns: {
+          categoria: string[]
+          ciudad: string
+          comision_plataforma_pct: number
+          created_at: string
+          descripcion: string | null
+          elegibilidad_marketplace: boolean
+          email_contacto: string | null
+          estado: Database["public"]["Enums"]["negocio_estado"]
+          id: string
+          identificacion_fiscal: string | null
+          logo_url: string | null
+          max_anticipacion_dias: number
+          min_anticipacion_minutos: number
+          nombre: string
+          onboarding_completo: boolean
+          owner_user_id: string
+          pago_completo_en_app: boolean
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          puntos_expiracion_meses: number
+          puntos_valor_100_cop: number
+          reembolso_parcial_pct: number
+          sena_maximo: number
+          sena_minimo: number
+          sena_monto_fijo: number | null
+          sena_pct: number | null
+          slug: string
+          telefono_contacto: string | null
+          updated_at: string
+          ventana_reembolso_parcial_horas: number
+          ventana_reembolso_total_horas: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reactivar_staff: {
         Args: { p_vinculo_id: string }
         Returns: {
@@ -2946,6 +3094,47 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      rechazar_negocio: {
+        Args: { p_motivo: string; p_negocio_id: string }
+        Returns: {
+          categoria: string[]
+          ciudad: string
+          comision_plataforma_pct: number
+          created_at: string
+          descripcion: string | null
+          elegibilidad_marketplace: boolean
+          email_contacto: string | null
+          estado: Database["public"]["Enums"]["negocio_estado"]
+          id: string
+          identificacion_fiscal: string | null
+          logo_url: string | null
+          max_anticipacion_dias: number
+          min_anticipacion_minutos: number
+          nombre: string
+          onboarding_completo: boolean
+          owner_user_id: string
+          pago_completo_en_app: boolean
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          puntos_expiracion_meses: number
+          puntos_valor_100_cop: number
+          reembolso_parcial_pct: number
+          sena_maximo: number
+          sena_minimo: number
+          sena_monto_fijo: number | null
+          sena_pct: number | null
+          slug: string
+          telefono_contacto: string | null
+          updated_at: string
+          ventana_reembolso_parcial_horas: number
+          ventana_reembolso_total_horas: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reenviar_invitacion: {
         Args: { p_invitacion_id: string }
         Returns: {
@@ -2989,6 +3178,30 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "producto_stock"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      reportar_resena: {
+        Args: { p_motivo: string; p_resena_id: string }
+        Returns: {
+          calificacion: number
+          cliente_id: string
+          comentario: string | null
+          created_at: string
+          estado: Database["public"]["Enums"]["resena_estado"]
+          id: string
+          moderado_motivo: string | null
+          moderado_por: string | null
+          negocio_id: string
+          reserva_id: string
+          respuesta_negocio: string | null
+          staff_id: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "resena"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -3151,6 +3364,47 @@ export type Database = {
           staff_id: string
           vinculo_id: string
         }[]
+      }
+      suspender_negocio: {
+        Args: { p_motivo: string; p_negocio_id: string }
+        Returns: {
+          categoria: string[]
+          ciudad: string
+          comision_plataforma_pct: number
+          created_at: string
+          descripcion: string | null
+          elegibilidad_marketplace: boolean
+          email_contacto: string | null
+          estado: Database["public"]["Enums"]["negocio_estado"]
+          id: string
+          identificacion_fiscal: string | null
+          logo_url: string | null
+          max_anticipacion_dias: number
+          min_anticipacion_minutos: number
+          nombre: string
+          onboarding_completo: boolean
+          owner_user_id: string
+          pago_completo_en_app: boolean
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          puntos_expiracion_meses: number
+          puntos_valor_100_cop: number
+          reembolso_parcial_pct: number
+          sena_maximo: number
+          sena_minimo: number
+          sena_monto_fijo: number | null
+          sena_pct: number | null
+          slug: string
+          telefono_contacto: string | null
+          updated_at: string
+          ventana_reembolso_parcial_horas: number
+          ventana_reembolso_total_horas: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       suspender_staff: {
         Args: { p_motivo?: string; p_vinculo_id: string }
