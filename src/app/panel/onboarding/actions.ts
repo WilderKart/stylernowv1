@@ -271,28 +271,31 @@ export async function eliminarServicio(servicioId: string): Promise<Resultado> {
 
 // ── Paso 4 — Invitar Staff (opcional) ───────────────────────────────────────
 
-export async function invitarStaff(negocioId: string, email: string): Promise<Resultado> {
+export async function invitarStaff(negocioId: string, email: string, sedeId: string): Promise<Resultado> {
   try {
-    const { supabase, userId } = await usuarioActual();
+    const { supabase } = await usuarioActual();
     const correo = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
       return { ok: false, error: "Ese correo no parece válido." };
     }
 
-    const { error } = await supabase
-      .from("invitacion_staff")
-      .insert({ negocio_id: negocioId, email: correo, invitado_por: userId });
+    // Mismo RPC que usa el Módulo 2.4 (panel/staff/actions.ts) — un solo
+    // camino para crear invitaciones, sin duplicar la lógica de tope de plan
+    // ni el upsert por (negocio_id, email).
+    const { data: invitacion, error } = await supabase.rpc("crear_invitacion_staff", {
+      p_negocio_id: negocioId,
+      p_email: correo,
+      p_sede_id: sedeId,
+    });
     if (error) {
-      if (error.code === "23505") return { ok: false, error: "Ya invitaste a ese correo." };
+      if (error.message.includes("PLAN_LIMIT_EXCEEDED")) {
+        return { ok: false, error: "Tu plan no permite más Staff — podés seguir sin invitar y sumarlo después." };
+      }
       return { ok: false, error: error.message };
     }
 
-    // TODO(Módulo 2.4): pantalla de aceptación en /invitacion/[id] que cree el
-    // vinculo_staff_negocio real cuando la persona invitada inicia sesión con
-    // este mismo correo. Por ahora la invitación queda registrada y notificada;
-    // la vinculación efectiva se completa en Gestión de Staff.
     const { data: negocio } = await supabase.from("negocio").select("nombre").eq("id", negocioId).single();
-    await notificarInvitacion(correo, negocio?.nombre ?? "un negocio en StylerNow");
+    await notificarInvitacion(correo, negocio?.nombre ?? "un negocio en StylerNow", invitacion.id);
 
     revalidatePath("/panel/onboarding");
     return { ok: true };
@@ -301,9 +304,10 @@ export async function invitarStaff(negocioId: string, email: string): Promise<Re
   }
 }
 
-async function notificarInvitacion(email: string, nombreNegocio: string) {
+async function notificarInvitacion(email: string, nombreNegocio: string, invitacionId: string) {
   const token = process.env.RESEND_API_KEY;
   if (!token) return; // No bloquea el onboarding si falta la key en este entorno.
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://stylernow.com"}/invitacion/${invitacionId}`;
 
   try {
     await fetch("https://api.resend.com/emails", {
@@ -313,7 +317,7 @@ async function notificarInvitacion(email: string, nombreNegocio: string) {
         from: "StylerNow <notificaciones@mail.stylernow.com>",
         to: email,
         subject: `Te invitaron a unirte a ${nombreNegocio} en StylerNow`,
-        html: `<h2>Te invitaron a StylerNow</h2><p>${nombreNegocio} te invitó a unirte como Staff. Ingresá a <a href="https://stylernow.com">StylerNow</a> con este mismo correo (${email}) para completar tu perfil.</p>`,
+        html: `<h2>Te invitaron a StylerNow</h2><p>${nombreNegocio} te invitó a unirte como Staff. Ingresá con este mismo correo (${email}) y <a href="${url}">aceptá o rechazá la invitación acá</a>.</p>`,
       }),
     });
   } catch {
@@ -324,7 +328,7 @@ async function notificarInvitacion(email: string, nombreNegocio: string) {
 export async function cancelarInvitacion(invitacionId: string): Promise<Resultado> {
   try {
     const { supabase } = await usuarioActual();
-    const { error } = await supabase.from("invitacion_staff").delete().eq("id", invitacionId);
+    const { error } = await supabase.rpc("cancelar_invitacion", { p_invitacion_id: invitacionId });
     if (error) return { ok: false, error: error.message };
     revalidatePath("/panel/onboarding");
     return { ok: true };

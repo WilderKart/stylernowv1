@@ -120,7 +120,7 @@ sin este dominio, el Marketplace de Cliente se ve vacío en producción.
       `011_registro_negocio.sql`, `src/app/panel/onboarding/`)
 - [ ] 2.2 Dashboard (ingresos, ocupación, próximas citas, plan, alertas)
 - [x] **2.3 Gestión de Sedes** — dominio completo, ver detalle abajo
-- [ ] 2.4 Gestión de Staff (listado, detalle, CRUD, Guardian, matriz de roles)
+- [x] **2.4 Gestión de Staff** — dominio completo, ver detalle abajo
 - [ ] 2.5 Servicios (CRUD, categorías, combos, asignación a Staff)
 - [ ] 2.6 Agenda (día/semana/Staff, drag & drop, bloqueos, conflictos)
 - [ ] 2.7 CRM (historial, notas, etiquetas, LTV, riesgo de abandono)
@@ -278,14 +278,119 @@ logout · el perfil Guardian se conserva, no se revoca por el traslado.
 Log.md` (ADL-011) · `CHANGELOG.md` (nuevo, creado en esta sesión) · este
 archivo.
 
+## Módulo 2.4 — detalle de lo construido
+
+Migración 015 · `src/app/panel/staff/`, `src/app/invitacion/[id]/`,
+`src/lib/hooks/use-en-linea.ts`. Consume `resolverContexto()` directamente
+— ninguna pantalla calcula su propio alcance comparando columnas a mano.
+
+- **El TODO real que quedó abierto en 2.1 se cerró acá**: `invitarStaff()`
+  solo registraba la fila y mandaba el correo — no existía ninguna forma de
+  ACEPTAR. `responder_invitacion()` (RPC) crea de verdad el `staff` y el
+  `vinculo_staff_negocio` cuando la persona invitada entra a
+  `/invitacion/[id]` con el mismo correo y decide aceptar o rechazar. El
+  wizard de onboarding (2.1) ahora llama al mismo RPC compartido
+  (`crear_invitacion_staff`) en vez de duplicar la lógica de insert — una
+  sola forma de invitar en todo el sistema.
+- **Listado con búsqueda/filtro/orden/paginación reales** (`/panel/staff`):
+  vista `vista_staff_negocio` (`security_invoker=true` — hereda el RLS real
+  de las tablas base, no es una puerta de autorización propia) consultada
+  directo con `.ilike()/.eq()/.range()/.order()` de supabase-js, sin RPC de
+  lectura a medida. Estados vacíos, skeleton de carga, banner de "sin
+  conexión" (`useEnLinea`, nuevo hook reutilizable) y "cargar más"
+  incremental — nada mockeado.
+- **Ciclo de vida completo del vínculo**, todo exclusivo de Barbería
+  (`03-Business-Rules/01_Roles.md`), todo auditado en `evento_auditoria`
+  (actor, fecha, negocio, antes/después) y sin borrado físico nunca:
+  `promover_guardian` / `revocar_guardian`, `suspender_staff` /
+  `reactivar_staff`, `retirar_staff` ("Eliminar acceso" de la matriz —
+  revoca el perfil Guardian si lo tenía, sin período de gracia).
+- **Invitaciones con ciclo completo**: pendiente, reenviada
+  (`reenviar_invitacion`, extiende `expira_at` y cuenta reenvíos),
+  cancelada (`cancelar_invitacion` — ya no es un DELETE, es un estado
+  auditado; se quitó la política de DELETE de la tabla), expirada (lazy,
+  al intentar responder una vencida), aceptada, rechazada (estado nuevo
+  `RECHAZADA` en el enum).
+- **Tope duro de plan aplicado a Staff** (`plan.staff_tope_absoluto` —
+  hoy solo Raven, 2), igual que 2.3 lo aplicó a Sedes: se revisa al crear
+  la invitación (contando vínculos activos + invitaciones pendientes, para
+  no poder sobre-reservar el cupo) y otra vez al aceptar (por si el cupo
+  se llenó mientras la invitación esperaba respuesta).
+- **ADL-009 respetado explícitamente**: `responder_invitacion` rechaza con
+  `YA_TIENE_VINCULO_ACTIVO` si la persona ya tiene un vínculo no-RETIRADO
+  en OTRO negocio, con un mensaje legible en vez de dejar que la rechace el
+  índice único a ciegas. Si vuelve a un negocio donde ya había estado
+  (RETIRADO), reactiva la MISMA fila en vez de crear una nueva — el
+  historial de Nivel PRO/EXPERT/MASTER, indexado por `vinculo_id`, no se
+  pierde.
+- **RLS corregido, no solo agregado**: el alcance de Guardian sobre
+  `vinculo_staff_negocio` era el negocio completo (`is_guardian_de_negocio`)
+  desde antes de este módulo — la matriz de Roles dice que "Ver
+  compañeros" es 🏢 (una sola sede), no el negocio entero. Se corrigió en
+  la misma migración que lo necesitaba, para no dejar la matriz de permisos
+  desalineada del código. Nuevas políticas: `perfil_select_staff_interno`
+  (Barbería/Guardian ven el teléfono/correo de su propio equipo — antes
+  `perfil` solo era visible para uno mismo, SuperSU, o CRM de Clientes) y
+  `negocio_select_invitado` (un invitado ve el nombre del negocio aunque
+  todavía esté `PENDIENTE_APROBACION` y él mismo todavía no sea Staff).
+- **`resolverContexto()` extendido con un rol nuevo, `STAFF`**: aceptar una
+  invitación como Staff plano (o como Guardian sin sede todavía asignada)
+  antes solo existía en teoría — en la práctica el resolutor los mandaba al
+  wizard de "crear negocio" (`rol NINGUNO`), un destino roto. Ahora
+  `/panel` les muestra una pantalla honesta con sus propios datos reales y
+  una nota clara de que la App Staff completa es Fase 4 — nunca un
+  Dashboard con datos inventados. Un vínculo `SUSPENDIDO` también se
+  distingue (`estadoVinculo`) para mostrar por qué está bloqueado, en vez
+  de la misma pantalla confusa.
+- **`PermisosPanel` ganó 8 campos nuevos** (`invitarStaff`,
+  `promoverGuardian`, `revocarGuardian`, `suspenderStaff`, `reactivarStaff`,
+  `retirarStaff`, `cancelarInvitacionStaff`, `cambiarHorarioOtroStaff` —
+  este último reservado para cuando exista Agenda, Guardian también lo
+  tiene per la matriz) — ninguna pantalla de Staff calcula su propio
+  alcance comparando `rol` a mano.
+- **Historial auditable** en la ficha de cada Staff (`/panel/staff/[id]`):
+  se lee directo de `evento_auditoria` (mismo patrón que ya usaba Sedes),
+  visible solo para Barbería — RLS ya lo filtra así, la UI solo lo alinea.
+
+### Verificado end-to-end contra la base real (44/44)
+Invitar → aceptar (crea `staff` + `vinculo_staff_negocio` reales) → rechazar
+(no crea nada) · solo el correo invitado puede responder su propia
+invitación · reenviar extiende el vencimiento · cancelar es un estado, no
+un DELETE, y no se puede cancelar dos veces · ADL-009: no se puede aceptar
+un segundo vínculo activo en otro negocio · tope duro de plan (Raven = 2)
+bloquea una 3ª invitación y se libera al retirar a alguien · promover/
+revocar Guardian con sus reglas (`FALTA_SEDE_ACTIVA`, `YA_ES_GUARDIAN`,
+`NO_ES_GUARDIAN`) · Guardian ve SOLO su sede en el listado, nunca otra
+sede del mismo negocio · Guardian rechazado por las 6 acciones exclusivas
+de Barbería (trasladar, suspender, retirar, invitar, revocarse el propio
+Guardian, cancelar invitaciones) · Guardian NO ve el log de auditoría del
+negocio — solo eventos donde él mismo fue el actor · suspender/reactivar/
+retirar con sus transiciones válidas e inválidas · Barbería ve el correo
+de su Staff, un tercero sin vínculo no · un invitado ve el nombre del
+negocio antes de ser Staff · SuperSU conserva acceso total.
+
+### Documentación actualizada con este módulo
+Este archivo · `CHANGELOG.md`. No se abrió un ADR nuevo — todo lo
+construido ejecuta decisiones ya tomadas en ADR-002 (roles) y ADR-006
+(Panel compartido), sin un cambio de arquitectura nuevo que registrar.
+
+### Propuestas pendientes de aprobación
+- **Documentos del Staff** (2.4.2 los pide como "arquitectura preparada",
+  no como pantalla ahora): cuando se necesiten, un bucket de Storage
+  (`staff-documentos`) + una tabla `staff_documento` se agregan sin tocar
+  el resolutor de permisos ni el RLS de este módulo — no se construyó nada
+  de esto todavía porque no hay un requisito concreto de qué documento
+  guardar ni quién debe verlo.
+- **Editar comisión después de la invitación** vive en Finanzas (2.10, no
+  construido) — hoy `comision_pct` se fija una sola vez al invitar y se
+  muestra de solo lectura en la ficha del Staff.
+
 ---
 
-**Próximo módulo a ejecutar: 2.4 — Gestión de Staff.** Tiene prioridad
-sobre 2.2 (Dashboard) porque cierra un pendiente ya abierto en 2.1 (la
-aceptación de invitaciones de Staff) y en 2.3 (el traslado ya existe a
-nivel de RPC, falta la pantalla completa de listado/detalle/CRUD). Se
-construye directamente sobre `resolverContexto()` — ya no hay que diseñar
-el mecanismo de alcance Guardian, solo consumirlo.
+**Próximo módulo a ejecutar: 2.2 — Dashboard.** Con 2.1, 2.3 y 2.4
+cerrados, se retoma el orden oficial de la Fase 2 en la parte que se había
+saltado por dependencias (2.3 y 2.4 debían resolverse antes de tener datos
+reales de Sedes/Staff que mostrar en un Dashboard con métricas ciertas).
 
 ---
 

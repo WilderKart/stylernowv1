@@ -90,6 +90,13 @@ export type Database = {
             referencedRelation: "vinculo_staff_negocio"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "bloqueo_ausencia_vinculo_id_fkey"
+            columns: ["vinculo_id"]
+            isOneToOne: false
+            referencedRelation: "vista_staff_negocio"
+            referencedColumns: ["vinculo_id"]
+          },
         ]
       }
       campana_publicitaria: {
@@ -270,6 +277,13 @@ export type Database = {
             referencedRelation: "vinculo_staff_negocio"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "disponibilidad_vinculo_id_fkey"
+            columns: ["vinculo_id"]
+            isOneToOne: false
+            referencedRelation: "vista_staff_negocio"
+            referencedColumns: ["vinculo_id"]
+          },
         ]
       }
       evento_auditoria: {
@@ -360,6 +374,7 @@ export type Database = {
       }
       invitacion_staff: {
         Row: {
+          comision_pct: number | null
           created_at: string
           email: string
           estado: Database["public"]["Enums"]["invitacion_staff_estado"]
@@ -367,8 +382,13 @@ export type Database = {
           id: string
           invitado_por: string
           negocio_id: string
+          reenviada_at: string | null
+          reenvios_count: number
+          respondida_at: string | null
+          sede_id: string | null
         }
         Insert: {
+          comision_pct?: number | null
           created_at?: string
           email: string
           estado?: Database["public"]["Enums"]["invitacion_staff_estado"]
@@ -376,8 +396,13 @@ export type Database = {
           id?: string
           invitado_por: string
           negocio_id: string
+          reenviada_at?: string | null
+          reenvios_count?: number
+          respondida_at?: string | null
+          sede_id?: string | null
         }
         Update: {
+          comision_pct?: number | null
           created_at?: string
           email?: string
           estado?: Database["public"]["Enums"]["invitacion_staff_estado"]
@@ -385,6 +410,10 @@ export type Database = {
           id?: string
           invitado_por?: string
           negocio_id?: string
+          reenviada_at?: string | null
+          reenvios_count?: number
+          respondida_at?: string | null
+          sede_id?: string | null
         }
         Relationships: [
           {
@@ -392,6 +421,13 @@ export type Database = {
             columns: ["negocio_id"]
             isOneToOne: false
             referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitacion_staff_sede_id_fkey"
+            columns: ["sede_id"]
+            isOneToOne: false
+            referencedRelation: "sede"
             referencedColumns: ["id"]
           },
         ]
@@ -596,6 +632,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vinculo_staff_negocio"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nivel_staff_consolidado_vinculo_id_fkey"
+            columns: ["vinculo_id"]
+            isOneToOne: false
+            referencedRelation: "vista_staff_negocio"
+            referencedColumns: ["vinculo_id"]
           },
         ]
       }
@@ -875,6 +918,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vinculo_staff_negocio"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "puntaje_staff_evento_vinculo_id_fkey"
+            columns: ["vinculo_id"]
+            isOneToOne: false
+            referencedRelation: "vista_staff_negocio"
+            referencedColumns: ["vinculo_id"]
           },
         ]
       }
@@ -1731,7 +1781,49 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      vista_staff_negocio: {
+        Row: {
+          comision_pct: number | null
+          created_at: string | null
+          email: string | null
+          es_guardian: boolean | null
+          especialidad: string | null
+          estado: Database["public"]["Enums"]["vinculo_estado"] | null
+          fecha_ingreso: string | null
+          foto_url: string | null
+          negocio_id: string | null
+          nivel: Database["public"]["Enums"]["nivel_staff"] | null
+          nombre: string | null
+          sede_id: string | null
+          sede_nombre: string | null
+          staff_id: string | null
+          telefono: string | null
+          vinculo_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vinculo_staff_negocio_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vinculo_staff_negocio_sede_activa_id_fkey"
+            columns: ["sede_id"]
+            isOneToOne: false
+            referencedRelation: "sede"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vinculo_staff_negocio_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["usuario_id"]
+          },
+        ]
+      }
     }
     Functions: {
       aplicar_evento_pago: {
@@ -1746,6 +1838,10 @@ export type Database = {
       calcular_sena: {
         Args: { p_monto_total: number; p_negocio_id: string }
         Returns: number
+      }
+      cancelar_invitacion: {
+        Args: { p_invitacion_id: string }
+        Returns: undefined
       }
       cancelar_reserva: {
         Args: { p_motivo?: string; p_reserva_id: string }
@@ -1772,6 +1868,34 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "sede"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      crear_invitacion_staff: {
+        Args: {
+          p_comision_pct?: number
+          p_email: string
+          p_negocio_id: string
+          p_sede_id: string
+        }
+        Returns: {
+          comision_pct: number | null
+          created_at: string
+          email: string
+          estado: Database["public"]["Enums"]["invitacion_staff_estado"]
+          expira_at: string
+          id: string
+          invitado_por: string
+          negocio_id: string
+          reenviada_at: string | null
+          reenvios_count: number
+          respondida_at: string | null
+          sede_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "invitacion_staff"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -2023,6 +2147,27 @@ export type Database = {
           staff_id: string
         }[]
       }
+      promover_guardian: {
+        Args: { p_vinculo_id: string }
+        Returns: {
+          comision_pct: number | null
+          created_at: string
+          es_guardian: boolean
+          estado: Database["public"]["Enums"]["vinculo_estado"]
+          fecha_ingreso: string | null
+          id: string
+          negocio_id: string
+          sede_activa_id: string | null
+          staff_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vinculo_staff_negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reabrir_sede: {
         Args: { p_sede_id: string }
         Returns: {
@@ -2044,6 +2189,96 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "sede"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      reactivar_staff: {
+        Args: { p_vinculo_id: string }
+        Returns: {
+          comision_pct: number | null
+          created_at: string
+          es_guardian: boolean
+          estado: Database["public"]["Enums"]["vinculo_estado"]
+          fecha_ingreso: string | null
+          id: string
+          negocio_id: string
+          sede_activa_id: string | null
+          staff_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vinculo_staff_negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      reenviar_invitacion: {
+        Args: { p_invitacion_id: string }
+        Returns: {
+          comision_pct: number | null
+          created_at: string
+          email: string
+          estado: Database["public"]["Enums"]["invitacion_staff_estado"]
+          expira_at: string
+          id: string
+          invitado_por: string
+          negocio_id: string
+          reenviada_at: string | null
+          reenvios_count: number
+          respondida_at: string | null
+          sede_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "invitacion_staff"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      responder_invitacion: {
+        Args: { p_aceptar: boolean; p_invitacion_id: string }
+        Returns: Json
+      }
+      retirar_staff: {
+        Args: { p_motivo?: string; p_vinculo_id: string }
+        Returns: {
+          comision_pct: number | null
+          created_at: string
+          es_guardian: boolean
+          estado: Database["public"]["Enums"]["vinculo_estado"]
+          fecha_ingreso: string | null
+          id: string
+          negocio_id: string
+          sede_activa_id: string | null
+          staff_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vinculo_staff_negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      revocar_guardian: {
+        Args: { p_vinculo_id: string }
+        Returns: {
+          comision_pct: number | null
+          created_at: string
+          es_guardian: boolean
+          estado: Database["public"]["Enums"]["vinculo_estado"]
+          fecha_ingreso: string | null
+          id: string
+          negocio_id: string
+          sede_activa_id: string | null
+          staff_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vinculo_staff_negocio"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -2077,6 +2312,27 @@ export type Database = {
           staff_id: string
           vinculo_id: string
         }[]
+      }
+      suspender_staff: {
+        Args: { p_motivo?: string; p_vinculo_id: string }
+        Returns: {
+          comision_pct: number | null
+          created_at: string
+          es_guardian: boolean
+          estado: Database["public"]["Enums"]["vinculo_estado"]
+          fecha_ingreso: string | null
+          id: string
+          negocio_id: string
+          sede_activa_id: string | null
+          staff_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vinculo_staff_negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       tiene_acceso_interno: { Args: { p_negocio_id: string }; Returns: boolean }
       trasladar_staff: {
@@ -2114,6 +2370,7 @@ export type Database = {
         | "ACEPTADA"
         | "EXPIRADA"
         | "CANCELADA"
+        | "RECHAZADA"
       lista_espera_estado:
         | "ACTIVA"
         | "NOTIFICADA"
@@ -2300,6 +2557,7 @@ export const Constants = {
         "ACEPTADA",
         "EXPIRADA",
         "CANCELADA",
+        "RECHAZADA",
       ],
       lista_espera_estado: [
         "ACTIVA",

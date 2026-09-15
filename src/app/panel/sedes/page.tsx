@@ -14,6 +14,8 @@ export default async function SedesPage() {
   // Guardian no gestiona una lista de sedes ajenas — administra la propia
   // desde su Resumen (ADR-006). Esta pantalla es exclusiva de Barbería.
   if (contexto.rol === "GUARDIAN") redirect(`/panel/sedes/${contexto.sedeId}`);
+  // Staff plano no administra sedes en absoluto (03-Business-Rules/01_Roles.md).
+  if (contexto.rol === "STAFF") redirect("/panel");
 
   const supabase = await createClient();
   const negocioId = contexto.negocioId!;

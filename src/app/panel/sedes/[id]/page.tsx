@@ -11,6 +11,7 @@ export default async function SedeDetallePage(props: PageProps<"/panel/sedes/[id
   const contexto = await resolverContexto();
   if (!contexto.userId) redirect(`/login?next=/panel/sedes/${id}`);
   if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
+  if (contexto.rol === "STAFF") redirect("/panel");
 
   const supabase = await createClient();
 

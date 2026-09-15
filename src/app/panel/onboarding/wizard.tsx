@@ -160,6 +160,7 @@ export function Wizard({
       {paso === 4 && negocio ? (
         <PasoStaff
           negocioId={negocio.id}
+          sedeId={sede?.id ?? null}
           invitaciones={invitaciones}
           onCambio={setInvitaciones}
           onEnviado={() => router.push("/panel")}
@@ -561,11 +562,13 @@ function PasoServicios({
 
 function PasoStaff({
   negocioId,
+  sedeId,
   invitaciones,
   onCambio,
   onEnviado,
 }: {
   negocioId: string;
+  sedeId: string | null;
   invitaciones: InvitacionData[];
   onCambio: (i: InvitacionData[]) => void;
   onEnviado: () => void;
@@ -577,9 +580,13 @@ function PasoStaff({
 
   async function onInvitar(e: React.FormEvent) {
     e.preventDefault();
+    if (!sedeId) {
+      setError("Agregá una sede antes de invitar Staff.");
+      return;
+    }
     setInvitando(true);
     setError(null);
-    const res = await invitarStaff(negocioId, email);
+    const res = await invitarStaff(negocioId, email, sedeId);
     setInvitando(false);
     if (!res.ok) {
       setError(res.error);

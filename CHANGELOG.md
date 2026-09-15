@@ -7,6 +7,18 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 2, Módulo 2.4: Gestión de Staff
+Dominio completo sobre `resolverContexto()`: listado con búsqueda/filtro/
+orden/paginación real (vista `vista_staff_negocio`, RLS heredado), ciclo de
+vida entero del vínculo (promover/revocar Guardian, suspender/reactivar,
+retirar) y — el TODO que había quedado abierto desde el Módulo 2.1 —
+aceptar/rechazar una invitación de verdad en `/invitacion/[id]`, que recién
+ahí crea el `staff` y el `vinculo_staff_negocio` reales. Corrige además el
+alcance de Guardian sobre `vinculo_staff_negocio`, que hasta ahora era el
+negocio completo en vez de solo su sede. Verificado: 44/44 casos reales
+contra la base, incluyendo el tope duro de Staff por plan y ADL-009 (un
+Staff nunca tiene dos vínculos activos a la vez).
+
 ### Añadido — ADR-006: Guardian comparte el Panel Negocio con permisos dinámicos
 Decisión de arquitectura del fundador: en vez de esperar a Fase 4 (App
 Staff), Guardian opera dentro del mismo Panel Negocio que la Barbería,

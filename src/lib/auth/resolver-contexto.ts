@@ -17,7 +17,10 @@ import { createClient } from "@/lib/supabase/server";
  * el alcance de Guardian en el siguiente request, sin logout.
  */
 
-export type RolPanel = "BARBERIA" | "GUARDIAN" | "NINGUNO";
+export type RolPanel = "BARBERIA" | "GUARDIAN" | "STAFF" | "NINGUNO";
+
+/** Estado crudo del vínculo Staff–Negocio, cuando existe uno. */
+export type EstadoVinculoPanel = "ACTIVO" | "SUSPENDIDO" | "INVITADO" | "RETIRADO" | null;
 
 export interface PermisosPanel {
   verTodasLasSedes: boolean;
@@ -29,16 +32,31 @@ export interface PermisosPanel {
   editarSedePropia: boolean;
   verConfiguracionGlobal: boolean;
   verFacturacion: boolean;
+  // Módulo 2.4 — Gestión de Staff (03-Business-Rules/01_Roles.md: todas
+  // exclusivas de Barbería salvo cambiarHorarioOtroStaff, que también es 🏢
+  // para Guardian — reservado para cuando exista el módulo de Agenda).
+  invitarStaff: boolean;
+  cancelarInvitacionStaff: boolean;
+  promoverGuardian: boolean;
+  revocarGuardian: boolean;
+  suspenderStaff: boolean;
+  reactivarStaff: boolean;
+  retirarStaff: boolean;
+  cambiarHorarioOtroStaff: boolean;
 }
 
 export interface ContextoUsuario {
   userId: string | null;
   rol: RolPanel;
   negocioId: string | null;
-  /** La propia sede si es Guardian; `null` en Barbería significa "todas". */
+  /** La propia sede si es Guardian/Staff; `null` en Barbería significa "todas". */
   sedeId: string | null;
   staffVinculoId: string | null;
   esGuardian: boolean;
+  /** Estado del vínculo tal cual está en la base — permite distinguir un
+   * Staff SUSPENDIDO (debe ver por qué está bloqueado) de uno sin ningún
+   * vínculo todavía (NINGUNO real). */
+  estadoVinculo: EstadoVinculoPanel;
   permisos: PermisosPanel;
 }
 
@@ -52,6 +70,14 @@ const PERMISOS_NINGUNO: PermisosPanel = {
   editarSedePropia: false,
   verConfiguracionGlobal: false,
   verFacturacion: false,
+  invitarStaff: false,
+  cancelarInvitacionStaff: false,
+  promoverGuardian: false,
+  revocarGuardian: false,
+  suspenderStaff: false,
+  reactivarStaff: false,
+  retirarStaff: false,
+  cambiarHorarioOtroStaff: false,
 };
 
 const CONTEXTO_NINGUNO: ContextoUsuario = {
@@ -61,6 +87,7 @@ const CONTEXTO_NINGUNO: ContextoUsuario = {
   sedeId: null,
   staffVinculoId: null,
   esGuardian: false,
+  estadoVinculo: null,
   permisos: PERMISOS_NINGUNO,
 };
 
@@ -87,6 +114,7 @@ export async function resolverContexto(): Promise<ContextoUsuario> {
       sedeId: null,
       staffVinculoId: null,
       esGuardian: false,
+      estadoVinculo: null,
       permisos: {
         verTodasLasSedes: true,
         crearSede: true,
@@ -97,39 +125,72 @@ export async function resolverContexto(): Promise<ContextoUsuario> {
         editarSedePropia: true,
         verConfiguracionGlobal: true,
         verFacturacion: true,
+        invitarStaff: true,
+        cancelarInvitacionStaff: true,
+        promoverGuardian: true,
+        revocarGuardian: true,
+        suspenderStaff: true,
+        reactivarStaff: true,
+        retirarStaff: true,
+        cambiarHorarioOtroStaff: true,
       },
     };
   }
 
-  // 2 · ¿Es Staff con vínculo ACTIVO y perfil Guardian? Plain Staff (sin
-  // Guardian) todavía no entra al Panel Negocio — su superficie es la App
-  // Staff de Fase 4 (ADR-006: este ADR cubre específicamente Guardian).
+  // 2 · ¿Tiene un vínculo Staff–Negocio? (cualquier estado salvo RETIRADO:
+  // ADL-009 garantiza que hay como máximo uno). Guardian con sede asignada
+  // comparte el Panel Negocio (ADR-006); un Staff plano o un Guardian sin
+  // sede activa (edge case: recién promovido antes de tener sede) cae en
+  // rol STAFF — su superficie completa es la App Staff de Fase 4, pero acá
+  // necesita un destino real (nunca el wizard de "crear negocio").
   const { data: vinculo } = await supabase
     .from("vinculo_staff_negocio")
-    .select("id, negocio_id, sede_activa_id, es_guardian")
+    .select("id, negocio_id, sede_activa_id, es_guardian, estado")
     .eq("staff_id", user.id)
-    .eq("estado", "ACTIVO")
+    .neq("estado", "RETIRADO")
     .maybeSingle();
 
-  if (vinculo?.es_guardian && vinculo.sede_activa_id) {
+  if (vinculo) {
+    if (vinculo.estado === "ACTIVO" && vinculo.es_guardian && vinculo.sede_activa_id) {
+      return {
+        userId: user.id,
+        rol: "GUARDIAN",
+        negocioId: vinculo.negocio_id,
+        sedeId: vinculo.sede_activa_id,
+        staffVinculoId: vinculo.id,
+        esGuardian: true,
+        estadoVinculo: "ACTIVO",
+        permisos: {
+          verTodasLasSedes: false,
+          crearSede: false,
+          eliminarSede: false,
+          cerrarReabrirSede: false,
+          marcarSedePrincipal: false,
+          trasladarStaff: false,
+          editarSedePropia: true,
+          verConfiguracionGlobal: false,
+          verFacturacion: false,
+          invitarStaff: false,
+          cancelarInvitacionStaff: false,
+          promoverGuardian: false,
+          revocarGuardian: false,
+          suspenderStaff: false,
+          reactivarStaff: false,
+          retirarStaff: false,
+          cambiarHorarioOtroStaff: true,
+        },
+      };
+    }
+
     return {
       userId: user.id,
-      rol: "GUARDIAN",
+      rol: "STAFF",
       negocioId: vinculo.negocio_id,
       sedeId: vinculo.sede_activa_id,
       staffVinculoId: vinculo.id,
-      esGuardian: true,
-      permisos: {
-        verTodasLasSedes: false,
-        crearSede: false,
-        eliminarSede: false,
-        cerrarReabrirSede: false,
-        marcarSedePrincipal: false,
-        trasladarStaff: false,
-        editarSedePropia: true,
-        verConfiguracionGlobal: false,
-        verFacturacion: false,
-      },
+      esGuardian: vinculo.es_guardian,
+      estadoVinculo: vinculo.estado as EstadoVinculoPanel,
+      permisos: PERMISOS_NINGUNO,
     };
   }
 
