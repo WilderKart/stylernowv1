@@ -21,6 +21,7 @@ plantillas de la Biblia + constructor personalizado, exportación CSV
 exclusiva de Barbería. Riesgo de abandono se muestra honesto como "no
 disponible" (depende de IA de Fase 6) en vez de un número inventado.
 Verificado: 14/14 casos reales, incluyendo el aislamiento entre negocios.
+`aa2e803`
 
 ### Añadido — Fase 2, Módulo 2.6: Agenda
 Vista Día (columnas por Staff, cuadrícula real según el horario de la
