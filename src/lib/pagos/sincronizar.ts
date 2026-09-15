@@ -64,6 +64,10 @@ async function aplicar(pagoId: string, pagoPasarela: PagoPasarela): Promise<Resu
         updated_at: new Date().toISOString(),
       })
       .eq("id", pagoId);
+    // 02_Commissions.md: la comisión ya acreditada al Wallet (aplicar_evento_pago)
+    // se revierte proporcionalmente — nunca queda comisión cobrada sobre un pago
+    // que terminó reembolsado al 100%.
+    await admin.rpc("revertir_comision_wallet", { p_pago_id: pagoId, p_monto_reembolsado: pagoPasarela.monto });
 
     return { estado: "REEMBOLSADO", motivo: r.motivo ?? "RESERVA_EXPIRADA" };
   }

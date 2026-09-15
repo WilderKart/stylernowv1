@@ -71,7 +71,8 @@ verificados, no solo "no lanza error en el camino feliz".
 | Fase 5.1 — Marketplace: Favoritos + Compartir | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
 | Fase 5.2 — Marketplace: Destacados/Ranking (Score) | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
 | Fase 5.3 — Marketplace: Mapa visual (MapLibre) | ✅ | ✅ | N/A | ⚠️ Manual pendiente | ✅ Cerrado |
-| Fase 6 — Growth Engine | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente (ADR-008 deja el diseño de Objetivos de Staff listo) |
+| Fase 6.1 — Wallet: comisión de plataforma real | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
+| Fase 6.2+ — Growth Engine (Ads, Suscripciones, IA, WhatsApp, Membresías/Gift Cards/Referidos) | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente (varios bloqueados sin credenciales/decisión de negocio) |
 
 Ver también `docs/TECH_DEBT_REGISTER.md` (mejoras que no bloquean) y
 `docs/PENDING_DECISIONS.md` (decisiones que dependen de algo externo).
@@ -1406,14 +1407,94 @@ todo lo especificado explícitamente por la Biblia.**
 
 ---
 
-**Próximo módulo a ejecutar: Fase 5.2 — Marketplace: Destacados/Ranking (Score).**
+# FASE 6 — Growth Engine
+
+Fuente: `08-Growth-Monetization/*`, `09-CRM-Intelligence/*`,
+`AI_Credit_System.md`, `WhatsApp_Delivery_Engine.md`. Sin documento
+dedicado para membresías/Gift Cards/referidos — quedan como Decisión
+abierta hasta que el fundador defina su mecánica de negocio (no se
+inventa una economía de puntos/descuentos sin esa definición).
+
+- [x] **Wallet — comisión de plataforma real** (`02_Commissions.md`) —
+      ver detalle del Módulo 6.1 abajo
+- [ ] Marketplace Ads (`06_Advertising_System.md`) — depende del Wallet
+      recién encendido en 6.1
+- [ ] Suscripciones: upgrade/downgrade con prorrateo, fallos de cobro y
+      reintentos (`04_Subscriptions_Lifecycle.md`, `05_Billing_Failures.md`)
+- [ ] IA operacional (Cliente/Staff/Negocio, `09-CRM-Intelligence/*`),
+      créditos IA (`AI_Credit_System.md`) — arquitectura de datos lista
+      desde ADR-008 (Módulo 4), implementación de IA real bloqueada sin
+      credenciales de un proveedor de LLM
+- [ ] Motor WhatsApp inteligente (`WhatsApp_Delivery_Engine.md`) —
+      bloqueado sin credenciales de WhatsApp Business API
+- [ ] Membresías, Gift Cards, referidos — Decisión abierta, sin
+      documento de reglas de negocio
+
+## Módulo 6.1 — detalle de lo construido (Wallet: comisión de plataforma real)
+
+Migraciones 041-042 · `src/app/panel/wallet/`, `src/lib/pagos/sincronizar.ts`,
+`src/app/reserva/[id]/actions.ts`.
+
+- **Hallazgo real, el más grave de toda la sesión hasta ahora**: `wallet`/
+  `wallet_movimiento` existen desde la migración 003,
+  `handle_new_negocio()` crea la fila de `wallet` de cada Negocio
+  automáticamente desde la migración 007 — pero **cero filas se
+  insertaron jamás en `wallet_movimiento`, y ningún `UPDATE` tocó
+  `wallet.saldo_disponible` en toda la base de código**.
+  `aplicar_evento_pago()` ya calculaba la comisión de plataforma y la
+  guardaba en `pago.comision_plataforma_monto` (solo para auditoría),
+  pero nunca acreditaba el monto neto al Wallet del Negocio — todo
+  Negocio real habría cobrado señas para siempre sin que ese dinero
+  llegara jamás a un saldo retirable.
+- **`aplicar_evento_pago()` extendida**: al aprobar un pago, acredita
+  `monto - comisión` al Wallet del Negocio con un `wallet_movimiento`
+  real (tipo `COMISION`).
+- **`revertir_comision_wallet()` (nueva)**: revierte proporcionalmente
+  ese crédito en un reembolso total o parcial — conectada en los 3
+  lugares del código (TypeScript, cliente admin) donde un `pago` pasa a
+  `REEMBOLSADO`/`REEMBOLSADO_PARCIAL`.
+- **`/panel/wallet` (nuevo, exclusivo Barbería)**: saldo disponible/
+  retenido + historial de movimientos — la RLS que lo protege
+  (`wallet_select_negocio`, `wallet_mov_select`) ya existía desde la
+  migración 006, sin ninguna pantalla que la usara.
+- **Segundo hallazgo, de seguridad, más grave que el primero**: la
+  prueba end-to-end de este módulo detectó que `revoke all on function
+  ... from public;` (usado para restringir `aplicar_evento_pago()` a
+  llamadas server-to-server con `service_role`, sin ningún chequeo de
+  autorización propio) **no bloqueaba en absoluto a un usuario
+  `authenticated` cualquiera** — Supabase otorga privilegios de
+  ejecución a `anon`/`authenticated` de forma independiente de `PUBLIC`,
+  y revocar solo de `PUBLIC` no los toca. **Cualquier usuario autenticado
+  de la plataforma podía llamar `aplicar_evento_pago()` directamente con
+  un `p_pago_id` arbitrario y `p_estado='APROBADO'`, confirmando
+  cualquier Reserva pendiente de pago sin haber pagado realmente** — un
+  vector de fraude financiero real y activo en producción desde la
+  migración 008 (Fase 1), no introducido por este módulo. Se corrigió
+  (migración 042) revocando explícitamente de `anon, authenticated`
+  además de `public`, en las 3 funciones del proyecto que dependían de
+  este patrón (`aplicar_evento_pago`, `expirar_reservas_vencidas`,
+  `revertir_comision_wallet`) — ninguna otra RPC del proyecto depende
+  solo de este mecanismo, todas verifican autorización dentro de su
+  propio cuerpo. Guardado como memoria persistente para no repetirlo.
+
+### Verificado end-to-end contra la base real (14/14)
+Aprobar un pago acredita el neto exacto (seña − comisión) al Wallet ·
+reembolso total revierte el crédito completo · reembolso parcial (50%)
+revierte proporcionalmente, ni de más ni de menos · reintentar el mismo
+evento no duplica nada (idempotencia preexistente, sin regresión) ·
+**ningún usuario autenticado puede invocar `revertir_comision_wallet()`
+ni `aplicar_evento_pago()` directamente** (verificado también contra la
+versión pre-fix, confirmando el hallazgo antes de corregirlo) · la
+Barbería dueña lee su propio Wallet y movimientos, otra Barbería no ve
+nada.
+
+### Documentación actualizada con este módulo
+Este archivo (Coverage Matrix + detalle), `CHANGELOG.md`, ADL-022
+(hallazgo de seguridad, marcado como el más grave de la sesión).
 
 ---
 
-# FASE 6 — Growth Engine
-
-- [ ] IA operacional, membresías, Gift Cards, referidos, campañas,
-      automatizaciones, créditos IA, motor WhatsApp inteligente
+**Próximo módulo a ejecutar: Fase 6.2 — Marketplace Ads.**
 
 ---
 

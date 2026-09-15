@@ -61,6 +61,27 @@ bloquea, el desarrollo sigue avanzando en paralelo sin esperar respuesta.
 - **Recomendación:** revisar el volumen real de uso del Mapa cuando haya Negocios reales operando, y decidir en ese momento si migrar — cambiar el `ESTILO_OSM` de `src/components/marketplace/mapa-marketplace.tsx` por la URL de tiles del proveedor elegido es un cambio de una sola constante, no una reescritura.
 - **Bloquea:** No — es una decisión de infraestructura para cuando haya tráfico real, no de negocio.
 
+## Fase 6 — IA operacional: falta credencial de un proveedor de LLM
+
+- **Contexto:** `09-CRM-Intelligence/02_AI_Client.md`, `03_AI_Staff.md`, `04_AI_Business.md` y `AI_Credit_System.md` especifican funcionalidades de IA real (insights de Staff, riesgo de abandono de Cliente, sugerencias de campaña) sobre créditos ya modelados en el schema (`credito_ia_lote`, `credito_ia_consumo`, migración 004).
+- **Impacto:** sin una API key de un proveedor de LLM (Anthropic, OpenAI, etc.), no se puede construir la funcionalidad de IA real — solo la arquitectura de datos (créditos, consumo) ya existe desde la Fase 1.
+- **Recomendación:** proveer la credencial cuando el fundador decida qué proveedor usar; mientras tanto no se avanza en esta sub-fase.
+- **Bloquea:** Solo la implementación de IA real — el resto de Fase 6 (Ads, Suscripciones) no depende de esto.
+
+## Fase 6 — Motor WhatsApp inteligente: falta credencial de WhatsApp Business API
+
+- **Contexto:** `WhatsApp_Delivery_Engine.md` especifica un motor de notificaciones por WhatsApp como canal principal.
+- **Impacto:** sin credenciales de WhatsApp Business API (Meta), no se puede construir el envío real — el canal Email/Push ya cubre notificaciones básicas.
+- **Recomendación:** proveer las credenciales cuando estén disponibles.
+- **Bloquea:** Solo el motor de WhatsApp — no bloquea el resto de la plataforma.
+
+## Fase 6 — Membresías, Gift Cards, Referidos: sin documento de reglas de negocio
+
+- **Contexto:** `00_MASTER_TASKLIST.md` lista estas tres funcionalidades dentro de Fase 6, pero ningún documento de la Biblia define su mecánica (precios, vigencias, porcentajes, reglas antifraude de referidos).
+- **Impacto:** construir esto ahora significaría inventar una economía de descuentos/puntos sin definición del fundador — un riesgo real de tener que rehacerlo.
+- **Recomendación:** el fundador define la mecánica exacta de cada uno (ej. ¿Gift Card con vencimiento? ¿Referido da % de descuento o Puntos? ¿Membresía es una suscripción del Cliente, no del Negocio?) antes de construir.
+- **Bloquea:** Sí, específicamente estas tres funcionalidades — el resto de Fase 6 no depende de ellas.
+
 ## Cómo agregar una entrada
 Si te encontrás con algo que de verdad no podés resolver sin que el
 fundador decida (falta una API key, hay una contradicción real en la

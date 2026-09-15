@@ -69,6 +69,9 @@ export async function cancelarReservaAction(
             updated_at: new Date().toISOString(),
           })
           .eq("id", pago.id);
+        // 02_Commissions.md: revierte proporcionalmente la comisión ya
+        // acreditada al Wallet del Negocio cuando el reembolso se ejecuta.
+        await admin.rpc("revertir_comision_wallet", { p_pago_id: pago.id, p_monto_reembolsado: monto });
       } catch (e) {
         // La Reserva ya quedó cancelada: el horario se liberó igual. El reembolso
         // pendiente queda visible en auditoría para reintento manual.

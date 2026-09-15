@@ -186,6 +186,13 @@ Cada decisión tiene: **Fecha, Decisión, Motivo, Impacto, Estado** (`Activa` / 
 **Impacto:** Migración 039. Regla general para cualquier RPC pública futura que agregue datos de múltiples tablas: si alguna de esas tablas tiene RLS restringida a un rol distinto del que llamará la función en producción, la función necesita `SECURITY DEFINER` — y la prueba de verificación debe ejercitarla con el rol real (`anon`/`authenticated` de un usuario sin privilegios), nunca solo con `service_role`.
 **Estado:** Activa.
 
+### ADL-022 — CRÍTICO: `revoke ... from public` no protege una función de `anon`/`authenticated` en Supabase — el hallazgo de seguridad más grave de todo el proyecto
+**Fecha:** 2026-09-15
+**Decisión:** Toda función pensada para ser invocada exclusivamente por código de servidor con `service_role` (nunca por un Cliente real) debe revocar explícitamente de `public, anon, authenticated` — nunca confiar en que revocar solo de `public` es suficiente.
+**Motivo:** Se encontró, mediante la prueba end-to-end del Módulo 6.1 (Wallet), que `aplicar_evento_pago()` — la función que confirma un pago y una Reserva, existente desde la migración 008 (Fase 1) — podía ser invocada directamente por **cualquier usuario autenticado de la plataforma**, sin pasar por el webhook de Mercado Pago ni por ninguna verificación real de pago. Un atacante podía confirmar cualquier Reserva ajena pendiente de pago llamando la función con un `p_pago_id` arbitrario y `p_estado='APROBADO'` — un vector de fraude financiero real, activo en producción desde el inicio del proyecto, no introducido por ningún cambio reciente. La causa raíz: Supabase otorga privilegios de ejecución a `anon`/`authenticated` de forma independiente de `PUBLIC` (vía `alter default privileges` a nivel de proyecto) — `revoke ... from public` no toca esos privilegios propios.
+**Impacto:** Migración 042 corrige las 3 funciones del proyecto que dependían de este patrón sin chequeo de autorización interno propio (`aplicar_evento_pago`, `expirar_reservas_vencidas`, `revertir_comision_wallet`). Se auditó el resto de las RPCs del proyecto: ninguna otra depende exclusivamente de este mecanismo — todas verifican autorización (`is_barberia_de()`, `is_supersu()`, comparación de `auth.uid()`) dentro de su propio cuerpo, así que no están expuestas aunque `authenticated` pueda técnicamente invocarlas. Guardado como memoria persistente para cualquier función futura de este patrón, en este proyecto o en cualquier otro sobre Supabase.
+**Estado:** Activa — corregido y verificado.
+
 ## Checklist
 - [x] Completo (vivo — se agregan entradas nuevas conforme surgen decisiones)
 - [ ] Revisado

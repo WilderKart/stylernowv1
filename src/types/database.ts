@@ -3827,6 +3827,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      revertir_comision_wallet: {
+        Args: { p_monto_reembolsado: number; p_pago_id: string }
+        Returns: undefined
+      }
       revocar_guardian: {
         Args: { p_vinculo_id: string }
         Returns: {
