@@ -21,7 +21,7 @@
 > de la Biblia — eso se deja anotado en "Propuestas pendientes de aprobación"
 > y se sigue con lo que sí se puede avanzar.
 >
-> **Última actualización:** 2026-09-14 · commit `365d3dc`
+> **Última actualización:** 2026-09-14 · commit `dde7703`
 
 ## Decisiones registradas (donde la orden oficial difiere de lo ya construido)
 
