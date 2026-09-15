@@ -24,7 +24,7 @@ en silencio la versión vigente en cada login sin importar el flag
 `UPDATE` sin `WHERE` incluso dentro de una función `SECURITY DEFINER`
 ("UPDATE requires a WHERE clause") — corregido en una migración nueva
 (028), sin tocar la 026 ya aplicada. Verificado: 26/26 casos reales.
-`PENDIENTE_HASH`
+`82cc14c`
 
 ### Añadido — Fase 3, Módulo 3.1: SuperSU — Dashboard global + Gestión de Negocios
 Nueva superficie `/admin`, completamente separada del Panel Negocio (guarda
