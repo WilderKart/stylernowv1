@@ -98,6 +98,13 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
   const sede = sedes[0];
   const favoritoInicial = await esFavorito(negocio.id);
 
+  // Conversión_normalizada (08-Growth-Monetization/01_Marketplace_Algorithm.md)
+  // se calcula sobre visitas reales al perfil — sin este registro, ese
+  // componente del Score queda inerte para siempre. No se espera la
+  // respuesta: una visita nunca debe bloquear ni ralentizar el render.
+  const supabaseVisita = await createClient();
+  await supabaseVisita.rpc("registrar_visita_perfil", { p_negocio_id: negocio.id });
+
   // schema.org LocalBusiness: requisito explícito de SEO de 02-UX/04_Marketplace.md.
   const jsonLd = {
     "@context": "https://schema.org",

@@ -874,6 +874,35 @@ export type Database = {
         }
         Relationships: []
       }
+      negocio_visita_perfil: {
+        Row: {
+          cliente_id: string | null
+          created_at: string
+          id: string
+          negocio_id: string
+        }
+        Insert: {
+          cliente_id?: string | null
+          created_at?: string
+          id?: string
+          negocio_id: string
+        }
+        Update: {
+          cliente_id?: string | null
+          created_at?: string
+          id?: string
+          negocio_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "negocio_visita_perfil_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nivel_staff_consolidado: {
         Row: {
           nivel: Database["public"]["Enums"]["nivel_staff"]
@@ -3285,7 +3314,9 @@ export type Database = {
         Args: {
           p_categoria?: string
           p_ciudad?: string
+          p_lat?: number
           p_limite?: number
+          p_lng?: number
           p_offset?: number
           p_orden?: string
           p_texto?: string
@@ -3298,6 +3329,7 @@ export type Database = {
           id: string
           logo_url: string
           nombre: string
+          patrocinado: boolean
           precio_desde: number
           proxima_disponibilidad: string
           sede_id: string
@@ -3310,6 +3342,10 @@ export type Database = {
         Returns: {
           ciudad: string
         }[]
+      }
+      marketplace_mi_posicion: {
+        Args: { p_negocio_id: string }
+        Returns: string
       }
       mi_vinculo: {
         Args: never
@@ -3634,6 +3670,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      registrar_visita_perfil: {
+        Args: { p_negocio_id: string }
+        Returns: undefined
       }
       reportar_resena: {
         Args: { p_motivo: string; p_resena_id: string }

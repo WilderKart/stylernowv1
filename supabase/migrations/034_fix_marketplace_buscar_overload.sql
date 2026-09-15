@@ -1,0 +1,11 @@
+-- StylerNow — Migración 034: corrige la sobrecarga de marketplace_buscar()
+--
+-- Mismo bug que ya se documentó en ADL-020/migración 031: agregar
+-- parámetros nuevos (p_lat, p_lng) a marketplace_buscar() en la migración
+-- 033 no reemplazó la versión de 6 parámetros — creó una segunda
+-- sobrecarga. Cualquier llamada con 6 argumentos (incluida la del propio
+-- Home, `src/app/page.tsx`, y la de `marketplace_mi_posicion()`) queda
+-- ambigua entre ambas. Se corrige eliminando explícitamente la sobrecarga
+-- vieja — verificado esta vez ANTES de que la prueba end-to-end lo
+-- encontrara, aplicando la lección de la Fase 4 de inmediato.
+drop function if exists public.marketplace_buscar(text, text, text, text, int, int);

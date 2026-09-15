@@ -28,6 +28,10 @@ perder el contexto con el tiempo.
 | Baja | 4 App Staff | Agenda de la App Staff solo tiene vista de día, no de semana | Bajo (UI adicional sobre datos ya disponibles) | El caso de uso principal ("qué tengo que atender hoy") ya está cubierto; vista de semana se agrega si un Staff real la pide |
 | Baja | 4 App Staff | No existe una pantalla "Inicio" separada (hoy/próximo cliente/objetivos) — Agenda ya cubre "hoy"/"próximo cliente" | Bajo | Los "objetivos" de Staff son ADR-008 (Fase 6, requiere IA); una pantalla de Inicio sin objetivos reales sería redundante con Agenda |
 
+| Baja | 5.2 Marketplace | La segmentación de una campaña (`campana_publicitaria.segmentacion` jsonb — ciudad/categoría objetivo) no se verifica en `Patrocinio_normalizado`; solo se chequea que la campaña esté ACTIVA y con presupuesto | Bajo (agregar condiciones al `exists(...)` una vez exista el shape real) | El sistema de Ads (Fase 6) todavía no define ni usa ese jsonb — construir el matching ahora sería inventar un formato no probado |
+| Media | 5.2 Marketplace | Calidad_de_Staff y Patrocinio_normalizado siempre calculan 0 hoy (ninguna Temporada cerró jamás — ADL-020; ningún sistema de Ads existe — Fase 6) | N/A, se resuelve solo cuando esas fases avancen | Documentado explícitamente en ADL-021/tasklist para que no se lea como un bug — son ceros honestos, no un cálculo fallido |
+| Baja | 5.2 Marketplace | El "Mapa visual con pines" (MapLibre + OpenStreetMap) queda para el Módulo 5.3 — hoy la geolocalización real y el chip "Cerca de mí" ya afectan el ranking, pero no hay visualización de mapa | Medio (integrar MapLibre GL JS + tiles de OSM) | Es una superficie de UI separada del motor de ranking en sí, que ya está completo y verificado |
+
 ## Cómo agregar una entrada
 Cuando detectes algo que valga la pena mejorar pero que no bloquea el
 módulo que estás cerrando: agregalo acá con el mismo formato, en vez de

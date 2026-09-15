@@ -179,6 +179,13 @@ Cada decisión tiene: **Fecha, Decisión, Motivo, Impacto, Estado** (`Activa` / 
 **Impacto:** Migración 030 (`iniciar_atencion_reserva`, `completar_venta_pos` extendida, trigger `trg_puntos_resena_calidad`), `docs/TECH_DEBT_REGISTER.md`.
 **Estado:** Activa — el resto de eventos se agrega cuando su lógica de origen (detección de recurrencia, motor de rollover) se construya.
 
+### ADL-021 — El Score del Marketplace exige SECURITY DEFINER: una función pública nunca debe asumir que el visitante anónimo tiene acceso RLS a las tablas internas que necesita agregar
+**Fecha:** 2026-09-15
+**Decisión:** `marketplace_buscar()` (Módulo 5.2) se declara `SECURITY DEFINER` — no porque necesite un chequeo de autorización propio (es pública, cualquiera la llama sin restricción), sino porque internamente agrega datos de tablas (`campana_publicitaria`, `vinculo_staff_negocio`, `nivel_staff_consolidado`, `reserva`) cuya RLS está, correctamente, restringida al negocio dueño o a SuperSU. Sin `SECURITY DEFINER`, esas subconsultas se ejecutan con los privilegios del visitante anónimo real y devuelven cero filas siempre, sin importar los datos reales — dos de los seis componentes del Score (Patrocinio, Calidad de Staff) quedaban permanentemente en 0 y un tercero (Conversión) parecía funcionar solo por coincidencia con el desempate.
+**Motivo:** Se encontró probando explícitamente con el cliente `anon` real (no `service_role`) — la disciplina de este proyecto de "probar con el mismo cliente que usa la app real" es precisamente lo que expuso un bug que una prueba con credenciales de administrador nunca habría detectado, porque `service_role` bypasea RLS por completo.
+**Impacto:** Migración 039. Regla general para cualquier RPC pública futura que agregue datos de múltiples tablas: si alguna de esas tablas tiene RLS restringida a un rol distinto del que llamará la función en producción, la función necesita `SECURITY DEFINER` — y la prueba de verificación debe ejercitarla con el rol real (`anon`/`authenticated` de un usuario sin privilegios), nunca solo con `service_role`.
+**Estado:** Activa.
+
 ## Checklist
 - [x] Completo (vivo — se agregan entradas nuevas conforme surgen decisiones)
 - [ ] Revisado

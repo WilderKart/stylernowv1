@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import {
   listarResenas,
   obtenerIngresosPeriodo,
+  obtenerMiPosicionMarketplace,
   obtenerRankingStaffPeriodo,
   obtenerServiciosTop,
 } from "./actions";
@@ -22,7 +23,7 @@ export default async function ReportesPage() {
   const sedeId = contexto.rol === "GUARDIAN" ? contexto.sedeId : null;
   const supabase = await createClient();
 
-  const [sedesRes, ingresosRes, serviciosRes, rankingRes, resenasRes] = await Promise.all([
+  const [sedesRes, ingresosRes, serviciosRes, rankingRes, resenasRes, posicionRes] = await Promise.all([
     contexto.rol === "BARBERIA"
       ? supabase.from("sede").select("id, nombre").eq("negocio_id", negocioId).eq("cerrada_permanente", false).order("nombre")
       : Promise.resolve({ data: null }),
@@ -30,6 +31,9 @@ export default async function ReportesPage() {
     obtenerServiciosTop(negocioId, sedeId),
     obtenerRankingStaffPeriodo({ negocioId, sedeId }),
     listarResenas(negocioId),
+    // marketplace_mi_posicion() exige ser la Barbería dueña — Guardian no
+    // tiene alcance sobre esto (03-Business-Rules/01_Roles.md, Permisos).
+    contexto.rol === "BARBERIA" ? obtenerMiPosicionMarketplace(negocioId) : Promise.resolve({ ok: false as const, error: "" }),
   ]);
 
   return (
@@ -43,6 +47,7 @@ export default async function ReportesPage() {
         serviciosIniciales={serviciosRes.ok ? serviciosRes.data : []}
         rankingInicial={rankingRes.ok ? rankingRes.data : []}
         resenasIniciales={resenasRes.ok ? resenasRes.data : []}
+        posicionMarketplace={posicionRes.ok ? posicionRes.data : null}
       />
     </div>
   );

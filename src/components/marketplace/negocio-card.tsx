@@ -16,6 +16,7 @@ export interface NegocioTarjeta {
   total_resenas: number;
   precio_desde: number | null;
   proxima_disponibilidad: string | null;
+  patrocinado?: boolean;
 }
 
 /**
@@ -47,7 +48,14 @@ export function NegocioCard({ negocio }: { negocio: NegocioTarjeta }) {
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[14.5px] font-bold text-text">{negocio.nombre}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="truncate text-[14.5px] font-bold text-text">{negocio.nombre}</p>
+          {negocio.patrocinado ? (
+            <Badge tone="neutral" className="shrink-0">
+              Patrocinado
+            </Badge>
+          ) : null}
+        </div>
         <div className="mt-1 flex items-center gap-2">
           <Rating valor={negocio.calificacion} total={negocio.total_resenas} />
           <span className="truncate text-[11.5px] text-text-faint">{negocio.ciudad}</span>

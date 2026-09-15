@@ -15,6 +15,14 @@ import {
   type ServicioTop,
 } from "./actions";
 
+const POSICION_ETIQUETA: Record<string, string> = {
+  TOP_10: "Entre los mejores de tu ciudad (Top 10%)",
+  TOP_25: "Bien posicionado en tu ciudad (Top 25%)",
+  TOP_50: "En la mitad superior de tu ciudad",
+  RESTO: "Con espacio para mejorar tu posición",
+  SIN_DATOS: "Todavía no hay suficientes datos para calcularlo",
+};
+
 export function VistaReportes({
   negocioId,
   sedeIdFijo,
@@ -23,6 +31,7 @@ export function VistaReportes({
   serviciosIniciales,
   rankingInicial,
   resenasIniciales,
+  posicionMarketplace,
 }: {
   negocioId: string;
   sedeIdFijo: string | null;
@@ -31,6 +40,7 @@ export function VistaReportes({
   serviciosIniciales: ServicioTop[];
   rankingInicial: RankingStaffReporte[];
   resenasIniciales: ResenaRecibida[];
+  posicionMarketplace: string | null;
 }) {
   const [sedeId, setSedeId] = useState<string>(sedeIdFijo ?? "");
   const [agrupacion, setAgrupacion] = useState<"semana" | "mes">("semana");
@@ -95,6 +105,16 @@ export function VistaReportes({
       </div>
 
       {error ? <p className="mb-4 text-[12.5px] font-semibold text-danger">{error}</p> : null}
+
+      {posicionMarketplace ? (
+        <section className="mb-8 rounded-2xl border border-border-subtle bg-surface p-4">
+          <h2 className="font-display mb-1.5 text-[13px] font-bold uppercase text-text">Tu posición en el Marketplace</h2>
+          <p className="text-[12.5px] text-text-muted">{POSICION_ETIQUETA[posicionMarketplace] ?? posicionMarketplace}</p>
+          <p className="mt-1.5 text-[10.5px] text-text-faint">
+            Comparado con negocios similares en tu ciudad. Por diseño, nunca mostramos un puntaje exacto ni la posición de otros negocios.
+          </p>
+        </section>
+      ) : null}
 
       <section className="mb-8">
         <h2 className="font-display mb-3 text-[13px] font-bold uppercase text-text">Ingresos por {agrupacion}</h2>

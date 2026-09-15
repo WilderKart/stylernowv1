@@ -115,6 +115,22 @@ export async function obtenerRankingStaffPeriodo(datos: {
   }
 }
 
+// ── Posición en el Marketplace ──────────────────────────────────────────
+// 08-Growth-Monetization/01_Marketplace_Algorithm.md, Permisos: "Ningún
+// Barbería puede ver el Score exacto de un competidor, solo su propia
+// posición relativa aproximada (rango, no número exacto)".
+
+export async function obtenerMiPosicionMarketplace(negocioId: string): Promise<Resultado<string>> {
+  try {
+    const { supabase } = await usuarioActual();
+    const { data, error } = await supabase.rpc("marketplace_mi_posicion", { p_negocio_id: negocioId });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, data: data as string };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
 // ── Reseñas ──────────────────────────────────────────────────────────────
 
 export interface ResenaRecibida {

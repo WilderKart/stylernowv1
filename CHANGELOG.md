@@ -7,6 +7,26 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 5, Módulo 5.2: Marketplace — Destacados/Ranking (Score de 6 componentes)
+Implementa la fórmula completa de `08-Growth-Monetization/01_Marketplace_
+Algorithm.md`, reemplazando el orden ad-hoc que `marketplace_buscar()`
+usaba desde la migración 013: Rating bayesiano (12 meses, regresionado al
+promedio de plataforma), Proximidad real (nuevo chip "Cerca de mí" en el
+Home, auto-expansión de radio 10-50km), Disponibilidad (7 días,
+reutilizando `slots_disponibles()`), Conversión (tabla nueva
+`negocio_visita_perfil` + `registrar_visita_perfil()`, conectada en el
+perfil público), Calidad de Staff y Patrocinio (honestamente en 0 hoy,
+sin datos fabricados). Nueva `marketplace_mi_posicion()` expone solo un
+rango aproximado (nunca el Score exacto), en `/panel/reportes`.
+**Bug más grave encontrado por la prueba end-to-end** (probando con el
+cliente `anon` real, no `service_role`): la función no era `SECURITY
+DEFINER`, así que corría con la RLS del visitante anónimo — Patrocinio y
+Calidad de Staff siempre daban 0 sin importar los datos reales, y la
+prueba de Conversión pasaba por coincidencia con el desempate por
+antigüedad. Corregido junto con otros 4 bugs de tipos/ambigüedad SQL, en
+5 migraciones forward sucesivas. Verificado: 14/14 casos reales con el
+cliente `anon`. `PENDIENTE_HASH`
+
 ### Añadido — Fase 5, Módulo 5.1: Marketplace — Favoritos + Compartir
 `favorito_negocio` (nueva, sin límite de cantidad, RLS autosuficiente sin
 RPC) conectada en el perfil público del Negocio y una página nueva

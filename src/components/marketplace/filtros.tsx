@@ -81,6 +81,40 @@ export function Filtros({ ciudades }: { ciudades: string[] }) {
   const orden = params.get("orden");
   const ciudad = params.get("ciudad");
   const soloHoy = params.get("hoy") === "1";
+  const cercaDeMi = params.get("lat") !== null && params.get("lng") !== null;
+  const [buscandoUbicacion, setBuscandoUbicacion] = useState(false);
+  const [errorUbicacion, setErrorUbicacion] = useState<string | null>(null);
+
+  // Proximidad_normalizada (08-Growth-Monetization/01_Marketplace_Algorithm.md)
+  // solo tiene efecto real si el Cliente comparte su ubicación — sin este
+  // chip, marketplace_buscar() nunca recibía p_lat/p_lng y ese componente
+  // del Score quedaba siempre neutral (1 para todos).
+  function alternarCercaDeMi() {
+    if (cercaDeMi) {
+      aplicar({ lat: null, lng: null });
+      return;
+    }
+    if (!("geolocation" in navigator)) {
+      setErrorUbicacion("Tu navegador no soporta geolocalización.");
+      return;
+    }
+    setBuscandoUbicacion(true);
+    setErrorUbicacion(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setBuscandoUbicacion(false);
+        // El modo geo reemplaza al filtro de ciudad por texto — la Biblia
+        // describe la Proximidad como una alternativa, no algo que se
+        // combine con "buscar por ciudad".
+        aplicar({ lat: String(pos.coords.latitude), lng: String(pos.coords.longitude), ciudad: null });
+      },
+      () => {
+        setBuscandoUbicacion(false);
+        setErrorUbicacion("No pudimos acceder a tu ubicación — revisá los permisos del navegador.");
+      },
+      { timeout: 8000 }
+    );
+  }
 
   return (
     <div className="mb-6 flex flex-col gap-3">
@@ -109,7 +143,12 @@ export function Filtros({ ciudades }: { ciudades: string[] }) {
         />
       </div>
 
+      {errorUbicacion ? <p className="text-[11.5px] text-danger">{errorUbicacion}</p> : null}
+
       <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0">
+        <Chip activo={cercaDeMi} onClick={alternarCercaDeMi}>
+          {buscandoUbicacion ? "Ubicándote..." : "Cerca de mí"}
+        </Chip>
         <Chip activo={soloHoy} onClick={() => aplicar({ hoy: soloHoy ? null : "1" })}>
           Disponible hoy
         </Chip>
@@ -133,7 +172,7 @@ export function Filtros({ ciudades }: { ciudades: string[] }) {
         ))}
       </div>
 
-      {ciudades.length > 1 ? (
+      {ciudades.length > 1 && !cercaDeMi ? (
         <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0">
           <Chip activo={!ciudad} onClick={() => aplicar({ ciudad: null })}>
             Todas las ciudades

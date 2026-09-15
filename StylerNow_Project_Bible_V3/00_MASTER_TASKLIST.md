@@ -69,8 +69,8 @@ verificados, no solo "no lanza error en el camino feliz".
 | Fase 3.3 — SuperSU: Soporte + Auditoría | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
 | Fase 4 — App Staff | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
 | Fase 5.1 — Marketplace: Favoritos + Compartir | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
-| Fase 5.2 — Marketplace: Destacados/Ranking (Score) | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
-| Fase 5.3 — Marketplace: Mapa + geolocalización | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| Fase 5.2 — Marketplace: Destacados/Ranking (Score) | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
+| Fase 5.3 — Marketplace: Mapa visual (MapLibre) | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
 | Fase 6 — Growth Engine | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente (ADR-008 deja el diseño de Objetivos de Staff listo) |
 
 Ver también `docs/TECH_DEBT_REGISTER.md` (mejoras que no bloquean) y
@@ -1194,16 +1194,20 @@ semana en Agenda, Inicio como pantalla separada).
 Fuente: `02-UX/04_Marketplace.md`, `08-Growth-Monetization/01_Marketplace_
 Algorithm.md`.
 
-- [ ] Mapa + geolocalización (MapLibre + OpenStreetMap)
+- [ ] Mapa visual con pines (MapLibre + OpenStreetMap) — la geolocalización
+      EN SÍ (permiso del navegador, chip "Cerca de mí", Proximidad real en
+      el Score) ya se construyó en el Módulo 5.2; falta solo la
+      visualización de mapa/pines, que es una superficie de UI aparte
 - [x] **Favoritos, compartir negocio** — ver detalle del Módulo 5.1 abajo
-- [ ] Destacados, ranking (`08-Growth-Monetization/01_Marketplace_
-      Algorithm.md`) — fórmula de Score de 6 componentes ya
-      completamente especificada en la Biblia, pendiente de implementar
+- [x] **Destacados, ranking** (`08-Growth-Monetization/01_Marketplace_
+      Algorithm.md`) — Score de 6 componentes completo, ver detalle del
+      Módulo 5.2 abajo
 - [x] **SEO avanzado** — ya estaba construido desde antes de esta fase
       (`generateMetadata`, canonical, Open Graph, JSON-LD schema.org
       `HealthAndBeautyBusiness` en `/negocio/[slug]`) — se confirma acá,
-      no se duplica. Recomendaciones no se construyeron: depende del
-      motor de Score (arriba), sin sentido construirlas antes
+      no se duplica. Recomendaciones no se construyeron: depende de un
+      historial de Score/comportamiento por Cliente que no existe
+      todavía — diferido a Fase 6
 
 ## Módulo 5.1 — detalle de lo construido (Favoritos + Compartir)
 
@@ -1243,6 +1247,108 @@ Marketplace. Se detectó al revisar manualmente el Home tras este módulo,
 se limpiaron los 7 con un script de barrido, y se guardó como memoria
 persistente para no repetir el error en scripts de verificación futuros
 — no requirió ningún cambio de código de producto.
+
+---
+
+## Módulo 5.2 — detalle de lo construido (Destacados / Ranking — Score de 6 componentes)
+
+Migraciones 033-039 · `marketplace_buscar()` reescrita, `marketplace_mi_posicion()`
+(nueva), `negocio_visita_perfil` (nueva), `src/components/marketplace/filtros.tsx`
+("Cerca de mí"), `negocio-card.tsx` (badge "Patrocinado"), `/negocio/[slug]/page.tsx`
+(registro de visita), `/panel/reportes` (posición aproximada).
+
+Implementa la fórmula completa de `08-Growth-Monetization/01_Marketplace_
+Algorithm.md` — reemplaza el orden "RELEVANCIA" ad-hoc (solo calificación +
+fecha) que existía desde la migración 013:
+
+- **Rating_normalizado (25%)**: promedio bayesiano de reseñas de los
+  últimos 12 meses, regresionado hacia el promedio de la plataforma
+  (confianza=5) — un Negocio de 0 reseñas arranca exactamente en el
+  promedio general, nunca en el peor extremo.
+- **Proximidad_normalizada (20%)**: distancia real (haversine) a la
+  ubicación del Cliente. **Nuevo en el Home**: chip "Cerca de mí" en
+  `Filtros` que pide `navigator.geolocation` y pasa `p_lat`/`p_lng` — sin
+  esto, este componente quedaba sin ningún disparador real en la UI. Caso
+  límite de la Biblia implementado: auto-expansión de radio (10km→50km en
+  incrementos de 5km) hasta encontrar ≥3 resultados.
+- **Disponibilidad_normalizada (20%)**: primer slot libre dentro de 7
+  días (reutiliza `slots_disponibles()`, ya verificado, sin duplicar su
+  lógica), decreciente desde 48h.
+- **Conversión_normalizada (15%)**: completadas ÷ visitas al perfil,
+  últimos 90 días. **Hallazgo real**: nunca existió tracking de visitas —
+  tabla nueva `negocio_visita_perfil` + RPC `registrar_visita_perfil()`,
+  conectada en `/negocio/[slug]/page.tsx` (cada carga real de un perfil
+  ahora deja rastro; verificado con un negocio real que sí quedó
+  registrado).
+- **Calidad_de_Staff (10%)**: proporción de Staff EXPERT/MASTER activo en
+  la Sede — hoy siempre da 0 para todos (ninguna Temporada cerró jamás,
+  ADL-020), un cero honesto, no fabricado.
+- **Patrocinio_normalizado (10%)**: campaña `ACTIVA` con presupuesto
+  disponible — hoy siempre da 0 (Ads es Fase 6), también honesto.
+- **`marketplace_mi_posicion()`** (nueva): Permisos de la Biblia — "ningún
+  Barbería puede ver el Score exacto de un competidor, solo su propia
+  posición relativa aproximada". Devuelve un rango fijo
+  (`TOP_10`/`TOP_25`/`TOP_50`/`RESTO`/`SIN_DATOS`), nunca un número —
+  reutiliza `marketplace_buscar()` para no duplicar la fórmula. Nueva
+  sección en `/panel/reportes`, exclusiva de Barbería (Guardian no tiene
+  alcance sobre esto).
+- **Badge "Patrocinado"**: `<NegocioCard>` ahora renderiza la etiqueta
+  cuando `patrocinado=true` — criterio de aceptación explícito de la
+  Biblia ("ningún resultado oculta la etiqueta Patrocinado").
+
+### Bugs reales encontrados por la prueba end-to-end (5, todos corregidos hacia adelante — nunca editando una migración ya aplicada)
+1. **Migración 034**: agregar `p_lat`/`p_lng` a `marketplace_buscar()`
+   creó una sobrecarga en vez de reemplazar la función (mismo patrón que
+   ADL-020/migración 031 en Fase 4) — rompía cualquier llamada de 6
+   argumentos, incluida la del propio Home.
+2. **Migración 035**: `avg(calificacion)` sin calificar con alias de
+   tabla colisionaba con la columna de salida `calificacion` del propio
+   `RETURNS TABLE` de la función — Postgres lo rechaza como ambiguo
+   (`plpgsql.variable_conflict = error`, una protección real).
+3. **Migración 036**: el mismo problema exacto con `id` dentro del
+   cálculo de Calidad_de_Staff.
+4. **Migración 037**: la CTE `puntuado` seleccionaba `distancia_km` dos
+   veces (una vía `cd.*`, otra explícita) — columna duplicada, ambigua al
+   referenciarla después.
+5. **Migración 038**: `round(f.score, 3)` fallaba porque `score` se
+   computaba mezclando `numeric` y `double precision` (de
+   `extract(epoch from ...)`) — Postgres no tiene `round(double
+   precision, integer)`, solo `round(numeric, integer)`.
+6. **Migración 039, el más grave de los seis**: `marketplace_buscar()` no
+   era `SECURITY DEFINER` — corría con la RLS del propio Cliente que
+   llama (normalmente `anon`, sin sesión). `campana_publicitaria`,
+   `vinculo_staff_negocio`/`nivel_staff_consolidado` y `reserva` nunca
+   tuvieron una política de lectura pública, así que Patrocinio_
+   normalizado y Calidad_de_Staff **siempre daban 0 para cualquier
+   visitante real del Marketplace, sin importar los datos reales** — y la
+   prueba de Conversión pasaba por pura coincidencia con el desempate por
+   antigüedad, no porque el componente funcionara. Se encontró probando
+   explícitamente con el cliente `anon` (no `service_role`) — exactamente
+   la disciplina que exige este proyecto ("pruebas reales contra la base
+   real", nunca solo `service_role`/admin).
+
+### Verificado end-to-end contra la base real (14/14, con el cliente `anon` real)
+Elegibilidad (`SUSPENDIDO`/sanción excluidos) · bayesiano (0 reseñas
+queda entre un Negocio de 5★ y uno con una sola reseña de 1★, nunca en el
+peor extremo) · proximidad real con geolocalización · auto-expansión de
+radio hasta 50km · patrocinio (con verificación explícita de
+`patrocinado=true` expuesto) · disponibilidad real (con Staff real
+asignado, no un negocio vacío) · conversión real (con el desempate por
+antigüedad jugando EN CONTRA del resultado esperado, para descartar falsos
+positivos) · `marketplace_mi_posicion()` nunca expone un número, aislada
+por negocio, accesible por SuperSU · estabilidad del desempate (misma
+búsqueda, mismo orden).
+
+### Documentación actualizada con este módulo
+Este archivo (Coverage Matrix + detalle), `CHANGELOG.md`, ADL-021,
+`docs/TECH_DEBT_REGISTER.md` (bono de combo completo en Producción de
+Staff Rewards ya cubierto en 2.5/2.9/4; segmentación de campaña
+`ciudad`/`categoria` del Patrocinio no implementada, sin sistema de Ads
+todavía; recomendaciones diferidas a Fase 6).
+
+---
+
+**Próximo módulo a ejecutar: Fase 5.3 — Marketplace: Mapa visual con pines (MapLibre + OpenStreetMap).**
 
 ---
 

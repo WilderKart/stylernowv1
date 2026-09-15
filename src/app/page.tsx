@@ -25,6 +25,8 @@ export default async function HomePage(props: PageProps<"/">) {
   const categoria = primerValor(params.categoria);
   const orden = primerValor(params.orden);
   const soloHoy = primerValor(params.hoy) === "1";
+  const lat = primerValor(params.lat);
+  const lng = primerValor(params.lng);
 
   const [{ data: user }, { data: resultados, error }, { data: ciudadesRaw }, { data: banners }] =
     await Promise.all([
@@ -35,6 +37,8 @@ export default async function HomePage(props: PageProps<"/">) {
         p_categoria: categoria,
         p_orden: orden ?? "RELEVANCIA",
         p_limite: 24,
+        p_lat: lat ? Number(lat) : undefined,
+        p_lng: lng ? Number(lng) : undefined,
       }),
       // marketplace_ciudades_disponibles() (Fase 3.2) ya excluye ciudades que
       // SuperSU deshabilitó desde /admin/configuracion — antes este listado
