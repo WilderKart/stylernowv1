@@ -1,5 +1,6 @@
 import { PanelNav } from "@/components/panel/panel-nav";
 import { Badge, Card } from "@/components/ui/card";
+import { resolverContexto } from "@/lib/auth/resolver-contexto";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -7,25 +8,28 @@ import { redirect } from "next/navigation";
 export const metadata = { title: "Sedes" };
 
 export default async function SedesPage() {
+  const contexto = await resolverContexto();
+  if (!contexto.userId) redirect("/login?next=/panel/sedes");
+  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
+  // Guardian no gestiona una lista de sedes ajenas — administra la propia
+  // desde su Resumen (ADR-006). Esta pantalla es exclusiva de Barbería.
+  if (contexto.rol === "GUARDIAN") redirect(`/panel/sedes/${contexto.sedeId}`);
+
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/panel/sedes");
+  const negocioId = contexto.negocioId!;
 
   const { data: negocio } = await supabase
     .from("negocio")
-    .select("id, nombre, plan_codigo")
-    .eq("owner_user_id", user.id)
-    .maybeSingle();
-
+    .select("plan_codigo")
+    .eq("id", negocioId)
+    .single();
   if (!negocio) redirect("/panel/onboarding");
 
   const [{ data: sedes }, { data: plan }] = await Promise.all([
     supabase
       .from("sede")
       .select("id, nombre, direccion, ciudad, es_principal, cerrada_temporalmente, cerrada_permanente")
-      .eq("negocio_id", negocio.id)
+      .eq("negocio_id", negocioId)
       .order("es_principal", { ascending: false })
       .order("created_at"),
     supabase.from("plan").select("limite_sedes").eq("codigo", negocio.plan_codigo).single(),
@@ -36,7 +40,7 @@ export default async function SedesPage() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
-      <PanelNav />
+      <PanelNav rol={contexto.rol} />
       <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-8 sm:px-10">
         <div className="mb-6 flex items-center justify-between gap-3">
           <div>

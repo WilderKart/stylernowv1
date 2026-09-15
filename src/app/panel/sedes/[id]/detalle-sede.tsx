@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { FormularioSede, type SedeExistente } from "@/components/negocio/formulario-sede";
+import type { PermisosPanel } from "@/lib/auth/resolver-contexto";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -42,6 +43,7 @@ interface OtraSede {
 export function DetalleSede({
   sede,
   negocioId,
+  permisos,
   excepcionesIniciales,
   staffInicial,
   otrasSedes,
@@ -52,6 +54,12 @@ export function DetalleSede({
     cerrada_permanente: boolean;
   };
   negocioId: string;
+  /** ADR-006: Guardian edita su sede y el horario, pero nunca cierra,
+   * elimina, marca principal ni traslada Staff — acciones exclusivas de
+   * Barbería (03-Business-Rules/01_Roles.md). Se ocultan por completo acá,
+   * no solo se deshabilitan — y las RPCs las rechazan igual del lado del
+   * servidor si alguien las llamara directo. */
+  permisos: PermisosPanel;
   excepcionesIniciales: Excepcion[];
   staffInicial: StaffDeSede[];
   otrasSedes: OtraSede[];
@@ -130,26 +138,33 @@ export function DetalleSede({
         <div className="flex flex-wrap gap-2">
           {sede.es_principal ? (
             <Badge tone="accent">SEDE PRINCIPAL</Badge>
-          ) : operativa ? (
+          ) : operativa && permisos.marcarSedePrincipal ? (
             <Button size="sm" variant="secondary" loading={accionando} onClick={onMarcarPrincipal}>
               Marcar como principal
             </Button>
           ) : null}
 
-          {operativa ? (
-            <Button size="sm" variant="secondary" loading={accionando} onClick={onCerrarTemporal}>
-              Cerrar temporalmente
-            </Button>
-          ) : sede.cerrada_permanente ? null : (
-            <Button size="sm" variant="secondary" loading={accionando} onClick={onReabrir}>
-              Reabrir
-            </Button>
-          )}
+          {permisos.cerrarReabrirSede &&
+            (operativa ? (
+              <Button size="sm" variant="secondary" loading={accionando} onClick={onCerrarTemporal}>
+                Cerrar temporalmente
+              </Button>
+            ) : sede.cerrada_permanente ? null : (
+              <Button size="sm" variant="secondary" loading={accionando} onClick={onReabrir}>
+                Reabrir
+              </Button>
+            ))}
 
-          {!sede.cerrada_permanente ? (
+          {permisos.eliminarSede && !sede.cerrada_permanente ? (
             <Button size="sm" variant="danger" loading={accionando} onClick={onEliminar}>
               Eliminar sede
             </Button>
+          ) : null}
+
+          {!permisos.cerrarReabrirSede && !permisos.eliminarSede ? (
+            <p className="text-[11.5px] text-text-faint">
+              Solo la Barbería puede cerrar, reabrir o eliminar una sede.
+            </p>
           ) : null}
         </div>
       </Card>

@@ -1,28 +1,33 @@
 "use client";
 
+import type { RolPanel } from "@/lib/auth/resolver-contexto";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 /**
- * Navegación del Panel Negocio (02-UX/09_Business_Panel.md: "Navegación
- * (sidebar)"). Versión mínima de barra superior — crece con cada módulo que
- * se construya (Dashboard, Agenda, Servicios, Staff, Clientes, Caja,
- * Reportes, Configuración); hoy solo tiene los módulos que ya existen, para
- * no linkear a pantallas que todavía no se construyeron.
+ * Navegación del Panel Negocio (02-UX/09_Business_Panel.md, ADR-006:
+ * compartida entre Barbería y Guardian con ítems condicionados por rol).
+ *
+ * Solo lista módulos que YA EXISTEN como pantalla real — "Sedes" no
+ * aparece para Guardian a propósito (administra la suya desde su propio
+ * Resumen, no gestiona una lista de sedes ajenas). A medida que se
+ * construyan Dashboard/Agenda/Servicios/CRM/Inventario (Módulos 2.2 y
+ * 2.5-2.9), cada uno agrega su propia entrada acá, ya filtrada por
+ * `permisos` — nunca una lista separada "para Guardian".
  */
-const ITEMS = [
-  { href: "/panel", etiqueta: "Resumen" },
-  { href: "/panel/sedes", etiqueta: "Sedes" },
-];
-
-export function PanelNav() {
+export function PanelNav({ rol }: { rol: RolPanel }) {
   const pathname = usePathname();
+
+  const items = [
+    { href: "/panel", etiqueta: "Resumen" },
+    ...(rol === "BARBERIA" ? [{ href: "/panel/sedes", etiqueta: "Sedes" }] : []),
+  ];
 
   return (
     <nav className="border-b border-border-subtle bg-surface">
       <div className="mx-auto flex w-full max-w-4xl gap-1 overflow-x-auto px-5 sm:px-10">
-        {ITEMS.map((item) => {
+        {items.map((item) => {
           const activo =
             item.href === "/panel" ? pathname === "/panel" : pathname.startsWith(item.href);
           return (
@@ -40,6 +45,11 @@ export function PanelNav() {
             </Link>
           );
         })}
+        {rol === "GUARDIAN" ? (
+          <span className="ml-auto flex shrink-0 items-center text-[11px] font-bold uppercase tracking-wide text-accent">
+            Guardian
+          </span>
+        ) : null}
       </div>
     </nav>
   );

@@ -238,10 +238,54 @@ código a ojo) — exactamente la disciplina que pidió el fundador.
 `slots_disponibles()` — 25/25 siguen pasando. El cambio para soportar
 excepciones de horario no rompió nada del flujo de reserva/pago existente.
 
+## ADR-006 — Guardian comparte el Panel Negocio (decisión del fundador, implementada antes de 2.4)
+
+Cambio de arquitectura explícito antes de seguir con Staff: el Panel
+Negocio no esperaba a Fase 4 para darle a Guardian una vista funcional —
+ver `ADR_006_Guardian_Panel_Compartido.md` y `Architecture_Decision_Log.md`
+ADL-011 para el razonamiento completo. Resumen de lo construido:
+
+- [x] **`resolverContexto()`** (`src/lib/auth/resolver-contexto.ts`) —
+      resolutor único que determina `rol` (`BARBERIA`/`GUARDIAN`/`NINGUNO`),
+      `negocioId`, `sedeId` y un objeto `permisos` explícito. No cachea
+      nada entre requests — un traslado de Staff cambia el alcance en el
+      siguiente request, sin logout (verificado)
+- [x] **Navegación dinámica** — `PanelNav` recibe el `rol` y oculta
+      "Sedes" para Guardian (administra la propia desde su Resumen, no
+      una lista de sedes ajenas)
+- [x] **`/panel` (Resumen) ramificado** — Barbería ve el negocio completo;
+      Guardian ve solo su sede
+- [x] **`/panel/sedes` y `/panel/sedes/[id]` con alcance real** — Guardian
+      nunca ve el listado completo (se redirige directo a su propia sede);
+      intentar abrir el detalle de una sede ajena devuelve 404; los
+      botones de cerrar/reabrir/eliminar/marcar-principal/trasladar se
+      **ocultan por completo** para Guardian (no solo se deshabilitan) — y
+      las RPCs los rechazan igual si alguien las llamara directo
+- [x] **`/panel/onboarding` protegido** — un Guardian ya no puede arrancar
+      el wizard como si fuera a registrar un negocio nuevo
+
+### Verificado end-to-end contra la base real (14/14)
+Guardian edita su propia sede y agrega excepciones de horario · Guardian
+NO puede editar ni agregar excepciones en una sede ajena del mismo negocio
+· Guardian rechazado por las 5 RPCs exclusivas de Barbería (cerrar,
+eliminar, marcar principal, crear sede, trasladar Staff) incluso sobre su
+propia sede · Barbería SÍ puede trasladarlo · tras el traslado, el alcance
+cambia al instante (edita la sede nueva, ya no la anterior) sin ningún
+logout · el perfil Guardian se conserva, no se revoca por el traslado.
+
+### Documentación actualizada con este cambio
+`ADR_006_Guardian_Panel_Compartido.md` (nuevo) · `Architecture_Decision_
+Log.md` (ADL-011) · `CHANGELOG.md` (nuevo, creado en esta sesión) · este
+archivo.
+
+---
+
 **Próximo módulo a ejecutar: 2.4 — Gestión de Staff.** Tiene prioridad
 sobre 2.2 (Dashboard) porque cierra un pendiente ya abierto en 2.1 (la
 aceptación de invitaciones de Staff) y en 2.3 (el traslado ya existe a
-nivel de RPC, falta la pantalla completa de listado/detalle/CRUD).
+nivel de RPC, falta la pantalla completa de listado/detalle/CRUD). Se
+construye directamente sobre `resolverContexto()` — ya no hay que diseñar
+el mecanismo de alcance Guardian, solo consumirlo.
 
 ---
 

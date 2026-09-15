@@ -109,6 +109,13 @@ Cada decisión tiene: **Fecha, Decisión, Motivo, Impacto, Estado** (`Activa` / 
 
 **Estado:** Activa. Supera cualquier mención anterior de los nombres de Plan antiguos o de un modelo de WhatsApp centrado en ese canal como principal.
 
+### ADL-011 — El Panel Negocio es una única superficie compartida entre Barbería y Guardian
+**Fecha:** 2026-09-14
+**Decisión:** Guardian no espera a la Fase 4 (App Staff) para tener una superficie funcional — opera dentro del mismo Panel Negocio que la Barbería, con alcance limitado a su `sede_activa` resuelto en cada request por una función central (`resolverContexto()`), nunca por una segunda copia de los componentes ni por lógica de permisos calculada a mano en cada pantalla.
+**Motivo:** Instrucción explícita del fundador durante la construcción del Módulo 2.4: esperar a Fase 4 contradecía ADR-002 (Guardian ya está definido como un perfil que opera con alcance de sede, no como usuario de una app de Staff aparte).
+**Impacto:** `02-UX/09_Business_Panel.md`, todos los módulos restantes de Fase 2 (heredan el mecanismo de alcance sin reconstruirlo), documento nuevo `ADR_006_Guardian_Panel_Compartido.md`.
+**Estado:** Activa.
+
 ## Checklist
 - [x] Completo (vivo — se agregan entradas nuevas conforme surgen decisiones)
 - [ ] Revisado

@@ -1,3 +1,4 @@
+import { resolverContexto } from "@/lib/auth/resolver-contexto";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Wizard } from "./wizard";
@@ -10,6 +11,13 @@ export default async function OnboardingNegocioPage() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/panel/onboarding");
+
+  // Un Guardian ya pertenece a un negocio existente como Staff — este wizard
+  // es exclusivo para dar de alta un negocio NUEVO como Barbería (ADR-006).
+  // Sin esta guarda, un Guardian sin negocio propio podría arrancar acá un
+  // registro nuevo como si fuera dueño, lo cual contradice su rol real.
+  const contexto = await resolverContexto();
+  if (contexto.rol === "GUARDIAN") redirect("/panel");
 
   const { data: negocio } = await supabase
     .from("negocio")
