@@ -507,6 +507,39 @@ export type Database = {
           },
         ]
       }
+      favorito_negocio: {
+        Row: {
+          cliente_id: string
+          created_at: string
+          negocio_id: string
+        }
+        Insert: {
+          cliente_id: string
+          created_at?: string
+          negocio_id: string
+        }
+        Update: {
+          cliente_id?: string
+          created_at?: string
+          negocio_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorito_negocio_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorito_negocio_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feature_flag: {
         Row: {
           activo: boolean

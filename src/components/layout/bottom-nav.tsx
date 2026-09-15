@@ -32,6 +32,15 @@ const ITEMS = [
     ),
   },
   {
+    href: "/favoritos",
+    etiqueta: "Favoritos",
+    icono: (activo: boolean) => (
+      <svg viewBox="0 0 24 24" width="20" height="20" fill={activo ? "currentColor" : "none"} stroke="currentColor" strokeWidth={activo ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 20.5s-7.5-4.6-10-9.3C.4 7.8 2 4.5 5.4 4a5 5 0 0 1 6.6 2.3A5 5 0 0 1 18.6 4c3.4.5 5 3.8 3.4 7.2-2.5 4.7-10 9.3-10 9.3z" />
+      </svg>
+    ),
+  },
+  {
     href: "/perfil",
     etiqueta: "Perfil",
     icono: (activo: boolean) => (

@@ -9,6 +9,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { esFavorito } from "./actions";
+import { BotonCompartir } from "./boton-compartir";
+import { BotonFavorito } from "./boton-favorito";
 
 async function cargarNegocio(slug: string) {
   const supabase = await createClient();
@@ -93,6 +96,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
 
   const { negocio, sedes, servicios, staff, resenas, promedio } = datos;
   const sede = sedes[0];
+  const favoritoInicial = await esFavorito(negocio.id);
 
   // schema.org LocalBusiness: requisito explícito de SEO de 02-UX/04_Marketplace.md.
   const jsonLd = {
@@ -156,9 +160,15 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
           )}
         </div>
 
-        <h1 className="font-display text-[26px] font-bold uppercase leading-tight tracking-tight text-text">
-          {negocio.nombre}
-        </h1>
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="font-display text-[26px] font-bold uppercase leading-tight tracking-tight text-text">
+            {negocio.nombre}
+          </h1>
+          <div className="mt-1 flex shrink-0 gap-2">
+            <BotonFavorito negocioId={negocio.id} slug={negocio.slug} favoritoInicial={favoritoInicial} />
+            <BotonCompartir nombre={negocio.nombre} slug={negocio.slug} />
+          </div>
+        </div>
         <div className="mt-2 flex flex-wrap items-center gap-2.5">
           <Rating valor={promedio} total={resenas.length} size="md" />
           {negocio.categoria.map((c) => (

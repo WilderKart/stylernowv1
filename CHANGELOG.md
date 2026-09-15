@@ -7,6 +7,21 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 5, Módulo 5.1: Marketplace — Favoritos + Compartir
+`favorito_negocio` (nueva, sin límite de cantidad, RLS autosuficiente sin
+RPC) conectada en el perfil público del Negocio y una página nueva
+`/favoritos`. Compartir reutiliza el `slug` ya indexado por SEO — Web
+Share API en móvil, portapapeles como respaldo. SEO avanzado (metadatos,
+Open Graph, JSON-LD schema.org) ya estaba construido de una fase
+anterior, se confirma sin duplicar. Verificado: 6/6 casos reales.
+**Incidente encontrado durante la verificación, sin ser un bug de
+producto**: la limpieza de varios scripts de prueba de esta sesión (POS,
+Comisión, Soporte, App Staff, Favoritos) dejaba negocios de prueba
+`ACTIVO` reales en la base de datos por no borrar su `wallet` antes
+(sin `ON DELETE CASCADE` a propósito) — 7 negocios de prueba detectados y
+limpiados manualmente, guardado como lección persistente para scripts
+futuros. `PENDIENTE_HASH`
+
 ### Añadido — Fase 4: App Staff (cierra la Fase 4)
 Superficie propia `/staff` (Agenda, Mi Nivel, Clientes, Perfil), guarda
 independiente de `resolverContexto()` para que una persona que es

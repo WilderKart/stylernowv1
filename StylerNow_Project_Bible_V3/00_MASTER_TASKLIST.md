@@ -68,7 +68,9 @@ verificados, no solo "no lanza error en el camino feliz".
 | Fase 3.2 — SuperSU: Configuración global | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
 | Fase 3.3 — SuperSU: Soporte + Auditoría | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
 | Fase 4 — App Staff | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
-| Fase 5 — Marketplace Premium | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| Fase 5.1 — Marketplace: Favoritos + Compartir | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
+| Fase 5.2 — Marketplace: Destacados/Ranking (Score) | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
+| Fase 5.3 — Marketplace: Mapa + geolocalización | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | Fase 6 — Growth Engine | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente (ADR-008 deja el diseño de Objetivos de Staff listo) |
 
 Ver también `docs/TECH_DEBT_REGISTER.md` (mejoras que no bloquean) y
@@ -1189,11 +1191,62 @@ semana en Agenda, Inicio como pantalla separada).
 
 # FASE 5 — Marketplace Premium (solo cuando existan negocios reales)
 
+Fuente: `02-UX/04_Marketplace.md`, `08-Growth-Monetization/01_Marketplace_
+Algorithm.md`.
+
 - [ ] Mapa + geolocalización (MapLibre + OpenStreetMap)
-- [ ] Favoritos, compartir negocio
+- [x] **Favoritos, compartir negocio** — ver detalle del Módulo 5.1 abajo
 - [ ] Destacados, ranking (`08-Growth-Monetization/01_Marketplace_
-      Algorithm.md`)
-- [ ] SEO avanzado, recomendaciones
+      Algorithm.md`) — fórmula de Score de 6 componentes ya
+      completamente especificada en la Biblia, pendiente de implementar
+- [x] **SEO avanzado** — ya estaba construido desde antes de esta fase
+      (`generateMetadata`, canonical, Open Graph, JSON-LD schema.org
+      `HealthAndBeautyBusiness` en `/negocio/[slug]`) — se confirma acá,
+      no se duplica. Recomendaciones no se construyeron: depende del
+      motor de Score (arriba), sin sentido construirlas antes
+
+## Módulo 5.1 — detalle de lo construido (Favoritos + Compartir)
+
+Migración 032 · `src/app/favoritos/`, `src/app/negocio/[slug]/actions.ts`,
+`boton-favorito.tsx`, `boton-compartir.tsx`.
+
+- **Favoritos**: nueva tabla `favorito_negocio` (par `cliente_id`/
+  `negocio_id`, sin límite de cantidad como exige la Biblia). RLS
+  autosuficiente (`for all using/with check (cliente_id = auth.uid())`)
+  — ni una sola RPC, el propio Cliente inserta/borra su fila
+  directamente, igual de simple que el patrón ya usado para
+  Disponibilidad de Staff. Página `/favoritos` nueva (reutiliza
+  `<NegocioCard>` del Home, cero componentes duplicados), botón de
+  favorito en el perfil público del Negocio, entrada nueva en
+  `<BottomNav>`.
+- **Compartir**: no necesitó tabla ni RPC — el `slug` del Negocio ya es
+  un link público indexado por SEO desde antes de esta fase. Web Share
+  API en móvil, copiar al portapapeles como respaldo universal.
+
+### Verificado end-to-end contra la base real (6/6)
+Un usuario anónimo no puede insertar un favorito · un Cliente guarda dos
+favoritos sin límite de cantidad · los favoritos persisten como filas
+reales · un Cliente no puede insertar ni leer favoritos a nombre de otro
+Cliente (RLS `with check` real, no solo `using`) · quitar un favorito
+funciona.
+
+### Incidente encontrado y corregido durante la verificación (no un bug de producto)
+La limpieza de la prueba de este módulo (y, se descubrió al investigar,
+la de varios módulos anteriores de esta sesión — POS, Comisión, Soporte,
+App Staff) borraba el Negocio de prueba sin borrar antes su `wallet`
+(creado automáticamente por `handle_new_negocio()`, migración 007, sin
+`ON DELETE CASCADE` a propósito — un Negocio real nunca se borra
+físicamente, "dar de baja" solo cambia `estado`). El `DELETE` fallaba en
+silencio porque ningún script revisaba su `.error`, dejando **7 negocios
+de prueba `ACTIVO` reales en la base de datos en vivo**, visibles en el
+Marketplace. Se detectó al revisar manualmente el Home tras este módulo,
+se limpiaron los 7 con un script de barrido, y se guardó como memoria
+persistente para no repetir el error en scripts de verificación futuros
+— no requirió ningún cambio de código de producto.
+
+---
+
+**Próximo módulo a ejecutar: Fase 5.2 — Marketplace: Destacados/Ranking (Score).**
 
 ---
 
