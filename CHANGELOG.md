@@ -23,7 +23,7 @@ de ADL-020/ADL-021 al agregar parámetros), corregido con `drop function`
 Biblia. Nota honesta: sin navegador disponible en este entorno para
 confirmar visualmente el renderizado WebGL de tiles/pines tras la
 hidratación — verificado hasta donde `curl`/build/tsc pueden alcanzar.
-`PENDIENTE_HASH`
+`a464e9a`
 
 ### Añadido — Fase 5, Módulo 5.2: Marketplace — Destacados/Ranking (Score de 6 componentes)
 Implementa la fórmula completa de `08-Growth-Monetization/01_Marketplace_
