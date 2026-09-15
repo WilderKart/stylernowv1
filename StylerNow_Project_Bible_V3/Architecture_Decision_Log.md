@@ -165,6 +165,20 @@ Cada decisión tiene: **Fecha, Decisión, Motivo, Impacto, Estado** (`Activa` / 
 **Impacto:** `src/app/panel/auditoria/`, `src/app/admin/auditoria/`. Cierra el ítem de deuda técnica abierto desde la Fase 1 ("no existe un visor de auditoría").
 **Estado:** Activa.
 
+### ADL-019 — App Staff (`/staff`) es una superficie independiente de `resolverContexto()`
+**Fecha:** 2026-09-15
+**Decisión:** `/staff` tiene su propia guarda (`obtenerContextoStaff()`, resuelve el vínculo activo directo desde `vinculo_staff_negocio`) en vez de reutilizar `resolverContexto()` (que resuelve el Panel Negocio). A diferencia de `requireSuperSU()`, esta guarda no redirige cuando no hay vínculo activo — el layout de `/staff` renderiza un estado vacío explicando la situación, nunca una pantalla en blanco.
+**Motivo:** `01-PRD/02_Functional_Architecture.md` es explícito: una persona puede ser Barbería de su propio Negocio Y tener un vínculo de Staff (negocio de 1 persona) y debe poder usar ambas superficies "indistintamente". Acoplar `/staff` a `resolverContexto()` (que resuelve una sola identidad por request para el Panel) habría forzado a elegir una sola.
+**Impacto:** `src/lib/auth/require-staff.ts`, `src/app/staff/*`. `/panel` ahora redirige `rol === "STAFF"` directo a `/staff` en vez de mostrar un placeholder "todavía no construido".
+**Estado:** Activa.
+
+### ADL-020 — El sistema de Nivel PRO/EXPERT/MASTER se enciende solo para eventos ya conectados a un flujo real, el resto queda diferido explícitamente
+**Fecha:** 2026-09-15
+**Decisión:** De las 3 categorías de puntaje (Producción, Calidad, Puntualidad) y sus ~8 eventos documentados en `03-Business-Rules/05_Staff_Rewards.md`, este módulo solo implementa los que se conectan de forma directa y verificable a una acción real ya construida: check-in tardío (Puntualidad), Servicio completado en Caja (Producción), reseña de 5 estrellas (Calidad). "Cliente recurrente", "Referido" y los bonos agregados de "día/semana 100% puntual" NO se implementan — requieren lógica de detección (qué es "recurrente") o un job de cierre periódico (rollover de temporada) que no existen todavía.
+**Motivo:** Construir esos eventos ahora habría significado inventar reglas de detección no especificadas con precisión suficiente en la Biblia para implementarlas con confianza, o construir infraestructura de cron/Edge Function fuera del alcance de un módulo de UI — mejor encender lo verificable end-to-end hoy y documentar el resto como deuda explícita que inventar una regla.
+**Impacto:** Migración 030 (`iniciar_atencion_reserva`, `completar_venta_pos` extendida, trigger `trg_puntos_resena_calidad`), `docs/TECH_DEBT_REGISTER.md`.
+**Estado:** Activa — el resto de eventos se agrega cuando su lógica de origen (detección de recurrencia, motor de rollover) se construya.
+
 ## Checklist
 - [x] Completo (vivo — se agregan entradas nuevas conforme surgen decisiones)
 - [ ] Revisado

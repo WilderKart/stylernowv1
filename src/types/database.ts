@@ -3170,6 +3170,76 @@ export type Database = {
         Returns: undefined
       }
       expirar_reservas_vencidas: { Args: never; Returns: number }
+      finalizar_atencion_reserva: {
+        Args: { p_reserva_id: string }
+        Returns: {
+          bloqueo_fin: string | null
+          bloqueo_inicio: string | null
+          buffer_posterior_minutos: number
+          buffer_previo_minutos: number
+          cancelado_motivo: string | null
+          cancelado_por: string | null
+          checkin_at: string | null
+          checkout_at: string | null
+          cliente_id: string
+          created_at: string
+          estado: Database["public"]["Enums"]["reserva_estado"]
+          expira_at: string | null
+          hora_fin: string
+          hora_inicio: string
+          id: string
+          idempotency_key: string | null
+          monto_sena: number
+          monto_total: number
+          negocio_id: string
+          rango: unknown
+          recurso_id: string | null
+          sede_id: string
+          staff_id: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reserva"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      iniciar_atencion_reserva: {
+        Args: { p_reserva_id: string }
+        Returns: {
+          bloqueo_fin: string | null
+          bloqueo_inicio: string | null
+          buffer_posterior_minutos: number
+          buffer_previo_minutos: number
+          cancelado_motivo: string | null
+          cancelado_por: string | null
+          checkin_at: string | null
+          checkout_at: string | null
+          cliente_id: string
+          created_at: string
+          estado: Database["public"]["Enums"]["reserva_estado"]
+          expira_at: string | null
+          hora_fin: string
+          hora_inicio: string
+          id: string
+          idempotency_key: string | null
+          monto_sena: number
+          monto_total: number
+          negocio_id: string
+          rango: unknown
+          recurso_id: string | null
+          sede_id: string
+          staff_id: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reserva"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       is_barberia_de: { Args: { p_negocio_id: string }; Returns: boolean }
       is_guardian_de_negocio: {
         Args: { p_negocio_id: string }
@@ -3576,6 +3646,7 @@ export type Database = {
           p_hasta?: string
           p_negocio_id: string
           p_sede_id?: string
+          p_vinculo_id?: string
         }
         Returns: {
           comision_generada: number
@@ -3732,6 +3803,11 @@ export type Database = {
           vinculo_id: string
         }[]
       }
+      staff_mi_nivel_actual: { Args: never; Returns: Json }
+      staff_mis_propinas: {
+        Args: { p_desde?: string; p_hasta?: string }
+        Returns: number
+      }
       suspender_negocio: {
         Args: { p_motivo: string; p_negocio_id: string }
         Returns: {
@@ -3794,6 +3870,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      temporada_actual_id: { Args: never; Returns: string }
       tiene_acceso_interno: { Args: { p_negocio_id: string }; Returns: boolean }
       trasladar_staff: {
         Args: { p_nueva_sede_id: string; p_vinculo_id: string }

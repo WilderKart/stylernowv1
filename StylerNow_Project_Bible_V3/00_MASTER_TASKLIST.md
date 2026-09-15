@@ -67,7 +67,7 @@ verificados, no solo "no lanza error en el camino feliz".
 | Fase 3.1 — SuperSU: Dashboard + Negocios | ✅ | ✅ | ✅ | ✅ | Cerrado |
 | Fase 3.2 — SuperSU: Configuración global | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
 | Fase 3.3 — SuperSU: Soporte + Auditoría | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
-| Fase 4 — App Staff | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| Fase 4 — App Staff | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
 | Fase 5 — Marketplace Premium | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | Fase 6 — Growth Engine | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente (ADR-008 deja el diseño de Objetivos de Staff listo) |
 
@@ -1076,16 +1076,114 @@ explícitamente diferido a `08-Growth-Monetization/06_Advertising_System.md`
 
 # FASE 4 — App Staff (aplicación propia, no una vista reducida del Panel)
 
-Fuente: `02-UX/08_Staff_App.md`.
+Fuente: `02-UX/08_Staff_App.md`. Superficie propia en `/staff`, con su
+propia guarda (`obtenerContextoStaff()`) — deliberadamente independiente
+de `resolverContexto()`/Panel Negocio, para que un usuario que es Barbería
+Y Staff a la vez (negocio de 1 persona) tenga ambas superficies accesibles
+"indistintamente" (`01-PRD/02_Functional_Architecture.md`).
 
-- [ ] Inicio (hoy, próximo cliente, objetivos)
-- [ ] Agenda (día/semana, check-in, finalizar servicio)
-- [ ] Clientes (solo los atendidos por ese Staff)
-- [ ] Ganancias (comisiones, propinas, historial)
-- [ ] Niveles (PRO/EXPERT/MASTER)
-- [ ] Guardian: mismos permisos adicionales aparecen automáticamente sobre
+- [x] **Agenda** (día, check-in/check-out) — ver detalle abajo. Vista de
+      semana no se construyó (V1: solo navegación día a día, suficiente
+      para el caso de uso real de "atender lo de hoy")
+- [x] **Clientes** (solo los atendidos por ese Staff)
+- [x] **Ganancias** (comisiones, propinas — semana en curso) — historial
+      por periodo más largo queda para cuando haya demanda real de
+      filtrar por rango de fechas
+- [x] **Niveles** (PRO/EXPERT/MASTER) — "Mi Nivel" con desglose en vivo
+- [x] **Perfil** (datos, foto, disponibilidad, ausencias)
+- [x] Guardian: mismos permisos adicionales aparecen automáticamente sobre
       la misma cuenta Staff cuando se otorga el perfil — nunca una segunda
-      app o cuenta separada (`03-Business-Rules/01_Roles.md`)
+      app o cuenta separada (`03-Business-Rules/01_Roles.md`); ya
+      garantizado por reutilizar `vinculo_staff_negocio.es_guardian` sin
+      ninguna lógica nueva
+- [ ] Inicio (home con "hoy, próximo cliente, objetivos") no se construyó
+      como pantalla separada — Agenda ya cubre "hoy" y "próximo cliente"; los
+      "objetivos" de Staff son ADR-008 (diferido a Fase 6, sin IA todavía)
+
+## Módulo 4 — detalle de lo construido
+
+Migraciones 030-031 · `src/app/staff/`, `src/lib/auth/require-staff.ts`.
+
+- **Hallazgo real, encontrado leyendo el schema antes de escribir código**:
+  el sistema completo de Nivel PRO/EXPERT/MASTER (tabla `temporada`,
+  `puntaje_staff_evento`, `nivel_staff_consolidado`, RLS, hasta una
+  insignia en `/panel/staff/[id]`) llevaba desde la Fase 1 sin que se
+  insertara jamás una sola fila — ninguna `temporada` existía, cero
+  eventos de puntaje. El sistema estaba construido pero completamente
+  inerte, igual que `punto_fidelizacion` en el Módulo 2.8 y la aprobación
+  de Negocio en el Módulo 3.1.
+- **Check-in / Check-out**: `EN_CURSO` existe en el enum desde la
+  migración 001 y `checkin_at`/`checkout_at` en `reserva` desde la 003 —
+  ninguna RPC los usaba. `iniciar_atencion_reserva()`/
+  `finalizar_atencion_reserva()` (nuevas, solo el Staff dueño de la
+  Reserva) los encienden. El check-out no cambia `estado`: la
+  finalización real (`COMPLETADA`) sigue pasando por
+  `completar_venta_pos()` en Caja — check-out solo marca que la atención
+  terminó, antes del cobro.
+- **Sistema de puntaje encendido, por primera vez, para 3 eventos
+  directamente conectados a lo que este módulo ya construye**:
+  Puntualidad (check-in con &gt;5 min de atraso, −10, dentro de
+  `iniciar_atencion_reserva()`), Producción (`completar_venta_pos()`
+  extendida una tercera vez para otorgar ESTANDAR +10/PREMIUM +25/
+  COMPLEMENTARIO +8 por Servicio completado), Calidad (trigger nuevo
+  `trg_puntos_resena_calidad` en `resena`, +15 por reseña de 5 estrellas
+  — un trigger, no una RPC, para que funcione sin importar desde dónde se
+  cree la reseña). "Cliente recurrente"/"Referido" (Calidad) y los bonos
+  agregados "día/semana 100% puntual" quedan diferidos — requieren
+  detección de recurrencia o un job de cierre periódico que no existen
+  todavía (`docs/TECH_DEBT_REGISTER.md`).
+- **Mi Nivel**: `staff_mi_nivel_actual()` lee en vivo de
+  `puntaje_staff_evento`/`nivel_staff_consolidado` — nunca recalcula la
+  fórmula en el cliente ni la duplica en una tabla nueva.
+- **Mis Ganancias**: `reportes_ranking_staff()` (2.10) se extiende con un
+  parámetro opcional `p_vinculo_id` para el caso de auto-servicio, en vez
+  de duplicar la fórmula de comisión en una función paralela — mismo
+  patrón que ya se usó para que `dashboard_ranking_staff_semana` (2.2)
+  delegara en esta misma función.
+- **Disponibilidad y Ausencias**: cero migraciones nuevas — `disponibilidad_
+  write_propio`/`bloqueo_ausencia_write_propio` ya permitían que un Staff
+  edite sus propias filas directamente desde la migración 006, sin ningún
+  consumidor hasta ahora.
+- **Bug real encontrado por la prueba end-to-end (migración 031)**: extender
+  `reportes_ranking_staff()` con un parámetro nuevo en la migración 030
+  **no reemplazó** la versión de 4 parámetros de la migración 023 —
+  Postgres trata una firma distinta como una sobrecarga nueva, no un
+  reemplazo. Ambas versiones coexistiendo rompían cualquier llamada
+  ambigua entre ellas (incluida la de `dashboard_ranking_staff_semana`)
+  con "Could not choose the best candidate function". Corregido
+  eliminando explícitamente la sobrecarga vieja — lección para cualquier
+  extensión futura de una función ya existente: si el nuevo parámetro no
+  es el último de la lista original, o si se agregan varios a la vez,
+  hay que verificar con una prueba real que la sobrecarga vieja
+  desaparece, no asumir que `create or replace` la reemplaza sola.
+- **Segundo bug real**: `finalizar_atencion_reserva()` (check-out) no
+  cambia `estado` a propósito, pero por eso mismo un segundo check-out no
+  tenía nada que lo bloqueara — pisaba `checkout_at` en silencio.
+  Corregido agregando la validación de que `checkout_at` todavía sea
+  nulo.
+
+### Verificado end-to-end contra la base real (23/23)
+Un Staff ajeno no puede hacer check-in/check-out de una Reserva que no es
+suya · check-in con &gt;5 min de atraso penaliza Puntualidad −10 · no se
+puede repetir check-in ni check-out · completar la venta en Caja sigue
+funcionando igual que antes (regresión POS: saldo, propina, puntos de
+fidelización) y además otorga +25 de Producción · una reseña de 5
+estrellas otorga +15 de Calidad vía trigger · `staff_mi_nivel_actual()`
+suma exactamente −10+25+15=30 con el desglose por categoría correcto · un
+Staff no puede consultar el ranking de otro vínculo, sí el propio · la
+Barbería sigue viendo el ranking completo sin el parámetro nuevo
+(regresión 2.10) · las propinas se suman correctamente · un Staff
+configura su propia disponibilidad/ausencia y no la de otro.
+
+### Documentación actualizada con este módulo
+Este archivo (Coverage Matrix + detalle), `CHANGELOG.md`, ADL-019,
+ADL-020, `docs/TECH_DEBT_REGISTER.md` (bonos agregados de puntualidad,
+cliente recurrente/referido, combo completo en Producción, vista de
+semana en Agenda, Inicio como pantalla separada).
+
+---
+
+**Próximo módulo a ejecutar: Fase 5 — Marketplace Premium.**
 
 ---
 

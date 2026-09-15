@@ -61,56 +61,14 @@ export default async function PanelPage() {
 
   const supabase = await createClient();
 
-  // Staff plano (o Guardian recién promovido sin sede asignada todavía):
-  // la App Staff completa es Fase 4 — acá solo necesita un destino real y
-  // honesto, con sus propios datos, nunca el wizard de alta de Negocio.
+  // Staff plano (o Guardian recién promovido sin sede asignada todavía): su
+  // superficie real es la App Staff (Fase 4, `/staff`) — nunca el wizard de
+  // alta de Negocio. `/staff` resuelve su propio contexto de forma
+  // independiente (`obtenerContextoStaff()`) y ya maneja suspendido/
+  // invitado/sin-vínculo con su propia pantalla, así que no se duplica esa
+  // lógica acá.
   if (contexto.rol === "STAFF") {
-    const { data: negocio } = await supabase
-      .from("negocio")
-      .select("nombre")
-      .eq("id", contexto.negocioId!)
-      .maybeSingle();
-
-    return (
-      <div className="flex min-h-dvh flex-col bg-bg">
-        <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 py-8 sm:px-10">
-          <h1 className="font-display mb-1 text-[22px] font-bold uppercase text-text">
-            {negocio?.nombre ?? "Tu negocio"}
-          </h1>
-
-          {contexto.estadoVinculo === "SUSPENDIDO" ? (
-            <Card className="mt-4 border-danger/30 bg-danger-soft">
-              <p className="text-[13px] font-bold text-danger">Tu acceso está suspendido</p>
-              <p className="mt-1.5 text-[12.5px] leading-relaxed text-text-muted">
-                {negocio?.nombre ?? "El negocio"} suspendió temporalmente tu vínculo. Tu
-                historial y tu Nivel se conservan intactos — contactá directamente a tu
-                empleador para reactivarlo.
-              </p>
-            </Card>
-          ) : (
-            <>
-              <p className="mb-6 text-[12.5px] text-text-faint">
-                Sos parte del equipo{contexto.esGuardian ? ", con perfil Guardian" : ""}.
-              </p>
-              {contexto.esGuardian && !contexto.sedeId ? (
-                <Card className="mb-4 border-accent/30 bg-accent-soft">
-                  <p className="text-[12.5px] text-text-muted">
-                    Tenés el perfil Guardian, pero todavía no tenés una sede asignada.
-                    Cuando tu Barbería te asigne una, vas a poder administrarla acá mismo,
-                    sin necesidad de cerrar sesión.
-                  </p>
-                </Card>
-              ) : null}
-              <p className="rounded-2xl border border-dashed border-border px-4 py-10 text-center text-[12.5px] text-text-faint">
-                La App Staff (tu Agenda, tus Clientes atendidos, tus Ganancias y tu Nivel —
-                Fase 4 del roadmap) todavía no está construida. Tu cuenta y tu vínculo con
-                el negocio ya son reales — esta pantalla se completa en esa fase.
-              </p>
-            </>
-          )}
-        </div>
-      </div>
-    );
+    redirect("/staff");
   }
 
   if (contexto.rol === "GUARDIAN") {

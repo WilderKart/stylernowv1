@@ -7,6 +7,27 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 4: App Staff (cierra la Fase 4)
+Superficie propia `/staff` (Agenda, Mi Nivel, Clientes, Perfil), guarda
+independiente de `resolverContexto()` para que una persona que es
+Barbería y Staff a la vez tenga ambas superficies accesibles.
+**Hallazgo real**: el sistema completo de Nivel PRO/EXPERT/MASTER llevaba
+desde la Fase 1 sin insertar jamás una fila — cero temporadas, cero
+eventos de puntaje. Este módulo lo enciende: check-in/check-out
+(`EN_CURSO`/`checkin_at`/`checkout_at` existían desde las migraciones 001
+y 003 sin ninguna RPC que los usara) penaliza Puntualidad; completar la
+venta en Caja (`completar_venta_pos()`, extendida una tercera vez) otorga
+Producción; un trigger nuevo en `resena` otorga Calidad por 5 estrellas.
+"Mis Ganancias" extiende `reportes_ranking_staff()` (2.10) con
+auto-servicio en vez de duplicar la fórmula de comisión. Disponibilidad y
+Ausencias no necesitaron ninguna migración — la RLS de auto-servicio ya
+existía desde el Módulo 1 sin usar. **Dos bugs reales encontrados por la
+prueba end-to-end**: extender una función con un parámetro nuevo no
+reemplaza la sobrecarga vieja en Postgres (rompía
+`dashboard_ranking_staff_semana`), y un segundo check-out pisaba
+`checkout_at` en silencio — ambos corregidos en una migración nueva.
+Verificado: 23/23 casos reales. `PENDIENTE_HASH`
+
 ### Añadido — Fase 3, Módulo 3.3: SuperSU — Soporte + Auditoría (cierra la Fase 3)
 Tickets de soporte (`ticket_soporte`/`ticket_mensaje`, nuevos): crear/ver/
 responder un ticket propio para Barbería (`/panel/soporte`) y gestión
