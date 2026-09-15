@@ -70,7 +70,7 @@ verificados, no solo "no lanza error en el camino feliz".
 | Fase 4 — App Staff | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
 | Fase 5.1 — Marketplace: Favoritos + Compartir | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
 | Fase 5.2 — Marketplace: Destacados/Ranking (Score) | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
-| Fase 5.3 — Marketplace: Mapa visual (MapLibre) | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
+| Fase 5.3 — Marketplace: Mapa visual (MapLibre) | ✅ | ✅ | N/A | ⚠️ Manual pendiente | ✅ Cerrado |
 | Fase 6 — Growth Engine | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente (ADR-008 deja el diseño de Objetivos de Staff listo) |
 
 Ver también `docs/TECH_DEBT_REGISTER.md` (mejoras que no bloquean) y
@@ -1194,10 +1194,9 @@ semana en Agenda, Inicio como pantalla separada).
 Fuente: `02-UX/04_Marketplace.md`, `08-Growth-Monetization/01_Marketplace_
 Algorithm.md`.
 
-- [ ] Mapa visual con pines (MapLibre + OpenStreetMap) — la geolocalización
-      EN SÍ (permiso del navegador, chip "Cerca de mí", Proximidad real en
-      el Score) ya se construyó en el Módulo 5.2; falta solo la
-      visualización de mapa/pines, que es una superficie de UI aparte
+- [x] **Mapa visual con pines** (MapLibre + OpenStreetMap) — ver detalle
+      del Módulo 5.3 abajo. Con esto, la Fase 5 — Marketplace Premium
+      queda completa en todo lo especificado por la Biblia
 - [x] **Favoritos, compartir negocio** — ver detalle del Módulo 5.1 abajo
 - [x] **Destacados, ranking** (`08-Growth-Monetization/01_Marketplace_
       Algorithm.md`) — Score de 6 componentes completo, ver detalle del
@@ -1349,6 +1348,61 @@ todavía; recomendaciones diferidas a Fase 6).
 ---
 
 **Próximo módulo a ejecutar: Fase 5.3 — Marketplace: Mapa visual con pines (MapLibre + OpenStreetMap).**
+
+---
+
+## Módulo 5.3 — detalle de lo construido (Mapa visual)
+
+Migración 040 · `src/components/marketplace/mapa-marketplace.tsx`,
+`mapa-marketplace-lazy.tsx`, `src/app/page.tsx` (toggle Lista/Mapa),
+paquete `maplibre-gl` (nuevo, `^6.10.0`).
+
+- **`marketplace_buscar()` extendida** con `sede_latitud`/`sede_longitud`
+  en su salida — el mapa necesita la ubicación de cada resultado, que
+  antes no se devolvía. Postgres **no** permite `create or replace
+  function` para cambiar el `RETURNS TABLE` de una función existente
+  ("cannot change return type of existing function", un error explícito,
+  a diferencia de la sobrecarga silenciosa de ADL-020/ADL-021 al agregar
+  parámetros) — se corrigió con `drop function` + `create function`,
+  nunca editando en sitio. Se re-verificó la suite completa del Módulo
+  5.2 (14/14) tras el cambio — cero regresiones.
+- **Toggle Lista/Mapa** en el Home, con el estado en la URL
+  (`?vista=mapa`) — igual que el resto de `Filtros`, compartible y
+  compatible con el botón atrás del navegador. Preserva todos los demás
+  filtros activos al alternar.
+- **`<MapaMarketplace>`**: MapLibre GL JS con tiles crudos de
+  OpenStreetMap (sin proveedor de pago, ver `docs/PENDING_DECISIONS.md`
+  para la nota de escala futura). Un pin por Negocio con Sede geolocalizada
+  (nombre, rating, precio desde, link al perfil en el popup); si el
+  Cliente activó "Cerca de mí" (Módulo 5.2), un pin distinto marca su
+  propia ubicación. Estado vacío explícito si ningún resultado tiene
+  ubicación cargada — nunca un mapa en blanco sin explicación.
+- **Carga perezosa obligatoria**: MapLibre usa WebGL/canvas, no puede
+  renderizar en el servidor. `next/dynamic` con `ssr:false` solo se
+  permite dentro de un límite de Cliente — de ahí el wrapper
+  `mapa-marketplace-lazy.tsx`, separado del componente real.
+
+### Verificado
+Build de producción limpio, `tsc`/`eslint` sin errores, smoke test contra
+la base real (`/?vista=mapa` con un Negocio real geolocalizado responde
+200 y su nombre aparece en el HTML). **Limitación explícita de esta
+verificación**: no hay navegador disponible en este entorno para
+confirmar visualmente que los tiles de OSM y los pines se renderizan
+correctamente en el canvas WebGL — eso ocurre solo tras la hidratación en
+el cliente, algo que `curl` no puede observar. Se recomienda una
+verificación visual manual en un navegador real antes de considerar este
+módulo validado end-to-end en la práctica.
+
+### Documentación actualizada con este módulo
+Este archivo (Coverage Matrix + detalle), `CHANGELOG.md`, `docs/
+PENDING_DECISIONS.md` (proveedor de tiles a escala).
+
+**Con este módulo, la Fase 5 — Marketplace Premium queda completa en
+todo lo especificado explícitamente por la Biblia.**
+
+---
+
+**Próximo módulo a ejecutar: Fase 6 — Growth Engine.**
 
 ---
 

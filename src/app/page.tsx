@@ -1,9 +1,11 @@
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
 import { Filtros } from "@/components/marketplace/filtros";
+import { MapaMarketplaceLazy } from "@/components/marketplace/mapa-marketplace-lazy";
 import { NegocioCard } from "@/components/marketplace/negocio-card";
 import { hoyISO } from "@/lib/formato";
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { Suspense } from "react";
 
 export const metadata = {
@@ -27,6 +29,7 @@ export default async function HomePage(props: PageProps<"/">) {
   const soloHoy = primerValor(params.hoy) === "1";
   const lat = primerValor(params.lat);
   const lng = primerValor(params.lng);
+  const vista = primerValor(params.vista) === "mapa" ? "mapa" : "lista";
 
   const [{ data: user }, { data: resultados, error }, { data: ciudadesRaw }, { data: banners }] =
     await Promise.all([
@@ -63,6 +66,16 @@ export default async function HomePage(props: PageProps<"/">) {
     : (resultados ?? []);
 
   const hayFiltros = Boolean(texto || ciudad || categoria || soloHoy);
+
+  function urlConVista(nuevaVista: "lista" | "mapa") {
+    const siguiente = new URLSearchParams();
+    for (const [clave, valor] of Object.entries(params)) {
+      if (clave === "vista" || typeof valor !== "string") continue;
+      siguiente.set(clave, valor);
+    }
+    siguiente.set("vista", nuevaVista);
+    return `?${siguiente.toString()}`;
+  }
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg pb-24">
@@ -101,9 +114,27 @@ export default async function HomePage(props: PageProps<"/">) {
           <Filtros ciudades={ciudades} />
         </Suspense>
 
-        <h2 className="font-display mb-4 text-base font-semibold uppercase tracking-wide text-text">
-          {hayFiltros ? "Resultados" : "Negocios destacados"}
-        </h2>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="font-display text-base font-semibold uppercase tracking-wide text-text">
+            {hayFiltros ? "Resultados" : "Negocios destacados"}
+          </h2>
+          {/* Vista alternable lista/mapa (02-UX/04_Marketplace.md) — el resto
+              de los filtros de la URL se conservan al alternar. */}
+          <div className="flex shrink-0 gap-1 rounded-full border border-border p-1">
+            <Link
+              href={urlConVista("lista")}
+              className={`rounded-full px-3 py-1 text-[11.5px] font-bold ${vista === "lista" ? "bg-accent text-bg" : "text-text-muted"}`}
+            >
+              Lista
+            </Link>
+            <Link
+              href={urlConVista("mapa")}
+              className={`rounded-full px-3 py-1 text-[11.5px] font-bold ${vista === "mapa" ? "bg-accent text-bg" : "text-text-muted"}`}
+            >
+              Mapa
+            </Link>
+          </div>
+        </div>
 
         {error ? (
           <div className="rounded-2xl border border-danger/40 bg-danger-soft p-5 text-center">
@@ -123,6 +154,8 @@ export default async function HomePage(props: PageProps<"/">) {
                 : "Los negocios aprobados por SuperSU aparecerán en este listado automáticamente."}
             </p>
           </div>
+        ) : vista === "mapa" ? (
+          <MapaMarketplaceLazy negocios={negocios} centroInicial={lat && lng ? { lat: Number(lat), lng: Number(lng) } : null} />
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {negocios.map((n) => (

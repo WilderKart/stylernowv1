@@ -17,6 +17,8 @@ export interface NegocioTarjeta {
   precio_desde: number | null;
   proxima_disponibilidad: string | null;
   patrocinado?: boolean;
+  sede_latitud?: number | null;
+  sede_longitud?: number | null;
 }
 
 /**

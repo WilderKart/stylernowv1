@@ -3333,6 +3333,8 @@ export type Database = {
           precio_desde: number
           proxima_disponibilidad: string
           sede_id: string
+          sede_latitud: number
+          sede_longitud: number
           slug: string
           total_resenas: number
         }[]

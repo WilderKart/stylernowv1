@@ -54,6 +54,13 @@ bloquea, el desarrollo sigue avanzando en paralelo sin esperar respuesta.
 - **Recomendación:** definir junto con Configuración global (Módulo 3.2, gestión de Planes SaaS) si el cambio forzado de Plan es inmediato o nunca retroactivo a mitad de ciclo — igual que la regla ya definida para el Plan en sí.
 - **Bloquea:** No — Aprobar/Rechazar/Suspender/Reactivar/Dar de baja ya cubren el ciclo de vida completo de un Negocio sin esta acción.
 
+## Mapa del Marketplace: tiles crudos de OpenStreetMap vs. proveedor dedicado
+
+- **Contexto:** el Mapa visual (Módulo 5.3, MapLibre + OpenStreetMap) usa el tile server público de OSM (`tile.openstreetmap.org`) directamente, sin ninguna credencial.
+- **Impacto:** la [política de uso de OSM](https://operations.osmfoundation.org/policies/tiles/) desalienta tráfico de producción a gran volumen sobre ese servidor gratuito — es perfectamente válido para el volumen actual del proyecto (cero Negocios reales todavía), pero a escala real convendría migrar a un proveedor dedicado (MapTiler, Stadia Maps, Protomaps auto-hospedado, etc.), típicamente con una API key.
+- **Recomendación:** revisar el volumen real de uso del Mapa cuando haya Negocios reales operando, y decidir en ese momento si migrar — cambiar el `ESTILO_OSM` de `src/components/marketplace/mapa-marketplace.tsx` por la URL de tiles del proveedor elegido es un cambio de una sola constante, no una reescritura.
+- **Bloquea:** No — es una decisión de infraestructura para cuando haya tráfico real, no de negocio.
+
 ## Cómo agregar una entrada
 Si te encontrás con algo que de verdad no podés resolver sin que el
 fundador decida (falta una API key, hay una contradicción real en la

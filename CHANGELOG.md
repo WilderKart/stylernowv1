@@ -7,6 +7,24 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 5, Módulo 5.3: Marketplace — Mapa visual (cierra la Fase 5)
+`<MapaMarketplace>` con MapLibre GL JS (paquete nuevo) y tiles crudos de
+OpenStreetMap — toggle Lista/Mapa en el Home con estado en la URL
+(`?vista=mapa`), un pin por Negocio geolocalizado con popup (nombre,
+rating, precio, link al perfil), pin distinto para la propia ubicación
+del Cliente si activó "Cerca de mí" (Módulo 5.2). `marketplace_buscar()`
+se extendió con `sede_latitud`/`sede_longitud` — Postgres no permite
+`create or replace function` para cambiar el `RETURNS TABLE` de una
+función existente (error explícito, distinto de la sobrecarga silenciosa
+de ADL-020/ADL-021 al agregar parámetros), corregido con `drop function`
++ `create function`. Se re-verificó la suite completa del Módulo 5.2
+(14/14) tras el cambio — cero regresiones. **Con este módulo, la Fase 5
+— Marketplace Premium queda completa** en todo lo especificado por la
+Biblia. Nota honesta: sin navegador disponible en este entorno para
+confirmar visualmente el renderizado WebGL de tiles/pines tras la
+hidratación — verificado hasta donde `curl`/build/tsc pueden alcanzar.
+`PENDIENTE_HASH`
+
 ### Añadido — Fase 5, Módulo 5.2: Marketplace — Destacados/Ranking (Score de 6 componentes)
 Implementa la fórmula completa de `08-Growth-Monetization/01_Marketplace_
 Algorithm.md`, reemplazando el orden ad-hoc que `marketplace_buscar()`
