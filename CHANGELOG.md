@@ -20,7 +20,7 @@ pantalla — tampoco se necesitó ninguna migración para leerla, la RLS que
 la scopea ya existía sin usar desde la migración 006. **Con este módulo,
 la Fase 3 — SuperSU CMS queda cerrada** (salvo Marketplace/anuncios,
 diferido a Fase 6). Verificado: 17/17 casos reales, sin bugs encontrados.
-`PENDIENTE_HASH`
+`6ce6975`
 
 ### Añadido — Fase 3, Módulo 3.2: SuperSU — Configuración global
 Comisión de plataforma (antes una columna por Negocio que en la práctica
