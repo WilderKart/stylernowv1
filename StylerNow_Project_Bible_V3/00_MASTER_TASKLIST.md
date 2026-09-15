@@ -42,6 +42,38 @@
 
 ---
 
+## Product Coverage Matrix (tablero maestro)
+
+Vista de una sola tabla de todos los dominios del producto, más rápida de
+leer que el detalle fase por fase de abajo. `RLS` = probado con pruebas
+reales contra Supabase, no solo escrito. `QA` = casos límite cubiertos y
+verificados, no solo "no lanza error en el camino feliz".
+
+| Dominio | Backend | Frontend | RLS | QA | Estado |
+|---|---|---|---|---|---|
+| Marketplace + Booking + Pago (Módulo 1) | ✅ | ✅ | ✅ | ✅ | Cerrado |
+| PWA Cliente (Perfil, nav, legal, offline) | ✅ | ✅ | ✅ | ✅ | Cerrado |
+| 2.1 Registro de Barbería | ✅ | ✅ | ✅ | ✅ | Cerrado |
+| 2.2 Dashboard | ✅ | ✅ | ✅ | ✅ | Cerrado |
+| 2.3 Gestión de Sedes | ✅ | ✅ | ✅ | ✅ | Cerrado |
+| 2.4 Gestión de Staff | ✅ | ✅ | ✅ | ✅ | Cerrado |
+| ADR-006 Panel compartido Guardian | ✅ | ✅ | ✅ | ✅ | Cerrado |
+| 2.5 Servicios | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
+| 2.6 Agenda | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| 2.7 CRM | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| 2.8 POS | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| 2.9 Inventario | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| 2.10 Reportes | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| Fase 3 — SuperSU CMS | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| Fase 4 — App Staff | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| Fase 5 — Marketplace Premium | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| Fase 6 — Growth Engine | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente (ADR-008 deja el diseño de Objetivos de Staff listo) |
+
+Ver también `docs/TECH_DEBT_REGISTER.md` (mejoras que no bloquean) y
+`docs/PENDING_DECISIONS.md` (decisiones que dependen de algo externo).
+
+---
+
 # FASE 1 — Plataforma Compartida
 
 Fuente: `01-PRD/02_Functional_Architecture.md`, `02-UX/03_Client_PWA.md`,

@@ -343,29 +343,57 @@ export interface EventoHistorial {
   payloadDespues: unknown;
 }
 
+/**
+ * Timeline Laboral del Staff (ADR-007): combina `evento_auditoria`
+ * (ingreso/traslado/Guardian/suspensión/reactivación/retiro) con
+ * `nivel_staff_consolidado` (cambios de Nivel PRO/EXPERT/MASTER por
+ * temporada cerrada). Un único punto de lectura — ninguna otra pantalla
+ * vuelve a consultar estas tablas a mano para mostrar historial de Staff.
+ * La parte de Nivel llega vacía hasta que exista el cierre de temporada
+ * (Fase 6, ADL-009) — es un hueco real del roadmap, no un bug acá.
+ */
 export async function obtenerHistorialStaff(vinculoId: string): Promise<Resultado<EventoHistorial[]>> {
   try {
     const { supabase } = await usuarioActual();
     // auditoria_select_negocio (RLS) solo deja ver esto a la Barbería dueña
     // del negocio — Guardian recibe una lista vacía, no un error.
-    const { data, error } = await supabase
-      .from("evento_auditoria")
-      .select("id, accion, created_at, motivo, payload_antes, payload_despues")
-      .eq("entidad_tipo", "vinculo_staff_negocio")
-      .eq("entidad_id", vinculoId)
-      .order("created_at", { ascending: false });
-    if (error) return { ok: false, error: error.message };
-    return {
-      ok: true,
-      data: (data ?? []).map((e) => ({
-        id: e.id,
-        accion: e.accion,
-        createdAt: e.created_at,
-        motivo: e.motivo,
-        payloadAntes: e.payload_antes,
-        payloadDespues: e.payload_despues,
-      })),
-    };
+    const [{ data: eventos, error: eEventos }, { data: niveles, error: eNiveles }] = await Promise.all([
+      supabase
+        .from("evento_auditoria")
+        .select("id, accion, created_at, motivo, payload_antes, payload_despues")
+        .eq("entidad_tipo", "vinculo_staff_negocio")
+        .eq("entidad_id", vinculoId),
+      supabase
+        .from("nivel_staff_consolidado")
+        .select("nivel, puntaje_final, temporada:temporada_id (fecha_fin)")
+        .eq("vinculo_id", vinculoId),
+    ]);
+    if (eEventos) return { ok: false, error: eEventos.message };
+    if (eNiveles) return { ok: false, error: eNiveles.message };
+
+    const deAuditoria: EventoHistorial[] = (eventos ?? []).map((e) => ({
+      id: e.id,
+      accion: e.accion,
+      createdAt: e.created_at,
+      motivo: e.motivo,
+      payloadAntes: e.payload_antes,
+      payloadDespues: e.payload_despues,
+    }));
+
+    const deNivel: EventoHistorial[] = (niveles ?? []).map((n, i) => ({
+      id: `nivel-${vinculoId}-${i}`,
+      accion: "STAFF_NIVEL_CONSOLIDADO",
+      createdAt: (n.temporada as unknown as { fecha_fin: string } | null)?.fecha_fin ?? new Date(0).toISOString(),
+      motivo: null,
+      payloadAntes: null,
+      payloadDespues: { nivel: n.nivel, puntaje_final: n.puntaje_final },
+    }));
+
+    const historial = [...deAuditoria, ...deNivel].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    return { ok: true, data: historial };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
   }

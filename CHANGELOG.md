@@ -7,6 +7,18 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Gobernanza del proyecto: Product Coverage Matrix, deuda técnica, decisiones pendientes
+`00_MASTER_TASKLIST.md` gana una Product Coverage Matrix (Backend/Frontend/
+RLS/QA por dominio, tablero maestro de un vistazo). Documentos nuevos:
+`docs/TECH_DEBT_REGISTER.md` (mejoras que no bloquean producción) y
+`docs/PENDING_DECISIONS.md` (decisiones que dependen de algo externo,
+cada una marcada explícitamente si bloquea o no). ADR-007 (Timeline
+Laboral del Staff — formaliza que `evento_auditoria` + `nivel_staff_
+consolidado` YA son ese historial, sin tabla nueva; `obtenerHistorialStaff()`
+ahora combina ambas fuentes) y ADR-008 (Objetivos de Staff — arquitectura
+de datos documentada por adelantado para Fase 6, sin implementación
+todavía, decisión consciente de alcance).
+
 ### Añadido — Fase 2, Módulo 2.2: Dashboard
 Resumen del día del Panel Negocio, mismo componente para Barbería y
 Guardian: citas de hoy, ingresos del día (solo Reservas completadas), % de

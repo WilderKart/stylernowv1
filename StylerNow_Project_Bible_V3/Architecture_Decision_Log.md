@@ -116,6 +116,20 @@ Cada decisión tiene: **Fecha, Decisión, Motivo, Impacto, Estado** (`Activa` / 
 **Impacto:** `02-UX/09_Business_Panel.md`, todos los módulos restantes de Fase 2 (heredan el mecanismo de alcance sin reconstruirlo), documento nuevo `ADR_006_Guardian_Panel_Compartido.md`.
 **Estado:** Activa.
 
+### ADL-012 — El Timeline Laboral del Staff reutiliza `evento_auditoria` y `nivel_staff_consolidado`, sin tabla nueva
+**Fecha:** 2026-09-14
+**Decisión:** El historial permanente de un Staff (ingreso, traslados, Guardian, suspensión, reactivación, retiro, y en el futuro Nivel y reconocimientos) no vive en una tabla nueva — se lee combinando `evento_auditoria` (ya inmutable, sin política de `DELETE`) y `nivel_staff_consolidado` (ya inmutable por temporada cerrada) en un único punto de lectura (`obtenerHistorialStaff()`).
+**Motivo:** Instrucción del fundador de formalizar un "Timeline Laboral" completo; construir una tabla paralela habría duplicado exactamente lo que `evento_auditoria` ya hace, violando la Regla de Oro.
+**Impacto:** Documento nuevo `ADR_007_Timeline_Laboral_Staff.md`, `src/app/panel/staff/actions.ts` (fusiona ambas fuentes), `src/app/panel/staff/[id]/detalle-staff.tsx`.
+**Estado:** Activa.
+
+### ADL-013 — Objetivos de Staff: arquitectura documentada, implementación diferida a Fase 6
+**Fecha:** 2026-09-14
+**Decisión:** Se documenta por adelantado qué tipos de objetivo tendrá Staff (cortes, ventas, reseñas, puntualidad, clientes recurrentes) y que cada uno reutiliza una fórmula que YA existe en la Biblia (KPIs, CRM) — pero no se construye ninguna tabla, RPC ni pantalla en esta sesión, porque depende de Reportes (2.10) e IA de Negocio (Fase 6), ninguno construido todavía.
+**Motivo:** Instrucción del fundador de "preparar la arquitectura sin implementar IA"; construirlo ahora sería una funcionalidad desconectada de los módulos que le dan sentido.
+**Impacto:** Documento nuevo `ADR_008_Objetivos_Staff.md`, entrada en `docs/PENDING_DECISIONS.md`.
+**Estado:** Activa — diseño fijado, implementación pendiente de Fase 6.
+
 ## Checklist
 - [x] Completo (vivo — se agregan entradas nuevas conforme surgen decisiones)
 - [ ] Revisado

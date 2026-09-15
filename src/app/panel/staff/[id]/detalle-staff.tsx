@@ -30,6 +30,7 @@ const ETIQUETA_ACCION: Record<string, string> = {
   STAFF_SUSPENDIDO: "Suspendido",
   STAFF_REACTIVADO: "Reactivado",
   STAFF_RETIRADO: "Se le retiró el acceso",
+  STAFF_NIVEL_CONSOLIDADO: "Nivel de la temporada",
 };
 
 const ESTADO_TONO: Record<string, "success" | "danger" | "neutral"> = {
@@ -251,6 +252,12 @@ export function DetalleStaff({
                     })}
                   </p>
                   {ev.motivo ? <p className="mt-1 text-[12px] text-text-muted">Motivo: {ev.motivo}</p> : null}
+                  {ev.accion === "STAFF_NIVEL_CONSOLIDADO" ? (
+                    <p className="mt-1 text-[12px] text-text-muted">
+                      {(ev.payloadDespues as { nivel?: string; puntaje_final?: number } | null)?.nivel} —{" "}
+                      {(ev.payloadDespues as { nivel?: string; puntaje_final?: number } | null)?.puntaje_final} pts
+                    </p>
+                  ) : null}
                 </li>
               ))}
             </ul>
