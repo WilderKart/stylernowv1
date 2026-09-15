@@ -7,6 +7,25 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 3, Módulo 3.2: SuperSU — Configuración global
+Comisión de plataforma (antes una columna por Negocio que en la práctica
+actuaba como constante fija, ahora un valor global real que
+`actualizar_comision_plataforma_global()` propaga de inmediato a todos los
+Negocios), ciudades habilitadas (oculta un Negocio del Marketplace sin
+tocar su `estado` — distinto de suspenderlo), banners del Home (con RLS
+pública por vigencia/activo, conectados de verdad en `/`), edición de
+Planes SaaS, y publicación versionada de textos legales.
+**Segundo hallazgo real de esta fase**: el mecanismo de "re-aceptación
+forzada" ante un cambio legal material nunca existió — el código aceptaba
+en silencio la versión vigente en cada login sin importar el flag
+`cambio_material`. Se corrigió con una pantalla de bloqueo nueva
+(`/legal/aceptar`) que exige aceptación explícita antes de continuar.
+**Bug real encontrado por la prueba end-to-end**: Supabase rechaza todo
+`UPDATE` sin `WHERE` incluso dentro de una función `SECURITY DEFINER`
+("UPDATE requires a WHERE clause") — corregido en una migración nueva
+(028), sin tocar la 026 ya aplicada. Verificado: 26/26 casos reales.
+`PENDIENTE_HASH`
+
 ### Añadido — Fase 3, Módulo 3.1: SuperSU — Dashboard global + Gestión de Negocios
 Nueva superficie `/admin`, completamente separada del Panel Negocio (guarda
 propia `requireSuperSU()`, nunca pasa por `resolverContexto()`).

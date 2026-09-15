@@ -65,8 +65,8 @@ verificados, no solo "no lanza error en el camino feliz".
 | 2.9 Inventario | ✅ | ✅ | ✅ | ✅ | Cerrado |
 | 2.10 Reportes | ✅ | ✅ | ✅ | ✅ | Cerrado — **Fase 2 completa** |
 | Fase 3.1 — SuperSU: Dashboard + Negocios | ✅ | ✅ | ✅ | ✅ | Cerrado |
-| Fase 3.2 — SuperSU: Configuración global | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
-| Fase 3.3 — SuperSU: Soporte + Auditoría | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| Fase 3.2 — SuperSU: Configuración global | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
+| Fase 3.3 — SuperSU: Soporte + Auditoría | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
 | Fase 4 — App Staff | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | Fase 5 — Marketplace Premium | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | Fase 6 — Growth Engine | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente (ADR-008 deja el diseño de Objetivos de Staff listo) |
@@ -875,10 +875,15 @@ reutiliza `resolverContexto()`, que es para los roles del lado Negocio).
 - [ ] Soporte (tickets, conversaciones, prioridades, SLA)
 - [ ] Auditoría (logs, eventos, exportaciones) — visor de
       `evento_auditoria`, ya poblada desde la Fase 1
-- [ ] Configuración global (planes Raven/Jarl/Valhalla/Allfather, créditos
-      IA, WhatsApp, Feature Flags, ciudades habilitadas, banners del
-      Home, textos legales versionados) — todo editable desde interfaz,
-      nunca SQL manual
+- [x] **Configuración global** — comisión de plataforma, ciudades
+      habilitadas, banners del Home, edición de Planes SaaS, textos
+      legales versionados. Ver detalle del Módulo 3.2 abajo. Créditos IA,
+      WhatsApp y Feature Flags no se construyeron: `credito_ia_lote`/
+      `whatsapp_conversacion_lote`/`feature_flag` ya existen en el schema
+      desde la migración 004 pero no tienen ningún consumidor real
+      todavía (IA/WhatsApp son Fase 6) — una UI de configuración sin
+      nada que configurar sería una pantalla sin efecto, contra la
+      Regla de Oro. Se prioriza cuando Fase 6 les dé uso real.
 
 ## Módulo 3.1 — detalle de lo construido
 
@@ -933,7 +938,79 @@ por SuperSU).
 
 ---
 
-**Próximo módulo a ejecutar: Fase 3.2 — Configuración global.**
+## Módulo 3.2 — detalle de lo construido
+
+Migraciones 026-028 · `src/app/admin/configuracion/`.
+
+- **Comisión de plataforma**: `negocio.comision_plataforma_pct` (desde la
+  migración 002) era una columna por Negocio que en la práctica actuaba
+  como un valor global fijo — nada la editaba nunca. Se agrega
+  `configuracion_plataforma` (singleton) como fuente de verdad; al
+  cambiarla, `actualizar_comision_plataforma_global()` actualiza en el
+  mismo momento la columna de TODOS los Negocios, así el siguiente pago
+  que se apruebe en cualquiera de ellos usa el valor nuevo de inmediato
+  — sin recalcular pagos ya aprobados (`booking_engine.sql` lee el valor
+  vigente del Negocio recién al aprobar el pago).
+- **Bug real encontrado por la prueba end-to-end**: el `UPDATE` masivo
+  sobre `negocio` fallaba con "UPDATE requires a WHERE clause" — Supabase
+  exige `WHERE` explícito incluso dentro de una función `SECURITY
+  DEFINER`. Corregido en la migración 028 con `where true`, sin tocar la
+  026/027 ya aplicadas.
+- **Ciudades habilitadas**: nueva tabla `ciudad_habilitada`, sembrada con
+  todas las ciudades que ya tenían Negocios. `marketplace_buscar()` y el
+  nuevo `marketplace_ciudades_disponibles()` (reemplaza el listado crudo
+  de ciudades del Home) respetan la bandera de inmediato. Deshabilitar
+  una ciudad **nunca** toca `negocio.estado` — es una acción de
+  visibilidad de descubrimiento, distinta de `suspender_negocio()`
+  (Módulo 3.1), verificado explícitamente.
+- **Banners del Home**: nueva tabla `banner_home` (imagen, texto, link,
+  vigencia, activo, orden) con RLS pública que solo expone banners
+  activos y dentro de su ventana de vigencia — conectados de verdad en
+  el Home del Marketplace (`src/app/page.tsx`), no solo en el CMS.
+- **Planes SaaS**: `actualizar_plan()` edita el catálogo existente
+  (precio, límites, funcionalidades) de los 4 planes ya seedeados
+  (Raven/Jarl/Valhalla/Allfather). "Crear" un Plan nuevo no se construyó:
+  `plan_codigo` es un enum sin quinto tramo definido en la Biblia de
+  Monetización — extenderlo sin caso de uso real habría sido
+  especulativo.
+- **Textos legales versionados**: `publicar_texto_legal()` auto-
+  incrementa la versión por tipo y nunca sobreescribe una versión ya
+  aceptada por algún usuario.
+- **Segundo hallazgo real, no menos grave que el de 3.1**: el mecanismo
+  de re-aceptación legal **nunca existió realmente** — `registrarAceptacionLegal()`
+  aceptaba en silencio la versión vigente de cada texto en CADA login,
+  sin importar el flag `cambio_material` (que existía en el schema desde
+  el Módulo 1 sin ningún consumidor). Esto significaba que aunque
+  SuperSU publicara un cambio material, ningún usuario real lo vería
+  nunca — quedaba aceptado automáticamente sin mostrarlo, incumpliendo
+  el consentimiento explícito que exige Ley 1581/`06-Security/
+  04_Compliance_Colombia.md`. Se corrigió: los cambios no materiales se
+  siguen aceptando en silencio (sin friction innecesaria), pero un
+  cambio material pendiente ahora bloquea al usuario en una pantalla
+  nueva (`/legal/aceptar`) que muestra el texto completo y exige un
+  checkbox explícito antes de continuar a donde iba — en su siguiente
+  inicio de sesión, exactamente como exige la Biblia.
+
+### Verificado end-to-end contra la base real (26/26)
+Aislamiento contra un usuario que no es SuperSU en las 6 acciones ·
+comisión global con efecto en tiempo real sobre un Negocio real ·
+comisión fuera de rango rechazada · deshabilitar una ciudad oculta un
+Negocio real de `marketplace_buscar`/`marketplace_ciudades_disponibles`
+sin tocar su `estado` · rehabilitar lo restaura de inmediato · un banner
+vencido no es visible públicamente aunque `activo=true`, uno vigente sí ·
+desactivar un banner preserva su texto (`coalesce`) · editar un Plan no
+toca `suscripcion` · publicar un texto legal incrementa la versión sin
+borrar la anterior · un usuario sin fila en `aceptacion_legal` para la
+versión nueva queda correctamente detectado como pendiente.
+
+### Documentación actualizada con este módulo
+Este archivo, `CHANGELOG.md`, ADL-016/ADL-017, `docs/TECH_DEBT_REGISTER.md`
+(Créditos IA/WhatsApp/Feature Flags sin UI de configuración — diferido a
+Fase 6, sin consumidor real todavía).
+
+---
+
+**Próximo módulo a ejecutar: Fase 3.3 — Soporte + Auditoría.**
 
 ---
 

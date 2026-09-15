@@ -144,6 +144,20 @@ Cada decisión tiene: **Fecha, Decisión, Motivo, Impacto, Estado** (`Activa` / 
 **Impacto:** Descubrió y cerró un hallazgo crítico: ningún Negocio podía pasar de `PENDIENTE_APROBACION` a `ACTIVO` — la política RLS ya lo permitía desde la migración 006 pero nada la usaba. `src/lib/auth/require-supersu.ts`, `src/app/admin/*`, migraciones 024-025.
 **Estado:** Activa.
 
+### ADL-016 — Comisión de plataforma: singleton `configuracion_plataforma` que propaga a `negocio` en cada escritura
+**Fecha:** 2026-09-15
+**Decisión:** `negocio.comision_plataforma_pct` (migración 002) queda como la columna que de verdad se lee al aprobar un pago, pero deja de ser la fuente de verdad editable — una tabla singleton nueva (`configuracion_plataforma`) es lo que SuperSU edita, y cada escritura hace un `UPDATE` masivo que propaga el valor a todos los Negocios en la misma transacción.
+**Motivo:** La Biblia describe un único control global ("slider que actualiza el valor global en tiempo real"), pero el schema real modela la comisión por Negocio (para permitir, a futuro, una tarifa negociada individual). Un singleton que propaga evita crear dos fuentes de verdad divergentes sin cerrar la puerta a una tarifa por Negocio el día que exista un caso de uso real.
+**Impacto:** Migraciones 026 y 028 (bug real: Supabase exige `WHERE` explícito en todo `UPDATE`, incluso dentro de `SECURITY DEFINER` — sin él, el `UPDATE` sin filtro fallaba).
+**Estado:** Activa.
+
+### ADL-017 — Re-aceptación legal material: gate explícito en `/legal/aceptar`, nunca auto-aceptación silenciosa
+**Fecha:** 2026-09-15
+**Decisión:** `registrarAceptacionLegal()` deja de aceptar automáticamente CUALQUIER versión vigente de un texto legal en cada login. Ahora distingue: una versión con `cambio_material = false` se sigue aceptando en silencio (sin fricción); una versión con `cambio_material = true` que el usuario no aceptó explícitamente bloquea su login en una pantalla nueva (`/legal/aceptar`) hasta que la acepte de forma explícita.
+**Motivo:** Se encontró, leyendo el código existente durante la construcción de "Textos legales versionados" (Módulo 3.2), que la función anterior ignoraba por completo la columna `cambio_material` (existente desde el Módulo 1) — cualquier cambio, material o no, se aceptaba en silencio sin mostrárselo nunca al usuario. Esto incumplía el consentimiento explícito exigido por la Ley 1581/`06-Security/04_Compliance_Colombia.md` y dejaba sin ningún efecto real la funcionalidad de "publicar con cambio material" que este mismo módulo estaba construyendo.
+**Impacto:** `src/lib/auth/aceptacion-legal.ts` (reescrito), `src/app/legal/aceptar/*` (nuevo), `src/app/login/actions.ts`, `src/app/login/formulario.tsx`, `src/app/auth/callback/route.ts`.
+**Estado:** Activa.
+
 ## Checklist
 - [x] Completo (vivo — se agregan entradas nuevas conforme surgen decisiones)
 - [ ] Revisado

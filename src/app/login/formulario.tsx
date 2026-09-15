@@ -94,9 +94,15 @@ export function FormularioLogin({ siguiente }: { siguiente: string }) {
     } catch {
       /* no crítico */
     }
-    // Primer login (sin teléfono todavía): un solo desvío a completar el perfil
-    // antes de seguir a donde iba (02-UX/02_Onboarding.md).
-    router.replace(res.faltaTelefono ? "/perfil?bienvenida=1" : siguiente);
+    const destino = res.faltaTelefono ? "/perfil?bienvenida=1" : siguiente;
+    // Un texto legal con cambio material pendiente de aceptar bloquea el paso
+    // siguiente — ni onboarding ni la ruta original — hasta que el usuario lo
+    // acepte explícitamente (02-UX/10_Super_Admin.md, re-aceptación forzada).
+    if (res.pendientesLegales.length > 0) {
+      router.replace(`/legal/aceptar?next=${encodeURIComponent(destino)}`);
+    } else {
+      router.replace(destino);
+    }
     router.refresh();
   }
 

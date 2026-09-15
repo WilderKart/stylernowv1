@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       // El botón del correo ya implica la misma aceptación que exige el paso 1 del
       // formulario (enviarCodigo la valida server-side antes de mandar el correo);
       // se registra acá porque este camino nunca pasa por verificarCodigo.
-      await registrarAceptacionLegal(supabase, data.user.id);
+      const { pendientesMateriales } = await registrarAceptacionLegal(supabase, data.user.id);
 
       // Mismo desvío de una sola vez que el flujo de código tipeado: sin teléfono
       // todavía, primero completa el perfil (02-UX/02_Onboarding.md).
@@ -41,6 +41,12 @@ export async function GET(request: NextRequest) {
         .single();
 
       const destino = perfil?.telefono ? next : "/perfil?bienvenida=1";
+      // Mismo bloqueo que el flujo de código tipeado (login/formulario.tsx): un
+      // cambio legal material pendiente se resuelve antes que cualquier otro
+      // destino (02-UX/10_Super_Admin.md).
+      if (pendientesMateriales.length > 0) {
+        return NextResponse.redirect(`${origin}/legal/aceptar?next=${encodeURIComponent(destino)}`);
+      }
       return NextResponse.redirect(`${origin}${destino}`);
     }
   }

@@ -26,7 +26,7 @@ export default async function HomePage(props: PageProps<"/">) {
   const orden = primerValor(params.orden);
   const soloHoy = primerValor(params.hoy) === "1";
 
-  const [{ data: user }, { data: resultados, error }, { data: ciudadesRaw }] =
+  const [{ data: user }, { data: resultados, error }, { data: ciudadesRaw }, { data: banners }] =
     await Promise.all([
       supabase.auth.getUser().then((r) => ({ data: r.data.user })),
       supabase.rpc("marketplace_buscar", {
@@ -36,7 +36,13 @@ export default async function HomePage(props: PageProps<"/">) {
         p_orden: orden ?? "RELEVANCIA",
         p_limite: 24,
       }),
-      supabase.from("negocio").select("ciudad").eq("estado", "ACTIVO"),
+      // marketplace_ciudades_disponibles() (Fase 3.2) ya excluye ciudades que
+      // SuperSU deshabilitó desde /admin/configuracion — antes este listado
+      // salía directo de `negocio` y mostraba ciudades ocultas del Marketplace.
+      supabase.rpc("marketplace_ciudades_disponibles"),
+      // banner_home (Fase 3.2): RLS pública solo devuelve banners activos y
+      // vigentes hoy — sin filtrar nada más acá.
+      supabase.from("banner_home").select("id, imagen_url, texto, url_destino").order("orden"),
     ]);
 
   const ciudades = [...new Set((ciudadesRaw ?? []).map((c) => c.ciudad))].sort();
@@ -59,6 +65,34 @@ export default async function HomePage(props: PageProps<"/">) {
       <Header autenticado={Boolean(user)} />
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-6 sm:px-10">
+        {banners && banners.length > 0 ? (
+          <div className="mb-6 flex gap-3 overflow-x-auto">
+            {banners.map((b) =>
+              b.url_destino ? (
+                <a key={b.id} href={b.url_destino} className="relative block h-32 min-w-[280px] shrink-0 overflow-hidden rounded-2xl bg-surface-2 sm:min-w-[360px]">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- imagen editorial de SuperSU, URL arbitraria (no forma parte del set de dominios optimizables de next/image) */}
+                  <img src={b.imagen_url} alt={b.texto ?? ""} className="size-full object-cover" />
+                  {b.texto ? (
+                    <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2 text-[12.5px] font-semibold text-white">
+                      {b.texto}
+                    </span>
+                  ) : null}
+                </a>
+              ) : (
+                <div key={b.id} className="relative h-32 min-w-[280px] shrink-0 overflow-hidden rounded-2xl bg-surface-2 sm:min-w-[360px]">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- imagen editorial de SuperSU, URL arbitraria */}
+                  <img src={b.imagen_url} alt={b.texto ?? ""} className="size-full object-cover" />
+                  {b.texto ? (
+                    <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2 text-[12.5px] font-semibold text-white">
+                      {b.texto}
+                    </span>
+                  ) : null}
+                </div>
+              )
+            )}
+          </div>
+        ) : null}
+
         <Suspense fallback={<div className="mb-6 h-[50px] rounded-2xl bg-surface" />}>
           <Filtros ciudades={ciudades} />
         </Suspense>

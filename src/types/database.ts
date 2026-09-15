@@ -60,6 +60,48 @@ export type Database = {
           },
         ]
       }
+      banner_home: {
+        Row: {
+          activo: boolean
+          created_at: string
+          id: string
+          imagen_url: string
+          orden: number
+          texto: string | null
+          updated_at: string
+          updated_by: string | null
+          url_destino: string | null
+          vigencia_desde: string | null
+          vigencia_hasta: string | null
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          id?: string
+          imagen_url: string
+          orden?: number
+          texto?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          url_destino?: string | null
+          vigencia_desde?: string | null
+          vigencia_hasta?: string | null
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          id?: string
+          imagen_url?: string
+          orden?: number
+          texto?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          url_destino?: string | null
+          vigencia_desde?: string | null
+          vigencia_hasta?: string | null
+        }
+        Relationships: []
+      }
       bloqueo_ausencia: {
         Row: {
           fecha_fin: string
@@ -158,6 +200,27 @@ export type Database = {
           },
         ]
       }
+      ciudad_habilitada: {
+        Row: {
+          ciudad: string
+          habilitada: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          ciudad: string
+          habilitada?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          ciudad?: string
+          habilitada?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       cliente_etiqueta: {
         Row: {
           cliente_id: string
@@ -241,6 +304,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      configuracion_plataforma: {
+        Row: {
+          comision_plataforma_pct_default: number
+          id: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          comision_plataforma_pct_default?: number
+          id?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          comision_plataforma_pct_default?: number
+          id?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       credito_ia_consumo: {
         Row: {
@@ -2380,6 +2464,102 @@ export type Database = {
       }
     }
     Functions: {
+      actualizar_banner_home: {
+        Args: {
+          p_activo?: boolean
+          p_id: string
+          p_imagen_url?: string
+          p_orden?: number
+          p_texto?: string
+          p_url_destino?: string
+          p_vigencia_desde?: string
+          p_vigencia_hasta?: string
+        }
+        Returns: {
+          activo: boolean
+          created_at: string
+          id: string
+          imagen_url: string
+          orden: number
+          texto: string | null
+          updated_at: string
+          updated_by: string | null
+          url_destino: string | null
+          vigencia_desde: string | null
+          vigencia_hasta: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "banner_home"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      actualizar_ciudad_habilitada: {
+        Args: { p_ciudad: string; p_habilitada: boolean }
+        Returns: {
+          ciudad: string
+          habilitada: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ciudad_habilitada"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      actualizar_comision_plataforma_global: {
+        Args: { p_pct: number }
+        Returns: {
+          comision_plataforma_pct_default: number
+          id: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "configuracion_plataforma"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      actualizar_plan: {
+        Args: {
+          p_codigo: Database["public"]["Enums"]["plan_codigo"]
+          p_conversaciones_whatsapp_mes?: number
+          p_creditos_ia_mes?: number
+          p_guardian_disponible?: boolean
+          p_limite_sedes?: number
+          p_marketplace_ads_disponible?: boolean
+          p_precio_mensual?: number
+          p_sede_addon_precio?: number
+          p_staff_addon_precio?: number
+          p_staff_incluido?: number
+        }
+        Returns: {
+          codigo: Database["public"]["Enums"]["plan_codigo"]
+          conversaciones_whatsapp_mes: number | null
+          creditos_ia_mes: number | null
+          guardian_disponible: boolean
+          limite_sedes: number | null
+          marketplace_ads_disponible: boolean
+          nombre: string
+          precio_mensual: number | null
+          sede_addon_precio: number | null
+          staff_addon_precio: number | null
+          staff_incluido: number | null
+          staff_tope_absoluto: number | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "plan"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_dashboard_resumen: { Args: never; Returns: Json }
       ajustar_stock: {
         Args: {
@@ -2586,6 +2766,35 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "producto_stock"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      crear_banner_home: {
+        Args: {
+          p_imagen_url: string
+          p_orden?: number
+          p_texto?: string
+          p_url_destino?: string
+          p_vigencia_desde?: string
+          p_vigencia_hasta?: string
+        }
+        Returns: {
+          activo: boolean
+          created_at: string
+          id: string
+          imagen_url: string
+          orden: number
+          texto: string | null
+          updated_at: string
+          updated_by: string | null
+          url_destino: string | null
+          vigencia_desde: string | null
+          vigencia_hasta: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "banner_home"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -2801,6 +3010,7 @@ export type Database = {
         Args: { p_negocio_id: string; p_sede_id?: string }
         Returns: Json
       }
+      eliminar_banner_home: { Args: { p_id: string }; Returns: undefined }
       enviar_negocio_a_aprobacion: {
         Args: { p_negocio_id: string }
         Returns: {
@@ -2877,6 +3087,12 @@ export type Database = {
           sede_id: string
           slug: string
           total_resenas: number
+        }[]
+      }
+      marketplace_ciudades_disponibles: {
+        Args: never
+        Returns: {
+          ciudad: string
         }[]
       }
       mi_vinculo: {
@@ -2964,6 +3180,27 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "vinculo_staff_negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      publicar_texto_legal: {
+        Args: {
+          p_cambio_material: boolean
+          p_contenido: string
+          p_tipo: string
+        }
+        Returns: {
+          cambio_material: boolean
+          contenido: string
+          id: string
+          publicado_at: string
+          tipo: string
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "texto_legal"
           isOneToOne: true
           isSetofReturn: false
         }

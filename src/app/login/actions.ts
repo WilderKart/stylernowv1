@@ -50,9 +50,11 @@ export async function verificarCodigo(email: string, token: string) {
   if (error) return { ok: false as const, error: error.message };
 
   let faltaTelefono = false;
+  let pendientesLegales: { id: string; tipo: string }[] = [];
 
   if (data.user) {
-    await registrarAceptacionLegal(supabase, data.user.id);
+    const { pendientesMateriales } = await registrarAceptacionLegal(supabase, data.user.id);
+    pendientesLegales = pendientesMateriales.map((t) => ({ id: t.id, tipo: t.tipo }));
 
     // 06-Security/04_Compliance_Colombia.md: registrar timestamp de aceptación del
     // consentimiento (el checkbox ya fue exigido en el paso anterior del formulario).
@@ -73,5 +75,5 @@ export async function verificarCodigo(email: string, token: string) {
     faltaTelefono = !perfil?.telefono;
   }
 
-  return { ok: true as const, faltaTelefono };
+  return { ok: true as const, faltaTelefono, pendientesLegales };
 }
