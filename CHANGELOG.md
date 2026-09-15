@@ -17,7 +17,7 @@ regresiones. Responder reseñas no necesitó ninguna migración: la columna
 y la política ya existían desde el Módulo 1 sin uso. Verificado: 10/10
 casos reales. **Con este módulo, los 10 dominios de la Fase 2 (2.1-2.10)
 quedan cerrados — una Barbería puede operar su negocio completo dentro de
-StylerNow.**
+StylerNow.** `0969266`
 
 ### Añadido — Fase 2, Módulo 2.9: Inventario
 Inventario no tenía documento de reglas de negocio en la Biblia (ADL-009
