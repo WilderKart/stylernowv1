@@ -45,6 +45,29 @@ KPIs de producto y negocio a nivel plataforma. Las definiciones técnicas de có
 | LTV de Cliente (aproximado) | Ticket promedio × frecuencia promedio de visitas anuales × 2 años (horizonte de referencia) | Trimestral |
 | Riesgo de abandono | Definido operativamente en `09-CRM-Intelligence/04_AI_Business.md` (modelo, no fórmula simple) | Semanal |
 
+### KPIs del Resumen del día (Panel Negocio — `02-UX/09_Business_Panel.md`)
+
+Estos KPIs no existían en este documento aunque `02-UX/09_Business_Panel.md`
+y `07-QA/04_Business.md` (QA-BIZ-031) ya los referenciaban — se completan
+acá para que ningún KPI se calcule de dos formas distintas (criterio de
+aceptación de este documento). "Hoy"/"esta semana" se calculan en huso
+horario `America/Bogota`, no UTC — ver `src/lib/formato.ts`.
+
+| KPI | Fórmula | Frecuencia |
+|---|---|---|
+| Citas de hoy | Conteo de Reservas cuya `hora_inicio` cae hoy, en estado distinto de `CANCELADA` | Tiempo real |
+| Ingresos del día | Suma de `monto_total` de Reservas `COMPLETADA` cuya `hora_inicio` cae hoy — extensión de la fórmula de GMV a un solo día; una cita `CONFIRMADA` pero todavía no completada no suma acá | Tiempo real |
+| % de ocupación del día | Minutos reservados hoy (Reservas distintas de `CANCELADA`, un `NO_SHOW` sigue contando porque igual ocupó la agenda) ÷ minutos de `disponibilidad` configurada hoy por el Staff `ACTIVO` de la Sede (o del Negocio si es vista agregada), descontando bloqueos de ausencia que se solapen con esa franja. `null` (no `0%`) cuando no hay ninguna disponibilidad configurada ese día — evita mostrar "0% de ocupación" cuando en realidad nadie tiene agenda cargada | Tiempo real |
+| Comisión generada por Staff (ranking semanal) | Suma de (`monto_total` × `comision_pct` ÷ 100) de Reservas `COMPLETADA` de esa persona en la semana en curso (lunes a domingo) — misma fórmula de comisión de Staff de `08-Growth-Monetization/02_Commissions.md`, agregada por semana | Tiempo real |
+
+**Simplificación V1 documentada** (no un bloqueante de lanzamiento, igual
+que la predicción de ocupación de IA en `09-CRM-Intelligence/04_AI_
+Business.md`): un bloqueo de ausencia que se solapa PARCIALMENTE con una
+franja de disponibilidad descuenta la franja completa, no solo la porción
+solapada. Para el caso típico (vacaciones, día de incapacidad completo)
+esto es exacto; un refinamiento a nivel de minuto exacto es candidato de
+mejora continua, no una corrección urgente.
+
 ### KPIs de Staff (Sistema PRO/EXPERT/MASTER)
 
 | KPI | Fórmula | Frecuencia |

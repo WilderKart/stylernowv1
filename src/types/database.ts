@@ -2027,6 +2027,21 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      dashboard_ranking_staff_semana: {
+        Args: { p_negocio_id: string; p_sede_id?: string }
+        Returns: {
+          comision_generada: number
+          foto_url: string
+          nombre: string
+          reservas_completadas: number
+          sede_nombre: string
+          vinculo_id: string
+        }[]
+      }
+      dashboard_resumen_dia: {
+        Args: { p_negocio_id: string; p_sede_id?: string }
+        Returns: Json
+      }
       enviar_negocio_a_aprobacion: {
         Args: { p_negocio_id: string }
         Returns: {

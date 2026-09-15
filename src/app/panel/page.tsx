@@ -1,11 +1,31 @@
+import { DashboardResumen } from "@/components/panel/dashboard-resumen";
 import { PanelNav } from "@/components/panel/panel-nav";
 import { Badge, Card } from "@/components/ui/card";
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { obtenerLineaTiempoDia, obtenerRankingSemana, obtenerResumenDia } from "./dashboard-actions";
 
 export const metadata = { title: "Panel" };
+
+async function cargarDashboard(negocioId: string, sedeId: string | null) {
+  const [resResumen, resRanking, resTimeline] = await Promise.all([
+    obtenerResumenDia(negocioId, sedeId),
+    obtenerRankingSemana(negocioId, sedeId),
+    obtenerLineaTiempoDia(negocioId, sedeId),
+  ]);
+  const erroresParciales = [resResumen, resRanking, resTimeline]
+    .filter((r): r is { ok: false; error: string } => !r.ok)
+    .map((r) => r.error);
+  return {
+    resumen: resResumen.ok ? resResumen.data : null,
+    ranking: resRanking.ok ? resRanking.data : [],
+    timeline: resTimeline.ok ? resTimeline.data : [],
+    erroresParciales:
+      erroresParciales.length > 0 ? ["No pudimos cargar todo el resumen del día — probá recargar."] : [],
+  };
+}
 
 const ESTADO_TONO = {
   PENDIENTE_APROBACION: "neutral",
@@ -25,10 +45,12 @@ const ESTADO_TEXTO = {
 
 /**
  * Raíz del Panel Negocio — ADR-006: compartida entre Barbería y Guardian,
- * el contenido se ramifica por `resolverContexto()`. Todavía NO es el
- * Dashboard del Módulo 2.2 (00_MASTER_TASKLIST.md) — es el destino mínimo
- * necesario para que el wizard de registro (2.1) tenga a dónde llevar al
- * negocio recién enviado a aprobación, sin inventar métricas falsas.
+ * el contenido se ramifica por `resolverContexto()`. Incluye el Dashboard
+ * del Módulo 2.2 (`<DashboardResumen>`, mismo componente para ambos roles
+ * — el alcance de Guardian ya viene recortado a su sede desde las RPCs de
+ * la migración 016, nunca se calcula en el componente). Antes de que el
+ * negocio quede `ACTIVO` no hay datos reales que mostrar, así que no se
+ * consulta nada — nunca métricas inventadas en 0.
  */
 export default async function PanelPage() {
   const contexto = await resolverContexto();
@@ -99,6 +121,8 @@ export default async function PanelPage() {
       .single();
     if (!sede) redirect("/panel/onboarding");
 
+    const dashboard = await cargarDashboard(contexto.negocioId!, sede.id);
+
     return (
       <div className="flex min-h-dvh flex-col bg-bg">
         <PanelNav rol={contexto.rol} />
@@ -152,11 +176,15 @@ export default async function PanelPage() {
             </svg>
           </Link>
 
-          <p className="mt-8 rounded-2xl border border-dashed border-border px-4 py-6 text-center text-[12.5px] text-text-faint">
-            El Dashboard con tus citas y ocupación (Módulo 2.2) todavía no está
-            construido. Como Guardian, cuando exista, va a mostrar solo los datos de
-            esta sede — nunca los de todo el negocio.
-          </p>
+          {/* Módulo 2.2 — mismo componente que ve Barbería, con el alcance ya
+              recortado a ESTA sede server-side (dashboard_resumen_dia con
+              p_sede_id) — nunca datos de todo el negocio para Guardian. */}
+          <DashboardResumen
+            resumen={dashboard.resumen}
+            ranking={dashboard.ranking}
+            timeline={dashboard.timeline}
+            erroresParciales={dashboard.erroresParciales}
+          />
         </div>
       </div>
     );
@@ -170,6 +198,9 @@ export default async function PanelPage() {
     .single();
 
   if (!negocio || !negocio.onboarding_completo) redirect("/panel/onboarding");
+
+  const dashboardBarberia =
+    negocio.estado === "ACTIVO" ? await cargarDashboard(negocio.id, null) : null;
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
@@ -225,10 +256,20 @@ export default async function PanelPage() {
           </svg>
         </Link>
 
-        <p className="mt-4 rounded-2xl border border-dashed border-border px-4 py-6 text-center text-[12.5px] text-text-faint">
-          El Dashboard completo (ingresos, ocupación, próximas citas — Módulo 2.2) todavía no
-          está construido. Esta pantalla es el punto de llegada mínimo del registro.
-        </p>
+        {dashboardBarberia ? (
+          <DashboardResumen
+            resumen={dashboardBarberia.resumen}
+            ranking={dashboardBarberia.ranking}
+            timeline={dashboardBarberia.timeline}
+            erroresParciales={dashboardBarberia.erroresParciales}
+          />
+        ) : (
+          <p className="mt-4 rounded-2xl border border-dashed border-border px-4 py-6 text-center text-[12.5px] text-text-faint">
+            El resumen del día se activa apenas tu negocio quede{" "}
+            <strong className="text-text">Activo</strong> — necesita Sedes y Staff aprobados
+            para tener datos reales que mostrar.
+          </p>
+        )}
       </div>
     </div>
   );

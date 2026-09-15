@@ -118,7 +118,7 @@ sin este dominio, el Marketplace de Cliente se ve vacío en producción.
 - [x] **2.1 Registro de Barbería** — wizard de 4 pasos, progreso persistente
       vía las tablas reales (sin tabla de "progreso" temporal — migración
       `011_registro_negocio.sql`, `src/app/panel/onboarding/`)
-- [ ] 2.2 Dashboard (ingresos, ocupación, próximas citas, plan, alertas)
+- [x] **2.2 Dashboard** — resumen del día, ver detalle abajo
 - [x] **2.3 Gestión de Sedes** — dominio completo, ver detalle abajo
 - [x] **2.4 Gestión de Staff** — dominio completo, ver detalle abajo
 - [ ] 2.5 Servicios (CRUD, categorías, combos, asignación a Staff)
@@ -385,12 +385,53 @@ construido ejecuta decisiones ya tomadas en ADR-002 (roles) y ADR-006
   construido) — hoy `comision_pct` se fija una sola vez al invitar y se
   muestra de solo lectura en la ficha del Staff.
 
+## Módulo 2.2 — detalle de lo construido
+
+Migración 016 · `src/app/panel/dashboard-actions.ts`,
+`src/components/panel/dashboard-resumen.tsx`, `01-PRD/05_KPIs.md`
+(sección "KPIs del Resumen del día", nueva — la Biblia no traía la fórmula
+exacta de % de ocupación ni de ingresos del día, solo la mencionaba).
+
+- **Mismo componente para Barbería y Guardian** (`<DashboardResumen>`) —
+  el alcance (negocio completo vs. una sola sede) se resuelve en las RPCs
+  server-side, nunca en el componente, siguiendo el mandato de ADR-006.
+- **`dashboard_resumen_dia()`**: citas de hoy (distinto de `CANCELADA`),
+  ingresos de hoy (solo `COMPLETADA` — una cita `CONFIRMADA` todavía no
+  suma), % de ocupación (minutos reservados hoy ÷ minutos de
+  `disponibilidad` configurada por Staff `ACTIVO` ese día, descontando
+  bloqueos de ausencia — `null`, no `0%`, cuando no hay ninguna
+  disponibilidad cargada) y la próxima cita `CONFIRMADA`.
+- **`dashboard_ranking_staff_semana()`**: top 10 por comisión generada
+  (`monto_total × comision_pct ÷ 100` de Reservas `COMPLETADA` de la
+  semana en curso, lunes a domingo) — misma fórmula de comisión de Staff
+  de `08-Growth-Monetization/02_Commissions.md`.
+- **Línea de tiempo del día**: `SELECT` directo sobre `reserva`, sin RPC
+  propio — ya lo protegen `reserva_select_barberia`/`reserva_select_
+  guardian` (migración 006).
+- **No se inventan métricas en 0**: si el negocio todavía no está
+  `ACTIVO`, ni siquiera se consultan las RPCs — se muestra el mensaje de
+  "en revisión" que ya existía, nunca un Dashboard con ceros falsos.
+- **Simplificación V1 documentada** (no bloqueante): un bloqueo de
+  ausencia que se solapa parcialmente con una franja de disponibilidad
+  descuenta la franja completa, no solo la porción solapada — ver la nota
+  en `01-PRD/05_KPIs.md`.
+
+### Verificado end-to-end contra la base real (15/15)
+Un tercero sin vínculo no puede pedir el resumen ni el ranking · citas/
+ingresos/ocupación/próxima cita calculados correctamente con una
+`COMPLETADA`, una `CONFIRMADA` futura y una `CANCELADA` (que no cuenta en
+nada) · una sede sin Staff ni citas da 0 y ocupación `null` (no división
+por cero) · Guardian obtiene el resumen de SU sede pero es rechazado si
+pide otra sede o el negocio completo sin `p_sede_id` · ranking calcula
+bien la comisión (50% de $50.000 = $25.000).
+
+### Documentación actualizada con este módulo
+`01-PRD/05_KPIs.md` (fórmulas nuevas), este archivo, `CHANGELOG.md`.
+
 ---
 
-**Próximo módulo a ejecutar: 2.2 — Dashboard.** Con 2.1, 2.3 y 2.4
-cerrados, se retoma el orden oficial de la Fase 2 en la parte que se había
-saltado por dependencias (2.3 y 2.4 debían resolverse antes de tener datos
-reales de Sedes/Staff que mostrar en un Dashboard con métricas ciertas).
+**Próximo módulo a ejecutar: 2.5 — Servicios.** Con 2.1, 2.2, 2.3 y 2.4
+cerrados, se retoma el orden oficial de la Fase 2 completo.
 
 ---
 

@@ -7,6 +7,15 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 2, Módulo 2.2: Dashboard
+Resumen del día del Panel Negocio, mismo componente para Barbería y
+Guardian: citas de hoy, ingresos del día (solo Reservas completadas), % de
+ocupación (minutos reservados ÷ disponibilidad configurada), próxima cita
+y ranking de Staff de la semana por comisión generada. Completa en
+`01-PRD/05_KPIs.md` las fórmulas de ocupación e ingresos diarios que la
+Biblia mencionaba pero no definía. Verificado: 15/15 casos reales,
+incluyendo que Guardian solo puede pedir el resumen de su propia sede.
+
 ### Añadido — Fase 2, Módulo 2.4: Gestión de Staff
 Dominio completo sobre `resolverContexto()`: listado con búsqueda/filtro/
 orden/paginación real (vista `vista_staff_negocio`, RLS heredado), ciclo de
