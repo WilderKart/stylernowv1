@@ -25,7 +25,7 @@ Calidad de Staff siempre daban 0 sin importar los datos reales, y la
 prueba de Conversión pasaba por coincidencia con el desempate por
 antigüedad. Corregido junto con otros 4 bugs de tipos/ambigüedad SQL, en
 5 migraciones forward sucesivas. Verificado: 14/14 casos reales con el
-cliente `anon`. `PENDIENTE_HASH`
+cliente `anon`. `433bd5f`
 
 ### Añadido — Fase 5, Módulo 5.1: Marketplace — Favoritos + Compartir
 `favorito_negocio` (nueva, sin límite de cantidad, RLS autosuficiente sin
