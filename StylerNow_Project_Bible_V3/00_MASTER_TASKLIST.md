@@ -63,8 +63,8 @@ verificados, no solo "no lanza error en el camino feliz".
 | 2.7 CRM | ✅ | ✅ | ✅ | ✅ | Cerrado |
 | 2.8 POS | ✅ | ✅ | ✅ | ✅ | Cerrado |
 | 2.9 Inventario | ✅ | ✅ | ✅ | ✅ | Cerrado |
-| 2.10 Reportes | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
-| Fase 3 — SuperSU CMS | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| 2.10 Reportes | ✅ | ✅ | ✅ | ✅ | Cerrado — **Fase 2 completa** |
+| Fase 3 — SuperSU CMS | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
 | Fase 4 — App Staff | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | Fase 5 — Marketplace Premium | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | Fase 6 — Growth Engine | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente (ADR-008 deja el diseño de Objetivos de Staff listo) |
@@ -158,10 +158,14 @@ sin este dominio, el Marketplace de Cliente se ve vacío en producción.
 - [x] **2.7 CRM** — dominio completo, ver detalle abajo
 - [x] **2.8 POS** — dominio completo, ver detalle abajo
 - [x] **2.9 Inventario** — dominio completo, ver detalle abajo
-- [ ] 2.10 Reportes (ventas, Staff, servicios, ocupación, exportaciones)
+- [x] **2.10 Reportes** — dominio completo, ver detalle abajo
 
 **Criterio de cierre de Fase 2** (orden oficial): una Barbería puede operar
-todo su negocio sin herramientas externas.
+todo su negocio sin herramientas externas. **Cumplido** — con 2.1 a 2.10
+cerrados, una Barbería puede registrarse, configurar Sedes/Servicios/
+Staff, operar la Agenda, cobrar en Caja, gestionar su CRM e Inventario, y
+ver sus Reportes — todo dentro de StylerNow, sin ninguna hoja de cálculo
+ni sistema externo.
 
 ## Módulo 2.1 — detalle de lo construido
 
@@ -795,7 +799,56 @@ Log.md` (ADL-014), este archivo, `CHANGELOG.md`.
 
 ---
 
-**Próximo módulo a ejecutar: 2.10 — Reportes (cierra la Fase 2).**
+## Módulo 2.10 — detalle de lo construido
+
+Migración 023 · `src/app/panel/reportes/`.
+
+- **Ingresos por semana/mes** (`reportes_ingresos_periodo()`): misma
+  convención de GMV que Dashboard (2.2) y CRM (2.7) — solo Reservas
+  `COMPLETADA` cuentan como ingreso real, nunca una `CONFIRMADA` todavía
+  no cobrada. Gráfico de barras real (CSS, sin librería nueva) con el
+  total del periodo.
+- **Servicios más vendidos** (`reportes_servicios_top()`): ranking por
+  veces vendido e ingresos, sobre `reserva_servicio.precio_congelado_
+  unitario` (el precio real cobrado en su momento, no el precio actual
+  del Servicio si cambió después).
+- **Ranking de Staff con rango de fechas real**
+  (`reportes_ranking_staff()`) — generaliza `dashboard_ranking_staff_
+  semana()` (Módulo 2.2, que tenía la semana en curso fija) en vez de
+  duplicar la fórmula de comisión por segunda vez: esa función pasa a ser
+  un envoltorio delgado sobre esta misma (`select * from reportes_
+  ranking_staff(...)`). Se re-verificó la suite completa de Dashboard
+  (15/15) después del refactor para confirmar que no cambió ningún
+  comportamiento ya probado.
+- **Reseñas recibidas, responder públicamente** (QA-BIZ-089): no
+  necesitó ninguna migración — `resena.respuesta_negocio` y la política
+  `resena_update_respuesta_negocio` (`tiene_acceso_interno`) ya existían
+  desde el Módulo 1 sin que nada las usara todavía.
+
+### Verificado end-to-end contra la base real (10/10)
+Un tercero rechazado en reportes de ingresos · ingresos del periodo
+correctos (solo `COMPLETADA`) · agrupación inválida rechazada · Servicio
+más vendido correcto (veces e ingresos) · ranking de Staff con rango
+amplio vs. rango acotado da comisiones distintas y correctas (confirma
+que el filtro de fechas funciona de verdad, no solo de nombre) ·
+`dashboard_ranking_staff_semana` sigue funcionando igual tras el refactor
+· un tercero no puede responder una reseña ajena (RLS en 0 filas
+afectadas, verificado releyendo) · Barbería sí puede responder y la
+respuesta queda guardada.
+
+### Documentación actualizada con este módulo
+Este archivo, `CHANGELOG.md`.
+
+---
+
+# FASE 2 — CERRADA
+
+Los 10 módulos (2.1 a 2.10) están construidos, verificados end-to-end
+contra la base real, y documentados. Una Barbería puede operar su
+negocio completo dentro de StylerNow — el criterio de cierre oficial de
+la Fase, cumplido.
+
+**Próxima fase a ejecutar: Fase 3 — SuperSU CMS.**
 
 ---
 

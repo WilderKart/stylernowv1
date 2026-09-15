@@ -2993,6 +2993,50 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      reportes_ingresos_periodo: {
+        Args: {
+          p_agrupacion?: string
+          p_desde?: string
+          p_hasta?: string
+          p_negocio_id: string
+          p_sede_id?: string
+        }
+        Returns: {
+          citas_completadas: number
+          ingresos: number
+          periodo: string
+        }[]
+      }
+      reportes_ranking_staff: {
+        Args: {
+          p_desde?: string
+          p_hasta?: string
+          p_negocio_id: string
+          p_sede_id?: string
+        }
+        Returns: {
+          comision_generada: number
+          foto_url: string
+          nombre: string
+          reservas_completadas: number
+          sede_nombre: string
+          vinculo_id: string
+        }[]
+      }
+      reportes_servicios_top: {
+        Args: {
+          p_desde?: string
+          p_hasta?: string
+          p_negocio_id: string
+          p_sede_id?: string
+        }
+        Returns: {
+          ingresos: number
+          nombre: string
+          servicio_id: string
+          veces_vendido: number
+        }[]
+      }
       reprogramar_reserva: {
         Args: {
           p_motivo?: string

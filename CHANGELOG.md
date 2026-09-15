@@ -7,6 +7,18 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 2, Módulo 2.10: Reportes (cierra la Fase 2)
+Ingresos por semana/mes (gráfico de barras real), servicios más vendidos,
+ranking de Staff con rango de fechas real, reseñas recibidas con
+respuesta pública. `dashboard_ranking_staff_semana` (2.2) se refactorizó
+para delegar en `reportes_ranking_staff()` en vez de duplicar la fórmula
+de comisión — re-verificada su suite completa (15/15) tras el cambio, sin
+regresiones. Responder reseñas no necesitó ninguna migración: la columna
+y la política ya existían desde el Módulo 1 sin uso. Verificado: 10/10
+casos reales. **Con este módulo, los 10 dominios de la Fase 2 (2.1-2.10)
+quedan cerrados — una Barbería puede operar su negocio completo dentro de
+StylerNow.**
+
 ### Añadido — Fase 2, Módulo 2.9: Inventario
 Inventario no tenía documento de reglas de negocio en la Biblia (ADL-009
 lo había marcado como Decisión abierta) — esta migración formaliza el
