@@ -16,7 +16,7 @@ nunca tuvo una pantalla que la llenara — el motor de reservas exige una
 fila explícita por Servicio para considerar a un Staff apto, así que
 ningún Servicio de ningún negocio era reservable por nadie hasta este
 módulo. La pantalla "Staff asignado" cierra ese hueco. Verificado: 20/20
-casos reales, incluyendo ese hallazgo (antes/después de asignar Staff).
+casos reales, incluyendo ese hallazgo (antes/después de asignar Staff). `d99a39c`
 
 ### Añadido — Gobernanza del proyecto: Product Coverage Matrix, deuda técnica, decisiones pendientes
 `00_MASTER_TASKLIST.md` gana una Product Coverage Matrix (Backend/Frontend/
