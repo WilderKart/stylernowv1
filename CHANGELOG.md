@@ -8,7 +8,7 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 ## [No liberado]
 
 ### Corregido — Vulnerabilidad de seguridad crítica: `aplicar_evento_pago()` invocable por cualquier usuario autenticado
-**El hallazgo más grave de todo el proyecto hasta la fecha.** `revoke all on function ... from public;` (usado desde la migración 008, Fase 1, para restringir la función que confirma pagos y Reservas a llamadas server-to-server con `service_role`) nunca bloqueó realmente a los roles `anon`/`authenticated` — Supabase les otorga privilegios de ejecución de forma independiente de `PUBLIC`. Cualquier usuario autenticado de la plataforma podía llamar `aplicar_evento_pago()` directamente con un `p_pago_id` arbitrario y `p_estado='APROBADO'`, **confirmando cualquier Reserva pendiente de pago sin haber pagado realmente** — un vector de fraude financiero real y activo en producción. Corregido revocando explícitamente de `anon, authenticated` en las 3 funciones del proyecto que dependían de este patrón sin chequeo de autorización propio. Ninguna otra RPC del proyecto está expuesta de la misma forma. `PENDIENTE_HASH`
+**El hallazgo más grave de todo el proyecto hasta la fecha.** `revoke all on function ... from public;` (usado desde la migración 008, Fase 1, para restringir la función que confirma pagos y Reservas a llamadas server-to-server con `service_role`) nunca bloqueó realmente a los roles `anon`/`authenticated` — Supabase les otorga privilegios de ejecución de forma independiente de `PUBLIC`. Cualquier usuario autenticado de la plataforma podía llamar `aplicar_evento_pago()` directamente con un `p_pago_id` arbitrario y `p_estado='APROBADO'`, **confirmando cualquier Reserva pendiente de pago sin haber pagado realmente** — un vector de fraude financiero real y activo en producción. Corregido revocando explícitamente de `anon, authenticated` en las 3 funciones del proyecto que dependían de este patrón sin chequeo de autorización propio. Ninguna otra RPC del proyecto está expuesta de la misma forma. `11c9e7a`
 
 ### Añadido — Fase 6, Módulo 6.1: Wallet — comisión de plataforma real
 `wallet`/`wallet_movimiento` existían desde la migración 003 y
@@ -22,7 +22,7 @@ totales/parciales, conectada en los 3 lugares donde un pago pasa a
 reembolsado. Nueva pantalla `/panel/wallet` (Barbería) con saldo y
 movimientos — la RLS que la protege ya existía desde la migración 006
 sin ninguna pantalla que la usara. Verificado: 14/14 casos reales.
-`PENDIENTE_HASH`
+`11c9e7a`
 
 ### Añadido — Fase 5, Módulo 5.3: Marketplace — Mapa visual (cierra la Fase 5)
 `<MapaMarketplace>` con MapLibre GL JS (paquete nuevo) y tiles crudos de
