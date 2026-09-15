@@ -20,7 +20,7 @@ Comisión, Soporte, App Staff, Favoritos) dejaba negocios de prueba
 `ACTIVO` reales en la base de datos por no borrar su `wallet` antes
 (sin `ON DELETE CASCADE` a propósito) — 7 negocios de prueba detectados y
 limpiados manualmente, guardado como lección persistente para scripts
-futuros. `PENDIENTE_HASH`
+futuros. `53ed2ab`
 
 ### Añadido — Fase 4: App Staff (cierra la Fase 4)
 Superficie propia `/staff` (Agenda, Mi Nivel, Clientes, Perfil), guarda
