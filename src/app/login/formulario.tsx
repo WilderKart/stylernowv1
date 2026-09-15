@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { enviarCodigo, verificarCodigo } from "./actions";
@@ -69,7 +70,7 @@ export function FormularioLogin({ siguiente }: { siguiente: string }) {
     }
     setLoading(true);
     setError(null);
-    const res = await enviarCodigo(email, siguiente);
+    const res = await enviarCodigo(email, siguiente, aceptaTerminos);
     setLoading(false);
     if (!res.ok) {
       setError(res.error);
@@ -127,10 +128,14 @@ export function FormularioLogin({ siguiente }: { siguiente: string }) {
                 onChange={(e) => setAceptaTerminos(e.target.checked)}
                 className="mt-0.5 size-4 shrink-0 accent-accent"
               />
-              Acepto los Términos y la{" "}
-              <a href="/legal/politica-de-datos" className="text-accent underline underline-offset-2">
+              Acepto los{" "}
+              <Link href="/legal/terminos" className="text-accent underline underline-offset-2">
+                Términos
+              </Link>{" "}
+              y la{" "}
+              <Link href="/legal/politica-de-datos" className="text-accent underline underline-offset-2">
                 Política de Tratamiento de Datos
-              </a>{" "}
+              </Link>{" "}
               de StylerNow.
             </label>
 

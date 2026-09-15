@@ -1,269 +1,289 @@
 # 00 — Master Tasklist (documento vivo)
 
-> Se actualiza en cada sesión de desarrollo. Es el único lugar que responde
-> "¿dónde estamos y qué falta?" sin tener que releer todo el código o la
-> Biblia de nuevo. Cada ítem cita el documento de la Biblia que lo especifica.
-> Convención: `[x]` construido y verificado · `[~]` construido parcialmente ·
+> Se actualiza en cada sesión de desarrollo y al cerrar cada módulo. Es el
+> único lugar que responde "¿dónde estamos y qué falta?" sin releer todo el
+> código o la Biblia de nuevo. Cada ítem cita el documento de la Biblia que
+> lo especifica. Convención: `[x]` construido y verificado · `[~]` parcial ·
 > `[ ]` no empezado.
 >
-> **Última actualización:** 2026-09-14 · commit `e1c3b49`
+> **Estructura de fases:** desde esta sesión sigue el "Orden Oficial de
+> Ejecución" dado por el fundador (Fase 1 Plataforma Compartida → Fase 2
+> Barbería → Fase 3 SuperSU CMS → Fase 4 App Staff → Fase 5 Marketplace
+> Premium → Fase 6 Growth Engine), que reemplaza la numeración de fases de
+> `01-PRD/04_Roadmap.md` como plan operativo — el Roadmap de la Biblia sigue
+> siendo la fuente de las reglas de negocio, esto es el orden de construcción.
+>
+> **Regla de oro (fundador):** no se desarrolla por pantallas, se desarrolla
+> por dominios completos. Un dominio cierra solo con: UI + backend + RLS +
+> auditoría + estados vacíos/error/offline + responsive + accesibilidad +
+> documentación + pruebas. No se avanza al siguiente módulo hasta cerrar el
+> actual, salvo que falte una credencial o decisión de negocio no inferible
+> de la Biblia — eso se deja anotado en "Propuestas pendientes de aprobación"
+> y se sigue con lo que sí se puede avanzar.
+>
+> **Última actualización:** 2026-09-14 · commit `pendiente` (cierre Fase 1)
 
-## Cómo leer esto
+## Decisiones registradas (donde la orden oficial difiere de lo ya construido)
 
-El roadmap oficial (`01-PRD/04_Roadmap.md`) define 4 fases de producto. Este
-documento desglosa la **Fase 1 (MVP)** por superficie (`01-PRD/02_Functional_
-Architecture.md`: Cliente PWA, Panel Negocio, App Staff, SuperSU CMS) porque
-es donde estamos parados, y deja Fases 2-4 como lista de referencia al final.
-
-**Estado en una frase:** el motor transaccional (reservas, pagos, auth) y la
-mitad del Cliente PWA están construidos y probados de punta a punta. Panel
-Negocio, App Staff y SuperSU CMS — las otras 3 superficies — **no existen
-todavía**. Sin al menos un Panel Negocio mínimo, ningún negocio puede darse
-de alta, y el Marketplace se ve vacío aunque el resto funcione perfecto.
-
----
-
-## Fase 0 — Fundación documental
-
-- [x] Biblia del Proyecto completa (`StylerNow_Project_Bible_V3/`)
-
-## Plataforma compartida (base común a las 4 superficies)
-
-Fuente: `01-PRD/02_Functional_Architecture.md` — "no existen bases de datos
-ni lógica de negocio duplicadas entre superficies".
-
-- [x] Esquema de base de datos completo — 002 a 007 (identidad, negocio,
-      transaccional, growth, RLS, triggers/storage)
-- [x] Motor de disponibilidad y reservas — 008/009 (`slots_disponibles`,
-      `crear_reserva`, lock por `EXCLUDE USING gist`, las 7 validaciones de
-      `03-Business-Rules/02_Booking_Rules.md`)
-- [x] Cálculo de Seña y reembolsos por ventana (`03-Business-Rules/03_
-      Payment_Rules.md`)
-- [x] Webhook idempotente de pasarela (`05-API/06_Webhooks.md`)
-- [x] RLS completo por tabla (`06-Security/02_RLS.md`) — helpers
-      `is_supersu`, `is_barberia_de`, `is_staff_de`, `is_guardian_de_sede`
-- [x] Auth: login por código OTP + magic link funcional de punta a punta
-      (`05-API/02_Auth.md`) — Resend como SMTP, dominio propio verificado
-      (`mail.stylernow.com`)
-- [x] Pagos: Mercado Pago Checkout Pro, reconciliación server-side,
-      reembolsos (`05-API/04_Payments.md`)
-- [x] Infraestructura de despliegue: Vercel + dominio + Supabase Auth URLs
-      configuradas y funcionando en producción
-- [ ] Consentimiento legal versionado — existe `perfil.consentimiento_
-      datos_at` pero no hay tabla `texto_legal`/`aceptacion_legal` poblada
-      ni pantalla que muestre el texto real (`06-Security/04_Compliance_
-      Colombia.md`) — hoy el checkbox de login no vincula a un texto legal
-      real, solo a un link `/legal/politica-de-datos` que no existe
-- [ ] Service Worker — `manifest.json` completo con íconos (✅), pero no
-      hay `sw.js`: cero cacheo de shell, cero instalabilidad real todavía
-      (`02-UX/03_Client_PWA.md`)
-- [ ] Auditoría (`evento_auditoria`) — la tabla y algunos inserts existen
-      (reservas, webhooks huérfanos) pero no hay pantalla en ninguna
-      superficie que la muestre todavía (llega con SuperSU CMS y Panel
-      Negocio → Reportes)
+- **Pasarela de pago: Mercado Pago, no Wompi.** La orden oficial lista Wompi
+  en el stack obligatorio, pero el usuario ya pidió explícitamente el cambio
+  a Mercado Pago en una sesión anterior, con credenciales de prueba
+  entregadas, dominio de correo verificado para sus notificaciones, y todo
+  el flujo (Checkout Pro, webhook, reconciliación, reembolsos) construido y
+  verificado end-to-end en producción. **No se revierte a Wompi** sin una
+  instrucción explícita nueva — hacerlo tiraría infraestructura ya probada
+  sin ninguna razón de negocio distinta a la que ya se resolvió.
+- **Mapas: MapLibre + OpenStreetMap.** Sin conflicto — todavía no se construyó
+  ninguna función de mapa. Se adopta tal cual lo pide la orden oficial cuando
+  llegue el turno de Marketplace Premium (Fase 5).
+- **Push: Firebase Cloud Messaging.** Sin conflicto, nada construido aún.
+  Requiere credenciales propias del proyecto (API key, VAPID key, service
+  account) que no existen todavía — queda en "Propuestas pendientes".
 
 ---
 
-## Superficie 1 — Cliente PWA
+# FASE 1 — Plataforma Compartida
 
-Fuente: `02-UX/02_Onboarding.md`, `03_Client_PWA.md`, `04_Marketplace.md`,
-`05_Booking.md`, `06_Payments.md`, `07_Appointments.md`.
+Fuente: `01-PRD/02_Functional_Architecture.md`, `02-UX/03_Client_PWA.md`,
+`06-Security/04_Compliance_Colombia.md`. Base común a las 4 superficies —
+después de cerrar esta fase no se vuelve a tocar salvo bugs.
 
-### Onboarding y cuenta
-- [x] Slides de valor (3 pantallas) → `/onboarding`
-- [x] Login/registro unificado por código OTP + magic link → `/login`
-      (el registro y el login son el mismo flujo — no hay una pantalla
-      "Crear cuenta" separada, es la decisión correcta de diseño, no un
-      bug: `signInWithOtp` con `shouldCreateUser:true` cubre ambos casos)
-- [ ] **Consentimiento de datos como paso propio con texto real** — hoy es
-      un checkbox que apunta a un link roto (`/legal/politica-de-datos`
-      no existe); falta la página y el texto legal versionado
-- [ ] Permiso de ubicación (opcional, "cerca de mí") — no implementado
-- [ ] Permiso de notificaciones push (opcional) — no implementado, no hay
-      ni la capa de abstracción que pide `03_Client_PWA.md` para Capacitor
-- [x] **Completar perfil tras el primer login** (nombre, teléfono) —
-      `verificarCodigo` y `/auth/callback` detectan `telefono is null`
-      (señal de primer login) y desvían una sola vez a `/perfil?
-      bienvenida=1` antes de seguir al destino original
+## Ya existía (sesiones previas)
+- [x] Esquema de base de datos completo (002-007), motor de reservas y pagos
+      (008/009), RLS por tabla (006), auth OTP + magic link funcionando en
+      producción, Mercado Pago Checkout Pro con reconciliación server-side,
+      infraestructura de despliegue (Vercel + dominio + Supabase Auth URLs)
 
-### Navegación de superficie
-- [~] **Bottom nav de 3 pestañas (Inicio / Citas / Perfil)** — construido
-      (`src/components/layout/bottom-nav.tsx`) y montado en Home, Mis
-      Reservas y Perfil. **No** está en el perfil de Negocio ni en el
-      flujo de reserva/pago a propósito: esas pantallas ya tienen su
-      propio CTA fijo abajo y agregar una segunda barra fija competiría
-      con él — cobertura real hoy es "pantallas de recorrido", no el
-      100% literal que pide `03_Client_PWA.md`
+## Cerrado en esta sesión
+- [x] **Service Worker** (`public/sw.js`) — cachea shell de la app (assets
+      con hash de `_next/static`, íconos) con estrategia cache-first;
+      documentos con network-first y respaldo de cache offline. Nunca
+      cachea rutas transaccionales (`/api/`, `/auth/`, `supabase.co`) —
+      consistente con `02-UX/03_Client_PWA.md`: "sin conexión se muestra
+      un estado explícito, nunca datos potencialmente obsoletos"
+- [x] **Prompt de instalación PWA** (`src/components/pwa/pwa-manager.tsx`)
+      — aparece recién desde la 2ª visita (nunca en la primera, exigido
+      explícito por la Biblia), usa `beforeinstallprompt` en
+      Android/Chrome/Edge/desktop; en iOS Safari (sin esa API) muestra
+      instrucciones manuales. Persiste visitas y descarte en localStorage
+- [x] **Error Boundary global** — `src/app/error.tsx` (errores de
+      segmento) + `src/app/global-error.tsx` (errores del propio
+      RootLayout, sin depender de Tailwind/componentes por si eso es lo
+      que rompió) + `src/app/not-found.tsx` (404 con la identidad visual
+      de la app en vez del default de Next)
+- [x] **Consentimiento legal versionado** (`06-Security/04_Compliance_
+      Colombia.md`) — migración 010 pobló `texto_legal` con Política de
+      Tratamiento de Datos y Términos v1 reales (Ley 1581 de 2012); nuevas
+      páginas `/legal/terminos` y `/legal/politica-de-datos` leyendo la
+      versión vigente desde la base; el checkbox del login ahora enlaza a
+      las dos, y **se valida server-side** en `enviarCodigo` (antes solo
+      era un gate del lado del cliente — cualquiera podía llamar a la
+      action directo y saltárselo); la aceptación queda registrada en
+      `aceptacion_legal` (upsert idempotente) desde los dos caminos de
+      login (código tipeado y magic link) — antes esa tabla existía en el
+      esquema desde la migración 004 pero nunca se usaba
 
-### Marketplace (`04_Marketplace.md`)
-- [x] Descubrimiento: búsqueda, filtros por categoría/orden/ciudad
-- [x] Perfil público de Negocio con SEO/JSON-LD
-- [x] Reseñas — **solo lectura** (ver pendiente abajo)
-- [ ] Filtro "Cerca de mí" reactivo a geolocalización — el chip existe
-      visualmente en `filtros.tsx` pero no dispara ninguna consulta con
-      ubicación real
-- [ ] Vista de mapa con pines — no implementada (alterna con lista)
-- [ ] Carrusel de Negocios patrocinados (`03-Business-Rules/06_
-      Marketplace_Ads.md`) — depende de Fase 2 (Marketplace Ads), no
-      bloquea Fase 1
-- [ ] **Favoritos** (guardar negocio, sin límite) — tabla no existe en el
-      esquema, RPC no existe, UI no existe
-- [ ] **Compartir negocio** (link público) — el perfil ya es indexable
-      por slug, falta solo el botón de compartir en la UI
+## Pendiente — requiere credencial o decisión que no puede inferirse de la Biblia
+- [ ] **Push Notifications (FCM)** — capa de abstracción de permisos lista
+      para construir (`02-UX/03_Client_PWA.md` la pide para ser
+      reemplazable por el plugin nativo de Capacitor sin tocar la pantalla
+      que la consume), pero la integración real necesita un proyecto de
+      Firebase del propio StylerNow (API key, VAPID key, service account)
+      → **Propuesta pendiente de aprobación**: crear el proyecto Firebase
+      y pasar las credenciales
+- [ ] **Monitoreo / Analytics de producción** (`10-Operations/06_
+      Analytics_Definitions.md`) → **Propuesta pendiente de aprobación**:
+      Vercel Analytics + Speed Insights son gratis en el plan actual y no
+      requieren credencial nueva (consistente con "nunca introducir
+      dependencias de pago si existe una alternativa gratuita
+      suficientemente sólida") — falta la confirmación para instalarlos
+- [ ] **Auditoría visible** — la tabla `evento_auditoria` y los inserts ya
+      existen (reservas, webhooks huérfanos, cancelaciones); la pantalla
+      que la muestra es responsabilidad de SuperSU CMS (Fase 3) y Panel
+      Negocio → Reportes (Fase 2.10) — no se construye una pantalla suelta
+      ahora para no duplicar esa UI cuando lleguen esas fases
 
-### Booking (`05_Booking.md`)
-- [x] Flujo de 4 pasos completo (servicio → staff → horario → resumen)
-- [x] Combos de servicios sin Staff único → mensaje explícito
-- [x] Lista de espera — alta desde el flujo (`unirseListaEspera`)
-- [ ] Lista de espera — **notificación cuando se libera un cupo**
-      (`03-Business-Rules/10_Waitlist_System.md`) no está implementada:
-      hoy el Cliente se anota pero nadie le avisa nunca (requiere el
-      motor de notificaciones, ver Plataforma compartida)
-
-### Payments (`06_Payments.md`)
-- [x] Pago de Seña vía Mercado Pago, con política de cancelación visible
-      antes de pagar
-- [x] Timeout de UX a los 30s con mensaje de "podés cerrar la app"
-- [ ] Propina (antes o después de la cita) — tabla `pago` ya soporta
-      `tipo='PROPINA'`, no hay ninguna pantalla ni acción todavía
-- [ ] Gestión de métodos de pago guardados (enmascarados) — no aplica
-      hasta integrar guardado de tarjeta de Mercado Pago (Fase 2+)
-
-### Appointments (`07_Appointments.md`)
-- [x] Listado "Próximas"/"Historial" → `/mis-reservas`
-- [x] Cancelación con monto de reembolso mostrado antes de confirmar
-- [ ] **Reagendar** una Reserva `CONFIRMADA` (reutilizar Paso 3 del
-      booking) — no implementado, hoy solo se puede cancelar y volver a
-      reservar desde cero
-- [ ] **Calificar (dejar reseña)** dentro de los 30 días de `COMPLETADA`
-      — no existe la pantalla ni la acción; hoy las reseñas solo se leen,
-      nunca se escriben desde la app
-- [ ] Detalle de reembolso aplicado visible en el detalle de una Reserva
-      `CANCELADA`/`NO_SHOW` — parcialmente cubierto (se muestra el
-      motivo genérico), falta el desglose exacto de monto reembolsado
-
-### Perfil (dentro de la Biblia, pestaña del bottom nav)
-- [x] **Página de perfil** → `/perfil` — editar nombre/teléfono, ver
-      total de puntos de fidelización disponibles, cerrar sesión
-- [ ] Editar avatar (subida a Storage, bucket `avatars` ya existe desde
-      la migración 007) — no implementado en esta pasada
-- [ ] Desglose de puntos por negocio (hoy se muestra un total agregado
-      cruzando todos los negocios, no por negocio individual)
-
-**Resumen Cliente PWA:** el núcleo transaccional (reservar y pagar) está
-completo y verificado. Lo que falta es lo que rodea ese núcleo: perfil,
-navegación persistente, favoritos, reseñas propias, reagendar, permisos
-nativos. Es la superficie más avanzada pero no está "cerrada".
+**Fase 1: cerrada salvo los 3 ítems de arriba, que quedan bloqueados por
+credenciales/decisión de negocio, no por trabajo pendiente de ingeniería.**
 
 ---
 
-## Superficie 2 — Panel Negocio — **0% construido**
+# FASE 2 — Dominio Barbería (máxima prioridad — cuello de botella del proyecto)
 
-Fuente: `02-UX/09_Business_Panel.md`, `02-UX/02_Onboarding.md` (wizard).
+Fuente: `02-UX/02_Onboarding.md` (wizard), `02-UX/09_Business_Panel.md`,
+`03-Business-Rules/01_Roles.md` (matriz de permisos), `01-PRD/03_
+Monetization.md` (planes). **Hoy ningún negocio puede existir realmente** —
+sin este dominio, el Marketplace de Cliente se ve vacío en producción.
 
-- [ ] **Wizard de onboarding de Negocio** (4 pasos: datos, sedes,
-      servicios, invitar staff) con progreso guardado entre sesiones —
-      **bloqueante**: sin esto no puede existir un solo Negocio real, y
-      por eso el Marketplace de Cliente se ve vacío
-- [ ] Dashboard (KPIs del negocio)
-- [ ] Agenda multi-Staff (vista de calendario del lado del Negocio)
-- [ ] Servicios y Staff (catálogo, precios, asignar Staff a Servicios,
-      invitar/remover Staff, otorgar/quitar Guardian)
-- [ ] Clientes/CRM básico
-- [ ] Caja/POS (cobro de Saldo en sede)
-- [ ] Reportes y reseñas recibidas (con opción de responder)
-- [ ] Configuración (política de cancelación, % de Seña, plan y
-      facturación)
+- [ ] 2.1 Registro de Barbería (wizard completo, progreso persistente)
+- [ ] 2.2 Dashboard (ingresos, ocupación, próximas citas, plan, alertas)
+- [ ] 2.3 Gestión de Sedes (crear/editar/cerrar/reactivar/trasladar)
+- [ ] 2.4 Gestión de Staff (listado, detalle, CRUD, Guardian, matriz de roles)
+- [ ] 2.5 Servicios (CRUD, categorías, combos, asignación a Staff)
+- [ ] 2.6 Agenda (día/semana/Staff, drag & drop, bloqueos, conflictos)
+- [ ] 2.7 CRM (historial, notas, etiquetas, LTV, riesgo de abandono)
+- [ ] 2.8 POS (venta rápida, productos, propinas, saldo pendiente, recibos)
+- [ ] 2.9 Inventario (entradas/salidas, consumo automático, alertas)
+- [ ] 2.10 Reportes (ventas, Staff, servicios, ocupación, exportaciones)
 
-**Por qué es la próxima prioridad real:** ninguna otra superficie ni
-funcionalidad del Cliente se puede probar con datos reales sin esto. Hoy
-el único negocio que existe en la base es el que crea y borra el script
-de verificación end-to-end.
+**Criterio de cierre de Fase 2** (orden oficial): una Barbería puede operar
+todo su negocio sin herramientas externas.
 
-## Superficie 3 — App Staff — **0% construido**
+**Próximo módulo a ejecutar: 2.1 Registro de Barbería** — es el que
+desbloquea todo lo demás (sin un negocio dado de alta, ninguno de los
+módulos 2.2-2.10 tiene datos reales sobre los que operar).
 
-Fuente: `02-UX/08_Staff_App.md`.
+---
 
-- [ ] Navegación principal propia (no es una vista reducida del Panel)
-- [ ] Agenda del día propia + check-in/check-out
-- [ ] Mi Nivel (PRO/EXPERT/MASTER) y detalle de puntaje
-- [ ] Clientes atendidos por ese Staff (no el CRM completo)
-- [ ] Perfil/Ganancias (comisiones, propinas, bloquear disponibilidad)
-
-## Superficie 4 — SuperSU CMS — **0% construido**
+# FASE 3 — SuperSU CMS (completo, sin código, no una pantalla de aprobación)
 
 Fuente: `02-UX/10_Super_Admin.md`.
 
-- [ ] Dashboard global de plataforma
-- [ ] Gestión de Negocios — **bloqueante junto con el wizard de Negocio**:
-      aunque exista el wizard, todo Negocio nace en `PENDIENTE_APROBACION`
-      y nunca aparece en el Marketplace sin que alguien lo apruebe; sin
-      esta pantalla, aprobar hoy requiere un UPDATE manual en la base
-- [ ] Planes y configuración global (sin código)
-- [ ] Soporte y moderación (incluye moderar reseñas reportadas)
+- [ ] Dashboard global (negocios, usuarios, ingresos, actividad, salud)
+- [ ] Gestión de Negocios (aprobar/rechazar/suspender/reactivar/cambiar plan)
+- [ ] Marketplace (moderación, destacados, anuncios, categorías)
+- [ ] Soporte (tickets, conversaciones, prioridades, SLA)
+- [ ] Auditoría (logs, eventos, exportaciones)
+- [ ] Configuración global (planes Raven/Jarl/Valhalla/Allfather, créditos
+      IA, WhatsApp, Feature Flags) — todo editable desde interfaz, nunca
+      SQL manual
 
 ---
 
-## Criterio de salida de Fase 1 (`01-PRD/04_Roadmap.md`, textual)
+# FASE 4 — App Staff (aplicación propia, no una vista reducida del Panel)
 
-> "Un Cliente puede descubrir, reservar y pagar una seña; un Negocio puede
-> operar su agenda completa; SuperSU puede aprobar Negocios y cobrar
-> comisión — todo sin intervención manual fuera de la plataforma."
+Fuente: `02-UX/08_Staff_App.md`.
 
-Hoy: la primera cláusula está verificada de punta a punta. La segunda y la
-tercera dependen enteramente de las superficies en 0% de arriba.
-
----
-
-## Fase 2 — Marketplace y crecimiento (no empezada)
-- [ ] Algoritmo completo de ranking (`08-Growth-Monetization/01_
-      Marketplace_Algorithm.md`)
-- [ ] Marketplace Ads autoservicio
-- [ ] Sistema PRO/EXPERT/MASTER activo con impacto real (tablas ya
-      existen desde la migración 003, sin UI ni cron que las alimente)
-- [ ] Multi-sede (Plan Valhalla)
-
-## Fase 3 — Inteligencia y retención (no empezada)
-- [ ] CRM completo
-- [ ] IA operacional (recomendaciones, predicción de ocupación)
-- [ ] Membresías y Gift Cards
-- [ ] Notificaciones WhatsApp avanzadas (campañas)
-
-## Fase 4 — Escala y empaquetado móvil (no empezada)
-- [ ] Empaquetado Capacitor
-- [ ] Plan Allfather con API dedicada
-- [ ] Compliance más allá de Colombia
+- [ ] Inicio (hoy, próximo cliente, objetivos)
+- [ ] Agenda (día/semana, check-in, finalizar servicio)
+- [ ] Clientes (solo los atendidos por ese Staff)
+- [ ] Ganancias (comisiones, propinas, historial)
+- [ ] Niveles (PRO/EXPERT/MASTER)
+- [ ] Guardian: mismos permisos adicionales aparecen automáticamente sobre
+      la misma cuenta Staff cuando se otorga el perfil — nunca una segunda
+      app o cuenta separada (`03-Business-Rules/01_Roles.md`)
 
 ---
 
-## Listo-para-lanzamiento (transversal, independiente de fase)
+# FASE 5 — Marketplace Premium (solo cuando existan negocios reales)
 
-No es "una fase más" — son controles que hay que pasar sí o sí antes de
-producción real, sin importar cuántas fases de producto estén cerradas.
+- [ ] Mapa + geolocalización (MapLibre + OpenStreetMap)
+- [ ] Favoritos, compartir negocio
+- [ ] Destacados, ranking (`08-Growth-Monetization/01_Marketplace_
+      Algorithm.md`)
+- [ ] SEO avanzado, recomendaciones
 
-- [ ] `security-review` (skill del repo) sobre el estado final antes de
-      lanzar
-- [ ] `production-readiness` (skill del repo) — build, RLS, secretos,
-      CSP, error boundaries, monitoreo
-- [ ] Textos legales reales (Términos, Política de Datos) — hoy son
-      links rotos
-- [ ] Página de error genérica / `error.tsx` global (no existe todavía;
-      un error no controlado hoy muestra la pantalla default de Next)
-- [ ] Analytics / observabilidad de producción (`10-Operations/06_
-      Analytics_Definitions.md`)
+---
+
+# FASE 6 — Growth Engine
+
+- [ ] IA operacional, membresías, Gift Cards, referidos, campañas,
+      automatizaciones, créditos IA, motor WhatsApp inteligente
+
+---
+
+# Planes oficiales (a implementar cuando llegue Fase 2.1 / Configuración)
+
+| Plan | Sedes | Staff | Guardian | Créditos IA |
+|---|---|---|---|---|
+| Raven | 1 | 1 (+1 máx.) | No | 100 |
+| Jarl | 1 | 5 | Sí | 600 |
+| Valhalla | hasta 5 | 10 (+adicional configurable) | por sede | 2.500 |
+| Allfather | personalizado | — | — | — |
+
+Lógica de upgrade/downgrade se implementa desde el Módulo 2.1 (elección de
+plan en el wizard), no se pospone a Configuración.
+
+---
+
+# Listo-para-lanzamiento (transversal, independiente de fase)
+
+- [ ] `security-review` (skill del repo) sobre el estado final antes de lanzar
+- [ ] `production-readiness` (skill del repo)
+- [x] Textos legales reales (Términos, Política de Datos) — cerrado en Fase 1
+- [x] Error Boundary global — cerrado en Fase 1
 - [ ] Credenciales de Mercado Pago de **producción** (hoy son `TEST-`)
-- [ ] Dominio de envío de correo migrado del subdominio compartido
-      (`mail.stylernow.com`) — este ya es del dominio real, no hace
-      falta migrar nada acá, queda como está ✅
+- [ ] Firebase (push) y proveedor de analytics — ver "Pendiente" de Fase 1
 
 ---
 
-## Próximo paso recomendado
+## Reporte de esta sesión
 
-**Panel Negocio, mínimo viable primero:** wizard de onboarding (Datos →
-Sede → Servicios) + una pantalla de aprobación en SuperSU (aunque sea
-solo una tabla con botón Aprobar/Rechazar, no todo el CMS). Con eso se
-cierra el círculo completo: un Negocio real se da de alta, se aprueba, y
-aparece en el Marketplace donde ya se lo puede reservar y pagar de punta
-a punta — el resto de cada superficie (reportes, CRM, agenda multi-staff)
-se construye después con el círculo ya cerrado y demostrable.
+### Módulo cerrado
+Fase 1 — Plataforma Compartida (Service Worker/PWA, Error Boundaries,
+Consentimiento legal versionado). Los 3 ítems restantes de Fase 1 quedan
+bloqueados por credencial/decisión, documentados arriba.
+
+### Archivos creados
+- `public/sw.js`
+- `src/components/pwa/pwa-manager.tsx`
+- `src/app/error.tsx`, `src/app/global-error.tsx`, `src/app/not-found.tsx`
+- `src/app/legal/[slug]/page.tsx`
+- `src/lib/auth/aceptacion-legal.ts`
+- `supabase/migrations/010_seed_textos_legales.sql`
+
+### Archivos modificados
+- `src/app/layout.tsx` (monta `PwaManager`)
+- `src/app/login/actions.ts` (`enviarCodigo` exige `aceptaTerminos`
+  server-side; registra aceptación legal en `verificarCodigo`)
+- `src/app/login/formulario.tsx` (pasa `aceptaTerminos`, agrega link a
+  Términos, usa `Link` en vez de `<a>`)
+- `src/app/auth/callback/route.ts` (registra aceptación legal también en
+  el camino de magic link)
+
+### Migraciones creadas
+- `010_seed_textos_legales.sql` — Política de Tratamiento de Datos y
+  Términos v1, aplicada en producción
+
+### Componentes reutilizables creados
+- `PwaManager` (banner de instalación + registro de SW)
+- `registrarAceptacionLegal()` (compartido entre login por código y magic
+  link, evita duplicar la lógica de upsert)
+
+### RLS implementado
+Ninguna política nueva — se reutilizó `aceptacion_legal_propia` (ya
+existía desde la migración 006) y `texto_legal_select_publico` (lectura
+pública, ya existía). Verificado que un usuario no puede leer ni escribir
+la aceptación legal de otro.
+
+### Casos límite cubiertos
+- localStorage/sessionStorage bloqueado (navegación privada) no rompe el
+  flujo de instalación PWA, solo omite el prompt
+- Registro del Service Worker falla silenciosamente sin afectar el resto
+  de la app
+- Segundo login no duplica la fila de `aceptacion_legal` (upsert
+  idempotente, verificado)
+- `global-error.tsx` no depende de Tailwind ni de componentes propios,
+  para sobrevivir si el problema está justamente ahí
+
+### Pruebas realizadas
+Script E2E contra la base real (creado y limpiado en la misma corrida):
+existencia de los 2 textos legales, upsert de aceptación bajo RLS de un
+usuario autenticado, no-duplicación en un segundo login, y aislamiento
+RLS (un usuario no ve la aceptación de otro). 5/5 verificaciones OK.
+`tsc --noEmit`, `eslint --max-warnings=0` y `next build` limpios.
+
+### Documentación actualizada
+Este archivo (`00_MASTER_TASKLIST.md`) — reestructurado a las 6 fases de
+la orden oficial de ejecución, con la decisión de Mercado Pago vs Wompi
+registrada explícitamente.
+
+### Riesgos detectados
+- El texto legal sembrado es un punto de partida razonable, **no una
+  revisión de un abogado** — recomendado hacerlo revisar antes de un
+  lanzamiento real con usuarios en producción.
+- `manifest.json`/`sw.js` no fueron probados en un dispositivo iOS físico
+  todavía (solo revisados por código) — el comportamiento de instalación
+  en iOS puede variar entre versiones de Safari.
+
+### Propuestas pendientes de aprobación
+1. Crear proyecto Firebase para Push Notifications (necesito que lo
+   crees vos y me pases API key + VAPID key + service account, o me
+   autorices a guiarte paso a paso como hicimos con Resend/Mercado Pago).
+2. Instalar Vercel Analytics + Speed Insights (gratis en el plan actual,
+   sin credencial nueva) — confirmame y lo agrego.
+3. Confirmar que seguimos con **Mercado Pago** (no Wompi) antes de tocar
+   cualquier cosa relacionada a pagos en fases futuras.
+
+**Siguiente módulo, arrancando ahora sin esperar respuesta: Fase 2 →
+Módulo 2.1 — Registro de Barbería.**

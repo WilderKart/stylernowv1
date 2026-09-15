@@ -1,3 +1,4 @@
+import { registrarAceptacionLegal } from "@/lib/auth/aceptacion-legal";
 import { destinoSeguro } from "@/lib/auth/destino-seguro";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse, type NextRequest } from "next/server";
@@ -26,6 +27,11 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      // El botón del correo ya implica la misma aceptación que exige el paso 1 del
+      // formulario (enviarCodigo la valida server-side antes de mandar el correo);
+      // se registra acá porque este camino nunca pasa por verificarCodigo.
+      await registrarAceptacionLegal(supabase, data.user.id);
+
       // Mismo desvío de una sola vez que el flujo de código tipeado: sin teléfono
       // todavía, primero completa el perfil (02-UX/02_Onboarding.md).
       const { data: perfil } = await supabase

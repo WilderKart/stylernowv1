@@ -1,5 +1,6 @@
 "use server";
 
+import { registrarAceptacionLegal } from "@/lib/auth/aceptacion-legal";
 import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 
@@ -17,7 +18,18 @@ async function origenActual() {
   return `${proto}://${host}`;
 }
 
-export async function enviarCodigo(email: string, siguiente: string) {
+export async function enviarCodigo(email: string, siguiente: string, aceptaTerminos: boolean) {
+  // Zero-trust: el checkbox del formulario es solo la primera barrera. Sin esta
+  // validación acá, cualquiera podía llamar a esta action directo (sin pasar por
+  // la UI) y saltarse el consentimiento exigido por 06-Security/04_Compliance_
+  // Colombia.md.
+  if (!aceptaTerminos) {
+    return {
+      ok: false as const,
+      error: "Debés aceptar los Términos y la Política de Tratamiento de Datos.",
+    };
+  }
+
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({
     email,
@@ -40,6 +52,8 @@ export async function verificarCodigo(email: string, token: string) {
   let faltaTelefono = false;
 
   if (data.user) {
+    await registrarAceptacionLegal(supabase, data.user.id);
+
     // 06-Security/04_Compliance_Colombia.md: registrar timestamp de aceptación del
     // consentimiento (el checkbox ya fue exigido en el paso anterior del formulario).
     await supabase
