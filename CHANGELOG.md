@@ -15,6 +15,7 @@ y ranking de Staff de la semana por comisión generada. Completa en
 `01-PRD/05_KPIs.md` las fórmulas de ocupación e ingresos diarios que la
 Biblia mencionaba pero no definía. Verificado: 15/15 casos reales,
 incluyendo que Guardian solo puede pedir el resumen de su propia sede.
+`11c716f`
 
 ### Añadido — Fase 2, Módulo 2.4: Gestión de Staff
 Dominio completo sobre `resolverContexto()`: listado con búsqueda/filtro/
