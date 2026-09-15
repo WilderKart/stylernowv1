@@ -43,6 +43,20 @@ export interface PermisosPanel {
   reactivarStaff: boolean;
   retirarStaff: boolean;
   cambiarHorarioOtroStaff: boolean;
+  // Módulo 2.5 — Servicios (03-Business-Rules/01_Roles.md: "Editar duración"
+  // y "Activar/Desactivar" son 🏢 Guardian, "Crear" y "Cambiar precio" son
+  // 🌐 exclusivo Barbería — reforzado también por un trigger de base de
+  // datos, no solo por esta capa de conveniencia).
+  crearServicio: boolean;
+  cambiarPrecioServicio: boolean;
+  editarServicio: boolean;
+  activarDesactivarServicio: boolean;
+  // Combos y asignación de Staff a Servicio no están en la matriz oficial;
+  // se tratan como decisión de precio/empaquetado — exclusivo Barbería,
+  // igual que "Cambiar precio" (mismo criterio ya usado por
+  // servicio_combo_write_barberia / staff_servicio_write_barberia en RLS).
+  gestionarCombos: boolean;
+  asignarStaffServicio: boolean;
 }
 
 export interface ContextoUsuario {
@@ -78,6 +92,12 @@ const PERMISOS_NINGUNO: PermisosPanel = {
   reactivarStaff: false,
   retirarStaff: false,
   cambiarHorarioOtroStaff: false,
+  crearServicio: false,
+  cambiarPrecioServicio: false,
+  editarServicio: false,
+  activarDesactivarServicio: false,
+  gestionarCombos: false,
+  asignarStaffServicio: false,
 };
 
 const CONTEXTO_NINGUNO: ContextoUsuario = {
@@ -133,6 +153,12 @@ export async function resolverContexto(): Promise<ContextoUsuario> {
         reactivarStaff: true,
         retirarStaff: true,
         cambiarHorarioOtroStaff: true,
+        crearServicio: true,
+        cambiarPrecioServicio: true,
+        editarServicio: true,
+        activarDesactivarServicio: true,
+        gestionarCombos: true,
+        asignarStaffServicio: true,
       },
     };
   }
@@ -178,6 +204,12 @@ export async function resolverContexto(): Promise<ContextoUsuario> {
           reactivarStaff: false,
           retirarStaff: false,
           cambiarHorarioOtroStaff: true,
+          crearServicio: false,
+          cambiarPrecioServicio: false,
+          editarServicio: true,
+          activarDesactivarServicio: true,
+          gestionarCombos: false,
+          asignarStaffServicio: false,
         },
       };
     }

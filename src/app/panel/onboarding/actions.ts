@@ -218,56 +218,10 @@ export async function guardarSede(datos: {
   }
 }
 
-// ── Paso 3 — Servicios ──────────────────────────────────────────────────────
-
-export async function crearServicio(datos: {
-  negocioId: string;
-  nombre: string;
-  duracionMinutos: number;
-  precioBase: number;
-  descripcion: string;
-}): Promise<Resultado<{ id: string }>> {
-  try {
-    const { supabase } = await usuarioActual();
-
-    if (datos.duracionMinutos <= 0) return { ok: false, error: "La duración debe ser mayor a 0." };
-    if (datos.precioBase < 0) return { ok: false, error: "El precio no puede ser negativo." };
-
-    const { data, error } = await supabase
-      .from("servicio")
-      .insert({
-        negocio_id: datos.negocioId,
-        nombre: datos.nombre,
-        duracion_minutos: datos.duracionMinutos,
-        precio_base: datos.precioBase,
-        descripcion: datos.descripcion || null,
-      })
-      .select("id")
-      .single();
-    if (error) return { ok: false, error: error.message };
-    revalidatePath("/panel/onboarding");
-    return { ok: true, data: { id: data.id } };
-  } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
-  }
-}
-
-export async function eliminarServicio(servicioId: string): Promise<Resultado> {
-  try {
-    const { supabase } = await usuarioActual();
-    // Soft delete (03-Business-Rules/02_Booking_Rules.md): nunca borrado físico,
-    // por si ya hay una Reserva futura referenciándolo.
-    const { error } = await supabase
-      .from("servicio")
-      .update({ estado: "INACTIVO" })
-      .eq("id", servicioId);
-    if (error) return { ok: false, error: error.message };
-    revalidatePath("/panel/onboarding");
-    return { ok: true };
-  } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
-  }
-}
+// Paso 3 — Servicios: `crearServicio`/`eliminarServicio` viven en
+// `@/app/panel/servicios/actions` desde el Módulo 2.5 — un solo lugar para
+// esa lógica (validaciones de duración/precio/duplicados), reutilizado acá
+// y en el Panel de Servicios completo. El wizard las importa directo.
 
 // ── Paso 4 — Invitar Staff (opcional) ───────────────────────────────────────
 

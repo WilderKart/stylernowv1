@@ -12,13 +12,14 @@ import { useState } from "react";
 import {
   cancelarInvitacion,
   crearOActualizarNegocio,
-  crearServicio,
-  eliminarServicio,
   elegirPlan,
   enviarAAprobacion,
   invitarStaff,
   subirLogo,
 } from "./actions";
+// Módulo 2.5: un solo lugar para crear/desactivar Servicios (validaciones
+// de duración/precio/duplicados), compartido con el Panel de Servicios.
+import { crearServicio, eliminarServicio } from "@/app/panel/servicios/actions";
 
 const PLANES = [
   { codigo: "RAVEN" as const, nombre: "Raven", precio: 69900, resumen: "1 sede · hasta 2 Staff" },

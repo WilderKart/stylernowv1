@@ -31,7 +31,7 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
 
   if (!negocio) notFound();
 
-  const [{ data: sedes }, { data: servicios }, { data: staff }] = await Promise.all([
+  const [{ data: sedes }, { data: servicios }, { data: staff }, { data: combosData }] = await Promise.all([
     supabase
       .from("sede")
       .select("id, nombre, direccion, zona_horaria")
@@ -46,7 +46,24 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
       .eq("estado", "ACTIVO")
       .order("precio_base"),
     supabase.rpc("negocio_staff_publico", { p_negocio_id: negocio.id }),
+    supabase
+      .from("servicio_combo")
+      .select("id, nombre, servicio_combo_item (servicio_id)")
+      .eq("negocio_id", negocio.id)
+      .eq("estado", "ACTIVO")
+      .order("nombre"),
   ]);
+
+  // Un combo con algún Servicio ya desactivado no se ofrece — evita que el
+  // Cliente arme una Reserva con un `servicio_id` que ya no es reservable.
+  const idsServiciosActivos = new Set((servicios ?? []).map((s) => s.id));
+  const combos = (combosData ?? [])
+    .map((c) => ({
+      id: c.id,
+      nombre: c.nombre,
+      servicio_ids: (c.servicio_combo_item ?? []).map((i) => i.servicio_id),
+    }))
+    .filter((c) => c.servicio_ids.length >= 2 && c.servicio_ids.every((id) => idsServiciosActivos.has(id)));
 
   if (!sedes?.length || !servicios?.length) {
     return (
@@ -70,6 +87,7 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
         sedes={sedes}
         servicios={servicios}
         staff={(staff ?? []).map((p) => ({ ...p, nivel: p.nivel }))}
+        combos={combos}
       />
     </div>
   );

@@ -7,6 +7,17 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 2, Módulo 2.5: Servicios
+CRUD completo (duración con rango 5-480 min, precio, categoría de puntaje,
+buffers), Combos (agrupan servicios con nombre propio, conectados de
+verdad al flujo de reserva del Cliente como atajo de un toque) y Staff
+asignado por Servicio. **Hallazgo real de producción**: `staff_servicio`
+nunca tuvo una pantalla que la llenara — el motor de reservas exige una
+fila explícita por Servicio para considerar a un Staff apto, así que
+ningún Servicio de ningún negocio era reservable por nadie hasta este
+módulo. La pantalla "Staff asignado" cierra ese hueco. Verificado: 20/20
+casos reales, incluyendo ese hallazgo (antes/después de asignar Staff).
+
 ### Añadido — Gobernanza del proyecto: Product Coverage Matrix, deuda técnica, decisiones pendientes
 `00_MASTER_TASKLIST.md` gana una Product Coverage Matrix (Backend/Frontend/
 RLS/QA por dominio, tablero maestro de un vistazo). Documentos nuevos:

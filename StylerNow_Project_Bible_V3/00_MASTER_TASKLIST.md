@@ -58,8 +58,8 @@ verificados, no solo "no lanza error en el camino feliz".
 | 2.3 Gestión de Sedes | ✅ | ✅ | ✅ | ✅ | Cerrado |
 | 2.4 Gestión de Staff | ✅ | ✅ | ✅ | ✅ | Cerrado |
 | ADR-006 Panel compartido Guardian | ✅ | ✅ | ✅ | ✅ | Cerrado |
-| 2.5 Servicios | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
-| 2.6 Agenda | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| 2.5 Servicios | ✅ | ✅ | ✅ | ✅ | Cerrado |
+| 2.6 Agenda | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
 | 2.7 CRM | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | 2.8 POS | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | 2.9 Inventario | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
@@ -153,7 +153,7 @@ sin este dominio, el Marketplace de Cliente se ve vacío en producción.
 - [x] **2.2 Dashboard** — resumen del día, ver detalle abajo
 - [x] **2.3 Gestión de Sedes** — dominio completo, ver detalle abajo
 - [x] **2.4 Gestión de Staff** — dominio completo, ver detalle abajo
-- [ ] 2.5 Servicios (CRUD, categorías, combos, asignación a Staff)
+- [x] **2.5 Servicios** — dominio completo, ver detalle abajo
 - [ ] 2.6 Agenda (día/semana/Staff, drag & drop, bloqueos, conflictos)
 - [ ] 2.7 CRM (historial, notas, etiquetas, LTV, riesgo de abandono)
 - [ ] 2.8 POS (venta rápida, productos, propinas, saldo pendiente, recibos)
@@ -462,8 +462,89 @@ bien la comisión (50% de $50.000 = $25.000).
 
 ---
 
-**Próximo módulo a ejecutar: 2.5 — Servicios.** Con 2.1, 2.2, 2.3 y 2.4
-cerrados, se retoma el orden oficial de la Fase 2 completo.
+## Módulo 2.5 — detalle de lo construido
+
+Migración 017 · `src/app/panel/servicios/`, `src/components/negocio/
+formulario-servicio.tsx`, `src/components/negocio/formulario-combo.tsx`.
+El CRUD base de `servicio` (RLS + trigger de protección de precio) ya
+existía desde la migración 006 (construido junto al motor de reservas) —
+esta migración completa lo que faltaba: cota superior de duración, y
+Combos como catálogo real (nunca se había construido una pantalla).
+
+- **Bug real de producción encontrado durante la verificación (el más
+  importante de esta sesión):** `staff_servicio` está vacía por defecto y
+  nunca tuvo una pantalla que la llenara — el motor de reservas
+  (`slots_disponibles`, migración 008/009) exige una fila explícita de
+  `staff_servicio` por cada Servicio para considerar a un Staff apto.
+  **Ningún Servicio de ningún negocio era reservable por nadie hasta este
+  módulo** — no por un bug del motor (esa lógica es correcta y ya estaba
+  verificada), sino porque no existía ninguna UI para poblar esa tabla. La
+  pantalla "Staff asignado" de `/panel/servicios/[id]` es la que cierra
+  ese hueco. Se verificó explícitamente con una prueba real: `negocio_
+  staff_publico()` no devuelve a nadie apto para un Servicio recién creado
+  hasta asignar Staff a mano.
+- **CRUD completo de Servicios** (`/panel/servicios`, `/panel/servicios/
+  nuevo`, `/panel/servicios/[id]`): nombre, descripción, duración (rango
+  5-480 min, antes solo tenía un mínimo de >0), precio, categoría de
+  puntaje (reutiliza `categoria_puntaje` — Estándar/Premium/Complementario,
+  ya existente para el Sistema de Niveles, `03-Business-Rules/05_Staff_
+  Rewards.md` — nunca se inventó una categorización nueva), buffers.
+  Activar/desactivar es soft delete (nunca borrado físico, Reservas
+  conservan su referencia íntegra).
+- **Validaciones server-side, no solo de UI**: duración fuera de rango y
+  precio negativo ya eran `CHECK` constraints reales de la base (desde
+  migración 002) — se verificaron con inserts directos, no solo leyendo el
+  esquema. Nombre duplicado (mismo negocio, mismo nombre, otro Servicio
+  ACTIVO) se valida en la Server Action.
+- **Permisos según la matriz de Roles, reforzados por un trigger que ya
+  existía**: Guardian puede editar duración y activar/desactivar (🏢) pero
+  el trigger `trg_proteger_precio_servicio` (migración 006) rechaza
+  cualquier cambio de precio que no venga de la Barbería — verificado con
+  un UPDATE real de Guardian, no asumido.
+- **Combos** (`servicio_combo` + `servicio_combo_item`, nuevo): agrupan 2+
+  Servicios activos con un nombre propio; exclusivo de Barbería (se trata
+  como decisión de precio/empaquetado, igual criterio que "Cambiar
+  precio" de la matriz). Conectado de verdad al flujo de reserva del
+  Cliente (`negocio/[slug]/reservar`): un combo aparece como un atajo de
+  un toque que selecciona sus Servicios miembro — nunca quedó como un
+  catálogo sin consumidor real.
+  - `precio_total_override`/`duracion_minutos_override` (la "eficiencia de
+    tiempo real" de `03-Business-Rules/02_Booking_Rules.md`) se guardan y
+    se muestran, pero **no están conectados todavía al motor de
+    disponibilidad** — conectarlos exige tocar `slots_disponibles`, un RPC
+    crítico ya verificado dos veces en sesiones anteriores (bugs de
+    `max(uuid)` y de `found` pisado). Se prioriza no arriesgar ese código
+    por una función opcional del combo — registrado en
+    `docs/TECH_DEBT_REGISTER.md`.
+- **`PermisosPanel` ganó 6 campos nuevos** (`crearServicio`,
+  `cambiarPrecioServicio`, `editarServicio`, `activarDesactivarServicio`,
+  `gestionarCombos`, `asignarStaffServicio`) — ninguna pantalla de
+  Servicios calcula su alcance comparando `rol` a mano.
+- **Reutilización**: `FormularioServicio` es el único formulario de
+  Servicio — el wizard de onboarding (2.1) y el Panel completo llaman a
+  las mismas Server Actions (`crearServicio`/`eliminarServicio` se movieron
+  de `onboarding/actions.ts` a `panel/servicios/actions.ts`, sin duplicar
+  la lógica de validación).
+
+### Verificado end-to-end contra la base real (20/20)
+Duración fuera de rango y precio negativo rechazados por `CHECK`
+constraints reales · Guardian rechazado al cambiar precio pero autorizado
+a cambiar duración/estado · Barbería SÍ cambia el precio · Guardian NO
+puede crear ni editar combos (RLS deja el UPDATE en 0 filas afectadas, no
+en un error — verificado releyendo con `service_role`, no solo revisando
+la ausencia de excepción) · un combo `INACTIVO` deja de ser visible
+públicamente · **sin `staff_servicio`, nadie figura apto para un Servicio
+— tras asignar, sí** (el hallazgo central del módulo) · un tercero anónimo
+no puede alterar `staff_servicio` · desactivar un Servicio lo conserva
+(`INACTIVO`, nunca borrado físico).
+
+### Documentación actualizada con este módulo
+Este archivo, `CHANGELOG.md`, `docs/TECH_DEBT_REGISTER.md` (override de
+combo no conectado al motor de disponibilidad).
+
+---
+
+**Próximo módulo a ejecutar: 2.6 — Agenda.**
 
 ---
 

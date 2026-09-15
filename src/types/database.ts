@@ -1434,6 +1434,80 @@ export type Database = {
           },
         ]
       }
+      servicio_combo: {
+        Row: {
+          created_at: string
+          descripcion: string | null
+          duracion_minutos_override: number | null
+          estado: Database["public"]["Enums"]["servicio_estado"]
+          id: string
+          negocio_id: string
+          nombre: string
+          precio_total_override: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          descripcion?: string | null
+          duracion_minutos_override?: number | null
+          estado?: Database["public"]["Enums"]["servicio_estado"]
+          id?: string
+          negocio_id: string
+          nombre: string
+          precio_total_override?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          descripcion?: string | null
+          duracion_minutos_override?: number | null
+          estado?: Database["public"]["Enums"]["servicio_estado"]
+          id?: string
+          negocio_id?: string
+          nombre?: string
+          precio_total_override?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicio_combo_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      servicio_combo_item: {
+        Row: {
+          combo_id: string
+          servicio_id: string
+        }
+        Insert: {
+          combo_id: string
+          servicio_id: string
+        }
+        Update: {
+          combo_id?: string
+          servicio_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicio_combo_item_combo_id_fkey"
+            columns: ["combo_id"]
+            isOneToOne: false
+            referencedRelation: "servicio_combo"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicio_combo_item_servicio_id_fkey"
+            columns: ["servicio_id"]
+            isOneToOne: false
+            referencedRelation: "servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff: {
         Row: {
           bio: string | null

@@ -35,6 +35,12 @@ export interface Sede {
   zona_horaria: string;
 }
 
+export interface Combo {
+  id: string;
+  nombre: string;
+  servicio_ids: string[];
+}
+
 export interface Profesional {
   staff_id: string;
   nombre: string;
@@ -51,11 +57,13 @@ export function FlujoReserva({
   sedes,
   servicios,
   staff,
+  combos,
 }: {
   negocio: DatosNegocio;
   sedes: Sede[];
   servicios: Servicio[];
   staff: Profesional[];
+  combos: Combo[];
 }) {
   const router = useRouter();
 
@@ -113,6 +121,16 @@ export function FlujoReserva({
     setServicioIds((previos) =>
       previos.includes(id) ? previos.filter((x) => x !== id) : [...previos, id]
     );
+  }
+
+  /** Un combo (Módulo 2.5) es solo un atajo de selección — reemplaza la
+   * elección actual por el conjunto de Servicios del combo. El motor de
+   * disponibilidad sigue sumando la duración/precio de cada Servicio
+   * individual (docs/TECH_DEBT_REGISTER.md: el override del combo todavía
+   * no está conectado ahí), así que esto no cambia ningún cálculo. */
+  function elegirCombo(combo: Combo) {
+    setSlot(null);
+    setServicioIds(combo.servicio_ids);
   }
 
   async function confirmar() {
@@ -227,6 +245,32 @@ export function FlujoReserva({
                     </option>
                   ))}
                 </select>
+              </div>
+            ) : null}
+
+            {combos.length > 0 ? (
+              <div className="mb-5">
+                <p className="mb-2 text-[11.5px] font-bold uppercase tracking-wide text-text-muted">
+                  Combos
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {combos.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => elegirCombo(c)}
+                      className={cn(
+                        "rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition-colors",
+                        servicioIds.length === c.servicio_ids.length &&
+                          c.servicio_ids.every((id) => servicioIds.includes(id))
+                          ? "border-accent bg-accent-soft text-accent"
+                          : "border-border-subtle bg-surface text-text-muted hover:border-accent/40"
+                      )}
+                    >
+                      {c.nombre}
+                    </button>
+                  ))}
+                </div>
               </div>
             ) : null}
 

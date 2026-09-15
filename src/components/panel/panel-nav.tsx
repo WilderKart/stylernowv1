@@ -22,10 +22,11 @@ export function PanelNav({ rol }: { rol: RolPanel }) {
   const items = [
     { href: "/panel", etiqueta: "Resumen" },
     ...(rol === "BARBERIA" ? [{ href: "/panel/sedes", etiqueta: "Sedes" }] : []),
-    // Staff es compartido entre Barbería y Guardian (ADR-006) — el alcance
-    // (negocio completo vs. una sola sede) lo resuelve la propia pantalla
-    // vía `permisos`, nunca un ítem de nav distinto por rol.
+    // Staff y Servicios son compartidos entre Barbería y Guardian (ADR-006)
+    // — el alcance lo resuelve la propia pantalla vía `permisos`, nunca un
+    // ítem de nav distinto por rol.
     { href: "/panel/staff", etiqueta: "Staff" },
+    { href: "/panel/servicios", etiqueta: "Servicios" },
   ];
 
   return (
