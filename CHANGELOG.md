@@ -17,7 +17,7 @@ Laboral del Staff — formaliza que `evento_auditoria` + `nivel_staff_
 consolidado` YA son ese historial, sin tabla nueva; `obtenerHistorialStaff()`
 ahora combina ambas fuentes) y ADR-008 (Objetivos de Staff — arquitectura
 de datos documentada por adelantado para Fase 6, sin implementación
-todavía, decisión consciente de alcance).
+todavía, decisión consciente de alcance). `bc7319d`
 
 ### Añadido — Fase 2, Módulo 2.2: Dashboard
 Resumen del día del Panel Negocio, mismo componente para Barbería y
