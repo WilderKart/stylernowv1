@@ -21,7 +21,7 @@ reportadas (`reportar_resena()` desde `/panel/reportes`, `moderar_resena()`
 desde `/admin/moderacion`) — un bug real de tipos (CASE sin castear al enum
 `resena_estado`) se encontró con la prueba end-to-end y se corrigió en una
 migración nueva (025), nunca editando la 024 ya aplicada. Verificado: 18/18
-casos reales. `PENDIENTE_HASH`
+casos reales. `9fbc82a`
 
 ### Añadido — Fase 2, Módulo 2.10: Reportes (cierra la Fase 2)
 Ingresos por semana/mes (gráfico de barras real), servicios más vendidos,
