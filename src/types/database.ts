@@ -734,6 +734,7 @@ export type Database = {
       perfil: {
         Row: {
           avatar_url: string | null
+          categorias_interes: string[]
           consentimiento_datos_at: string | null
           consentimiento_marketing: boolean
           created_at: string
@@ -747,6 +748,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          categorias_interes?: string[]
           consentimiento_datos_at?: string | null
           consentimiento_marketing?: boolean
           created_at?: string
@@ -760,6 +762,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          categorias_interes?: string[]
           consentimiento_datos_at?: string | null
           consentimiento_marketing?: boolean
           created_at?: string

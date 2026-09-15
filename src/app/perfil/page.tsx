@@ -20,7 +20,11 @@ export default async function PerfilPage(props: PageProps<"/perfil">) {
   if (!user) redirect("/login?next=/perfil");
 
   const [{ data: perfil }, { data: puntos }] = await Promise.all([
-    supabase.from("perfil").select("nombre, telefono, email").eq("id", user.id).single(),
+    supabase
+      .from("perfil")
+      .select("nombre, telefono, email, fecha_nacimiento, categorias_interes")
+      .eq("id", user.id)
+      .single(),
     supabase
       .from("punto_fidelizacion")
       .select("cantidad_disponible")
@@ -69,6 +73,8 @@ export default async function PerfilPage(props: PageProps<"/perfil">) {
         <FormularioPerfil
           nombreInicial={perfil?.nombre ?? ""}
           telefonoInicial={perfil?.telefono ?? ""}
+          fechaNacimientoInicial={perfil?.fecha_nacimiento ?? ""}
+          categoriasInicial={perfil?.categorias_interes ?? []}
           email={perfil?.email ?? user.email ?? ""}
           bienvenida={bienvenida}
         />

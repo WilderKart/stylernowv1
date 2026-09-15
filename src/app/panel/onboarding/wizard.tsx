@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { CATEGORIAS_NEGOCIO as CATEGORIAS } from "@/lib/categorias-negocio";
 import { duracion } from "@/lib/formato";
 import { cn, formatCOP } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -19,19 +20,6 @@ import {
   subirLogo,
   type HorarioSemana,
 } from "./actions";
-
-/** 01-PRD/01_Product_Vision.md: las verticales soportadas desde el día uno. */
-const CATEGORIAS = [
-  { valor: "barberia", etiqueta: "Barbería" },
-  { valor: "salon", etiqueta: "Salón de belleza" },
-  { valor: "estilismo", etiqueta: "Estilismo" },
-  { valor: "manicura", etiqueta: "Manicura/Pedicura" },
-  { valor: "lashista", etiqueta: "Extensiones de pestañas" },
-  { valor: "tatuajes", etiqueta: "Tatuajes" },
-  { valor: "spa", etiqueta: "Spa" },
-  { valor: "masajes", etiqueta: "Masajes" },
-  { valor: "grooming", etiqueta: "Grooming masculino" },
-];
 
 const DIAS: { clave: keyof HorarioSemana; etiqueta: string }[] = [
   { clave: "lun", etiqueta: "Lunes" },

@@ -10,19 +10,27 @@ export type ResultadoPerfil = { ok: true } | { ok: false; error: string };
  * solo su propio recurso). RLS `perfil_update_propio` ya limita la fila al dueño
  * de la sesión — este action no necesita repetir esa validación, solo saneamos
  * el dato antes de escribir.
+ *
+ * Solo `nombre` es obligatorio. Teléfono, fecha de nacimiento e intereses son
+ * opcionales pero incentivados en la UI (recordatorios de cita, promociones
+ * relevantes, futuros beneficios de fidelización) — nunca bloquean el uso de
+ * la app si se dejan vacíos.
  */
 export async function actualizarPerfil(datos: {
   nombre: string;
-  telefono: string;
+  codigoPais: string;
+  telefonoLocal: string;
+  fechaNacimiento: string;
+  categoriasInteres: string[];
 }): Promise<ResultadoPerfil> {
   const nombre = datos.nombre.trim();
-  const telefono = datos.telefono.trim();
+  const telefonoLocal = datos.telefonoLocal.replace(/\D/g, "");
 
   if (nombre.length < 2) {
     return { ok: false, error: "El nombre es muy corto." };
   }
-  if (telefono && !/^\+?[0-9\s-]{7,15}$/.test(telefono)) {
-    return { ok: false, error: "Revisá el formato del teléfono." };
+  if (telefonoLocal && (telefonoLocal.length < 6 || telefonoLocal.length > 12)) {
+    return { ok: false, error: "Revisá el número de celular." };
   }
 
   const supabase = await createClient();
@@ -33,7 +41,12 @@ export async function actualizarPerfil(datos: {
 
   const { error } = await supabase
     .from("perfil")
-    .update({ nombre, telefono: telefono || null })
+    .update({
+      nombre,
+      telefono: telefonoLocal ? `${datos.codigoPais}${telefonoLocal}` : null,
+      fecha_nacimiento: datos.fechaNacimiento || null,
+      categorias_interes: datos.categoriasInteres,
+    })
     .eq("id", user.id);
 
   if (error) return { ok: false, error: error.message };
