@@ -28,6 +28,7 @@ export function PanelNav({ rol }: { rol: RolPanel }) {
     { href: "/panel/agenda", etiqueta: "Agenda" },
     { href: "/panel/crm", etiqueta: "Clientes" },
     { href: "/panel/pos", etiqueta: "Caja" },
+    { href: "/panel/inventario", etiqueta: "Inventario" },
     { href: "/panel/staff", etiqueta: "Staff" },
     { href: "/panel/servicios", etiqueta: "Servicios" },
   ];

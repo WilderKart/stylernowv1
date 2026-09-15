@@ -130,6 +130,13 @@ Cada decisión tiene: **Fecha, Decisión, Motivo, Impacto, Estado** (`Activa` / 
 **Impacto:** Documento nuevo `ADR_008_Objetivos_Staff.md`, entrada en `docs/PENDING_DECISIONS.md`.
 **Estado:** Activa — diseño fijado, implementación pendiente de Fase 6.
 
+### ADL-014 — Inventario: stock por (Producto, Sede), resuelve la Decisión abierta de ADL-009
+**Fecha:** 2026-09-15
+**Decisión:** Inventario no tenía documento de reglas de negocio propio — solo la matriz de permisos de `01_Roles.md`, que le da a Guardian alcance de su Sede. Se modela `producto_stock` como una fila por (Producto, Sede) — nunca una cantidad única a nivel Negocio — y se conecta con POS (`completar_venta_pos()` ahora también descuenta stock, tanto por venta directa como por consumo automático configurado por Servicio).
+**Motivo:** El alcance 🏢 de Guardian en la matriz de Roles no tendría sentido si el stock fuera una sola cantidad compartida entre Sedes; el roadmap pide explícitamente conectar Inventario con Staff/Servicios/Sedes.
+**Impacto:** Documento nuevo `ADR_009_Inventario_Stock_Por_Sede.md`, migración 022, `completar_venta_pos()` extendida (migración 021 → 022, misma función).
+**Estado:** Activa.
+
 ## Checklist
 - [x] Completo (vivo — se agregan entradas nuevas conforme surgen decisiones)
 - [ ] Revisado

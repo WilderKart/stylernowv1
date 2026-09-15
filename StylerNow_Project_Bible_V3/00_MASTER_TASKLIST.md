@@ -62,8 +62,8 @@ verificados, no solo "no lanza error en el camino feliz".
 | 2.6 Agenda | ✅ | ✅ | ✅ | ✅ | Cerrado |
 | 2.7 CRM | ✅ | ✅ | ✅ | ✅ | Cerrado |
 | 2.8 POS | ✅ | ✅ | ✅ | ✅ | Cerrado |
-| 2.9 Inventario | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
-| 2.10 Reportes | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| 2.9 Inventario | ✅ | ✅ | ✅ | ✅ | Cerrado |
+| 2.10 Reportes | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
 | Fase 3 — SuperSU CMS | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | Fase 4 — App Staff | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | Fase 5 — Marketplace Premium | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
@@ -157,7 +157,7 @@ sin este dominio, el Marketplace de Cliente se ve vacío en producción.
 - [x] **2.6 Agenda** — dominio completo, ver detalle abajo
 - [x] **2.7 CRM** — dominio completo, ver detalle abajo
 - [x] **2.8 POS** — dominio completo, ver detalle abajo
-- [ ] 2.9 Inventario (entradas/salidas, consumo automático, alertas)
+- [x] **2.9 Inventario** — dominio completo, ver detalle abajo
 - [ ] 2.10 Reportes (ventas, Staff, servicios, ocupación, exportaciones)
 
 **Criterio de cierre de Fase 2** (orden oficial): una Barbería puede operar
@@ -735,7 +735,67 @@ Este archivo, `CHANGELOG.md`.
 
 ---
 
-**Próximo módulo a ejecutar: 2.9 — Inventario.**
+## Módulo 2.9 — detalle de lo construido
+
+Migración 022 · `src/app/panel/inventario/`. A diferencia de todos los
+módulos anteriores, Inventario NO tenía documento de reglas de negocio en
+la Biblia — ADL-009 lo había marcado explícitamente como Decisión abierta.
+Esta migración ES esa fase posterior; el diseño completo, con su
+razonamiento, queda formalizado en `ADR_009_Inventario_Stock_Por_Sede.md`
+(ADL-014).
+
+- **`producto_stock`, una fila por (Producto, Sede)** — nunca una
+  cantidad única a nivel Negocio. `producto` (Módulo 2.8) sigue siendo el
+  catálogo compartido; el conteo físico es por Sede, que es justamente
+  por qué la matriz de Roles le da a Guardian alcance 🏢 (su Sede) en
+  este módulo — verificado explícitamente: Guardian de sede A no puede
+  tocar el stock de sede B.
+- **Todo movimiento deja rastro**: `registrar_movimiento_inventario()`
+  (entrada/salida) y `ajustar_stock()` (conteo físico, delta con signo)
+  son el único camino de escritura — nunca un `UPDATE` directo de
+  `stock_actual`. `movimiento_inventario` es el libro mayor real; el
+  `stock_actual` cacheado es una derivación, nunca la fuente de verdad.
+- **Conectado de verdad con POS y Servicios (el roadmap lo pedía
+  explícitamente)**: `completar_venta_pos()` (migración 021) se extendió
+  para descontar stock por dos caminos, ambos auditados: `SALIDA`
+  (Productos vendidos directo en la venta) y `CONSUMO_SERVICIO`
+  (`servicio_producto_consumo`, insumos que un Servicio gasta
+  automáticamente al completarse — nunca se cobran, solo se descuentan).
+  Se re-verificó la suite completa de POS (14/14) después de este cambio
+  para confirmar que no rompió nada ya probado.
+- **Solicitud de reposición** como paso previo a "registrar entrada"
+  (la matriz de Roles las lista como dos acciones distintas): Guardian/
+  Barbería piden reponer, Barbería la atiende — atenderla genera una
+  ENTRADA real automáticamente, no es un estado que quede suelto.
+- **"Configurar reglas" exclusivo de Barbería**: stock mínimo por
+  (Producto, Sede) y las reglas de consumo automático por Servicio —
+  verificado que Guardian es rechazado en ambas.
+- **Alerta de stock bajo en tiempo de consulta**
+  (`stock_actual <= stock_minimo`) — nunca una bandera guardada que se
+  pueda desincronizar del conteo real.
+- **Stock negativo permitido, sin `CHECK` que lo bloquee** (decisión
+  consciente, documentada en el ADR): un problema de conteo no debe
+  impedir cobrarle a un Cliente una cita ya hecha.
+
+### Verificado end-to-end contra la base real (20/20)
+Entrada/salida/ajuste correctos · un tercero rechazado · Guardian de una
+sede rechazado en la sede ajena, autorizado en la propia ·
+`CONSUMO_SERVICIO` no se puede registrar manualmente (solo lo genera
+`completar_venta_pos`) · stock mínimo y consumo automático exclusivos de
+Barbería, Guardian rechazado en ambos · solicitud de reposición: creada
+por Guardian, atendida por Barbería genera una ENTRADA real, no se puede
+atender dos veces · **el consumo automático de un Servicio completado
+descuenta stock sin que el Producto se haya vendido en POS, trazado a la
+Reserva exacta** · vender un Producto en POS y el consumo automático de
+otro Servicio descuentan ambos correctamente en la misma sesión.
+
+### Documentación actualizada con este módulo
+`ADR_009_Inventario_Stock_Por_Sede.md` (nuevo), `Architecture_Decision_
+Log.md` (ADL-014), este archivo, `CHANGELOG.md`.
+
+---
+
+**Próximo módulo a ejecutar: 2.10 — Reportes (cierra la Fase 2).**
 
 ---
 

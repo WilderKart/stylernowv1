@@ -590,6 +590,74 @@ export type Database = {
           },
         ]
       }
+      movimiento_inventario: {
+        Row: {
+          actor_id: string
+          cantidad: number
+          created_at: string
+          id: string
+          motivo: string | null
+          negocio_id: string
+          producto_id: string
+          referencia_reserva_id: string | null
+          sede_id: string
+          tipo: Database["public"]["Enums"]["movimiento_inventario_tipo"]
+        }
+        Insert: {
+          actor_id: string
+          cantidad: number
+          created_at?: string
+          id?: string
+          motivo?: string | null
+          negocio_id: string
+          producto_id: string
+          referencia_reserva_id?: string | null
+          sede_id: string
+          tipo: Database["public"]["Enums"]["movimiento_inventario_tipo"]
+        }
+        Update: {
+          actor_id?: string
+          cantidad?: number
+          created_at?: string
+          id?: string
+          motivo?: string | null
+          negocio_id?: string
+          producto_id?: string
+          referencia_reserva_id?: string | null
+          sede_id?: string
+          tipo?: Database["public"]["Enums"]["movimiento_inventario_tipo"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movimiento_inventario_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movimiento_inventario_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "producto"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movimiento_inventario_referencia_reserva_id_fkey"
+            columns: ["referencia_reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reserva"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movimiento_inventario_sede_id_fkey"
+            columns: ["sede_id"]
+            isOneToOne: false
+            referencedRelation: "sede"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       negocio: {
         Row: {
           categoria: string[]
@@ -991,6 +1059,58 @@ export type Database = {
             columns: ["negocio_id"]
             isOneToOne: false
             referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      producto_stock: {
+        Row: {
+          id: string
+          negocio_id: string
+          producto_id: string
+          sede_id: string
+          stock_actual: number
+          stock_minimo: number
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          negocio_id: string
+          producto_id: string
+          sede_id: string
+          stock_actual?: number
+          stock_minimo?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          negocio_id?: string
+          producto_id?: string
+          sede_id?: string
+          stock_actual?: number
+          stock_minimo?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "producto_stock_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "producto_stock_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "producto"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "producto_stock_sede_id_fkey"
+            columns: ["sede_id"]
+            isOneToOne: false
+            referencedRelation: "sede"
             referencedColumns: ["id"]
           },
         ]
@@ -1691,6 +1811,100 @@ export type Database = {
           },
         ]
       }
+      servicio_producto_consumo: {
+        Row: {
+          cantidad: number
+          producto_id: string
+          servicio_id: string
+        }
+        Insert: {
+          cantidad: number
+          producto_id: string
+          servicio_id: string
+        }
+        Update: {
+          cantidad?: number
+          producto_id?: string
+          servicio_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicio_producto_consumo_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "producto"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicio_producto_consumo_servicio_id_fkey"
+            columns: ["servicio_id"]
+            isOneToOne: false
+            referencedRelation: "servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      solicitud_reposicion: {
+        Row: {
+          atendida_at: string | null
+          cantidad_solicitada: number
+          created_at: string
+          estado: Database["public"]["Enums"]["solicitud_reposicion_estado"]
+          id: string
+          motivo: string | null
+          negocio_id: string
+          producto_id: string
+          sede_id: string
+          solicitado_por: string
+        }
+        Insert: {
+          atendida_at?: string | null
+          cantidad_solicitada: number
+          created_at?: string
+          estado?: Database["public"]["Enums"]["solicitud_reposicion_estado"]
+          id?: string
+          motivo?: string | null
+          negocio_id: string
+          producto_id: string
+          sede_id: string
+          solicitado_por: string
+        }
+        Update: {
+          atendida_at?: string | null
+          cantidad_solicitada?: number
+          created_at?: string
+          estado?: Database["public"]["Enums"]["solicitud_reposicion_estado"]
+          id?: string
+          motivo?: string | null
+          negocio_id?: string
+          producto_id?: string
+          sede_id?: string
+          solicitado_por?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitud_reposicion_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitud_reposicion_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "producto"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitud_reposicion_sede_id_fkey"
+            columns: ["sede_id"]
+            isOneToOne: false
+            referencedRelation: "sede"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff: {
         Row: {
           bio: string | null
@@ -2166,6 +2380,29 @@ export type Database = {
       }
     }
     Functions: {
+      ajustar_stock: {
+        Args: {
+          p_motivo?: string
+          p_nuevo_stock_actual: number
+          p_producto_id: string
+          p_sede_id: string
+        }
+        Returns: {
+          id: string
+          negocio_id: string
+          producto_id: string
+          sede_id: string
+          stock_actual: number
+          stock_minimo: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "producto_stock"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       aplicar_evento_pago: {
         Args: {
           p_estado: Database["public"]["Enums"]["pago_estado"]
@@ -2174,6 +2411,27 @@ export type Database = {
           p_payload?: Json
         }
         Returns: Json
+      }
+      atender_solicitud_reposicion: {
+        Args: { p_cantidad_recibida?: number; p_solicitud_id: string }
+        Returns: {
+          atendida_at: string | null
+          cantidad_solicitada: number
+          created_at: string
+          estado: Database["public"]["Enums"]["solicitud_reposicion_estado"]
+          id: string
+          motivo: string | null
+          negocio_id: string
+          producto_id: string
+          sede_id: string
+          solicitado_por: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "solicitud_reposicion"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       calcular_sena: {
         Args: { p_monto_total: number; p_negocio_id: string }
@@ -2226,6 +2484,28 @@ export type Database = {
           p_reserva_id: string
         }
         Returns: Json
+      }
+      configurar_stock_minimo: {
+        Args: {
+          p_producto_id: string
+          p_sede_id: string
+          p_stock_minimo: number
+        }
+        Returns: {
+          id: string
+          negocio_id: string
+          producto_id: string
+          sede_id: string
+          stock_actual: number
+          stock_minimo: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "producto_stock"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       crear_invitacion_staff: {
         Args: {
@@ -2689,6 +2969,30 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      registrar_movimiento_inventario: {
+        Args: {
+          p_cantidad: number
+          p_motivo?: string
+          p_producto_id: string
+          p_sede_id: string
+          p_tipo: Database["public"]["Enums"]["movimiento_inventario_tipo"]
+        }
+        Returns: {
+          id: string
+          negocio_id: string
+          producto_id: string
+          sede_id: string
+          stock_actual: number
+          stock_minimo: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "producto_stock"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reprogramar_reserva: {
         Args: {
           p_motivo?: string
@@ -2869,6 +3173,11 @@ export type Database = {
         | "EXPIRADA_VENTANA"
         | "EXPIRADA_FECHA"
         | "CANCELADA"
+      movimiento_inventario_tipo:
+        | "ENTRADA"
+        | "SALIDA"
+        | "AJUSTE"
+        | "CONSUMO_SERVICIO"
       negocio_estado:
         | "PENDIENTE_APROBACION"
         | "ACTIVO"
@@ -2902,6 +3211,7 @@ export type Database = {
         | "CANCELADA"
         | "NO_SHOW"
       servicio_estado: "ACTIVO" | "INACTIVO"
+      solicitud_reposicion_estado: "PENDIENTE" | "ATENDIDA" | "CANCELADA"
       suscripcion_estado: "ACTIVA" | "EN_MORA" | "SUSPENDIDA" | "CANCELADA"
       temporada_estado: "EN_CURSO" | "CERRADA" | "CONSOLIDADA"
       vinculo_estado: "INVITADO" | "ACTIVO" | "SUSPENDIDO" | "RETIRADO"
@@ -3058,6 +3368,12 @@ export const Constants = {
         "EXPIRADA_FECHA",
         "CANCELADA",
       ],
+      movimiento_inventario_tipo: [
+        "ENTRADA",
+        "SALIDA",
+        "AJUSTE",
+        "CONSUMO_SERVICIO",
+      ],
       negocio_estado: [
         "PENDIENTE_APROBACION",
         "ACTIVO",
@@ -3095,6 +3411,7 @@ export const Constants = {
         "NO_SHOW",
       ],
       servicio_estado: ["ACTIVO", "INACTIVO"],
+      solicitud_reposicion_estado: ["PENDIENTE", "ATENDIDA", "CANCELADA"],
       suscripcion_estado: ["ACTIVA", "EN_MORA", "SUSPENDIDA", "CANCELADA"],
       temporada_estado: ["EN_CURSO", "CERRADA", "CONSOLIDADA"],
       vinculo_estado: ["INVITADO", "ACTIVO", "SUSPENDIDO", "RETIRADO"],

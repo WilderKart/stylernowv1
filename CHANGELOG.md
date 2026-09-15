@@ -7,6 +7,22 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 2, Módulo 2.9: Inventario
+Inventario no tenía documento de reglas de negocio en la Biblia (ADL-009
+lo había marcado como Decisión abierta) — esta migración formaliza el
+diseño completo (`ADR_009_Inventario_Stock_Por_Sede.md`, ADL-014):
+`producto_stock` lleva el conteo por (Producto, Sede), nunca una cantidad
+única a nivel Negocio, consistente con el alcance de Sede que la matriz
+de Roles ya le daba a Guardian. Todo movimiento pasa por
+`registrar_movimiento_inventario()`/`ajustar_stock()` y deja rastro en
+`movimiento_inventario`. Conectado de verdad con POS: `completar_venta_pos()`
+ahora también descuenta stock, tanto por venta directa de Productos como
+por consumo automático configurado por Servicio
+(`servicio_producto_consumo`) — se re-verificó la suite completa de POS
+(14/14) tras el cambio. Solicitud de reposición, stock mínimo con alerta
+en tiempo real, "Configurar reglas" exclusivo de Barbería. Verificado:
+20/20 casos reales.
+
 ### Añadido — Fase 2, Módulo 2.8: POS
 `completar_venta_pos()`: registra Productos vendidos durante la atención,
 canjea Puntos de fidelización (FIFO, nunca bajo $0), cobra el Saldo
