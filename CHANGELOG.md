@@ -7,6 +7,18 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 2, Módulo 2.8: POS
+`completar_venta_pos()`: registra Productos vendidos durante la atención,
+canjea Puntos de fidelización (FIFO, nunca bajo $0), cobra el Saldo
+restante (efectivo/datáfono propio), registra Propina, marca la Reserva
+COMPLETADA y otorga Puntos nuevos — todo en una sola transacción.
+**Hallazgo real de producción**: el sistema de Puntos de fidelización
+tenía tabla y RLS desde el Módulo 1 pero nunca otorgaba Puntos — esta es
+la primera vez que se activa de verdad. `cierre_caja_dia()` da el
+resumen efectivo/digital/total del día. Catálogo de Productos simple
+(`/panel/pos/productos`). Verificado: 14/14 casos reales, incluyendo el
+canje FIFO exacto y que el saldo nunca queda negativo.
+
 ### Añadido — Fase 2, Módulo 2.7: CRM
 Listado (foto, nombre, visitas, LTV, última visita, etiquetas) con
 búsqueda/filtro/orden/paginación real. `vista_crm_cliente` calcula LTV =

@@ -61,8 +61,8 @@ verificados, no solo "no lanza error en el camino feliz".
 | 2.5 Servicios | ✅ | ✅ | ✅ | ✅ | Cerrado |
 | 2.6 Agenda | ✅ | ✅ | ✅ | ✅ | Cerrado |
 | 2.7 CRM | ✅ | ✅ | ✅ | ✅ | Cerrado |
-| 2.8 POS | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
-| 2.9 Inventario | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
+| 2.8 POS | ✅ | ✅ | ✅ | ✅ | Cerrado |
+| 2.9 Inventario | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente |
 | 2.10 Reportes | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | Fase 3 — SuperSU CMS | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
 | Fase 4 — App Staff | ⬜ | ⬜ | ⬜ | ⬜ | Pendiente |
@@ -156,7 +156,7 @@ sin este dominio, el Marketplace de Cliente se ve vacío en producción.
 - [x] **2.5 Servicios** — dominio completo, ver detalle abajo
 - [x] **2.6 Agenda** — dominio completo, ver detalle abajo
 - [x] **2.7 CRM** — dominio completo, ver detalle abajo
-- [ ] 2.8 POS (venta rápida, productos, propinas, saldo pendiente, recibos)
+- [x] **2.8 POS** — dominio completo, ver detalle abajo
 - [ ] 2.9 Inventario (entradas/salidas, consumo automático, alertas)
 - [ ] 2.10 Reportes (ventas, Staff, servicios, ocupación, exportaciones)
 
@@ -685,7 +685,57 @@ Este archivo, `CHANGELOG.md`.
 
 ---
 
-**Próximo módulo a ejecutar: 2.8 — POS.**
+## Módulo 2.8 — detalle de lo construido
+
+Migración 021 · `src/app/panel/pos/`.
+
+- **Hallazgo real de producción (el mismo patrón que `staff_servicio` en
+  2.5): `punto_fidelizacion` tenía tabla y RLS de lectura desde el Módulo
+  1, pero ningún código otorgaba Puntos todavía.** El sistema de
+  fidelización de Cliente existía en el esquema pero nunca se había
+  activado — esta migración es la primera vez que se otorgan Puntos de
+  verdad (al completar una venta) y la primera vez que se canjean.
+- **`completar_venta_pos()`**: una sola transacción que registra
+  Productos vendidos durante la atención, canjea Puntos (FIFO, nunca deja
+  el saldo bajo $0 — `03-Business-Rules/04_Loyalty.md`), cobra el Saldo
+  restante (efectivo/datáfono propio — `03-Business-Rules/03_Payment_
+  Rules.md`: "cobrado por el Negocio directamente en Sede"), registra
+  Propina, marca la Reserva `COMPLETADA`, y otorga Puntos nuevos (10 por
+  cada $10.000 del valor del **Servicio** — nunca de los Productos, la
+  regla de acumulación de `04_Loyalty.md` es explícita: "Reserva
+  completada", no "venta completada").
+- **`cierre_caja_dia()`**: efectivo vs. digital (todo lo que no es
+  `EFECTIVO` — datáfono propio y Mercado Pago) y total del día,
+  exactamente el mockup `B6-POS`. Nunca ajusta discrepancias
+  automáticamente (`QA-BIZ-084`) — solo suma lo que quedó registrado.
+- **Catálogo de Productos** (`/panel/pos/productos`): CRUD simple,
+  reutiliza el mismo enum `servicio_estado` (ACTIVO/INACTIVO) que
+  `servicio` — Inventario (2.9) extiende esta misma tabla con stock, sin
+  rediseñarla.
+- **Autorización de quien cobra**: Barbería, Guardian de la Sede, o el
+  propio Staff que atendió la cita (`reserva.staff_id = auth.uid()`) —
+  consistente con que la venta ocurre "durante la atención".
+- **Configuración de Puntos por Negocio**: `negocio.puntos_valor_100_cop`
+  (tasa de canje, default $5.000) y `puntos_expiracion_meses` (rango
+  6-24, `CHECK` real de la base — `04_Loyalty.md`).
+
+### Verificado end-to-end contra la base real (14/14)
+Un tercero no puede cobrar una venta ajena · el Staff que atendió sí
+puede · saldo + producto calculado correctamente · Puntos otorgados solo
+sobre el valor del Servicio (no el producto) · no se puede cobrar la
+misma reserva dos veces · canjear Puntos descuenta el valor exacto según
+la tasa configurada y los deja en 0 disponibles (consumo FIFO) · pedir
+canjear más Puntos de los disponibles no rompe, aplica solo lo que hay,
+el saldo nunca queda negativo · cierre de caja suma efectivo/digital/
+total correctamente · un tercero no ve el cierre de caja ajeno ·
+producto con precio negativo rechazado por `CHECK` real.
+
+### Documentación actualizada con este módulo
+Este archivo, `CHANGELOG.md`.
+
+---
+
+**Próximo módulo a ejecutar: 2.9 — Inventario.**
 
 ---
 

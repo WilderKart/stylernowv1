@@ -610,6 +610,8 @@ export type Database = {
           owner_user_id: string
           pago_completo_en_app: boolean
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          puntos_expiracion_meses: number
+          puntos_valor_100_cop: number
           reembolso_parcial_pct: number
           sena_maximo: number
           sena_minimo: number
@@ -640,6 +642,8 @@ export type Database = {
           owner_user_id: string
           pago_completo_en_app?: boolean
           plan_codigo?: Database["public"]["Enums"]["plan_codigo"]
+          puntos_expiracion_meses?: number
+          puntos_valor_100_cop?: number
           reembolso_parcial_pct?: number
           sena_maximo?: number
           sena_minimo?: number
@@ -670,6 +674,8 @@ export type Database = {
           owner_user_id?: string
           pago_completo_en_app?: boolean
           plan_codigo?: Database["public"]["Enums"]["plan_codigo"]
+          puntos_expiracion_meses?: number
+          puntos_valor_100_cop?: number
           reembolso_parcial_pct?: number
           sena_maximo?: number
           sena_minimo?: number
@@ -950,6 +956,44 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      producto: {
+        Row: {
+          created_at: string
+          estado: Database["public"]["Enums"]["servicio_estado"]
+          id: string
+          negocio_id: string
+          nombre: string
+          precio: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estado?: Database["public"]["Enums"]["servicio_estado"]
+          id?: string
+          negocio_id: string
+          nombre: string
+          precio: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estado?: Database["public"]["Enums"]["servicio_estado"]
+          id?: string
+          negocio_id?: string
+          nombre?: string
+          precio?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "producto_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       puntaje_staff_evento: {
         Row: {
@@ -1820,6 +1864,58 @@ export type Database = {
         }
         Relationships: []
       }
+      venta_producto: {
+        Row: {
+          cantidad: number
+          created_at: string
+          id: string
+          negocio_id: string
+          precio_unitario: number
+          producto_id: string
+          reserva_id: string
+        }
+        Insert: {
+          cantidad: number
+          created_at?: string
+          id?: string
+          negocio_id: string
+          precio_unitario: number
+          producto_id: string
+          reserva_id: string
+        }
+        Update: {
+          cantidad?: number
+          created_at?: string
+          id?: string
+          negocio_id?: string
+          precio_unitario?: number
+          producto_id?: string
+          reserva_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venta_producto_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venta_producto_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "producto"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venta_producto_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reserva"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vinculo_staff_negocio: {
         Row: {
           comision_pct: number | null
@@ -2116,6 +2212,21 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      cierre_caja_dia: {
+        Args: { p_fecha?: string; p_negocio_id: string; p_sede_id?: string }
+        Returns: Json
+      }
+      completar_venta_pos: {
+        Args: {
+          p_metodo_pago_propina?: string
+          p_metodo_pago_saldo?: string
+          p_productos?: Json
+          p_propina?: number
+          p_puntos_a_canjear?: number
+          p_reserva_id: string
+        }
+        Returns: Json
+      }
       crear_invitacion_staff: {
         Args: {
           p_comision_pct?: number
@@ -2348,6 +2459,8 @@ export type Database = {
           owner_user_id: string
           pago_completo_en_app: boolean
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          puntos_expiracion_meses: number
+          puntos_valor_100_cop: number
           reembolso_parcial_pct: number
           sena_maximo: number
           sena_minimo: number
