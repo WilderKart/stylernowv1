@@ -7,6 +7,25 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Refactorizado — ADR-014, Fase F (obligatoria): Pipeline de Eventos pasa a ser el bus oficial de StylerNow
+`venta_pipeline_handler`/`ejecutar_pipeline_venta_completada()` (ADL-027)
+se generalizan a `evento_pipeline_handler` (con columna `evento` y
+catálogo cerrado por `check`) y `ejecutar_pipeline_evento(tipo, payload)`
+— cualquier evento futuro de la plataforma se conecta con una fila nueva,
+nunca modificando de nuevo la función que lo emite.
+`completar_venta_pos()` ya no llama a un orquestador con nombre
+específico de venta, sino al bus genérico. Catálogo oficial reconocido:
+`venta_completada` (7 handlers reales, ya verificados), `reserva_confirmada`,
+`cliente_registrado`, `plan_actualizado`, `staff_trasladado` — estos 4
+últimos SIN handlers fabricados a propósito (ningún consumidor real
+existe todavía para ninguno; ver ADL-031 para el porqué de cada uno,
+incluyendo una regla de negocio ya aprobada que un handler reactivo de
+`plan_actualizado` habría contradicho). Verificado: 22/22 casos (incluye
+aislamiento real por tipo de evento — un handler de `reserva_confirmada`
+nunca corre durante `venta_completada` — y el catálogo cerrado rechaza un
+evento inventado) + regresión completa de las 9 suites existentes — cero
+regresiones. `tsc`/`eslint`/`next build` limpios.
+
 ### Añadido — ADR-014, Fase B: Checkout completo de Gift Cards + endurecimiento de seguridad
 Cuatro pantallas de Cliente nuevas: `/gift-cards` (hub), `/gift-cards/comprar`
 (elegir Negocio con búsqueda en vivo, monto libre o rápido, para uno mismo

@@ -1043,6 +1043,42 @@ export type Database = {
           },
         ]
       }
+      evento_pipeline_handler: {
+        Row: {
+          activo: boolean
+          created_at: string
+          descripcion: string
+          evento: string
+          funcion_sql: string
+          id: string
+          nombre: string
+          orden: number
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          descripcion: string
+          evento: string
+          funcion_sql: string
+          id?: string
+          nombre: string
+          orden: number
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          descripcion?: string
+          evento?: string
+          funcion_sql?: string
+          id?: string
+          nombre?: string
+          orden?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       familia_grupo: {
         Row: {
           created_at: string
@@ -3777,39 +3813,6 @@ export type Database = {
           },
         ]
       }
-      venta_pipeline_handler: {
-        Row: {
-          activo: boolean
-          created_at: string
-          descripcion: string
-          funcion_sql: string
-          id: string
-          nombre: string
-          orden: number
-          updated_at: string
-        }
-        Insert: {
-          activo?: boolean
-          created_at?: string
-          descripcion: string
-          funcion_sql: string
-          id?: string
-          nombre: string
-          orden: number
-          updated_at?: string
-        }
-        Update: {
-          activo?: boolean
-          created_at?: string
-          descripcion?: string
-          funcion_sql?: string
-          id?: string
-          nombre?: string
-          orden?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
       venta_producto: {
         Row: {
           cantidad: number
@@ -5389,83 +5392,45 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      crear_gift_card:
-        | {
-            Args: {
-              p_destinatario_email?: string
-              p_destinatario_telefono?: string
-              p_dias_vigencia?: number
-              p_monto: number
-              p_negocio_id: string
-              p_pin: string
-            }
-            Returns: {
-              comision_plataforma_monto: number | null
-              created_at: string
-              es_huerfano: boolean
-              estado: Database["public"]["Enums"]["pago_estado"]
-              id: string
-              id_preferencia_pasarela: string | null
-              id_transaccion_pasarela: string | null
-              metadata: Json
-              monto: number
-              monto_reembolsado: number
-              motivo_reembolso: string | null
-              negocio_id: string | null
-              pasarela: string
-              payload_pasarela: Json | null
-              procesado_at: string | null
-              reserva_id: string | null
-              staff_destino_id: string | null
-              tipo: Database["public"]["Enums"]["pago_tipo"]
-              updated_at: string
-            }
-            SetofOptions: {
-              from: "*"
-              to: "pago"
-              isOneToOne: true
-              isSetofReturn: false
-            }
-          }
-        | {
-            Args: {
-              p_destinatario_email?: string
-              p_destinatario_nombre?: string
-              p_destinatario_telefono?: string
-              p_dias_vigencia?: number
-              p_mensaje?: string
-              p_monto: number
-              p_negocio_id: string
-              p_pin: string
-            }
-            Returns: {
-              comision_plataforma_monto: number | null
-              created_at: string
-              es_huerfano: boolean
-              estado: Database["public"]["Enums"]["pago_estado"]
-              id: string
-              id_preferencia_pasarela: string | null
-              id_transaccion_pasarela: string | null
-              metadata: Json
-              monto: number
-              monto_reembolsado: number
-              motivo_reembolso: string | null
-              negocio_id: string | null
-              pasarela: string
-              payload_pasarela: Json | null
-              procesado_at: string | null
-              reserva_id: string | null
-              staff_destino_id: string | null
-              tipo: Database["public"]["Enums"]["pago_tipo"]
-              updated_at: string
-            }
-            SetofOptions: {
-              from: "*"
-              to: "pago"
-              isOneToOne: true
-              isSetofReturn: false
-            }
-          }
+      crear_gift_card: {
+        Args: {
+          p_destinatario_email?: string
+          p_destinatario_nombre?: string
+          p_destinatario_telefono?: string
+          p_dias_vigencia?: number
+          p_mensaje?: string
+          p_monto: number
+          p_negocio_id: string
+          p_pin: string
+        }
+        Returns: {
+          comision_plataforma_monto: number | null
+          created_at: string
+          es_huerfano: boolean
+          estado: Database["public"]["Enums"]["pago_estado"]
+          id: string
+          id_preferencia_pasarela: string | null
+          id_transaccion_pasarela: string | null
+          metadata: Json
+          monto: number
+          monto_reembolsado: number
+          motivo_reembolso: string | null
+          negocio_id: string | null
+          pasarela: string
+          payload_pasarela: Json | null
+          procesado_at: string | null
+          reserva_id: string | null
+          staff_destino_id: string | null
+          tipo: Database["public"]["Enums"]["pago_tipo"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pago"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       crear_grupo_familiar: {
         Args: {
           p_descuento_familiar_pct?: number
@@ -5993,8 +5958,8 @@ export type Database = {
         }[]
       }
       ejecutar_downgrades_programados: { Args: never; Returns: Json }
-      ejecutar_pipeline_venta_completada: {
-        Args: { p_evento: Json }
+      ejecutar_pipeline_evento: {
+        Args: { p_evento_tipo: string; p_payload: Json }
         Returns: Json
       }
       eliminar_banner_home: { Args: { p_id: string }; Returns: undefined }

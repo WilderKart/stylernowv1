@@ -2304,10 +2304,72 @@ para no repetirse en proyectos futuros).
 
 ---
 
+## ADR-014, Fase E+G — Regla definitiva de Recomendación IA + rol de Ollama
+
+Documentación pura, sin cambio de código — ver `AI_Credit_System.md`,
+`09-CRM-Intelligence/02_AI_Client.md`, `ADR_013_AI_OS_Monetizacion.md`,
+`docs/PENDING_DECISIONS.md`, ADL-030, y el comentario actualizado en
+`src/lib/ia/ai-provider.ts`.
+
+- **Fase E**: "Recomendación Marketplace" (el widget del Home,
+  `02_AI_Client.md`) es gratuita, algoritmo de plataforma, nunca consume
+  créditos de ningún Negocio. "Recomendación IA del Negocio" (la acción
+  `recomendacion` de `ai_accion_costo`) es la sugerencia personalizada
+  del Motor de recompensas de Lealtad — consume créditos como cualquier
+  otra función Negocio-facing. Eran dos funciones distintas desde el
+  principio; el código ya estaba correcto, solo faltaba la aclaración.
+- **Fase G**: Ollama nunca es una dependencia de producción — su rol
+  queda fijado como exclusivamente de desarrollo interno (documentación,
+  pruebas, clasificación). `ai_modelo_config` ya lo reflejaba sin cambio
+  de código (`OLLAMA_BASE_URL` ausente por diseño en producción).
+
+`3d4e930`
+
+---
+
+## ADR-014, Fase F (obligatoria) — Pipeline de Eventos como bus oficial de StylerNow
+
+Migraciones `077_pipeline_eventos_global.sql`,
+`078_completar_venta_pos_usa_pipeline_global.sql`.
+
+- `venta_pipeline_handler`/`ejecutar_pipeline_venta_completada()`
+  (ADL-027) se generalizan a `evento_pipeline_handler` (columna `evento`
+  nueva, catálogo cerrado por `check`, sin tabla de referencia separada)
+  y `ejecutar_pipeline_evento(p_evento_tipo, p_payload)` — mismo
+  aislamiento de fallos real (savepoint implícito de PL/pgSQL) que ya
+  probó ADL-027, ahora reutilizable para cualquier evento.
+- `completar_venta_pos()` llama al bus genérico en vez de un nombre
+  específico de venta — no vuelve a tocarse para agregar un handler
+  nuevo de venta jamás.
+- Catálogo oficial de eventos reconocidos: `venta_completada` (7
+  handlers reales, heredados de ADL-027), `reserva_confirmada`,
+  `cliente_registrado`, `plan_actualizado`, `staff_trasladado`. Los
+  últimos 4 se reconocen en el `check` constraint (listos para un
+  handler real el día que exista un consumidor) pero **deliberadamente
+  sin ningún handler fabricado hoy** — ver ADL-031 para el porqué
+  específico de cada uno (incluye un caso donde fabricar un handler
+  habría contradicho una regla de negocio ya aprobada en
+  `AI_Credit_System.md`).
+
+### Verificado end-to-end contra la base real (22/22 + regresión completa)
+Todo lo ya verificado en ADL-027 sigue igual (mismo resultado
+observable, aislamiento de fallos real) + dos casos nuevos: un handler
+registrado para `reserva_confirmada` NUNCA se ejecuta durante un evento
+`venta_completada` (aislamiento real por tipo de evento, no solo por
+handler individual) y el catálogo cerrado rechaza un nombre de evento
+inventado. Re-verificación completa de las 9 suites de regresión
+existentes — cero regresiones, mismo comportamiento observable de POS.
+
+### Documentación actualizada con esta fase
+Este archivo, `CHANGELOG.md`, `Architecture_Decision_Log.md` (ADL-031).
+
+`(pendiente de commit)`
+
+---
+
 **Próximo módulo a ejecutar: ADR-014, Fase C — Tracking real del ROI de
-IA (`ai_interaction`/`ai_conversion`/`ai_roi_snapshot`), Fase D
-(exportación PDF/Excel), Fase E (regla definitiva de Recomendación IA),
-Fase F (Pipeline Global de Eventos), Fase G (rol de Ollama). Motor
+IA (`ai_interaction`/`ai_conversion`/`ai_roi_snapshot`) y Fase D
+(exportación PDF/Excel) — únicas fases de ADR-014 sin cerrar. Motor
 WhatsApp sigue bloqueado sin credenciales de WhatsApp Business API (ver
 `docs/PENDING_DECISIONS.md`).**
 
