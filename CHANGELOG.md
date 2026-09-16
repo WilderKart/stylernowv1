@@ -18,7 +18,7 @@ Las otras 3 funciones de ese documento, más las de `02_AI_Client.md` y
 `03_AI_Staff.md`, requieren una credencial de proveedor de LLM que
 todavía no existe y quedan sin construir (`docs/PENDING_DECISIONS.md`).
 Verificado: 7/7 casos reales.
-`PENDIENTE_HASH`
+`148015b`
 
 ### Añadido — Fase 6, Módulo 6.3: Suscripciones (ciclo de vida completo)
 Upgrade inmediato con cobro único real prorrateado (`solicitar_upgrade_plan`,
