@@ -4,16 +4,20 @@ import {
   listarPlanes,
   listarTextosLegales,
   obtenerComisionGlobal,
+  obtenerMetricasAdsPlataforma,
+  obtenerTarifasAds,
 } from "./actions";
 import { VistaConfiguracion } from "./vista-configuracion";
 
 export default async function AdminConfiguracionPage() {
-  const [comision, ciudades, banners, planes, textos] = await Promise.all([
+  const [comision, ciudades, banners, planes, textos, tarifasAds, metricasAds] = await Promise.all([
     obtenerComisionGlobal(),
     listarCiudades(),
     listarBanners(),
     listarPlanes(),
     listarTextosLegales(),
+    obtenerTarifasAds(),
+    obtenerMetricasAdsPlataforma(),
   ]);
 
   return (
@@ -25,6 +29,8 @@ export default async function AdminConfiguracionPage() {
         bannersIniciales={banners.ok ? banners.data : []}
         planesIniciales={planes.ok ? planes.data : []}
         textosIniciales={textos.ok ? textos.data : []}
+        tarifasAdsIniciales={tarifasAds.ok ? tarifasAds.data : { cpcDestacado: 0, cpcPin: 0, cpmPin: 0 }}
+        metricasAdsIniciales={metricasAds.ok ? metricasAds.data : { gastoTotalPlataforma: 0, campanasActivas: 0 }}
       />
     </main>
   );

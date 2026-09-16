@@ -48,6 +48,58 @@ export async function obtenerComisionGlobal(): Promise<Resultado<number>> {
   }
 }
 
+// ── Tarifas de referencia de Marketplace Ads ────────────────────────────
+
+export interface TarifasAds {
+  cpcDestacado: number;
+  cpcPin: number;
+  cpmPin: number;
+}
+
+export async function obtenerTarifasAds(): Promise<Resultado<TarifasAds>> {
+  try {
+    const { supabase } = await usuarioActual();
+    const { data, error } = await supabase.from("configuracion_plataforma").select("cpc_destacado_cop, cpc_pin_cop, cpm_pin_cop").single();
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, data: { cpcDestacado: Number(data.cpc_destacado_cop), cpcPin: Number(data.cpc_pin_cop), cpmPin: Number(data.cpm_pin_cop) } };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
+export async function actualizarTarifasAds(tarifas: TarifasAds): Promise<Resultado> {
+  try {
+    const { supabase } = await usuarioActual();
+    const { error } = await supabase.rpc("actualizar_tarifas_ads", {
+      p_cpc_destacado: tarifas.cpcDestacado,
+      p_cpc_pin: tarifas.cpcPin,
+      p_cpm_pin: tarifas.cpmPin,
+    });
+    if (error) return { ok: false, error: traducirError(error.message) };
+    revalidatePath("/admin/configuracion");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
+export interface MetricasAdsPlataforma {
+  gastoTotalPlataforma: number;
+  campanasActivas: number;
+}
+
+export async function obtenerMetricasAdsPlataforma(): Promise<Resultado<MetricasAdsPlataforma>> {
+  try {
+    const { supabase } = await usuarioActual();
+    const { data, error } = await supabase.rpc("metricas_ads_plataforma");
+    if (error) return { ok: false, error: traducirError(error.message) };
+    const m = data as { gastoTotalPlataforma: number; campanasActivas: number };
+    return { ok: true, data: { gastoTotalPlataforma: Number(m.gastoTotalPlataforma), campanasActivas: m.campanasActivas } };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
 export async function actualizarComisionGlobal(pct: number): Promise<Resultado> {
   try {
     const { supabase } = await usuarioActual();

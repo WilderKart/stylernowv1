@@ -10,12 +10,15 @@ import {
   actualizarCiudad,
   actualizarComisionGlobal,
   actualizarPlan,
+  actualizarTarifasAds,
   crearBanner,
   eliminarBanner,
   publicarTextoLegal,
   type BannerAdmin,
   type CiudadAdmin,
+  type MetricasAdsPlataforma,
   type PlanAdmin,
+  type TarifasAds,
   type TextoLegalAdmin,
 } from "./actions";
 
@@ -25,12 +28,16 @@ export function VistaConfiguracion({
   bannersIniciales,
   planesIniciales,
   textosIniciales,
+  tarifasAdsIniciales,
+  metricasAdsIniciales,
 }: {
   comisionInicial: number;
   ciudadesIniciales: CiudadAdmin[];
   bannersIniciales: BannerAdmin[];
   planesIniciales: PlanAdmin[];
   textosIniciales: TextoLegalAdmin[];
+  tarifasAdsIniciales: TarifasAds;
+  metricasAdsIniciales: MetricasAdsPlataforma;
 }) {
   return (
     <div className="flex flex-col gap-10">
@@ -39,7 +46,69 @@ export function VistaConfiguracion({
       <SeccionBanners bannersIniciales={bannersIniciales} />
       <SeccionPlanes planesIniciales={planesIniciales} />
       <SeccionTextosLegales textosIniciales={textosIniciales} />
+      <SeccionAds tarifasIniciales={tarifasAdsIniciales} metricas={metricasAdsIniciales} />
     </div>
+  );
+}
+
+// ── Marketplace Ads: tarifas de referencia (SuperSU) ────────────────────
+
+function SeccionAds({ tarifasIniciales, metricas }: { tarifasIniciales: TarifasAds; metricas: MetricasAdsPlataforma }) {
+  const [tarifas, setTarifas] = useState(tarifasIniciales);
+  const [guardando, setGuardando] = useState(false);
+  const [mensaje, setMensaje] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function guardar() {
+    setGuardando(true);
+    setError(null);
+    setMensaje(null);
+    const res = await actualizarTarifasAds(tarifas);
+    setGuardando(false);
+    if (!res.ok) return setError(res.error);
+    setMensaje("Tarifas actualizadas.");
+  }
+
+  return (
+    <section>
+      <h2 className="font-display mb-1 text-[14px] font-bold uppercase text-text">Marketplace Ads — tarifas de referencia</h2>
+      <p className="mb-3 text-[12px] text-text-faint">
+        Base de cobro para las campañas Destacado y Pin patrocinado de las Barberías.
+      </p>
+      <div className="mb-4 flex gap-4 text-[12.5px] text-text-muted">
+        <span>
+          Gasto total de la plataforma: <strong className="text-text">{formatCOP(metricas.gastoTotalPlataforma)}</strong>
+        </span>
+        <span>
+          Campañas activas: <strong className="text-text">{metricas.campanasActivas}</strong>
+        </span>
+      </div>
+      <div className="mb-3 grid grid-cols-3 gap-3">
+        <Input
+          label="CPC Destacado (COP)"
+          type="number"
+          value={tarifas.cpcDestacado}
+          onChange={(e) => setTarifas({ ...tarifas, cpcDestacado: Number(e.target.value) })}
+        />
+        <Input
+          label="CPC Pin (COP)"
+          type="number"
+          value={tarifas.cpcPin}
+          onChange={(e) => setTarifas({ ...tarifas, cpcPin: Number(e.target.value) })}
+        />
+        <Input
+          label="CPM Pin (COP/1000)"
+          type="number"
+          value={tarifas.cpmPin}
+          onChange={(e) => setTarifas({ ...tarifas, cpmPin: Number(e.target.value) })}
+        />
+      </div>
+      {mensaje ? <p className="mb-2 text-[11.5px] font-semibold text-success">{mensaje}</p> : null}
+      {error ? <p className="mb-2 text-[11.5px] font-semibold text-danger">{error}</p> : null}
+      <Button size="sm" loading={guardando} onClick={guardar}>
+        Guardar tarifas
+      </Button>
+    </section>
   );
 }
 

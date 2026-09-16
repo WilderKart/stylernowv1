@@ -17,6 +17,7 @@ export interface NegocioTarjeta {
   precio_desde: number | null;
   proxima_disponibilidad: string | null;
   patrocinado?: boolean;
+  campana_id?: string | null;
   sede_latitud?: number | null;
   sede_longitud?: number | null;
 }
@@ -28,9 +29,14 @@ export interface NegocioTarjeta {
 export function NegocioCard({ negocio }: { negocio: NegocioTarjeta }) {
   const disponibilidad = proximaDisponibilidad(negocio.proxima_disponibilidad);
 
+  const href =
+    negocio.patrocinado && negocio.campana_id
+      ? `/negocio/${negocio.slug}?campana_id=${negocio.campana_id}`
+      : `/negocio/${negocio.slug}`;
+
   return (
     <Link
-      href={`/negocio/${negocio.slug}`}
+      href={href}
       className="flex gap-3 rounded-2xl border border-border-subtle bg-surface p-3 transition-colors hover:border-accent/40"
     >
       <div className="relative size-[76px] shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-[#3a2e1a] to-[#1a1512]">

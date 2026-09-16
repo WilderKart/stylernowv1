@@ -7,6 +7,23 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 6, Módulo 6.2: Marketplace Ads (Destacado + Pin patrocinado)
+Campañas publicitarias de punta a punta para los formatos Destacado y
+Pin patrocinado (Plan Jarl+): creación, activación con cobro real desde
+el Wallet propio (`06-1`), pausa/reanudación/finalización siguiendo la
+máquina de estados oficial, clics (CPC) e impresiones (CPM) reales que
+nunca exceden el presupuesto diario ni total — al agotarse, la campaña
+pasa a `AGOTADA` automáticamente sin cobrar el evento que la excedería.
+Atribución real de Reservas (ventana de 24h desde el clic) con métricas
+de CTR y costo por Reserva. Nueva sección en `/admin/configuracion`
+para las tarifas de referencia CPC/CPM (SuperSU) y el gasto agregado de
+la plataforma. Banner y Promoción Flash **no se exponen** en esta
+versión — decisión de alcance explícita (Banner necesita renderizado en
+el Home, Flash depende de push, bloqueado desde la Fase 1). Verificado:
+22/22 casos reales, más re-verificación completa de los Módulos 5.2 y
+6.1 (14/14 cada uno) tras extender `marketplace_buscar()` y el Wallet de
+nuevo — cero regresiones. `PENDIENTE_HASH`
+
 ### Corregido — Vulnerabilidad de seguridad crítica: `aplicar_evento_pago()` invocable por cualquier usuario autenticado
 **El hallazgo más grave de todo el proyecto hasta la fecha.** `revoke all on function ... from public;` (usado desde la migración 008, Fase 1, para restringir la función que confirma pagos y Reservas a llamadas server-to-server con `service_role`) nunca bloqueó realmente a los roles `anon`/`authenticated` — Supabase les otorga privilegios de ejecución de forma independiente de `PUBLIC`. Cualquier usuario autenticado de la plataforma podía llamar `aplicar_evento_pago()` directamente con un `p_pago_id` arbitrario y `p_estado='APROBADO'`, **confirmando cualquier Reserva pendiente de pago sin haber pagado realmente** — un vector de fraude financiero real y activo en producción. Corregido revocando explícitamente de `anon, authenticated` en las 3 funciones del proyecto que dependían de este patrón sin chequeo de autorización propio. Ninguna otra RPC del proyecto está expuesta de la misma forma. `11c9e7a`
 

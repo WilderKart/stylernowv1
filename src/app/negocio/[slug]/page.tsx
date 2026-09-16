@@ -91,6 +91,8 @@ export async function generateMetadata(
 
 export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
   const { slug } = await props.params;
+  const searchParams = await props.searchParams;
+  const campanaId = typeof searchParams.campana_id === "string" ? searchParams.campana_id : null;
   const datos = await cargarNegocio(slug);
   if (!datos) notFound();
 
@@ -100,10 +102,17 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
 
   // Conversión_normalizada (08-Growth-Monetization/01_Marketplace_Algorithm.md)
   // se calcula sobre visitas reales al perfil — sin este registro, ese
-  // componente del Score queda inerte para siempre. No se espera la
-  // respuesta: una visita nunca debe bloquear ni ralentizar el render.
+  // componente del Score queda inerte para siempre. Se espera la respuesta
+  // (una sola escritura indexada, latencia despreciable) para no arriesgar
+  // perderla si el proceso termina apenas se envía la respuesta HTTP.
   const supabaseVisita = await createClient();
-  await supabaseVisita.rpc("registrar_visita_perfil", { p_negocio_id: negocio.id });
+  await supabaseVisita.rpc("registrar_visita_perfil", { p_negocio_id: negocio.id, p_campana_id: campanaId ?? undefined });
+
+  // Marketplace Ads (Módulo 6.2): un clic en un resultado patrocinado se
+  // cobra en tiempo real contra el Wallet del propio Negocio anunciante.
+  if (campanaId) {
+    await supabaseVisita.rpc("registrar_clic_patrocinado", { p_campana_id: campanaId, p_negocio_id: negocio.id });
+  }
 
   // schema.org LocalBusiness: requisito explícito de SEO de 02-UX/04_Marketplace.md.
   const jsonLd = {

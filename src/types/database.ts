@@ -143,6 +143,7 @@ export type Database = {
       }
       campana_publicitaria: {
         Row: {
+          clics: number
           created_at: string
           estado: Database["public"]["Enums"]["campana_estado"]
           fecha_fin: string | null
@@ -152,13 +153,16 @@ export type Database = {
           gasto_hoy_fecha: string
           gasto_total: number
           id: string
+          impresiones: number
           negocio_id: string
           presupuesto_diario: number
           presupuesto_total: number | null
           segmentacion: Json
+          unidad_cobro: string
           updated_at: string
         }
         Insert: {
+          clics?: number
           created_at?: string
           estado?: Database["public"]["Enums"]["campana_estado"]
           fecha_fin?: string | null
@@ -168,13 +172,16 @@ export type Database = {
           gasto_hoy_fecha?: string
           gasto_total?: number
           id?: string
+          impresiones?: number
           negocio_id: string
           presupuesto_diario: number
           presupuesto_total?: number | null
           segmentacion?: Json
+          unidad_cobro?: string
           updated_at?: string
         }
         Update: {
+          clics?: number
           created_at?: string
           estado?: Database["public"]["Enums"]["campana_estado"]
           fecha_fin?: string | null
@@ -184,10 +191,12 @@ export type Database = {
           gasto_hoy_fecha?: string
           gasto_total?: number
           id?: string
+          impresiones?: number
           negocio_id?: string
           presupuesto_diario?: number
           presupuesto_total?: number | null
           segmentacion?: Json
+          unidad_cobro?: string
           updated_at?: string
         }
         Relationships: [
@@ -308,18 +317,27 @@ export type Database = {
       configuracion_plataforma: {
         Row: {
           comision_plataforma_pct_default: number
+          cpc_destacado_cop: number
+          cpc_pin_cop: number
+          cpm_pin_cop: number
           id: boolean
           updated_at: string
           updated_by: string | null
         }
         Insert: {
           comision_plataforma_pct_default?: number
+          cpc_destacado_cop?: number
+          cpc_pin_cop?: number
+          cpm_pin_cop?: number
           id?: boolean
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
           comision_plataforma_pct_default?: number
+          cpc_destacado_cop?: number
+          cpc_pin_cop?: number
+          cpm_pin_cop?: number
           id?: boolean
           updated_at?: string
           updated_by?: string | null
@@ -876,24 +894,34 @@ export type Database = {
       }
       negocio_visita_perfil: {
         Row: {
+          campana_id: string | null
           cliente_id: string | null
           created_at: string
           id: string
           negocio_id: string
         }
         Insert: {
+          campana_id?: string | null
           cliente_id?: string | null
           created_at?: string
           id?: string
           negocio_id: string
         }
         Update: {
+          campana_id?: string | null
           cliente_id?: string | null
           created_at?: string
           id?: string
           negocio_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "negocio_visita_perfil_campana_id_fkey"
+            columns: ["campana_id"]
+            isOneToOne: false
+            referencedRelation: "campana_publicitaria"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "negocio_visita_perfil_negocio_id_fkey"
             columns: ["negocio_id"]
@@ -2599,6 +2627,34 @@ export type Database = {
       }
     }
     Functions: {
+      activar_campana: {
+        Args: { p_campana_id: string }
+        Returns: {
+          clics: number
+          created_at: string
+          estado: Database["public"]["Enums"]["campana_estado"]
+          fecha_fin: string | null
+          fecha_inicio: string | null
+          formato: string
+          gasto_hoy: number
+          gasto_hoy_fecha: string
+          gasto_total: number
+          id: string
+          impresiones: number
+          negocio_id: string
+          presupuesto_diario: number
+          presupuesto_total: number | null
+          segmentacion: Json
+          unidad_cobro: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "campana_publicitaria"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       actor_tipo_soporte: { Args: { p_negocio_id: string }; Returns: string }
       actualizar_banner_home: {
         Args: {
@@ -2650,6 +2706,9 @@ export type Database = {
         Args: { p_pct: number }
         Returns: {
           comision_plataforma_pct_default: number
+          cpc_destacado_cop: number
+          cpc_pin_cop: number
+          cpm_pin_cop: number
           id: boolean
           updated_at: string
           updated_by: string | null
@@ -2713,6 +2772,24 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "plan"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      actualizar_tarifas_ads: {
+        Args: { p_cpc_destacado: number; p_cpc_pin: number; p_cpm_pin: number }
+        Returns: {
+          comision_plataforma_pct_default: number
+          cpc_destacado_cop: number
+          cpc_pin_cop: number
+          cpm_pin_cop: number
+          id: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "configuracion_plataforma"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -2952,6 +3029,42 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "banner_home"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      crear_campana_publicitaria: {
+        Args: {
+          p_fecha_fin?: string
+          p_formato: string
+          p_negocio_id: string
+          p_presupuesto_diario: number
+          p_presupuesto_total: number
+          p_segmentacion?: Json
+          p_unidad_cobro: string
+        }
+        Returns: {
+          clics: number
+          created_at: string
+          estado: Database["public"]["Enums"]["campana_estado"]
+          fecha_fin: string | null
+          fecha_inicio: string | null
+          formato: string
+          gasto_hoy: number
+          gasto_hoy_fecha: string
+          gasto_total: number
+          id: string
+          impresiones: number
+          negocio_id: string
+          presupuesto_diario: number
+          presupuesto_total: number | null
+          segmentacion: Json
+          unidad_cobro: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "campana_publicitaria"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -3267,6 +3380,34 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      finalizar_campana: {
+        Args: { p_campana_id: string }
+        Returns: {
+          clics: number
+          created_at: string
+          estado: Database["public"]["Enums"]["campana_estado"]
+          fecha_fin: string | null
+          fecha_inicio: string | null
+          formato: string
+          gasto_hoy: number
+          gasto_hoy_fecha: string
+          gasto_total: number
+          id: string
+          impresiones: number
+          negocio_id: string
+          presupuesto_diario: number
+          presupuesto_total: number | null
+          segmentacion: Json
+          unidad_cobro: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "campana_publicitaria"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       iniciar_atencion_reserva: {
         Args: { p_reserva_id: string }
         Returns: {
@@ -3323,6 +3464,7 @@ export type Database = {
         }
         Returns: {
           calificacion: number
+          campana_id: string
           categoria: string[]
           ciudad: string
           descripcion: string
@@ -3349,6 +3491,8 @@ export type Database = {
         Args: { p_negocio_id: string }
         Returns: string
       }
+      metricas_ads_plataforma: { Args: never; Returns: Json }
+      metricas_campana: { Args: { p_campana_id: string }; Returns: Json }
       mi_vinculo: {
         Args: never
         Returns: {
@@ -3416,6 +3560,34 @@ export type Database = {
           servicio_ids: string[]
           staff_id: string
         }[]
+      }
+      pausar_campana: {
+        Args: { p_campana_id: string; p_motivo?: string }
+        Returns: {
+          clics: number
+          created_at: string
+          estado: Database["public"]["Enums"]["campana_estado"]
+          fecha_fin: string | null
+          fecha_inicio: string | null
+          formato: string
+          gasto_hoy: number
+          gasto_hoy_fecha: string
+          gasto_total: number
+          id: string
+          impresiones: number
+          negocio_id: string
+          presupuesto_diario: number
+          presupuesto_total: number | null
+          segmentacion: Json
+          unidad_cobro: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "campana_publicitaria"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       promover_guardian: {
         Args: { p_vinculo_id: string }
@@ -3649,6 +3821,14 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      registrar_clic_patrocinado: {
+        Args: { p_campana_id: string; p_negocio_id: string }
+        Returns: undefined
+      }
+      registrar_impresion_patrocinada: {
+        Args: { p_campana_id: string }
+        Returns: undefined
+      }
       registrar_movimiento_inventario: {
         Args: {
           p_cantidad: number
@@ -3674,7 +3854,7 @@ export type Database = {
         }
       }
       registrar_visita_perfil: {
-        Args: { p_negocio_id: string }
+        Args: { p_campana_id?: string; p_negocio_id: string }
         Returns: undefined
       }
       reportar_resena: {

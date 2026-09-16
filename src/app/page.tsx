@@ -54,6 +54,14 @@ export default async function HomePage(props: PageProps<"/">) {
 
   const ciudades = [...new Set((ciudadesRaw ?? []).map((c) => c.ciudad))].sort();
 
+  // Impresiones reales de Marketplace Ads (Módulo 6.2) — una por resultado
+  // patrocinado mostrado en esta página. No se espera la respuesta: nunca
+  // debe ralentizar el render de la búsqueda.
+  const campanasEnPantalla = [...new Set((resultados ?? []).map((n) => n.campana_id).filter((id): id is string => Boolean(id)))];
+  if (campanasEnPantalla.length > 0) {
+    void Promise.all(campanasEnPantalla.map((id) => supabase.rpc("registrar_impresion_patrocinada", { p_campana_id: id })));
+  }
+
   // "Disponible hoy" se aplica sobre la página ya traída: `proxima_disponibilidad`
   // se calcula por fila y no es un criterio indexable. Con catálogos grandes esto
   // pasa al Score del Marketplace (08-Growth-Monetization/01_Marketplace_Algorithm.md).

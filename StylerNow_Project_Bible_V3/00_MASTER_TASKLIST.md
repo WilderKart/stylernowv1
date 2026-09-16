@@ -72,7 +72,8 @@ verificados, no solo "no lanza error en el camino feliz".
 | Fase 5.2 — Marketplace: Destacados/Ranking (Score) | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
 | Fase 5.3 — Marketplace: Mapa visual (MapLibre) | ✅ | ✅ | N/A | ⚠️ Manual pendiente | ✅ Cerrado |
 | Fase 6.1 — Wallet: comisión de plataforma real | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
-| Fase 6.2+ — Growth Engine (Ads, Suscripciones, IA, WhatsApp, Membresías/Gift Cards/Referidos) | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente (varios bloqueados sin credenciales/decisión de negocio) |
+| Fase 6.2 — Marketplace Ads (Destacado + Pin) | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
+| Fase 6.3+ — Growth Engine (Suscripciones, IA, WhatsApp, Membresías/Gift Cards/Referidos) | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente (varios bloqueados sin credenciales/decisión de negocio) |
 
 Ver también `docs/TECH_DEBT_REGISTER.md` (mejoras que no bloquean) y
 `docs/PENDING_DECISIONS.md` (decisiones que dependen de algo externo).
@@ -1417,8 +1418,10 @@ inventa una economía de puntos/descuentos sin esa definición).
 
 - [x] **Wallet — comisión de plataforma real** (`02_Commissions.md`) —
       ver detalle del Módulo 6.1 abajo
-- [ ] Marketplace Ads (`06_Advertising_System.md`) — depende del Wallet
-      recién encendido en 6.1
+- [x] **Marketplace Ads** (`06_Advertising_System.md`) — formatos
+      Destacado y Pin patrocinado, ver detalle del Módulo 6.2 abajo.
+      Banner y Promoción Flash NO se exponen todavía — decisión de
+      alcance explícita, ver detalle abajo
 - [ ] Suscripciones: upgrade/downgrade con prorrateo, fallos de cobro y
       reintentos (`04_Subscriptions_Lifecycle.md`, `05_Billing_Failures.md`)
 - [ ] IA operacional (Cliente/Staff/Negocio, `09-CRM-Intelligence/*`),
@@ -1494,7 +1497,90 @@ Este archivo (Coverage Matrix + detalle), `CHANGELOG.md`, ADL-022
 
 ---
 
-**Próximo módulo a ejecutar: Fase 6.2 — Marketplace Ads.**
+## Módulo 6.2 — detalle de lo construido (Marketplace Ads)
+
+Migraciones 043-047 · `src/app/panel/ads/`, extensión de `/admin/
+configuracion` (tarifas + métricas agregadas), `marketplace_buscar()`
+expone `campana_id`, `registrar_visita_perfil()` acepta la campaña de
+origen, `NegocioCard`/Home/`negocio/[slug]` conectan clic e impresión
+reales.
+
+- **Alcance deliberadamente acotado, no un recorte silencioso**: de los 4
+  formatos de `06_Advertising_System.md`, este módulo construye
+  **Destacado y Pin patrocinado de punta a punta** (creación, activación
+  con cobro real, pausa/reanudación/finalización, clics/impresiones
+  reales, atribución, métricas). **Banner y Promoción Flash NO se
+  exponen** en la UI de creación — Banner necesitaría además
+  renderizarse en el carrusel del Home (hoy solo editorial, `banner_home`
+  de la Fase 3.2) y Flash depende de notificaciones push, una Decisión
+  Pendiente sin credencial de Firebase desde la Fase 1
+  (`docs/PENDING_DECISIONS.md`) — exponer su creación sin que tuvieran
+  ningún efecto real habría sido un botón muerto (Regla de Oro).
+- **Cobro real en tiempo real desde el Wallet** (recién encendido en
+  6.1): cada clic (CPC) o impresión (CPM) descuenta la tarifa de
+  referencia (configurable por SuperSU) del Wallet del propio Negocio
+  anunciante, con un `wallet_movimiento` real tipo `CAMPANA`. Nunca
+  excede el `presupuesto_diario` ni el `presupuesto_total` — al
+  alcanzarlos, la campaña pasa a `AGOTADA` automáticamente y el evento
+  que la excedería no se cobra (invariante explícito de
+  `03-Business-Rules/06_Marketplace_Ads.md`).
+- **V1: `presupuesto_total` es obligatorio** (la Biblia lo describe como
+  opcional) — sin él, el modelo de prepago necesitaría un job programado
+  de recorte diario que no existe todavía (mismo tipo de limitación que
+  el rollover de Temporada, ADL-020/Fase 4). Documentado explícitamente
+  como simplificación, no un olvido.
+- **Atribución real de Reservas**: `negocio_visita_perfil` (Módulo 5.2)
+  se extiende con la campaña de origen del clic;
+  `metricas_campana()` cuenta como atribuida toda Reserva `COMPLETADA`
+  del mismo Cliente dentro de las 24 horas siguientes, calcula CTR y
+  costo por Reserva atribuida — sin duplicar ninguna fórmula ya
+  existente.
+- **`marketplace_mi_posicion()`/Score sin cambios de fórmula**: Destacado
+  y Pin usan hoy el mismo boost de `Patrocinio_normalizado` (Módulo 5.2)
+  — la garantía posicional exclusiva del Pin (siempre en las primeras
+  posiciones) y el límite de saturación (2 posiciones patrocinadas
+  consecutivas máximo) quedan diferidos: tocan de nuevo el `ORDER BY` de
+  `marketplace_buscar()`, ya corregido 5 veces en el Módulo 5.2, y
+  merecen su propio módulo con foco exclusivo en ese riesgo antes de
+  tocarlo una sexta vez.
+- **SuperSU**: nueva sección en `/admin/configuracion` para las tarifas
+  de referencia CPC/CPM y el gasto agregado de la plataforma
+  (`06_Advertising_System.md`, Permisos). "SuperSU puede pausar
+  cualquier campaña" ya funciona a nivel de RPC (verificado), pero sin
+  un selector/listado de todas las campañas del proyecto en la UI de
+  SuperSU todavía — diferido (ver `TECH_DEBT_REGISTER.md`).
+- **Bugs reales de la misma familia ya documentada (ADL-020/021),
+  corregidos de inmediato al escribir el código, sin necesitar una
+  prueba que los expusiera primero**: agregar `campana_id` a
+  `marketplace_buscar()` y un segundo parámetro a
+  `registrar_visita_perfil()` exigían `drop function` + `create
+  function` (migraciones 044-045) — aplicada la lección de las fases
+  anteriores desde el primer intento.
+
+### Verificado end-to-end contra la base real (22/22)
+Plan Raven no puede crear campañas, Plan Jarl sí · activar sin saldo
+suficiente se rechaza, con saldo se activa · un clic anónimo cobra el
+CPC de referencia en tiempo real · superar el presupuesto diario agota
+la campaña automáticamente SIN cobrar el evento que la excede · una
+impresión CPM cobra el costo prorrateado · pausar/reanudar/finalizar
+respetan la máquina de estados y los permisos (otra Barbería no puede,
+SuperSU sí puede pausar cualquiera) · una campaña `FINALIZADA` nunca se
+reactiva · una Reserva completada dentro de 24h de un clic/visita queda
+atribuida correctamente en las métricas · otra Barbería no ve métricas
+ajenas · solo SuperSU cambia las tarifas de referencia. **Se re-verificó
+también la suite completa del Módulo 5.2 (14/14) y del Módulo 6.1
+(14/14) tras tocar `marketplace_buscar()` y el flujo de Wallet de
+nuevo — cero regresiones.**
+
+### Documentación actualizada con este módulo
+Este archivo (Coverage Matrix + detalle), `CHANGELOG.md`, `docs/
+TECH_DEBT_REGISTER.md` (Banner/Flash diferidos, garantía posicional del
+Pin y saturación diferidas, selector de campañas para SuperSU, tope de
+presupuesto total obligatorio).
+
+---
+
+**Próximo módulo a ejecutar: Fase 6.3 — Suscripciones (upgrade/downgrade, fallos de cobro).**
 
 ---
 
