@@ -29,7 +29,7 @@ fuera de alcance — requiere Mercado Pago Preapproval, ver
 `docs/PENDING_DECISIONS.md` y ADL-023. Verificado: 51/51 casos reales,
 más re-verificación completa de los Módulos 5.2 (15/15), 6.1 (14/14) y
 6.2 (22/22) — cero regresiones.
-`PENDIENTE_HASH`
+`9e77e77`
 
 ### Añadido — Fase 6, Módulo 6.2: Marketplace Ads (Destacado + Pin patrocinado)
 Campañas publicitarias de punta a punta para los formatos Destacado y
