@@ -8,6 +8,7 @@ import {
   listarReservasCompletadas,
   quitarEtiqueta,
   subirFoto,
+  type BeneficiosLealtadCliente,
   type FotoCliente,
   type NotaCliente,
   type ReservaHistorial,
@@ -34,12 +35,14 @@ export function DetalleCliente({
   historialInicial,
   notasIniciales,
   fotosIniciales,
+  beneficiosLealtad,
 }: {
   negocioId: string;
   resumen: ResumenCliente;
   historialInicial: ReservaHistorial[];
   notasIniciales: NotaCliente[];
   fotosIniciales: FotoCliente[];
+  beneficiosLealtad: BeneficiosLealtadCliente | null;
 }) {
   const [etiquetas, setEtiquetas] = useState<string[]>(
     resumen.esVip ? ["VIP"] : []
@@ -142,6 +145,45 @@ export function DetalleCliente({
         </p>
         {resumen.telefono ? <p className="mt-2 text-[12px] text-text-muted">{resumen.telefono}</p> : null}
       </Card>
+
+      {/* ── Lealtad (ADR-011, transversal) ───────────────────────────── */}
+      {beneficiosLealtad ? (
+        <section className="mb-6">
+          <h2 className="font-display mb-2 text-[13px] font-bold uppercase text-text">Lealtad</h2>
+          <Card className="flex flex-col gap-2.5">
+            {beneficiosLealtad.nivelVip ? (
+              <div className="flex items-center justify-between">
+                <p className="text-[12px] text-text-faint">Club VIP</p>
+                <Badge tone="accent">{beneficiosLealtad.nivelVip}</Badge>
+              </div>
+            ) : null}
+            {beneficiosLealtad.membresiaActiva ? (
+              <div className="flex items-center justify-between">
+                <p className="text-[12px] text-text-faint">Membresía</p>
+                <p className="text-[12.5px] font-semibold text-text">
+                  {beneficiosLealtad.membresiaActiva.planNombre}
+                  {beneficiosLealtad.membresiaActiva.limiteUsosMes ? ` · ${beneficiosLealtad.membresiaActiva.usosMesActual}/${beneficiosLealtad.membresiaActiva.limiteUsosMes} usos este mes` : ""}
+                </p>
+              </div>
+            ) : null}
+            {beneficiosLealtad.cashbackPendiente > 0 ? (
+              <div className="flex items-center justify-between">
+                <p className="text-[12px] text-text-faint">Cashback disponible</p>
+                <p className="text-[12.5px] font-bold text-success">{formatCOP(beneficiosLealtad.cashbackPendiente)}</p>
+              </div>
+            ) : null}
+            {beneficiosLealtad.sellosProgreso.map((s) => (
+              <div key={s.campanaNombre} className="flex items-center justify-between">
+                <p className="text-[12px] text-text-faint">Sellos · {s.campanaNombre}</p>
+                <p className="text-[12.5px] font-semibold text-text">{s.sellosActuales}/{s.sellosRequeridos}</p>
+              </div>
+            ))}
+            {!beneficiosLealtad.nivelVip && !beneficiosLealtad.membresiaActiva && beneficiosLealtad.cashbackPendiente === 0 && beneficiosLealtad.sellosProgreso.length === 0 ? (
+              <p className="text-[12px] text-text-faint">Sin beneficios de Lealtad activos en tu negocio todavía.</p>
+            ) : null}
+          </Card>
+        </section>
+      ) : null}
 
       {/* ── Etiquetas ─────────────────────────────────────────────────── */}
       <section className="mb-6">

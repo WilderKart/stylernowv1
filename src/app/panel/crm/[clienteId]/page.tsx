@@ -1,7 +1,7 @@
 import { BarraSuperior } from "@/components/layout/header";
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
 import { notFound, redirect } from "next/navigation";
-import { listarFotos, listarHistorialCliente, listarNotas, obtenerResumenCliente } from "../actions";
+import { listarFotos, listarHistorialCliente, listarNotas, obtenerBeneficiosLealtadCliente, obtenerResumenCliente } from "../actions";
 import { DetalleCliente } from "./detalle-cliente";
 
 export const metadata = { title: "Cliente" };
@@ -17,10 +17,11 @@ export default async function ClienteDetallePage(props: PageProps<"/panel/crm/[c
   const resResumen = await obtenerResumenCliente(negocioId, clienteId);
   if (!resResumen.ok) notFound();
 
-  const [resHistorial, resNotas, resFotos] = await Promise.all([
+  const [resHistorial, resNotas, resFotos, resBeneficios] = await Promise.all([
     listarHistorialCliente(negocioId, clienteId),
     listarNotas(negocioId, clienteId),
     listarFotos(negocioId, clienteId),
+    obtenerBeneficiosLealtadCliente(negocioId, clienteId),
   ]);
 
   return (
@@ -32,6 +33,7 @@ export default async function ClienteDetallePage(props: PageProps<"/panel/crm/[c
         historialInicial={resHistorial.ok ? resHistorial.data : []}
         notasIniciales={resNotas.ok ? resNotas.data : []}
         fotosIniciales={resFotos.ok ? resFotos.data : []}
+        beneficiosLealtad={resBeneficios.ok ? resBeneficios.data : null}
       />
     </div>
   );

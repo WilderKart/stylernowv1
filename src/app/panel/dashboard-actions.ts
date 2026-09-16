@@ -151,3 +151,36 @@ export async function obtenerLineaTiempoDia(negocioId: string, sedeId?: string |
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
   }
 }
+
+// ── Lealtad transversal (ADR-011 + extensión del fundador, 2026-09-16) ──
+
+export interface MetricasLealtadNegocio {
+  membresiasActivas: number;
+  giftCardsActivas: number;
+  sellosCampanasActivas: number;
+  cashbackOtorgadoMes: number;
+  miembrosVip: number;
+  referidosCompletadosMes: number;
+}
+
+export async function obtenerMetricasLealtadNegocio(negocioId: string): Promise<Resultado<MetricasLealtadNegocio>> {
+  try {
+    const { supabase } = await usuarioActual();
+    const { data, error } = await supabase.rpc("metricas_lealtad_negocio", { p_negocio_id: negocioId });
+    if (error) return { ok: false, error: error.message };
+    const m = data as Record<string, number>;
+    return {
+      ok: true,
+      data: {
+        membresiasActivas: m.membresiasActivas,
+        giftCardsActivas: m.giftCardsActivas,
+        sellosCampanasActivas: m.sellosCampanasActivas,
+        cashbackOtorgadoMes: Number(m.cashbackOtorgadoMes),
+        miembrosVip: m.miembrosVip,
+        referidosCompletadosMes: m.referidosCompletadosMes,
+      },
+    };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}

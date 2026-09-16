@@ -5746,6 +5746,10 @@ export type Database = {
       }
       metricas_ads_plataforma: { Args: never; Returns: Json }
       metricas_campana: { Args: { p_campana_id: string }; Returns: Json }
+      metricas_lealtad_negocio: {
+        Args: { p_negocio_id: string }
+        Returns: Json
+      }
       metricas_lealtad_plataforma: { Args: never; Returns: Json }
       mi_cashback: {
         Args: never

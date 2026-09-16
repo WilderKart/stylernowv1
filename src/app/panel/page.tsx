@@ -5,7 +5,9 @@ import { resolverContexto } from "@/lib/auth/resolver-contexto";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { obtenerLineaTiempoDia, obtenerRankingSemana, obtenerResumenDia } from "./dashboard-actions";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
+import { formatCOP } from "@/lib/utils";
+import { obtenerLineaTiempoDia, obtenerMetricasLealtadNegocio, obtenerRankingSemana, obtenerResumenDia, type MetricasLealtadNegocio } from "./dashboard-actions";
 
 export const metadata = { title: "Panel" };
 
@@ -159,6 +161,8 @@ export default async function PanelPage() {
 
   const dashboardBarberia =
     negocio.estado === "ACTIVO" ? await cargarDashboard(negocio.id, null) : null;
+  const metricasLealtadRes = negocio.estado === "ACTIVO" ? await obtenerMetricasLealtadNegocio(negocio.id) : null;
+  const metricasLealtad = metricasLealtadRes?.ok ? metricasLealtadRes.data : null;
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
@@ -214,6 +218,8 @@ export default async function PanelPage() {
           </svg>
         </Link>
 
+        {metricasLealtad ? <TarjetasLealtad metricas={metricasLealtad} /> : null}
+
         {dashboardBarberia ? (
           <DashboardResumen
             resumen={dashboardBarberia.resumen}
@@ -230,5 +236,32 @@ export default async function PanelPage() {
         )}
       </div>
     </div>
+  );
+}
+
+/** Lealtad transversal (ADR-011 + extensión del fundador): KPIs de Lealtad en el Dashboard. */
+function TarjetasLealtad({ metricas }: { metricas: MetricasLealtadNegocio }) {
+  return (
+    <section className="mb-6">
+      <h2 className="font-display mb-2 text-[12px] font-bold uppercase text-text">Lealtad</h2>
+      <div className="grid grid-cols-3 gap-2">
+        <Card className="p-3 text-center">
+          <AnimatedCounter value={metricas.membresiasActivas} className="text-[16px] font-bold text-text" />
+          <p className="mt-0.5 text-[9px] uppercase tracking-wide text-text-faint">Membresías</p>
+        </Card>
+        <Card className="p-3 text-center">
+          <AnimatedCounter value={metricas.miembrosVip} className="text-[16px] font-bold text-text" />
+          <p className="mt-0.5 text-[9px] uppercase tracking-wide text-text-faint">Miembros VIP</p>
+        </Card>
+        <Card className="p-3 text-center">
+          <AnimatedCounter value={metricas.sellosCampanasActivas} className="text-[16px] font-bold text-text" />
+          <p className="mt-0.5 text-[9px] uppercase tracking-wide text-text-faint">Campañas Sellos</p>
+        </Card>
+      </div>
+      <p className="mt-2 text-[11px] text-text-faint">
+        Cashback otorgado este mes: <strong className="text-text">{formatCOP(metricas.cashbackOtorgadoMes)}</strong>
+        {" · "}Referidos completados este mes: <strong className="text-text">{metricas.referidosCompletadosMes}</strong>
+      </p>
+    </section>
   );
 }

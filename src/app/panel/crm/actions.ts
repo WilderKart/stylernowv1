@@ -562,3 +562,62 @@ export async function listarReservasCompletadas(negocioId: string, clienteId: st
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
   }
 }
+
+// ── Lealtad transversal (ADR-011 + extensión del fundador, 2026-09-16) ──
+// Beneficios activos de este Cliente EN ESTE NEGOCIO — nunca datos de
+// otros negocios (aislamiento multi-tenant, RLS `tiene_acceso_interno`).
+export interface BeneficiosLealtadCliente {
+  membresiaActiva: { planNombre: string; usosMesActual: number; limiteUsosMes: number | null } | null;
+  nivelVip: string | null;
+  sellosProgreso: { campanaNombre: string; sellosActuales: number; sellosRequeridos: number }[];
+  cashbackPendiente: number;
+}
+
+export async function obtenerBeneficiosLealtadCliente(negocioId: string, clienteId: string): Promise<Resultado<BeneficiosLealtadCliente>> {
+  try {
+    const { supabase } = await usuarioActual();
+
+    const [membresiaRes, vipRes, sellosRes, cashbackRes] = await Promise.all([
+      supabase
+        .from("cliente_membresia")
+        .select("usos_mes_actual, membresia_plan:plan_id (nombre, limite_usos_mes)")
+        .eq("cliente_id", clienteId).eq("negocio_id", negocioId).eq("estado", "ACTIVA").maybeSingle(),
+      supabase
+        .from("vip_miembro")
+        .select("vip_nivel:nivel_id (nombre)")
+        .eq("cliente_id", clienteId).eq("negocio_id", negocioId).maybeSingle(),
+      supabase
+        .from("sello_cliente")
+        .select("sellos_actuales, sello_campana:campana_id (nombre, sellos_requeridos, negocio_id)")
+        .eq("cliente_id", clienteId),
+      supabase
+        .from("cashback_movimiento")
+        .select("monto, cashback_regla:regla_id (negocio_id)")
+        .eq("cliente_id", clienteId).eq("estado", "DISPONIBLE"),
+    ]);
+
+    const plan = membresiaRes.data?.membresia_plan as unknown as { nombre: string; limite_usos_mes: number | null } | null;
+    const nivel = vipRes.data?.vip_nivel as unknown as { nombre: string } | null;
+
+    const sellos = (sellosRes.data ?? [])
+      .map((s) => ({ ...s, campana: s.sello_campana as unknown as { nombre: string; sellos_requeridos: number; negocio_id: string } | null }))
+      .filter((s) => s.campana?.negocio_id === negocioId)
+      .map((s) => ({ campanaNombre: s.campana!.nombre, sellosActuales: s.sellos_actuales, sellosRequeridos: s.campana!.sellos_requeridos }));
+
+    const cashbackPendiente = (cashbackRes.data ?? [])
+      .filter((c) => (c.cashback_regla as unknown as { negocio_id: string } | null)?.negocio_id === negocioId)
+      .reduce((acc, c) => acc + Number(c.monto), 0);
+
+    return {
+      ok: true,
+      data: {
+        membresiaActiva: membresiaRes.data ? { planNombre: plan?.nombre ?? "—", usosMesActual: membresiaRes.data.usos_mes_actual, limiteUsosMes: plan?.limite_usos_mes ?? null } : null,
+        nivelVip: nivel?.nombre ?? null,
+        sellosProgreso: sellos,
+        cashbackPendiente,
+      },
+    };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}

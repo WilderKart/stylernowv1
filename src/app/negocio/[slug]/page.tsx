@@ -108,6 +108,22 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
   const supabaseVisita = await createClient();
   await supabaseVisita.rpc("registrar_visita_perfil", { p_negocio_id: negocio.id, p_campana_id: campanaId ?? undefined });
 
+  // Lealtad transversal (ADR-011 + extensión del fundador): insignia VIP
+  // del propio Cliente en ESTE Negocio — nunca su nivel en otro Negocio.
+  const {
+    data: { user: usuarioVip },
+  } = await supabaseVisita.auth.getUser();
+  let miNivelVip: string | null = null;
+  if (usuarioVip) {
+    const { data: vipData } = await supabaseVisita
+      .from("vip_miembro")
+      .select("vip_nivel:nivel_id (nombre)")
+      .eq("cliente_id", usuarioVip.id)
+      .eq("negocio_id", negocio.id)
+      .maybeSingle();
+    miNivelVip = (vipData?.vip_nivel as unknown as { nombre: string } | null)?.nombre ?? null;
+  }
+
   // Marketplace Ads (Módulo 6.2): un clic en un resultado patrocinado se
   // cobra en tiempo real contra el Wallet del propio Negocio anunciante.
   if (campanaId) {
@@ -177,9 +193,16 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
         </div>
 
         <div className="flex items-start justify-between gap-3">
-          <h1 className="font-display text-[26px] font-bold uppercase leading-tight tracking-tight text-text">
-            {negocio.nombre}
-          </h1>
+          <div>
+            <h1 className="font-display text-[26px] font-bold uppercase leading-tight tracking-tight text-text">
+              {negocio.nombre}
+            </h1>
+            {miNivelVip ? (
+              <Badge tone="accent" className="mt-1.5">
+                Sos {miNivelVip} acá
+              </Badge>
+            ) : null}
+          </div>
           <div className="mt-1 flex shrink-0 gap-2">
             <BotonFavorito negocioId={negocio.id} slug={negocio.slug} favoritoInicial={favoritoInicial} />
             <BotonCompartir nombre={negocio.nombre} slug={negocio.slug} />
