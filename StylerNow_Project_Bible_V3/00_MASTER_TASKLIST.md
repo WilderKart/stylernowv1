@@ -2363,7 +2363,7 @@ existentes — cero regresiones, mismo comportamiento observable de POS.
 ### Documentación actualizada con esta fase
 Este archivo, `CHANGELOG.md`, `Architecture_Decision_Log.md` (ADL-031).
 
-`(pendiente de commit)`
+`ba3e1de`
 
 ---
 
