@@ -2225,7 +2225,7 @@ regresión existentes — cero regresiones.
 ### Documentación actualizada con esta fase
 Este archivo, `CHANGELOG.md`.
 
-`(ver hash del commit conjunto con la Fase B, más abajo)`
+`ff1185c`
 
 ---
 
@@ -2300,7 +2300,7 @@ para no repetirse en proyectos futuros).
   requiere un diseño de autorización nuevo (el Wallet no tiene alcance
   de Negocio) — ver `docs/TECH_DEBT_REGISTER.md`.
 
-`(pendiente de commit)`
+`ff1185c`
 
 ---
 
