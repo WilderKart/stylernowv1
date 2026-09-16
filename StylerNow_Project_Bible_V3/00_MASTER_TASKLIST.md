@@ -2425,7 +2425,7 @@ Este archivo, `CHANGELOG.md`, `Architecture_Decision_Log.md` (ADL-032),
 apertura/clic y tiempo ahorrado, ambos honestamente sin medir todavía),
 memoria persistente de sesión (`security_invoker` en vistas sobre RLS).
 
-`(pendiente de commit)`
+`dfbd69b`
 
 ---
 
