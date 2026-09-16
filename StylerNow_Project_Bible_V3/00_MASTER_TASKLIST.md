@@ -2187,6 +2187,8 @@ comportamiento observable.
 ### Documentación actualizada con este refactor
 Este archivo, `CHANGELOG.md`, `Architecture_Decision_Log.md` (ADL-027).
 
+`fd8177b`
+
 ---
 
 **Próximo módulo a ejecutar: terminar de conectar el AI OS a más
