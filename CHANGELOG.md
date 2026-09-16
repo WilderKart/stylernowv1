@@ -31,7 +31,7 @@ más re-verificación completa de las 8 suites de regresión existentes
 (POS, App Staff, Wallet, Suscripciones, Marketplace Score, Marketplace
 Ads, Horarios muertos) tras 4 extensiones sucesivas de
 `completar_venta_pos()`/`aplicar_evento_pago()` — cero regresiones.
-`PENDIENTE_HASH`
+`9ed79c9`
 
 ### Añadido — Fase 6, Módulo 6.4: IA Operacional — Horarios muertos (Nivel 0)
 `detectar_horarios_muertos()`: la única de las 4 funciones de
