@@ -75,7 +75,8 @@ verificados, no solo "no lanza error en el camino feliz".
 | Fase 6.2 — Marketplace Ads (Destacado + Pin) | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
 | Fase 6.3 — Suscripciones (ciclo de vida, sin calendario automático de mora) | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
 | Fase 6.4 — IA Operacional, Horarios muertos (Nivel 0, sin IA) | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
-| Fase 6.5+ — Growth Engine (resto de IA, WhatsApp, Membresías/Gift Cards/Referidos) | ⬜ | ⬜ | ⬜ | ⬜ | Bloqueado sin credenciales/decisión de negocio (ver `docs/PENDING_DECISIONS.md`) |
+| Fase 6.5 — Dominio Lealtad completo (ADR-011: Wallet, Membresías, Gift Cards, Referidos, Sellos, Cashback, VIP, Familias, Corporativo, Referidos Staff, Motor IA) | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
+| Fase 6.6+ — Growth Engine (IA con LLM real de `09-CRM-Intelligence/*`, WhatsApp) | ⬜ | ⬜ | ⬜ | ⬜ | IA ya no bloqueada por credencial (OpenRouter+Nemotron conectados) — falta construir; WhatsApp sigue bloqueado sin credenciales (ver `docs/PENDING_DECISIONS.md`) |
 
 Ver también `docs/TECH_DEBT_REGISTER.md` (mejoras que no bloquean) y
 `docs/PENDING_DECISIONS.md` (decisiones que dependen de algo externo).
@@ -709,12 +710,12 @@ Migración 021 · `src/app/panel/pos/`.
   verdad (al completar una venta) y la primera vez que se canjean.
 - **`completar_venta_pos()`**: una sola transacción que registra
   Productos vendidos durante la atención, canjea Puntos (FIFO, nunca deja
-  el saldo bajo $0 — `03-Business-Rules/04_Loyalty.md`), cobra el Saldo
+  el saldo bajo $0 — `03-Business-Rules/04_Lealtad.md`), cobra el Saldo
   restante (efectivo/datáfono propio — `03-Business-Rules/03_Payment_
   Rules.md`: "cobrado por el Negocio directamente en Sede"), registra
   Propina, marca la Reserva `COMPLETADA`, y otorga Puntos nuevos (10 por
   cada $10.000 del valor del **Servicio** — nunca de los Productos, la
-  regla de acumulación de `04_Loyalty.md` es explícita: "Reserva
+  regla de acumulación de `04_Lealtad.md` es explícita: "Reserva
   completada", no "venta completada").
 - **`cierre_caja_dia()`**: efectivo vs. digital (todo lo que no es
   `EFECTIVO` — datáfono propio y Mercado Pago) y total del día,
@@ -729,7 +730,7 @@ Migración 021 · `src/app/panel/pos/`.
   consistente con que la venta ocurre "durante la atención".
 - **Configuración de Puntos por Negocio**: `negocio.puntos_valor_100_cop`
   (tasa de canje, default $5.000) y `puntos_expiracion_meses` (rango
-  6-24, `CHECK` real de la base — `04_Loyalty.md`).
+  6-24, `CHECK` real de la base — `04_Lealtad.md`).
 
 ### Verificado end-to-end contra la base real (14/14)
 Un tercero no puede cobrar una venta ajena · el Staff que atendió sí
@@ -1734,14 +1735,173 @@ Este archivo (Coverage Matrix + detalle), `CHANGELOG.md`.
 
 ---
 
-**Próximo módulo a ejecutar: Fase 6 — IA operacional (Funciones 1-3 de
-`04_AI_Business.md`, `02_AI_Client.md`, `03_AI_Staff.md`) / Motor WhatsApp /
-Membresías-Gift Cards-Referidos — los tres bloqueados sin credencial o
-decisión de negocio (ver `docs/PENDING_DECISIONS.md`). Growth Engine
-queda con su ciclo de vida de negocio completo (Wallet, Ads, Suscripciones)
-y su única función de IA sin credencial (Horarios muertos, Nivel 0); lo
-que resta de Fase 6 depende de que el fundador resuelva alguno de esos
-tres bloqueos.**
+## Módulo 6.5 — detalle de lo construido (Dominio LEALTAD completo, ADR-011)
+
+Migraciones 051-061 (schema, RLS, RPCs de los 12 sistemas, extensión de
+`completar_venta_pos()`, SuperSU) · `src/lib/ia/ai-provider.ts` (OpenRouter
++ Nemotron con failover automático) · `src/app/lealtad/` (Cliente),
+`src/app/panel/lealtad/` (Barbería), `src/app/admin/lealtad/` (SuperSU),
+`src/app/staff/lealtad/` (App Staff) · extensión de
+`src/app/panel/pos/actions.ts` (ascenso VIP automático).
+
+- **Resuelve la Decisión Abierta de `docs/PENDING_DECISIONS.md`** que
+  bloqueaba Membresías/Gift Cards/Referidos por falta de reglas de
+  negocio — el fundador entregó la especificación completa vía ADR-011,
+  ampliándolo a 12 sistemas que comparten un mismo motor. "Loyalty" se
+  renombra a **Lealtad** en todo el producto nuevo (`03-Business-Rules/
+  04_Lealtad.md`, antes `04_Loyalty.md` — los comentarios dentro de
+  migraciones ya aplicadas, ej. `021_pos.sql`, no se editan
+  retroactivamente).
+- **Aislamiento de dinero explícito**: `lealtad_wallet` (saldo de
+  recompensas por Cliente) es un dominio completamente separado de
+  `wallet` (comisión de plataforma por Negocio, Módulo 6.1) y de
+  `credito_ia_lote` (consumo de IA por Negocio) — nunca se fusionan,
+  verificado explícitamente.
+- **Módulo 1 — StylerWallet**: núcleo del dominio. Todo movimiento
+  (`lealtad_movimiento`) queda auditado, nunca se borra. Helpers internos
+  `_lealtad_wallet_id`/`_lealtad_acreditar` (revocados de
+  `anon`/`authenticated`, mismo patrón ADL-022) crean el Wallet on-demand
+  y acreditan de forma atómica.
+- **Módulo 2 — Membresías**: planes configurables por Negocio (precio,
+  duración 1/3/6/12 meses, límite de usos, descuento, congelación
+  0/7/15/30 días). Suscripción vía cobro único real de Mercado Pago
+  Checkout Pro (reusa `pago_tipo = 'MEMBRESIA'`, existente desde la
+  migración 001 sin consumidor real hasta ahora). El uso del beneficio
+  (Servicio incluido/descuento) se registra manualmente en el punto de
+  servicio (`registrar_uso_membresia`) — deliberadamente NO integrado
+  dentro de `slots_disponibles`/la creación de Reserva (el motor de
+  disponibilidad crítico, ya con 2 bugs históricos corregidos) — mismo
+  criterio ya aplicado a `servicio_combo` en el Módulo 2.5.
+- **Módulos 3/10 — Gift Cards** (individuales y empresariales): digitales
+  únicamente en V1 (física queda como arquitectura de datos lista, sin
+  proveedor de impresión — ver `docs/TECH_DEBT_REGISTER.md`). PIN
+  hasheado (`pgcrypto`), QR/código único. Nace `BLOQUEADA` hasta que el
+  pago se aprueba (reusa `pago_tipo = 'GIFT_CARD'`, también existente
+  desde la migración 001). Redención acredita el saldo completo al
+  StylerWallet (simplificación V1: sin redención parcial). Lote masivo
+  corporativo (`crear_lote_gift_cards_corporativo`, hasta 500 por lote).
+- **Módulos 4/11 — Referidos (Cliente y Staff)**: recompensa se genera
+  **solo** cuando el referido completa su primera Reserva pagada — se
+  engancha directamente en `completar_venta_pos()` (4ª extensión de esa
+  función, junto a Sellos/Cashback más abajo), calculando si es
+  verdaderamente la primera Reserva `COMPLETADA` del Cliente ANTES de
+  marcarla como tal. Nunca efectivo directo: la recompensa entra al
+  StylerWallet del referente. Un Cliente solo puede activar UNA ruta
+  (Cliente o Staff), nunca ambas — `unique` en `referido_cliente_id` de
+  cada tabla, chequeado cruzado en las RPCs de registro.
+- **Módulo 5 — Sellos digitales (**"ya no queda pendiente", pedido
+  explícito**)**: construido completo. Un sello por campaña activa por
+  Reserva elegible, otorgado automáticamente en `completar_venta_pos()`,
+  nunca duplicado (índice único parcial por `reserva_id` + campaña —
+  corregido en migración 053 tras detectar que la primera versión del
+  índice era única solo por `reserva_id`, lo que habría bloqueado
+  incorrectamente otorgar sello en dos campañas simultáneas). Canje
+  manual al alcanzar el umbral (`canjear_sellos`).
+- **Módulo 6 — Cashback**: % configurable sobre Servicios/Productos
+  elegibles (vacío = todos), otorgado automáticamente en la misma
+  extensión de `completar_venta_pos()`, acreditado directo al
+  StylerWallet, respetando límite mensual si existe. Nunca efectivo.
+- **Módulo 7 — Club VIP**: niveles renombrables por Negocio (semilla
+  estándar Bronze/Silver/Gold/Black vía `sembrar_niveles_vip_default`),
+  asignación manual (`asignar_vip`/`degradar_vip`, con historial) y
+  ascenso automático por gasto acumulado (`evaluar_ascenso_vip_automatico`,
+  enganchado desde `/panel/pos` tras cada venta — deliberadamente FUERA
+  de `completar_venta_pos()` para no tocar esa función una 5ª vez sin
+  necesidad estricta, con manejo best-effort que nunca rompe un cobro ya
+  confirmado).
+- **Módulo 8 — Paquetes familiares**: un titular agrupa miembros con
+  límite configurable; un Cliente pertenece a una sola familia a la vez.
+- **Módulo 9 — Suscripciones corporativas**: empresa compra cupos de
+  beneficio para empleados, con vigencia y Sedes permitidas; reportes
+  agregados de consumo (`reportes_corporativo`).
+- **Módulo 12 — Motor de recompensas automáticas**: arquitectura Nivel
+  0 (reglas fijas, 5 disparadores: Cliente inactivo, Cumpleaños, Objetivo
+  logrado, Riesgo de abandono, Mejor horario — este último reusa
+  `detectar_horarios_muertos()` del Módulo 6.4 sin duplicar la fórmula) +
+  enganche real a IA (OpenRouter/Nemotron) para redactar sugerencias más
+  elaboradas en el futuro. Toda sugerencia requiere confirmación humana
+  antes de cualquier efecto de dinero — al confirmar, si la regla define
+  `{"tipo":"CREDITO_WALLET","monto":N}`, se ejecuta ese único crédito
+  automático soportado en V1; cualquier otra acción queda para que la
+  Barbería la ejecute a mano.
+- **Motor antifraude**: solo lo verificable sin infraestructura nueva —
+  `CANJE_DUPLICADO` (PIN incorrecto en Gift Card) y `ABUSO_REFERIDO`
+  (auto-referido). Detección de dispositivo repetido/IP sospechosa/
+  múltiples cuentas queda diferida (requiere fingerprinting cliente-side +
+  captura de IP en cada request, no existente en el proyecto — ver
+  `docs/TECH_DEBT_REGISTER.md`). **Hallazgo real corregido antes de
+  producción**: el primer intento de registrar el evento de fraude
+  insertaba la fila INMEDIATAMENTE ANTES de un `raise exception` en la
+  misma función — pero un `RAISE EXCEPTION` aborta TODA la transacción,
+  incluyendo ese INSERT recién hecho; el evento de fraude nunca habría
+  persistido. Se corrigió (migración 060) moviendo el registro a una RPC
+  separada (`registrar_evento_fraude`, transacción propia) invocada desde
+  la capa de servidor cuando el RPC principal devuelve el código de error
+  específico — la única solución correcta sin `dblink`/`pg_background`
+  (no instalados en este proyecto).
+- **SuperSU** (`/admin/lealtad`): métricas agregadas de plataforma
+  (saldo total en Wallets, Membresías/Gift Cards/Referidos/Cashback/VIP/
+  Familias/Corporativo) y cola de revisión de eventos de fraude.
+- **IA: OpenRouter + Nemotron con failover automático**
+  (`src/lib/ia/ai-provider.ts`): cada llamada intenta OpenRouter primero;
+  si falla (verificado forzando una key inválida), reintenta
+  automáticamente con Nemotron (NVIDIA, vía tokenrouter.com). Ninguna
+  clave vive en código — solo en variables de entorno. Desbloquea
+  también las funciones de IA de `09-CRM-Intelligence/*` bloqueadas en
+  `docs/PENDING_DECISIONS.md` (construcción pendiente, ya sin bloqueo de
+  credencial). Nemotron: clave válida, modelo real confirmado
+  (`nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free` vía `/models`),
+  pero la cuenta de tokenrouter.com tiene $0.00 de crédito — el respaldo
+  está listo pero sin capacidad real hasta que se recargue (`docs/
+  PENDING_DECISIONS.md`).
+- **Hallazgo real corregido antes de producción**: `crear_gift_card()`
+  fallaba con "function gen_random_bytes(integer) does not exist" —
+  Supabase instala `pgcrypto` en el esquema `extensions`, no en `public`,
+  y ninguna función del proyecto incluye `extensions` en su
+  `search_path`. Se corrigió (migración 060) calificando el esquema
+  explícito (`extensions.gen_random_bytes`/`crypt`/`gen_salt`) en vez de
+  exponer todo el esquema `extensions` a cada función del proyecto.
+- **Hallazgo real corregido antes de producción**: el cálculo de Cashback
+  por Servicios específicos referenciaba `servicio.precio` — columna que
+  no existe (`precio_base`). Se corrigió (migración 059) usando
+  `reserva_servicio.precio_congelado_unitario` (el precio real cobrado en
+  esa Reserva), más correcto que `precio_base` de catálogo.
+
+### Verificado end-to-end contra la base real (51/51 + 7/7 + regresión completa)
+Sellos/Cashback/Referido se otorgan automáticamente al completar una
+venta en POS, sin duplicar en ventas repetidas · el referente (no el
+referido) recibe la recompensa en su propio StylerWallet · Membresía se
+activa solo tras el pago aprobado, sin tocar Wallet/Reserva ·  Gift Card
+nace bloqueada, se activa con el pago, PIN incorrecto se rechaza y se
+puede auditar en una transacción separada · redimir una Gift Card ya
+canjeada se rechaza · `canjear_lealtad_wallet` nunca deja saldo negativo ·
+niveles VIP estándar se siembran una sola vez · un Cliente no puede
+pertenecer a dos familias · cupos corporativos se respetan · el motor de
+recompensas reusa Horarios muertos sin duplicar fórmula, y el crédito
+automático de una sugerencia confirmada nunca se duplica · RLS: ningún
+Cliente ve el StylerWallet ni las sugerencias de otro. **Se re-verificó
+también la suite completa de POS, App Staff, Wallet, Suscripciones,
+Marketplace Score, Marketplace Ads y Horarios muertos tras las 4
+extensiones de `completar_venta_pos()`/`aplicar_evento_pago()` — cero
+regresiones en las 8 suites.**
+
+### Documentación actualizada con este módulo
+Este archivo (Coverage Matrix + detalle), `CHANGELOG.md`,
+`docs/PENDING_DECISIONS.md` (resuelve Membresías/Gift Cards/Referidos;
+IA operacional ya no bloqueada por credencial; nueva entrada Nemotron sin
+crédito), `docs/TECH_DEBT_REGISTER.md` (Gift Card física, detección de
+dispositivo/IP, uso de Membresía no integrado a la creación de Reserva),
+`ADR_011_Motor_Lealtad.md`, `03-Business-Rules/04_Lealtad.md` (renombrado
+de `04_Loyalty.md`), ADL-024/025 (los dos hallazgos reales corregidos).
+
+---
+
+**Próximo módulo a ejecutar: Fase 6 — IA con LLM real
+(`02_AI_Client.md`, `03_AI_Staff.md`, Funciones 1-3 de
+`04_AI_Business.md`) — ya no bloqueada por credencial (OpenRouter +
+Nemotron conectados vía ADR-011), queda por construir. Motor WhatsApp
+sigue bloqueado sin credenciales de WhatsApp Business API (ver
+`docs/PENDING_DECISIONS.md`).**
 
 ---
 

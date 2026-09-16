@@ -27,8 +27,8 @@ Pruebas de integración/E2E de la superficie Cliente. Formato: ID | Caso | Resul
 | QA-CLI-014 | Instalar la PWA tras segunda visita | Prompt de instalación aparece | `02-UX/03_Client_PWA.md` |
 | QA-CLI-015 | Instalar la PWA en primera visita | Prompt NO aparece aún | `02-UX/03_Client_PWA.md` |
 | QA-CLI-016 | Abrir la app sin conexión tras instalada | Shell carga desde cache | `02-UX/03_Client_PWA.md` |
-| QA-CLI-017 | Cambiar de celular y reinstalar con misma cuenta | Historial y Puntos se conservan | `03-Business-Rules/04_Loyalty.md` |
-| QA-CLI-018 | Editar teléfono de contacto en perfil | Puntos y reservas se conservan bajo el mismo `cliente_id` | `03-Business-Rules/04_Loyalty.md` |
+| QA-CLI-017 | Cambiar de celular y reinstalar con misma cuenta | Historial y Puntos se conservan | `03-Business-Rules/04_Lealtad.md` |
+| QA-CLI-018 | Editar teléfono de contacto en perfil | Puntos y reservas se conservan bajo el mismo `cliente_id` | `03-Business-Rules/04_Lealtad.md` |
 
 ### Descubrimiento y Marketplace (QA-CLI-019 a 045)
 | ID | Caso | Resultado esperado | Fuente |
@@ -118,17 +118,17 @@ Pruebas de integración/E2E de la superficie Cliente. Formato: ID | Caso | Resul
 | QA-CLI-093 | Doble tap en botón de pago | Solo un cobro se ejecuta | `05-API/01_Standards.md` |
 | QA-CLI-094 | Comprar Gift Card | Saldo disponible para uso futuro | `01-PRD/03_Monetization.md` |
 | QA-CLI-095 | Usar Gift Card como método de pago de Seña | Sin comisión adicional sobre su redención | `03-Business-Rules/03_Payment_Rules.md` |
-| QA-CLI-096 | Suscribir Membresía a un Negocio | Cobro recurrente configurado | `03-Business-Rules/04_Loyalty.md` |
-| QA-CLI-097 | Cancelar Membresía a mitad de ciclo | Beneficio se conserva hasta fin del ciclo pagado | `03-Business-Rules/04_Loyalty.md` |
+| QA-CLI-096 | Suscribir Membresía a un Negocio | Cobro recurrente configurado | `03-Business-Rules/04_Lealtad.md` |
+| QA-CLI-097 | Cancelar Membresía a mitad de ciclo | Beneficio se conserva hasta fin del ciclo pagado | `03-Business-Rules/04_Lealtad.md` |
 | QA-CLI-098 | Fallo de cobro de Membresía | Pasa a `SUSPENDIDA_POR_IMPAGO`, pierde beneficio de inmediato | `08-Growth-Monetization/05_Billing_Failures.md` |
-| QA-CLI-099 | Reserva completada otorga Puntos | 10 pts por cada $10.000 | `03-Business-Rules/04_Loyalty.md` |
-| QA-CLI-100 | Reseña con texto otorga Puntos | +15 pts | `03-Business-Rules/04_Loyalty.md` |
-| QA-CLI-101 | Referido completa su primera Reserva | +50 pts a quien refirió | `03-Business-Rules/04_Loyalty.md` |
-| QA-CLI-102 | Canjear Puntos en Sede | Descuenta hasta $0, excedente permanece | `03-Business-Rules/04_Loyalty.md` |
-| QA-CLI-103 | Puntos a 30 días de expirar | Notificación enviada | `03-Business-Rules/04_Loyalty.md` |
-| QA-CLI-104 | Puntos expiran a los 12 meses (FIFO) | Lote más antiguo se consume/expira primero | `03-Business-Rules/04_Loyalty.md` |
-| QA-CLI-105 | Negocio se suspende con Puntos del Cliente activos | Puntos se congelan, no canjeables | `03-Business-Rules/04_Loyalty.md` |
-| QA-CLI-106 | Negocio se reactiva | Puntos vuelven a estar disponibles si no expiraron | `03-Business-Rules/04_Loyalty.md` |
+| QA-CLI-099 | Reserva completada otorga Puntos | 10 pts por cada $10.000 | `03-Business-Rules/04_Lealtad.md` |
+| QA-CLI-100 | Reseña con texto otorga Puntos | +15 pts | `03-Business-Rules/04_Lealtad.md` |
+| QA-CLI-101 | Referido completa su primera Reserva | +50 pts a quien refirió | `03-Business-Rules/04_Lealtad.md` |
+| QA-CLI-102 | Canjear Puntos en Sede | Descuenta hasta $0, excedente permanece | `03-Business-Rules/04_Lealtad.md` |
+| QA-CLI-103 | Puntos a 30 días de expirar | Notificación enviada | `03-Business-Rules/04_Lealtad.md` |
+| QA-CLI-104 | Puntos expiran a los 12 meses (FIFO) | Lote más antiguo se consume/expira primero | `03-Business-Rules/04_Lealtad.md` |
+| QA-CLI-105 | Negocio se suspende con Puntos del Cliente activos | Puntos se congelan, no canjeables | `03-Business-Rules/04_Lealtad.md` |
+| QA-CLI-106 | Negocio se reactiva | Puntos vuelven a estar disponibles si no expiraron | `03-Business-Rules/04_Lealtad.md` |
 | QA-CLI-107 | 3er strike de No-show en 90 días | Exige pago 100% anticipado en próximas Reservas | `03-Business-Rules/09_No_Show_Policy.md` |
 | QA-CLI-108 | Strike expira pasado el periodo de 90 días | Exigencia de pago total se revierte automáticamente | `03-Business-Rules/09_No_Show_Policy.md` |
 | QA-CLI-109 | Ver métodos de pago guardados | Datos sensibles enmascarados | `02-UX/06_Payments.md` |

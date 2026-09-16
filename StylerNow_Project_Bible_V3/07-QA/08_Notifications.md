@@ -20,8 +20,8 @@ Pruebas de disparo, contenido y canal de cada notificación de `02-UX/11_Notific
 | QA-NOT-007 | No-show marcado (Cliente) | Push informativo con detalle de retención de Seña | `02-UX/11_Notifications.md` |
 | QA-NOT-008 | No-show marcado (Staff) | Push + WhatsApp con opción de reagendar sin costo | `02-UX/11_Notifications.md` |
 | QA-NOT-009 | Cupo de Lista de espera liberado | Push + WhatsApp, ventana de 15 min visible | `03-Business-Rules/10_Waitlist_System.md` |
-| QA-NOT-010 | Puntos a 30 días de expirar | Push enviado exactamente a los 30 días | `03-Business-Rules/04_Loyalty.md` |
-| QA-NOT-011 | Puntos a 29 o 31 días de expirar | No se envía (solo a los 30 exactos) | `03-Business-Rules/04_Loyalty.md` |
+| QA-NOT-010 | Puntos a 30 días de expirar | Push enviado exactamente a los 30 días | `03-Business-Rules/04_Lealtad.md` |
+| QA-NOT-011 | Puntos a 29 o 31 días de expirar | No se envía (solo a los 30 exactos) | `03-Business-Rules/04_Lealtad.md` |
 | QA-NOT-012 | Cliente desactiva notificaciones promocionales | Transaccionales siguen llegando | `02-UX/11_Notifications.md` |
 | QA-NOT-013 | Cliente intenta desactivar notificación transaccional | No disponible en configuración | `02-UX/11_Notifications.md` |
 | QA-NOT-014 | Cliente sin permiso de push | Eventos caen a centro de notificaciones in-app | `02-UX/11_Notifications.md` |
@@ -32,7 +32,7 @@ Pruebas de disparo, contenido y canal de cada notificación de `02-UX/11_Notific
 | QA-NOT-019 | Fallo de entrega de push en ventana de Lista de espera | WhatsApp como canal secundario mitiga | `02-UX/11_Notifications.md` |
 | QA-NOT-020 | Recomendación de IA enviada como campaña | Requiere confirmación previa de la Barbería | `09-CRM-Intelligence/04_AI_Business.md` |
 | QA-NOT-021 | Cliente con Membresía suspendida por impago | Notificado el mismo día del fallo | `08-Growth-Monetization/05_Billing_Failures.md` |
-| QA-NOT-022 | Notificación de cumpleaños del Cliente | Enviada en el mes correspondiente | `03-Business-Rules/04_Loyalty.md` |
+| QA-NOT-022 | Notificación de cumpleaños del Cliente | Enviada en el mes correspondiente | `03-Business-Rules/04_Lealtad.md` |
 | QA-NOT-023 | Notificación duplicada por reintento de evento | No se envía dos veces (idempotencia) | `05-API/06_Webhooks.md` |
 | QA-NOT-024 | Cliente cambia de teléfono | Notificaciones siguen llegando al nuevo canal verificado | `03-Business-Rules/07_CRM.md` |
 | QA-NOT-025 | Cliente con dos Negocios activos recibe notificaciones cruzadas | Cada notificación indica el Negocio correspondiente sin mezclar | `03-Business-Rules/01_Roles.md` |

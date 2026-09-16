@@ -200,6 +200,20 @@ Cada decisión tiene: **Fecha, Decisión, Motivo, Impacto, Estado** (`Activa` / 
 **Impacto:** Se aprovechó la ocasión para construir el primer cron real del proyecto (`vercel.json` + `/api/cron/diario`, protegido por `CRON_SECRET` vía el mecanismo nativo de Vercel Cron), desbloqueando `expirar_reservas_vencidas()` (dormida desde la migración 008, migración 042 la había asegurado pero nada la invocaba nunca) y la nueva `ejecutar_downgrades_programados()`. Requiere que `CRON_SECRET` se agregue a las variables de entorno de Vercel y se haga un deploy — pendiente en `TECH_DEBT_REGISTER.md`, no controlable desde este entorno. Módulos futuros con la misma necesidad (rollover de Temporada, bonos de Puntualidad — Fase 4) pueden engancharse a esta misma ruta en vez de abrir infraestructura nueva cada vez.
 **Estado:** Activa.
 
+### ADL-024 — `RAISE EXCEPTION` aborta la transacción completa: un evento de auditoría insertado justo antes nunca persiste
+**Fecha:** 2026-09-16
+**Decisión:** Ninguna función SQL debe insertar un evento de auditoría/fraude inmediatamente antes de un `raise exception` en la misma llamada, esperando que ambos efectos ocurran. Cuando se necesita registrar un intento fallido Y rechazarlo, el registro debe hacerse desde una llamada de sistema **separada** (otra transacción) después de que el error llega al llamador — nunca dentro de la función que también falla.
+**Motivo:** Encontrado escribiendo el motor antifraude del dominio Lealtad (ADR-011): `registrar_referido()` y `redimir_gift_card()` insertaban una fila en `lealtad_fraude_evento` inmediatamente antes de `raise exception` (auto-referido / PIN incorrecto). Un `RAISE EXCEPTION` en PL/pgSQL aborta TODA la transacción de la llamada, incluyendo cualquier `INSERT` hecho microsegundos antes — el evento de fraude nunca habría llegado a persistir en producción, precisamente en el caso que más importa auditar (un intento real de fraude). Postgres no soporta transacciones autónomas nativas (requeriría `dblink`/`pg_background`, no instalados en este proyecto).
+**Impacto:** Migración 060 elimina los INSERT-antes-de-raise y agrega `registrar_evento_fraude()`, una RPC separada que la capa de servidor (o el propio Cliente, auto-limitado a reportarse a sí mismo) invoca en su propia transacción al capturar el código de error específico. Verificado explícitamente: el evento de fraude ahora sí persiste. Regla general para cualquier función futura de este proyecto que combine "rechazar" con "auditar el intento".
+**Estado:** Activa — corregido y verificado.
+
+### ADL-025 — Las extensiones de Supabase viven en el esquema `extensions`, no en `public`
+**Fecha:** 2026-09-16
+**Decisión:** Cualquier función que use `pgcrypto` (`gen_random_bytes`, `crypt`, `gen_salt` — no confundir con `gen_random_uuid()`, que es nativo de Postgres 13+ desde `public`) debe calificar el esquema explícitamente (`extensions.gen_random_bytes(...)`) en vez de agregar `extensions` al `search_path` del proyecto entero.
+**Motivo:** `crear_gift_card()` (ADR-011) falló con "function gen_random_bytes(integer) does not exist" pese a que `pgcrypto` está habilitado desde la migración 001. Causa: Supabase instala las extensiones en el esquema `extensions` por convención, y toda función de este proyecto usa `set search_path = public` (sin incluir `extensions`) — un patrón deliberado de este codebase para no exponer accidentalmente otras funciones de extensiones a cada función nueva.
+**Impacto:** Migración 060 corrige las 3 funciones afectadas calificando el esquema explícitamente. Regla general para cualquier función futura que necesite `pgcrypto` u otra extensión instalada por Supabase fuera de `public`.
+**Estado:** Activa — corregido y verificado.
+
 ## Checklist
 - [x] Completo (vivo — se agregan entradas nuevas conforme surgen decisiones)
 - [ ] Revisado

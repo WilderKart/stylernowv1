@@ -32,7 +32,7 @@ Pruebas de integración del ciclo completo de dinero: Seña, Saldo, reembolsos, 
 | QA-PAY-019 | Compra de Gift Card exitosa | Saldo disponible | `01-PRD/03_Monetization.md` |
 | QA-PAY-020 | Compra de Gift Card fallida | No se emite saldo | `05-API/04_Payments.md` |
 | QA-PAY-021 | Redimir Gift Card como método de pago de Seña | Sin comisión adicional | `03-Business-Rules/03_Payment_Rules.md` |
-| QA-PAY-022 | Suscribir Membresía, primer cobro exitoso | Beneficio activo | `03-Business-Rules/04_Loyalty.md` |
+| QA-PAY-022 | Suscribir Membresía, primer cobro exitoso | Beneficio activo | `03-Business-Rules/04_Lealtad.md` |
 | QA-PAY-023 | Ver estado de pago vía polling tras iniciar cobro asíncrono | Refleja el estado real una vez confirmado | `05-API/04_Payments.md` |
 | QA-PAY-024 | Cerrar la app tras iniciar cobro, antes de completar | `pago` queda `PENDIENTE`, expira con la Reserva | `03-Business-Rules/03_Payment_Rules.md` |
 | QA-PAY-025 | Transmisión de monto como entero en pesos (sin subunidad) | Formato correcto en toda request/response | `05-API/01_Standards.md` |
@@ -61,7 +61,7 @@ Pruebas de integración del ciclo completo de dinero: Seña, Saldo, reembolsos, 
 | QA-PAY-044 | Reembolso por No-show del Staff | 100% automático | `03-Business-Rules/09_No_Show_Policy.md` |
 | QA-PAY-045 | No reembolso por No-show del Cliente | Seña retenida | `03-Business-Rules/09_No_Show_Policy.md` |
 | QA-PAY-046 | Reversión manual de un No-show mal marcado | Revierte también el reembolso si ya se procesó | `03-Business-Rules/09_No_Show_Policy.md` |
-| QA-PAY-047 | Reembolso de Membresía cancelada a mitad de ciclo | No se reembolsa el periodo en curso | `03-Business-Rules/04_Loyalty.md` |
+| QA-PAY-047 | Reembolso de Membresía cancelada a mitad de ciclo | No se reembolsa el periodo en curso | `03-Business-Rules/04_Lealtad.md` |
 | QA-PAY-048 | Reembolso en cascada por cierre de Sede | Todas las Reservas futuras de esa Sede | `08-Growth-Monetization/04_Subscriptions_Lifecycle.md` |
 | QA-PAY-049 | Reembolso en cascada por suspensión de Negocio | Todas las Reservas futuras `CONFIRMADA` | `08-Growth-Monetization/04_Subscriptions_Lifecycle.md` |
 | QA-PAY-050 | Todo reembolso genera evento de auditoría | Verificable con monto y motivo exactos | `04-Data-Model/04_Audit.md` |

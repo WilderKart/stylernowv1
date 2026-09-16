@@ -61,7 +61,7 @@ Leyenda: ✅ completo · 🟡 parcial · ⬜ pendiente
 | `01_Roles.md` | ✅ |
 | `02_Booking_Rules.md` | ✅ |
 | `03_Payment_Rules.md` | ✅ |
-| `04_Loyalty.md` | ✅ |
+| `04_Lealtad.md` | ✅ |
 | `05_Staff_Rewards.md` | ✅ |
 | `06_Marketplace_Ads.md` | ✅ |
 | `07_CRM.md` | ✅ |

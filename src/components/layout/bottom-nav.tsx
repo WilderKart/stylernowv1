@@ -41,6 +41,17 @@ const ITEMS = [
     ),
   },
   {
+    href: "/lealtad",
+    etiqueta: "Lealtad",
+    icono: (activo: boolean) => (
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={activo ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 3v4M12 3 9 5.5M12 3l3 2.5" />
+        <rect x="3.5" y="7" width="17" height="13" rx="2.5" />
+        <path d="M3.5 12h17" />
+      </svg>
+    ),
+  },
+  {
     href: "/perfil",
     etiqueta: "Perfil",
     icono: (activo: boolean) => (

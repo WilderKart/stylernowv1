@@ -61,12 +61,9 @@ bloquea, el desarrollo sigue avanzando en paralelo sin esperar respuesta.
 - **Recomendación:** revisar el volumen real de uso del Mapa cuando haya Negocios reales operando, y decidir en ese momento si migrar — cambiar el `ESTILO_OSM` de `src/components/marketplace/mapa-marketplace.tsx` por la URL de tiles del proveedor elegido es un cambio de una sola constante, no una reescritura.
 - **Bloquea:** No — es una decisión de infraestructura para cuando haya tráfico real, no de negocio.
 
-## Fase 6 — IA operacional: falta credencial de un proveedor de LLM
+## ~~Fase 6 — IA operacional: falta credencial de un proveedor de LLM~~ (Resuelta el 2026-09-16)
 
-- **Contexto:** `09-CRM-Intelligence/02_AI_Client.md`, `03_AI_Staff.md`, `04_AI_Business.md` y `AI_Credit_System.md` especifican funcionalidades de IA real (insights de Staff, riesgo de abandono de Cliente, sugerencias de campaña) sobre créditos ya modelados en el schema (`credito_ia_lote`, `credito_ia_consumo`, migración 004).
-- **Impacto:** sin una API key de un proveedor de LLM (Anthropic, OpenAI, etc.), no se puede construir la funcionalidad de IA real — solo la arquitectura de datos (créditos, consumo) ya existe desde la Fase 1.
-- **Recomendación:** proveer la credencial cuando el fundador decida qué proveedor usar; mientras tanto no se avanza en esta sub-fase.
-- **Bloquea:** Solo la implementación de IA real — el resto de Fase 6 (Ads, Suscripciones) no depende de esto.
+- **Resuelta.** El fundador proveyó una API key de OpenRouter (más Nemotron como respaldo automático, ver entrada de abajo) — `src/lib/ia/ai-provider.ts` (ADR-011). Función 4 de `04_AI_Business.md` (Horarios muertos) ya estaba construida sin necesitar esto (es Nivel 0). Las 3 funciones restantes que sí necesitan un LLM real (`02_AI_Client.md`, `03_AI_Staff.md`, Funciones 1-3 de `04_AI_Business.md`) quedan como el próximo trabajo pendiente de Fase 6 — la credencial ya no es el bloqueo, solo falta construirlas.
 
 ## Fase 6 — Motor WhatsApp inteligente: falta credencial de WhatsApp Business API
 
@@ -75,12 +72,16 @@ bloquea, el desarrollo sigue avanzando en paralelo sin esperar respuesta.
 - **Recomendación:** proveer las credenciales cuando estén disponibles.
 - **Bloquea:** Solo el motor de WhatsApp — no bloquea el resto de la plataforma.
 
-## Fase 6 — Membresías, Gift Cards, Referidos: sin documento de reglas de negocio
+## ~~Fase 6 — Membresías, Gift Cards, Referidos: sin documento de reglas de negocio~~ (Resuelta por ADR-011)
 
-- **Contexto:** `00_MASTER_TASKLIST.md` lista estas tres funcionalidades dentro de Fase 6, pero ningún documento de la Biblia define su mecánica (precios, vigencias, porcentajes, reglas antifraude de referidos).
-- **Impacto:** construir esto ahora significaría inventar una economía de descuentos/puntos sin definición del fundador — un riesgo real de tener que rehacerlo.
-- **Recomendación:** el fundador define la mecánica exacta de cada uno (ej. ¿Gift Card con vencimiento? ¿Referido da % de descuento o Puntos? ¿Membresía es una suscripción del Cliente, no del Negocio?) antes de construir.
-- **Bloquea:** Sí, específicamente estas tres funcionalidades — el resto de Fase 6 no depende de ellas.
+- **Resuelta el 2026-09-16.** El fundador entregó la especificación completa del dominio Lealtad (ADR-011), que no solo resuelve Membresías/Gift Cards/Referidos sino que los amplía a 12 sistemas (+ Sellos, Cashback, VIP, Familias, Corporativo, Referidos de Staff, motor de recompensas por IA). Construido completo — ver `00_MASTER_TASKLIST.md`, sección Fase 6 / Dominio Lealtad.
+
+## Fase 6 — Motor Nemotron (respaldo de IA): cuenta sin crédito
+
+- **Contexto:** ADR-011 pide un segundo proveedor de IA como respaldo automático de OpenRouter — se conectó Nemotron/NVIDIA vía `tokenrouter.com` (`src/lib/ia/ai-provider.ts`). La clave es válida y el modelo real (`nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free`) se confirmó por `/models`.
+- **Impacto:** la cuenta de tokenrouter.com tiene $0.00 de crédito ("insufficient_user_quota") — el respaldo está completamente conectado y el failover automático funciona (verificado forzando una falla en OpenRouter), pero hoy no tiene capacidad real si ambos proveedores fallaran a la vez. Mientras OpenRouter siga funcionando (gratuito), esto no afecta la operación normal.
+- **Recomendación:** recargar la cuenta en tokenrouter.com cuando el fundador lo considere necesario — no requiere ningún cambio de código.
+- **Bloquea:** No — es un respaldo, no el proveedor principal.
 
 ## Fase 6 — Cobro recurrente real de Suscripción: falta Mercado Pago Preapproval + medio de pago guardado
 

@@ -35,7 +35,7 @@ Efectos de la suspensión:
 - Las Reservas futuras ya `CONFIRMADA` se cancelan automáticamente con reembolso al 100% (consistente con `Business_Rules_Bible.md`, pregunta de cierre de Sede — aplica el mismo principio a nivel Negocio completo).
 - Cualquier campaña publicitaria activa se pausa (`03-Business-Rules/06_Marketplace_Ads.md`).
 - El Panel Negocio, App Staff y accesos asociados quedan en modo de solo lectura (la Barbería puede ver su historial y datos, pero no crear Reservas nuevas ni operar) hasta la reactivación.
-- Los Puntos de fidelización de Clientes en ese Negocio se congelan (`03-Business-Rules/04_Loyalty.md`).
+- Los Puntos de fidelización de Clientes en ese Negocio se congelan (`03-Business-Rules/04_Lealtad.md`).
 
 ### Reactivación
 
@@ -65,7 +65,7 @@ Ver `04-Data-Model/03_State_Machines.md`, máquinas "Negocio" y "Suscripción".
 
 ## Dependencias
 - Depende de: `01-PRD/03_Monetization.md`, `04-Data-Model/03_State_Machines.md`, `03-Business-Rules/03_Payment_Rules.md`.
-- De este documento dependen: `05_Billing_Failures.md`, `03-Business-Rules/10_Waitlist_System.md`, `03-Business-Rules/04_Loyalty.md`, `08-Growth-Monetization/06_Advertising_System.md`.
+- De este documento dependen: `05_Billing_Failures.md`, `03-Business-Rules/10_Waitlist_System.md`, `03-Business-Rules/04_Lealtad.md`, `08-Growth-Monetization/06_Advertising_System.md`.
 
 ## Casos límite
 

@@ -8,6 +8,7 @@ const ITEMS = [
   { href: "/staff/agenda", etiqueta: "Agenda" },
   { href: "/staff/nivel", etiqueta: "Mi Nivel" },
   { href: "/staff/clientes", etiqueta: "Clientes" },
+  { href: "/staff/lealtad", etiqueta: "Lealtad" },
   { href: "/staff/perfil", etiqueta: "Perfil" },
 ];
 

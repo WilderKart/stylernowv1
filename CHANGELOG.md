@@ -7,6 +7,32 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 6, Módulo 6.5: Dominio LEALTAD completo (ADR-011)
+12 sistemas de recompensa construidos de punta a punta, reemplazando
+"Loyalty" por **Lealtad** en todo el producto: StylerWallet (núcleo de
+saldo del Cliente, aislado del Wallet de comisión de Negocio y de los
+créditos IA), Membresías (cobro real vía Mercado Pago), Gift Cards
+(digitales, PIN + QR, individuales y empresariales por lote), Referidos
+de Cliente y de Staff (recompensa solo tras la primera Reserva pagada del
+referido), Sellos digitales, Cashback, Club VIP (manual y ascenso
+automático por gasto), Paquetes familiares, Suscripciones corporativas, y
+un Motor de recompensas automáticas (reglas Nivel 0 + enganche real a
+IA). Cuatro superficies completas: Cliente (`/lealtad`), Panel Barbería
+(`/panel/lealtad`), App Staff (`/staff/lealtad`), SuperSU
+(`/admin/lealtad`, métricas + revisión de fraude). Motor antifraude real
+para canje duplicado y auto-referido. Nueva capa `AIProvider`
+(`src/lib/ia/ai-provider.ts`): OpenRouter como proveedor principal con
+failover automático a Nemotron/NVIDIA si falla — verificado forzando una
+falla real. Dos hallazgos corregidos antes de producción: un evento de
+fraude que se insertaba justo antes de un `RAISE EXCEPTION` (por lo tanto
+nunca persistía — ver ADL-024) y una llamada a `pgcrypto` sin calificar
+el esquema `extensions` (ADL-025). Verificado: 51/51 + 7/7 casos reales,
+más re-verificación completa de las 8 suites de regresión existentes
+(POS, App Staff, Wallet, Suscripciones, Marketplace Score, Marketplace
+Ads, Horarios muertos) tras 4 extensiones sucesivas de
+`completar_venta_pos()`/`aplicar_evento_pago()` — cero regresiones.
+`PENDIENTE_HASH`
+
 ### Añadido — Fase 6, Módulo 6.4: IA Operacional — Horarios muertos (Nivel 0)
 `detectar_horarios_muertos()`: la única de las 4 funciones de
 `09-CRM-Intelligence/04_AI_Business.md` que la Biblia marca explícitamente

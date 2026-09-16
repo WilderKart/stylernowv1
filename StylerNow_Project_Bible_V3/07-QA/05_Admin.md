@@ -44,7 +44,7 @@ Pruebas de integración/E2E de la superficie SuperSU. Formato: ID | Caso | Resul
 | QA-ADM-027 | Ver historial de auditoría de un Negocio específico | Completo y correcto | `04-Data-Model/04_Audit.md` |
 | QA-ADM-028 | Buscar Negocio por nombre/ciudad | Resultado correcto | `02-UX/10_Super_Admin.md` |
 | QA-ADM-029 | Ver actividad reciente en el Dashboard global | Eventos correctos y recientes | `02-UX/10_Super_Admin.md` |
-| QA-ADM-030 | Negocio suspendido, Puntos de sus Clientes | Congelados correctamente | `03-Business-Rules/04_Loyalty.md` |
+| QA-ADM-030 | Negocio suspendido, Puntos de sus Clientes | Congelados correctamente | `03-Business-Rules/04_Lealtad.md` |
 
 ### Planes, configuración global y moderación (QA-ADM-031 a 065)
 | ID | Caso | Resultado esperado | Fuente |

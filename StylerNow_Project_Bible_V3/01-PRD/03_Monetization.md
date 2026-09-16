@@ -84,7 +84,7 @@ Todo Allfather se gestiona con un contrato individual aprobado y registrado por 
 | **Marketplace Ads** | Formatos: destacado, pin patrocinado, banner, promoción flash. Autoservicio desde Jarl en adelante. | `08-Growth-Monetization/06_Advertising_System.md` |
 | **Comisión por transacción** | % sobre la Seña procesada por la pasarela dentro de la app (ver ADL-005). | `08-Growth-Monetization/02_Commissions.md` |
 | **Paquetes de créditos IA** | Compra de créditos adicionales fuera de la asignación mensual del Plan. | `AI_Credit_System.md` |
-| **Membresías** | Programa de suscripción del Cliente final hacia un Negocio específico (ej. "3 cortes al mes"), facilitado por la plataforma. | `03-Business-Rules/04_Loyalty.md` |
+| **Membresías** | Programa de suscripción del Cliente final hacia un Negocio específico (ej. "3 cortes al mes"), facilitado por la plataforma. | `03-Business-Rules/04_Lealtad.md` |
 | **Gift Cards** | Tarjetas de regalo digitales emitidas por un Negocio, vendidas a través de la Cliente PWA. | `03-Business-Rules/03_Payment_Rules.md` |
 | **Productos** | Venta de producto físico (ej. cera, shampoo) vía POS del Panel Negocio, sin comisión de plataforma salvo que se venda desde el Marketplace del Cliente. | `02-UX/09_Business_Panel.md` |
 | **Cupones patrocinados** | Promociones financiadas parcialmente por marcas de producto (ingreso B2B2C, fuera del alcance de V1, registrado aquí como línea futura). | — (Decisión abierta, ver Casos límite) |

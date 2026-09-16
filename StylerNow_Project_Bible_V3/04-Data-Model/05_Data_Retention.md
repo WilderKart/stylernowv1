@@ -19,7 +19,7 @@ Toda entidad que puede ser referenciada por un registro histórico (`servicio`, 
 | `reserva`, `pago`, `evento_auditoria` (transaccionales/fiscales) | 5 años | Se archivan a almacenamiento frío, nunca se borran | Retención fiscal colombiana (`06-Security/04_Compliance_Colombia.md`) |
 | Perfil de `cliente` (datos personales: nombre, teléfono, email) | Mientras la cuenta esté activa + 2 años de inactividad | Se anonimiza (no se borra el `id`, se reemplaza el dato identificable), salvo solicitud explícita de supresión, que se atiende de inmediato dentro de los límites de la fila de arriba | Habeas Data (derecho de portabilidad y minimización) |
 | Notas y fotos de CRM (`03-Business-Rules/07_CRM.md`) | Igual que el perfil de Cliente al que pertenecen | Se eliminan físicamente al anonimizar el perfil (a diferencia del dato transaccional, no tienen valor fiscal) | Habeas Data |
-| `punto_fidelizacion` (lote de puntos) | Hasta expiración (`03-Business-Rules/04_Loyalty.md`) + 1 año | Se archiva, no se borra (evidencia de pasivo histórico) | Auditoría financiera del Negocio |
+| `punto_fidelizacion` (lote de puntos) | Hasta expiración (`03-Business-Rules/04_Lealtad.md`) + 1 año | Se archiva, no se borra (evidencia de pasivo histórico) | Auditoría financiera del Negocio |
 | `puntaje_staff_evento` | Indefinida mientras el `vinculo_staff_negocio` exista; tras `RETIRADO`, 3 años | Se archiva | Trazabilidad del Sistema PRO/EXPERT/MASTER, posibles disputas |
 | `resena` en estado `ELIMINADA` | Indefinida (no se borra físicamente) | Permanece oculta pero consultable por SuperSU | Evidencia de moderación, posible disputa legal |
 | Logs de sesión / autenticación | 12 meses | Se borran físicamente | No son datos de negocio, solo seguridad operativa — ver `10-Operations/04_Logs_Policy.md` |
@@ -40,7 +40,7 @@ No aplica una máquina de estados adicional — el soft delete usa el campo `est
 - Solo SuperSU (o un proceso automatizado programado, con `actor_tipo = SISTEMA`) ejecuta la anonimización o el archivado a almacenamiento frío.
 
 ## Dependencias
-- Depende de: `01_Entities.md`, `04_Audit.md`, `03-Business-Rules/07_CRM.md`, `03-Business-Rules/04_Loyalty.md`.
+- Depende de: `01_Entities.md`, `04_Audit.md`, `03-Business-Rules/07_CRM.md`, `03-Business-Rules/04_Lealtad.md`.
 - De este documento dependen: `06-Security/04_Compliance_Colombia.md`, `10-Operations/02_Migration_Strategy.md`, `10-Operations/03_Disaster_Recovery.md`.
 
 ## Casos límite

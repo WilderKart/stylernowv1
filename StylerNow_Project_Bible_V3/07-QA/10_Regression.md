@@ -281,7 +281,7 @@ Casos que cruzan más de un documento de dominio o más de una superficie. Forma
 | QA-REG-236 | Cancelación exactamente a las 24h del límite de ventana | Se resuelve consistentemente hacia un solo lado de la regla | `03-Business-Rules/03_Payment_Rules.md` |
 | QA-REG-237 | Cancelación exactamente a las 2h del límite de ventana | Se resuelve consistentemente | `03-Business-Rules/03_Payment_Rules.md` |
 | QA-REG-238 | No-show marcado exactamente a los 15 minutos | Transición ocurre en el segundo exacto esperado | `03-Business-Rules/09_No_Show_Policy.md` |
-| QA-REG-239 | Puntos expirando exactamente a los 12 meses | Expiración ocurre en la fecha exacta | `03-Business-Rules/04_Loyalty.md` |
+| QA-REG-239 | Puntos expirando exactamente a los 12 meses | Expiración ocurre en la fecha exacta | `03-Business-Rules/04_Lealtad.md` |
 | QA-REG-240 | Tercer strike de No-show exactamente en el día 90 de la ventana móvil | Se cuenta correctamente dentro de la ventana | `03-Business-Rules/09_No_Show_Policy.md` |
 | QA-REG-241 | Comisión de plataforma en el límite exacto de 3% | Aceptada | `08-Growth-Monetization/02_Commissions.md` |
 | QA-REG-242 | Comisión de plataforma en el límite exacto de 15% | Aceptada | `08-Growth-Monetization/02_Commissions.md` |

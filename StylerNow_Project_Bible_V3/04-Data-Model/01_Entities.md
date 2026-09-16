@@ -36,7 +36,7 @@ Tabla puente: qué Staff puede prestar qué Servicio (un Staff no necesariamente
 `recurso_tipo` (ej. "camilla", "cabina", "silla") define una categoría; `recurso` es la instancia física dentro de una Sede (ej. "Camilla 2"). Campos de `recurso`: `id`, `sede_id`, `recurso_tipo_id`, `nombre`, `estado` (`DISPONIBLE`/`FUERA_DE_SERVICIO`).
 
 ### `cliente`
-Entidad global (no particionada por Negocio — ver `Glossary.md`). Campos: `id`, `usuario_id`, `nombre`, `telefono`, `email`, `fecha_nacimiento` (opcional, para regla de cumpleaños de `03-Business-Rules/04_Loyalty.md`), `fecha_registro`.
+Entidad global (no particionada por Negocio — ver `Glossary.md`). Campos: `id`, `usuario_id`, `nombre`, `telefono`, `email`, `fecha_nacimiento` (opcional, para regla de cumpleaños de `03-Business-Rules/04_Lealtad.md`), `fecha_registro`.
 
 ### `reserva`
 La entidad transaccional central. Campos: `id`, `cliente_id`, `negocio_id`, `sede_id`, `staff_id` (asignado, nunca nulo tras confirmación — incluso si se pidió "cualquiera", se registra el Staff resultante), `recurso_id` (nullable), `hora_inicio`, `hora_fin`, `estado` (ver State Machines), `monto_total`, `monto_sena`, `precio_congelado` (snapshot del precio del Servicio al momento de confirmar — ver `Business_Rules_Bible.md`).

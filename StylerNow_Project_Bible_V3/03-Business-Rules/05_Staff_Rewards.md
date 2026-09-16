@@ -4,7 +4,7 @@
 Especificar por completo la mecánica de gamificación del Staff — el diferenciador de producto declarado explícitamente en la visión — de modo que su cálculo, temporadas, degradación y beneficios sean auditables e idénticos en toda superficie que los consuma (App Staff, Panel Negocio, Marketplace, comisión).
 
 ## Alcance
-Cubre exclusivamente el sistema de Nivel del **Staff**. El sistema de fidelización del **Cliente** es un documento distinto (`04_Loyalty.md` — ver `Glossary.md`, no confundir "Punto" de Cliente con "Puntaje" de Staff). Este documento es la única fuente de verdad del cálculo; ninguna otra superficie reimplementa la fórmula (ver ADL-006).
+Cubre exclusivamente el sistema de Nivel del **Staff**. El sistema de fidelización del **Cliente** es un documento distinto (`04_Lealtad.md` — ver `Glossary.md`, no confundir "Punto" de Cliente con "Puntaje" de Staff). Este documento es la única fuente de verdad del cálculo; ninguna otra superficie reimplementa la fórmula (ver ADL-006).
 
 ## Reglas
 

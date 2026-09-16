@@ -53,7 +53,7 @@ Estado de una Reserva confirmada en la que el Cliente no se presentó y no cance
 Mecanismo por el cual un Cliente se registra para un horario/Staff que hoy está lleno y es notificado automáticamente si se libera un cupo. Ver `03-Business-Rules/10_Waitlist_System.md`.
 
 ### Punto
-Unidad de fidelización otorgada a un Cliente por completar Reservas, dejar reseñas, referir, etc. Distinto de los puntos del Sistema PRO/EXPERT/MASTER, que aplican a Staff, no a Cliente. Ver `03-Business-Rules/04_Loyalty.md`.
+Unidad de fidelización otorgada a un Cliente por completar Reservas, dejar reseñas, referir, etc. Distinto de los puntos del Sistema PRO/EXPERT/MASTER, que aplican a Staff, no a Cliente. Ver `03-Business-Rules/04_Lealtad.md`.
 
 ### Nivel (Staff)
 Posición de un Staff en el Sistema PRO / EXPERT / MASTER, calculada por producción, calidad y puntualidad. Ver `03-Business-Rules/05_Staff_Rewards.md`.

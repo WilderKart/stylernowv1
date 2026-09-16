@@ -44,7 +44,7 @@ No aplica — las notificaciones son eventos disparados, no entidades con ciclo 
 El sistema envía automáticamente según el catálogo; ningún rol de producto puede enviar una notificación transaccional arbitraria a un usuario fuera de este catálogo (evita spam interno).
 
 ## Dependencias
-- Depende de: `03-Business-Rules/02_Booking_Rules.md`, `03-Business-Rules/03_Payment_Rules.md`, `03-Business-Rules/09_No_Show_Policy.md`, `03-Business-Rules/10_Waitlist_System.md`, `03-Business-Rules/04_Loyalty.md`, `08-Growth-Monetization/05_Billing_Failures.md`, `WhatsApp_Delivery_Engine.md`.
+- Depende de: `03-Business-Rules/02_Booking_Rules.md`, `03-Business-Rules/03_Payment_Rules.md`, `03-Business-Rules/09_No_Show_Policy.md`, `03-Business-Rules/10_Waitlist_System.md`, `03-Business-Rules/04_Lealtad.md`, `08-Growth-Monetization/05_Billing_Failures.md`, `WhatsApp_Delivery_Engine.md`.
 - De este documento dependen: `07-QA/08_Notifications.md`, `09-CRM-Intelligence/04_AI_Business.md`.
 
 ## Casos límite

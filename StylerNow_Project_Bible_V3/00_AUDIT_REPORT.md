@@ -58,7 +58,7 @@ Se leyó el contenido íntegro de los 52 archivos existentes (51 `.md` en subcar
 | 01_Roles.md | PLANTILLA — crítico: nada más puede definir permisos sin esto |
 | 02_Booking_Rules.md | PLANTILLA — crítico: el núcleo transaccional del producto no tiene reglas |
 | 03_Payment_Rules.md | PLANTILLA |
-| 04_Loyalty.md | PLANTILLA |
+| 04_Lealtad.md | PLANTILLA |
 | 05_Staff_Rewards.md | PARCIAL (mejor documento del set: define niveles PRO/EXPERT/MASTER, puntaje por producción/calidad/puntualidad, penalizaciones y beneficios — pero sin cálculo temporal, temporadas, degradación, auditoría detallada, eventos especiales ni impacto cuantificado en Marketplace/comisión) |
 | 06_Marketplace_Ads.md | PARCIAL (formatos y fórmula de score de una línea, sin pesos, desempates, presupuesto, facturación ni antifraude) |
 | 07_CRM.md | PLANTILLA — contradice al README, que promete CRM como diferenciador |

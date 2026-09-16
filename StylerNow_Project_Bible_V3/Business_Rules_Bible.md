@@ -53,7 +53,7 @@ R: El pago pasa a `EN_DISPUTA`; el servicio ya prestado no se revierte; el caso 
 R: El 100% de la propina va al Staff específico que el Cliente eligió (o al Staff que atendió la Reserva, si no hubo elección explícita). StylerNow no retiene comisión sobre propinas. Detalle completo, incluyendo el caso de propina en un combo con más de un Staff: `08-Growth-Monetization/03_Tips_Distribution.md`.
 
 **P: ¿Cuándo expiran los Puntos de fidelización de un Cliente?**
-R: A los 12 meses del otorgamiento, por lote (FIFO), con aviso 30 días antes. Nunca antes de 6 meses ni después de 24, sin importar la configuración del Negocio. Ver `03-Business-Rules/04_Loyalty.md`. (Nota: no confundir con el puntaje de Staff del Sistema PRO/EXPERT/MASTER, que se reinicia por temporada trimestral, no por expiración individual — ver `03-Business-Rules/05_Staff_Rewards.md`.)
+R: A los 12 meses del otorgamiento, por lote (FIFO), con aviso 30 días antes. Nunca antes de 6 meses ni después de 24, sin importar la configuración del Negocio. Ver `03-Business-Rules/04_Lealtad.md`. (Nota: no confundir con el puntaje de Staff del Sistema PRO/EXPERT/MASTER, que se reinicia por temporada trimestral, no por expiración individual — ver `03-Business-Rules/05_Staff_Rewards.md`.)
 
 **P: ¿Qué pasa si un Staff MASTER cambia de Sede dentro del mismo Negocio?**
 R: Su Nivel y puntaje no cambian — el Nivel es por vínculo Staff–Negocio, no por Sede. Ver `03-Business-Rules/05_Staff_Rewards.md`.
@@ -107,7 +107,7 @@ R: Se anonimiza el perfil CRM (nombre, notas, fotos) preservando el registro tra
 R: No, nunca. El aislamiento de CRM por Negocio es absoluto — ver `03-Business-Rules/07_CRM.md`, Reglas de aislamiento.
 
 **P: ¿Qué pasa si el Cliente cambia de número de teléfono?**
-R: Los Puntos, historial y perfil sobreviven porque están atados al `cliente_id` interno, no al dato de contacto — el cambio de teléfono es una actualización de perfil, no una cuenta nueva. Ver `03-Business-Rules/04_Loyalty.md`.
+R: Los Puntos, historial y perfil sobreviven porque están atados al `cliente_id` interno, no al dato de contacto — el cambio de teléfono es una actualización de perfil, no una cuenta nueva. Ver `03-Business-Rules/04_Lealtad.md`.
 
 ---
 

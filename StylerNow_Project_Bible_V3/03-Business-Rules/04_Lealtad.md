@@ -1,4 +1,12 @@
-# 04 — Loyalty
+# 04 — Lealtad
+
+> Renombrado por ADR-011 (2026-09-16): el dominio completo de recompensas
+> de StylerNow se llama oficialmente **Lealtad** en todo el producto —
+> "Loyalty" no se vuelve a usar. Este documento cubre Puntos de Cliente
+> (el sistema original); el resto de los 12 módulos del dominio Lealtad
+> (Wallet, Membresías, Gift Cards, Referidos, Sellos, Cashback, VIP,
+> Familias, Corporativo, Referidos de Staff, motor de IA) vive en
+> `ADR_011_Motor_Lealtad.md`.
 
 ## Objetivo
 Definir el sistema de fidelización del **Cliente** (distinto del Sistema PRO/EXPERT/MASTER, que es para Staff — ver `05_Staff_Rewards.md`) para que la acumulación, expiración y canje de Puntos sea predecible y auditable.

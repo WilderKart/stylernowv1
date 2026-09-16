@@ -104,7 +104,7 @@ Pruebas de integración/E2E de la superficie Negocio. Formato: ID | Caso | Resul
 | ID | Caso | Resultado esperado | Fuente |
 |---|---|---|---|
 | QA-BIZ-081 | Registrar venta de producto adicional | Se suma al cierre de caja del día | `02-UX/09_Business_Panel.md` |
-| QA-BIZ-082 | Aplicar canje de Puntos en la caja | Descuenta hasta $0, excedente se conserva | `03-Business-Rules/04_Loyalty.md` |
+| QA-BIZ-082 | Aplicar canje de Puntos en la caja | Descuenta hasta $0, excedente se conserva | `03-Business-Rules/04_Lealtad.md` |
 | QA-BIZ-083 | Cierre de caja del día | Total efectivo + digital correcto | `02-UX/09_Business_Panel.md` |
 | QA-BIZ-084 | Discrepancia en el cierre de caja | Se registra sin ajuste automático oculto | `02-UX/09_Business_Panel.md` |
 | QA-BIZ-085 | Cobrar saldo completo por la app (config. opcional) | Comisión se calcula sobre el total, no solo la Seña | `08-Growth-Monetization/02_Commissions.md` |

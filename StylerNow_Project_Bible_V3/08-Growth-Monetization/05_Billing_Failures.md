@@ -22,7 +22,7 @@ Este periodo de gracia de 10 días (Día 0 a Día 10) es el estándar de platafo
 
 Más corto, porque el impacto de un fallo es menor (afecta solo al beneficio de un Cliente, no a la operación completa de un Negocio):
 
-1. **Día 0** — falla el cobro. La Membresía pasa a `SUSPENDIDA_POR_IMPAGO` (ver `03-Business-Rules/04_Loyalty.md`). El Cliente pierde el beneficio de la Membresía de inmediato (no hay gracia de uso, a diferencia de la suscripción de Negocio).
+1. **Día 0** — falla el cobro. La Membresía pasa a `SUSPENDIDA_POR_IMPAGO` (ver `03-Business-Rules/04_Lealtad.md`). El Cliente pierde el beneficio de la Membresía de inmediato (no hay gracia de uso, a diferencia de la suscripción de Negocio).
 2. **Día 1** — notificación al Cliente.
 3. **Día 5** — segundo y último intento automático.
 4. **Día 5, si falla** — la Membresía pasa a `CANCELADA` definitivamente; el Cliente puede volver a suscribirse manualmente cuando quiera, generando una Membresía nueva.
@@ -36,7 +36,7 @@ La Barbería (o el Cliente, para Membresía) puede actualizar su medio de pago e
 Todo reintento automático queda registrado en auditoría con `actor_tipo = SISTEMA`. Un reintento fuera de este calendario (ej. SuperSU lo fuerza) requiere `actor_tipo = SUPER_ADMIN` con motivo.
 
 ## Estados
-Ver `04-Data-Model/03_State_Machines.md`, máquina "Suscripción" (`ACTIVA` → `EN_MORA` → `SUSPENDIDA`), y `03-Business-Rules/04_Loyalty.md` para el estado de Membresía.
+Ver `04-Data-Model/03_State_Machines.md`, máquina "Suscripción" (`ACTIVA` → `EN_MORA` → `SUSPENDIDA`), y `03-Business-Rules/04_Lealtad.md` para el estado de Membresía.
 
 ## Permisos
 - Barbería actualiza su propio medio de pago y ve el estado de mora de su suscripción.
@@ -44,7 +44,7 @@ Ver `04-Data-Model/03_State_Machines.md`, máquina "Suscripción" (`ACTIVA` → 
 - SuperSU puede extender el periodo de gracia o forzar un reintento manual, con motivo obligatorio.
 
 ## Dependencias
-- Depende de: `04_Subscriptions_Lifecycle.md`, `03-Business-Rules/03_Payment_Rules.md`, `03-Business-Rules/04_Loyalty.md`.
+- Depende de: `04_Subscriptions_Lifecycle.md`, `03-Business-Rules/03_Payment_Rules.md`, `03-Business-Rules/04_Lealtad.md`.
 - De este documento dependen: `02-UX/11_Notifications.md` (las notificaciones de Día 1, 7 y 5), `07-QA/07_Payments.md`.
 
 ## Casos límite

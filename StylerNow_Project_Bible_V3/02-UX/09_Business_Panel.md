@@ -33,7 +33,7 @@ Tabla de Clientes atendidos por el Negocio: visitas, gasto total (LTV), última 
 
 - Registro de venta de Servicio adicional o producto físico durante la atención (ej. venta de producto de cuidado personal).
 - Resumen de cierre de caja del día: efectivo vs. digital, total del día.
-- Aplicación de descuento por canje de Puntos de fidelización (`03-Business-Rules/04_Loyalty.md`) directamente desde esta pantalla.
+- Aplicación de descuento por canje de Puntos de fidelización (`03-Business-Rules/04_Lealtad.md`) directamente desde esta pantalla.
 
 ### Reportes (ver mockup `B7-ReportsReviews`)
 

@@ -58,7 +58,7 @@ Una Reserva en `PENDIENTE_PAGO` que no recibe confirmación de pago dentro de 10
 ### Gift Cards y Membresías (pagos no ligados a una Reserva única)
 
 - Una Gift Card se compra como una transacción independiente; su saldo se aplica como método de pago válido para la Seña o el saldo de una Reserva futura, sin comisión de plataforma adicional sobre su redención (la comisión ya se cobró, si aplica, al momento de la compra de la Gift Card).
-- Una Membresía (ver `03-Business-Rules/04_Loyalty.md`) genera cobros recurrentes gestionados igual que una suscripción: mismas reglas de fallo de cobro que `08-Growth-Monetization/05_Billing_Failures.md`.
+- Una Membresía (ver `03-Business-Rules/04_Lealtad.md`) genera cobros recurrentes gestionados igual que una suscripción: mismas reglas de fallo de cobro que `08-Growth-Monetization/05_Billing_Failures.md`.
 
 ## Estados
 Ver `04-Data-Model/03_State_Machines.md`, máquina "Pago".
