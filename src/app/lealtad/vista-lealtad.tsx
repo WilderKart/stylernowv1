@@ -5,8 +5,15 @@ import { Badge, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { formatCOP } from "@/lib/utils";
+import Link from "next/link";
 import { useState } from "react";
-import { crearGrupoFamiliar, redimirGiftCard, registrarEventoFraude, registrarReferido, type ResumenLealtad } from "./actions";
+import { crearGrupoFamiliar, registrarReferido, type ResumenLealtad } from "./actions";
+
+const MEMBRESIA_ESTADO_TONO: Record<string, "success" | "accent" | "neutral"> = {
+  ACTIVA: "success",
+  PROXIMA_A_VENCER: "accent",
+  SUSPENDIDA: "neutral",
+};
 
 const TIPO_ETIQUETA: Record<string, string> = {
   GIFT_CARD: "Gift Card",
@@ -19,7 +26,7 @@ const TIPO_ETIQUETA: Record<string, string> = {
 };
 
 export function VistaLealtad({ resumenInicial, errorInicial }: { resumenInicial: ResumenLealtad; errorInicial: string | null }) {
-  const [resumen, setResumen] = useState(resumenInicial);
+  const [resumen] = useState(resumenInicial);
   const error = errorInicial;
 
   return (
@@ -33,7 +40,29 @@ export function VistaLealtad({ resumenInicial, errorInicial }: { resumenInicial:
         <p className="mt-1 text-[11px] text-text-faint">Gift Cards, Referidos, Cashback y Promociones — todo en un solo saldo, usable en cualquier Negocio que lo acepte.</p>
       </Card>
 
-      <SeccionGiftCard onCanjeada={(saldo) => setResumen((r) => ({ ...r, walletSaldo: saldo }))} />
+      {resumen.membresias.length > 0 ? (
+        <section className="mb-6">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="font-display text-[12px] font-bold uppercase text-text">Mis Membresías</h2>
+            <Link href="/membresias" className="text-[11px] font-bold uppercase text-accent">Ver todas →</Link>
+          </div>
+          <ul className="flex flex-col gap-1.5">
+            {resumen.membresias.slice(0, 3).map((m) => (
+              <li key={m.id}>
+                <Link href={`/membresias/${m.id}`} className="flex items-center justify-between rounded-xl border border-border-subtle bg-surface px-3 py-2">
+                  <div>
+                    <p className="text-[12px] font-semibold text-text">{m.planNombre}</p>
+                    <p className="text-[10.5px] text-text-faint">{m.negocioNombre}</p>
+                  </div>
+                  <Badge tone={MEMBRESIA_ESTADO_TONO[m.estado] ?? "neutral"}>{m.estado === "SUSPENDIDA" ? "Congelada" : m.estado === "PROXIMA_A_VENCER" ? "Por vencer" : "Activa"}</Badge>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      <SeccionGiftCard />
 
       {resumen.movimientos.length > 0 ? (
         <section className="mb-6">
@@ -93,42 +122,16 @@ export function VistaLealtad({ resumenInicial, errorInicial }: { resumenInicial:
   );
 }
 
-function SeccionGiftCard({ onCanjeada }: { onCanjeada: (saldo: number) => void }) {
-  const [codigo, setCodigo] = useState("");
-  const [pin, setPin] = useState("");
-  const [cargando, setCargando] = useState(false);
-  const [mensaje, setMensaje] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
-
-  async function onCanjear() {
-    if (!codigo.trim() || !pin.trim()) return;
-    setCargando(true);
-    setMensaje(null);
-    const res = await redimirGiftCard(codigo, pin);
-    setCargando(false);
-    if (!res.ok) {
-      if (res.error.includes("PIN no es correcto")) {
-        await registrarEventoFraude("CANJE_DUPLICADO", null, { motivo: "PIN_INCORRECTO" });
-      }
-      setMensaje({ tipo: "error", texto: res.error });
-      return;
-    }
-    setMensaje({ tipo: "ok", texto: `¡Listo! Nuevo saldo: ${formatCOP(res.data.saldoDisponible)}` });
-    setCodigo("");
-    setPin("");
-    onCanjeada(res.data.saldoDisponible);
-  }
-
+function SeccionGiftCard() {
+  // Por seguridad (ADR-014, Fase B: "canje únicamente desde POS") el canje
+  // de una Gift Card ya no es autoservicio remoto — se acredita al
+  // StylerWallet solo cuando el Staff la registra en el local. Acá el
+  // Cliente solo compra o consulta su saldo, nunca canjea a distancia.
   return (
     <Card className="mb-6">
-      <h2 className="font-display mb-2 text-[12px] font-bold uppercase text-text">Canjear Gift Card</h2>
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <Input placeholder="Código" value={codigo} onChange={(e) => setCodigo(e.target.value.toUpperCase())} />
-        <Input placeholder="PIN" value={pin} onChange={(e) => setPin(e.target.value)} type="password" />
-        <Button size="sm" loading={cargando} onClick={onCanjear} disabled={!codigo.trim() || !pin.trim()}>
-          Canjear
-        </Button>
-      </div>
-      {mensaje ? <p className={`mt-2 text-[12px] font-semibold ${mensaje.tipo === "ok" ? "text-success" : "text-danger"}`}>{mensaje.texto}</p> : null}
+      <h2 className="font-display mb-2 text-[12px] font-bold uppercase text-text">Gift Cards</h2>
+      <p className="mb-3 text-[12px] text-text-muted">Comprá una para vos o para regalar, y consultá el saldo de las que ya tenés.</p>
+      <Link href="/gift-cards" className="text-[12px] font-bold uppercase text-accent">Ver Gift Cards →</Link>
     </Card>
   );
 }

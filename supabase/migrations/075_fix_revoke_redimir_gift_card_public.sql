@@ -1,0 +1,12 @@
+-- StylerNow — Migración 075: corrige un hallazgo de seguridad real en la
+-- migración 073 — `revoke execute on function public.redimir_gift_card(text, text)
+-- from authenticated;` NO cerraba el autoservicio remoto, porque Postgres
+-- otorga EXECUTE a PUBLIC por defecto en toda función nueva, y ningún rol
+-- (incluido `authenticated`) queda bloqueado mientras esa concesión a
+-- PUBLIC siga viva. Es el mismo tipo de trampa ya documentado en ADL-022
+-- ("revoke from public no bloquea a anon/authenticated"), en la dirección
+-- espejo: revocar solo de `authenticated` no sirve si PUBLIC todavía
+-- puede ejecutarla. Descubierto por la propia suite de verificación de
+-- Fase B: un Cliente todavía podía canjear su Gift Card a distancia pese
+-- a la migración 073.
+revoke execute on function public.redimir_gift_card(text, text) from public, anon, authenticated;

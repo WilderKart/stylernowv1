@@ -124,6 +124,15 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
     miNivelVip = (vipData?.vip_nivel as unknown as { nombre: string } | null)?.nombre ?? null;
   }
 
+  // Solo se ofrece el link a Membresías si el Negocio tiene al menos un
+  // plan activo — nunca un link muerto hacia una lista vacía (Regla de Oro).
+  const { count: planesMembresiaCount } = await supabaseVisita
+    .from("membresia_plan")
+    .select("id", { count: "exact", head: true })
+    .eq("negocio_id", negocio.id)
+    .eq("activo", true);
+  const tieneMembresias = (planesMembresiaCount ?? 0) > 0;
+
   // Marketplace Ads (Módulo 6.2): un clic en un resultado patrocinado se
   // cobra en tiempo real contra el Wallet del propio Negocio anunciante.
   if (campanaId) {
@@ -202,6 +211,16 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
                 Sos {miNivelVip} acá
               </Badge>
             ) : null}
+            <div className="mt-1.5 flex flex-wrap gap-x-3">
+              {tieneMembresias ? (
+                <Link href={`/negocio/${negocio.slug}/membresias`} className="block text-[12px] font-bold uppercase text-accent">
+                  Ver Membresías →
+                </Link>
+              ) : null}
+              <Link href={`/gift-cards/comprar?negocio=${negocio.slug}`} className="block text-[12px] font-bold uppercase text-accent">
+                Regalar Gift Card →
+              </Link>
+            </div>
           </div>
           <div className="mt-1 flex shrink-0 gap-2">
             <BotonFavorito negocioId={negocio.id} slug={negocio.slug} favoritoInicial={favoritoInicial} />

@@ -1,0 +1,16 @@
+-- StylerNow — Migración 076: corrige un hallazgo real de la migración
+-- 073 — `create or replace function` NO reemplaza una función existente
+-- cuando la lista de parámetros cambia (acá se agregaron 2 parámetros
+-- nuevos al final): Postgres la trata como un OVERLOAD nuevo, dejando la
+-- firma vieja de 6 parámetros (migración 055/060) viva junto a la nueva
+-- de 8. PostgREST no puede elegir entre ambas cuando una llamada real
+-- (con menos argumentos, apoyándose en los defaults) calza con las dos
+-- — "Could not choose the best candidate function" — descubierto por la
+-- propia suite de verificación de Fase B.
+--
+-- Regla general para este proyecto: agregar un parámetro nuevo a una RPC
+-- ya existente SIEMPRE debe ir acompañado de un `drop function` explícito
+-- de la firma vieja en la misma migración, nunca asumir que
+-- `create or replace` la reemplaza sola cuando cambia la lista de
+-- parámetros.
+drop function if exists public.crear_gift_card(uuid, numeric, text, text, text, int);

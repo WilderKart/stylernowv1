@@ -23,6 +23,11 @@ const MENSAJES_ERROR: Record<string, string> = {
   PRODUCTO_NO_DISPONIBLE: "Uno de los productos elegidos ya no está disponible.",
   METODO_PAGO_INVALIDO: "Elegí un método de pago válido.",
   MONTO_INVALIDO: "Revisá los montos ingresados.",
+  GIFT_CARD_NO_ENCONTRADA: "No encontramos ninguna Gift Card con ese código.",
+  PIN_INCORRECTO: "El PIN no es correcto.",
+  YA_CANJEADA: "Esa Gift Card ya fue canjeada.",
+  GIFT_CARD_NO_DISPONIBLE: "Esa Gift Card no está disponible para canjear.",
+  GIFT_CARD_VENCIDA: "Esa Gift Card ya venció.",
 };
 
 function traducirError(mensaje: string) {
@@ -163,6 +168,23 @@ export async function obtenerPuntosDisponibles(negocioId: string, clienteId: str
       .gt("fecha_expiracion", new Date().toISOString());
     if (error) return { ok: false, error: error.message };
     return { ok: true, data: (data ?? []).reduce((acc, p) => acc + p.cantidad_disponible, 0) };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
+// ── Gift Cards (ADR-014, Fase B: "canje únicamente desde POS") ────────────
+// Acredita el saldo TOTAL de la Gift Card al StylerWallet del Cliente
+// presente — acción independiente del cobro de una Reserva puntual (el
+// Cliente puede venir solo a canjear su Gift Card sin comprar nada más
+// en el momento). Gastar ese saldo de StylerWallet dentro de una venta de
+// POS todavía no está conectado — ver docs/TECH_DEBT_REGISTER.md.
+export async function canjearGiftCardEnPos(codigo: string, pin: string, clienteId: string): Promise<Resultado<{ montoAcreditado: number }>> {
+  try {
+    const { supabase } = await usuarioActual();
+    const { data, error } = await supabase.rpc("redimir_gift_card_pos", { p_codigo: codigo.trim(), p_pin: pin.trim(), p_cliente_id: clienteId });
+    if (error) return { ok: false, error: traducirError(error.message) };
+    return { ok: true, data: { montoAcreditado: Number(data) } };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
   }

@@ -7,12 +7,14 @@ import { formatCOP } from "@/lib/utils";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
+  canjearGiftCardEnPos,
   completarVenta,
   obtenerPuntosDisponibles,
   type ProductoPOS,
   type ReservaParaCobrar,
   type ResultadoVenta,
 } from "./actions";
+import { toast } from "sonner";
 
 export function ListaPOS({
   negocioId,
@@ -27,6 +29,7 @@ export function ListaPOS({
 }) {
   const [reservas, setReservas] = useState(reservasIniciales);
   const [seleccionada, setSeleccionada] = useState<ReservaParaCobrar | null>(null);
+  const [mostrarGiftCard, setMostrarGiftCard] = useState(false);
   const error = errorInicial;
 
   return (
@@ -37,6 +40,9 @@ export function ListaPOS({
           <p className="mt-1 text-[12.5px] text-text-muted">Citas de hoy listas para cobrar</p>
         </div>
         <div className="flex gap-2">
+          <button type="button" onClick={() => setMostrarGiftCard(true)} className="rounded-full border border-border px-3.5 py-2 text-[12px] font-bold text-text-muted hover:border-accent/40">
+            Gift Card
+          </button>
           <Link href="/panel/pos/productos" className="rounded-full border border-border px-3.5 py-2 text-[12px] font-bold text-text-muted hover:border-accent/40">
             Productos
           </Link>
@@ -45,6 +51,10 @@ export function ListaPOS({
           </Link>
         </div>
       </div>
+
+      {mostrarGiftCard ? (
+        <ModalCanjeGiftCard reservas={reservas} onCerrar={() => setMostrarGiftCard(false)} />
+      ) : null}
 
       {error ? <p className="mb-4 text-[12.5px] font-semibold text-danger">{error}</p> : null}
 
@@ -256,6 +266,83 @@ function ModalCobro({
         <Button variant="ghost" className="mt-2 w-full" onClick={onCerrar}>
           Cancelar
         </Button>
+      </div>
+    </div>
+  );
+}
+
+function ModalCanjeGiftCard({ reservas, onCerrar }: { reservas: ReservaParaCobrar[]; onCerrar: () => void }) {
+  const clientesUnicos = Array.from(new Map(reservas.map((r) => [r.clienteId, r.clienteNombre])).entries());
+  const [clienteId, setClienteId] = useState(clientesUnicos[0]?.[0] ?? "");
+  const [codigo, setCodigo] = useState("");
+  const [pin, setPin] = useState("");
+  const [procesando, setProcesando] = useState(false);
+  const [resultado, setResultado] = useState<number | null>(null);
+
+  async function canjear() {
+    if (!clienteId || !codigo.trim() || !pin.trim()) {
+      toast.error("Completá el Cliente, el código y el PIN.");
+      return;
+    }
+    setProcesando(true);
+    const res = await canjearGiftCardEnPos(codigo, pin, clienteId);
+    setProcesando(false);
+    if (!res.ok) { toast.error(res.error); return; }
+    setResultado(res.data.montoAcreditado);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center" onClick={onCerrar}>
+      <div className="max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-t-3xl bg-bg p-5 sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
+        <p className="mb-4 text-[15px] font-bold text-text">Canjear Gift Card</p>
+
+        {resultado !== null ? (
+          <>
+            <p className="mb-1 text-[13px] text-text-muted">Se acreditaron</p>
+            <p className="font-display mb-4 text-[26px] font-bold text-accent">{formatCOP(resultado)}</p>
+            <p className="mb-4 text-[12px] text-text-faint">al StylerWallet del Cliente. Ya puede usarlo en su próxima visita.</p>
+            <Button className="w-full" onClick={onCerrar}>Listo</Button>
+          </>
+        ) : (
+          <>
+            <label className="mb-1.5 block text-[12px] font-semibold text-text-muted">Cliente presente</label>
+            <select
+              value={clienteId}
+              onChange={(e) => setClienteId(e.target.value)}
+              className="mb-4 h-10 w-full rounded-lg border border-border bg-bg px-2 text-[12.5px] text-text"
+            >
+              {clientesUnicos.length === 0 ? <option value="">Sin citas hoy</option> : null}
+              {clientesUnicos.map(([id, nombre]) => (
+                <option key={id} value={id}>{nombre}</option>
+              ))}
+            </select>
+
+            <label className="mb-1.5 block text-[12px] font-semibold text-text-muted">Código de la Gift Card</label>
+            <input
+              value={codigo}
+              onChange={(e) => setCodigo(e.target.value.toUpperCase())}
+              placeholder="Ej. A1B2C3D4E5"
+              className="mb-4 h-10 w-full rounded-lg border border-border bg-bg px-2 text-[12.5px] uppercase text-text"
+            />
+
+            <label className="mb-1.5 block text-[12px] font-semibold text-text-muted">PIN</label>
+            <input
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+              type="password"
+              inputMode="numeric"
+              placeholder="••••"
+              className="mb-5 h-10 w-full rounded-lg border border-border bg-bg px-2 text-[12.5px] text-text"
+            />
+
+            <Button className="w-full" loading={procesando} disabled={!clienteId} onClick={canjear}>
+              Canjear
+            </Button>
+            <Button variant="ghost" className="mt-2 w-full" onClick={onCerrar}>
+              Cancelar
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );

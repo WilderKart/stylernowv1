@@ -45,19 +45,26 @@ export interface ResumenLealtad {
   sellos: { campanaId: string; campanaNombre: string; negocioNombre: string; sellosActuales: number; sellosRequeridos: number; recompensaDescripcion: string }[];
   cashback: { id: string; negocioNombre: string; monto: number; estado: string; createdAt: string }[];
   familia: { id: string; nombre: string; limiteMiembros: number } | null;
+  membresias: { id: string; planNombre: string; negocioNombre: string; estado: string }[];
 }
 
 export async function obtenerResumenLealtad(): Promise<Resultado<ResumenLealtad>> {
   try {
     const { supabase, userId } = await usuarioActual();
 
-    const [walletRes, codigoRes, referidosRes, sellosRes, cashbackRes, familiaRes] = await Promise.all([
+    const [walletRes, codigoRes, referidosRes, sellosRes, cashbackRes, familiaRes, membresiasRes] = await Promise.all([
       supabase.from("lealtad_wallet").select("saldo_disponible, id").eq("cliente_id", userId).maybeSingle(),
       supabase.rpc("obtener_mi_codigo_referido"),
       supabase.rpc("mis_referidos"),
       supabase.rpc("mis_sellos"),
       supabase.rpc("mi_cashback"),
       supabase.rpc("mi_familia"),
+      supabase
+        .from("cliente_membresia")
+        .select("id, estado, plan:plan_id (nombre), negocio:negocio_id (nombre)")
+        .eq("cliente_id", userId)
+        .in("estado", ["ACTIVA", "PROXIMA_A_VENCER", "SUSPENDIDA"])
+        .order("created_at", { ascending: false }),
     ]);
 
     let movimientos: ResumenLealtad["movimientos"] = [];
@@ -84,20 +91,14 @@ export async function obtenerResumenLealtad(): Promise<Resultado<ResumenLealtad>
         })),
         cashback: (cashbackRes.data ?? []).map((c) => ({ id: c.id, negocioNombre: c.negocio_nombre, monto: Number(c.monto), estado: c.estado, createdAt: c.created_at })),
         familia: familiaRes.data ? { id: familiaRes.data.id, nombre: familiaRes.data.nombre, limiteMiembros: familiaRes.data.limite_miembros } : null,
+        membresias: (membresiasRes.data ?? []).map((m) => ({
+          id: m.id,
+          estado: m.estado,
+          planNombre: (m.plan as unknown as { nombre: string } | null)?.nombre ?? "Membresía",
+          negocioNombre: (m.negocio as unknown as { nombre: string } | null)?.nombre ?? "",
+        })),
       },
     };
-  } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
-  }
-}
-
-export async function redimirGiftCard(codigo: string, pin: string): Promise<Resultado<{ saldoDisponible: number }>> {
-  try {
-    const { supabase } = await usuarioActual();
-    const { data, error } = await supabase.rpc("redimir_gift_card", { p_codigo: codigo.trim(), p_pin: pin.trim() });
-    if (error) return { ok: false, error: traducirError(error.message) };
-    revalidatePath("/lealtad");
-    return { ok: true, data: { saldoDisponible: Number(data.saldo_disponible) } };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
   }

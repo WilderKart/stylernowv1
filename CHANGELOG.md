@@ -7,6 +7,47 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — ADR-014, Fase B: Checkout completo de Gift Cards + endurecimiento de seguridad
+Cuatro pantallas de Cliente nuevas: `/gift-cards` (hub), `/gift-cards/comprar`
+(elegir Negocio con búsqueda en vivo, monto libre o rápido, para uno mismo
+o para otra persona con nombre/email/mensaje, PIN, checkout real vía
+Mercado Pago), `/gift-cards/mis` (compradas y recibidas, RLS ampliada para
+que el destinatario también las vea por su email verificado en su propio
+JWT) y `/gift-cards/canjear` (consulta de saldo de solo lectura,
+PIN-protegida, nunca canjea). **Endurecimiento de seguridad deliberado**:
+el autoservicio remoto (`redimir_gift_card()`, Cliente convierte su propia
+Gift Card a StylerWallet desde cualquier lado) queda cerrado — el único
+canje real ahora es `redimir_gift_card_pos()`, exclusivo de Staff/Barbería
+del Negocio de la Gift Card, acreditando el StylerWallet del Cliente
+presente, expuesto en el Panel de Caja (`/panel/pos`, botón "Gift Card").
+Dos hallazgos de seguridad reales corregidos antes de cerrar el módulo: un
+`revoke ... from authenticated` que no cerraba el acceso porque `PUBLIC`
+seguía teniendo el `EXECUTE` implícito (ADL-028, espejo exacto de
+ADL-022), y un `create or replace function` con parámetros nuevos que
+creó un overload ambiguo en vez de reemplazar la función (ADL-029).
+Verificado: 21/21 casos reales contra Supabase (compra, activación,
+consulta, aislamiento RLS, cierre del autoservicio, canje cruzado entre
+Negocios rechazado, auditoría) + regresión completa de las 9 suites
+existentes — cero regresiones. `tsc`/`eslint`/`next build` limpios.
+
+### Añadido — ADR-014, Fase A: Checkout completo de Membresías
+Cinco pantallas de Cliente nuevas: `/negocio/[slug]/membresias` (comparar
+planes de un Negocio, con badge si ya tenés una Membresía activa ahí),
+`/negocio/[slug]/membresias/[planId]` (detalle completo de beneficios),
+`/checkout/membresia/[planId]` (checkout real vía Mercado Pago, mismo
+patrón que Upgrade de Plan/paquete de créditos de IA), `/membresias` (Mis
+Membresías, todas las que tenés en cualquier Negocio) y
+`/membresias/[id]` + `/membresias/[id]/historial` (detalle, congelar/
+reactivar/cancelar, historial de uso). Sección "Mis Membresías" agregada
+al hub de Lealtad (`/lealtad`) y link "Ver Membresías"/"Regalar Gift Card"
+en la página pública del Negocio. Cierra el hallazgo honesto del Módulo
+6.6 (AI OS): el dominio Lealtad no tenía checkout de Cliente real para
+Membresía ni Gift Card, pese a que todo el backend ya existía y estaba
+verificado desde el Módulo 6.5. Verificado: 15/15 casos reales contra
+Supabase (compra, activación, joins exactos de cada pantalla, RLS,
+congelar/reactivar/cancelar) + regresión completa. `tsc`/`eslint`/
+`next build` limpios.
+
 ### Refactorizado — `completar_venta_pos()` pasa a ser un Pipeline de Eventos
 Pedido directo del fundador tras la 5ª extensión de esta función. Se
 divide en una fase crítica (Pago, Membresía, canje de Puntos, Inventario

@@ -2191,11 +2191,125 @@ Este archivo, `CHANGELOG.md`, `Architecture_Decision_Log.md` (ADL-027).
 
 ---
 
-**Próximo módulo a ejecutar: terminar de conectar el AI OS a más
-superficies de Fase 6 (Concierge de Cliente, Coach de Staff, Analista de
-Negocio — `02_AI_Client.md`, `03_AI_Staff.md`, `04_AI_Business.md`).
-Motor WhatsApp sigue bloqueado sin credenciales de WhatsApp Business API
-(ver `docs/PENDING_DECISIONS.md`).**
+## ADR-014, Fase A — Checkout completo de Membresías (cierra el Módulo 6.5)
+
+`src/app/negocio/[slug]/membresias/` (lista + detalle), `src/app/checkout/membresia/[planId]/`
+(checkout real), `src/app/membresias/` (Mis Membresías, detalle,
+historial), secciones nuevas en `src/app/lealtad/vista-lealtad.tsx` y
+`src/app/negocio/[slug]/page.tsx`.
+
+- Todo el backend ya existía y estaba verificado desde el Módulo 6.5 —
+  esta fase es 100% frontend, reusando `suscribirse_membresia()`,
+  `cancelar_membresia()`, `congelar_membresia()`,
+  `reactivar_membresia_congelada()` y el patrón de checkout ya probado 3
+  veces (`iniciarUpgrade`/`comprarPaqueteIa`).
+- Recorrido completo real: el Cliente navega los planes de un Negocio,
+  ve el detalle de beneficios, paga con Mercado Pago Checkout Pro, la
+  Membresía se activa automáticamente al aprobarse el pago
+  (`aplicar_evento_pago()`, rama MEMBRESIA, ya existente), y aparece
+  tanto en `/membresias` como en la sección "Mis Membresías" del hub de
+  Lealtad.
+- El link "Ver Membresías" en la página pública del Negocio solo se
+  muestra si existe al menos un plan activo — nunca un link muerto
+  hacia una lista vacía (Regla de Oro).
+
+### Verificado end-to-end contra la base real (15/15 + regresión completa)
+Las queries EXACTAS con joins (`plan:plan_id(...)`, `negocio:negocio_id(...)`)
+usadas por cada pantalla nueva se probaron contra Supabase real, no solo
+compiladas — un alias mal escrito pasa `tsc` pero devuelve `null` en
+producción. Compra real (`suscribirse_membresia` + `aplicar_evento_pago`),
+RLS (un Cliente ajeno no ve la Membresía de otro), congelar/reactivar con
+las reglas del plan. Re-verificación completa de las 9 suites de
+regresión existentes — cero regresiones.
+
+### Documentación actualizada con esta fase
+Este archivo, `CHANGELOG.md`.
+
+`(ver hash del commit conjunto con la Fase B, más abajo)`
+
+---
+
+## ADR-014, Fase B — Checkout completo de Gift Cards + endurecimiento de seguridad
+
+Migraciones `073_gift_card_checkout_y_seguridad_pos.sql` a
+`076_fix_crear_gift_card_overload_ambiguo.sql` · `src/app/gift-cards/`
+(hub, comprar, mis, canjear) · `src/app/panel/pos/actions.ts` +
+`lista-pos.tsx` (canje desde Caja) · `src/app/lealtad/vista-lealtad.tsx`
+(sección Gift Card reescrita).
+
+- **Decisión de seguridad deliberada** (pedida explícitamente por el
+  fundador: "canje únicamente desde POS"): el autoservicio remoto
+  (`redimir_gift_card()`, el Cliente convertía su propia Gift Card a
+  StylerWallet desde cualquier lugar) queda cerrado. El único canje real
+  ahora es `redimir_gift_card_pos()` — exclusivo de Staff/Barbería del
+  Negocio de la Gift Card, acredita el StylerWallet del Cliente
+  PRESENTE (no de quien procesa el canje) — expuesto como una acción
+  independiente en el Panel de Caja, no atada a una venta puntual.
+  `consultar_gift_card()` (nueva, solo lectura, PIN-protegida) reemplaza
+  al autoservicio para que el Cliente pueda verificar su código/saldo
+  antes de ir al Negocio, sin mover un solo peso.
+- Compra completa: elegir Negocio (búsqueda en vivo reusando
+  `marketplace_buscar()`, sin RPC nueva), monto libre o rápido, para uno
+  mismo o para otra persona (nombre/email/mensaje — 2 columnas nuevas en
+  `gift_card`), PIN elegido por el comprador, checkout real vía Mercado
+  Pago. RLS ampliada: el destinatario también ve la Gift Card que le
+  regalaron, verificado contra su propio email en el JWT (nunca un
+  email arbitrario).
+- **Dos hallazgos de seguridad reales, encontrados por la propia suite
+  de verificación de esta fase (no antes de escribirla)**:
+  1. `revoke execute on function ... from authenticated` NO cerraba el
+     autoservicio — Postgres otorga `EXECUTE` a `PUBLIC` por defecto en
+     toda función nueva, y ese acceso implícito seguía abierto. Un
+     Cliente real todavía podía canjear a distancia después de aplicada
+     la migración que se suponía lo cerraba. Corregido revocando
+     también de `public` — ver ADL-028 (espejo exacto de ADL-022).
+  2. `create or replace function` extendiendo `crear_gift_card()` de 6 a
+     8 parámetros creó un OVERLOAD nuevo en vez de reemplazar la
+     función — ambas firmas coexistieron, y una llamada real con pocos
+     argumentos se volvió ambigua para PostgREST
+     ("Could not choose the best candidate function"). Corregido con un
+     `drop function` explícito de la firma vieja — ver ADL-029.
+- **Hallazgo repetido, no nuevo**: la migración 073 también reintrodujo
+  el bug de ADL-025 (`gen_random_bytes`/`crypt` sin calificar el esquema
+  `extensions`) al copiar el cuerpo de `crear_gift_card()` — corregido
+  en la migración 074.
+
+### Verificado end-to-end contra la base real (21/21 + regresión completa)
+Compra con mensaje/destinatario, activación automática, RLS (comprador,
+destinatario por email-JWT, tercero sin acceso), `consultar_gift_card()`
+nunca mueve saldo, **el autoservicio remoto queda genuinamente cerrado**
+(`permission denied`, no solo un mensaje de negocio), un Cliente no puede
+usar la RPC de POS para sí mismo, Staff SÍ puede canjear a nombre del
+Cliente presente y el saldo llega a la wallet correcta (no a la del
+Staff), doble canje rechazado, Staff de un Negocio distinto no puede
+canjear una Gift Card ajena, auditoría completa. Re-verificación completa
+de las 9 suites de regresión existentes tras las migraciones — cero
+regresiones. `tsc`/`eslint`/`next build` limpios.
+
+### Documentación actualizada con esta fase
+Este archivo, `CHANGELOG.md`, `Architecture_Decision_Log.md` (ADL-028,
+ADL-029), `docs/TECH_DEBT_REGISTER.md` (gasto de StylerWallet en POS
+todavía no conectado — decisión deliberada, no un olvido), memoria
+persistente de sesión (dos hallazgos de REVOKE/overload documentados
+para no repetirse en proyectos futuros).
+
+### Riesgos detectados
+- El StylerWallet (Gift Cards/Referidos/Cashback/VIP) sigue sin poder
+  gastarse como método de pago DENTRO de una venta de POS — solo se
+  puede acreditar (vía canje de Gift Card) y consultar. Conectarlo
+  requiere un diseño de autorización nuevo (el Wallet no tiene alcance
+  de Negocio) — ver `docs/TECH_DEBT_REGISTER.md`.
+
+`(pendiente de commit)`
+
+---
+
+**Próximo módulo a ejecutar: ADR-014, Fase C — Tracking real del ROI de
+IA (`ai_interaction`/`ai_conversion`/`ai_roi_snapshot`), Fase D
+(exportación PDF/Excel), Fase E (regla definitiva de Recomendación IA),
+Fase F (Pipeline Global de Eventos), Fase G (rol de Ollama). Motor
+WhatsApp sigue bloqueado sin credenciales de WhatsApp Business API (ver
+`docs/PENDING_DECISIONS.md`).**
 
 ---
 

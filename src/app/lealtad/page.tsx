@@ -23,7 +23,7 @@ export default async function LealtadPage() {
         resumenInicial={
           resumen.ok
             ? resumen.data
-            : { walletSaldo: 0, movimientos: [], codigoReferido: null, referidos: [], sellos: [], cashback: [], familia: null }
+            : { walletSaldo: 0, movimientos: [], codigoReferido: null, referidos: [], sellos: [], cashback: [], familia: null, membresias: [] }
         }
         errorInicial={resumen.ok ? null : resumen.error}
       />

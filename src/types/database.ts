@@ -1206,11 +1206,13 @@ export type Database = {
           corporativo_cuenta_id: string | null
           created_at: string
           destinatario_email: string | null
+          destinatario_nombre: string | null
           destinatario_telefono: string | null
           estado: Database["public"]["Enums"]["gift_card_estado"]
           fecha_expiracion: string | null
           id: string
           lote_id: string | null
+          mensaje: string | null
           monto_original: number
           negocio_id: string
           pin_hash: string
@@ -1223,11 +1225,13 @@ export type Database = {
           corporativo_cuenta_id?: string | null
           created_at?: string
           destinatario_email?: string | null
+          destinatario_nombre?: string | null
           destinatario_telefono?: string | null
           estado?: Database["public"]["Enums"]["gift_card_estado"]
           fecha_expiracion?: string | null
           id?: string
           lote_id?: string | null
+          mensaje?: string | null
           monto_original: number
           negocio_id: string
           pin_hash: string
@@ -1240,11 +1244,13 @@ export type Database = {
           corporativo_cuenta_id?: string | null
           created_at?: string
           destinatario_email?: string | null
+          destinatario_nombre?: string | null
           destinatario_telefono?: string | null
           estado?: Database["public"]["Enums"]["gift_card_estado"]
           fecha_expiracion?: string | null
           id?: string
           lote_id?: string | null
+          mensaje?: string | null
           monto_original?: number
           negocio_id?: string
           pin_hash?: string
@@ -4291,6 +4297,34 @@ export type Database = {
         Args: { p_evento: Json }
         Returns: undefined
       }
+      _validar_gift_card_para_canje: {
+        Args: { p_codigo: string; p_pin: string }
+        Returns: {
+          codigo: string
+          comprador_id: string | null
+          corporativo_cuenta_id: string | null
+          created_at: string
+          destinatario_email: string | null
+          destinatario_nombre: string | null
+          destinatario_telefono: string | null
+          estado: Database["public"]["Enums"]["gift_card_estado"]
+          fecha_expiracion: string | null
+          id: string
+          lote_id: string | null
+          mensaje: string | null
+          monto_original: number
+          negocio_id: string
+          pin_hash: string
+          saldo_actual: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "gift_card"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       activar_campana: {
         Args: { p_campana_id: string }
         Returns: {
@@ -4861,11 +4895,13 @@ export type Database = {
           corporativo_cuenta_id: string | null
           created_at: string
           destinatario_email: string | null
+          destinatario_nombre: string | null
           destinatario_telefono: string | null
           estado: Database["public"]["Enums"]["gift_card_estado"]
           fecha_expiracion: string | null
           id: string
           lote_id: string | null
+          mensaje: string | null
           monto_original: number
           negocio_id: string
           pin_hash: string
@@ -5211,6 +5247,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      consultar_gift_card: {
+        Args: { p_codigo: string; p_pin: string }
+        Returns: {
+          estado: Database["public"]["Enums"]["gift_card_estado"]
+          fecha_expiracion: string
+          monto_original: number
+          negocio_nombre: string
+          saldo_actual: number
+        }[]
+      }
       consumir_creditos_ia: {
         Args: {
           p_accion: string
@@ -5343,43 +5389,83 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      crear_gift_card: {
-        Args: {
-          p_destinatario_email?: string
-          p_destinatario_telefono?: string
-          p_dias_vigencia?: number
-          p_monto: number
-          p_negocio_id: string
-          p_pin: string
-        }
-        Returns: {
-          comision_plataforma_monto: number | null
-          created_at: string
-          es_huerfano: boolean
-          estado: Database["public"]["Enums"]["pago_estado"]
-          id: string
-          id_preferencia_pasarela: string | null
-          id_transaccion_pasarela: string | null
-          metadata: Json
-          monto: number
-          monto_reembolsado: number
-          motivo_reembolso: string | null
-          negocio_id: string | null
-          pasarela: string
-          payload_pasarela: Json | null
-          procesado_at: string | null
-          reserva_id: string | null
-          staff_destino_id: string | null
-          tipo: Database["public"]["Enums"]["pago_tipo"]
-          updated_at: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "pago"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+      crear_gift_card:
+        | {
+            Args: {
+              p_destinatario_email?: string
+              p_destinatario_telefono?: string
+              p_dias_vigencia?: number
+              p_monto: number
+              p_negocio_id: string
+              p_pin: string
+            }
+            Returns: {
+              comision_plataforma_monto: number | null
+              created_at: string
+              es_huerfano: boolean
+              estado: Database["public"]["Enums"]["pago_estado"]
+              id: string
+              id_preferencia_pasarela: string | null
+              id_transaccion_pasarela: string | null
+              metadata: Json
+              monto: number
+              monto_reembolsado: number
+              motivo_reembolso: string | null
+              negocio_id: string | null
+              pasarela: string
+              payload_pasarela: Json | null
+              procesado_at: string | null
+              reserva_id: string | null
+              staff_destino_id: string | null
+              tipo: Database["public"]["Enums"]["pago_tipo"]
+              updated_at: string
+            }
+            SetofOptions: {
+              from: "*"
+              to: "pago"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: {
+              p_destinatario_email?: string
+              p_destinatario_nombre?: string
+              p_destinatario_telefono?: string
+              p_dias_vigencia?: number
+              p_mensaje?: string
+              p_monto: number
+              p_negocio_id: string
+              p_pin: string
+            }
+            Returns: {
+              comision_plataforma_monto: number | null
+              created_at: string
+              es_huerfano: boolean
+              estado: Database["public"]["Enums"]["pago_estado"]
+              id: string
+              id_preferencia_pasarela: string | null
+              id_transaccion_pasarela: string | null
+              metadata: Json
+              monto: number
+              monto_reembolsado: number
+              motivo_reembolso: string | null
+              negocio_id: string | null
+              pasarela: string
+              payload_pasarela: Json | null
+              procesado_at: string | null
+              reserva_id: string | null
+              staff_destino_id: string | null
+              tipo: Database["public"]["Enums"]["pago_tipo"]
+              updated_at: string
+            }
+            SetofOptions: {
+              from: "*"
+              to: "pago"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
       crear_grupo_familiar: {
         Args: {
           p_descuento_familiar_pct?: number
@@ -6787,6 +6873,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      redimir_gift_card_pos: {
+        Args: { p_cliente_id: string; p_codigo: string; p_pin: string }
+        Returns: number
       }
       reenviar_invitacion: {
         Args: { p_invitacion_id: string }
