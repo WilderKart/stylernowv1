@@ -14,7 +14,7 @@ Cuatro funciones de IA para la Barbería. Cada función es independiente y puede
 **Proceso:** proyecta la ocupación esperada de los próximos 14 días por franja horaria.
 **Salida:** vista de calendario con un indicador de "ocupación esperada" (bajo/medio/alto) superpuesto sobre la Agenda del Panel Negocio, antes de que las Reservas reales lleguen.
 **Limitación:** es una proyección estadística, no una garantía — se etiqueta explícitamente como "Estimado" en la UI, nunca como un número de certeza absoluta.
-**Costo y nivel de IA:** Nivel 2 (IA Premium) — 10 créditos del Negocio por corrida, cada 14 días, por Sede. Ver `AI_Credit_System.md`.
+**Costo y nivel de IA:** Nivel 2 (IA Premium) — 10 créditos del Negocio por corrida, cada 14 días, por Sede. Ver `AI_Credit_System.md` (costo de referencia — el valor vigente vive en `ai_accion_costo`, editable por SuperSU desde ADR-013; hoy consolidado dentro de `analista_negocio`).
 
 ### Función 2 — Riesgo de abandono de Cliente
 
@@ -22,14 +22,14 @@ Cuatro funciones de IA para la Barbería. Cada función es independiente y puede
 **Proceso:** calcula un nivel de riesgo (bajo/medio/alto) por Cliente, recalculado semanalmente.
 **Salida:** se muestra en el perfil CRM del Cliente (`01_CRM_Complete.md`) y alimenta el segmento sugerido "Clientes en riesgo" para campañas de retención.
 **Limitación:** no predice una fecha exacta de abandono, solo un nivel de riesgo relativo dentro de la base de Clientes del propio Negocio.
-**Costo y nivel de IA:** Nivel 1 (IA económica) — 1 crédito del Negocio por Cliente evaluado, calculado en lote semanal (no por consulta individual cuando la Barbería abre el perfil de un Cliente — el cálculo ya está hecho y cacheado desde el lote). Ver `AI_Credit_System.md`.
+**Costo y nivel de IA:** Nivel 1 (IA económica) — 1 crédito del Negocio por Cliente evaluado, calculado en lote semanal (no por consulta individual cuando la Barbería abre el perfil de un Cliente — el cálculo ya está hecho y cacheado desde el lote). Ver `AI_Credit_System.md` (costo de referencia — el valor vigente vive en `ai_accion_costo` como `prediccion_abandono`, editable por SuperSU desde ADR-013).
 
 ### Función 3 — Sugerencia de campañas
 
 **Entradas:** segmentos de Clientes (`01_CRM_Complete.md`), resultado de campañas anteriores del mismo Negocio (si las hay), horarios muertos detectados (Función 4).
 **Proceso:** combina segmento + oportunidad de agenda para sugerir una campaña concreta (ej. "12 Clientes en riesgo de abandono + martes por la tarde con baja ocupación → sugerir 15% de descuento en ese horario para ese segmento").
 **Salida:** tarjeta de sugerencia de campaña con un botón de "Crear campaña con estos parámetros" que pre-llena el formulario de notificación/promoción, pero **requiere que la Barbería la revise y confirme explícitamente el envío** — nunca se dispara una campaña ni un descuento sin acción humana.
-**Costo y nivel de IA:** Nivel 2 (IA Premium) — 8 créditos del Negocio por sugerencia generada, bajo demanda (cuando la Barbería/Guardian abre la sección de campañas sugeridas), cacheada 24h. Ver `AI_Credit_System.md`.
+**Costo y nivel de IA:** Nivel 2 (IA Premium) — 8 créditos del Negocio por sugerencia generada, bajo demanda (cuando la Barbería/Guardian abre la sección de campañas sugeridas), cacheada 24h. Ver `AI_Credit_System.md` (costo de referencia — el valor vigente vive en `ai_accion_costo` como `campana_asistida`, editable por SuperSU desde ADR-013).
 
 ### Función 4 — Horarios muertos y oportunidades
 

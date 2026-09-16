@@ -12,10 +12,13 @@ import type { NextRequest } from "next/server";
  * Tareas de sistema que hasta esta migración no tenían NINGÚN disparador —
  * existían como RPC pero nadie las llamaba jamás en producción
  * (`expirar_reservas_vencidas` desde la migración 008; `ejecutar_downgrades_programados`,
- * nueva en la migración 049). Futuros módulos con la misma necesidad
- * (rollover de Temporada, bonos agregados de Puntualidad — ver
- * TECH_DEBT_REGISTER.md, Módulo 4 App Staff) agregan su tarea acá en vez de
- * abrir una infraestructura de cron nueva cada vez.
+ * nueva en la migración 049; `otorgar_creditos_plan_mensual` — AI OS/ADR-013,
+ * migración 067 — mismo patrón, revocada de `authenticated` a propósito para
+ * que solo este cron con `service_role` pueda otorgar créditos de Plan).
+ * Futuros módulos con la misma necesidad (rollover de Temporada, bonos
+ * agregados de Puntualidad — ver TECH_DEBT_REGISTER.md, Módulo 4 App Staff)
+ * agregan su tarea acá en vez de abrir una infraestructura de cron nueva
+ * cada vez.
  */
 export async function GET(request: NextRequest) {
   const secreto = process.env.CRON_SECRET;
@@ -33,6 +36,9 @@ export async function GET(request: NextRequest) {
 
   const { data: downgrades, error: e2 } = await admin.rpc("ejecutar_downgrades_programados");
   resultado.downgrades = e2 ? { error: e2.message } : downgrades;
+
+  const { data: creditosIa, error: e3 } = await admin.rpc("otorgar_creditos_plan_mensual");
+  resultado.creditos_ia_otorgados = e3 ? { error: e3.message } : creditosIa;
 
   return Response.json({ ok: true, ejecutado_at: new Date().toISOString(), ...resultado });
 }

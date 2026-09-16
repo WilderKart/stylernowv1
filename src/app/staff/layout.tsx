@@ -1,7 +1,17 @@
 import { obtenerContextoStaff } from "@/lib/auth/require-staff";
 import { StaffNav } from "./staff-nav";
+import { Suspense } from "react";
+import CargandoStaff from "./loading";
 
-export default async function StaffLayout({ children }: { children: React.ReactNode }) {
+/**
+ * El guard (`await obtenerContextoStaff()`) vive en un componente propio
+ * envuelto en un `<Suspense>` local — NO directo en `StaffLayout` — porque
+ * `loading.tsx` de un segmento nunca envuelve el `layout.tsx` de ese mismo
+ * segmento (ver node_modules/next/dist/docs/.../loading.md). Sin este
+ * boundary local, la Suspense boundary que atrapa este guard async es la de
+ * `src/app/loading.tsx` (el skeleton del Marketplace).
+ */
+async function StaffGuardado({ children }: { children: React.ReactNode }) {
   const contexto = await obtenerContextoStaff();
 
   if (!contexto) {
@@ -45,5 +55,13 @@ export default async function StaffLayout({ children }: { children: React.ReactN
       <StaffNav negocioNombre={contexto.negocioNombre} esGuardian={contexto.esGuardian} />
       {children}
     </div>
+  );
+}
+
+export default function StaffLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<CargandoStaff />}>
+      <StaffGuardado>{children}</StaffGuardado>
+    </Suspense>
   );
 }

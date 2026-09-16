@@ -90,6 +90,41 @@ bloquea, el desarrollo sigue avanzando en paralelo sin esperar respuesta.
 - **Recomendación:** cuando el fundador decida, habilitar Mercado Pago Preapproval en la cuenta comercial y definir el flujo de "guardar medio de pago" en el Panel Negocio (Checkout Pro no lo soporta) — en ese momento se construye el calendario Día 0/1/3/7/10 real sobre esa base.
 - **Bloquea:** Solo el calendario automático de reintentos de cobro — el resto del ciclo de vida de Suscripción (upgrade, downgrade, suspensión, cancelación, camino manual de mora) ya funciona completo sin esto.
 
+## Fase 6 — AI OS: falta credencial de Gemini y servidor de Ollama
+
+- **Contexto:** el Cost Optimizer del ADR-013 define un orden oficial de proveedores (Ollama local → OpenRouter económico → Gemini → premium → fallback). Hoy `ai_modelo_config` tiene Ollama y Gemini seedeados con `activo=false` porque no existe `OLLAMA_BASE_URL` (requiere un servidor propio, no disponible en este entorno serverless/Vercel) ni `GEMINI_API_KEY`.
+- **Impacto:** el Cost Optimizer funciona completo hoy con OpenRouter (principal) + Nemotron (respaldo, heredado de ADR-011) — ningún consumidor de IA está bloqueado. Agregar Gemini/Ollama solo ampliaría las opciones de costo/calidad disponibles.
+- **Recomendación:** (a) Gemini — proveer `GEMINI_API_KEY` cuando el fundador lo considere necesario, no requiere cambio de código, el Cost Optimizer la detecta sola. (b) Ollama — requiere decidir si vale la pena operar un servidor propio (costo de infraestructura) solo para tener un proveedor gratuito adicional, dado que OpenRouter ya ofrece un modelo gratuito.
+- **Bloquea:** No — son proveedores adicionales, no el único camino de IA.
+
+## Fase 6 — Lealtad: checkout de Cliente para Membresía y Gift Card no construido
+
+- **Contexto:** `suscribirse_membresia()` y la compra de Gift Card (Módulo 6.5) están completas y verificadas del lado del backend, pero ninguna tiene un botón/checkout real en el frontend de Cliente — a diferencia de Upgrade de Plan y del paquete de créditos de IA (Módulo 6.6), que sí replican el patrón completo de Mercado Pago Checkout Pro. Encontrado durante el Módulo 6.6 al buscar un ejemplo de checkout existente para replicar.
+- **Impacto:** un Cliente no puede hoy comprar una Membresía ni una Gift Card con dinero real desde la app — el recorrido transversal de Lealtad (ver Módulo 6.5/6.6 en `00_MASTER_TASKLIST.md`) se verificó insertando el registro de Membresía directamente vía `service_role`, no a través de una compra real. El dominio Lealtad no queda genuinamente cerrado de punta a punta hasta que esto exista.
+- **Recomendación:** construir el checkout (patrón ya probado 3 veces: `iniciarUpgrade`/`comprarPaqueteIa`) para Membresía en `/negocio/[slug]` (donde el Cliente ya ve los Servicios del Negocio) y para Gift Card en una pantalla nueva o dentro de `/lealtad`. Es trabajo de alcance conocido y bajo riesgo — la pregunta para el fundador es de prioridad, no de diseño.
+- **Bloquea:** No al resto de Lealtad (todo lo demás del dominio funciona), pero sí bloquea poder decir que el dominio Lealtad está 100% cerrado de punta a punta con dinero real.
+
+## Fase 6 — ROI de IA: métricas de atribución de resultado no son medibles todavía
+
+- **Contexto:** la extensión del ADR-012/013 pide un ROI Dashboard con clientes recuperados, reservas generadas por IA, ventas atribuidas y tiempo ahorrado. Ninguna de estas existe hoy como dato: no hay ningún mecanismo que vincule una sugerencia/acción de IA con un resultado de negocio posterior (¿esta Reserva ocurrió *por* la sugerencia de IA, o el Cliente hubiera vuelto igual?).
+- **Impacto:** `/panel/ia` muestra hoy solo métricas reales y verificables (créditos consumidos, costo estimado, consumo por categoría) — las métricas de atribución se documentan explícitamente como "no medible todavía" en la UI, en vez de inventar una fórmula sin datos reales detrás.
+- **Recomendación:** definir con el fundador un mecanismo de atribución (ej. marcar en `reserva`/`pago` un `origen_ia` cuando la Reserva nace de un flujo asistido por IA, con una ventana de atribución explícita) antes de construir el cálculo — es una decisión de producto (qué cuenta como "generado por IA"), no solo una consulta SQL nueva.
+- **Bloquea:** No al resto del AI OS — es una mejora del ROI Dashboard, no del motor de créditos/costos en sí.
+
+## Fase 6 — Exportación de reportes: PDF/Excel no implementados (solo CSV)
+
+- **Contexto:** la extensión del ADR-012/013 pide exportación PDF/Excel/CSV del ROI de IA. Se implementó CSV (sin dependencia nueva, generado en el cliente). El proyecto no tiene hoy ninguna librería de generación de PDF ni Excel.
+- **Impacto:** el historial de consumo de IA se puede exportar y analizar en cualquier hoja de cálculo (CSV cubre ese caso de uso), pero no hay un reporte con formato/branding (PDF) ni un archivo `.xlsx` con múltiples hojas.
+- **Recomendación:** cuando el fundador confirme que vale la pena la inversión, elegir una librería (ej. `jsPDF` para PDF, `exceljs` para Excel) — es una decisión de alcance/costo de mantenimiento, no una necesidad bloqueante hoy.
+- **Bloquea:** No.
+
+## Fase 6 — AI OS: ¿la función `recomendacion` es la misma que "Recomendación de Negocios al Cliente"?
+
+- **Contexto:** encontrado en la auditoría Fase 0 de ADR-013 (comparar el nuevo catálogo `ai_accion_costo` contra la Biblia ya existente). `09-CRM-Intelligence/02_AI_Client.md` describe "Recomendación de Negocios al Cliente" como infraestructura del Marketplace — su costo lo absorbe StylerNow, **nunca** se descuenta de un Negocio (`AI_Credit_System.md`, Nivel 1). El catálogo nuevo de ADR-013 incluye una acción `recomendacion` habilitada desde el Plan Raven, con costo en créditos cobrado al Negocio (`ai_accion_costo`).
+- **Impacto:** si es la misma función, `ai_accion_costo` la está cobrando incorrectamente a un Negocio individual por algo que la Biblia define como costo de plataforma — habría que exceptuarla del Credit Meter (como ya hace `AI_Credit_System.md` con la función original). Si es una función distinta (ej. "recomendar un Servicio/Producto a un Cliente específico" desde el Panel, no el widget del Home del Marketplace), el cobro actual es correcto y solo falta un nombre menos ambiguo para evitar la confusión.
+- **Recomendación:** el fundador confirma cuál de las dos interpretaciones es la correcta. Mientras tanto, la acción `recomendacion` se implementó como cobrable al Negocio (consistente con el resto del catálogo de ADR-013), sin asumir la respuesta.
+- **Bloquea:** No al resto del AI OS — es un ajuste de una sola fila en `ai_accion_costo` una vez confirmado.
+
 ## Cómo agregar una entrada
 Si te encontrás con algo que de verdad no podés resolver sin que el
 fundador decida (falta una API key, hay una contradicción real en la

@@ -1,7 +1,31 @@
 # AI Credit System
 
+> **Actualizado por ADR-013 (2026-09-16, ver `ADR_013_AI_OS_Monetizacion.md`)**: la
+> arquitectura conceptual de este documento (3 niveles, degradación, FIFO,
+> auditoría) sigue vigente y fue implementada tal cual. Los **números**
+> hardcodeados originales de este documento (costo por función, precio del
+> paquete, ventana de expiración de créditos comprados) fueron reemplazados
+> por la matriz oficial de ADR-013 — la fuente única de verdad de precios ya
+> **no es este archivo Markdown, es la base de datos** (`ai_accion_costo`,
+> `ai_paquete_creditos`, `plan_funcion_ia`, todas editables por SuperSU vía
+> el AI Center — `/admin/ai` — sin tocar código ni este documento). La única
+> excepción donde el número viejo de este documento se mantuvo tal cual: la
+> ventana de expiración de créditos comprados (90 días, ver más abajo).
+>
+> **Hallazgo pendiente de confirmación del fundador**: la función
+> `recomendacion` del catálogo nuevo de ADR-013 (habilitada desde el Plan
+> Raven) podría ser la misma "Recomendación de Negocios al Cliente" de
+> `09-CRM-Intelligence/02_AI_Client.md` (que este documento marca
+> explícitamente como costo de infraestructura de plataforma, **nunca**
+> descontado de un Negocio) — o podría ser una función distinta,
+> Negocio-facing (ej. recomendar un Servicio/Producto a un Cliente
+> específico desde el Panel). Se implementó como cobrable al Negocio
+> (`ai_accion_costo`) por consistencia con el resto del catálogo de
+> ADR-013, sin asumir cuál de las dos interpretaciones es la correcta — ver
+> `docs/PENDING_DECISIONS.md`.
+
 ## Objetivo
-Especificar por completo el sistema de créditos que mide y limita el consumo de IA en StylerNow, como implementación directa del principio financiero de `ADR_001_Monetization_Principles.md` ("StylerNow nunca subsidia costos variables"). Este documento es la fuente única de verdad de cuánto cuesta, en créditos, cada función de IA ya documentada en `09-CRM-Intelligence`.
+Especificar por completo el sistema de créditos que mide y limita el consumo de IA en StylerNow, como implementación directa del principio financiero de `ADR_001_Monetization_Principles.md` ("StylerNow nunca subsidia costos variables"). Este documento es la fuente única de verdad **conceptual** de cómo funciona el sistema de créditos; los números concretos (costo por función, precios de paquete) viven en la base de datos desde ADR-013 — ver nota arriba.
 
 ## Alcance
 Asignación de créditos por Plan, renovación, compra de paquetes adicionales, expiración, auditoría, y la arquitectura de 3 niveles de IA que determina cuándo una función consume créditos y cuándo no. No redefine las funciones de IA en sí (ya documentadas en `09-CRM-Intelligence/02_AI_Client.md`, `03_AI_Staff.md`, `04_AI_Business.md`) — este documento fija su costo y su nivel.

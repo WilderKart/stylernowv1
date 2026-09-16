@@ -7,6 +7,85 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Corregido — Auditoría Fase 0 de ADR-013: expiración de créditos IA comprados
+`AI_Credit_System.md` (ya aprobado) fija 90 días de expiración para un
+paquete de créditos IA comprado; la migración 068 lo había implementado
+con 365 días por error de interpretación. Corregido en la migración 069
+(`aplicar_evento_pago()`, rama `PAQUETE_CREDITOS_IA`) para que el código
+coincida con la regla de negocio ya vigente, en vez de dejar una
+contradicción silenciosa entre la Biblia y el código. Re-verificado:
+41/41 casos del AI OS + regresión completa de las 9 suites existentes —
+cero regresiones.
+
+### Añadido — Fase 6, Módulo 6.6: AI OS — Monetización y Motor de Costos de IA (ADR-013)
+"StylerNow nunca subsidia IA": ninguna llamada de IA con costo real corre
+sin descontar créditos del propio Negocio. Seis sistemas P0 construidos
+completos: **AI Pricing Engine** (`ai_accion_costo`, 13 acciones
+seedeadas, 100% editable por SuperSU vía `actualizar_accion_costo_ia`,
+nada hardcodeado), **Cost Optimizer** (`ai_modelo_config`, orden de
+preferencia real leído por `ai-provider.ts` — Ollama/Gemini registrados
+`activo=false` sin credencial, OpenRouter/Nemotron activos), **Credit
+Meter** (`consumir_creditos_ia`: gating por `plan_funcion_ia`, nunca deja
+saldo negativo, consumo FIFO real por `fecha_otorgamiento` entre lotes de
+`credito_ia_lote`, existente desde la migración 004 sin consumidor real
+hasta ahora), **AI Memory** (`ai_memoria_negocio`, versionada — cada
+edición crea una versión nueva, nunca sobreescribe — con aprobar/olvidar
+real vía `DELETE`/restaurar versión histórica), **Prompt
+Builder/Library** (`ai_prompt`, tipos OFICIAL/PROPIO/COMPARTIDO, sin
+Marketplace todavía, arquitectura completa) y **funciones de IA
+gateadas por Plan, no por add-on** (`plan_funcion_ia`, matriz oficial
+Raven/Jarl/Valhalla/Allfather seedeada). Compra de paquetes de créditos
+vía Mercado Pago Checkout Pro (6ª rama de `aplicar_evento_pago()`,
+mismo patrón que Suscripción/Membresía). **AI Cost Simulator** real
+(`simular_consumo_ia`, heurística documentada mientras no exista
+histórico de consumo). Motor de recompensas de Lealtad (Módulo 6.5)
+conectado a IA real por primera vez: sugerencias Nivel 1/2 ahora las
+redacta el LLM (`redactarSugerenciaConIA`), con fallback a plantilla si
+fallan los créditos o el proveedor. Cron mensual real
+(`otorgar_creditos_plan_mensual`, `/api/cron/diario`, idempotente).
+Frontend nuevo: **SuperSU AI Center** (`/admin/ai` — Pricing Engine, Cost
+Optimizer, paquetes, matriz de funciones por Plan, Cost Simulator) y **AI
+Workspace de Barbería** (`/panel/ia` — saldo y compra de créditos,
+Memoria de IA editable/aprobable/olvidable, Biblioteca de prompts,
+historial de consumo exportable a CSV, ROI de IA con métricas reales de
+consumo/costo — las métricas de atribución de resultado, como reservas o
+ventas generadas por IA, se reportan explícitamente como no medibles
+todavía, sin inventar un número, por falta de trazabilidad — ver
+`docs/TECH_DEBT_REGISTER.md`). Verificado: 41/41 casos reales contra
+Supabase (gating de Plan, saldo insuficiente, FIFO, saldo nunca negativo,
+aislamiento entre Negocios, versionado/aprobación/olvido/restauración de
+Memoria, Prompt Library, edición de Pricing Engine, Cost Simulator, RLS),
+más re-verificación completa de las 8 suites de regresión existentes —
+cero regresiones. `tsc`/`eslint`/`next build` limpios.
+
+### Añadido — Lealtad: motor transversal de punta a punta (extiende el Módulo 6.5, ADR-011)
+El dominio Lealtad deja de ser una pantalla aislada: se integra
+automáticamente con Agenda/POS (consumo automático de beneficio de
+Membresía por Servicio — 5ª extensión de `completar_venta_pos()`), CRM
+(tarjeta de beneficios activos de cada Cliente: membresía, nivel VIP,
+progreso de Sellos, cashback pendiente), Marketplace (insignia VIP visible
+en la página pública del Negocio) y Dashboard del Panel (KPIs de Lealtad
+con `AnimatedCounter`). Recorrido completo verificado de punta a punta
+contra Supabase real: comprar Membresía → aparece en Mi Lealtad → reserva
+→ el sistema consume el beneficio automáticamente → queda reflejado en
+CRM/Marketplace/Dashboard. Verificado: 6/6 casos nuevos + regresión
+completa de las 8 suites existentes — cero regresiones. `8be079c`
+
+### Añadido — ADR-012: Component Registry Governance (shadcn/ui + rare-ui)
+Gobernanza formal para instalar componentes de librerías externas sin
+pedir autorización previa, sujeta a 8 reglas obligatorias (resolver una
+necesidad real de la Biblia, integrar con el backend, dark mode,
+accesibilidad, responsive, wrapper en el proyecto, nunca usarse crudo en
+más de un lugar). 12 componentes de shadcn/ui instalados y retokenizados
+al sistema de diseño propio de StylerNow (proceso documentado y repetible
+en `src/components/ui/REGISTRY.md`) + 5 componentes de rare-ui
+(`duration-picker`, `otp-input`, `emoji-reaction`, `animated-counter`,
+`fluid-orb`). Skeleton real (`loading.tsx`, convención nativa de Next.js
+App Router) desplegado en las 9 áreas mínimas exigidas: Dashboard,
+Agenda, Marketplace, Staff, CRM, Inventario, Reportes, Perfil, Panel
+SuperSU. `Toaster` (Sonner) global. `tsc`/`eslint`/`next build` limpios.
+`26bebde`
+
 ### Añadido — Fase 6, Módulo 6.5: Dominio LEALTAD completo (ADR-011)
 12 sistemas de recompensa construidos de punta a punta, reemplazando
 "Loyalty" por **Lealtad** en todo el producto: StylerWallet (núcleo de

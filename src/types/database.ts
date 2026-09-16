@@ -60,6 +60,224 @@ export type Database = {
           },
         ]
       }
+      ai_accion_costo: {
+        Row: {
+          accion: string
+          activo: boolean
+          categoria: string
+          costo_creditos: number
+          costo_proveedor_estimado: number
+          created_at: string
+          id: string
+          margen_pct: number
+          modelo_fallback: string | null
+          modelo_preferido: string | null
+          nivel_ia: number
+          updated_at: string
+        }
+        Insert: {
+          accion: string
+          activo?: boolean
+          categoria: string
+          costo_creditos: number
+          costo_proveedor_estimado?: number
+          created_at?: string
+          id?: string
+          margen_pct?: number
+          modelo_fallback?: string | null
+          modelo_preferido?: string | null
+          nivel_ia: number
+          updated_at?: string
+        }
+        Update: {
+          accion?: string
+          activo?: boolean
+          categoria?: string
+          costo_creditos?: number
+          costo_proveedor_estimado?: number
+          created_at?: string
+          id?: string
+          margen_pct?: number
+          modelo_fallback?: string | null
+          modelo_preferido?: string | null
+          nivel_ia?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_memoria_negocio: {
+        Row: {
+          aprobado: boolean
+          categoria: string
+          contenido: Json
+          creado_por: string | null
+          created_at: string
+          id: string
+          negocio_id: string
+          sede_id: string | null
+          version: number
+          vigente: boolean
+        }
+        Insert: {
+          aprobado?: boolean
+          categoria: string
+          contenido?: Json
+          creado_por?: string | null
+          created_at?: string
+          id?: string
+          negocio_id: string
+          sede_id?: string | null
+          version?: number
+          vigente?: boolean
+        }
+        Update: {
+          aprobado?: boolean
+          categoria?: string
+          contenido?: Json
+          creado_por?: string | null
+          created_at?: string
+          id?: string
+          negocio_id?: string
+          sede_id?: string | null
+          version?: number
+          vigente?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_memoria_negocio_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_memoria_negocio_sede_id_fkey"
+            columns: ["sede_id"]
+            isOneToOne: false
+            referencedRelation: "sede"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_modelo_config: {
+        Row: {
+          activo: boolean
+          costo_por_millon_tokens_usd: number
+          created_at: string
+          id: string
+          modelo_id: string
+          nombre: string
+          orden_preferencia: number
+          proveedor: string
+          requiere_credencial: string | null
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          costo_por_millon_tokens_usd?: number
+          created_at?: string
+          id?: string
+          modelo_id: string
+          nombre: string
+          orden_preferencia: number
+          proveedor: string
+          requiere_credencial?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          costo_por_millon_tokens_usd?: number
+          created_at?: string
+          id?: string
+          modelo_id?: string
+          nombre?: string
+          orden_preferencia?: number
+          proveedor?: string
+          requiere_credencial?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_paquete_creditos: {
+        Row: {
+          activo: boolean
+          created_at: string
+          creditos: number | null
+          id: string
+          nombre: string
+          precio_cop: number | null
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          creditos?: number | null
+          id?: string
+          nombre: string
+          precio_cop?: number | null
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          creditos?: number | null
+          id?: string
+          nombre?: string
+          precio_cop?: number | null
+        }
+        Relationships: []
+      }
+      ai_prompt: {
+        Row: {
+          activo: boolean
+          autor_id: string | null
+          categoria: string
+          contenido: string
+          created_at: string
+          id: string
+          negocio_id: string | null
+          nombre: string
+          tipo: string
+          updated_at: string
+          variables: Json
+          version: number
+        }
+        Insert: {
+          activo?: boolean
+          autor_id?: string | null
+          categoria: string
+          contenido: string
+          created_at?: string
+          id?: string
+          negocio_id?: string | null
+          nombre: string
+          tipo: string
+          updated_at?: string
+          variables?: Json
+          version?: number
+        }
+        Update: {
+          activo?: boolean
+          autor_id?: string | null
+          categoria?: string
+          contenido?: string
+          created_at?: string
+          id?: string
+          negocio_id?: string | null
+          nombre?: string
+          tipo?: string
+          updated_at?: string
+          variables?: Json
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_prompt_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       banner_home: {
         Row: {
           activo: boolean
@@ -1954,6 +2172,32 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      plan_funcion_ia: {
+        Row: {
+          funcion: string
+          habilitado: boolean
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+        }
+        Insert: {
+          funcion: string
+          habilitado?: boolean
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+        }
+        Update: {
+          funcion?: string
+          habilitado?: boolean
+          plan_codigo?: Database["public"]["Enums"]["plan_codigo"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_funcion_ia_plan_codigo_fkey"
+            columns: ["plan_codigo"]
+            isOneToOne: false
+            referencedRelation: "plan"
+            referencedColumns: ["codigo"]
+          },
+        ]
       }
       producto: {
         Row: {
@@ -4014,6 +4258,35 @@ export type Database = {
         }
       }
       actor_tipo_soporte: { Args: { p_negocio_id: string }; Returns: string }
+      actualizar_accion_costo_ia: {
+        Args: {
+          p_accion: string
+          p_activo?: boolean
+          p_costo_creditos: number
+          p_costo_proveedor_estimado?: number
+          p_margen_pct?: number
+        }
+        Returns: {
+          accion: string
+          activo: boolean
+          categoria: string
+          costo_creditos: number
+          costo_proveedor_estimado: number
+          created_at: string
+          id: string
+          margen_pct: number
+          modelo_fallback: string | null
+          modelo_preferido: string | null
+          nivel_ia: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ai_accion_costo"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       actualizar_banner_home: {
         Args: {
           p_activo?: boolean
@@ -4095,6 +4368,49 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "ticket_soporte"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      actualizar_modelo_config_ia: {
+        Args: {
+          p_activo: boolean
+          p_costo_por_millon_tokens_usd?: number
+          p_nombre: string
+          p_orden_preferencia: number
+        }
+        Returns: {
+          activo: boolean
+          costo_por_millon_tokens_usd: number
+          created_at: string
+          id: string
+          modelo_id: string
+          nombre: string
+          orden_preferencia: number
+          proveedor: string
+          requiere_credencial: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ai_modelo_config"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      actualizar_paquete_creditos_ia: {
+        Args: { p_activo: boolean; p_paquete_id: string; p_precio_cop: number }
+        Returns: {
+          activo: boolean
+          created_at: string
+          creditos: number | null
+          id: string
+          nombre: string
+          precio_cop: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ai_paquete_creditos"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -4349,6 +4665,27 @@ export type Database = {
           p_payload?: Json
         }
         Returns: Json
+      }
+      aprobar_memoria_ia: {
+        Args: { p_memoria_id: string }
+        Returns: {
+          aprobado: boolean
+          categoria: string
+          contenido: Json
+          creado_por: string | null
+          created_at: string
+          id: string
+          negocio_id: string
+          sede_id: string | null
+          version: number
+          vigente: boolean
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ai_memoria_negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       aprobar_negocio: {
         Args: { p_negocio_id: string }
@@ -4684,6 +5021,44 @@ export type Database = {
         }
         Returns: Json
       }
+      comprar_paquete_creditos_ia: {
+        Args: { p_negocio_id: string; p_paquete_id: string }
+        Returns: {
+          comision_plataforma_monto: number | null
+          created_at: string
+          es_huerfano: boolean
+          estado: Database["public"]["Enums"]["pago_estado"]
+          id: string
+          id_preferencia_pasarela: string | null
+          id_transaccion_pasarela: string | null
+          metadata: Json
+          monto: number
+          monto_reembolsado: number
+          motivo_reembolso: string | null
+          negocio_id: string | null
+          pasarela: string
+          payload_pasarela: Json | null
+          procesado_at: string | null
+          reserva_id: string | null
+          staff_destino_id: string | null
+          tipo: Database["public"]["Enums"]["pago_tipo"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pago"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      configurar_funcion_plan_ia: {
+        Args: {
+          p_funcion: string
+          p_habilitado: boolean
+          p_plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+        }
+        Returns: undefined
+      }
       configurar_referidos: {
         Args: {
           p_activo: boolean
@@ -4773,6 +5148,15 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      consumir_creditos_ia: {
+        Args: {
+          p_accion: string
+          p_negocio_id: string
+          p_referencia_id?: string
+          p_referencia_tipo?: string
+        }
+        Returns: Json
       }
       crear_banner_home: {
         Args: {
@@ -5085,6 +5469,64 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "membresia_plan"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      crear_prompt_ia: {
+        Args: {
+          p_categoria: string
+          p_contenido: string
+          p_negocio_id: string
+          p_nombre: string
+          p_tipo: string
+          p_variables?: Json
+        }
+        Returns: {
+          activo: boolean
+          autor_id: string | null
+          categoria: string
+          contenido: string
+          created_at: string
+          id: string
+          negocio_id: string | null
+          nombre: string
+          tipo: string
+          updated_at: string
+          variables: Json
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ai_prompt"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      crear_prompt_oficial_ia: {
+        Args: {
+          p_categoria: string
+          p_contenido: string
+          p_nombre: string
+          p_variables?: Json
+        }
+        Returns: {
+          activo: boolean
+          autor_id: string | null
+          categoria: string
+          contenido: string
+          created_at: string
+          id: string
+          negocio_id: string | null
+          nombre: string
+          tipo: string
+          updated_at: string
+          variables: Json
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ai_prompt"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -5580,6 +6022,53 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      guardar_memoria_ia: {
+        Args: {
+          p_categoria: string
+          p_contenido: Json
+          p_negocio_id: string
+          p_sede_id?: string
+        }
+        Returns: {
+          aprobado: boolean
+          categoria: string
+          contenido: Json
+          creado_por: string | null
+          created_at: string
+          id: string
+          negocio_id: string
+          sede_id: string | null
+          version: number
+          vigente: boolean
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ai_memoria_negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      historial_memoria_ia: {
+        Args: { p_categoria: string; p_negocio_id: string }
+        Returns: {
+          aprobado: boolean
+          categoria: string
+          contenido: Json
+          creado_por: string | null
+          created_at: string
+          id: string
+          negocio_id: string
+          sede_id: string | null
+          version: number
+          vigente: boolean
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "ai_memoria_negocio"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       iniciar_atencion_reserva: {
         Args: { p_reserva_id: string }
         Returns: {
@@ -5638,6 +6127,50 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "lealtad_fraude_evento"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      listar_memoria_ia: {
+        Args: { p_negocio_id: string }
+        Returns: {
+          aprobado: boolean
+          categoria: string
+          contenido: Json
+          creado_por: string | null
+          created_at: string
+          id: string
+          negocio_id: string
+          sede_id: string | null
+          version: number
+          vigente: boolean
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "ai_memoria_negocio"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      listar_prompts_ia: {
+        Args: { p_negocio_id: string }
+        Returns: {
+          activo: boolean
+          autor_id: string | null
+          categoria: string
+          contenido: string
+          created_at: string
+          id: string
+          negocio_id: string | null
+          nombre: string
+          tipo: string
+          updated_at: string
+          variables: Json
+          version: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "ai_prompt"
           isOneToOne: false
           isSetofReturn: true
         }
@@ -5907,6 +6440,8 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      olvidar_memoria_ia: { Args: { p_memoria_id: string }; Returns: undefined }
+      otorgar_creditos_plan_mensual: { Args: never; Returns: Json }
       pausar_campana: {
         Args: { p_campana_id: string; p_motivo?: string }
         Returns: {
@@ -6470,6 +7005,27 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      restaurar_version_memoria_ia: {
+        Args: { p_memoria_id_historica: string }
+        Returns: {
+          aprobado: boolean
+          categoria: string
+          contenido: Json
+          creado_por: string | null
+          created_at: string
+          id: string
+          negocio_id: string
+          sede_id: string | null
+          version: number
+          vigente: boolean
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ai_memoria_negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       retirar_empleado_corporativo: {
         Args: { p_cliente_id: string; p_cuenta_id: string }
         Returns: undefined
@@ -6520,6 +7076,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      saldo_creditos_ia: { Args: { p_negocio_id: string }; Returns: number }
       sembrar_niveles_vip_default: {
         Args: { p_negocio_id: string }
         Returns: {
@@ -6540,6 +7097,14 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      simular_consumo_ia: {
+        Args: {
+          p_num_clientes: number
+          p_num_staff: number
+          p_plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+        }
+        Returns: Json
+      }
       slots_disponibles: {
         Args: {
           p_fecha: string

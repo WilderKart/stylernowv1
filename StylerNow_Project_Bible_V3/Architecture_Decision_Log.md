@@ -214,6 +214,13 @@ Cada decisión tiene: **Fecha, Decisión, Motivo, Impacto, Estado** (`Activa` / 
 **Impacto:** Migración 060 corrige las 3 funciones afectadas calificando el esquema explícitamente. Regla general para cualquier función futura que necesite `pgcrypto` u otra extensión instalada por Supabase fuera de `public`.
 **Estado:** Activa — corregido y verificado.
 
+### ADL-026 — Un parámetro `numeric`/`text` de una RPC sin `default` en SQL se genera como no-nullable en TypeScript, aunque la base de datos sí acepte `NULL`
+**Fecha:** 2026-09-16
+**Decisión:** Cuando una RPC necesita aceptar legítimamente `NULL` en un parámetro (ej. "precio a cotizar manualmente" de un paquete Enterprise), y ese parámetro no tiene `default null` en la firma SQL, el tipo generado por Supabase (`src/types/database.ts`) lo marca como `number`/`string` obligatorio, nunca `| null` — un cast explícito (`as number`) es la solución correcta en la capa de servidor, no una señal de bug.
+**Motivo:** Encontrado en `actualizar_paquete_creditos_ia(p_paquete_id uuid, p_precio_cop numeric, p_activo boolean)` (AI OS, ADR-013): el paquete "Enterprise" tiene `precio_cop = null` a propósito (cotización manual, sin autoservicio), y SuperSU necesita poder togglear su `activo` sin verse forzado a inventar un precio. El generador de tipos de Supabase infiere la nulabilidad de un parámetro de función a partir de si tiene `default` en SQL, no de si el tipo de columna subyacente permite `NULL` — son dos cosas distintas.
+**Impacto:** Ningún cambio de esquema necesario. Regla general para cualquier RPC futura de este proyecto con un parámetro legítimamente nulleable sin valor por defecto: castear en la capa de servidor (`p_parametro: valor as TipoDeclarado`) en vez de agregar un `default null` artificial a la función SQL solo para conformar al generador de tipos.
+**Estado:** Activa — documentado, sin corrección de esquema necesaria.
+
 ## Checklist
 - [x] Completo (vivo — se agregan entradas nuevas conforme surgen decisiones)
 - [ ] Revisado

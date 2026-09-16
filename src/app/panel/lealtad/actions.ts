@@ -1,7 +1,17 @@
 "use server";
 
+import { chatJSON } from "@/lib/ia/ai-provider";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
+
+/** Disparador de Lealtad → acción de la matriz del AI Pricing Engine (ADR-013). */
+const ACCION_IA_POR_DISPARADOR: Record<string, string> = {
+  CLIENTE_INACTIVO: "prediccion_abandono",
+  RIESGO_ABANDONO: "prediccion_abandono",
+  CUMPLEANOS: "recomendacion",
+  OBJETIVO_LOGRADO: "recomendacion",
+};
 
 type Resultado<T = undefined> =
   | ({ ok: true } & (T extends undefined ? object : { data: T }))
@@ -279,42 +289,101 @@ export async function listarSugerenciasAction(negocioId: string): Promise<Result
   return { ok: true, data: (data ?? []).map((s) => ({ id: s.id, descripcion: s.descripcion, justificacion: s.justificacion, estado: s.estado, clienteId: s.cliente_id, createdAt: s.created_at })) };
 }
 
-export async function generarSugerenciasAction(negocioId: string): Promise<Resultado<{ generadas: number }>> {
+function descripcionPlantilla(disparador: string, contexto: Record<string, unknown>): string {
+  switch (disparador) {
+    case "CLIENTE_INACTIVO":
+    case "RIESGO_ABANDONO":
+      return `Cliente sin visitar hace ${(contexto.dias_desde_ultima_visita as number | undefined) ?? "varios"} días — considerá una promoción de reactivación.`;
+    case "CUMPLEANOS":
+      return `Hoy es el cumpleaños de ${(contexto.nombre as string | undefined) ?? "este Cliente"} — considerá un regalo o descuento especial.`;
+    case "OBJETIVO_LOGRADO":
+      return `Este Cliente alcanzó el objetivo de sellos de "${(contexto.campana as string | undefined) ?? "una campaña"}".`;
+    case "MEJOR_HORARIO":
+      return "Franja con baja ocupación detectada — considerá una promoción en ese horario.";
+    default:
+      return "Oportunidad detectada por el motor de recompensas.";
+  }
+}
+
+/**
+ * Módulo 12 (ADR-011) + AI Reward Engine (ADR-013): Nivel 0 usa una
+ * plantilla fija (gratis, sin IA real). Nivel 1/2 llama al AIProvider
+ * real (OpenRouter/Nemotron, con failover) para redactar una sugerencia
+ * más elaborada, informada por la AI Memory del propio Negocio (tono de
+ * comunicación) — y consume créditos IA del Negocio vía el Credit Meter
+ * ANTES de llamar al proveedor (el costo del proveedor se incurre igual
+ * si la respuesta después no sirve; "StylerNow nunca subsidia IA").
+ */
+async function redactarSugerenciaConIA(negocioId: string, disparador: string, contexto: Record<string, unknown>, admin: ReturnType<typeof createAdminClient>): Promise<{ descripcion: string; justificacion: string | null; costoCreditos: number } | null> {
+  const accion = ACCION_IA_POR_DISPARADOR[disparador];
+  if (!accion) return null;
+
+  const { data: consumo, error: eConsumo } = await admin.rpc("consumir_creditos_ia", { p_negocio_id: negocioId, p_accion: accion, p_referencia_tipo: "recompensa_regla" });
+  if (eConsumo) return null; // sin créditos o función no incluida en el Plan — cae a la plantilla Nivel 0, nunca rompe el flujo.
+
+  const { data: memoriaTono } = await admin.from("ai_memoria_negocio").select("contenido").eq("negocio_id", negocioId).eq("categoria", "TONO").eq("vigente", true).maybeSingle();
+  const tono = (memoriaTono?.contenido as { descripcion?: string } | undefined)?.descripcion;
+
+  try {
+    const resultado = await chatJSON<{ descripcion: string; justificacion: string }>(
+      [
+        {
+          role: "system",
+          content: `Sos el asistente de marketing de una barbería/salón en Colombia usando StylerNow.${tono ? ` Tono de comunicación de este negocio: ${tono}.` : ""} Respondé SOLO con JSON: {"descripcion": "sugerencia breve y accionable en español, máximo 140 caracteres", "justificacion": "por qué, citando el dato concreto, máximo 100 caracteres"}.`,
+        },
+        { role: "user", content: `Disparador: ${disparador}. Contexto: ${JSON.stringify(contexto)}.` },
+      ],
+      { nivel: 2, maxTokens: 200, supabase: admin }
+    );
+    return { descripcion: resultado.descripcion, justificacion: resultado.justificacion, costoCreditos: (consumo as { creditosConsumidos: number })?.creditosConsumidos ?? 0 };
+  } catch {
+    // El proveedor falló tras agotar el failover — la plantilla Nivel 0 sigue disponible como respaldo honesto.
+    return null;
+  }
+}
+
+export async function generarSugerenciasAction(negocioId: string): Promise<Resultado<{ generadas: number; conIaReal: number }>> {
   const supabase = await cliente();
+  const admin = createAdminClient();
   const { data: reglas, error: eReglas } = await supabase.from("recompensa_regla").select("id, disparador, nivel_ia").eq("negocio_id", negocioId).eq("activo", true);
   if (eReglas) return { ok: false, error: eReglas.message };
 
   let generadas = 0;
+  let conIaReal = 0;
   for (const regla of reglas ?? []) {
     const { data: candidatos, error: eCand } = await supabase.rpc("evaluar_candidatos_recompensa", { p_regla_id: regla.id });
     if (eCand || !candidatos) continue;
 
     for (const cand of candidatos.slice(0, 20)) {
-      let descripcion = "";
-      switch (regla.disparador) {
-        case "CLIENTE_INACTIVO":
-        case "RIESGO_ABANDONO":
-          descripcion = `Cliente sin visitar hace ${(cand.contexto as { dias_desde_ultima_visita?: number })?.dias_desde_ultima_visita ?? "varios"} días — considerá una promoción de reactivación.`;
-          break;
-        case "CUMPLEANOS":
-          descripcion = `Hoy es el cumpleaños de ${(cand.contexto as { nombre?: string })?.nombre ?? "este Cliente"} — considerá un regalo o descuento especial.`;
-          break;
-        case "OBJETIVO_LOGRADO":
-          descripcion = `Este Cliente alcanzó el objetivo de sellos de "${(cand.contexto as { campana?: string })?.campana ?? "una campaña"}".`;
-          break;
-        case "MEJOR_HORARIO":
-          descripcion = `Franja con baja ocupación detectada — considerá una promoción en ese horario.`;
-          break;
-        default:
-          descripcion = "Oportunidad detectada por el motor de recompensas.";
+      const contexto = (cand.contexto ?? {}) as Record<string, unknown>;
+      let descripcion: string;
+      let justificacion: string | null = null;
+      let costoCreditos = 0;
+
+      if (regla.nivel_ia >= 1) {
+        const conIa = await redactarSugerenciaConIA(negocioId, regla.disparador, contexto, admin);
+        if (conIa) {
+          descripcion = conIa.descripcion;
+          justificacion = conIa.justificacion;
+          costoCreditos = conIa.costoCreditos;
+          conIaReal++;
+        } else {
+          descripcion = descripcionPlantilla(regla.disparador, contexto);
+        }
+      } else {
+        descripcion = descripcionPlantilla(regla.disparador, contexto);
       }
-      const { error: eCrear } = await supabase.rpc("crear_sugerencia_recompensa", { p_regla_id: regla.id, p_cliente_id: cand.cliente_id ?? undefined, p_descripcion: descripcion });
+
+      const { error: eCrear } = await supabase.rpc("crear_sugerencia_recompensa", {
+        p_regla_id: regla.id, p_cliente_id: cand.cliente_id ?? undefined, p_descripcion: descripcion,
+        p_justificacion: justificacion ?? undefined, p_costo_credito_ia: costoCreditos,
+      });
       if (!eCrear) generadas++;
     }
   }
 
   revalidatePath("/panel/lealtad");
-  return { ok: true, data: { generadas } };
+  return { ok: true, data: { generadas, conIaReal } };
 }
 
 export async function confirmarSugerenciaAction(sugerenciaId: string): Promise<Resultado> {

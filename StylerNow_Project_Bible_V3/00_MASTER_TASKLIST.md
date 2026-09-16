@@ -1896,12 +1896,244 @@ de `04_Loyalty.md`), ADL-024/025 (los dos hallazgos reales corregidos).
 
 ---
 
-**Próximo módulo a ejecutar: Fase 6 — IA con LLM real
-(`02_AI_Client.md`, `03_AI_Staff.md`, Funciones 1-3 de
-`04_AI_Business.md`) — ya no bloqueada por credencial (OpenRouter +
-Nemotron conectados vía ADR-011), queda por construir. Motor WhatsApp
-sigue bloqueado sin credenciales de WhatsApp Business API (ver
-`docs/PENDING_DECISIONS.md`).**
+## ADR-012 — Component Registry Governance (shadcn/ui + rare-ui)
+
+`components.json` · `src/components/ui/REGISTRY.md` (origen/versión/uso/
+módulo de cada componente, tabla de retokenización) ·
+`ADR_012_Component_Registry_Governance.md`.
+
+- 8 reglas obligatorias para instalar cualquier componente de una
+  librería externa sin pedir autorización previa cada vez: debe resolver
+  una necesidad real de la Biblia, integrarse con el backend real, no
+  romper el diseño aprobado, funcionar en dark mode (único tema del
+  producto), ser accesible, ser responsive, quedar envuelto en el
+  proyecto (nunca importado crudo del registry en más de un lugar), y
+  documentado en `REGISTRY.md`.
+- 12 componentes de shadcn/ui instalados: Skeleton, Sonner, Drawer,
+  Calendar, Command Palette, Carousel, Empty States, Progress, Tooltip,
+  Popover, Context Menu, OTP Input (+ Dialog como dependencia). Cada uno
+  generaba tokens de color genéricos que no existen o colisionan
+  semánticamente con el sistema de StylerNow (`bg-primary` de shadcn ≠
+  `accent` de StylerNow) — se retokenizaron los 12 archivos con un script
+  repetible (`fix-shadcn-tokens.mjs`), documentado como procedimiento
+  estándar para el próximo componente que se instale.
+- 5 componentes de `rare-ui`: `duration-picker`, `otp-input`,
+  `emoji-reaction`, `animated-counter` (usado en Dashboard/Lealtad para
+  las métricas numéricas), `fluid-orb`.
+- **Skeleton real desplegado en las 9 áreas mínimas exigidas** vía
+  `loading.tsx` (convención nativa de Next.js App Router — no requiere
+  tocar ninguna lógica de datos existente): Dashboard, Agenda,
+  Marketplace, Staff, CRM, Inventario, Reportes, Perfil, Panel SuperSU.
+  El `loading.tsx` raíz (`src/app/loading.tsx`, con forma de Marketplace)
+  también actúa como fallback de cualquier otra ruta sin `loading.tsx`
+  propio — trade-off aceptado y documentado en vez de crear 10+ archivos
+  genéricos adicionales.
+- `Toaster` (Sonner) montado globalmente en `src/app/layout.tsx` — sin
+  `next-themes` (no existe `ThemeProvider` en esta app, solo dark mode),
+  tema fijado a `dark` y variables CSS mapeadas a los tokens propios.
+- `Button` extendido de forma aditiva (`variant="outline"`,
+  `size="icon"`, `buttonVariants()` exportado) para soportar las APIs que
+  varios componentes de shadcn asumen — ningún call site existente se
+  tocó.
+
+### Documentación actualizada con este módulo
+`CHANGELOG.md`, este archivo, `ADR_012_Component_Registry_Governance.md`,
+`src/components/ui/REGISTRY.md`.
+
+`26bebde`
+
+---
+
+## Lealtad — motor transversal de punta a punta (extiende el Módulo 6.5, ADR-011)
+
+`062_lealtad_transversal_membresia_pos.sql` (5ª extensión de
+`completar_venta_pos()`) · `063_lealtad_metricas_negocio.sql` ·
+`src/app/panel/crm/actions.ts` + `[clienteId]/detalle-cliente.tsx` ·
+`src/app/negocio/[slug]/page.tsx` · `src/app/panel/dashboard-actions.ts` +
+`page.tsx`.
+
+- El fundador pidió explícitamente que Lealtad dejara de ser un módulo
+  aislado: debía poder recorrerse de punta a punta con Supabase real
+  (comprar Membresía → aparece en Mi Lealtad → reserva → el sistema
+  consume el beneficio automáticamente → refleja en Panel/App
+  Staff/SuperSU) antes de considerar el dominio cerrado.
+- **POS/Agenda**: al cobrar una Reserva, si el Cliente tiene una
+  Membresía activa, cada Servicio de esa Reserva se descuenta
+  automáticamente (100% si `servicio_ids` del plan está vacío o lo
+  incluye; `descuento_pct` en caso contrario) — mismo criterio ya usado
+  por `sello_campana`/`cashback_regla` para "vacío = aplica a todos".
+- **CRM**: tarjeta de beneficios activos de cada Cliente (Membresía
+  vigente, nivel VIP, progreso de cada campaña de Sellos, cashback
+  pendiente) — todo con alcance de Negocio, no global.
+- **Marketplace**: insignia "Sos {nivel} acá" visible en la página
+  pública del Negocio si el Cliente visitante tiene nivel VIP asignado
+  ahí.
+- **Dashboard**: 3 métricas de Lealtad (Membresías activas, saldo total
+  en Wallets de Lealtad, cashback otorgado) con `AnimatedCounter`.
+- **Verificado end-to-end contra Supabase real (6/6)**: el descuento de
+  Membresía es exacto según el plan configurado, `membresia_uso` y
+  `usos_mes_actual` se actualizan automáticamente, un Cliente sin
+  Membresía no recibe ningún descuento. Re-verificación completa de las
+  8 suites de regresión existentes — cero regresiones.
+
+### Documentación actualizada con este módulo
+`CHANGELOG.md`, este archivo.
+
+`8be079c`
+
+---
+
+## Módulo 6.6 — detalle de lo construido (AI OS: Monetización y Motor de Costos de IA, ADR-013)
+
+Migraciones `064_ai_os_schema.sql` a `068_ai_os_memory_prompts_pago.sql` ·
+`src/lib/ia/ai-provider.ts` (reescrito: Cost Optimizer real leyendo
+`ai_modelo_config`) · `src/app/admin/ai/` (SuperSU AI Center) ·
+`src/app/panel/ia/` (AI Workspace de Barbería) · extensión de
+`src/app/panel/lealtad/actions.ts` (Motor de recompensas conectado a IA
+real) · `src/app/api/cron/diario/route.ts` (3ª tarea: otorgamiento
+mensual de créditos).
+
+- **Principio oficial del ADR-013, aplicado en cada decisión**:
+  "StylerNow nunca subsidia IA" — toda llamada con costo se financia con
+  créditos del propio Negocio. Los créditos únicamente limitan **cuánto**
+  puede usarse una función; **qué** funciones existen lo decide el Plan
+  contratado (`plan_funcion_ia`), nunca un add-on que desbloquea función
+  nueva.
+- **AI Pricing Engine** (`ai_accion_costo`): 13 acciones seedeadas con la
+  matriz oficial del ADR (costo en créditos, categoría, nivel de IA),
+  100% editable por SuperSU vía `actualizar_accion_costo_ia()` — nada
+  hardcodeado en TypeScript.
+- **Cost Optimizer** (`ai_modelo_config`): orden de preferencia real
+  (`orden_preferencia`), leído por `ai-provider.ts` en cada llamada.
+  Ollama y Gemini quedan seedeados con `activo=false` (sin servidor
+  local ni API key todavía — ver `docs/PENDING_DECISIONS.md`);
+  OpenRouter y Nemotron activos y con failover automático verificado
+  (heredado de ADR-011).
+- **Credit Meter** (`consumir_creditos_ia`): valida primero que la
+  función esté habilitada para el Plan del Negocio (`FUNCION_NO_INCLUIDA_EN_PLAN`),
+  después que el saldo alcance (`CREDITOS_INSUFICIENTES`), consume FIFO
+  por `fecha_otorgamiento` entre los lotes vigentes de `credito_ia_lote`
+  — tabla que existe desde la migración 004 sin ningún consumidor real
+  hasta ahora, mismo patrón "arquitectura lista, nunca conectada"
+  encontrado varias veces en este proyecto. Nunca deja el saldo negativo
+  (verificado). `otorgar_creditos_plan_mensual()` (revocada de
+  `authenticated`, solo cron/`service_role`) y
+  `comprar_paquete_creditos_ia()` (6ª rama de `aplicar_evento_pago()`,
+  mismo patrón de cobro único que Suscripción/Membresía) son las dos
+  únicas formas de acreditar créditos.
+- **AI Memory** (`ai_memoria_negocio`): versionada de verdad — cada
+  `guardar_memoria_ia()` marca la versión anterior `vigente=false` e
+  inserta una fila nueva, nunca sobreescribe. `aprobar_memoria_ia()`,
+  `olvidar_memoria_ia()` (único `DELETE` real de todo el proyecto fuera
+  del patrón habitual de nunca borrar — mandato explícito del ADR-013:
+  "el propietario podrá... olvidar información", auditado igual vía
+  `payload_antes`) y `restaurar_version_memoria_ia()` (restaura creando
+  una versión nueva, nunca revive la fila vieja).
+- **Prompt Builder/Library** (`ai_prompt`): arquitectura completa
+  (OFICIAL/PROPIO/COMPARTIDO/MARKETPLACE_FUTURO) sin Marketplace todavía,
+  tal como pide el ADR. UI actual es un editor de texto simple, no un
+  constructor visual de variables — ver `docs/TECH_DEBT_REGISTER.md`.
+- **AI Cost Simulator** (`simular_consumo_ia`): reusa el mismo AI Pricing
+  Engine, responde preguntas reales de "qué pasaría si" (Plan, Staff,
+  Clientes) con una heurística de consumo documentada explícitamente
+  (todavía no hay histórico real de consumo por Staff/Cliente para
+  calibrar contra él).
+- **Motor de recompensas de Lealtad conectado a IA real por primera
+  vez**: `generarSugerenciasAction()` ahora redacta con el LLM real
+  (`redactarSugerenciaConIA`) cuando la regla es Nivel 1/2 — consume
+  créditos ANTES de llamar al proveedor (el costo se incurre aunque el
+  parseo de la respuesta falle, consistente con "nunca subsidia"), lee
+  `ai_memoria_negocio` (categoría TONO) como contexto de la Barbería, y
+  cae de vuelta a la plantilla fija si faltan créditos, la función no
+  está en el Plan, o el proveedor de IA falla. Resuelve la deuda técnica
+  registrada en el Módulo 6.5 ("sugerencias de plantilla fija, falta
+  conectar el LLM real").
+- **SuperSU AI Center** (`/admin/ai`): resumen de consumo global (créditos
+  consumidos, Negocios usando IA, costo estimado de proveedor por
+  categoría), edición del AI Pricing Engine, del Cost Optimizer, de los
+  paquetes de recarga, matriz de funciones por Plan, y el AI Cost
+  Simulator.
+- **AI Workspace de Barbería** (`/panel/ia`): saldo de créditos, compra de
+  paquetes (Mercado Pago Checkout Pro, mismo patrón que Upgrade de Plan),
+  Memoria de IA editable/aprobable/con historial/restaurable, Biblioteca
+  de prompts (crear PROPIO/COMPARTIDO, ver OFICIAL), historial de consumo
+  exportable a CSV, y **ROI de IA con métricas honestas**: créditos
+  consumidos, costo estimado y consumo por categoría son reales; las
+  métricas de resultado (clientes recuperados, reservas y ventas
+  atribuidas a IA, tiempo ahorrado) se muestran explícitamente como "no
+  medible todavía" en vez de inventar un número — no existe ningún
+  mecanismo de trazabilidad de atribución en el proyecto (ver
+  `docs/TECH_DEBT_REGISTER.md`). Exportación PDF/Excel queda diferida
+  (solo CSV implementado); ver `docs/PENDING_DECISIONS.md`.
+- **Hallazgo real corregido durante la construcción**: `ai_paquete_creditos.creditos`
+  tenía un `check (creditos > 0)` que rechazaba el sentinela `null` del
+  paquete "Enterprise" (cotización manual) — como la migración que creó
+  esa restricción ya estaba aplicada, se corrigió con una migración
+  nueva (`065_fix_paquete_creditos_enterprise.sql`) en vez de editar la
+  aplicada, confirmando una vez más (like ya documentado en sesiones
+  anteriores) que `supabase db push` envuelve cada archivo de migración
+  en una única transacción todo-o-nada.
+- **Hallazgo documentado (no bug)**: un parámetro `numeric` de una RPC
+  sin `default` se genera como no-nullable en TypeScript aunque la base
+  sí acepte `NULL` — ver ADL-026.
+
+### Verificado end-to-end contra la base real (41/41 + regresión completa)
+Saldo inicial en 0 · gating por Plan (`FUNCION_NO_INCLUIDA_EN_PLAN`) ·
+rechazo por saldo insuficiente sin tocar el saldo · consumo FIFO real
+entre lotes por `fecha_otorgamiento` · el saldo nunca queda negativo · un
+Negocio no puede consumir créditos de otro · `otorgar_creditos_plan_mensual()`
+bloqueada para `authenticated`, idempotente en una segunda corrida del
+cron el mismo mes · compra de paquete + `aplicar_evento_pago()` acredita
+el lote exacto, un segundo `aplicar_evento_pago()` sobre el mismo pago no
+duplica (`YA_PROCESADO`) · Memoria: versionado, aprobación, olvido
+(`DELETE` real auditado), restauración crean versión nueva, RLS aísla la
+Memoria/Prompts de un Negocio ajeno · Prompt Library: tipos permitidos
+por rol, RLS · AI Pricing Engine y Cost Simulator solo editables/usables
+por SuperSU. Re-verificación completa de las 8 suites de regresión
+existentes tras la 6ª extensión de `aplicar_evento_pago()` — cero
+regresiones. `tsc --noEmit`, `eslint` y `next build` limpios.
+
+### Documentación actualizada con este módulo
+Este archivo (Coverage Matrix + detalle), `CHANGELOG.md`,
+`ADR_013_AI_OS_Monetizacion.md`, `docs/PENDING_DECISIONS.md` (Gemini/
+Ollama, prioridad del checkout de Membresía/Gift Card, export PDF/Excel),
+`docs/TECH_DEBT_REGISTER.md` (Gemini/Ollama sin credencial, ROI
+especulativo no medible, Prompt Builder sin constructor visual, checkout
+de Membresía/Gift Card faltante), `Architecture_Decision_Log.md`
+(ADL-026).
+
+### Riesgos detectados
+- **Hallazgo honesto sobre el Módulo 6.5 (Lealtad), encontrado durante
+  este trabajo**: ni `suscribirse_membresia()` ni la compra de Gift Card
+  tienen todavía una pantalla de Cliente que las invoque — ambas RPCs
+  existen y están verificadas, pero el "recorrido completo" de comprar
+  una Membresía/Gift Card con dinero real todavía no tiene un punto de
+  entrada en el frontend de Cliente (la verificación transversal de
+  Lealtad probó el consumo del beneficio insertando `cliente_membresia`
+  directamente como `service_role`, no a través de una compra real). El
+  paquete de créditos de IA sí quedó con su checkout completo (mismo
+  patrón que Upgrade de Plan) porque era parte explícita del alcance de
+  este módulo. Ver `docs/TECH_DEBT_REGISTER.md` y
+  `docs/PENDING_DECISIONS.md`.
+- No se construyeron pantallas dedicadas para cada función de IA
+  orientada a Cliente/Staff con nombre propio (Concierge conversacional,
+  búsqueda en lenguaje natural, Coach de Staff, voz a texto, Analista de
+  Negocio) — el AI OS (P0) es la capa compartida que todas esas
+  funciones necesitarán, y se probó de punta a punta a través del único
+  consumidor real que ya existía (el Motor de recompensas de Lealtad).
+  Construir cada superficie con nombre propio es la Fase 6 que sigue.
+
+`(pendiente de commit)`
+
+---
+
+**Próximo módulo a ejecutar: terminar de conectar el AI OS a más
+superficies de Fase 6 (Concierge de Cliente, Coach de Staff, Analista de
+Negocio — `02_AI_Client.md`, `03_AI_Staff.md`, `04_AI_Business.md`) y/o
+refactorizar `completar_venta_pos()` a una arquitectura de pipeline de
+eventos (pedido explícito del fundador, ver Architecture_Decision_Log.md
+para el diseño). Motor WhatsApp sigue bloqueado sin credenciales de
+WhatsApp Business API (ver `docs/PENDING_DECISIONS.md`).**
 
 ---
 

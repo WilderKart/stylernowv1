@@ -1,27 +1,21 @@
 import "server-only";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
- * Capa de abstracción de proveedores de IA (ADR-011 + extensión pedida por
- * el fundador el 2026-09-16): StylerNow nunca depende de un solo proveedor
- * de LLM. Cada llamada intenta los proveedores configurados EN ORDEN — si
- * uno falla (caída, cuota agotada, error de red), automáticamente
- * reintenta con el siguiente, sin que el llamador tenga que saberlo.
+ * Capa de abstracción de proveedores de IA + Cost Optimizer (ADR-011 y
+ * ADR-013): StylerNow nunca depende de un solo proveedor de LLM, y nunca
+ * hardcodea el orden de preferencia en TypeScript — vive en
+ * `ai_modelo_config` (AI OS, migración 064), editable por SuperSU sin
+ * tocar código.
  *
- * Proveedores soportados hoy, ambos con API compatible OpenAI
- * (`/chat/completions`):
- * 1. OpenRouter (principal) — `OPENROUTER_API_KEY`/`OPENROUTER_BASE_URL`/`OPENROUTER_MODEL`.
- * 2. Nemotron/NVIDIA vía tokenrouter.com (respaldo) — `NEMOTRON_API_KEY`/
- *    `NEMOTRON_BASE_URL`/`NEMOTRON_MODEL`. NOTA: verificado el 2026-09-16
- *    que la clave es válida y el modelo real es
- *    `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free`, pero la cuenta
- *    tiene $0.00 de crédito ("insufficient_user_quota") — el respaldo
- *    queda completamente conectado y listo, pero no tendrá capacidad real
- *    hasta que se recargue esa cuenta en tokenrouter.com.
- *
- * Ninguna clave vive en código ni en ningún archivo versionado — solo en
- * variables de entorno. Si un proveedor no tiene su API key configurada,
- * simplemente se omite de la lista (nunca rompe la app por faltar el
- * respaldo).
+ * Orden oficial del Cost Optimizer (ADR-013): Ollama local → OpenRouter
+ * económico → Gemini → modelo premium → fallback. Hoy solo OpenRouter y
+ * Nemotron (mapeado al proveedor NEMOTRON) tienen credenciales reales
+ * configuradas — Ollama (requiere un servidor local, no disponible en
+ * este entorno/Vercel) y Gemini (sin API key todavía) quedan registrados
+ * en `ai_modelo_config` con `activo = false`, listos para activarse el
+ * día que exista la credencial, sin tocar código (ver
+ * docs/PENDING_DECISIONS.md).
  */
 
 interface ProveedorConfig {
@@ -31,31 +25,60 @@ interface ProveedorConfig {
   modelo: string;
 }
 
-function proveedoresDisponibles(): ProveedorConfig[] {
+/** Único lugar donde se resuelve una credencial de entorno para un proveedor. */
+function credencialProveedor(proveedor: string): { apiKey: string; baseUrl: string } | null {
+  switch (proveedor) {
+    case "OPENROUTER":
+      if (!process.env.OPENROUTER_API_KEY) return null;
+      return { apiKey: process.env.OPENROUTER_API_KEY, baseUrl: (process.env.OPENROUTER_BASE_URL ?? "https://openrouter.ai/api/v1").replace(/\/$/, "") };
+    case "NEMOTRON":
+      if (!process.env.NEMOTRON_API_KEY) return null;
+      return { apiKey: process.env.NEMOTRON_API_KEY, baseUrl: (process.env.NEMOTRON_BASE_URL ?? "https://api.tokenrouter.com/v1").replace(/\/$/, "") };
+    case "GEMINI":
+      if (!process.env.GEMINI_API_KEY) return null;
+      return { apiKey: process.env.GEMINI_API_KEY, baseUrl: (process.env.GEMINI_BASE_URL ?? "https://generativelanguage.googleapis.com/v1beta/openai").replace(/\/$/, "") };
+    case "OLLAMA":
+      if (!process.env.OLLAMA_BASE_URL) return null;
+      return { apiKey: "ollama", baseUrl: process.env.OLLAMA_BASE_URL.replace(/\/$/, "") };
+    default:
+      return null;
+  }
+}
+
+/**
+ * Cost Optimizer: lee `ai_modelo_config` (orden de preferencia real,
+ * editable por SuperSU) y arma la lista de proveedores REALMENTE
+ * disponibles hoy (activos + con credencial presente en el entorno).
+ * Si no se pasa un cliente de Supabase, o la tabla no responde, cae al
+ * orden mínimo hardcodeado (OpenRouter → Nemotron) para que la app nunca
+ * quede sin IA por un problema de lectura de configuración.
+ */
+async function proveedoresDisponibles(supabase?: SupabaseClient): Promise<ProveedorConfig[]> {
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("ai_modelo_config")
+      .select("nombre, proveedor, modelo_id, orden_preferencia, activo")
+      .eq("activo", true)
+      .order("orden_preferencia", { ascending: true });
+
+    if (!error && data) {
+      const lista: ProveedorConfig[] = [];
+      for (const fila of data) {
+        const cred = credencialProveedor(fila.proveedor);
+        if (!cred) continue; // sin credencial en el entorno — se omite, nunca rompe la app.
+        lista.push({ nombre: fila.nombre, apiKey: cred.apiKey, baseUrl: cred.baseUrl, modelo: fila.modelo_id });
+      }
+      if (lista.length > 0) return lista;
+    }
+  }
+
+  // Fallback mínimo si no hay Supabase disponible o la tabla está vacía.
   const lista: ProveedorConfig[] = [];
-
-  if (process.env.OPENROUTER_API_KEY) {
-    lista.push({
-      nombre: "OpenRouter",
-      apiKey: process.env.OPENROUTER_API_KEY,
-      baseUrl: (process.env.OPENROUTER_BASE_URL ?? "https://openrouter.ai/api/v1").replace(/\/$/, ""),
-      modelo: process.env.OPENROUTER_MODEL ?? "openrouter/free",
-    });
-  }
-
-  if (process.env.NEMOTRON_API_KEY) {
-    lista.push({
-      nombre: "Nemotron",
-      apiKey: process.env.NEMOTRON_API_KEY,
-      baseUrl: (process.env.NEMOTRON_BASE_URL ?? "https://api.tokenrouter.com/v1").replace(/\/$/, ""),
-      modelo: process.env.NEMOTRON_MODEL ?? "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
-    });
-  }
-
-  if (lista.length === 0) {
-    throw new Error("Ningún proveedor de IA configurado (falta OPENROUTER_API_KEY y/o NEMOTRON_API_KEY en el entorno).");
-  }
-
+  const or = credencialProveedor("OPENROUTER");
+  if (or) lista.push({ nombre: "OpenRouter", ...or, modelo: process.env.OPENROUTER_MODEL ?? "openrouter/free" });
+  const nemo = credencialProveedor("NEMOTRON");
+  if (nemo) lista.push({ nombre: "Nemotron", ...nemo, modelo: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free" });
+  if (lista.length === 0) throw new Error("Ningún proveedor de IA configurado (falta OPENROUTER_API_KEY y/o NEMOTRON_API_KEY en el entorno).");
   return lista;
 }
 
@@ -104,14 +127,14 @@ async function llamarProveedor(p: ProveedorConfig, mensajes: MensajeChat[], maxT
 }
 
 /**
- * Llamada de chat con failover automático — intenta cada proveedor
- * configurado en orden hasta que uno responda; solo falla si TODOS fallan.
- * `nivel` etiqueta la llamada para logs/costos (Nivel 1 económica / Nivel 2
- * premium, `AI_Credit_System.md`) — ambos niveles usan hoy el mismo modelo
- * de cada proveedor, hasta que haya presupuesto para diferenciarlos.
+ * Llamada de chat con Cost Optimizer + failover automático — intenta cada
+ * proveedor activo en el orden de `ai_modelo_config` hasta que uno
+ * responda; solo falla si TODOS fallan. `supabase` es opcional pero se
+ * recomienda siempre pasarlo (server_role) para que el orden real de
+ * `ai_modelo_config` gobierne, en vez del fallback hardcodeado.
  */
-export async function chat(mensajes: MensajeChat[], opciones: { nivel?: 1 | 2; maxTokens?: number } = {}): Promise<RespuestaChat> {
-  const proveedores = proveedoresDisponibles();
+export async function chat(mensajes: MensajeChat[], opciones: { nivel?: 1 | 2; maxTokens?: number; supabase?: SupabaseClient } = {}): Promise<RespuestaChat> {
+  const proveedores = await proveedoresDisponibles(opciones.supabase);
   const errores: string[] = [];
 
   for (const p of proveedores) {
@@ -128,12 +151,11 @@ export async function chat(mensajes: MensajeChat[], opciones: { nivel?: 1 | 2; m
 }
 
 /**
- * Pide una respuesta JSON estricta (insights estructurados, ver
- * `09-CRM-Intelligence/*` y Módulo 12 de ADR-011) — reintenta una vez con
- * un recordatorio explícito si el modelo devuelve texto no parseable,
- * dentro del mismo intento de failover de `chat()`.
+ * Pide una respuesta JSON estricta (insights estructurados) — reintenta
+ * una vez con un recordatorio explícito si el modelo devuelve texto no
+ * parseable, dentro del mismo intento de failover de `chat()`.
  */
-export async function chatJSON<T>(mensajes: MensajeChat[], opciones: { nivel?: 1 | 2; maxTokens?: number } = {}): Promise<T> {
+export async function chatJSON<T>(mensajes: MensajeChat[], opciones: { nivel?: 1 | 2; maxTokens?: number; supabase?: SupabaseClient } = {}): Promise<T> {
   const intentar = async (mensajesIntento: MensajeChat[]) => {
     const r = await chat(mensajesIntento, opciones);
     const match = r.contenido.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
