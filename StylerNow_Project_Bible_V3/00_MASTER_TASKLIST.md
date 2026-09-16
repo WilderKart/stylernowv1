@@ -2123,7 +2123,7 @@ de Membresía/Gift Card faltante), `Architecture_Decision_Log.md`
   consumidor real que ya existía (el Motor de recompensas de Lealtad).
   Construir cada superficie con nombre propio es la Fase 6 que sigue.
 
-`(pendiente de commit)`
+`b450aa6`
 
 ---
 
