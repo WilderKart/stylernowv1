@@ -90,12 +90,17 @@ bloquea, el desarrollo sigue avanzando en paralelo sin esperar respuesta.
 - **Recomendación:** cuando el fundador decida, habilitar Mercado Pago Preapproval en la cuenta comercial y definir el flujo de "guardar medio de pago" en el Panel Negocio (Checkout Pro no lo soporta) — en ese momento se construye el calendario Día 0/1/3/7/10 real sobre esa base.
 - **Bloquea:** Solo el calendario automático de reintentos de cobro — el resto del ciclo de vida de Suscripción (upgrade, downgrade, suspensión, cancelación, camino manual de mora) ya funciona completo sin esto.
 
-## Fase 6 — AI OS: falta credencial de Gemini y servidor de Ollama
+## Fase 6 — AI OS: falta credencial de Gemini
 
-- **Contexto:** el Cost Optimizer del ADR-013 define un orden oficial de proveedores (Ollama local → OpenRouter económico → Gemini → premium → fallback). Hoy `ai_modelo_config` tiene Ollama y Gemini seedeados con `activo=false` porque no existe `OLLAMA_BASE_URL` (requiere un servidor propio, no disponible en este entorno serverless/Vercel) ni `GEMINI_API_KEY`.
-- **Impacto:** el Cost Optimizer funciona completo hoy con OpenRouter (principal) + Nemotron (respaldo, heredado de ADR-011) — ningún consumidor de IA está bloqueado. Agregar Gemini/Ollama solo ampliaría las opciones de costo/calidad disponibles.
-- **Recomendación:** (a) Gemini — proveer `GEMINI_API_KEY` cuando el fundador lo considere necesario, no requiere cambio de código, el Cost Optimizer la detecta sola. (b) Ollama — requiere decidir si vale la pena operar un servidor propio (costo de infraestructura) solo para tener un proveedor gratuito adicional, dado que OpenRouter ya ofrece un modelo gratuito.
-- **Bloquea:** No — son proveedores adicionales, no el único camino de IA.
+- **Contexto:** el Cost Optimizer del ADR-013 define un orden oficial de proveedores. Hoy `ai_modelo_config` tiene Gemini seedeado con `activo=false` porque no existe `GEMINI_API_KEY`.
+- **Impacto:** el Cost Optimizer funciona completo hoy con OpenRouter (principal) + Nemotron (respaldo, heredado de ADR-011) — ningún consumidor de IA está bloqueado. Agregar Gemini solo ampliaría las opciones de costo/calidad disponibles.
+- **Recomendación:** proveer `GEMINI_API_KEY` cuando el fundador lo considere necesario — no requiere cambio de código, el Cost Optimizer la detecta sola.
+- **Bloquea:** No — es un proveedor adicional, no el único camino de IA.
+
+## ~~Fase 6 — AI OS: rol de Ollama en la plataforma~~ (Resuelta por ADR-014, Fase G)
+
+- **Resolución (2026-09-16):** Ollama no se elimina del Cost Optimizer, pero su rol queda oficialmente fijado — **nunca** es una dependencia de producción (ningún consumidor real, facturable a un Negocio, puede depender de que un servidor Ollama esté disponible); su uso legítimo es exclusivamente de **desarrollo interno**: documentación, pruebas, clasificación y tareas internas del equipo, corriendo en la máquina del desarrollador. `ai_modelo_config` ya refleja esto correctamente sin cambio de código: la fila `ollama-local` solo se activa si `OLLAMA_BASE_URL` existe en el entorno — ausente por diseño en Vercel/producción, presente solo si un desarrollador lo configura en su `.env.local` para sus propias pruebas. Ver `ADR_013_AI_OS_Monetizacion.md` (nota de la Fase G) y el comentario correspondiente en `src/lib/ia/ai-provider.ts`.
+- **Bloquea:** No aplica — ya resuelta, sin decisión de infraestructura pendiente (operar un servidor Ollama de producción queda explícitamente descartado, no solo diferido).
 
 ## Fase 6 — Lealtad: checkout de Cliente para Membresía y Gift Card no construido
 
@@ -118,12 +123,9 @@ bloquea, el desarrollo sigue avanzando en paralelo sin esperar respuesta.
 - **Recomendación:** cuando el fundador confirme que vale la pena la inversión, elegir una librería (ej. `jsPDF` para PDF, `exceljs` para Excel) — es una decisión de alcance/costo de mantenimiento, no una necesidad bloqueante hoy.
 - **Bloquea:** No.
 
-## Fase 6 — AI OS: ¿la función `recomendacion` es la misma que "Recomendación de Negocios al Cliente"?
+## ~~Fase 6 — AI OS: ¿la función `recomendacion` es la misma que "Recomendación de Negocios al Cliente"?~~ (Resuelta por ADR-014, Fase E)
 
-- **Contexto:** encontrado en la auditoría Fase 0 de ADR-013 (comparar el nuevo catálogo `ai_accion_costo` contra la Biblia ya existente). `09-CRM-Intelligence/02_AI_Client.md` describe "Recomendación de Negocios al Cliente" como infraestructura del Marketplace — su costo lo absorbe StylerNow, **nunca** se descuenta de un Negocio (`AI_Credit_System.md`, Nivel 1). El catálogo nuevo de ADR-013 incluye una acción `recomendacion` habilitada desde el Plan Raven, con costo en créditos cobrado al Negocio (`ai_accion_costo`).
-- **Impacto:** si es la misma función, `ai_accion_costo` la está cobrando incorrectamente a un Negocio individual por algo que la Biblia define como costo de plataforma — habría que exceptuarla del Credit Meter (como ya hace `AI_Credit_System.md` con la función original). Si es una función distinta (ej. "recomendar un Servicio/Producto a un Cliente específico" desde el Panel, no el widget del Home del Marketplace), el cobro actual es correcto y solo falta un nombre menos ambiguo para evitar la confusión.
-- **Recomendación:** el fundador confirma cuál de las dos interpretaciones es la correcta. Mientras tanto, la acción `recomendacion` se implementó como cobrable al Negocio (consistente con el resto del catálogo de ADR-013), sin asumir la respuesta.
-- **Bloquea:** No al resto del AI OS — es un ajuste de una sola fila en `ai_accion_costo` una vez confirmado.
+- **Resolución (2026-09-16):** son dos funciones distintas. **Recomendación Marketplace** (`02_AI_Client.md`) es gratuita, algoritmo de plataforma — nunca consume créditos de ningún Negocio. **Recomendación IA del Negocio** (la acción `recomendacion` de `ai_accion_costo`) es la sugerencia personalizada del Motor de recompensas de Lealtad para un Cliente específico ante un disparador — consume créditos como cualquier otra función Negocio-facing. El código ya estaba correcto (cobrable al Negocio); solo faltaba esta aclaración en la Biblia, ahora agregada en `AI_Credit_System.md` y `02_AI_Client.md`.
 
 ## Cómo agregar una entrada
 Si te encontrás con algo que de verdad no podés resolver sin que el

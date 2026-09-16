@@ -242,6 +242,13 @@ Cada decisión tiene: **Fecha, Decisión, Motivo, Impacto, Estado** (`Activa` / 
 **Impacto:** Corregido en la migración 076 (`drop function` de la firma vieja de 6 parámetros). Regla permanente: toda extensión de parámetros de una RPC ya existente debe incluir el `drop function` de la firma anterior en la misma migración — `create or replace function` por sí solo NUNCA es suficiente cuando cambia la lista de parámetros.
 **Estado:** Activa — corregido y verificado.
 
+### ADL-030 — Regla definitiva: "Recomendación Marketplace" (gratuita) vs. "Recomendación IA del Negocio" (cobrable) son funciones distintas, nunca la misma
+**Fecha:** 2026-09-16
+**Decisión:** Dos funciones de IA con nombre parecido conviven en el proyecto y deben tratarse siempre como distintas: **Recomendación Marketplace** ("Recomendación de Negocios al Cliente", `09-CRM-Intelligence/02_AI_Client.md`) es infraestructura de plataforma — algoritmo basado en ubicación/calificaciones/disponibilidad/historial, gratuita, nunca descuenta créditos de ningún Negocio, sin excepción. **Recomendación IA del Negocio** (acción `recomendacion` de `ai_accion_costo`, ADR-013) es la sugerencia personalizada que el Motor de recompensas de Lealtad genera para un Cliente específico ante un disparador (cumpleaños, objetivo logrado) — consume créditos del Negocio que la pide, igual que `campana_asistida`/`prediccion_abandono`/`pricing_advisor`.
+**Motivo:** ADR-013 (Módulo 6.6, AI OS) introdujo la acción `recomendacion` en `ai_accion_costo` sin verificar contra la Biblia existente si colisionaba con la función ya documentada en `02_AI_Client.md` — quedó registrado como hallazgo pendiente en `docs/PENDING_DECISIONS.md`. El fundador resolvió la ambigüedad explícitamente en ADR-014, Fase E, con la regla de arriba.
+**Impacto:** Ningún cambio de código — la implementación ya era correcta (la acción `recomendacion` de `ai_accion_costo` nunca se llamó desde la Recomendación Marketplace, que sigue sin pasar por `consumir_creditos_ia()`). Se actualizó `AI_Credit_System.md` y `02_AI_Client.md` con la distinción explícita para que nadie vuelva a confundirlas. Regla general para cualquier función de IA futura: un nombre parecido a uno ya documentado en la Biblia exige verificar explícitamente si es la misma función antes de asumirlo — nunca "probablemente es la misma" ni "probablemente es distinta" sin decisión del fundador.
+**Estado:** Activa — resuelto, sin cambio de código necesario.
+
 ## Checklist
 - [x] Completo (vivo — se agregan entradas nuevas conforme surgen decisiones)
 - [ ] Revisado

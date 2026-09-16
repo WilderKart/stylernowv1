@@ -12,17 +12,19 @@
 > excepción donde el número viejo de este documento se mantuvo tal cual: la
 > ventana de expiración de créditos comprados (90 días, ver más abajo).
 >
-> **Hallazgo pendiente de confirmación del fundador**: la función
-> `recomendacion` del catálogo nuevo de ADR-013 (habilitada desde el Plan
-> Raven) podría ser la misma "Recomendación de Negocios al Cliente" de
-> `09-CRM-Intelligence/02_AI_Client.md` (que este documento marca
-> explícitamente como costo de infraestructura de plataforma, **nunca**
-> descontado de un Negocio) — o podría ser una función distinta,
-> Negocio-facing (ej. recomendar un Servicio/Producto a un Cliente
-> específico desde el Panel). Se implementó como cobrable al Negocio
-> (`ai_accion_costo`) por consistencia con el resto del catálogo de
-> ADR-013, sin asumir cuál de las dos interpretaciones es la correcta — ver
-> `docs/PENDING_DECISIONS.md`.
+> **Resuelto por ADR-014, Fase E (2026-09-16) — regla definitiva de
+> Recomendación IA**: existen dos funciones distintas que comparten un
+> nombre parecido. **Recomendación Marketplace** ("Recomendación de
+> Negocios al Cliente", `09-CRM-Intelligence/02_AI_Client.md`) es
+> gratuita, algoritmo de plataforma, basada en ubicación/calificaciones/
+> disponibilidad/historial — nunca consume créditos de ningún Negocio,
+> sin excepción. **Recomendación IA del Negocio** (la acción
+> `recomendacion` de `ai_accion_costo`) es la sugerencia personalizada
+> que el Motor de recompensas de Lealtad genera para un Cliente
+> específico ante un disparador (cumpleaños, objetivo logrado), pedida
+> por un Negocio para su propio beneficio — consume créditos igual que
+> `campana_asistida`/`prediccion_abandono`/`pricing_advisor`. Ninguna
+> ambigüedad de código: el contexto (quién la invoca) ya las distingue.
 
 ## Objetivo
 Especificar por completo el sistema de créditos que mide y limita el consumo de IA en StylerNow, como implementación directa del principio financiero de `ADR_001_Monetization_Principles.md` ("StylerNow nunca subsidia costos variables"). Este documento es la fuente única de verdad **conceptual** de cómo funciona el sistema de créditos; los números concretos (costo por función, precios de paquete) viven en la base de datos desde ADR-013 — ver nota arriba.

@@ -39,6 +39,9 @@ El Motor de recompensas automáticas de Lealtad (ADR-011, Módulo 6.5) — hasta
 - **SuperSU AI Center** (`/admin/ai`): resumen de consumo global, AI Pricing Engine editable, Cost Optimizer editable, paquetes de recarga editables, matriz de funciones por Plan, AI Cost Simulator.
 - **AI Workspace de Barbería** (`/panel/ia`): saldo y compra de créditos, Memoria de IA (editar/aprobar/olvidar/historial/restaurar), Biblioteca de prompts (crear PROPIO/COMPARTIDO, ver OFICIAL), historial de consumo exportable a CSV, ROI de IA.
 
+### Ollama — rol oficial (ADR-014, Fase G, 2026-09-16)
+Ollama nunca es una dependencia de producción: ningún consumidor real, facturable a un Negocio, puede depender de que un servidor Ollama esté disponible. Su uso legítimo es exclusivamente de **desarrollo interno** (documentación, pruebas, clasificación, tareas internas del equipo) corriendo en la máquina del desarrollador — nunca en el Cost Optimizer que sirve tráfico real de un Negocio. `ai_modelo_config` ya refleja esto sin cambio de código: la fila `ollama-local` solo se activa si `OLLAMA_BASE_URL` existe en el entorno, ausente por diseño en Vercel/producción.
+
 ## Consecuencias
 
 **Positivas:**

@@ -11,11 +11,18 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * Orden oficial del Cost Optimizer (ADR-013): Ollama local → OpenRouter
  * económico → Gemini → modelo premium → fallback. Hoy solo OpenRouter y
  * Nemotron (mapeado al proveedor NEMOTRON) tienen credenciales reales
- * configuradas — Ollama (requiere un servidor local, no disponible en
- * este entorno/Vercel) y Gemini (sin API key todavía) quedan registrados
- * en `ai_modelo_config` con `activo = false`, listos para activarse el
- * día que exista la credencial, sin tocar código (ver
- * docs/PENDING_DECISIONS.md).
+ * configuradas — Gemini (sin API key todavía) queda registrado en
+ * `ai_modelo_config` con `activo = false`, listo para activarse el día
+ * que exista la credencial, sin tocar código (ver docs/PENDING_DECISIONS.md).
+ *
+ * Ollama (ADR-014, Fase G): nunca es una dependencia de producción — su
+ * rol es exclusivamente de desarrollo interno (documentación, pruebas,
+ * clasificación, tareas internas), corriendo en la máquina del
+ * desarrollador. `OLLAMA_BASE_URL` está ausente por diseño en Vercel/
+ * producción; si un desarrollador la define en su propio `.env.local`,
+ * el Cost Optimizer la usa igual que cualquier otro proveedor activo —
+ * nunca debe depender de ella ningún flujo que sirva tráfico real de un
+ * Negocio.
  */
 
 interface ProveedorConfig {
