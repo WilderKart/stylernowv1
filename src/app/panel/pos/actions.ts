@@ -205,18 +205,10 @@ export async function completarVenta(datos: {
       puntos_otorgados: number;
     };
 
-    // Lealtad (ADR-011, Módulo 7): reevalúa el ascenso VIP automático por
-    // gasto acumulado tras cada venta — best-effort, nunca rompe el cobro
-    // ya confirmado si esto falla (ej. el negocio no configuró niveles VIP).
-    const { data: reservaLealtad } = await supabase.from("reserva").select("cliente_id, negocio_id").eq("id", datos.reservaId).maybeSingle();
-    if (reservaLealtad) {
-      try {
-        await supabase.rpc("evaluar_ascenso_vip_automatico", { p_cliente_id: reservaLealtad.cliente_id, p_negocio_id: reservaLealtad.negocio_id });
-      } catch {
-        // best-effort — no rompe el cobro ya confirmado.
-      }
-    }
-
+    // El ascenso VIP automático (Lealtad, ADR-011) ya no se llama desde
+    // acá: es un handler del Pipeline de Eventos venta_completada
+    // (migración 070-072), ejecutado dentro de la misma transacción de
+    // completar_venta_pos() con aislamiento de fallos real.
     revalidatePath("/panel/pos");
     revalidatePath("/panel/agenda");
     return {

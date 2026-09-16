@@ -3771,6 +3771,39 @@ export type Database = {
           },
         ]
       }
+      venta_pipeline_handler: {
+        Row: {
+          activo: boolean
+          created_at: string
+          descripcion: string
+          funcion_sql: string
+          id: string
+          nombre: string
+          orden: number
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          descripcion: string
+          funcion_sql: string
+          id?: string
+          nombre: string
+          orden: number
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          descripcion?: string
+          funcion_sql?: string
+          id?: string
+          nombre?: string
+          orden?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       venta_producto: {
         Row: {
           cantidad: number
@@ -4229,6 +4262,35 @@ export type Database = {
         Returns: undefined
       }
       _lealtad_wallet_id: { Args: { p_cliente_id: string }; Returns: string }
+      _pipeline_auditoria_venta: {
+        Args: { p_evento: Json }
+        Returns: undefined
+      }
+      _pipeline_cashback_otorgar: {
+        Args: { p_evento: Json }
+        Returns: undefined
+      }
+      _pipeline_puntaje_staff_otorgar: {
+        Args: { p_evento: Json }
+        Returns: undefined
+      }
+      _pipeline_puntos_fidelizacion_otorgar: {
+        Args: { p_evento: Json }
+        Returns: undefined
+      }
+      _pipeline_referidos_cliente_completar: {
+        Args: { p_evento: Json }
+        Returns: undefined
+      }
+      _pipeline_referidos_staff_completar: {
+        Args: { p_evento: Json }
+        Returns: undefined
+      }
+      _pipeline_sellos_otorgar: { Args: { p_evento: Json }; Returns: undefined }
+      _pipeline_vip_evaluar_ascenso: {
+        Args: { p_evento: Json }
+        Returns: undefined
+      }
       activar_campana: {
         Args: { p_campana_id: string }
         Returns: {
@@ -5845,6 +5907,10 @@ export type Database = {
         }[]
       }
       ejecutar_downgrades_programados: { Args: never; Returns: Json }
+      ejecutar_pipeline_venta_completada: {
+        Args: { p_evento: Json }
+        Returns: Json
+      }
       eliminar_banner_home: { Args: { p_id: string }; Returns: undefined }
       enviar_negocio_a_aprobacion: {
         Args: { p_negocio_id: string }

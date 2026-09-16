@@ -7,6 +7,26 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Refactorizado — `completar_venta_pos()` pasa a ser un Pipeline de Eventos
+Pedido directo del fundador tras la 5ª extensión de esta función. Se
+divide en una fase crítica (Pago, Membresía, canje de Puntos, Inventario
+de la venta — determinan el monto cobrado, siguen inline) y un Pipeline
+de Eventos `venta_completada` (`venta_pipeline_handler`,
+`ejecutar_pipeline_venta_completada()`, migraciones 070-072): cada
+sistema satélite (Puntos otorgados, Puntaje de Staff, Sellos, Cashback,
+Referidos de Cliente/Staff, ascenso VIP, Auditoría resumen) ahora es una
+función independiente registrada en una tabla, no un bloque más
+hardcodeado. Aislamiento de fallos real vía `begin...exception when
+others...end` (savepoint implícito de PL/pgSQL): un handler roto nunca
+deshace el cobro ya confirmado ni bloquea a los demás handlers — ver
+ADL-027. El ascenso VIP automático se migró de una 2ª llamada RPC desde
+TypeScript (`src/app/panel/pos/actions.ts`) a un handler más del
+pipeline, cerrando una ventana real de inconsistencia por fallo de red
+entre las dos llamadas. Verificado: 20/20 casos nuevos (incluyendo
+aislamiento de fallos forzando un handler roto) + regresión completa de
+las 9 suites existentes — cero regresiones, mismo resultado observable
+que antes del refactor. `tsc`/`eslint`/`next build` limpios.
+
 ### Corregido — Auditoría Fase 0 de ADR-013: expiración de créditos IA comprados
 `AI_Credit_System.md` (ya aprobado) fija 90 días de expiración para un
 paquete de créditos IA comprado; la migración 068 lo había implementado

@@ -2127,13 +2127,73 @@ de Membresía/Gift Card faltante), `Architecture_Decision_Log.md`
 
 ---
 
+## Refactor transversal — `completar_venta_pos()` pasa a ser un Pipeline de Eventos
+
+Migraciones `070_venta_pipeline_schema.sql`, `071_venta_pipeline_handlers.sql`,
+`072_completar_venta_pos_pipeline.sql` · `src/app/panel/pos/actions.ts`
+(elimina la 2ª llamada RPC de ascenso VIP, ahora un handler más).
+
+- Pedido directo del fundador tras la 5ª extensión de esta función
+  (Módulo 6.5, Lealtad): "evitar que se vuelva inmanejable a medida que
+  StylerNow siga creciendo". Diagrama de referencia del fundador: `Venta
+  confirmada → Pipeline → Pago, Membresía, Sellos, Cashback, Wallet, VIP,
+  Inventario, Comisiones Staff, Reportes, IA, Auditoría`.
+- **Fase crítica (sigue inline, sin cambios de comportamiento)**: Pago,
+  Membresía y canje de Puntos determinan el MONTO cobrado — un fallo ahí
+  debe abortar toda la venta, así que deliberadamente NO se convierten en
+  handlers aislables. Inventario de la venta (productos vendidos +
+  consumo automático) también sigue inline por la misma razón: afecta el
+  total a cobrar antes de calcularlo.
+- **Wallet no es un handler de este pipeline**, a propósito: la comisión
+  de plataforma se acredita en `aplicar_evento_pago()`, un evento
+  distinto (pago vía pasarela de una Reserva, no cierre de venta
+  presencial en POS) — fusionarlos habría sido un error conceptual, no
+  una simplificación.
+- **Reportes e IA no tienen todavía handler**, a propósito: ninguno tiene
+  hoy un consumidor real por-venta (Reportes ya lee las tablas vivas
+  directamente; el Reward Engine de IA se dispara desde `/panel/lealtad`,
+  no por venta) — agregar un handler vacío habría sido un "botón muerto"
+  (Regla de Oro). El registro `venta_pipeline_handler` es exactamente el
+  punto de extensión para cuando exista un consumidor real: una función
+  nueva + una fila, sin tocar `completar_venta_pos()` nunca más.
+- **7 handlers reales extraídos**, cada uno una función independiente
+  registrada en `venta_pipeline_handler` (editable/deshabilitable por
+  SuperSU sin deploy, mismo patrón que `ai_modelo_config`): Puntos de
+  fidelización, Puntaje de Staff, Sellos, Cashback, Referidos de Cliente,
+  Referidos de Staff, ascenso VIP automático (migrado desde una 2ª
+  llamada RPC en `src/app/panel/pos/actions.ts` — cierra una ventana real
+  de inconsistencia por fallo de red entre las dos llamadas), más la
+  Auditoría resumen de la venta como último handler.
+- **Aislamiento de fallos real**: el orquestador (`ejecutar_pipeline_venta_completada()`)
+  ejecuta cada handler dentro de un `begin...exception when others...end`
+  — un savepoint implícito de PL/pgSQL — así que un handler roto nunca
+  deshace el cobro ya confirmado ni bloquea a los demás handlers. Ver
+  ADL-027 para el detalle técnico y la distinción con ADL-024.
+
+### Verificado end-to-end contra la base real (20/20 + regresión completa)
+`completar_venta_pos()` devuelve exactamente la misma forma de resultado
+que antes del refactor (más un array `pipeline` nuevo, aditivo) · el
+ascenso VIP ocurre en la MISMA transacción sin la 2ª llamada externa · el
+Puntaje de Staff se otorga igual que antes · **con un handler roto
+insertado deliberadamente en el registro** (apuntando a una función SQL
+inexistente): la venta se cobra igual, la Reserva queda `COMPLETADA`, el
+Pago se registra igual, el resto de los handlers (antes y después del
+roto en el orden) corre normalmente, y queda un `evento_auditoria`
+`PIPELINE_HANDLER_FALLO` con el detalle del error · RLS: solo SuperSU lee
+el registro de handlers. Re-verificación completa de las 9 suites de
+regresión existentes tras el refactor — cero regresiones, mismo
+comportamiento observable.
+
+### Documentación actualizada con este refactor
+Este archivo, `CHANGELOG.md`, `Architecture_Decision_Log.md` (ADL-027).
+
+---
+
 **Próximo módulo a ejecutar: terminar de conectar el AI OS a más
 superficies de Fase 6 (Concierge de Cliente, Coach de Staff, Analista de
-Negocio — `02_AI_Client.md`, `03_AI_Staff.md`, `04_AI_Business.md`) y/o
-refactorizar `completar_venta_pos()` a una arquitectura de pipeline de
-eventos (pedido explícito del fundador, ver Architecture_Decision_Log.md
-para el diseño). Motor WhatsApp sigue bloqueado sin credenciales de
-WhatsApp Business API (ver `docs/PENDING_DECISIONS.md`).**
+Negocio — `02_AI_Client.md`, `03_AI_Staff.md`, `04_AI_Business.md`).
+Motor WhatsApp sigue bloqueado sin credenciales de WhatsApp Business API
+(ver `docs/PENDING_DECISIONS.md`).**
 
 ---
 
