@@ -397,8 +397,9 @@ function SeccionRoi({ roi }: { roi: RoiIa | null }) {
     <section>
       <h2 className="font-display mb-1 text-[13px] font-bold uppercase text-text">ROI de IA</h2>
       <p className="mb-3 text-[11px] text-text-faint">
-        Consumo y costo reales. Las métricas de resultado (clientes recuperados, reservas y ventas atribuidas a IA) todavía
-        no son medibles: falta trazabilidad de atribución (ver hoja de ruta).
+        Consumo, costo y atribución reales — nunca una estimación inventada. La atribución cuenta Reservas de un Cliente que
+        había confirmado una sugerencia de IA en los 30 días previos (Motor de recompensas de Lealtad); el resto de posibles
+        señales (campañas por email/WhatsApp, tiempo ahorrado) todavía no tiene una fuente de datos real detrás.
       </p>
       <div className="mb-3 grid grid-cols-2 gap-3">
         <Card className="text-center">
@@ -408,6 +409,14 @@ function SeccionRoi({ roi }: { roi: RoiIa | null }) {
         <Card className="text-center">
           <p className="text-[18px] font-bold text-text">{roi.campanasEjecutadasIa}</p>
           <p className="text-[10px] font-bold uppercase tracking-wide text-text-faint">Campañas asistidas por IA</p>
+        </Card>
+        <Card className="text-center">
+          <p className="text-[18px] font-bold text-text">{roi.conversionesTotal}</p>
+          <p className="text-[10px] font-bold uppercase tracking-wide text-text-faint">Reservas atribuidas a IA</p>
+        </Card>
+        <Card className="text-center">
+          <p className="text-[18px] font-bold text-text">{formatCOP(roi.montoAtribuidoTotal)}</p>
+          <p className="text-[10px] font-bold uppercase tracking-wide text-text-faint">Monto atribuido a IA</p>
         </Card>
       </div>
       {roi.consumoPorCategoria.length > 0 ? (

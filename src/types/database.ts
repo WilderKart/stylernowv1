@@ -105,6 +105,68 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_conversion: {
+        Row: {
+          cliente_id: string
+          created_at: string
+          dias_desde_sugerencia: number
+          id: string
+          monto_atribuido: number
+          negocio_id: string
+          recompensa_sugerencia_id: string
+          reserva_id: string
+        }
+        Insert: {
+          cliente_id: string
+          created_at?: string
+          dias_desde_sugerencia: number
+          id?: string
+          monto_atribuido: number
+          negocio_id: string
+          recompensa_sugerencia_id: string
+          reserva_id: string
+        }
+        Update: {
+          cliente_id?: string
+          created_at?: string
+          dias_desde_sugerencia?: number
+          id?: string
+          monto_atribuido?: number
+          negocio_id?: string
+          recompensa_sugerencia_id?: string
+          reserva_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_conversion_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_conversion_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_conversion_recompensa_sugerencia_id_fkey"
+            columns: ["recompensa_sugerencia_id"]
+            isOneToOne: false
+            referencedRelation: "recompensa_sugerencia"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_conversion_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reserva"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_memoria_negocio: {
         Row: {
           aprobado: boolean
@@ -271,6 +333,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "ai_prompt_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_roi_snapshot: {
+        Row: {
+          conversiones_total: number
+          costo_proveedor_usd: number
+          created_at: string
+          creditos_consumidos: number
+          id: string
+          interacciones_total: number
+          monto_atribuido_total: number
+          negocio_id: string
+          periodo_fin: string
+          periodo_inicio: string
+          tiempo_ahorrado_minutos_estimado: number | null
+        }
+        Insert: {
+          conversiones_total?: number
+          costo_proveedor_usd?: number
+          created_at?: string
+          creditos_consumidos?: number
+          id?: string
+          interacciones_total?: number
+          monto_atribuido_total?: number
+          negocio_id: string
+          periodo_fin: string
+          periodo_inicio: string
+          tiempo_ahorrado_minutos_estimado?: number | null
+        }
+        Update: {
+          conversiones_total?: number
+          costo_proveedor_usd?: number
+          created_at?: string
+          creditos_consumidos?: number
+          id?: string
+          interacciones_total?: number
+          monto_atribuido_total?: number
+          negocio_id?: string
+          periodo_fin?: string
+          periodo_inicio?: string
+          tiempo_ahorrado_minutos_estimado?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_roi_snapshot_negocio_id_fkey"
             columns: ["negocio_id"]
             isOneToOne: false
             referencedRelation: "negocio"
@@ -4181,6 +4293,27 @@ export type Database = {
       }
     }
     Views: {
+      ai_interaction: {
+        Row: {
+          accion: string | null
+          categoria: string | null
+          created_at: string | null
+          creditos_consumidos: number | null
+          id: string | null
+          negocio_id: string | null
+          nivel: number | null
+          saldo_restante: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credito_ia_consumo_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vista_crm_cliente: {
         Row: {
           cliente_foto_url: string | null
@@ -4271,6 +4404,10 @@ export type Database = {
         Returns: undefined
       }
       _lealtad_wallet_id: { Args: { p_cliente_id: string }; Returns: string }
+      _pipeline_ai_atribuir_conversion: {
+        Args: { p_evento: Json }
+        Returns: undefined
+      }
       _pipeline_auditoria_venta: {
         Args: { p_evento: Json }
         Returns: undefined
@@ -6139,6 +6276,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      generar_roi_snapshot_mensual: { Args: never; Returns: Json }
       guardar_memoria_ia: {
         Args: {
           p_categoria: string

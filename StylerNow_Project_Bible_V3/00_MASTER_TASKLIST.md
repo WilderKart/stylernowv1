@@ -2367,11 +2367,72 @@ Este archivo, `CHANGELOG.md`, `Architecture_Decision_Log.md` (ADL-031).
 
 ---
 
-**Próximo módulo a ejecutar: ADR-014, Fase C — Tracking real del ROI de
-IA (`ai_interaction`/`ai_conversion`/`ai_roi_snapshot`) y Fase D
-(exportación PDF/Excel) — únicas fases de ADR-014 sin cerrar. Motor
-WhatsApp sigue bloqueado sin credenciales de WhatsApp Business API (ver
-`docs/PENDING_DECISIONS.md`).**
+## ADR-014, Fase C — Tracking real del ROI de IA
+
+Migraciones `079_ai_roi_tracking_real.sql`,
+`080_fix_ai_interaction_security_invoker.sql` · `src/app/panel/ia/actions.ts`
+(`obtenerRoiIa` ampliado) · `src/app/panel/ia/vista-ai-workspace.tsx`
+(sección ROI muestra atribución real) · `src/app/api/cron/diario/route.ts`
+(4ª tarea: `generar_roi_snapshot_mensual`).
+
+- Cierra el hallazgo honesto del Módulo 6.6: ya existe un mecanismo real
+  que vincula una acción de IA con un resultado de negocio posterior.
+- **`ai_interaction`**: vista sobre `credito_ia_consumo` (no una tabla
+  nueva — evita duplicar datos que el AI OS ya captura desde el Módulo
+  6.6).
+- **`ai_conversion`**: atribución real con ventana explícita de 30 días —
+  una Reserva de un Cliente que había confirmado una `recompensa_sugerencia`
+  redactada por IA (Nivel 1/2, con costo real) en ese período. Población
+  automática vía un handler nuevo del Pipeline de Eventos Global (Fase F,
+  `_pipeline_ai_atribuir_conversion`) — demostración concreta de para qué
+  se construyó ese bus: cero cambios a `completar_venta_pos()`.
+- **`ai_roi_snapshot`**: agregado mensual real (créditos, costo,
+  interacciones, conversiones, monto atribuido), generado por
+  `generar_roi_snapshot_mensual()` desde el cron diario (idempotente por
+  período, revocada de `authenticated`).
+- **Alcance honesto**: de los eventos pedidos en la extensión del ADR
+  (campaña creada/enviada/apertura/clic/reserva/venta/retorno/tiempo
+  ahorrado), solo Reserva/Venta tienen hoy una fuente de datos real —
+  campaña/apertura/clic requerirían un motor de entrega multicanal que no
+  existe (`docs/PENDING_DECISIONS.md`), y "tiempo ahorrado" queda como
+  columna nullable sin metodología definida, nunca un número inventado.
+
+### Hallazgo de seguridad real, corregido antes de cerrar la fase
+`ai_interaction` no heredaba la RLS de `credito_ia_consumo` a pesar de
+ser una vista simple sobre esa tabla — descubierto por la propia suite
+de verificación: un Cliente sin ningún vínculo con un Negocio podía leer
+su consumo de IA completo a través de la vista. Causa: toda vista nueva
+de Postgres tiene `security_invoker = false` por defecto desde la
+versión 15 (retrocompatibilidad) — con eso, la RLS de la tabla base se
+evalúa con los permisos del DUEÑO de la vista (que no está sujeto a
+ella), no del usuario real que consulta. Corregido con
+`security_invoker = true` (migración 080) — ver ADL-032, con memoria
+persistente de sesión para no repetirse en proyectos futuros.
+
+### Verificado end-to-end contra la base real (16/16 + regresión completa)
+`ai_interaction` refleja el consumo real con el join de categoría
+correcto, RLS aislada tras el fix · una sugerencia CONFIRMADA con costo
+real es la única candidata a atribución · la conversión se crea SOLA al
+completarse una venta real, con el monto exacto cobrado · nunca se
+duplica la atribución de la misma sugerencia · RLS de las 3 estructuras
+nuevas · el cron mensual corre sin error y queda bloqueado para
+`authenticated`. Re-verificación completa de las 9 suites de regresión
+existentes — cero regresiones.
+
+### Documentación actualizada con esta fase
+Este archivo, `CHANGELOG.md`, `Architecture_Decision_Log.md` (ADL-032),
+`docs/TECH_DEBT_REGISTER.md` y `docs/PENDING_DECISIONS.md` (campaña/
+apertura/clic y tiempo ahorrado, ambos honestamente sin medir todavía),
+memoria persistente de sesión (`security_invoker` en vistas sobre RLS).
+
+`(pendiente de commit)`
+
+---
+
+**Próximo módulo a ejecutar: ADR-014, Fase D — Exportación PDF/Excel
+(CSV ya existe desde el Módulo 6.6) — única fase de ADR-014 sin cerrar.
+Motor WhatsApp sigue bloqueado sin credenciales de WhatsApp Business API
+(ver `docs/PENDING_DECISIONS.md`).**
 
 ---
 

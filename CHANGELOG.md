@@ -7,6 +7,33 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — ADR-014, Fase C: Tracking real del ROI de IA
+Cierra el hallazgo honesto del Módulo 6.6: ahora existe un mecanismo real
+que vincula una acción de IA con un resultado de negocio. `ai_interaction`
+(vista sobre `credito_ia_consumo`, sin duplicar datos), `ai_conversion`
+(atribución real: una Reserva de un Cliente que había confirmado una
+sugerencia de IA del Motor de recompensas en los 30 días previos —
+ventana explícita, nunca una estimación inventada) y `ai_roi_snapshot`
+(agregado mensual real, cron-generado, idempotente). La atribución ocurre
+automáticamente vía un handler nuevo del Pipeline de Eventos Global
+(Fase F) — demostración concreta de por qué se construyó ese bus: cero
+cambios a `completar_venta_pos()`. El ROI Dashboard (`/panel/ia`) ahora
+muestra Reservas y monto atribuidos a IA con datos reales, ya no "no
+medible todavía". Se documenta honestamente lo que sigue sin medirse
+(campaña enviada/apertura/clic — no hay motor de entrega multicanal;
+tiempo ahorrado — sin metodología definida) en vez de inventar un número.
+
+**Hallazgo de seguridad real, corregido antes de cerrar la fase**: la
+vista `ai_interaction` no heredaba la RLS de `credito_ia_consumo` — una
+vista de Postgres se ejecuta con los permisos del DUEÑO por defecto
+(`security_invoker = false` desde PG15), no del usuario que la consulta.
+Corregido con `security_invoker = true` — ver ADL-032.
+
+Verificado: 16/16 casos reales contra Supabase (atribución automática vía
+el pipeline, sin duplicados, RLS de las 3 estructuras nuevas, el cron
+revocado de `authenticated`) + regresión completa de las 9 suites
+existentes — cero regresiones. `tsc`/`eslint`/`next build` limpios.
+
 ### Refactorizado — ADR-014, Fase F (obligatoria): Pipeline de Eventos pasa a ser el bus oficial de StylerNow
 `venta_pipeline_handler`/`ejecutar_pipeline_venta_completada()` (ADL-027)
 se generalizan a `evento_pipeline_handler` (con columna `evento` y

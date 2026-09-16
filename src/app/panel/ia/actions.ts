@@ -266,6 +266,12 @@ export interface RoiIa {
   consumoPorCategoria: { categoria: string; creditos: number }[];
   consumoPorMes: { mes: string; creditos: number }[];
   campanasEjecutadasIa: number;
+  // ADR-014, Fase C: atribución REAL (nunca estimada) — reservas cuyo
+  // Cliente había confirmado una sugerencia de IA en los 30 días previos.
+  // Ver ai_conversion (migración 079) y el handler del pipeline
+  // _pipeline_ai_atribuir_conversion.
+  conversionesTotal: number;
+  montoAtribuidoTotal: number;
 }
 
 export async function obtenerRoiIa(negocioId: string): Promise<Resultado<RoiIa>> {
@@ -296,6 +302,9 @@ export async function obtenerRoiIa(negocioId: string): Promise<Resultado<RoiIa>>
     porMes.set(mes, (porMes.get(mes) ?? 0) + c.creditos_consumidos);
   }
 
+  const { data: conversiones } = await supabase.from("ai_conversion").select("monto_atribuido").eq("negocio_id", negocioId);
+  const montoAtribuidoTotal = (conversiones ?? []).reduce((acc, c) => acc + Number(c.monto_atribuido), 0);
+
   return {
     ok: true,
     data: {
@@ -304,6 +313,8 @@ export async function obtenerRoiIa(negocioId: string): Promise<Resultado<RoiIa>>
       consumoPorCategoria: Array.from(porCategoria.entries()).map(([categoria, creditos]) => ({ categoria, creditos })).sort((a, b) => b.creditos - a.creditos),
       consumoPorMes: Array.from(porMes.entries()).map(([mes, creditos]) => ({ mes, creditos })).sort((a, b) => a.mes.localeCompare(b.mes)),
       campanasEjecutadasIa: campanasEjecutadas,
+      conversionesTotal: (conversiones ?? []).length,
+      montoAtribuidoTotal,
     },
   };
 }

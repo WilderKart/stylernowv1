@@ -127,6 +127,20 @@ bloquea, el desarrollo sigue avanzando en paralelo sin esperar respuesta.
 
 - **Resolución (2026-09-16):** son dos funciones distintas. **Recomendación Marketplace** (`02_AI_Client.md`) es gratuita, algoritmo de plataforma — nunca consume créditos de ningún Negocio. **Recomendación IA del Negocio** (la acción `recomendacion` de `ai_accion_costo`) es la sugerencia personalizada del Motor de recompensas de Lealtad para un Cliente específico ante un disparador — consume créditos como cualquier otra función Negocio-facing. El código ya estaba correcto (cobrable al Negocio); solo faltaba esta aclaración en la Biblia, ahora agregada en `AI_Credit_System.md` y `02_AI_Client.md`.
 
+## Fase 6 — ROI de IA: metodología de "tiempo ahorrado" no definida
+
+- **Contexto:** `ai_roi_snapshot` (ADR-014, Fase C) tiene una columna `tiempo_ahorrado_minutos_estimado` que queda siempre `null` — no existe ninguna metodología de estimación acordada (¿minutos que tomaría redactar manualmente una sugerencia vs. que la genere la IA? ¿un valor fijo por acción? ¿algo medido con datos reales de Staff?).
+- **Impacto:** el ROI Dashboard no muestra "tiempo ahorrado" — se omite en vez de inventar un número, consistente con "nunca estimaciones inventadas" (ADR-014, Fase C).
+- **Recomendación:** el fundador define la fórmula cuando la considere necesaria — es una decisión de negocio (qué se considera "tiempo ahorrado" y con qué línea base), no una decisión técnica.
+- **Bloquea:** No — el resto del ROI (créditos, costo, conversiones, monto atribuido) ya es real y se muestra hoy.
+
+## Fase 6 — ROI de IA: campaña enviada/apertura/clic no medibles (falta motor de campañas)
+
+- **Contexto:** la extensión del ADR-012/013 y ADR-014 Fase C piden medir "campaña enviada", "apertura" y "clic" como eventos del ROI de IA. El proyecto no tiene ningún motor de entrega de campañas multicanal (email/WhatsApp) — WhatsApp está explícitamente diferido (ver más abajo), y no existe tracking de apertura/clic de ningún canal.
+- **Impacto:** el ROI de IA mide honestamente lo que sí tiene una fuente de datos real (créditos consumidos, costo, Reservas/Ventas atribuidas a una sugerencia de IA confirmada) — no incluye campaña/apertura/clic.
+- **Recomendación:** construir esto requiere decidir primero el motor de entrega (Email vía Resend, ya usado en el proyecto para otros fines, es el candidato más cercano) antes de que el tracking tenga algo real que medir — es una decisión de alcance/infraestructura, no una tabla adicional.
+- **Bloquea:** No — el resto del ROI de IA ya es real y útil sin esto.
+
 ## Cómo agregar una entrada
 Si te encontrás con algo que de verdad no podés resolver sin que el
 fundador decida (falta una API key, hay una contradicción real en la

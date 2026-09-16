@@ -256,6 +256,13 @@ Cada decisión tiene: **Fecha, Decisión, Motivo, Impacto, Estado** (`Activa` / 
 **Impacto:** `completar_venta_pos()` llama ahora a `ejecutar_pipeline_evento('venta_completada', v_evento)` en vez de un nombre específico — no vuelve a tocarse para agregar un handler nuevo de venta. Verificado explícitamente: un handler registrado para `reserva_confirmada` NUNCA se ejecuta durante un evento `venta_completada` (aislamiento por tipo de evento, no solo por handler), y el `check` constraint rechaza un nombre de evento inventado.
 **Estado:** Activa — implementado y verificado.
 
+### ADL-032 — Una vista sobre una tabla con RLS NO hereda esa RLS por defecto: se ejecuta con los permisos del DUEÑO de la vista, no del usuario que la consulta
+**Fecha:** 2026-09-16
+**Decisión:** Toda vista de Postgres creada sobre una tabla protegida por RLS debe declararse explícitamente con `security_invoker = true` (`create view ... with (security_invoker = true) as ...`, o `alter view ... set (security_invoker = true);` si ya existe) — nunca asumir que una vista hereda la RLS de sus tablas base solo porque esas tablas la tienen.
+**Motivo:** `ai_interaction` (ADR-014, Fase C, migración 079) se creó como una vista simple sobre `credito_ia_consumo` (protegida por RLS: solo `tiene_acceso_interno(negocio_id)` o SuperSU) — la propia suite de verificación de Fase C demostró que un Cliente sin ningún vínculo con un Negocio SÍ podía leer el consumo de IA de ese Negocio a través de la vista. Causa: desde Postgres 15, toda vista nueva tiene `security_invoker = false` por defecto (retrocompatibilidad) — con ese valor, las políticas RLS de las tablas subyacentes se evalúan con los permisos del DUEÑO de la vista (típicamente el rol que corrió la migración, que no está sujeto a esa RLS), no con los del usuario real que hace la consulta vía PostgREST/supabase-js.
+**Impacto:** Corregido en la migración 080 (`alter view public.ai_interaction set (security_invoker = true);`). Regla permanente para este proyecto: cualquier vista nueva sobre una tabla con RLS incluye `security_invoker = true` en la misma sentencia `create view`, nunca como una corrección posterior — y se verifica explícitamente intentando leerla como un usuario sin acceso, igual que cualquier RPC de autoservicio cerrado (ver ADL-028).
+**Estado:** Activa — corregido y verificado.
+
 ## Checklist
 - [x] Completo (vivo — se agregan entradas nuevas conforme surgen decisiones)
 - [ ] Revisado

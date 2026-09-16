@@ -1,0 +1,12 @@
+-- StylerNow — Migración 080: corrige un hallazgo de seguridad real en la
+-- vista `ai_interaction` (migración 079) — por defecto, una vista de
+-- Postgres se ejecuta con los permisos de su DUEÑO para evaluar RLS de
+-- las tablas subyacentes, no con los del usuario que la consulta
+-- (`security_invoker = false` es el default desde Postgres 15, por
+-- compatibilidad hacia atrás). El dueño de la vista es el rol que corrió
+-- la migración, que no está sujeto a la RLS de `credito_ia_consumo` —
+-- así que CUALQUIER usuario autenticado podía leer el consumo de IA de
+-- CUALQUIER Negocio a través de la vista, aunque `credito_ia_consumo`
+-- en sí mismo esté correctamente protegido. Descubierto por la propia
+-- suite de verificación de Fase C.
+alter view public.ai_interaction set (security_invoker = true);
