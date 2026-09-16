@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { formatCOP } from "@/lib/utils";
 import { useState } from "react";
 import { crearGrupoFamiliar, redimirGiftCard, registrarEventoFraude, registrarReferido, type ResumenLealtad } from "./actions";
@@ -62,9 +63,7 @@ export function VistaLealtad({ resumenInicial, errorInicial }: { resumenInicial:
             {resumen.sellos.map((s) => (
               <li key={s.campanaId} className="rounded-2xl border border-border-subtle bg-surface p-3.5">
                 <p className="text-[12.5px] font-semibold text-text">{s.negocioNombre} · {s.campanaNombre}</p>
-                <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-surface-2">
-                  <div className="h-full bg-accent" style={{ width: `${Math.min(100, (s.sellosActuales / s.sellosRequeridos) * 100)}%` }} />
-                </div>
+                <Progress value={Math.min(100, (s.sellosActuales / s.sellosRequeridos) * 100)} className="mt-1.5 h-2" />
                 <p className="mt-1 text-[10.5px] text-text-faint">{s.sellosActuales} de {s.sellosRequeridos} — {s.recompensaDescripcion}</p>
               </li>
             ))}

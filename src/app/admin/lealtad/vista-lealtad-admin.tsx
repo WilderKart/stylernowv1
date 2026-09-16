@@ -1,8 +1,8 @@
 "use client";
 
+import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { Badge, Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { formatCOP } from "@/lib/utils";
 import { useState } from "react";
 import { marcarFraudeRevisado, type EventoFraude, type MetricasLealtad } from "./actions";
 
@@ -26,13 +26,13 @@ export function VistaLealtadAdmin({ metricas, errorMetricas, eventosIniciales }:
 
       {metricas ? (
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Metrica etiqueta="Saldo en StylerWallets" valor={formatCOP(metricas.saldoTotalWallets)} />
+          <Metrica etiqueta="Saldo en StylerWallets" valor={metricas.saldoTotalWallets} moneda />
           <Metrica etiqueta="Membresías activas" valor={metricas.membresiasActivas} />
           <Metrica etiqueta="Gift Cards activas" valor={metricas.giftCardsActivas} />
-          <Metrica etiqueta="Saldo Gift Cards" valor={formatCOP(metricas.giftCardsSaldoTotal)} />
+          <Metrica etiqueta="Saldo Gift Cards" valor={metricas.giftCardsSaldoTotal} moneda />
           <Metrica etiqueta="Referidos completados" valor={metricas.referidosCompletados} />
           <Metrica etiqueta="Campañas de Sellos activas" valor={metricas.sellosCampanasActivas} />
-          <Metrica etiqueta="Cashback otorgado (histórico)" valor={formatCOP(metricas.cashbackOtorgadoTotal)} />
+          <Metrica etiqueta="Cashback otorgado (histórico)" valor={metricas.cashbackOtorgadoTotal} moneda />
           <Metrica etiqueta="Miembros VIP" valor={metricas.vipMiembrosTotal} />
           <Metrica etiqueta="Grupos familiares" valor={metricas.familiasTotal} />
           <Metrica etiqueta="Cuentas corporativas activas" valor={metricas.cuentasCorporativasActivas} />
@@ -68,10 +68,16 @@ export function VistaLealtadAdmin({ metricas, errorMetricas, eventosIniciales }:
   );
 }
 
-function Metrica({ etiqueta, valor, alerta }: { etiqueta: string; valor: string | number; alerta?: boolean }) {
+function Metrica({ etiqueta, valor, alerta, moneda }: { etiqueta: string; valor: number; alerta?: boolean; moneda?: boolean }) {
   return (
     <Card className="text-center">
-      <p className={`text-[18px] font-bold ${alerta ? "text-danger" : "text-text"}`}>{valor}</p>
+      <AnimatedCounter
+        value={valor}
+        separator="."
+        decimalSeparator=","
+        prefix={moneda ? "$" : undefined}
+        className={`text-[18px] font-bold ${alerta ? "text-danger" : "text-text"}`}
+      />
       <p className="mt-0.5 text-[9.5px] font-bold uppercase tracking-wide text-text-faint">{etiqueta}</p>
     </Card>
   );
