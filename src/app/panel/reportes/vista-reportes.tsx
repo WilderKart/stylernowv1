@@ -9,6 +9,7 @@ import {
   obtenerRankingStaffPeriodo,
   reportarResena,
   responderResena,
+  type HorarioMuerto,
   type PuntoIngreso,
   type RankingStaffReporte,
   type ResenaRecibida,
@@ -23,6 +24,13 @@ const POSICION_ETIQUETA: Record<string, string> = {
   SIN_DATOS: "Todavía no hay suficientes datos para calcularlo",
 };
 
+const DIA_SEMANA_ETIQUETA = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
+function formatearHora(hora: string) {
+  const [h, m] = hora.split(":");
+  return `${h}:${m}`;
+}
+
 export function VistaReportes({
   negocioId,
   sedeIdFijo,
@@ -32,6 +40,7 @@ export function VistaReportes({
   rankingInicial,
   resenasIniciales,
   posicionMarketplace,
+  horariosMuertos,
 }: {
   negocioId: string;
   sedeIdFijo: string | null;
@@ -41,6 +50,7 @@ export function VistaReportes({
   rankingInicial: RankingStaffReporte[];
   resenasIniciales: ResenaRecibida[];
   posicionMarketplace: string | null;
+  horariosMuertos: HorarioMuerto[];
 }) {
   const [sedeId, setSedeId] = useState<string>(sedeIdFijo ?? "");
   const [agrupacion, setAgrupacion] = useState<"semana" | "mes">("semana");
@@ -191,6 +201,30 @@ export function VistaReportes({
           </ul>
         )}
       </section>
+
+      {horariosMuertos.length > 0 ? (
+        <section className="mb-8">
+          <h2 className="font-display mb-1 text-[13px] font-bold uppercase text-text">Horarios con baja ocupación</h2>
+          <p className="mb-3 text-[11px] text-text-faint">
+            Franjas de las últimas 8 semanas con menos del 30% de ocupación real sobre tu disponibilidad configurada — cálculo estadístico, sin IA generativa.
+          </p>
+          <ul className="flex flex-col gap-2">
+            {horariosMuertos.map((h) => (
+              <li key={`${h.vinculoId}-${h.diaSemana}-${h.horaInicio}`} className="flex items-center justify-between gap-3 rounded-2xl border border-border-subtle bg-surface p-3.5">
+                <div>
+                  <p className="text-[13px] font-semibold text-text">
+                    {h.staffNombre} · {DIA_SEMANA_ETIQUETA[h.diaSemana]} {formatearHora(h.horaInicio)}–{formatearHora(h.horaFin)}
+                  </p>
+                  <p className="text-[11px] text-text-faint">
+                    {h.sedeNombre} · {h.horasReservadas}h reservadas de {h.horasDisponibles}h disponibles
+                  </p>
+                </div>
+                <Badge tone="accent">{h.ocupacionPct}% ocupado</Badge>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <SeccionResenas resenasIniciales={resenasIniciales} />
     </main>

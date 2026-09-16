@@ -74,7 +74,8 @@ verificados, no solo "no lanza error en el camino feliz".
 | Fase 6.1 — Wallet: comisión de plataforma real | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
 | Fase 6.2 — Marketplace Ads (Destacado + Pin) | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
 | Fase 6.3 — Suscripciones (ciclo de vida, sin calendario automático de mora) | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
-| Fase 6.4+ — Growth Engine (IA, WhatsApp, Membresías/Gift Cards/Referidos) | ⬜ | ⬜ | ⬜ | ⬜ | Bloqueado sin credenciales/decisión de negocio (ver `docs/PENDING_DECISIONS.md`) |
+| Fase 6.4 — IA Operacional, Horarios muertos (Nivel 0, sin IA) | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
+| Fase 6.5+ — Growth Engine (resto de IA, WhatsApp, Membresías/Gift Cards/Referidos) | ⬜ | ⬜ | ⬜ | ⬜ | Bloqueado sin credenciales/decisión de negocio (ver `docs/PENDING_DECISIONS.md`) |
 
 Ver también `docs/TECH_DEBT_REGISTER.md` (mejoras que no bloquean) y
 `docs/PENDING_DECISIONS.md` (decisiones que dependen de algo externo).
@@ -1432,8 +1433,12 @@ inventa una economía de puntos/descuentos sin esa definición).
       silencioso
 - [ ] IA operacional (Cliente/Staff/Negocio, `09-CRM-Intelligence/*`),
       créditos IA (`AI_Credit_System.md`) — arquitectura de datos lista
-      desde ADR-008 (Módulo 4), implementación de IA real bloqueada sin
-      credenciales de un proveedor de LLM
+      desde ADR-008 (Módulo 4). **Función 4 de `04_AI_Business.md`
+      (Horarios muertos) ya construida — es Nivel 0, "sin IA" explícito
+      de la propia Biblia, ver detalle del Módulo 6.4 abajo.** Las otras
+      3 funciones (`02_AI_Client.md`, `03_AI_Staff.md`, Funciones 1-3 de
+      `04_AI_Business.md`) siguen bloqueadas sin credenciales de un
+      proveedor de LLM
 - [ ] Motor WhatsApp inteligente (`WhatsApp_Delivery_Engine.md`) —
       bloqueado sin credenciales de WhatsApp Business API
 - [ ] Membresías, Gift Cards, referidos — Decisión abierta, sin
@@ -1688,13 +1693,54 @@ TECH_DEBT_REGISTER.md` (calendario automático de reintentos, Puntos de
 fidelización congelados sin canje todavía, enganchar Temporada/
 Puntualidad al mismo cron), ADL-023.
 
+## Módulo 6.4 — detalle de lo construido (IA Operacional, Función 4: Horarios muertos)
+
+Migración 050 · extensión de `src/app/panel/reportes/` (`actions.ts`,
+`page.tsx`, `vista-reportes.tsx`).
+
+- **La única de las 4 funciones de `09-CRM-Intelligence/04_AI_Business.md`
+  que la propia Biblia marca como "Nivel 0 (sin IA, gratuito, sin
+  límite)... resuelto enteramente con reglas fijas, sin modelo de IA ni
+  consumo de créditos"** — se construye ahora en su totalidad; las otras
+  3 funciones de ese documento, más `02_AI_Client.md` y `03_AI_Staff.md`,
+  requieren una credencial de proveedor de LLM que todavía no existe (ver
+  `docs/PENDING_DECISIONS.md`) y quedan sin construir.
+- `detectar_horarios_muertos()`: por cada franja de `disponibilidad` de
+  cada Staff activo, calcula horas disponibles reales en las últimas 8
+  semanas (descontando `bloqueo_ausencia`) contra horas efectivamente
+  reservadas en esa misma franja, y devuelve las franjas con muestra
+  suficiente (≥4h disponibles) y ocupación sistemáticamente baja (<30%).
+- **Alcance recortado, no un olvido**: la Biblia describe que esta salida
+  también "alimenta... una sugerencia de activar una Promoción Flash en
+  esa franja específica" — Flash sigue bloqueada desde el Módulo 6.2
+  (depende del motor de Push/Firebase, `docs/PENDING_DECISIONS.md`), así
+  que se expone el insight puro en `/panel/reportes` sin ningún botón de
+  acción que no tendría efecto real (Regla de Oro).
+- **Permisos exactos de la Biblia**: exclusivo de Barbería (ve todas las
+  Sedes) y Guardian (ve solo la Sede de su propio vínculo) — un Staff que
+  no es Guardian recibe `NO_AUTORIZADO`, verificado explícitamente contra
+  la base real, no solo inferido de la RLS de otras tablas.
+
+### Verificado end-to-end contra la base real (7/7)
+Una franja de 4h/semana sin ninguna Reserva en 8 semanas aparece con 0%
+de ocupación y ~32h disponibles (4h × 8 ocurrencias) · al agregar
+Reservas que cubren más del 30% de esas horas, la franja deja de
+aparecer · otra Barbería no puede consultar los horarios muertos de un
+negocio ajeno · un Staff que no es Guardian no puede invocar la función ·
+un Guardian de la Sede sí puede, y ve la franja de su propia Sede.
+
+### Documentación actualizada con este módulo
+Este archivo (Coverage Matrix + detalle), `CHANGELOG.md`.
+
 ---
 
-**Próximo módulo a ejecutar: Fase 6 — IA operacional / Motor WhatsApp /
+**Próximo módulo a ejecutar: Fase 6 — IA operacional (Funciones 1-3 de
+`04_AI_Business.md`, `02_AI_Client.md`, `03_AI_Staff.md`) / Motor WhatsApp /
 Membresías-Gift Cards-Referidos — los tres bloqueados sin credencial o
 decisión de negocio (ver `docs/PENDING_DECISIONS.md`). Growth Engine
-queda con su ciclo de vida de negocio completo (Wallet, Ads, Suscripciones);
-lo que resta de Fase 6 depende de que el fundador resuelva alguno de esos
+queda con su ciclo de vida de negocio completo (Wallet, Ads, Suscripciones)
+y su única función de IA sin credencial (Horarios muertos, Nivel 0); lo
+que resta de Fase 6 depende de que el fundador resuelva alguno de esos
 tres bloqueos.**
 
 ---

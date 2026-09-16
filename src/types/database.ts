@@ -3369,6 +3369,21 @@ export type Database = {
         Args: { p_negocio_id: string; p_sede_id?: string }
         Returns: Json
       }
+      detectar_horarios_muertos: {
+        Args: { p_negocio_id: string }
+        Returns: {
+          dia_semana: number
+          hora_fin: string
+          hora_inicio: string
+          horas_disponibles: number
+          horas_reservadas: number
+          ocupacion_pct: number
+          sede_id: string
+          sede_nombre: string
+          staff_nombre: string
+          vinculo_id: string
+        }[]
+      }
       ejecutar_downgrades_programados: { Args: never; Returns: Json }
       eliminar_banner_home: { Args: { p_id: string }; Returns: undefined }
       enviar_negocio_a_aprobacion: {

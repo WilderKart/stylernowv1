@@ -194,3 +194,44 @@ export async function responderResena(resenaId: string, respuesta: string): Prom
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
   }
 }
+
+// ── IA Operacional, Función 4: Horarios muertos (Nivel 0, sin IA) ──────────
+// 09-CRM-Intelligence/04_AI_Business.md
+
+export interface HorarioMuerto {
+  vinculoId: string;
+  staffNombre: string;
+  sedeId: string;
+  sedeNombre: string;
+  diaSemana: number;
+  horaInicio: string;
+  horaFin: string;
+  horasDisponibles: number;
+  horasReservadas: number;
+  ocupacionPct: number;
+}
+
+export async function obtenerHorariosMuertos(negocioId: string): Promise<Resultado<HorarioMuerto[]>> {
+  try {
+    const { supabase } = await usuarioActual();
+    const { data, error } = await supabase.rpc("detectar_horarios_muertos", { p_negocio_id: negocioId });
+    if (error) return { ok: false, error: error.message };
+    return {
+      ok: true,
+      data: (data ?? []).map((h) => ({
+        vinculoId: h.vinculo_id!,
+        staffNombre: h.staff_nombre!,
+        sedeId: h.sede_id!,
+        sedeNombre: h.sede_nombre!,
+        diaSemana: h.dia_semana!,
+        horaInicio: h.hora_inicio!,
+        horaFin: h.hora_fin!,
+        horasDisponibles: Number(h.horas_disponibles),
+        horasReservadas: Number(h.horas_reservadas),
+        ocupacionPct: Number(h.ocupacion_pct),
+      })),
+    };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}

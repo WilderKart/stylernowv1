@@ -7,6 +7,19 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 6, Módulo 6.4: IA Operacional — Horarios muertos (Nivel 0)
+`detectar_horarios_muertos()`: la única de las 4 funciones de
+`09-CRM-Intelligence/04_AI_Business.md` que la Biblia marca explícitamente
+como "Nivel 0, sin IA" — analiza disponibilidad configurada vs. Reservas
+reales de las últimas 8 semanas (descontando ausencias) y devuelve las
+franjas por Staff con menos del 30% de ocupación real, expuestas en
+`/panel/reportes` (Barbería ve todas las Sedes, Guardian solo la suya).
+Las otras 3 funciones de ese documento, más las de `02_AI_Client.md` y
+`03_AI_Staff.md`, requieren una credencial de proveedor de LLM que
+todavía no existe y quedan sin construir (`docs/PENDING_DECISIONS.md`).
+Verificado: 7/7 casos reales.
+`PENDIENTE_HASH`
+
 ### Añadido — Fase 6, Módulo 6.3: Suscripciones (ciclo de vida completo)
 Upgrade inmediato con cobro único real prorrateado (`solicitar_upgrade_plan`,
 vía Mercado Pago Checkout Pro, nunca reinicia el ciclo de facturación),

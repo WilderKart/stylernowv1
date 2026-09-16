@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import {
   listarResenas,
+  obtenerHorariosMuertos,
   obtenerIngresosPeriodo,
   obtenerMiPosicionMarketplace,
   obtenerRankingStaffPeriodo,
@@ -23,7 +24,7 @@ export default async function ReportesPage() {
   const sedeId = contexto.rol === "GUARDIAN" ? contexto.sedeId : null;
   const supabase = await createClient();
 
-  const [sedesRes, ingresosRes, serviciosRes, rankingRes, resenasRes, posicionRes] = await Promise.all([
+  const [sedesRes, ingresosRes, serviciosRes, rankingRes, resenasRes, posicionRes, horariosMuertosRes] = await Promise.all([
     contexto.rol === "BARBERIA"
       ? supabase.from("sede").select("id, nombre").eq("negocio_id", negocioId).eq("cerrada_permanente", false).order("nombre")
       : Promise.resolve({ data: null }),
@@ -34,6 +35,7 @@ export default async function ReportesPage() {
     // marketplace_mi_posicion() exige ser la Barbería dueña — Guardian no
     // tiene alcance sobre esto (03-Business-Rules/01_Roles.md, Permisos).
     contexto.rol === "BARBERIA" ? obtenerMiPosicionMarketplace(negocioId) : Promise.resolve({ ok: false as const, error: "" }),
+    obtenerHorariosMuertos(negocioId),
   ]);
 
   return (
@@ -48,6 +50,7 @@ export default async function ReportesPage() {
         rankingInicial={rankingRes.ok ? rankingRes.data : []}
         resenasIniciales={resenasRes.ok ? resenasRes.data : []}
         posicionMarketplace={posicionRes.ok ? posicionRes.data : null}
+        horariosMuertos={horariosMuertosRes.ok ? horariosMuertosRes.data : []}
       />
     </div>
   );
