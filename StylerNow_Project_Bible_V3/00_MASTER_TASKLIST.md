@@ -1655,9 +1655,9 @@ Migraciones 048-049 · `src/app/panel/suscripcion/`, extensión de
   librerías adicionales). Desbloquea `expirar_reservas_vencidas()`
   (dormida desde la migración 008 — nada la invocaba jamás en producción,
   solo scripts de prueba) y la nueva `ejecutar_downgrades_programados()`.
-  Requiere que `CRON_SECRET` se agregue a las variables de entorno de
-  Vercel y se haga un deploy — pendiente, ver `TECH_DEBT_REGISTER.md` (no
-  controlable desde este entorno de desarrollo).
+  `CRON_SECRET` ya está configurado en las variables de entorno de Vercel
+  (confirmado por el fundador) — el cron queda activo desde el próximo
+  deploy.
 
 ### Verificado end-to-end contra la base real (51/51)
 Upgrade calcula el monto prorrateado correcto y bloquea un segundo
@@ -1684,9 +1684,9 @@ suspensión/reactivación/cancelación de nuevo — cero regresiones.**
 ### Documentación actualizada con este módulo
 Este archivo (Coverage Matrix + detalle), `CHANGELOG.md`,
 `docs/PENDING_DECISIONS.md` (Mercado Pago Preapproval), `docs/
-TECH_DEBT_REGISTER.md` (CRON_SECRET pendiente en Vercel, calendario
-automático de reintentos, Puntos de fidelización congelados sin canje
-todavía, enganchar Temporada/Puntualidad al mismo cron), ADL-023.
+TECH_DEBT_REGISTER.md` (calendario automático de reintentos, Puntos de
+fidelización congelados sin canje todavía, enganchar Temporada/
+Puntualidad al mismo cron), ADL-023.
 
 ---
 
