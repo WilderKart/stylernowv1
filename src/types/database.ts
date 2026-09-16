@@ -1030,6 +1030,7 @@ export type Database = {
           id: string
           id_preferencia_pasarela: string | null
           id_transaccion_pasarela: string | null
+          metadata: Json
           monto: number
           monto_reembolsado: number
           motivo_reembolso: string | null
@@ -1050,6 +1051,7 @@ export type Database = {
           id?: string
           id_preferencia_pasarela?: string | null
           id_transaccion_pasarela?: string | null
+          metadata?: Json
           monto: number
           monto_reembolsado?: number
           motivo_reembolso?: string | null
@@ -1070,6 +1072,7 @@ export type Database = {
           id?: string
           id_preferencia_pasarela?: string | null
           id_transaccion_pasarela?: string | null
+          metadata?: Json
           monto?: number
           monto_reembolsado?: number
           motivo_reembolso?: string | null
@@ -2150,6 +2153,7 @@ export type Database = {
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
           plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"] | null
           reintentos_fallo_count: number
+          suspendido_causa: string | null
           updated_at: string
         }
         Insert: {
@@ -2164,6 +2168,7 @@ export type Database = {
             | Database["public"]["Enums"]["plan_codigo"]
             | null
           reintentos_fallo_count?: number
+          suspendido_causa?: string | null
           updated_at?: string
         }
         Update: {
@@ -2178,6 +2183,7 @@ export type Database = {
             | Database["public"]["Enums"]["plan_codigo"]
             | null
           reintentos_fallo_count?: number
+          suspendido_causa?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -2893,9 +2899,72 @@ export type Database = {
         Args: { p_monto_total: number; p_negocio_id: string }
         Returns: number
       }
+      cancelar_downgrade_programado: {
+        Args: { p_negocio_id: string }
+        Returns: {
+          created_at: string
+          estado: Database["public"]["Enums"]["suscripcion_estado"]
+          fecha_inicio_ciclo: string
+          fecha_proximo_cobro: string
+          id: string
+          negocio_id: string
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"] | null
+          reintentos_fallo_count: number
+          suspendido_causa: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "suscripcion"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       cancelar_invitacion: {
         Args: { p_invitacion_id: string }
         Returns: undefined
+      }
+      cancelar_negocio_propio: {
+        Args: { p_motivo: string; p_negocio_id: string }
+        Returns: {
+          categoria: string[]
+          ciudad: string
+          comision_plataforma_pct: number
+          created_at: string
+          descripcion: string | null
+          elegibilidad_marketplace: boolean
+          email_contacto: string | null
+          estado: Database["public"]["Enums"]["negocio_estado"]
+          id: string
+          identificacion_fiscal: string | null
+          logo_url: string | null
+          max_anticipacion_dias: number
+          min_anticipacion_minutos: number
+          nombre: string
+          onboarding_completo: boolean
+          owner_user_id: string
+          pago_completo_en_app: boolean
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          puntos_expiracion_meses: number
+          puntos_valor_100_cop: number
+          reembolso_parcial_pct: number
+          sena_maximo: number
+          sena_minimo: number
+          sena_monto_fijo: number | null
+          sena_pct: number | null
+          slug: string
+          telefono_contacto: string | null
+          updated_at: string
+          ventana_reembolso_parcial_horas: number
+          ventana_reembolso_total_horas: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       cancelar_negocio_supersu: {
         Args: { p_motivo: string; p_negocio_id: string }
@@ -3107,6 +3176,7 @@ export type Database = {
           id: string
           id_preferencia_pasarela: string | null
           id_transaccion_pasarela: string | null
+          metadata: Json
           monto: number
           monto_reembolsado: number
           motivo_reembolso: string | null
@@ -3256,6 +3326,7 @@ export type Database = {
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
           plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"] | null
           reintentos_fallo_count: number
+          suspendido_causa: string | null
           updated_at: string
         }
         SetofOptions: {
@@ -3298,6 +3369,7 @@ export type Database = {
         Args: { p_negocio_id: string; p_sede_id?: string }
         Returns: Json
       }
+      ejecutar_downgrades_programados: { Args: never; Returns: Json }
       eliminar_banner_home: { Args: { p_id: string }; Returns: undefined }
       enviar_negocio_a_aprobacion: {
         Args: { p_negocio_id: string }
@@ -3408,6 +3480,47 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      forzar_reactivacion_pago_externo: {
+        Args: { p_motivo: string; p_negocio_id: string }
+        Returns: {
+          categoria: string[]
+          ciudad: string
+          comision_plataforma_pct: number
+          created_at: string
+          descripcion: string | null
+          elegibilidad_marketplace: boolean
+          email_contacto: string | null
+          estado: Database["public"]["Enums"]["negocio_estado"]
+          id: string
+          identificacion_fiscal: string | null
+          logo_url: string | null
+          max_anticipacion_dias: number
+          min_anticipacion_minutos: number
+          nombre: string
+          onboarding_completo: boolean
+          owner_user_id: string
+          pago_completo_en_app: boolean
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          puntos_expiracion_meses: number
+          puntos_valor_100_cop: number
+          reembolso_parcial_pct: number
+          sena_maximo: number
+          sena_minimo: number
+          sena_monto_fijo: number | null
+          sena_pct: number | null
+          slug: string
+          telefono_contacto: string | null
+          updated_at: string
+          ventana_reembolso_parcial_horas: number
+          ventana_reembolso_total_horas: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       iniciar_atencion_reserva: {
         Args: { p_reserva_id: string }
         Returns: {
@@ -3451,6 +3564,28 @@ export type Database = {
       is_guardian_de_sede: { Args: { p_sede_id: string }; Returns: boolean }
       is_staff_de: { Args: { p_negocio_id: string }; Returns: boolean }
       is_supersu: { Args: never; Returns: boolean }
+      marcar_negocio_en_mora: {
+        Args: { p_motivo: string; p_negocio_id: string }
+        Returns: {
+          created_at: string
+          estado: Database["public"]["Enums"]["suscripcion_estado"]
+          fecha_inicio_ciclo: string
+          fecha_proximo_cobro: string
+          id: string
+          negocio_id: string
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"] | null
+          reintentos_fallo_count: number
+          suspendido_causa: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "suscripcion"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       marketplace_buscar: {
         Args: {
           p_categoria?: string
@@ -4050,6 +4185,64 @@ export type Database = {
           staff_id: string
         }[]
       }
+      solicitar_downgrade_plan: {
+        Args: {
+          p_negocio_id: string
+          p_plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"]
+        }
+        Returns: {
+          created_at: string
+          estado: Database["public"]["Enums"]["suscripcion_estado"]
+          fecha_inicio_ciclo: string
+          fecha_proximo_cobro: string
+          id: string
+          negocio_id: string
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"] | null
+          reintentos_fallo_count: number
+          suspendido_causa: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "suscripcion"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      solicitar_upgrade_plan: {
+        Args: {
+          p_negocio_id: string
+          p_plan_codigo_nuevo: Database["public"]["Enums"]["plan_codigo"]
+        }
+        Returns: {
+          comision_plataforma_monto: number | null
+          created_at: string
+          es_huerfano: boolean
+          estado: Database["public"]["Enums"]["pago_estado"]
+          id: string
+          id_preferencia_pasarela: string | null
+          id_transaccion_pasarela: string | null
+          metadata: Json
+          monto: number
+          monto_reembolsado: number
+          motivo_reembolso: string | null
+          negocio_id: string | null
+          pasarela: string
+          payload_pasarela: Json | null
+          procesado_at: string | null
+          reserva_id: string | null
+          staff_destino_id: string | null
+          tipo: Database["public"]["Enums"]["pago_tipo"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pago"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       staff_de_sede: {
         Args: { p_sede_id: string }
         Returns: {
@@ -4068,7 +4261,7 @@ export type Database = {
         Returns: number
       }
       suspender_negocio: {
-        Args: { p_motivo: string; p_negocio_id: string }
+        Args: { p_causa?: string; p_motivo: string; p_negocio_id: string }
         Returns: {
           categoria: string[]
           ciudad: string
@@ -4201,6 +4394,7 @@ export type Database = {
         | "MEMBRESIA"
         | "PAQUETE_CREDITOS_IA"
         | "PAQUETE_CONVERSACIONES_WHATSAPP"
+        | "SUSCRIPCION"
       plan_codigo: "RAVEN" | "JARL" | "VALHALLA" | "ALLFATHER"
       recurso_estado: "DISPONIBLE" | "FUERA_DE_SERVICIO"
       resena_estado: "VISIBLE" | "REPORTADA" | "ELIMINADA"
@@ -4400,6 +4594,7 @@ export const Constants = {
         "MEMBRESIA",
         "PAQUETE_CREDITOS_IA",
         "PAQUETE_CONVERSACIONES_WHATSAPP",
+        "SUSCRIPCION",
       ],
       plan_codigo: ["RAVEN", "JARL", "VALHALLA", "ALLFATHER"],
       recurso_estado: ["DISPONIBLE", "FUERA_DE_SERVICIO"],

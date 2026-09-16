@@ -21,6 +21,8 @@ const MENSAJES_ERROR: Record<string, string> = {
   NEGOCIO_NO_ENCONTRADO: "No encontramos ese negocio.",
   TRANSICION_INVALIDA: "Ese negocio no está en un estado que permita esta acción.",
   MOTIVO_REQUERIDO: "Tenés que indicar un motivo.",
+  CAUSA_INVALIDA: "Causa de suspensión inválida.",
+  SUSPENSION_POR_INFRACCION_REQUIERE_REACTIVACION_EXPLICITA: "Esta suspensión fue por infracción — usá 'Reactivar', no 'Forzar reactivación por pago externo'.",
   RESENA_NO_REPORTABLE: "Esa reseña ya fue reportada o eliminada.",
   RESENA_NO_EN_COLA: "Esa reseña ya no está pendiente de moderación.",
 };
@@ -77,6 +79,8 @@ export interface NegocioAdmin {
   estado: string;
   planCodigo: string;
   createdAt: string;
+  suscripcionEstado: string | null;
+  suscripcionCausa: string | null;
 }
 
 type NegocioEstado = "PENDIENTE_APROBACION" | "ACTIVO" | "SUSPENDIDO" | "RECHAZADO" | "CANCELADO";
@@ -86,7 +90,7 @@ export async function listarNegocios(estado?: NegocioEstado | string): Promise<R
     const { supabase } = await usuarioActual();
     let q = supabase
       .from("negocio")
-      .select("id, nombre, slug, ciudad, estado, plan_codigo, created_at")
+      .select("id, nombre, slug, ciudad, estado, plan_codigo, created_at, suscripcion:suscripcion (estado, suspendido_causa)")
       .order("created_at", { ascending: false })
       .limit(200);
     if (estado) q = q.eq("estado", estado as NegocioEstado);
@@ -94,15 +98,21 @@ export async function listarNegocios(estado?: NegocioEstado | string): Promise<R
     if (error) return { ok: false, error: error.message };
     return {
       ok: true,
-      data: (data ?? []).map((n) => ({
-        id: n.id,
-        nombre: n.nombre,
-        slug: n.slug,
-        ciudad: n.ciudad,
-        estado: n.estado,
-        planCodigo: n.plan_codigo,
-        createdAt: n.created_at,
-      })),
+      data: (data ?? []).map((n) => {
+        const suscripcion = n.suscripcion as { estado: string; suspendido_causa: string | null } | { estado: string; suspendido_causa: string | null }[] | null;
+        const s = Array.isArray(suscripcion) ? suscripcion[0] : suscripcion;
+        return {
+          id: n.id,
+          nombre: n.nombre,
+          slug: n.slug,
+          ciudad: n.ciudad,
+          estado: n.estado,
+          planCodigo: n.plan_codigo,
+          createdAt: n.created_at,
+          suscripcionEstado: s?.estado ?? null,
+          suscripcionCausa: s?.suspendido_causa ?? null,
+        };
+      }),
     };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
@@ -135,10 +145,34 @@ export async function rechazarNegocio(negocioId: string, motivo: string): Promis
   }
 }
 
-export async function suspenderNegocio(negocioId: string, motivo: string): Promise<Resultado> {
+export async function suspenderNegocio(negocioId: string, motivo: string, causa: "IMPAGO" | "INFRACCION" = "INFRACCION"): Promise<Resultado> {
   try {
     const { supabase } = await usuarioActual();
-    const { error } = await supabase.rpc("suspender_negocio", { p_negocio_id: negocioId, p_motivo: motivo });
+    const { error } = await supabase.rpc("suspender_negocio", { p_negocio_id: negocioId, p_motivo: motivo, p_causa: causa });
+    if (error) return { ok: false, error: traducirError(error.message) };
+    revalidatePath("/admin/negocios");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
+export async function marcarNegocioEnMora(negocioId: string, motivo: string): Promise<Resultado> {
+  try {
+    const { supabase } = await usuarioActual();
+    const { error } = await supabase.rpc("marcar_negocio_en_mora", { p_negocio_id: negocioId, p_motivo: motivo });
+    if (error) return { ok: false, error: traducirError(error.message) };
+    revalidatePath("/admin/negocios");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
+export async function forzarReactivacionPagoExterno(negocioId: string, motivo: string): Promise<Resultado> {
+  try {
+    const { supabase } = await usuarioActual();
+    const { error } = await supabase.rpc("forzar_reactivacion_pago_externo", { p_negocio_id: negocioId, p_motivo: motivo });
     if (error) return { ok: false, error: traducirError(error.message) };
     revalidatePath("/admin/negocios");
     return { ok: true };

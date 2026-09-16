@@ -82,6 +82,13 @@ bloquea, el desarrollo sigue avanzando en paralelo sin esperar respuesta.
 - **Recomendación:** el fundador define la mecánica exacta de cada uno (ej. ¿Gift Card con vencimiento? ¿Referido da % de descuento o Puntos? ¿Membresía es una suscripción del Cliente, no del Negocio?) antes de construir.
 - **Bloquea:** Sí, específicamente estas tres funcionalidades — el resto de Fase 6 no depende de ellas.
 
+## Fase 6 — Cobro recurrente real de Suscripción: falta Mercado Pago Preapproval + medio de pago guardado
+
+- **Contexto:** `08-Growth-Monetization/05_Billing_Failures.md` especifica un calendario automático de reintentos (Día 0/1/3/7/10) que reintenta cobrar la suscripción mensual de un Negocio. La integración de pago hoy (`src/lib/pagos/mercadopago.ts`) es Checkout Pro — genera una preferencia de cobro único cada vez, sin ningún concepto de tarjeta guardada. Mercado Pago sí ofrece un producto distinto para esto (Preapproval / suscripciones automáticas), pero es una integración distinta, no una extensión de la actual, y requiere habilitarlo en la cuenta comercial.
+- **Impacto:** sin esto, el "intento de cobro automático" del Día 0/3/7 no puede ser real — se construyó en su lugar (Módulo 6.3) todo lo que sí es real hoy: Upgrade con cobro único prorrateado vía Checkout Pro, Downgrade programado con re-validación, y el camino 100% manual de SuperSU para marcar `EN_MORA` / forzar reactivación por pago externo. El calendario automático de reintentos queda sin construir.
+- **Recomendación:** cuando el fundador decida, habilitar Mercado Pago Preapproval en la cuenta comercial y definir el flujo de "guardar medio de pago" en el Panel Negocio (Checkout Pro no lo soporta) — en ese momento se construye el calendario Día 0/1/3/7/10 real sobre esa base.
+- **Bloquea:** Solo el calendario automático de reintentos de cobro — el resto del ciclo de vida de Suscripción (upgrade, downgrade, suspensión, cancelación, camino manual de mora) ya funciona completo sin esto.
+
 ## Cómo agregar una entrada
 Si te encontrás con algo que de verdad no podés resolver sin que el
 fundador decida (falta una API key, hay una contradicción real en la

@@ -6,12 +6,21 @@ import { useState } from "react";
 import {
   aprobarNegocio,
   cancelarNegocio,
+  forzarReactivacionPagoExterno,
   listarNegocios,
+  marcarNegocioEnMora,
   reactivarNegocio,
   rechazarNegocio,
   suspenderNegocio,
   type NegocioAdmin,
 } from "../actions";
+
+const SUSCRIPCION_TONO: Record<string, "success" | "danger" | "neutral" | "accent"> = {
+  ACTIVA: "success",
+  EN_MORA: "accent",
+  SUSPENDIDA: "danger",
+  CANCELADA: "neutral",
+};
 
 const ESTADO_TONO: Record<string, "success" | "danger" | "neutral" | "accent"> = {
   PENDIENTE_APROBACION: "accent",
@@ -92,7 +101,14 @@ export function ListaNegocios({ negociosIniciales, errorInicial }: { negociosIni
                     {n.ciudad} · {n.planCodigo} · {new Date(n.createdAt).toLocaleDateString("es-CO")}
                   </p>
                 </div>
-                <Badge tone={ESTADO_TONO[n.estado] ?? "neutral"}>{n.estado}</Badge>
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  <Badge tone={ESTADO_TONO[n.estado] ?? "neutral"}>{n.estado}</Badge>
+                  {n.suscripcionEstado && n.suscripcionEstado !== "ACTIVA" ? (
+                    <Badge tone={SUSCRIPCION_TONO[n.suscripcionEstado] ?? "neutral"}>
+                      {n.suscripcionEstado}{n.suscripcionCausa ? ` · ${n.suscripcionCausa}` : ""}
+                    </Badge>
+                  ) : null}
+                </div>
               </div>
 
               <div className="mt-3 flex flex-wrap gap-2">
@@ -114,6 +130,32 @@ export function ListaNegocios({ negociosIniciales, errorInicial }: { negociosIni
                     </Button>
                   </>
                 ) : null}
+                {n.estado === "ACTIVO" && n.suscripcionEstado === "ACTIVA" ? (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    loading={accionando === n.id}
+                    onClick={() => {
+                      const motivo = prompt("Motivo (ej. la pasarela reportó un cobro fallido):");
+                      if (motivo) ejecutar(n.id, () => marcarNegocioEnMora(n.id, motivo));
+                    }}
+                  >
+                    Marcar en mora
+                  </Button>
+                ) : null}
+                {n.suscripcionEstado === "EN_MORA" || (n.suscripcionEstado === "SUSPENDIDA" && n.suscripcionCausa === "IMPAGO") ? (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    loading={accionando === n.id}
+                    onClick={() => {
+                      const motivo = prompt("Motivo (ej. pagó por transferencia manual verificada):");
+                      if (motivo) ejecutar(n.id, () => forzarReactivacionPagoExterno(n.id, motivo));
+                    }}
+                  >
+                    Forzar reactivación (pago externo)
+                  </Button>
+                ) : null}
                 {n.estado === "ACTIVO" ? (
                   <Button
                     size="sm"
@@ -121,7 +163,7 @@ export function ListaNegocios({ negociosIniciales, errorInicial }: { negociosIni
                     loading={accionando === n.id}
                     onClick={() => {
                       const motivo = prompt("Motivo de la suspensión:");
-                      if (motivo) ejecutar(n.id, () => suspenderNegocio(n.id, motivo));
+                      if (motivo) ejecutar(n.id, () => suspenderNegocio(n.id, motivo, "INFRACCION"));
                     }}
                   >
                     Suspender

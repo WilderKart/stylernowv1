@@ -7,6 +7,30 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Añadido — Fase 6, Módulo 6.3: Suscripciones (ciclo de vida completo)
+Upgrade inmediato con cobro único real prorrateado (`solicitar_upgrade_plan`,
+vía Mercado Pago Checkout Pro, nunca reinicia el ciclo de facturación),
+Downgrade programado al siguiente ciclo con re-validación de límites de
+Sedes/Staff el día exacto de la ejecución (cancela automáticamente si el
+exceso reaparece, en vez de ejecutarse a ciegas), Suspensión/Reactivación/
+Cancelación extendidas para sincronizar `suscripcion.estado`, pausar
+campañas activas y cancelar la lista de espera (la cancelación, terminal,
+las finaliza en vez de pausarlas), cancelación definitiva autoservicio
+para la propia Barbería, y el camino manual de SuperSU para el fallo de
+cobro (`marcar_negocio_en_mora`, `forzar_reactivacion_pago_externo`) que
+cubre el Caso límite de pago externo de la Biblia. Corrección proactiva
+crítica en `aplicar_evento_pago()`: sin una rama dedicada para pagos de
+Suscripción, todo upgrade real se habría auto-reembolsado por tratarse
+como una Reserva vencida. Primer cron real del proyecto (`vercel.json` +
+`/api/cron/diario`, protegido por `CRON_SECRET`), desbloqueando
+`expirar_reservas_vencidas()` (dormida desde la Fase 1). El calendario
+automático de reintentos de cobro (Día 0/1/3/7/10) queda explícitamente
+fuera de alcance — requiere Mercado Pago Preapproval, ver
+`docs/PENDING_DECISIONS.md` y ADL-023. Verificado: 51/51 casos reales,
+más re-verificación completa de los Módulos 5.2 (15/15), 6.1 (14/14) y
+6.2 (22/22) — cero regresiones.
+`PENDIENTE_HASH`
+
 ### Añadido — Fase 6, Módulo 6.2: Marketplace Ads (Destacado + Pin patrocinado)
 Campañas publicitarias de punta a punta para los formatos Destacado y
 Pin patrocinado (Plan Jarl+): creación, activación con cobro real desde

@@ -73,7 +73,8 @@ verificados, no solo "no lanza error en el camino feliz".
 | Fase 5.3 — Marketplace: Mapa visual (MapLibre) | ✅ | ✅ | N/A | ⚠️ Manual pendiente | ✅ Cerrado |
 | Fase 6.1 — Wallet: comisión de plataforma real | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
 | Fase 6.2 — Marketplace Ads (Destacado + Pin) | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
-| Fase 6.3+ — Growth Engine (Suscripciones, IA, WhatsApp, Membresías/Gift Cards/Referidos) | ⬜ | ⬜ | ⬜ | ⬜ | Siguiente (varios bloqueados sin credenciales/decisión de negocio) |
+| Fase 6.3 — Suscripciones (ciclo de vida, sin calendario automático de mora) | ✅ | ✅ | ✅ | ✅ | ✅ Cerrado |
+| Fase 6.4+ — Growth Engine (IA, WhatsApp, Membresías/Gift Cards/Referidos) | ⬜ | ⬜ | ⬜ | ⬜ | Bloqueado sin credenciales/decisión de negocio (ver `docs/PENDING_DECISIONS.md`) |
 
 Ver también `docs/TECH_DEBT_REGISTER.md` (mejoras que no bloquean) y
 `docs/PENDING_DECISIONS.md` (decisiones que dependen de algo externo).
@@ -1422,8 +1423,13 @@ inventa una economía de puntos/descuentos sin esa definición).
       Destacado y Pin patrocinado, ver detalle del Módulo 6.2 abajo.
       Banner y Promoción Flash NO se exponen todavía — decisión de
       alcance explícita, ver detalle abajo
-- [ ] Suscripciones: upgrade/downgrade con prorrateo, fallos de cobro y
-      reintentos (`04_Subscriptions_Lifecycle.md`, `05_Billing_Failures.md`)
+- [x] **Suscripciones** (`04_Subscriptions_Lifecycle.md`) — ciclo de vida
+      completo (upgrade/downgrade/suspensión/reactivación/cancelación), ver
+      detalle del Módulo 6.3 abajo. El calendario automático de reintentos
+      de `05_Billing_Failures.md` (Día 0/1/3/7/10) NO está construido —
+      requiere Mercado Pago Preapproval, decisión de infraestructura de
+      pagos pendiente en `docs/PENDING_DECISIONS.md`, no un recorte
+      silencioso
 - [ ] IA operacional (Cliente/Staff/Negocio, `09-CRM-Intelligence/*`),
       créditos IA (`AI_Credit_System.md`) — arquitectura de datos lista
       desde ADR-008 (Módulo 4), implementación de IA real bloqueada sin
@@ -1580,7 +1586,116 @@ presupuesto total obligatorio).
 
 ---
 
-**Próximo módulo a ejecutar: Fase 6.3 — Suscripciones (upgrade/downgrade, fallos de cobro).**
+## Módulo 6.3 — detalle de lo construido (Suscripciones)
+
+Migraciones 048-049 · `src/app/panel/suscripcion/`, extensión de
+`src/app/admin/actions.ts` y `src/app/admin/negocios/lista-negocios.tsx`
+(mora/reactivación forzada), `vercel.json` + `src/app/api/cron/diario/`
+(primer cron real del proyecto).
+
+- **Alcance deliberadamente acotado, documentado como ADL-023, no un
+  recorte silencioso**: el ciclo de vida de Suscripción se construyó
+  completo y real (Upgrade inmediato con cobro único prorrateado,
+  Downgrade programado con re-validación el día de ejecución,
+  Suspensión/Reactivación/Cancelación con cascada real). El calendario
+  automático de reintentos de cobro de `05_Billing_Failures.md` (Día
+  0/1/3/7/10) queda **fuera de alcance**: requiere Mercado Pago
+  Preapproval (suscripciones automáticas con tarjeta guardada) — una
+  integración de pasarela distinta de Checkout Pro (lo único integrado
+  hoy), no una extensión. Simularlo sin cobro real habría sido una
+  automatización falsa, contra la Regla de Oro. Se construyó en su lugar
+  el camino 100% manual de SuperSU (`marcar_negocio_en_mora`,
+  `forzar_reactivacion_pago_externo`) que cubre el Caso límite explícito
+  de la Biblia ("pagó por transferencia manual, SuperSU fuerza
+  reactivación") sin depender del calendario automático — ver
+  `docs/PENDING_DECISIONS.md`.
+- **Upgrade real vía Checkout Pro**: `solicitar_upgrade_plan()` calcula
+  el cobro prorrateado exacto (`01-PRD/03_Monetization.md`: diferencia de
+  precio × días restantes del ciclo actual / 30, **sin reiniciar el
+  ciclo**) y crea un `pago` real tipo `SUSCRIPCION` que se cobra vía
+  Mercado Pago Checkout Pro, igual que la Seña de una Reserva. El Plan
+  cambia en cuanto la pasarela confirma el pago.
+- **Hallazgo real, corregido proactivamente antes de verificar**:
+  `aplicar_evento_pago()` (el corazón de todo pago de la plataforma,
+  compartido con Reservas) trataba "sin Reserva asociada" como "Reserva
+  vencida" y reembolsaba automáticamente — sin una rama dedicada, **todo
+  pago de upgrade real se habría auto-reembolsado en el instante en que
+  la pasarela lo aprobara**. Se agregó una rama aislada para
+  `tipo = 'SUSCRIPCION'` que actualiza el Plan directamente, sin tocar
+  Wallet ni comisión (no es una transacción de Marketplace) ni Reserva
+  alguna — verificado explícitamente que el Wallet del Negocio queda
+  intacto tras un upgrade.
+- **Downgrade programado y re-validado**: `solicitar_downgrade_plan()`
+  valida los límites estructurales del Plan destino en el momento de
+  pedirlo (Sedes activas vs. `limite_sedes`, Staff activo vs.
+  `staff_tope_absoluto` — solo Raven tiene tope duro de Staff) y guarda
+  el destino en `suscripcion.plan_codigo_destino` (columna que ya existía
+  desde la migración 004, nunca usada hasta ahora). `ejecutar_downgrades_programados()`
+  (pensada para el cron diario) **re-valida esos mismos límites el día de
+  la ejecución** — si el exceso reapareció mientras tanto (Caso límite
+  explícito de la Biblia: agenda un Staff extra justo antes del cambio de
+  ciclo), el downgrade se cancela automáticamente en vez de ejecutarse a
+  ciegas, y se notifica a la Barbería.
+- **Suspensión/Reactivación/Cancelación — se extendieron las RPCs ya
+  existentes desde la migración 024 (Módulo 3.1)**, agregando lo que
+  `04_Subscriptions_Lifecycle.md` especifica y que no existía cuando se
+  escribieron (no existían Wallet, Ads ni la columna
+  `suscripcion.suspendido_causa`): sincronizar `suscripcion.estado`,
+  pausar toda campaña publicitaria activa, cancelar la lista de espera.
+  La cancelación (terminal) **finaliza** las campañas en vez de
+  pausarlas, a diferencia de la suspensión (reversible). Ninguna
+  campaña se reactiva sola al reactivar el Negocio — la Barbería la
+  reanuda a mano, nunca gasto publicitario sorpresa.
+- **Nueva: cancelación definitiva autoservicio** (`cancelar_negocio_propio`)
+  — la Biblia permite que la propia Barbería dé de baja su Negocio, no
+  solo SuperSU; comparte la misma cascada que la versión de SuperSU,
+  sin duplicar lógica.
+- **Primer cron real del proyecto**: `vercel.json` + `/api/cron/diario`,
+  protegido con `CRON_SECRET` vía el mecanismo nativo de Vercel Cron (sin
+  librerías adicionales). Desbloquea `expirar_reservas_vencidas()`
+  (dormida desde la migración 008 — nada la invocaba jamás en producción,
+  solo scripts de prueba) y la nueva `ejecutar_downgrades_programados()`.
+  Requiere que `CRON_SECRET` se agregue a las variables de entorno de
+  Vercel y se haga un deploy — pendiente, ver `TECH_DEBT_REGISTER.md` (no
+  controlable desde este entorno de desarrollo).
+
+### Verificado end-to-end contra la base real (51/51)
+Upgrade calcula el monto prorrateado correcto y bloquea un segundo
+upgrade concurrente, Allfather, mismo Plan y dirección inválida (Plan más
+barato como "upgrade") · el pago de upgrade aprobado cambia el Plan de
+inmediato **sin tocar el Wallet** (la corrección crítica de
+`aplicar_evento_pago()`) · downgrade bloquea por exceso de Staff y se
+programa una vez resuelto · el cron ejecuta el downgrade cuando los
+límites ya están dentro de rango, y lo **cancela** (sin tocar el Plan
+actual) si el exceso reapareció antes de ejecutar, con notificación real
+· `ejecutar_downgrades_programados()` no es invocable por ningún usuario
+autenticado (mismo patrón ADL-022) · suspensión por SuperSU pausa
+campañas y cancela lista de espera automáticamente · reactivación no
+reanuda campañas solas · `marcar_negocio_en_mora`/
+`forzar_reactivacion_pago_externo` cubren el Caso límite de pago externo,
+y correctamente rechazan forzar la reactivación de una suspensión por
+infracción · cancelación autoservicio y de SuperSU finalizan campañas
+(terminal) en vez de pausarlas · ninguna acción de SuperSU es invocable
+por una Barbería ni sobre un Negocio ajeno. **Se re-verificó también la
+suite completa de los Módulos 5.2 (14/14 → 15/15 con el nuevo caso),
+6.1 (14/14) y 6.2 (22/22) tras tocar `aplicar_evento_pago()` y las RPCs de
+suspensión/reactivación/cancelación de nuevo — cero regresiones.**
+
+### Documentación actualizada con este módulo
+Este archivo (Coverage Matrix + detalle), `CHANGELOG.md`,
+`docs/PENDING_DECISIONS.md` (Mercado Pago Preapproval), `docs/
+TECH_DEBT_REGISTER.md` (CRON_SECRET pendiente en Vercel, calendario
+automático de reintentos, Puntos de fidelización congelados sin canje
+todavía, enganchar Temporada/Puntualidad al mismo cron), ADL-023.
+
+---
+
+**Próximo módulo a ejecutar: Fase 6 — IA operacional / Motor WhatsApp /
+Membresías-Gift Cards-Referidos — los tres bloqueados sin credencial o
+decisión de negocio (ver `docs/PENDING_DECISIONS.md`). Growth Engine
+queda con su ciclo de vida de negocio completo (Wallet, Ads, Suscripciones);
+lo que resta de Fase 6 depende de que el fundador resuelva alguno de esos
+tres bloqueos.**
 
 ---
 
