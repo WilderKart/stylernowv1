@@ -1,9 +1,14 @@
 "use client";
 
+import { Chip } from "@/components/brutal";
 import { Button } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { FormularioSede } from "@/components/negocio/formulario-sede";
+import { SelectorPlanes } from "@/components/planes/selector-planes";
+import { elegirPais } from "@/app/panel/suscripcion/prueba";
+import type { CatalogoPais } from "@/lib/planes/catalogo";
+import type { CicloFacturacion } from "@/lib/planes/precios";
 import { CATEGORIAS_NEGOCIO as CATEGORIAS } from "@/lib/categorias-negocio";
 import { duracion } from "@/lib/formato";
 import { cn, formatCOP } from "@/lib/utils";
@@ -21,15 +26,10 @@ import {
 // de duración/precio/duplicados), compartido con el Panel de Servicios.
 import { crearServicio, eliminarServicio } from "@/app/panel/servicios/actions";
 
-const PLANES = [
-  { codigo: "RAVEN" as const, nombre: "Raven", precio: 69900, resumen: "1 sede · hasta 2 Staff" },
-  { codigo: "JARL" as const, nombre: "Jarl", precio: 149900, resumen: "1 sede · 5 Staff + Guardian" },
-  { codigo: "VALHALLA" as const, nombre: "Valhalla", precio: 349900, resumen: "Hasta 5 sedes · 10 Staff" },
-];
-
 const PASOS = ["Datos", "Sede", "Servicios", "Staff"];
 
 interface NegocioData {
+  pais_codigo?: string;
   id: string;
   nombre: string;
   categoria: string[];
@@ -71,7 +71,9 @@ export function Wizard({
   serviciosIniciales,
   planInicial,
   invitacionesIniciales,
+  catalogos,
 }: {
+  catalogos: CatalogoPais[];
   perfilEmail: string;
   negocioInicial: NegocioData | null;
   sedeInicial: SedeData | null;
@@ -117,7 +119,7 @@ export function Wizard({
                 disabled={!alcanzable}
                 onClick={() => alcanzable && setPaso(numero)}
                 className={cn(
-                  "h-1 w-full rounded-full transition-colors",
+                  "h-1 w-full rounded-none transition-colors",
                   numero <= paso ? "bg-accent" : alcanzable ? "bg-border-subtle" : "bg-border-subtle/40"
                 )}
               />
@@ -138,6 +140,7 @@ export function Wizard({
         <PasoDatos
           negocio={negocio}
           planActual={plan}
+          catalogos={catalogos}
           perfilEmail={perfilEmail}
           onGuardado={(n) => setNegocio(n)}
           onPlanElegido={(p) => setPlan(p)}
@@ -178,6 +181,7 @@ export function Wizard({
 function PasoDatos({
   negocio,
   planActual,
+  catalogos,
   perfilEmail,
   onGuardado,
   onPlanElegido,
@@ -185,6 +189,7 @@ function PasoDatos({
 }: {
   negocio: NegocioData | null;
   planActual: string | null;
+  catalogos: CatalogoPais[];
   perfilEmail: string;
   onGuardado: (n: NegocioData) => void;
   onPlanElegido: (p: string) => void;
@@ -198,6 +203,9 @@ function PasoDatos({
   const [email, setEmail] = useState(negocio?.email_contacto ?? "");
   const [logoUrl, setLogoUrl] = useState(negocio?.logo_url ?? null);
   const [planSeleccionado, setPlanSeleccionado] = useState(planActual);
+  const [paisCodigo, setPaisCodigo] = useState(negocio?.pais_codigo ?? catalogos[0]?.pais.codigo ?? "CO");
+  const [ciclo, setCiclo] = useState<CicloFacturacion>("MENSUAL");
+  const catalogo = catalogos.find((c) => c.pais.codigo === paisCodigo) ?? catalogos[0];
 
   const [guardando, setGuardando] = useState(false);
   const [subiendoLogo, setSubiendoLogo] = useState(false);
@@ -256,6 +264,14 @@ function PasoDatos({
     }
 
     const negocioId = res.data.id;
+    if (paisCodigo !== (negocio?.pais_codigo ?? "CO")) {
+      const resPais = await elegirPais(negocioId, paisCodigo);
+      if (!resPais.ok) {
+        setGuardando(false);
+        setError(resPais.error);
+        return;
+      }
+    }
     if (planSeleccionado !== planActual) {
       const resPlan = await elegirPlan(negocioId, planSeleccionado as "RAVEN" | "JARL" | "VALHALLA");
       if (!resPlan.ok) {
@@ -322,7 +338,7 @@ function PasoDatos({
                 onClick={() => alternarCategoria(c.valor)}
                 aria-pressed={activo}
                 className={cn(
-                  "rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition-colors",
+                  "rounded-none border px-3.5 py-2 text-[12.5px] font-semibold transition-colors",
                   activo
                     ? "border-accent bg-accent-soft text-accent"
                     : "border-border text-text-muted hover:border-accent/40"
@@ -356,40 +372,34 @@ function PasoDatos({
         onChange={(e) => setEmail(e.target.value)}
       />
 
-      <div>
-        <label className="mb-2 block text-[11.5px] font-bold uppercase tracking-wide text-text-muted">
-          Plan
-        </label>
-        <div className="flex flex-col gap-2">
-          {PLANES.map((p) => {
-            const activo = planSeleccionado === p.codigo;
-            return (
-              <button
-                key={p.codigo}
-                type="button"
-                onClick={() => setPlanSeleccionado(p.codigo)}
-                aria-pressed={activo}
-                className={cn(
-                  "flex items-center justify-between rounded-2xl border p-3.5 text-left transition-colors",
-                  activo
-                    ? "border-accent bg-accent-soft"
-                    : "border-border-subtle bg-surface hover:border-accent/40"
-                )}
-              >
-                <span>
-                  <span className="block text-[14px] font-bold text-text">{p.nombre}</span>
-                  <span className="block text-[12px] text-text-faint">{p.resumen}</span>
-                </span>
-                <span className="shrink-0 text-[13px] font-bold text-accent">
-                  {formatCOP(p.precio)}/mes
-                </span>
-              </button>
-            );
-          })}
+      <div className="flex flex-col gap-3">
+        <span className="sn-label">País y plan</span>
+        <div className="flex flex-wrap gap-2" role="group" aria-label="País del negocio">
+          {catalogos.map((c) => (
+            <Chip
+              key={c.pais.codigo}
+              selected={c.pais.codigo === paisCodigo}
+              onClick={() => {
+                setPaisCodigo(c.pais.codigo);
+                setCiclo("MENSUAL");
+              }}
+            >
+              {c.pais.nombre} · {c.pais.moneda}
+            </Chip>
+          ))}
         </div>
-        <p className="mt-2 text-[11px] text-text-faint">
-          ¿Necesitás más de 5 sedes o condiciones a medida? Plan Allfather, cotizado por
-          nuestro equipo — escribinos por soporte.
+        {catalogo ? (
+          <SelectorPlanes
+            catalogo={catalogo}
+            value={planSeleccionado}
+            onChange={(codigo) => setPlanSeleccionado(codigo)}
+            ciclo={ciclo}
+            onCicloChange={setCiclo}
+            deshabilitadoCodigos={["ALLFATHER"]}
+          />
+        ) : null}
+        <p className="sn-meta">
+          Prueba 14 días con método de pago; se cobra al terminar. ¿Cadena o franquicia (Allfather)? Habla con ventas por soporte.
         </p>
       </div>
 
