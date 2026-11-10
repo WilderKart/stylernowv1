@@ -44,6 +44,20 @@ Por tanto, el **81,9 %** tiene al menos una capacidad equivalente construida, au
 
 **Brechas de mayor riesgo:** consentimientos de propósito/terceros sin registro granular; selección de rol frente a roles derivados; planes y precios distintos; mockup de pago con proveedores que no usa la app; campos de precio por nivel sin soporte actual; ausencia de Mi Marca y superficies de privacidad. Ninguna de estas discrepancias debe resolverse cambiando reglas de negocio por inferencia.
 
+## Qué falta para funcionar como el prototipo objetivo
+
+El prototipo objetivo es la referencia visual y de navegación; no sustituye los datos, reglas ni controles de acceso de la app. Para llegar a él hacen falta tres tipos de trabajo:
+
+| Trabajo | Alcance que indica la matriz | Resultado necesario |
+|---|---|---|
+| Sistema visual común | Las 105 pantallas; incluso las 30 `CUBIERTA` necesitan restyle. | Tokens brutalistas, tema claro/oscuro, Archivo/Space Mono y componentes React reutilizables para `sn-*`/`p-*`; layouts móvil/escritorio y accesibilidad responsive. |
+| Completar lo existente | 56 `PARCIAL`. | Añadir las funciones/campos enumerados por pantalla sin cambiar queries, auth, reglas de negocio, guards o RLS actuales; mapear pestañas y enlaces a rutas reales. |
+| Construir capacidades ausentes | 19 `FALTA`; no se halló UI de app sin lógica (`SOLO UI`: 0). | Diseñar frontend y, donde se apruebe, servicios/migraciones aditivas con RLS; entre otras: soporte de Cliente, privacidad granular, Mi Marca, chat y módulos admin que hoy no tienen superficie. |
+| Reconciliar reglas | Temas en “Conflictos que requieren aprobación”. | Resolver primero selector de rol, catálogo/Plan Fundador, precio por nivel Staff, métodos de pago y propósitos A1–A9; el mockup no autoriza cambios de negocio. |
+| Demostrar paridad | Fase 5 y validaciones todavía no ejecutadas. | Datos reales, estados de carga/vacío/error/offline, navegación por rol, pruebas de flujos y tamaños 360/390/1280/1440, desbordes y capturas comparativas contra las 105 pantallas. |
+
+Orden funcional recomendado: registro/login → home/lista/mapa → perfil del negocio → reserva → pago → mis citas; después Profesional, Dueño y Super Admin. La matriz por código precisa para cada pantalla su estado, dependencia, esfuerzo y prioridad.
+
 ## Matriz de pantallas
 
 Los nombres de archivo del prototipo se forman con el código de cada fila, por ejemplo `G01-Splash.html`, dentro de `stylernow-prototipo/stylernow-prototipo/pantallas/`. Las rutas de equivalencia son aproximadas cuando varias pantallas del prototipo son pasos de una sola página real.
@@ -188,7 +202,7 @@ Los nombres de archivo del prototipo se forman con el código de cada fila, por 
 | W01 | Landing para negocios | Visitante/dueño | No hay landing B2B equivalente; `/onboarding` es onboarding de Cliente | FALTA | Landing de captación, planes y enlaces al alta con mensajes aprobados. | `plan`, `suscripcion`, onboarding; no requiere tabla nueva para la landing. | L | P1 |
 | W02 | Perfil web público | Visitante/cliente | `/negocio/[slug]` | CUBIERTA | Restyle y optimización web; conservar SEO y lectura pública controlada. | `negocio`, `sede`, `servicio`, `staff`, `resena`. | S | P0 |
 
-## Matriz inversa: capacidades actuales fuera del prototipo
+## Lo que la app ya tiene y el prototipo no cubre
 
 No se recomienda retirar ninguna ruta ni capacidad. La recomendación es conservarla y darle el sistema visual nuevo; cuando una capacidad sea parte de una vista más amplia del prototipo, fusionar solo la presentación y mantener su URL/acciones.
 
