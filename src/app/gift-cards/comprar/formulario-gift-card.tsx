@@ -39,6 +39,7 @@ export function FormularioGiftCard({
   const [pagoId, setPagoId] = useState<string | null>(pagoIdRetorno);
   const [esperando, setEsperando] = useState(!!pagoIdRetorno);
   const [comprada, setComprada] = useState(false);
+  const [esperaLarga, setEsperaLarga] = useState(false);
   const yaRedirigido = useRef(false);
 
   useEffect(() => {
@@ -48,8 +49,16 @@ export function FormularioGiftCard({
 
   useEffect(() => {
     if (!pagoId) return;
+    const inicio = Date.now();
     const intervalo = setInterval(async () => {
-      const estado = await consultarEstadoCompraGiftCard(pagoId);
+      // Pasados 90 s sin respuesta se avisa al usuario (el pago puede estar aprobado y la tarjeta ya activa).
+      if (Date.now() - inicio > 90_000) setEsperaLarga(true);
+      let estado: Awaited<ReturnType<typeof consultarEstadoCompraGiftCard>>;
+      try {
+        estado = await consultarEstadoCompraGiftCard(pagoId);
+      } catch {
+        return; // un fallo de red puntual no detiene el sondeo; se reintenta en el siguiente ciclo
+      }
       if (estado.pago === "APROBADO" && !yaRedirigido.current) {
         yaRedirigido.current = true;
         setEsperando(false);
@@ -238,6 +247,15 @@ export function FormularioGiftCard({
             <span aria-hidden className="size-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
             <span className="section">Esperando la confirmación…</span>
           </div>
+        ) : null}
+        {esperando && esperaLarga ? (
+          <p className="sn-help" role="status">
+            Está tardando más de lo normal. Si ya pagaste, tu gift card se activa sola: revísala en{" "}
+            <a className="underline" href="/gift-cards/mis">
+              Mis gift cards
+            </a>
+            .
+          </p>
         ) : null}
       </div>
 
