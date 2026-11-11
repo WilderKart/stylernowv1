@@ -177,7 +177,9 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
 
   const sinDisponibilidad = servicios.length === 0 || sedes.length === 0;
   const marca = await obtenerMarcaPublica(negocio.id);
-  const partesNombre = negocio.nombre.split(" ");
+  // Mi Marca publicada: el nombre y el logo de marca sustituyen a los del negocio en la portada.
+  const nombreVisible = marca?.nombreMarca ?? negocio.nombre;
+  const partesNombre = nombreVisible.split(" ");
   const mitad = Math.ceil(partesNombre.length / 2);
 
   return (
@@ -200,8 +202,8 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
         {/* ── Portada ───────────────────────────────────────────────── */}
         <div className="relative">
           <Photo
-            src={negocio.logo_url ?? FOTO_NEGOCIO_RESPALDO}
-            alt={negocio.nombre}
+            src={marca?.logoUrl ?? negocio.logo_url ?? FOTO_NEGOCIO_RESPALDO}
+            alt={nombreVisible}
             className="h-[250px] w-full"
           />
           <Link
