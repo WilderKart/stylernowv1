@@ -9,7 +9,7 @@ import { calcularSenaEstimada, resumenPoliticaCancelacion, type ConfigSena } fro
 import { cn, formatCOP } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { crearReservaAction, obtenerSlots, unirseListaEspera, type Slot } from "./actions";
 
 const DIAS_VISIBLES = 14;
@@ -80,6 +80,9 @@ export function FlujoReserva({
   const [fecha, setFecha] = useState(() => hoyISO(sedes[0]?.zona_horaria));
   const [slot, setSlot] = useState<Slot | null>(null);
   const [inicioDias, setInicioDias] = useState(0);
+  // Mientras el cliente no toque el selector de día, se salta solo al primer día con horas libres
+  // (si hoy ya cerró, abrir en un día todo tachado parece que el negocio no tiene disponibilidad).
+  const diaElegidoManualmente = useRef(false);
 
   const [slots, setSlots] = useState<Slot[]>([]);
   const [cargandoSlots, iniciarCarga] = useTransition();
@@ -112,6 +115,14 @@ export function FlujoReserva({
         const nuevos = await obtenerSlots({ sedeId: sede.id, servicioIds, fecha, staffId });
         setSlots(nuevos);
         setError(null);
+        if (!diaElegidoManualmente.current && !nuevos.some((x) => x.disponible)) {
+          const rango = Array.from({ length: DIAS_VISIBLES }, (_, i) => sumarDias(hoyISO(sede.zona_horaria), i));
+          const idx = rango.indexOf(fecha);
+          if (idx >= 0 && idx < rango.length - 1) {
+            setFecha(rango[idx + 1]);
+            setInicioDias(Math.max(0, Math.min(idx + 1 - 1, DIAS_VISIBLES - DIAS_POR_VENTANA)));
+          }
+        }
       } catch (e) {
         setError(e instanceof Error ? e.message : "No pudimos cargar los horarios.");
         setSlots([]);
@@ -458,6 +469,7 @@ export function FlujoReserva({
                       key={d}
                       type="button"
                       onClick={() => {
+                        diaElegidoManualmente.current = true;
                         setFecha(d);
                         setSlot(null);
                       }}
