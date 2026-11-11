@@ -40,13 +40,13 @@ export function ListaPOS({
           <p className="mt-1 text-[12.5px] text-text-muted">Citas de hoy listas para cobrar</p>
         </div>
         <div className="flex gap-2">
-          <button type="button" onClick={() => setMostrarGiftCard(true)} className="rounded-full border border-border px-3.5 py-2 text-[12px] font-bold text-text-muted hover:border-accent/40">
+          <button type="button" onClick={() => setMostrarGiftCard(true)} className="rounded-none border border-border px-3.5 py-2 text-[12px] font-bold text-text-muted hover:border-accent/40">
             Gift Card
           </button>
-          <Link href="/panel/pos/productos" className="rounded-full border border-border px-3.5 py-2 text-[12px] font-bold text-text-muted hover:border-accent/40">
+          <Link href="/panel/pos/productos" className="rounded-none border border-border px-3.5 py-2 text-[12px] font-bold text-text-muted hover:border-accent/40">
             Productos
           </Link>
-          <Link href="/panel/pos/caja" className="rounded-full border border-border px-3.5 py-2 text-[12px] font-bold text-text-muted hover:border-accent/40">
+          <Link href="/panel/pos/caja" className="rounded-none border border-border px-3.5 py-2 text-[12px] font-bold text-text-muted hover:border-accent/40">
             Cierre de caja
           </Link>
         </div>

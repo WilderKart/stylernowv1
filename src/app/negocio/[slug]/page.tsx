@@ -1,12 +1,10 @@
-import { BarraSuperior } from "@/components/layout/header";
-import { Button } from "@/components/ui/button";
-import { Badge, Card } from "@/components/ui/card";
-import { Rating } from "@/components/ui/rating";
+import { Label, Marquee, Meta, Num, Photo, ProCard, Stars, Status } from "@/components/brutal";
+import { FOTOS_RESPALDO, FOTO_NEGOCIO_RESPALDO, nivelATier } from "@/components/negocio/nivel";
 import { duracion } from "@/lib/formato";
+import { resumenPoliticaCancelacion } from "@/lib/pagos/sena";
 import { createClient } from "@/lib/supabase/server";
 import { formatCOP } from "@/lib/utils";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { esFavorito } from "./actions";
@@ -174,222 +172,216 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
     })),
   };
 
+  const sinDisponibilidad = servicios.length === 0 || sedes.length === 0;
+  const partesNombre = negocio.nombre.split(" ");
+  const mitad = Math.ceil(partesNombre.length / 2);
+
   return (
-    <div className="flex min-h-dvh flex-col bg-bg pb-28">
+    <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-bg">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <BarraSuperior titulo={negocio.nombre} volverA="/" />
-
-      <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-5 sm:px-10">
-        <div className="relative mb-5 aspect-[16/9] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-[#3a2e1a] to-[#1a1512]">
-          {negocio.logo_url ? (
-            <Image
-              src={negocio.logo_url}
-              alt={negocio.nombre}
-              fill
-              sizes="(max-width: 768px) 100vw, 768px"
-              className="object-cover"
-              priority
-            />
-          ) : (
-            <span className="font-display absolute inset-0 flex items-center justify-center text-5xl font-bold text-accent/30">
-              {negocio.nombre.charAt(0).toUpperCase()}
-            </span>
-          )}
+      <main className="flex-1">
+        {/* ── Portada ───────────────────────────────────────────────── */}
+        <div className="relative">
+          <Photo
+            src={negocio.logo_url ?? FOTO_NEGOCIO_RESPALDO}
+            alt={negocio.nombre}
+            className="h-[250px] w-full"
+          />
+          <Link
+            href="/"
+            aria-label="Volver"
+            className="sn-iconbtn absolute top-2 left-2 border-2 border-ink bg-paper text-ink"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </Link>
+          <BotonCompartir nombre={negocio.nombre} slug={negocio.slug} />
+          <BotonFavorito negocioId={negocio.id} slug={negocio.slug} favoritoInicial={favoritoInicial} />
         </div>
 
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="font-display text-[26px] font-bold uppercase leading-tight tracking-tight text-text">
-              {negocio.nombre}
-            </h1>
-            {miNivelVip ? (
-              <Badge tone="accent" className="mt-1.5">
-                Sos {miNivelVip} acá
-              </Badge>
-            ) : null}
-            <div className="mt-1.5 flex flex-wrap gap-x-3">
-              {tieneMembresias ? (
-                <Link href={`/negocio/${negocio.slug}/membresias`} className="block text-[12px] font-bold uppercase text-accent">
-                  Ver Membresías →
-                </Link>
-              ) : null}
-              <Link href={`/gift-cards/comprar?negocio=${negocio.slug}`} className="block text-[12px] font-bold uppercase text-accent">
-                Regalar Gift Card →
-              </Link>
+        <div className="px-4 pt-3.5 pb-1.5">
+          <Num>
+            {negocio.categoria.join(" · ") || "Negocio"} · {negocio.ciudad}
+          </Num>
+        </div>
+        <h1 className="poster-1 px-4 pb-3 break-words">
+          {partesNombre.slice(0, mitad).join(" ")}
+          {partesNombre.length > 1 ? <br /> : null}
+          {partesNombre.slice(mitad).join(" ")}
+          {"."}
+        </h1>
+        {miNivelVip ? (
+          <div className="px-4 pb-3">
+            <Status tone="ok">Sos {miNivelVip} acá</Status>
+          </div>
+        ) : null}
+
+        <div className="sn-gridcols grid-cols-3 border-b-2 border-line">
+          <div className="min-w-0">
+            <Meta>Rating</Meta>
+            <div className="sn-fig text-[22px]">
+              {resenas.length > 0 ? `★ ${promedio.toFixed(1).replace(".", ",")}` : "—"}
             </div>
           </div>
-          <div className="mt-1 flex shrink-0 gap-2">
-            <BotonFavorito negocioId={negocio.id} slug={negocio.slug} favoritoInicial={favoritoInicial} />
-            <BotonCompartir nombre={negocio.nombre} slug={negocio.slug} />
+          <div className="min-w-0">
+            <Meta>Reseñas</Meta>
+            <div className="sn-fig text-[22px]">{resenas.length}</div>
+          </div>
+          <div className="min-w-0">
+            <Meta>Servicios</Meta>
+            <div className="sn-fig text-[22px]">{servicios.length}</div>
           </div>
         </div>
-        <div className="mt-2 flex flex-wrap items-center gap-2.5">
-          <Rating valor={promedio} total={resenas.length} size="md" />
-          {negocio.categoria.map((c) => (
-            <Badge key={c} tone="accent">
-              {c}
-            </Badge>
-          ))}
-        </div>
+
+        <Marquee tone="signal" text={`Reserva en línea · ${negocio.ciudad} · Disponibilidad en tiempo real`} />
+
         {negocio.descripcion ? (
-          <p className="mt-3 text-[14px] leading-relaxed text-text-muted">
-            {negocio.descripcion}
-          </p>
+          <p className="body-sm m-0 px-4 pt-4 break-words">{negocio.descripcion}</p>
         ) : null}
 
         {sede ? (
-          <Card className="mt-4 flex items-start gap-3">
-            <svg
-              viewBox="0 0 24 24"
-              width="18"
-              height="18"
-              fill="none"
-              stroke="#e8a23c"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="mt-0.5 shrink-0"
-              aria-hidden="true"
+          <div className="mx-4 mt-4 border-2 border-line p-3">
+            <Label>{sede.nombre}</Label>
+            <p className="body-sm m-0 mt-1 break-words">
+              {sede.direccion} · {sede.ciudad}
+            </p>
+            {sede.latitud && sede.longitud ? (
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${sede.latitud},${sede.longitud}`}
+                target="_blank"
+                rel="noreferrer"
+                className="sn-label inline-flex min-h-12 items-center underline"
+              >
+                Ver en el mapa ↗
+              </a>
+            ) : null}
+          </div>
+        ) : null}
+
+        <div className="flex flex-wrap gap-x-4 px-4 pt-2">
+          {tieneMembresias ? (
+            <Link
+              href={`/negocio/${negocio.slug}/membresias`}
+              className="sn-label inline-flex min-h-12 items-center underline"
             >
-              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1116 0z" />
-              <circle cx="12" cy="10" r="2.6" />
-            </svg>
-            <div className="min-w-0">
-              <p className="text-[13.5px] font-semibold text-text">{sede.nombre}</p>
-              <p className="text-[12.5px] text-text-muted">
-                {sede.direccion} · {sede.ciudad}
-              </p>
-              {sede.latitud && sede.longitud ? (
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${sede.latitud},${sede.longitud}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-1 inline-block text-[12.5px] font-semibold text-accent"
-                >
-                  Ver en el mapa
-                </a>
-              ) : null}
-            </div>
-          </Card>
-        ) : null}
+              Ver membresías →
+            </Link>
+          ) : null}
+          <Link
+            href={`/gift-cards/comprar?negocio=${negocio.slug}`}
+            className="sn-label inline-flex min-h-12 items-center underline"
+          >
+            Regalar gift card →
+          </Link>
+        </div>
 
-        {/* ── Servicios ─────────────────────────────────────────────── */}
-        <section className="mt-7">
-          <h2 className="font-display mb-3 text-base font-semibold uppercase tracking-wide text-text">
-            Servicios
-          </h2>
-          {servicios.length === 0 ? (
-            <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-xs text-text-faint">
-              Este negocio todavía no publicó su lista de servicios.
-            </p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {servicios.map((s) => (
-                <li
-                  key={s.id}
-                  className="flex items-center justify-between gap-3 rounded-2xl border border-border-subtle bg-surface p-3.5"
-                >
-                  <div className="min-w-0">
-                    <p className="text-[14px] font-semibold text-text">{s.nombre}</p>
-                    <p className="text-[12px] text-text-faint">
-                      {duracion(s.duracion_minutos)}
-                      {s.descripcion ? ` · ${s.descripcion}` : ""}
-                    </p>
-                  </div>
-                  <span className="shrink-0 text-[14px] font-bold text-accent">
-                    {formatCOP(s.precio_base)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        {/* ── Profesionales ─────────────────────────────────────────── */}
-        {staff.length > 0 ? (
-          <section className="mt-7">
-            <h2 className="font-display mb-3 text-base font-semibold uppercase tracking-wide text-text">
-              Profesionales
-            </h2>
-            <div className="-mx-5 flex gap-3 overflow-x-auto px-5 sm:mx-0 sm:px-0">
-              {staff.map((p) => (
-                <div key={p.staff_id} className="w-[110px] shrink-0 text-center">
-                  <div className="relative mx-auto mb-2 size-[72px] overflow-hidden rounded-full bg-surface-2">
-                    {p.foto_url ? (
-                      <Image src={p.foto_url} alt="" fill sizes="72px" className="object-cover" />
-                    ) : (
-                      <span className="font-display absolute inset-0 flex items-center justify-center text-lg font-bold text-text-faint">
-                        {p.nombre.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-                  <p className="truncate text-[12.5px] font-semibold text-text">{p.nombre}</p>
-                  {p.especialidad ? (
-                    <p className="truncate text-[11px] text-text-faint">{p.especialidad}</p>
-                  ) : null}
-                  {p.nivel ? (
-                    <Badge tone="accent" className="mt-1">
-                      {p.nivel}
-                    </Badge>
-                  ) : null}
+        {/* ── 01 Servicios ──────────────────────────────────────────── */}
+        <div className="p-sec">
+          <Num>01 / Servicios</Num>
+        </div>
+        {servicios.length === 0 ? (
+          <div className="mx-4 border-2 border-dashed border-line p-6 text-center">
+            <Meta>Este negocio todavía no publicó su lista de servicios.</Meta>
+          </div>
+        ) : (
+          <ul className="m-0 list-none border-t-2 border-line p-0">
+            {servicios.map((s) => (
+              <li key={s.id} className="border-b border-grid-soft px-4 py-3">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <b className="body min-w-0 break-words">{s.nombre}</b>
+                  <Meta>{duracion(s.duracion_minutos)}</Meta>
                 </div>
+                {s.descripcion ? <p className="body-sm m-0 mt-1 break-words">{s.descripcion}</p> : null}
+                <div className="mt-2">
+                  <span className="sn-price">{formatCOP(s.precio_base)}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* ── 02 Equipo ─────────────────────────────────────────────── */}
+        {staff.length > 0 ? (
+          <>
+            <div className="p-sec">
+              <Num>02 / Equipo</Num>
+            </div>
+            <div className="p-stack px-4">
+              {staff.map((p, i) => (
+                <ProCard
+                  key={p.staff_id}
+                  name={p.nombre}
+                  role={p.especialidad ?? undefined}
+                  tier={nivelATier(p.nivel)}
+                  photo={p.foto_url ?? FOTOS_RESPALDO[i % FOTOS_RESPALDO.length]}
+                />
               ))}
             </div>
-          </section>
+          </>
         ) : null}
 
-        {/* ── Reseñas ───────────────────────────────────────────────── */}
-        <section className="mt-7">
-          <h2 className="font-display mb-3 text-base font-semibold uppercase tracking-wide text-text">
-            Reseñas verificadas
-          </h2>
-          {resenas.length === 0 ? (
-            <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-xs text-text-faint">
-              Todavía no hay reseñas. Solo quien completó una cita puede dejar una.
-            </p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {resenas.map((r) => (
-                <li key={r.id} className="rounded-2xl border border-border-subtle bg-surface p-3.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-[13px] font-semibold text-text">{r.cliente_nombre}</p>
-                    <Rating valor={r.calificacion} total={1} />
+        {/* ── 03 Reseñas ────────────────────────────────────────────── */}
+        <div className="p-sec">
+          <Num>03 / Reseñas · {resenas.length}</Num>
+        </div>
+        {resenas.length === 0 ? (
+          <div className="mx-4 border-2 border-dashed border-line p-6 text-center">
+            <Meta>Todavía no hay reseñas. Solo quien completó una cita puede dejar una.</Meta>
+          </div>
+        ) : (
+          <div className="p-stack px-4">
+            {resenas.map((r) => (
+              <div key={r.id} className="sn-review">
+                <div className="sn-review__head">
+                  <Label className="min-w-0 break-words">{r.cliente_nombre}</Label>
+                  <Stars value={r.calificacion} />
+                </div>
+                <div className="sn-review__body">
+                  {r.comentario ? <p className="body-sm m-0 break-words">{r.comentario}</p> : null}
+                  <Meta>Cita verificada</Meta>
+                </div>
+                {r.respuesta_negocio ? (
+                  <div className="sn-review__reply">
+                    <b className="sn-label">Respuesta de {negocio.nombre}</b>
+                    <br />
+                    {r.respuesta_negocio}
                   </div>
-                  {r.comentario ? (
-                    <p className="mt-1.5 text-[13px] leading-relaxed text-text-muted">
-                      {r.comentario}
-                    </p>
-                  ) : null}
-                  {r.respuesta_negocio ? (
-                    <p className="mt-2 border-l-2 border-accent/40 pl-3 text-[12.5px] text-text-faint">
-                      <span className="font-semibold text-text-muted">Respuesta del negocio: </span>
-                      {r.respuesta_negocio}
-                    </p>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ── 04 Política de cancelación ────────────────────────────── */}
+        <div className="p-sec">
+          <Num>04 / Política de cancelación</Num>
+        </div>
+        <ul className="body-sm m-0 mb-4 flex list-none flex-col gap-1.5 px-4">
+          {resumenPoliticaCancelacion(negocio).map((linea) => (
+            <li key={linea}>{linea}</li>
+          ))}
+        </ul>
       </main>
 
       {/* CTA principal fijo (02-UX/04_Marketplace.md). */}
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border-subtle bg-bg/95 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:px-10">
-        <div className="mx-auto w-full max-w-3xl">
-          {servicios.length === 0 || sedes.length === 0 ? (
-            <Button size="lg" className="w-full" disabled>
-              SIN DISPONIBILIDAD PUBLICADA
-            </Button>
-          ) : (
-            <Button asChild size="lg" className="w-full">
-              <Link href={`/negocio/${negocio.slug}/reservar`}>RESERVAR TURNO</Link>
-            </Button>
-          )}
-        </div>
+      <div className="p-foot">
+        {sinDisponibilidad ? (
+          <span className="sn-btn sn-btn--secondary w-full justify-center" aria-disabled="true">
+            Sin disponibilidad publicada
+          </span>
+        ) : (
+          <Link href={`/negocio/${negocio.slug}/reservar`} className="sn-btn sn-btn--primary w-full">
+            <span>Reservar turno</span>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true">
+              <path d="M7 17 17 7M7 7h10v10" />
+            </svg>
+          </Link>
+        )}
       </div>
     </div>
   );

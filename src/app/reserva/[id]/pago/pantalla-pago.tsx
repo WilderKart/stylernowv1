@@ -1,7 +1,22 @@
 "use client";
 
+import {
+  Barra,
+  Bloque,
+  diaYMes,
+  ErrorAviso,
+  Fila,
+  Filas,
+  horaCorta,
+  Pantalla,
+  Pie,
+  Sec,
+  TicketCita,
+  Top,
+} from "@/app/lealtad/ui-cliente";
+import { Status } from "@/components/brutal";
 import { Button } from "@/components/ui/button";
-import { fechaHoraLarga } from "@/lib/formato";
+import { Check, Clock, ShieldCheck, Ticket, Wallet } from "lucide-react";
 import { formatCOP } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -40,24 +55,20 @@ function Cuenta({ expiraAt }: { expiraAt: string }) {
   const seg = Math.floor((restante % 60000) / 1000);
 
   if (restante <= 0) {
-    return (
-      <p className="text-[12.5px] font-semibold text-danger">
-        La reserva del horario expiró. Volvé a elegir un turno.
-      </p>
-    );
+    return <ErrorAviso>La reserva del horario expiró. Vuelve a elegir un turno.</ErrorAviso>;
   }
 
   return (
-    <p className="text-[12.5px] text-text-muted">
+    <p className="sn-meta">
       Te guardamos el horario por{" "}
-      <span className="font-bold tabular-nums text-accent">
+      <span className="font-bold tabular-nums text-text">
         {min}:{String(seg).padStart(2, "0")}
       </span>
     </p>
   );
 }
 
-export function PantallaPago({ resumen }: { resumen: ResumenPago }) {
+export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volverA: string }) {
   const router = useRouter();
   const [iniciando, setIniciando] = useState(false);
   const [esperando, setEsperando] = useState(false);
@@ -78,7 +89,7 @@ export function PantallaPago({ resumen }: { resumen: ResumenPago }) {
       }
       if (estado.pago === "RECHAZADO") {
         setEsperando(false);
-        setError("El pago fue rechazado. Podés intentar de nuevo con otro medio.");
+        setError("El pago fue rechazado. Puedes intentar de nuevo con otro medio.");
       }
       if (estado.reserva === "CANCELADA" && !yaRedirigido.current) {
         yaRedirigido.current = true;
@@ -115,111 +126,116 @@ export function PantallaPago({ resumen }: { resumen: ResumenPago }) {
     window.location.href = r.url;
   }
 
+  const dm = diaYMes(resumen.horaInicio, resumen.zonaHoraria);
+  const hora = horaCorta(resumen.horaInicio, resumen.zonaHoraria);
+  const saldoLocal = resumen.montoTotal - resumen.montoSena;
+
+  // Esperando la confirmación de la pasarela (C10): bloque tinta a pantalla completa.
+  if (esperando) {
+    return (
+      <Pantalla className="sn-block-ink !bg-ink !text-paper justify-center gap-6 px-4 py-6" role="status" aria-live="polite">
+        <span className="sn-num !text-signal">00 / Pagando</span>
+        <p className="poster-1 break-words !text-paper">
+          Un
+          <br />
+          <span className="sn-hot">momento.</span>
+        </p>
+        <Barra pct={68} etiqueta="Confirmando el pago" className="!h-5 !border-paper" />
+        <p className="body m-0 text-[#D4D4D4]">Confirmando tu pago con Mercado Pago. No cierres la app.</p>
+        {demorado ? (
+          <p className="body-sm m-0 text-[#D4D4D4]">
+            Está tardando más de lo normal. Puedes cerrar la app con tranquilidad: te avisamos apenas se confirme el pago.
+          </p>
+        ) : null}
+        <span className="sn-meta !text-[#A3A3A3]">Pago seguro · StylerNow no guarda los datos de tu tarjeta</span>
+        {error ? <ErrorAviso>{error}</ErrorAviso> : null}
+      </Pantalla>
+    );
+  }
+
   return (
-    <div className="flex min-h-dvh flex-col pb-32">
-      <main className="mx-auto w-full max-w-md flex-1 px-5 py-6 sm:px-0">
-        {/* Resumen fijo arriba: qué se está pagando, siempre a la vista. */}
-        <section className="rounded-2xl border border-border-subtle bg-surface p-4">
-          <p className="text-[11.5px] font-bold uppercase tracking-wide text-text-muted">
-            {resumen.negocio}
-          </p>
-          <p className="mt-1 text-[15px] font-bold text-text">{resumen.servicios}</p>
-          <p className="mt-0.5 text-[12.5px] text-text-muted">
-            {resumen.profesional} · <span className="capitalize">{fechaHoraLarga(resumen.horaInicio, resumen.zonaHoraria)}</span>
-          </p>
+    <Pantalla>
+      <Top titulo="Reserva · Resumen" volverA={volverA} />
+      <div className="p-steps" aria-label="Pasos de la reserva">
+        <span className="is-done">01 Servicio</span>
+        <span className="is-done">02 Profesional</span>
+        <span className="is-done">03 Hora</span>
+        <span className="is-on" aria-current="step">
+          04 Pago
+        </span>
+      </div>
 
-          <div className="mt-4 border-t border-border-subtle pt-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[12.5px] text-text-muted">Total del servicio</span>
-              <span className="text-[13px] font-semibold text-text">
-                {formatCOP(resumen.montoTotal)}
-              </span>
-            </div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <span className="text-[13.5px] font-bold text-text">Seña a pagar</span>
-              <span className="font-display text-[26px] font-bold leading-none text-accent">
-                {formatCOP(resumen.montoSena)}
-              </span>
-            </div>
-            {resumen.montoSena < resumen.montoTotal ? (
-              <p className="mt-1.5 text-[11.5px] text-text-faint">
-                El saldo de {formatCOP(resumen.montoTotal - resumen.montoSena)} lo pagás en el
-                local.
-              </p>
-            ) : null}
-          </div>
-        </section>
-
+      <div className="p-4">
+        <TicketCita
+          dia={dm.dia}
+          mes={dm.mes}
+          estado={
+            <Status tone="warn" icon={<Clock aria-hidden className="size-3.5" />}>
+              Pendiente de pago
+            </Status>
+          }
+          titulo={resumen.servicios}
+          lineas={[`${resumen.profesional} · ${hora} · ${resumen.negocio}`]}
+          pie={
+            <>
+              <span className="sn-label">Total</span>
+              <span className="sn-fig text-[22px]">{formatCOP(resumen.montoTotal)}</span>
+            </>
+          }
+        />
         {resumen.expiraAt ? (
-          <div className="mt-3 text-center">
+          <div className="mt-3">
             <Cuenta expiraAt={resumen.expiraAt} />
           </div>
         ) : null}
-
-        <section className="mt-5 rounded-2xl border border-border bg-surface-2 p-4">
-          <p className="mb-2 text-[11.5px] font-bold uppercase tracking-wide text-text-muted">
-            Medios de pago
-          </p>
-          <p className="text-[12.5px] leading-relaxed text-text-muted">
-            Elegís el medio en el siguiente paso: tarjeta de crédito o débito, PSE, y
-            billeteras habilitadas por la pasarela.
-          </p>
-          <p className="mt-3 flex items-center gap-1.5 text-[12px] font-semibold text-success">
-            <svg
-              viewBox="0 0 24 24"
-              width="14"
-              height="14"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6z" />
-              <path d="M9 12l2 2 4-4" />
-            </svg>
-            Pago seguro procesado por Mercado Pago
-          </p>
-          <p className="mt-2 text-[11.5px] text-text-faint">
-            StylerNow no almacena los datos de tu tarjeta en ningún momento.
-          </p>
-        </section>
-
-        {esperando ? (
-          <div className="mt-5 rounded-2xl border border-border bg-surface p-4 text-center">
-            <span className="mx-auto mb-3 block size-6 animate-spin rounded-full border-2 border-accent border-t-transparent" />
-            <p className="text-[13px] font-semibold text-text">Esperando la confirmación…</p>
-            {demorado ? (
-              <p className="mx-auto mt-1.5 max-w-[280px] text-[12px] leading-relaxed text-text-muted">
-                Está tardando más de lo normal. Podés cerrar la app con tranquilidad: te
-                avisamos apenas se confirme el pago.
-              </p>
-            ) : null}
-          </div>
-        ) : null}
-
-        {error ? (
-          <p role="alert" className="mt-4 text-center text-[12.5px] font-semibold text-danger">
-            {error}
-          </p>
-        ) : null}
-      </main>
-
-      {/* Un solo botón de pago, deshabilitado tras el primer tap (05-API/01_Standards.md). */}
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border-subtle bg-bg/95 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur">
-        <div className="mx-auto w-full max-w-md">
-          <Button
-            size="lg"
-            className="w-full"
-            loading={iniciando || esperando}
-            disabled={iniciando || esperando}
-            onClick={pagar}
-          >
-            PAGAR {formatCOP(resumen.montoSena)} Y CONFIRMAR
-          </Button>
-        </div>
       </div>
-    </div>
+
+      <Filas>
+        <Fila
+          icono={<Ticket aria-hidden className="size-5" />}
+          titulo="Seña a pagar"
+          meta="Se descuenta del total el día de la cita"
+          derecha={<span className="sn-price">{formatCOP(resumen.montoSena)}</span>}
+        />
+        {saldoLocal > 0 ? (
+          <Fila
+            icono={<Wallet aria-hidden className="size-5" />}
+            titulo="Pagas en el local"
+            derecha={<span className="sn-price">{formatCOP(saldoLocal)}</span>}
+          />
+        ) : null}
+      </Filas>
+
+      <Sec>01 / Método de pago</Sec>
+      <Filas>
+        <Fila
+          icono={<ShieldCheck aria-hidden className="size-5" />}
+          titulo="Mercado Pago"
+          meta="Tarjeta de crédito o débito, PSE y billeteras habilitadas. Eliges el medio en el siguiente paso."
+          derecha={
+            <Status tone="ok" icon={<Check aria-hidden className="size-3.5" />}>
+              Elegido
+            </Status>
+          }
+        />
+      </Filas>
+      <Bloque etiqueta="00 / Seguridad">
+        Pago seguro procesado por Mercado Pago. StylerNow no almacena los datos de tu tarjeta en ningún momento.
+      </Bloque>
+
+      {error ? (
+        <div className="px-4 pt-4">
+          <ErrorAviso>{error}</ErrorAviso>
+        </div>
+      ) : null}
+
+      <div className="flex-1" />
+      {/* Un solo botón de pago, deshabilitado tras el primer tap (05-API/01_Standards.md). */}
+      <Pie>
+        <Button size="lg" className="w-full" loading={iniciando} disabled={iniciando} onClick={pagar}>
+          Pagar seña {formatCOP(resumen.montoSena)}
+        </Button>
+      </Pie>
+    </Pantalla>
   );
 }

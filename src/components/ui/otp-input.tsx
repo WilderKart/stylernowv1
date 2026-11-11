@@ -371,7 +371,7 @@ export function OtpInput({
               opacity: BLINK,
             }}
             className={cn(
-              "pointer-events-none absolute left-0 top-1/2 w-0.5 rounded-full bg-black dark:bg-white",
+              "pointer-events-none absolute left-0 top-1/2 w-0.5 rounded-none bg-black dark:bg-white",
               scale.caret,
             )}
           />

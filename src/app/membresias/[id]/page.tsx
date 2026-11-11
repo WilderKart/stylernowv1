@@ -1,4 +1,4 @@
-import { BarraSuperior } from "@/components/layout/header";
+import { Pantalla, Top } from "@/app/lealtad/ui-cliente";
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { VistaMiMembresia } from "./vista-mi-membresia";
@@ -27,9 +27,9 @@ export default async function MiMembresiaPage(props: PageProps<"/membresias/[id]
   const negocio = membresia.negocio as unknown as { nombre: string; slug: string } | null;
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
-      <BarraSuperior titulo="Mi Membresía" volverA="/membresias" />
+    <Pantalla>
+      <Top titulo="Mi membresía" volverA="/membresias" />
       <VistaMiMembresia membresia={membresia} negocioNombre={negocio?.nombre ?? "StylerNow"} />
-    </div>
+    </Pantalla>
   );
 }

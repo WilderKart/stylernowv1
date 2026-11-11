@@ -95,18 +95,18 @@ export function VistaReportes({
               ))}
             </select>
           ) : null}
-          <div className="flex gap-1 rounded-full border border-border p-1">
+          <div className="flex gap-1 rounded-none border border-border p-1">
             <button
               type="button"
               onClick={() => onCambiarFiltro(sedeId, "semana")}
-              className={`rounded-full px-3 py-1 text-[11.5px] font-bold ${agrupacion === "semana" ? "bg-accent text-bg" : "text-text-muted"}`}
+              className={`rounded-none px-3 py-1 text-[11.5px] font-bold ${agrupacion === "semana" ? "bg-accent text-ink" : "text-text-muted"}`}
             >
               Semana
             </button>
             <button
               type="button"
               onClick={() => onCambiarFiltro(sedeId, "mes")}
-              className={`rounded-full px-3 py-1 text-[11.5px] font-bold ${agrupacion === "mes" ? "bg-accent text-bg" : "text-text-muted"}`}
+              className={`rounded-none px-3 py-1 text-[11.5px] font-bold ${agrupacion === "mes" ? "bg-accent text-ink" : "text-text-muted"}`}
             >
               Mes
             </button>
@@ -127,7 +127,23 @@ export function VistaReportes({
       ) : null}
 
       <section className="mb-8">
-        <h2 className="font-display mb-3 text-[13px] font-bold uppercase text-text">Ingresos por {agrupacion}</h2>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <h2 className="font-display text-[13px] font-bold uppercase text-text">Ingresos por {agrupacion}</h2>
+          <div className="flex gap-2">
+            <a
+              href={`/api/reportes/exportar?negocioId=${negocioId}&formato=excel&agrupacion=${agrupacion}`}
+              className="rounded-none border border-border px-3 py-1.5 text-[10.5px] font-bold uppercase text-text-muted hover:border-accent/40"
+            >
+              Excel
+            </a>
+            <a
+              href={`/api/reportes/exportar?negocioId=${negocioId}&formato=pdf&agrupacion=${agrupacion}`}
+              className="rounded-none border border-border px-3 py-1.5 text-[10.5px] font-bold uppercase text-text-muted hover:border-accent/40"
+            >
+              PDF
+            </a>
+          </div>
+        </div>
         {cargando ? (
           <div className="h-40 animate-pulse rounded-2xl border border-border-subtle bg-surface" />
         ) : ingresos.length === 0 ? (

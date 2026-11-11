@@ -1,7 +1,9 @@
 "use client";
 
+import { Barra, Bloque, ErrorAviso, Fila, Filas, Pie, Sec, TicketCita } from "@/app/lealtad/ui-cliente";
+import { Status } from "@/components/brutal";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Check, Clock, ShieldCheck } from "lucide-react";
 import { formatCOP } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -35,7 +37,7 @@ export function PantallaCheckoutMembresia({ resumen }: { resumen: ResumenCompraM
         router.replace(`/membresias/${estado.membresiaId}`);
       } else if (estado.pago === "RECHAZADO") {
         setEsperando(false);
-        setError("El pago fue rechazado. Podés intentar de nuevo con otro medio.");
+        setError("El pago fue rechazado. Puedes intentar de nuevo con otro medio.");
       }
     }, INTERVALO_POLLING_MS);
     return () => clearInterval(intervalo);
@@ -52,41 +54,73 @@ export function PantallaCheckoutMembresia({ resumen }: { resumen: ResumenCompraM
     window.location.href = r.url;
   }
 
+  if (esperando) {
+    return (
+      <main className="sn-block-ink !bg-ink !text-paper flex flex-1 flex-col justify-center gap-6 px-4 py-6" role="status" aria-live="polite">
+        <span className="sn-num !text-signal">00 / Pagando</span>
+        <p className="poster-1 break-words !text-paper">
+          Un
+          <br />
+          <span className="sn-hot">momento.</span>
+        </p>
+        <Barra pct={68} etiqueta="Confirmando el pago" className="!h-5 !border-paper" />
+        <p className="body m-0 text-[#D4D4D4]">Confirmando tu pago con Mercado Pago. No cierres la app.</p>
+        <span className="sn-meta !text-[#A3A3A3]">Pago seguro · StylerNow no guarda los datos de tu tarjeta</span>
+      </main>
+    );
+  }
+
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-5 py-6 pb-32 sm:px-0">
-      <Card>
-        <p className="text-[11.5px] font-bold uppercase tracking-wide text-text-muted">{resumen.negocio}</p>
-        <p className="mt-1 text-[15px] font-bold text-text">{resumen.nombrePlan}</p>
-        <p className="mt-0.5 text-[12.5px] text-text-muted">Se renueva cada {resumen.duracionMeses} mes{resumen.duracionMeses > 1 ? "es" : ""}</p>
-        <div className="mt-4 flex items-baseline justify-between border-t border-border-subtle pt-3">
-          <span className="text-[13.5px] font-bold text-text">Total a pagar</span>
-          <span className="font-display text-[26px] font-bold leading-none text-accent">{formatCOP(resumen.precio)}</span>
-        </div>
-      </Card>
+    <main className="flex flex-1 flex-col">
+      <div className="p-4">
+        <TicketCita
+          dia={String(resumen.duracionMeses)}
+          mes={resumen.duracionMeses > 1 ? "Meses" : "Mes"}
+          estado={
+            <Status tone="warn" icon={<Clock aria-hidden className="size-3.5" />}>
+              Pendiente de pago
+            </Status>
+          }
+          titulo={resumen.nombrePlan}
+          lineas={[resumen.negocio, `Se renueva cada ${resumen.duracionMeses} mes${resumen.duracionMeses > 1 ? "es" : ""}`]}
+          pie={
+            <>
+              <span className="sn-label">Total a pagar</span>
+              <span className="sn-fig text-[22px]">{formatCOP(resumen.precio)}</span>
+            </>
+          }
+        />
+      </div>
 
-      <section className="mt-5 rounded-2xl border border-border bg-surface-2 p-4">
-        <p className="flex items-center gap-1.5 text-[12px] font-semibold text-success">Pago seguro procesado por Mercado Pago</p>
-        <p className="mt-2 text-[11.5px] text-text-faint">StylerNow no almacena los datos de tu tarjeta en ningún momento.</p>
-      </section>
-
-      {esperando ? (
-        <div className="mt-5 rounded-2xl border border-border bg-surface p-4 text-center">
-          <span className="mx-auto mb-3 block size-6 animate-spin rounded-full border-2 border-accent border-t-transparent" />
-          <p className="text-[13px] font-semibold text-text">Esperando la confirmación…</p>
-        </div>
-      ) : null}
+      <Sec>01 / Método de pago</Sec>
+      <Filas>
+        <Fila
+          icono={<ShieldCheck aria-hidden className="size-5" />}
+          titulo="Mercado Pago"
+          meta="Eliges el medio en el siguiente paso."
+          derecha={
+            <Status tone="ok" icon={<Check aria-hidden className="size-3.5" />}>
+              Elegido
+            </Status>
+          }
+        />
+      </Filas>
+      <Bloque etiqueta="00 / Seguridad">
+        Pago seguro procesado por Mercado Pago. StylerNow no almacena los datos de tu tarjeta en ningún momento.
+      </Bloque>
 
       {error ? (
-        <p role="alert" className="mt-4 text-center text-[12.5px] font-semibold text-danger">{error}</p>
+        <div className="px-4 pt-4">
+          <ErrorAviso>{error}</ErrorAviso>
+        </div>
       ) : null}
 
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border-subtle bg-bg/95 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur">
-        <div className="mx-auto w-full max-w-md">
-          <Button size="lg" className="w-full" loading={iniciando || esperando} disabled={iniciando || esperando} onClick={comprar}>
-            PAGAR {formatCOP(resumen.precio)}
-          </Button>
-        </div>
-      </div>
+      <div className="flex-1" />
+      <Pie>
+        <Button size="lg" className="w-full" loading={iniciando} disabled={iniciando} onClick={comprar}>
+          Pagar {formatCOP(resumen.precio)}
+        </Button>
+      </Pie>
     </main>
   );
 }

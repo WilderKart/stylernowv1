@@ -1,91 +1,64 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { Compass, Heart, Map, Ticket, User } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 /**
- * Navegación principal de la Cliente PWA (02-UX/03_Client_PWA.md): Inicio, Citas,
- * Perfil. Se monta en las pantallas de "recorrido" (Home, perfil de Negocio, Mis
- * Reservas, Perfil) — las pantallas de un solo propósito (flujo de reserva, pago)
- * mantienen su propio CTA fijo en vez de competir con una segunda barra fija.
+ * Navegación principal de la Cliente PWA (patrón .sn-tabbar del prototipo): barra negra
+ * fija con la pestaña activa en naranja. Se monta en las pantallas de "recorrido" (Home,
+ * Mis Reservas, Favoritos, Perfil); las de un solo propósito (flujo de reserva, pago)
+ * mantienen su propio CTA fijo. Se arma aquí y no con <TabBar> porque "Mapa" es la vista
+ * `/?vista=mapa` del Home y TabBar solo compara el pathname.
  */
+const ICONO = { strokeWidth: 2, strokeLinecap: "square", strokeLinejoin: "miter", "aria-hidden": true } as const;
+
 const ITEMS = [
-  {
-    href: "/",
-    etiqueta: "Inicio",
-    icono: (activo: boolean) => (
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={activo ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 11.5 12 4l8 7.5" />
-        <path d="M6 10v9h12v-9" />
-      </svg>
-    ),
-  },
-  {
-    href: "/mis-reservas",
-    etiqueta: "Citas",
-    icono: (activo: boolean) => (
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={activo ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3.5" y="5" width="17" height="15" rx="2.5" />
-        <path d="M3.5 9.5h17M8 3v3.5M16 3v3.5" />
-      </svg>
-    ),
-  },
-  {
-    href: "/favoritos",
-    etiqueta: "Favoritos",
-    icono: (activo: boolean) => (
-      <svg viewBox="0 0 24 24" width="20" height="20" fill={activo ? "currentColor" : "none"} stroke="currentColor" strokeWidth={activo ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 20.5s-7.5-4.6-10-9.3C.4 7.8 2 4.5 5.4 4a5 5 0 0 1 6.6 2.3A5 5 0 0 1 18.6 4c3.4.5 5 3.8 3.4 7.2-2.5 4.7-10 9.3-10 9.3z" />
-      </svg>
-    ),
-  },
-  {
-    href: "/lealtad",
-    etiqueta: "Lealtad",
-    icono: (activo: boolean) => (
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={activo ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 3v4M12 3 9 5.5M12 3l3 2.5" />
-        <rect x="3.5" y="7" width="17" height="13" rx="2.5" />
-        <path d="M3.5 12h17" />
-      </svg>
-    ),
-  },
-  {
-    href: "/perfil",
-    etiqueta: "Perfil",
-    icono: (activo: boolean) => (
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={activo ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="8" r="3.5" />
-        <path d="M4.5 20c1.3-3.7 4.3-5.5 7.5-5.5s6.2 1.8 7.5 5.5" />
-      </svg>
-    ),
-  },
+  { id: "explorar", href: "/", etiqueta: "Explorar", icono: <Compass {...ICONO} /> },
+  { id: "mapa", href: "/?vista=mapa", etiqueta: "Mapa", icono: <Map {...ICONO} /> },
+  { id: "citas", href: "/mis-reservas", etiqueta: "Citas", icono: <Ticket {...ICONO} /> },
+  { id: "favoritos", href: "/favoritos", etiqueta: "Favoritos", icono: <Heart {...ICONO} /> },
+  { id: "perfil", href: "/perfil", etiqueta: "Perfil", icono: <User {...ICONO} /> },
 ] as const;
 
-export function BottomNav() {
+function Barra() {
   const pathname = usePathname();
+  const enMapa = useSearchParams().get("vista") === "mapa";
+
+  function activo(id: (typeof ITEMS)[number]["id"], href: string) {
+    if (id === "explorar") return pathname === "/" && !enMapa;
+    if (id === "mapa") return pathname === "/" && enMapa;
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border-subtle bg-bg/95 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-5xl items-stretch justify-around px-2 pb-[env(safe-area-inset-bottom)]">
-        {ITEMS.map((item) => {
-          const activo = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex flex-1 flex-col items-center gap-1 py-2.5 text-[10.5px] font-semibold transition-colors",
-                activo ? "text-accent" : "text-text-faint hover:text-text-muted"
-              )}
-            >
-              {item.icono(activo)}
-              {item.etiqueta}
-            </Link>
-          );
-        })}
-      </div>
+    <nav aria-label="Navegación principal" className="sn-tabbar pb-[env(safe-area-inset-bottom)]">
+      {ITEMS.map((it) => {
+        const a = activo(it.id, it.href);
+        return (
+          <Link
+            key={it.id}
+            href={it.href}
+            aria-current={a ? "page" : undefined}
+            className={cn("sn-tab min-w-0 no-underline", a && "is-active")}
+          >
+            {it.icono}
+            <span className="max-w-full truncate">{it.etiqueta}</span>
+          </Link>
+        );
+      })}
     </nav>
+  );
+}
+
+export function BottomNav() {
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-30">
+      <Suspense fallback={<nav aria-label="Navegación principal" className="sn-tabbar" />}>
+        <Barra />
+      </Suspense>
+    </div>
   );
 }

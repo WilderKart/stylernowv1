@@ -141,7 +141,7 @@ export function ListaStaff({
         {permisos.invitarStaff ? (
           <Link
             href="/panel/staff/nuevo"
-            className="shrink-0 rounded-full bg-accent px-4 py-2.5 text-[12.5px] font-bold text-bg hover:bg-accent-hover"
+            className="shrink-0 rounded-none bg-accent px-4 py-2.5 text-[12.5px] font-bold text-ink hover:bg-accent-hover"
           >
             + INVITAR STAFF
           </Link>

@@ -1,4 +1,4 @@
-import { BarraSuperior } from "@/components/layout/header";
+import { Hot, PantallaAuth } from "@/app/login/_componentes/pantalla-auth";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 
@@ -38,32 +38,37 @@ export default async function LegalPage(props: PageProps<"/legal/[slug]">) {
   const parrafos = texto.contenido.split("\n\n").filter(Boolean);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
-      <BarraSuperior titulo={config.titulo} volverA="/login" />
-      <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-6 sm:px-10">
-        <p className="mb-6 text-[11.5px] text-text-faint">
+    <PantallaAuth
+      indice="10 / Legal"
+      volver="/login"
+      tamano={3}
+      ancho="max-w-2xl"
+      titulo={<Hot>{config.titulo}</Hot>}
+      intro={
+        <span className="sn-meta">
           Versión {texto.version} · vigente desde{" "}
           {new Date(texto.publicado_at).toLocaleDateString("es-CO", {
             day: "numeric",
             month: "long",
             year: "numeric",
           })}
-        </p>
-        <div className="flex flex-col gap-4">
-          {parrafos.map((p, i) => {
-            const esTitulo = /^\d+\.\s/.test(p);
-            return esTitulo ? (
-              <h2 key={i} className="font-display mt-2 text-[15px] font-bold text-text">
-                {p}
-              </h2>
-            ) : (
-              <p key={i} className="text-[13.5px] leading-relaxed text-text-muted">
-                {p}
-              </p>
-            );
-          })}
-        </div>
-      </main>
-    </div>
+        </span>
+      }
+    >
+      <div className="flex flex-col gap-4 border-t-2 border-border pt-4">
+        {parrafos.map((p, i) => {
+          const esTitulo = /^\d+\.\s/.test(p);
+          return esTitulo ? (
+            <h2 key={i} className="section mt-2 text-[15px] leading-5 break-words">
+              {p}
+            </h2>
+          ) : (
+            <p key={i} className="body text-text-muted break-words">
+              {p}
+            </p>
+          );
+        })}
+      </div>
+    </PantallaAuth>
   );
 }

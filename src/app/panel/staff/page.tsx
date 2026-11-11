@@ -1,7 +1,6 @@
 import { PanelNav } from "@/components/panel/panel-nav";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import { listarInvitacionesPendientes, listarStaff } from "./actions";
 import { ListaStaff } from "./lista-staff";
 
@@ -10,12 +9,7 @@ export const metadata = { title: "Staff" };
 const LIMITE_PAGINA = 20;
 
 export default async function StaffListaPage() {
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect("/login?next=/panel/staff");
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
-  // Staff plano no administra el equipo — ve su propia ficha cuando exista
-  // la App Staff (Fase 4), no esta pantalla.
-  if (contexto.rol === "STAFF") redirect("/panel");
+  const contexto = await verificarAccesoPanel(["BARBERIA", "GUARDIAN"], "/panel/staff");
 
   const negocioId = contexto.negocioId!;
   const supabase = await createClient();

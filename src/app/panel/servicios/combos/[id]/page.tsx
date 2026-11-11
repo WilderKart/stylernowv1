@@ -1,17 +1,14 @@
 import { BarraSuperior } from "@/components/layout/header";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { createClient } from "@/lib/supabase/server";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { DetalleCombo } from "./detalle-combo";
 
 export const metadata = { title: "Detalle de combo" };
 
 export default async function ComboDetallePage(props: PageProps<"/panel/servicios/combos/[id]">) {
   const { id } = await props.params;
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect(`/login?next=/panel/servicios/combos/${id}`);
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
-  if (contexto.rol === "STAFF") redirect("/panel");
+  const contexto = await verificarAccesoPanel(["BARBERIA", "GUARDIAN"], `/panel/servicios/combos/${id}`);
 
   const supabase = await createClient();
   const { data: combo } = await supabase

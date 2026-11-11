@@ -1,16 +1,12 @@
 import { PanelNav } from "@/components/panel/panel-nav";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
-import { redirect } from "next/navigation";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { listarMisTickets } from "./actions";
 import { VistaSoporte } from "./vista-soporte";
 
 export const metadata = { title: "Soporte" };
 
 export default async function SoportePage() {
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect("/login?next=/panel/soporte");
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
-  if (contexto.rol === "STAFF") redirect("/panel");
+  const contexto = await verificarAccesoPanel(["BARBERIA", "GUARDIAN"], "/panel/soporte");
 
   const res = await listarMisTickets();
 

@@ -1,18 +1,19 @@
 "use client";
 
+import { Barra, ErrorAviso, Fila, Filas, Sec } from "@/app/lealtad/ui-cliente";
+import { Status } from "@/components/brutal";
 import { Button } from "@/components/ui/button";
-import { Badge, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import { formatCOP } from "@/lib/utils";
+import { ArrowDownLeft, ArrowUpRight, Check, Gift, Store, Stamp, Users } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { crearGrupoFamiliar, registrarReferido, type ResumenLealtad } from "./actions";
 
-const MEMBRESIA_ESTADO_TONO: Record<string, "success" | "accent" | "neutral"> = {
-  ACTIVA: "success",
-  PROXIMA_A_VENCER: "accent",
-  SUSPENDIDA: "neutral",
+const MEMBRESIA_ESTADO_TONO: Record<string, "ok" | "warn" | "info"> = {
+  ACTIVA: "ok",
+  PROXIMA_A_VENCER: "warn",
+  SUSPENDIDA: "info",
 };
 
 const TIPO_ETIQUETA: Record<string, string> = {
@@ -30,109 +31,123 @@ export function VistaLealtad({ resumenInicial, errorInicial }: { resumenInicial:
   const error = errorInicial;
 
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-6 sm:px-10">
-      <h1 className="font-display mb-4 text-base font-semibold uppercase tracking-wide text-text">Mi Lealtad</h1>
-      {error ? <p className="mb-4 text-[12.5px] font-semibold text-danger">{error}</p> : null}
+    <>
+      <div className="sn-block-ink !bg-ink !text-paper px-4 py-5">
+        <span className="sn-num !text-signal">01 / StylerWallet</span>
+        <p className="poster-1 mt-1 break-words !text-paper">{formatCOP(resumen.walletSaldo)}</p>
+        <span className="sn-meta !text-[#A3A3A3]">
+          Gift cards, referidos, cashback y promociones en un solo saldo, usable en cualquier negocio que lo acepte.
+        </span>
+      </div>
 
-      <Card className="mb-6 text-center">
-        <p className="text-[11px] font-bold uppercase tracking-wide text-text-faint">StylerWallet</p>
-        <p className="mt-1 text-[28px] font-bold text-text">{formatCOP(resumen.walletSaldo)}</p>
-        <p className="mt-1 text-[11px] text-text-faint">Gift Cards, Referidos, Cashback y Promociones — todo en un solo saldo, usable en cualquier Negocio que lo acepte.</p>
-      </Card>
-
-      {resumen.membresias.length > 0 ? (
-        <section className="mb-6">
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="font-display text-[12px] font-bold uppercase text-text">Mis Membresías</h2>
-            <Link href="/membresias" className="text-[11px] font-bold uppercase text-accent">Ver todas →</Link>
-          </div>
-          <ul className="flex flex-col gap-1.5">
-            {resumen.membresias.slice(0, 3).map((m) => (
-              <li key={m.id}>
-                <Link href={`/membresias/${m.id}`} className="flex items-center justify-between rounded-xl border border-border-subtle bg-surface px-3 py-2">
-                  <div>
-                    <p className="text-[12px] font-semibold text-text">{m.planNombre}</p>
-                    <p className="text-[10.5px] text-text-faint">{m.negocioNombre}</p>
-                  </div>
-                  <Badge tone={MEMBRESIA_ESTADO_TONO[m.estado] ?? "neutral"}>{m.estado === "SUSPENDIDA" ? "Congelada" : m.estado === "PROXIMA_A_VENCER" ? "Por vencer" : "Activa"}</Badge>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
+      {error ? (
+        <div className="p-4">
+          <ErrorAviso>{error}</ErrorAviso>
+        </div>
       ) : null}
 
-      <SeccionGiftCard />
+      {resumen.membresias.length > 0 ? (
+        <>
+          <Sec derecha={<Link href="/membresias" className="sn-label underline">Ver todas</Link>}>02 / Membresías</Sec>
+          <Filas>
+            {resumen.membresias.slice(0, 3).map((m) => (
+              <Fila
+                key={m.id}
+                icono={<Store aria-hidden className="size-5" />}
+                titulo={m.planNombre}
+                meta={m.negocioNombre}
+                href={`/membresias/${m.id}`}
+                derecha={
+                  <Status tone={MEMBRESIA_ESTADO_TONO[m.estado] ?? "info"}>
+                    {m.estado === "SUSPENDIDA" ? "Congelada" : m.estado === "PROXIMA_A_VENCER" ? "Por vencer" : "Activa"}
+                  </Status>
+                }
+              />
+            ))}
+          </Filas>
+        </>
+      ) : null}
+
+      <Sec>03 / Gift cards</Sec>
+      <Filas>
+        {/* Por seguridad (ADR-014, Fase B: canje únicamente desde POS) el canje de una Gift Card
+            no es autoservicio remoto: aquí el Cliente solo compra o consulta su saldo. */}
+        <Fila
+          icono={<Gift aria-hidden className="size-5" />}
+          titulo="Gift cards"
+          meta="Compra una para ti o para regalar, y consulta el saldo de las que ya tienes."
+          href="/gift-cards"
+        />
+      </Filas>
 
       {resumen.movimientos.length > 0 ? (
-        <section className="mb-6">
-          <h2 className="font-display mb-2 text-[12px] font-bold uppercase text-text">Movimientos recientes</h2>
-          <ul className="flex flex-col gap-1.5">
+        <>
+          <Sec>04 / Movimientos recientes</Sec>
+          <Filas>
             {resumen.movimientos.slice(0, 8).map((m) => (
-              <li key={m.id} className="flex items-center justify-between rounded-xl border border-border-subtle bg-surface px-3 py-2">
-                <div>
-                  <p className="text-[12px] font-semibold text-text">{TIPO_ETIQUETA[m.tipo] ?? m.tipo}</p>
-                  <p className="text-[10.5px] text-text-faint">{new Date(m.createdAt).toLocaleDateString("es-CO")}{m.motivo ? ` · ${m.motivo}` : ""}</p>
-                </div>
-                <p className={`shrink-0 text-[12.5px] font-bold ${m.monto >= 0 ? "text-success" : "text-danger"}`}>
-                  {m.monto >= 0 ? "+" : ""}{formatCOP(m.monto)}
-                </p>
-              </li>
+              <Fila
+                key={m.id}
+                icono={m.monto >= 0 ? <ArrowDownLeft aria-hidden className="size-5" /> : <ArrowUpRight aria-hidden className="size-5" />}
+                titulo={TIPO_ETIQUETA[m.tipo] ?? m.tipo}
+                meta={`${new Date(m.createdAt).toLocaleDateString("es-CO")}${m.motivo ? ` · ${m.motivo}` : ""}`}
+                derecha={
+                  <span className={m.monto >= 0 ? "sn-price" : "sn-price text-danger"}>
+                    {m.monto >= 0 ? "+" : ""}
+                    {formatCOP(m.monto)}
+                  </span>
+                }
+              />
             ))}
-          </ul>
-        </section>
+          </Filas>
+        </>
       ) : null}
 
       <SeccionReferidos codigoReferido={resumen.codigoReferido} referidos={resumen.referidos} />
 
       {resumen.sellos.length > 0 ? (
-        <section className="mb-6">
-          <h2 className="font-display mb-2 text-[12px] font-bold uppercase text-text">Sellos</h2>
-          <ul className="flex flex-col gap-2">
+        <>
+          <Sec>06 / Sellos</Sec>
+          <Filas>
             {resumen.sellos.map((s) => (
-              <li key={s.campanaId} className="rounded-2xl border border-border-subtle bg-surface p-3.5">
-                <p className="text-[12.5px] font-semibold text-text">{s.negocioNombre} · {s.campanaNombre}</p>
-                <Progress value={Math.min(100, (s.sellosActuales / s.sellosRequeridos) * 100)} className="mt-1.5 h-2" />
-                <p className="mt-1 text-[10.5px] text-text-faint">{s.sellosActuales} de {s.sellosRequeridos} — {s.recompensaDescripcion}</p>
-              </li>
+              <div key={s.campanaId} className="flex flex-col gap-2 border-b border-border-subtle px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <Stamp aria-hidden className="size-5 shrink-0" />
+                  <b className="break-words text-[15px]">
+                    {s.negocioNombre} · {s.campanaNombre}
+                  </b>
+                </div>
+                <Barra pct={(s.sellosActuales / s.sellosRequeridos) * 100} etiqueta="Progreso de sellos" />
+                <span className="sn-meta break-words">
+                  {s.sellosActuales} de {s.sellosRequeridos} · {s.recompensaDescripcion}
+                </span>
+              </div>
             ))}
-          </ul>
-        </section>
+          </Filas>
+        </>
       ) : null}
 
       {resumen.cashback.length > 0 ? (
-        <section className="mb-6">
-          <h2 className="font-display mb-2 text-[12px] font-bold uppercase text-text">Cashback</h2>
-          <ul className="flex flex-col gap-1.5">
+        <>
+          <Sec>07 / Cashback</Sec>
+          <Filas>
             {resumen.cashback.slice(0, 6).map((c) => (
-              <li key={c.id} className="flex items-center justify-between rounded-xl border border-border-subtle bg-surface px-3 py-2">
-                <p className="text-[12px] text-text-muted">{c.negocioNombre}</p>
-                <div className="flex items-center gap-2">
-                  <Badge tone={c.estado === "DISPONIBLE" ? "success" : "neutral"}>{c.estado}</Badge>
-                  <p className="text-[12.5px] font-bold text-text">{formatCOP(c.monto)}</p>
-                </div>
-              </li>
+              <Fila
+                key={c.id}
+                titulo={c.negocioNombre}
+                derecha={
+                  <>
+                    <Status tone={c.estado === "DISPONIBLE" ? "ok" : "info"}>{c.estado}</Status>
+                    <span className="sn-price">{formatCOP(c.monto)}</span>
+                  </>
+                }
+              />
             ))}
-          </ul>
-        </section>
+          </Filas>
+        </>
       ) : null}
 
       <SeccionFamilia familia={resumen.familia} onCreada={() => window.location.reload()} />
-    </main>
-  );
-}
-
-function SeccionGiftCard() {
-  // Por seguridad (ADR-014, Fase B: "canje únicamente desde POS") el canje
-  // de una Gift Card ya no es autoservicio remoto — se acredita al
-  // StylerWallet solo cuando el Staff la registra en el local. Acá el
-  // Cliente solo compra o consulta su saldo, nunca canjea a distancia.
-  return (
-    <Card className="mb-6">
-      <h2 className="font-display mb-2 text-[12px] font-bold uppercase text-text">Gift Cards</h2>
-      <p className="mb-3 text-[12px] text-text-muted">Comprá una para vos o para regalar, y consultá el saldo de las que ya tenés.</p>
-      <Link href="/gift-cards" className="text-[12px] font-bold uppercase text-accent">Ver Gift Cards →</Link>
-    </Card>
+    </>
   );
 }
 
@@ -147,41 +162,64 @@ function SeccionReferidos({ codigoReferido, referidos }: { codigoReferido: strin
     setMensaje(null);
     const res = await registrarReferido(codigoAUsar);
     setCargando(false);
-    setMensaje(res.ok ? { tipo: "ok", texto: "¡Listo! Cuando completes tu primera Reserva, tu referente recibe su recompensa." } : { tipo: "error", texto: res.error });
+    setMensaje(res.ok ? { tipo: "ok", texto: "¡Listo! Cuando completes tu primera reserva, tu referente recibe su recompensa." } : { tipo: "error", texto: res.error });
     if (res.ok) setCodigoAUsar("");
   }
 
   return (
-    <section className="mb-6">
-      <h2 className="font-display mb-2 text-[12px] font-bold uppercase text-text">Referidos</h2>
-      <Card className="mb-2.5">
-        <p className="text-[11px] text-text-faint">Tu código para compartir</p>
-        <p className="mt-1 text-[20px] font-bold tracking-wide text-accent">{codigoReferido ?? "—"}</p>
-      </Card>
-      <Card className="mb-2.5">
-        <p className="mb-2 text-[11px] text-text-faint">¿Alguien te compartió un código?</p>
-        <div className="flex gap-2">
-          <Input placeholder="Código de referido" value={codigoAUsar} onChange={(e) => setCodigoAUsar(e.target.value.toUpperCase())} />
-          <Button size="sm" loading={cargando} onClick={onUsarCodigo} disabled={!codigoAUsar.trim()}>
+    <>
+      <Sec>05 / Referidos{referidos.length ? ` · ${referidos.length}` : ""}</Sec>
+      <div className="mx-4 border-2 border-border shadow-hard">
+        <div className="border-b border-border-subtle p-3">
+          <span className="sn-label">Tu código</span>
+        </div>
+        <p className="poster-3 break-all p-3">{codigoReferido ?? "—"}</p>
+      </div>
+
+      <div className="flex flex-col gap-3 p-4">
+        <p className="body-sm break-words">¿Alguien te compartió un código? Ingrésalo aquí.</p>
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="min-w-0 flex-1 basis-48">
+            <Input
+              aria-label="Código de referido"
+              placeholder="Código de referido"
+              value={codigoAUsar}
+              onChange={(e) => setCodigoAUsar(e.target.value.toUpperCase())}
+            />
+          </div>
+          <Button loading={cargando} onClick={onUsarCodigo} disabled={!codigoAUsar.trim()}>
             Usar
           </Button>
         </div>
-        {mensaje ? <p className={`mt-2 text-[12px] font-semibold ${mensaje.tipo === "ok" ? "text-success" : "text-danger"}`}>{mensaje.texto}</p> : null}
-      </Card>
+        {mensaje ? (
+          mensaje.tipo === "ok" ? (
+            <Status tone="ok" role="status" icon={<Check aria-hidden className="size-3.5" />} className="self-start">
+              {mensaje.texto}
+            </Status>
+          ) : (
+            <ErrorAviso>{mensaje.texto}</ErrorAviso>
+          )
+        ) : null}
+      </div>
+
       {referidos.length > 0 ? (
-        <ul className="flex flex-col gap-1.5">
+        <Filas>
           {referidos.map((r) => (
-            <li key={r.id} className="flex items-center justify-between rounded-xl border border-border-subtle bg-surface px-3 py-2">
-              <p className="text-[11.5px] text-text-faint">{new Date(r.createdAt).toLocaleDateString("es-CO")}</p>
-              <div className="flex items-center gap-2">
-                <Badge tone={r.estado === "COMPLETADO" ? "success" : "neutral"}>{r.estado}</Badge>
-                {r.montoRecompensa ? <p className="text-[12px] font-bold text-text">{formatCOP(r.montoRecompensa)}</p> : null}
-              </div>
-            </li>
+            <Fila
+              key={r.id}
+              icono={<Users aria-hidden className="size-5" />}
+              titulo={new Date(r.createdAt).toLocaleDateString("es-CO")}
+              derecha={
+                <>
+                  <Status tone={r.estado === "COMPLETADO" ? "ok" : "info"}>{r.estado}</Status>
+                  {r.montoRecompensa ? <span className="sn-price">{formatCOP(r.montoRecompensa)}</span> : null}
+                </>
+              }
+            />
           ))}
-        </ul>
+        </Filas>
       ) : null}
-    </section>
+    </>
   );
 }
 
@@ -200,21 +238,25 @@ function SeccionFamilia({ familia, onCreada }: { familia: ResumenLealtad["famili
 
   if (familia) {
     return (
-      <Card>
-        <h2 className="font-display mb-1 text-[12px] font-bold uppercase text-text">Mi familia</h2>
-        <p className="text-[12.5px] text-text-muted">{familia.nombre} · hasta {familia.limiteMiembros} miembros</p>
-      </Card>
+      <>
+        <Sec>08 / Mi familia</Sec>
+        <Filas>
+          <Fila icono={<Users aria-hidden className="size-5" />} titulo={familia.nombre} meta={`Hasta ${familia.limiteMiembros} miembros`} />
+        </Filas>
+      </>
     );
   }
 
   return (
-    <Card>
-      <h2 className="font-display mb-1 text-[12px] font-bold uppercase text-text">Paquete familiar</h2>
-      <p className="mb-2 text-[12px] text-text-faint">Agrupá a tu familia para compartir beneficios.</p>
-      {error ? <p className="mb-2 text-[12px] font-semibold text-danger">{error}</p> : null}
-      <Button size="sm" variant="secondary" loading={creando} onClick={onCrear}>
-        Crear grupo familiar
-      </Button>
-    </Card>
+    <>
+      <Sec>08 / Paquete familiar</Sec>
+      <div className="flex flex-col gap-3 px-4 pb-6">
+        <p className="body-sm break-words">Agrupa a tu familia para compartir beneficios.</p>
+        {error ? <ErrorAviso>{error}</ErrorAviso> : null}
+        <Button variant="secondary" size="lg" loading={creando} onClick={onCrear}>
+          Crear grupo familiar
+        </Button>
+      </div>
+    </>
   );
 }

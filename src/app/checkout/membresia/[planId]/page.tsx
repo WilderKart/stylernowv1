@@ -1,4 +1,4 @@
-import { BarraSuperior } from "@/components/layout/header";
+import { Pantalla, Top } from "@/app/lealtad/ui-cliente";
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { PantallaCheckoutMembresia } from "./pantalla-checkout-membresia";
@@ -25,8 +25,8 @@ export default async function CheckoutMembresiaPage(props: PageProps<"/checkout/
   const negocio = plan.negocio as unknown as { nombre: string; slug: string } | null;
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
-      <BarraSuperior titulo="Comprar Membresía" volverA={negocio ? `/negocio/${negocio.slug}/membresias/${plan.id}` : "/"} />
+    <Pantalla>
+      <Top titulo="Comprar membresía" volverA={negocio ? `/negocio/${negocio.slug}/membresias/${plan.id}` : "/"} />
       <PantallaCheckoutMembresia
         resumen={{
           planId: plan.id,
@@ -36,6 +36,6 @@ export default async function CheckoutMembresiaPage(props: PageProps<"/checkout/
           duracionMeses: plan.duracion_meses,
         }}
       />
-    </div>
+    </Pantalla>
   );
 }

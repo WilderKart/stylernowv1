@@ -8,7 +8,7 @@ import type { NegocioTarjeta } from "./negocio-card";
 // Cliente, por eso este wrapper existe separado del componente real.
 const MapaMarketplace = dynamic(() => import("./mapa-marketplace").then((m) => m.MapaMarketplace), {
   ssr: false,
-  loading: () => <div className="h-[420px] w-full animate-pulse rounded-2xl border border-border-subtle bg-surface" />,
+  loading: () => <div className="sn-map !h-[60dvh] !min-h-[320px] animate-pulse" aria-busy="true" aria-label="Cargando mapa" />,
 });
 
 export function MapaMarketplaceLazy({

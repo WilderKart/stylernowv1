@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { alternarFavorito } from "./actions";
@@ -28,18 +27,20 @@ export function BotonFavorito({ negocioId, slug, favoritoInicial }: { negocioId:
       disabled={cargando}
       aria-label={favorito ? "Quitar de favoritos" : "Guardar en favoritos"}
       aria-pressed={favorito}
-      className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border-subtle bg-surface transition-colors disabled:opacity-50"
+      className="sn-fav disabled:opacity-50"
     >
       <svg
         viewBox="0 0 24 24"
-        width="18"
-        height="18"
-        fill={favorito ? "#e8a23c" : "none"}
-        stroke={favorito ? "#e8a23c" : "currentColor"}
-        strokeWidth="1.8"
-        className={cn("text-text-muted", favorito && "text-accent")}
+        width="20"
+        height="20"
+        fill={favorito ? "currentColor" : "none"}
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+        aria-hidden="true"
       >
-        <path d="M12 20.5s-7.5-4.6-10-9.3C.4 7.8 2 4.5 5.4 4a5 5 0 0 1 6.6 2.3A5 5 0 0 1 18.6 4c3.4.5 5 3.8 3.4 7.2-2.5 4.7-10 9.3-10 9.3z" />
+        <path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z" />
       </svg>
     </button>
   );

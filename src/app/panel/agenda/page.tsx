@@ -1,16 +1,12 @@
 import { PanelNav } from "@/components/panel/panel-nav";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { VistaAgenda } from "./vista-agenda";
 
 export const metadata = { title: "Agenda" };
 
 export default async function AgendaPage(props: PageProps<"/panel/agenda">) {
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect("/login?next=/panel/agenda");
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
-  if (contexto.rol === "STAFF") redirect("/panel");
+  const contexto = await verificarAccesoPanel(["BARBERIA", "GUARDIAN"], "/panel/agenda");
 
   const negocioId = contexto.negocioId!;
   const supabase = await createClient();

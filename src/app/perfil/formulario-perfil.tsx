@@ -1,10 +1,12 @@
 "use client";
 
+import { ErrorAviso } from "@/app/lealtad/ui-cliente";
+import { Chip, ChipGroup, Panel, Status } from "@/components/brutal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CATEGORIAS_NEGOCIO } from "@/lib/categorias-negocio";
 import { CODIGOS_PAIS, separarTelefono } from "@/lib/codigos-pais";
-import { cn } from "@/lib/utils";
+import { Check, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { actualizarPerfil, cerrarSesion } from "./actions";
@@ -82,39 +84,25 @@ export function FormularioPerfil({
   return (
     <div className="flex flex-col gap-6">
       {bienvenida ? (
-        <div className="rounded-2xl border border-accent/40 bg-accent-soft p-4">
-          <p className="text-[13.5px] font-bold text-text">¡Bienvenido a StylerNow!</p>
-          <p className="mt-1 text-[12.5px] leading-relaxed text-text-muted">
-            Contanos tu nombre y tu celular para que el negocio pueda avisarte de tu
-            cita — solo te lo pedimos esta vez.
+        <div className="border-2 border-border bg-signal p-4 text-ink shadow-hard">
+          <h3 className="section">¡Bienvenido a StylerNow!</h3>
+          <p className="body-sm mt-1.5 break-words">
+            Cuéntanos tu nombre y tu celular para que el negocio pueda avisarte de tu cita. Solo te lo pedimos esta vez.
           </p>
         </div>
       ) : null}
 
       {faltantes.length > 0 ? (
-        <div className="rounded-2xl border border-accent/30 bg-accent-soft p-4">
-          <p className="flex items-center gap-2 text-[13px] font-bold text-text">
-            <svg
-              viewBox="0 0 24 24"
-              width="15"
-              height="15"
-              fill="none"
-              stroke="#e8a23c"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3 1.1-6.5L2.6 9.3l6.5-.9z" />
-            </svg>
-            Sumá puntos completando tu perfil
+        <Panel className="p-4">
+          <p className="sn-label flex items-center gap-2">
+            <Star aria-hidden className="size-4" />
+            Suma puntos completando tu perfil
           </p>
-          <p className="mt-1.5 text-[12px] leading-relaxed text-text-muted">
-            Te falta: {faltantes.join(", ")}. Con estos datos te avisamos de tu cita a
-            tiempo, te llegan promos de negocios que realmente te interesan, y quedás
-            listo para sumar puntos apenas activemos fidelización.
+          <p className="body-sm mt-2 break-words">
+            Te falta: {faltantes.join(", ")}. Con estos datos te avisamos de tu cita a tiempo, te llegan promos de negocios
+            que realmente te interesan y quedas listo para sumar puntos.
           </p>
-        </div>
+        </Panel>
       ) : null}
 
       <form onSubmit={onGuardar} className="flex flex-col gap-4">
@@ -125,18 +113,18 @@ export function FormularioPerfil({
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
         />
-        <Input label="Correo" value={email} disabled className="opacity-60" />
+        <Input label="Correo" value={email} disabled />
 
-        <div>
-          <label className="mb-2 block text-[11.5px] font-bold uppercase tracking-wide text-text-muted">
+        <div className="flex flex-col gap-2">
+          <label htmlFor="perfil-telefono" className="sn-label">
             Celular (WhatsApp)
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <select
               value={codigoPais}
               onChange={(e) => setCodigoPais(e.target.value)}
               aria-label="Código de país"
-              className="h-[52px] shrink-0 rounded-[13px] border border-border bg-surface px-2.5 text-[14px] text-text outline-none focus:border-accent/60"
+              className="min-h-12 shrink-0 border-2 border-border bg-bg px-2.5 text-[15px] text-text outline-none focus:shadow-hard"
             >
               {CODIGOS_PAIS.map((c) => (
                 <option key={c.codigo} value={c.codigo}>
@@ -145,12 +133,13 @@ export function FormularioPerfil({
               ))}
             </select>
             <input
+              id="perfil-telefono"
               type="tel"
               inputMode="numeric"
               placeholder="300 000 0000"
               value={telefonoLocal}
-              onChange={(e) => setTelefonoLocal(e.target.value.replace(/\D/g, ""))}
-              className="h-[52px] w-full rounded-[13px] border border-border bg-surface px-4 text-[14.5px] text-text placeholder:text-text-faint outline-none focus:border-accent/60"
+              onChange={(e) => setTelefonoLocal(e.target.value.replace(/D/g, ""))}
+              className="min-h-12 min-w-0 flex-1 basis-40 border-2 border-border bg-bg px-3 text-[15px] text-text outline-none placeholder:text-text-muted focus:shadow-hard"
             />
           </div>
         </div>
@@ -163,51 +152,31 @@ export function FormularioPerfil({
           onChange={(e) => setFechaNacimiento(e.target.value)}
         />
 
-        <div>
-          <label className="mb-2 block text-[11.5px] font-bold uppercase tracking-wide text-text-muted">
-            ¿Qué te interesa?
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {CATEGORIAS_NEGOCIO.map((c) => {
-              const activo = categorias.includes(c.valor);
-              return (
-                <button
-                  key={c.valor}
-                  type="button"
-                  onClick={() => alternarCategoria(c.valor)}
-                  aria-pressed={activo}
-                  className={cn(
-                    "rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition-colors",
-                    activo
-                      ? "border-accent bg-accent-soft text-accent"
-                      : "border-border text-text-muted hover:border-accent/40"
-                  )}
-                >
-                  {c.etiqueta}
-                </button>
-              );
-            })}
-          </div>
-          <p className="mt-2 text-[11px] text-text-faint">
-            Así te mostramos primero los negocios y promociones que más te sirven.
-          </p>
+        <div className="flex flex-col gap-2">
+          <span className="sn-label">¿Qué te interesa?</span>
+          <ChipGroup>
+            {CATEGORIAS_NEGOCIO.map((c) => (
+              <Chip key={c.valor} selected={categorias.includes(c.valor)} onClick={() => alternarCategoria(c.valor)}>
+                {c.etiqueta}
+              </Chip>
+            ))}
+          </ChipGroup>
+          <p className="sn-help">Así te mostramos primero los negocios y promociones que más te sirven.</p>
         </div>
 
-        {error ? <p className="text-xs text-danger">{error}</p> : null}
-        {guardado ? <p className="text-xs font-semibold text-success">Guardado.</p> : null}
+        {error ? <ErrorAviso>{error}</ErrorAviso> : null}
+        {guardado ? (
+          <Status tone="ok" role="status" icon={<Check aria-hidden className="size-3.5" />}>
+            Guardado
+          </Status>
+        ) : null}
 
         <Button type="submit" size="lg" loading={guardando} className="w-full">
-          GUARDAR CAMBIOS
+          Guardar cambios
         </Button>
       </form>
 
-      <Button
-        variant="ghost"
-        size="sm"
-        loading={cerrando}
-        onClick={onCerrarSesion}
-        className="w-full"
-      >
+      <Button variant="secondary" size="lg" loading={cerrando} onClick={onCerrarSesion} className="w-full">
         Cerrar sesión
       </Button>
     </div>

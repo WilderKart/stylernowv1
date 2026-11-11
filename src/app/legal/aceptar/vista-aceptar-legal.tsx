@@ -1,6 +1,9 @@
 "use client";
 
+import { ErrorForm } from "@/app/login/_componentes/pantalla-auth";
+import { Meta, Num } from "@/components/brutal";
 import { Button } from "@/components/ui/button";
+import { ArrowUpRight, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { aceptarPendientes } from "./actions";
@@ -39,30 +42,39 @@ export function VistaAceptarLegal({
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      {textos.map((t) => (
-        <div key={t.id} className="rounded-2xl border border-border-subtle bg-surface p-4">
-          <p className="mb-2 text-[13px] font-bold text-text">
-            {t.titulo} <span className="text-text-faint">· versión {t.version}</span>
-          </p>
-          <div className="mb-3 max-h-52 overflow-y-auto rounded-xl bg-surface-2 p-3 text-[12px] leading-relaxed text-text-muted">
-            {t.contenido.split("\n\n").filter(Boolean).map((p, i) => (
-              <p key={i} className="mb-2">
+    <div className="flex flex-col gap-4">
+      {textos.map((t, i) => (
+        <section key={t.id} className="border-2 border-border bg-bg">
+          <div className="border-b-2 border-border p-4">
+            <Num>{String(i + 1).padStart(2, "0")} / Documento</Num>
+            <h2 className="section mt-1 text-[15px] leading-5 break-words">{t.titulo}</h2>
+            <Meta className="mt-1 block">Versión {t.version}</Meta>
+          </div>
+          <div className="max-h-52 overflow-y-auto bg-surface p-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {t.contenido.split("\n\n").filter(Boolean).map((p, j) => (
+              <p key={j} className="body-sm mb-2 text-text-muted break-words">
                 {p}
               </p>
             ))}
           </div>
-          <label className="flex items-start gap-2.5 text-[12.5px] text-text-muted">
-            <input type="checkbox" checked={marcados.has(t.id)} onChange={() => toggle(t.id)} className="mt-0.5 size-4 shrink-0 accent-accent" />
-            Leí y acepto {t.titulo.toLowerCase()}.
+          <label className="flex cursor-pointer items-start gap-3 border-t-2 border-border p-4 has-[:focus-visible]:outline-3 has-[:focus-visible]:-outline-offset-3 has-[:focus-visible]:outline-[var(--focus)]">
+            <input type="checkbox" checked={marcados.has(t.id)} onChange={() => toggle(t.id)} className="peer sr-only" />
+            <span
+              aria-hidden
+              className="grid size-6 flex-none place-items-center border-2 border-border text-ink peer-checked:bg-signal [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
+            >
+              <Check className="size-4" />
+            </span>
+            <span className="body-sm">Leí y acepto {t.titulo.toLowerCase()}.</span>
           </label>
-        </div>
+        </section>
       ))}
 
-      {error ? <p className="text-[12.5px] font-semibold text-danger">{error}</p> : null}
+      {error ? <ErrorForm>{error}</ErrorForm> : null}
 
-      <Button size="lg" disabled={!todosMarcados} loading={aceptando} onClick={confirmar}>
-        Aceptar y continuar
+      <Button size="lg" disabled={!todosMarcados} loading={aceptando} onClick={confirmar} className="w-full justify-between">
+        <span>Aceptar y continuar</span>
+        <ArrowUpRight className="size-[18px]" aria-hidden />
       </Button>
     </div>
   );

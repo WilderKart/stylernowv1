@@ -125,7 +125,7 @@ function FormularioCampana({ negocioId, onCreada }: { negocioId: string; onCread
               key={f}
               type="button"
               onClick={() => setFormato(f)}
-              className={`rounded-full border px-3 py-1.5 text-[12px] font-bold ${formato === f ? "border-accent bg-accent-soft text-accent" : "border-border text-text-muted"}`}
+              className={`rounded-none border px-3 py-1.5 text-[12px] font-bold ${formato === f ? "border-accent bg-accent-soft text-accent" : "border-border text-text-muted"}`}
             >
               {FORMATO_ETIQUETA[f]}
             </button>
@@ -142,7 +142,7 @@ function FormularioCampana({ negocioId, onCreada }: { negocioId: string; onCread
                 key={u}
                 type="button"
                 onClick={() => setUnidadCobro(u)}
-                className={`rounded-full border px-3 py-1.5 text-[12px] font-bold ${unidadCobro === u ? "border-accent bg-accent-soft text-accent" : "border-border text-text-muted"}`}
+                className={`rounded-none border px-3 py-1.5 text-[12px] font-bold ${unidadCobro === u ? "border-accent bg-accent-soft text-accent" : "border-border text-text-muted"}`}
               >
                 {u === "CPC" ? "Por clic" : "Por mil vistas"}
               </button>

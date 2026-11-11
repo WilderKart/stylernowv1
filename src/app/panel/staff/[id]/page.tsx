@@ -1,7 +1,7 @@
 import { BarraSuperior } from "@/components/layout/header";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { createClient } from "@/lib/supabase/server";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { obtenerHistorialStaff } from "../actions";
 import { DetalleStaff } from "./detalle-staff";
 
@@ -9,10 +9,7 @@ export const metadata = { title: "Detalle de Staff" };
 
 export default async function StaffDetallePage(props: PageProps<"/panel/staff/[id]">) {
   const { id } = await props.params;
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect(`/login?next=/panel/staff/${id}`);
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
-  if (contexto.rol === "STAFF") redirect("/panel");
+  const contexto = await verificarAccesoPanel(["BARBERIA", "GUARDIAN"], `/panel/staff/${id}`);
 
   const supabase = await createClient();
 

@@ -31,16 +31,11 @@ export function BotonCompartir({ nombre, slug }: { nombre: string; slug: string 
   }
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label="Compartir"
-      className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border-subtle bg-surface text-text-muted"
-    >
+    <button type="button" onClick={onClick} aria-label="Compartir" className="sn-fav !right-12">
       {copiado ? (
-        <span className="text-[9.5px] font-bold uppercase text-success">Copiado</span>
+        <span className="font-mono text-[10px] font-bold uppercase">Copiado</span>
       ) : (
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true">
           <circle cx="18" cy="5" r="2.5" />
           <circle cx="6" cy="12" r="2.5" />
           <circle cx="18" cy="19" r="2.5" />

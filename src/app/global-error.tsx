@@ -6,7 +6,9 @@ import { useEffect } from "react";
  * Reemplaza el layout raíz completo (incluido <html>/<body>) si el error
  * ocurre en el propio RootLayout — el único caso que error.tsx no cubre.
  * Deliberadamente sin depender de Tailwind ni de componentes de la app: si
- * algo ahí es lo que rompió, esta pantalla tiene que sobrevivir igual.
+ * algo ahí es lo que rompió, esta pantalla tiene que sobrevivir igual. Por eso
+ * replica el sistema brutalista (esquinas 0, sombra dura, mono/condensado) con
+ * estilos en línea y colores fijos del tema claro del prototipo.
  */
 export default function GlobalError({
   error,
@@ -19,48 +21,78 @@ export default function GlobalError({
     console.error("[global-error]", error);
   }, [error]);
 
+  const mono = "'Space Mono', ui-monospace, Menlo, Consolas, monospace";
   return (
     <html lang="es">
       <body
         style={{
           margin: 0,
           minHeight: "100dvh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 16,
-          padding: 24,
-          textAlign: "center",
-          background: "#0a0a0a",
-          color: "#f5f1ea",
+          background: "#FFFFFF",
+          color: "#0A0A0A",
           fontFamily: "system-ui, -apple-system, sans-serif",
         }}
       >
-        <h1 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>StylerNow no pudo cargar</h1>
-        <p style={{ fontSize: 14, color: "#9c9690", maxWidth: 320, margin: 0 }}>
-          Algo falló al iniciar la aplicación. Reintentá — si persiste, contanos.
-        </p>
-        {error.digest ? (
-          <p style={{ fontSize: 11, color: "#6b6862", fontFamily: "monospace" }}>
-            Ref: {error.digest}
-          </p>
-        ) : null}
-        <button
-          onClick={reset}
+        <main
           style={{
-            background: "#e8a23c",
-            color: "#0a0a0a",
-            border: "none",
-            borderRadius: 12,
-            padding: "12px 24px",
-            fontSize: 14,
-            fontWeight: 700,
-            cursor: "pointer",
+            boxSizing: "border-box",
+            width: "100%",
+            maxWidth: 512,
+            minHeight: "100dvh",
+            margin: "0 auto",
+            padding: 16,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            gap: 12,
           }}
         >
-          REINTENTAR
-        </button>
+          <span style={{ font: `700 12px/16px ${mono}`, letterSpacing: 0.72, textTransform: "uppercase" }}>00 / Error</span>
+          <h1
+            style={{
+              margin: 0,
+              fontFamily: "Archivo, Impact, 'Arial Narrow', sans-serif",
+              fontStretch: "condensed",
+              fontWeight: 900,
+              fontSize: "clamp(36px, 13vw, 56px)",
+              lineHeight: 0.9,
+              textTransform: "uppercase",
+              overflowWrap: "anywhere",
+            }}
+          >
+            StylerNow
+            <br />
+            no pudo <span style={{ background: "#FF4D00", padding: "0 4px" }}>cargar.</span>
+          </h1>
+          <p style={{ margin: 0, fontSize: 15, lineHeight: "22px", color: "#525252" }}>
+            Algo falló al iniciar la aplicación. Reintentá — si persiste, contanos.
+          </p>
+          {error.digest ? (
+            <span style={{ font: `400 11px/14px ${mono}`, letterSpacing: 0.66, textTransform: "uppercase", color: "#525252" }}>
+              Código: {error.digest}
+            </span>
+          ) : null}
+          <button
+            onClick={reset}
+            style={{
+              minHeight: 48,
+              width: "100%",
+              padding: "0 16px",
+              border: "2px solid #0A0A0A",
+              borderRadius: 0,
+              background: "#FF4D00",
+              color: "#0A0A0A",
+              boxShadow: "4px 4px 0 0 #0A0A0A",
+              font: `700 12px/16px ${mono}`,
+              letterSpacing: 0.72,
+              textTransform: "uppercase",
+              cursor: "pointer",
+              textAlign: "left",
+            }}
+          >
+            Reintentar
+          </button>
+        </main>
       </body>
     </html>
   );

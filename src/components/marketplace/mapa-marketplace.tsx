@@ -1,5 +1,6 @@
 "use client";
 
+import { Photo, Status } from "@/components/brutal";
 import { formatCOP } from "@/lib/utils";
 import {
   AttributionControl,
@@ -7,11 +8,12 @@ import {
   Map as MapLibreMap,
   Marker,
   NavigationControl,
-  Popup,
   type StyleSpecification,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { useEffect, useRef } from "react";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { fotoNegocio } from "./foto-respaldo";
 import type { NegocioTarjeta } from "./negocio-card";
 
 // Estilo mínimo con tiles crudos de OpenStreetMap — decisión ya tomada
@@ -41,6 +43,8 @@ export function MapaMarketplace({
 }) {
   const contenedorRef = useRef<HTMLDivElement>(null);
   const mapaRef = useRef<MapLibreMap | null>(null);
+  const [seleccionadoId, setSeleccionadoId] = useState<string | null>(null);
+  const seleccionado = negocios.find((n) => n.id === seleccionadoId) ?? null;
 
   useEffect(() => {
     if (!contenedorRef.current || mapaRef.current) return;
@@ -64,20 +68,15 @@ export function MapaMarketplace({
     mapaRef.current = mapa;
 
     if (centroInicial) {
-      new Marker({ color: "#e8a23c" }).setLngLat([centroInicial.lng, centroInicial.lat]).addTo(mapa);
+      new Marker({ element: crearPinYo() }).setLngLat([centroInicial.lng, centroInicial.lat]).addTo(mapa);
     }
 
     const limites = new LngLatBounds();
     if (centroInicial) limites.extend([centroInicial.lng, centroInicial.lat]);
 
     for (const n of conUbicacion) {
-      const popup = new Popup({ offset: 24, closeButton: false }).setHTML(
-        `<a href="/negocio/${n.slug}" style="display:block;min-width:160px;text-decoration:none;color:#0a0a0a">
-           <strong style="font-size:13px">${escapeHtml(n.nombre)}</strong><br/>
-           <span style="font-size:12px">${n.calificacion.toFixed(1)}★ (${n.total_resenas})${n.precio_desde !== null ? " · desde " + formatCOP(n.precio_desde) : ""}</span>
-         </a>`
-      );
-      new Marker({ color: "#1b1815" }).setLngLat([n.sede_longitud, n.sede_latitud]).setPopup(popup).addTo(mapa);
+      const pin = crearPin(n, () => setSeleccionadoId(n.id));
+      new Marker({ element: pin, anchor: "bottom-left", offset: [-11, 0] }).setLngLat([n.sede_longitud, n.sede_latitud]).addTo(mapa);
       limites.extend([n.sede_longitud, n.sede_latitud]);
     }
 
@@ -95,15 +94,56 @@ export function MapaMarketplace({
   const sinUbicacion = negocios.length > 0 && negocios.every((n) => n.sede_latitud == null || n.sede_longitud == null);
 
   return (
-    <div className="relative h-[420px] w-full overflow-hidden rounded-2xl border border-border-subtle">
-      <div ref={contenedorRef} className="size-full" />
-      {sinUbicacion ? (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-bg/80 px-6 text-center">
-          <p className="text-[12.5px] text-text-faint">Ninguno de estos negocios registró su ubicación todavía.</p>
+    <div className="flex w-full flex-col">
+      <div className="sn-map relative !h-[60dvh] !min-h-[320px] w-full">
+        <div ref={contenedorRef} className="size-full" />
+        {sinUbicacion ? (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-bg/90 px-6 text-center">
+            <p className="sn-label">Ninguno de estos negocios registró su ubicación todavía.</p>
+          </div>
+        ) : null}
+      </div>
+      {seleccionado ? (
+        <Link
+          href={seleccionado.patrocinado && seleccionado.campana_id ? `/negocio/${seleccionado.slug}?campana_id=${seleccionado.campana_id}` : `/negocio/${seleccionado.slug}`}
+          className="grid min-h-[110px] grid-cols-[110px_minmax(0,1fr)] border-2 border-t-0 border-border text-text no-underline"
+        >
+          <Photo src={fotoNegocio(seleccionado.id, seleccionado.logo_url)} className="border-r-2 border-border" />
+          <div className="flex min-w-0 flex-col gap-1.5 p-3">
+            <span className="sn-meta truncate">{seleccionado.ciudad}</span>
+            <span className="poster-4 break-words">{seleccionado.nombre}</span>
+            <span className="sn-price">
+              {seleccionado.total_resenas > 0 ? `★ ${seleccionado.calificacion.toFixed(1).replace(".", ",")}` : "NUEVO"}
+              {seleccionado.precio_desde !== null ? ` · Desde ${formatCOP(seleccionado.precio_desde)}` : ""} ↗
+            </span>
+          </div>
+        </Link>
+      ) : (
+        <div className="border-2 border-t-0 border-border p-3">
+          <Status tone="info">Tocá un pin para ver el negocio</Status>
         </div>
-      ) : null}
+      )}
     </div>
   );
+}
+
+/** Pin cuadrado del sistema (.sn-pin) como elemento DOM del Marker de MapLibre. */
+function crearPin(n: NegocioTarjeta, alSeleccionar: () => void) {
+  const el = document.createElement("button");
+  el.type = "button";
+  el.setAttribute("aria-label", n.nombre);
+  el.style.cssText = "background:none;border:0;padding:0;cursor:pointer";
+  const etiqueta = n.total_resenas > 0 ? "★ " + n.calificacion.toFixed(1).replace(".", ",") : "NUEVO";
+  el.innerHTML = `<span class="sn-pin ${n.patrocinado ? "sn-pin--signal" : ""}" style="position:relative;transform:none;animation:none"><span class="sn-pin__head">${escapeHtml(etiqueta)}</span><span class="sn-pin__stem"></span></span>`;
+  el.addEventListener("click", alSeleccionar);
+  return el;
+}
+
+function crearPinYo() {
+  const el = document.createElement("span");
+  el.className = "sn-pin sn-pin--me";
+  el.style.cssText = "position:relative;transform:none;display:block";
+  return el;
 }
 
 function escapeHtml(texto: string) {

@@ -1,7 +1,9 @@
 "use client";
 
+import { ErrorAviso, Fila } from "@/app/lealtad/ui-cliente";
 import { Button } from "@/components/ui/button";
 import { formatCOP } from "@/lib/utils";
+import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { cancelarReservaAction } from "./actions";
@@ -39,34 +41,40 @@ export function BotonCancelar({
 
   if (!confirmando) {
     return (
-      <Button variant="ghost" size="sm" className="w-full" onClick={() => setConfirmando(true)}>
-        Cancelar reserva
-      </Button>
+      <Fila
+        icono={<X aria-hidden className="size-5" />}
+        titulo="Cancelar cita"
+        meta={
+          reembolsoPct === 0
+            ? "Sin reembolso de la seña en este momento"
+            : `Te devolvemos ${formatCOP(reembolsoEstimado)} si cancelas ahora`
+        }
+        peligro
+        onClick={() => setConfirmando(true)}
+      />
     );
   }
 
   return (
-    <div className="rounded-2xl border border-danger/40 bg-danger-soft p-4">
-      <p className="text-[13px] font-semibold text-text">¿Cancelamos tu turno?</p>
-      <p className="mt-1 text-[12.5px] leading-relaxed text-text-muted">
+    <div className="m-4 border-2 border-danger p-4 shadow-hard">
+      <h3 className="section">¿Cancelamos tu turno?</h3>
+      <p className="body-sm mt-2 break-words">
         {reembolsoPct === 0
           ? "Estás dentro de la ventana sin reembolso: la seña queda para el negocio por el espacio reservado."
           : `Te devolvemos ${formatCOP(reembolsoEstimado)} (${reembolsoPct}% de la seña) al mismo medio de pago.`}
       </p>
 
-      {error ? <p className="mt-2 text-[12px] font-semibold text-danger">{error}</p> : null}
+      {error ? (
+        <div className="mt-3">
+          <ErrorAviso>{error}</ErrorAviso>
+        </div>
+      ) : null}
 
-      <div className="mt-3 flex gap-2">
-        <Button
-          variant="secondary"
-          size="sm"
-          className="flex-1"
-          onClick={() => setConfirmando(false)}
-          disabled={cargando}
-        >
+      <div className="mt-4 flex flex-wrap gap-3">
+        <Button variant="secondary" className="min-w-0 flex-1" onClick={() => setConfirmando(false)} disabled={cargando}>
           No, mantener
         </Button>
-        <Button variant="danger" size="sm" className="flex-1" loading={cargando} onClick={cancelar}>
+        <Button variant="danger" className="min-w-0 flex-1" loading={cargando} onClick={cancelar}>
           Sí, cancelar
         </Button>
       </div>

@@ -1,16 +1,12 @@
 import { BarraSuperior } from "@/components/layout/header";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
-import { redirect } from "next/navigation";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { obtenerCierreCaja } from "../actions";
 import { VistaCierreCaja } from "./vista-cierre-caja";
 
 export const metadata = { title: "Cierre de caja" };
 
 export default async function CierreCajaPage() {
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect("/login?next=/panel/pos/caja");
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
-  if (contexto.rol === "STAFF") redirect("/panel");
+  const contexto = await verificarAccesoPanel(["BARBERIA", "GUARDIAN"], "/panel/pos/caja");
 
   const negocioId = contexto.negocioId!;
   const sedeId = contexto.rol === "GUARDIAN" ? contexto.sedeId : null;

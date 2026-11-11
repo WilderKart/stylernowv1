@@ -85,7 +85,7 @@ export function FormularioServicio({
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4 rounded-2xl border border-border-subtle bg-surface p-5">
+    <form onSubmit={onSubmit} className="flex flex-col gap-4 border-2 border-line bg-bg p-4">
       <Input label="Nombre" required value={nombre} onChange={(e) => setNombre(e.target.value)} />
       <Input
         label="Descripción (opcional)"
@@ -114,7 +114,7 @@ export function FormularioServicio({
           />
         ) : (
           <div>
-            <label className="mb-1.5 block text-[12px] font-semibold text-text-muted">Precio</label>
+            <label className="sn-label mb-1.5 block">Precio</label>
             <p className="flex h-12 items-center text-[13.5px] text-text-faint">
               Solo la Barbería puede cambiarlo
             </p>
@@ -123,15 +123,15 @@ export function FormularioServicio({
       </div>
 
       <div>
-        <label className="mb-1.5 block text-[12px] font-semibold text-text-muted">Categoría de puntaje</label>
+        <label className="sn-label mb-1.5 block">Categoría de puntaje</label>
         <div className="flex flex-col gap-1.5">
           {CATEGORIAS.map((c) => (
             <button
               key={c.valor}
               type="button"
               onClick={() => setCategoriaPuntaje(c.valor)}
-              className={`rounded-xl border px-3 py-2 text-left transition-colors ${
-                categoriaPuntaje === c.valor ? "border-accent bg-accent-soft" : "border-border"
+              className={`min-h-12 w-full border-2 px-3 py-2 text-left transition-colors ${
+                categoriaPuntaje === c.valor ? "border-ink bg-signal text-ink" : "border-border"
               }`}
             >
               <p className="text-[12.5px] font-semibold text-text">{c.etiqueta}</p>

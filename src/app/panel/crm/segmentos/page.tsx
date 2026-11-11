@@ -1,16 +1,12 @@
 import { BarraSuperior } from "@/components/layout/header";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
-import { redirect } from "next/navigation";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { listarEtiquetasNegocio } from "../actions";
 import { ConstructorSegmentos } from "./constructor-segmentos";
 
 export const metadata = { title: "Segmentos de Clientes" };
 
 export default async function SegmentosPage() {
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect("/login?next=/panel/crm/segmentos");
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
-  if (contexto.rol === "STAFF") redirect("/panel");
+  const contexto = await verificarAccesoPanel(["BARBERIA", "GUARDIAN"], "/panel/crm/segmentos");
 
   const negocioId = contexto.negocioId!;
   const resEtiquetas = await listarEtiquetasNegocio(negocioId);

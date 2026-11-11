@@ -156,9 +156,23 @@ export function VistaAiWorkspace({
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-display text-[13px] font-bold uppercase text-text">Historial de consumo</h2>
           {consumoInicial.length > 0 ? (
-            <button type="button" onClick={exportarConsumoCsv} className="text-[10.5px] font-bold uppercase text-accent">
-              Exportar CSV
-            </button>
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={exportarConsumoCsv} className="text-[10.5px] font-bold uppercase text-accent">
+                CSV
+              </button>
+              <a
+                href={`/api/ia/exportar?negocioId=${negocioId}&formato=excel`}
+                className="text-[10.5px] font-bold uppercase text-accent"
+              >
+                Excel
+              </a>
+              <a
+                href={`/api/ia/exportar?negocioId=${negocioId}&formato=pdf`}
+                className="text-[10.5px] font-bold uppercase text-accent"
+              >
+                PDF
+              </a>
+            </div>
           ) : null}
         </div>
         {consumoInicial.length === 0 ? (

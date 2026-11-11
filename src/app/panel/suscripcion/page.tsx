@@ -1,18 +1,14 @@
 import { PanelNav } from "@/components/panel/panel-nav";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
-import { redirect } from "next/navigation";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { obtenerCatalogoPlanes, obtenerMiSuscripcion } from "./actions";
 import { VistaSuscripcion } from "./vista-suscripcion";
 
 export const metadata = { title: "Mi Plan" };
 
 export default async function SuscripcionPage() {
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect("/login?next=/panel/suscripcion");
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
-  // 04_Subscriptions_Lifecycle.md, Permisos: solo la Barbería (dueña de la
+  // 04_Subscriptions_Lifecycle.md: solo la Barbería (dueña de la
   // suscripción) gestiona upgrade/downgrade/cancelación — Guardian/Staff no.
-  if (contexto.rol !== "BARBERIA") redirect("/panel");
+  const contexto = await verificarAccesoPanel(["BARBERIA"], "/panel/suscripcion");
 
   const negocioId = contexto.negocioId!;
   const [suscripcionRes, planesRes] = await Promise.all([

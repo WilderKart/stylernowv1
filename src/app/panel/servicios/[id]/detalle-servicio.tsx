@@ -92,7 +92,7 @@ export function DetalleServicio({
                   <button
                     type="button"
                     onClick={() => onAlternarStaff(s.staffId, !s.asignado)}
-                    className={`shrink-0 rounded-full px-3 py-1.5 text-[11.5px] font-bold ${
+                    className={`shrink-0 rounded-none px-3 py-1.5 text-[11.5px] font-bold ${
                       s.asignado ? "bg-accent-soft text-accent" : "border border-border text-text-muted"
                     }`}
                   >

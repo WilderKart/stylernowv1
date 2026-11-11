@@ -91,7 +91,7 @@ export function FormularioCombo({
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4 rounded-2xl border border-border-subtle bg-surface p-5">
+    <form onSubmit={onSubmit} className="flex flex-col gap-4 border-2 border-line bg-bg p-4">
       <Input label="Nombre del combo" required value={nombre} onChange={(e) => setNombre(e.target.value)} />
       <Input
         label="Descripción (opcional)"
@@ -100,7 +100,7 @@ export function FormularioCombo({
       />
 
       <div>
-        <label className="mb-1.5 block text-[12px] font-semibold text-text-muted">
+        <label className="sn-label mb-1.5 block">
           Servicios incluidos (mínimo 2)
         </label>
         {servicios.length === 0 ? (
@@ -112,8 +112,8 @@ export function FormularioCombo({
                 <button
                   type="button"
                   onClick={() => alternar(s.id)}
-                  className={`flex w-full items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left transition-colors ${
-                    servicioIds.includes(s.id) ? "border-accent bg-accent-soft" : "border-border"
+                  className={`flex w-full items-center justify-between gap-2 min-h-12 w-full border-2 px-3 py-2 text-left transition-colors ${
+                    servicioIds.includes(s.id) ? "border-ink bg-signal text-ink" : "border-border"
                   }`}
                 >
                   <span className="text-[12.5px] font-semibold text-text">{s.nombre}</span>
@@ -133,8 +133,8 @@ export function FormularioCombo({
         </p>
       ) : null}
 
-      <label className="flex items-center gap-2 text-[12.5px] text-text-muted">
-        <input type="checkbox" checked={usarOverride} onChange={(e) => setUsarOverride(e.target.checked)} />
+      <label className="flex min-h-12 items-center gap-2 text-[12.5px] text-text-muted">
+        <input type="checkbox" className="size-5 shrink-0 accent-[var(--signal)]" checked={usarOverride} onChange={(e) => setUsarOverride(e.target.checked)} />
         Definir un precio/duración especial para el combo (en vez de sumar los servicios)
       </label>
 

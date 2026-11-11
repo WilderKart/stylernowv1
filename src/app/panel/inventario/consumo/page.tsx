@@ -1,5 +1,5 @@
 import { BarraSuperior } from "@/components/layout/header";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { listarConsumoPorServicio } from "../actions";
@@ -8,9 +8,7 @@ import { EditorConsumo } from "./editor-consumo";
 export const metadata = { title: "Consumo por Servicio" };
 
 export default async function ConsumoPage() {
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect("/login?next=/panel/inventario/consumo");
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
+  const contexto = await verificarAccesoPanel(["BARBERIA", "GUARDIAN"], "/panel/inventario/consumo");
   // "Configurar reglas" es exclusivo de Barbería (03-Business-Rules/01_Roles.md).
   if (contexto.rol !== "BARBERIA") redirect("/panel/inventario");
 

@@ -1,6 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { Chip as ChipBase, ChipGroup } from "@/components/brutal";
+
+import { Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
@@ -21,32 +23,6 @@ const ORDENES = [
   { valor: "PRECIO", etiqueta: "Precio" },
   { valor: "RECIENTE", etiqueta: "Nuevos" },
 ];
-
-function Chip({
-  activo,
-  children,
-  onClick,
-}: {
-  activo: boolean;
-  children: React.ReactNode;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={activo}
-      className={cn(
-        "shrink-0 rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition-colors",
-        activo
-          ? "border-accent bg-accent-soft text-accent"
-          : "border-border text-text-muted hover:border-accent/40 hover:text-text"
-      )}
-    >
-      {children}
-    </button>
-  );
-}
 
 export function Filtros({ ciudades }: { ciudades: string[] }) {
   const router = useRouter();
@@ -118,34 +94,24 @@ export function Filtros({ ciudades }: { ciudades: string[] }) {
 
   return (
     <div className="mb-6 flex flex-col gap-3">
-      <div className="flex h-[50px] items-center gap-2.5 rounded-2xl border border-border bg-surface px-4 focus-within:border-accent/60">
-        <svg
-          viewBox="0 0 24 24"
-          width="17"
-          height="17"
-          fill="none"
-          stroke="#6b6862"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <circle cx="11" cy="11" r="6.5" />
-          <path d="M20 20l-4.3-4.3" />
-        </svg>
+      <label className="sn-input focus-within:shadow-hard">
+        <Search aria-hidden className="size-5 shrink-0" strokeWidth={2} strokeLinecap="square" strokeLinejoin="miter" />
         <input
           type="search"
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
-          placeholder="Busca tu barbería, salón o spa..."
+          placeholder="Barbería, uñas, estética"
           aria-label="Buscar negocios"
-          className="w-full bg-transparent text-[13.5px] text-text outline-none placeholder:text-text-faint"
         />
-      </div>
+      </label>
 
-      {errorUbicacion ? <p className="text-[11.5px] text-danger">{errorUbicacion}</p> : null}
+      {errorUbicacion ? (
+        <p role="alert" className="sn-meta !text-danger">
+          {errorUbicacion}
+        </p>
+      ) : null}
 
-      <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0">
+      <ChipGroup aria-label="Filtros" className="!pb-0">
         <Chip activo={cercaDeMi} onClick={alternarCercaDeMi}>
           {buscandoUbicacion ? "Ubicándote..." : "Cerca de mí"}
         </Chip>
@@ -161,6 +127,9 @@ export function Filtros({ ciudades }: { ciudades: string[] }) {
             {o.etiqueta}
           </Chip>
         ))}
+      </ChipGroup>
+
+      <ChipGroup aria-label="Categorías" className="!pb-0">
         {CATEGORIAS.map((c) => (
           <Chip
             key={c.valor}
@@ -170,10 +139,10 @@ export function Filtros({ ciudades }: { ciudades: string[] }) {
             {c.etiqueta}
           </Chip>
         ))}
-      </div>
+      </ChipGroup>
 
       {ciudades.length > 1 && !cercaDeMi ? (
-        <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0">
+        <ChipGroup aria-label="Ciudades" className="!pb-0">
           <Chip activo={!ciudad} onClick={() => aplicar({ ciudad: null })}>
             Todas las ciudades
           </Chip>
@@ -182,8 +151,16 @@ export function Filtros({ ciudades }: { ciudades: string[] }) {
               {c}
             </Chip>
           ))}
-        </div>
+        </ChipGroup>
       ) : null}
     </div>
+  );
+}
+
+function Chip({ activo, children, onClick }: { activo: boolean; children: React.ReactNode; onClick: () => void }) {
+  return (
+    <ChipBase selected={activo} onClick={onClick} className="!min-h-12 max-w-full !whitespace-normal">
+      {children}
+    </ChipBase>
   );
 }
