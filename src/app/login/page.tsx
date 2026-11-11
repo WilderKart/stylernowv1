@@ -1,4 +1,5 @@
 import { destinoSeguro } from "@/lib/auth/destino-seguro";
+import { obtenerPreferencias } from "@/lib/cliente/preferencias";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { FormularioLogin } from "./formulario";
@@ -17,7 +18,14 @@ export default async function LoginPage(props: PageProps<"/login">) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (user) redirect(siguiente);
+  if (user) {
+    // C17: sesión activa pero registro sin completar (sin país) → se muestra el paso de registro.
+    const prefs = await obtenerPreferencias();
+    if (prefs.ok && prefs.data.pais === null) {
+      return <FormularioLogin siguiente={siguiente} registroPendiente emailSesion={user.email ?? ""} />;
+    }
+    redirect(siguiente);
+  }
 
   return <FormularioLogin siguiente={siguiente} />;
 }

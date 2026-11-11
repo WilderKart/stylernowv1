@@ -2,7 +2,23 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { Avatar } from "@/components/brutal";
 import { Fila, Filas, Pantalla, Sec, Top } from "@/app/lealtad/ui-cliente";
 import { formatCOP } from "@/lib/utils";
-import { ArrowUpRight, CalendarDays, Gift, Star, Ticket } from "lucide-react";
+import {
+  ArrowUpRight,
+  Bell,
+  CalendarDays,
+  Camera,
+  CircleHelp,
+  Gift,
+  Globe,
+  MapPin,
+  Percent,
+  Shield,
+  Star,
+  Ticket,
+  UserCog,
+  UserPlus,
+  Wallet,
+} from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -95,7 +111,21 @@ export default async function PerfilPage(props: PageProps<"/perfil">) {
         <Fila icono={<Gift aria-hidden className="size-5" />} titulo="Gift cards" meta="Compra, regala y consulta" href="/gift-cards" />
       </Filas>
 
-      <Sec>02 / Cuenta</Sec>
+      <Sec>02 / Ajustes</Sec>
+      <Filas>
+        <Fila icono={<Bell aria-hidden className="size-5" />} titulo="Notificaciones" meta="Avisos de tus citas y novedades" href="/notificaciones" />
+        <Fila icono={<Camera aria-hidden className="size-5" />} titulo="Mi Look" meta="Tus fotos de antes y después" href="/mi-look" />
+        <Fila icono={<Wallet aria-hidden className="size-5" />} titulo="Pagos y saldo" meta="Historial y devolución de saldo" href="/pagos" />
+        <Fila icono={<UserPlus aria-hidden className="size-5" />} titulo="Referidos" meta="Invita y gana saldo" href="/referidos" />
+        <Fila icono={<Percent aria-hidden className="size-5" />} titulo="Ofertas" meta="Promociones cerca de ti" href="/ofertas" />
+        <Fila icono={<Globe aria-hidden className="size-5" />} titulo="Idioma y región" meta="País, idioma y moneda" href="/ajustes/idioma-region" />
+        <Fila icono={<MapPin aria-hidden className="size-5" />} titulo="Permisos" meta="Ubicación, notificaciones y más" href="/ajustes/permisos" />
+        <Fila icono={<Shield aria-hidden className="size-5" />} titulo="Privacidad" meta="Tus datos y consentimientos" href="/privacidad" />
+        <Fila icono={<CircleHelp aria-hidden className="size-5" />} titulo="Ayuda" meta="Preguntas frecuentes y soporte" href="/ayuda" />
+        <Fila icono={<UserCog aria-hidden className="size-5" />} titulo="Cuenta" meta="Descargar o eliminar tu cuenta" href="/cuenta" />
+      </Filas>
+
+      <Sec>03 / Tus datos</Sec>
       <div className="flex flex-col gap-4 px-4 pb-6">
         <CambiarContrasena passwordEstablecida={perfil?.password_establecida ?? false} />
 

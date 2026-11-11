@@ -5,7 +5,7 @@ import { MapaMarketplaceLazy } from "@/components/marketplace/mapa-marketplace-l
 import { NegocioCard } from "@/components/marketplace/negocio-card";
 import { Sello } from "@/components/marketplace/sello";
 import { EmptyState, Marquee, Num } from "@/components/brutal";
-import { hoyISO } from "@/lib/formato";
+import { buscarNegociosFiltrado } from "@/lib/cliente/profesionales";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -41,18 +41,51 @@ export default async function HomePage(props: PageProps<"/">) {
   const lng = primerValor(params.lng);
   const vista = primerValor(params.vista) === "mapa" ? "mapa" : "lista";
 
+  const radio = Number(primerValor(params.radio));
+  const calif = Number(primerValor(params.calif));
+  const latN = lat ? Number(lat) : NaN;
+  const lngN = lng ? Number(lng) : NaN;
+  const conCoords = Number.isFinite(latN) && Number.isFinite(lngN);
+  const radioKm = conCoords && Number.isFinite(radio) && radio > 0 ? radio : undefined;
+  const califMin = Number.isFinite(calif) && calif > 0 ? calif : undefined;
+  // Filtros avanzados (distancia, calificación mínima, abierto hoy) -> envoltorio con disponibilidad real.
+  const avanzado = soloHoy || radioKm !== undefined || califMin !== undefined;
+  const ordenValido = (["CALIFICACION", "PRECIO", "RECIENTE"] as const).find((o) => o === orden) ?? "RELEVANCIA";
+
+  const busqueda = async () => {
+    if (avanzado) {
+      const r = await buscarNegociosFiltrado({
+        texto,
+        ciudad,
+        categoria,
+        orden: ordenValido,
+        lat: conCoords ? latN : undefined,
+        lng: conCoords ? lngN : undefined,
+        radioKm,
+        califMin,
+        abiertoHoy: soloHoy,
+        limite: 24,
+      });
+      return r.ok
+        ? { data: r.data.map((n) => ({ ...n, ciudad: n.ciudad ?? "" })), error: null }
+        : { data: null, error: { message: r.error } };
+    }
+    const r = await supabase.rpc("marketplace_buscar", {
+      p_texto: texto,
+      p_ciudad: ciudad,
+      p_categoria: categoria,
+      p_orden: orden ?? "RELEVANCIA",
+      p_limite: 24,
+      p_lat: lat ? Number(lat) : undefined,
+      p_lng: lng ? Number(lng) : undefined,
+    });
+    return { data: r.data, error: r.error };
+  };
+
   const [{ data: user }, { data: resultados, error }, { data: banners }] =
     await Promise.all([
       supabase.auth.getUser().then((r) => ({ data: r.data.user })),
-      supabase.rpc("marketplace_buscar", {
-        p_texto: texto,
-        p_ciudad: ciudad,
-        p_categoria: categoria,
-        p_orden: orden ?? "RELEVANCIA",
-        p_limite: 24,
-        p_lat: lat ? Number(lat) : undefined,
-        p_lng: lng ? Number(lng) : undefined,
-      }),
+      busqueda(),
       // banner_home (Fase 3.2): RLS pública solo devuelve banners activos y
       // vigentes hoy — sin filtrar nada más acá.
       supabase.from("banner_home").select("id, imagen_url, texto, url_destino").order("orden"),
@@ -66,18 +99,10 @@ export default async function HomePage(props: PageProps<"/">) {
     void Promise.all(campanasEnPantalla.map((id) => supabase.rpc("registrar_impresion_patrocinada", { p_campana_id: id })));
   }
 
-  // "Disponible hoy" se aplica sobre la página ya traída: `proxima_disponibilidad`
-  // se calcula por fila y no es un criterio indexable. Con catálogos grandes esto
-  // pasa al Score del Marketplace (08-Growth-Monetization/01_Marketplace_Algorithm.md).
-  const negocios = soloHoy
-    ? (resultados ?? []).filter(
-        (n) =>
-          n.proxima_disponibilidad !== null &&
-          n.proxima_disponibilidad.slice(0, 10) <= hoyISO()
-      )
-    : (resultados ?? []);
+  // "Abierto hoy" lo resuelve la BD con disponibilidad real (marketplace_buscar_filtrado).
+  const negocios = resultados ?? [];
 
-  const hayFiltros = Boolean(texto || ciudad || categoria || soloHoy);
+  const hayFiltros = Boolean(texto || ciudad || categoria || avanzado);
 
   function urlConVista(nuevaVista: "lista" | "mapa") {
     const siguiente = new URLSearchParams();

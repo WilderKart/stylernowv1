@@ -2,7 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowUpRight, Check } from "lucide-react";
+import { Casilla } from "@/components/privacidad/casilla";
+import { ArrowUpRight, Check, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
@@ -15,6 +16,7 @@ import {
   solicitarRecuperacion,
   verificarCodigo,
 } from "./actions";
+import { crearCuentaRegistro, necesitaRegistro } from "./registro-actions";
 
 /**
  * Clave de sessionStorage para sobrevivir al paso "codigo" si el usuario cambia de
@@ -25,12 +27,27 @@ import {
  */
 const CLAVE_PASO = "stylernow_login_paso";
 
-type Paso = "email" | "password" | "codigo" | "crear-password" | "recovery-enviado";
+type Paso = "email" | "password" | "codigo" | "registro" | "crear-password" | "recovery-enviado";
 
-export function FormularioLogin({ siguiente }: { siguiente: string }) {
+type PostVerificacion = { faltaContrasena: boolean; faltaTelefono: boolean };
+
+export function FormularioLogin({
+  siguiente,
+  registroPendiente,
+  emailSesion,
+}: {
+  siguiente: string;
+  /** Sesión ya activa pero sin registro completado (C17): abre directo el paso de registro. */
+  registroPendiente?: boolean;
+  emailSesion?: string;
+}) {
   const router = useRouter();
-  const [step, setStep] = useState<Paso>("email");
-  const [email, setEmail] = useState("");
+  const [step, setStep] = useState<Paso>(registroPendiente ? "registro" : "email");
+  const [email, setEmail] = useState(emailSesion ?? "");
+  const [nombre, setNombre] = useState("");
+  const [pais, setPais] = useState("CO");
+  const [marketing, setMarketing] = useState(false);
+  const [post, setPost] = useState<PostVerificacion>({ faltaContrasena: false, faltaTelefono: false });
   const [password, setPassword] = useState("");
   const [codigo, setCodigo] = useState("");
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
@@ -41,6 +58,7 @@ export function FormularioLogin({ siguiente }: { siguiente: string }) {
 
   useEffect(() => {
     iniciarHidratacion(() => {
+      if (registroPendiente) return;
       try {
         const guardado = sessionStorage.getItem(CLAVE_PASO);
         if (!guardado) return;
@@ -54,7 +72,7 @@ export function FormularioLogin({ siguiente }: { siguiente: string }) {
         // el usuario simplemente vuelve a pedir el código, no rompe nada.
       }
     });
-  }, [iniciarHidratacion]);
+  }, [iniciarHidratacion, registroPendiente]);
 
   function avanzarAPasoCodigo(correo: string) {
     setStep("codigo");
@@ -130,18 +148,45 @@ export function FormularioLogin({ siguiente }: { siguiente: string }) {
     }
     setPendienteLegales(res.pendientesLegales);
 
+    const siguientePaso: PostVerificacion = { faltaContrasena: res.faltaContrasena, faltaTelefono: res.faltaTelefono };
+    setPost(siguientePaso);
+
+    // C17: si es un usuario nuevo (perfil sin país), primero el paso de registro.
+    const reg = await necesitaRegistro();
+    if (reg.necesita) {
+      setStep("registro");
+      return;
+    }
+    continuarTrasVerificar(siguientePaso);
+  }
+
+  function continuarTrasVerificar(p: PostVerificacion) {
     // Auth_State_Machine.md: "OTP Verificado" exige "Crear contraseña" antes
     // de llegar a "Cuenta activa" — se pide una sola vez, la primera vez.
-    if (res.faltaContrasena) {
+    if (p.faltaContrasena) {
       setStep("crear-password");
       return;
     }
-    if (res.faltaTelefono) {
+    if (p.faltaTelefono) {
       router.replace("/perfil?bienvenida=1");
       router.refresh();
       return;
     }
     irADestinoFinal();
+  }
+
+  async function onCrearCuenta(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    const res = await crearCuentaRegistro(nombre, pais, marketing);
+    setLoading(false);
+    if (!res.ok) {
+      setError(res.error);
+      return;
+    }
+    // Si llegó con sesión previa (sin pasar por el OTP), los pendientes salen de la sesión: se continúa al destino.
+    continuarTrasVerificar(registroPendiente ? { faltaContrasena: false, faltaTelefono: false } : post);
   }
 
   async function onCrearContrasena(e: React.FormEvent) {
@@ -205,6 +250,13 @@ export function FormularioLogin({ siguiente }: { siguiente: string }) {
         tu <Hot>correo.</Hot>
       </>
     ),
+    registro: (
+      <>
+        Crea tu
+        <br />
+        <Hot>cuenta.</Hot>
+      </>
+    ),
     "crear-password": (
       <>
         Crea tu
@@ -224,13 +276,15 @@ export function FormularioLogin({ siguiente }: { siguiente: string }) {
     email: "04 / Ingreso",
     password: "04 / Ingreso",
     codigo: "05 / Verificación",
-    "crear-password": "06 / Contraseña",
-    "recovery-enviado": "07 / Recuperar",
+    registro: "06 / Registro",
+    "crear-password": "07 / Contraseña",
+    "recovery-enviado": "08 / Recuperar",
   };
   const intros: Record<Paso, string> = {
     email: "Ingresa tu correo para reservar tu próxima cita.",
     password: `Ingresá tu contraseña para ${email}.`,
     codigo: `Te enviamos un código a ${email}.`,
+    registro: "Un minuto. Así el negocio sabe a quién espera.",
     "crear-password": "Ya verificamos tu correo — creá una contraseña para tu cuenta.",
     "recovery-enviado": `Si ${email} tiene una cuenta, te enviamos un enlace para recuperarla.`,
   };
@@ -373,6 +427,65 @@ export function FormularioLogin({ siguiente }: { siguiente: string }) {
           <button type="button" onClick={volverAPasoEmail} className={claseEnlace}>
             Cambiar correo ↗
           </button>
+        </form>
+      ) : null}
+
+      {step === "registro" ? (
+        <form onSubmit={onCrearCuenta} className="flex flex-col gap-3.5">
+          <Input label="01 / Correo · Verificado" type="email" value={email} readOnly />
+          <Input
+            label="02 / Nombre y apellido"
+            autoComplete="name"
+            required
+            minLength={2}
+            maxLength={80}
+            placeholder="Como quieres que te llamen"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+          />
+          <div className="flex flex-col gap-2">
+            <label htmlFor="registro-pais" className="font-mono text-xs leading-4 font-bold tracking-[0.72px] text-text uppercase">
+              03 / País
+            </label>
+            <div className="relative">
+              <select
+                id="registro-pais"
+                value={pais}
+                onChange={(e) => setPais(e.target.value)}
+                className="min-h-12 w-full appearance-none border-2 border-border bg-bg py-0 pr-11 pl-3 text-[15px] text-text outline-none focus:shadow-hard"
+              >
+                <option value="CO">Colombia · CO</option>
+                <option value="US">Estados Unidos · US</option>
+                <option value="MX">México · MX</option>
+                <option value="ES">España · ES</option>
+              </select>
+              <ChevronDown aria-hidden className="pointer-events-none absolute top-3.5 right-3.5 size-5" />
+            </div>
+          </div>
+          <Casilla
+            caja
+            checked={marketing}
+            onChange={setMarketing}
+            etiqueta="OPCIONAL"
+            descripcion="Quiero recibir novedades y ofertas de StylerNow por correo. Me puedo dar de baja cuando quiera."
+            className="mt-1"
+          />
+          {error ? <ErrorForm>{error}</ErrorForm> : null}
+          <p className="body-sm text-text-muted">
+            Al crear tu cuenta aceptas los{" "}
+            <Link href="/legal/terminos" className="font-bold text-[var(--accent-text)] underline underline-offset-2">
+              Términos
+            </Link>{" "}
+            y la{" "}
+            <Link href="/legal/politica-de-datos" className="font-bold text-[var(--accent-text)] underline underline-offset-2">
+              Política de privacidad
+            </Link>
+            .
+          </p>
+          <Button type="submit" size="lg" loading={loading} disabled={nombre.trim().length < 2} className="w-full justify-between">
+            <span>Crear cuenta</span>
+            <ArrowUpRight className="size-[18px]" aria-hidden />
+          </Button>
         </form>
       ) : null}
 

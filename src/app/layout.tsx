@@ -1,5 +1,6 @@
 import { BloquearZoom } from "@/components/pwa/bloquear-zoom";
 import { PwaManager } from "@/components/pwa/pwa-manager";
+import { SistemaCliente } from "@/components/sistema";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata, Viewport } from "next";
 import { Archivo, Space_Mono } from "next/font/google";
@@ -61,6 +62,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {children}
         <BloquearZoom />
         <PwaManager />
+        <SistemaCliente />
         <Toaster />
       </body>
     </html>

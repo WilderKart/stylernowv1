@@ -1,27 +1,11 @@
 "use client";
 
 import { Chip as ChipBase, ChipGroup } from "@/components/brutal";
-import { CATEGORIAS_NEGOCIO } from "@/lib/categorias-negocio";
-
-import { Search } from "lucide-react";
+import { CATEGORIAS_FILTRO as CATEGORIAS } from "./categorias-filtro";
+import { HojaFiltros, type FiltrosAvanzados } from "./hoja-filtros";
+import { Search, SlidersHorizontal } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-
-/**
- * Chips de categoría. Los `valor` salen del registro único (src/lib/categorias-negocio.ts): antes "Uñas" y
- * "Estética" filtraban por valores que no existen y devolvían vacío. El resto de categorías
- * (estilismo, grooming…) se encuentran con el buscador de texto.
- */
-const VISIBLES: Record<string, string> = {
-  barberia: "Barbería",
-  salon: "Salón",
-  manicura: "Uñas",
-  lashista: "Pestañas",
-  tatuajes: "Tatuajes",
-  spa: "Spa",
-  masajes: "Masajes",
-};
-const CATEGORIAS = CATEGORIAS_NEGOCIO.filter((c) => c.valor in VISIBLES).map((c) => ({ valor: c.valor, etiqueta: VISIBLES[c.valor] }));
 
 const ORDENES = [
   { valor: "CALIFICACION", etiqueta: "Mejor calificadas" },
@@ -61,6 +45,10 @@ export function Filtros() {
   const categoria = params.get("categoria");
   const orden = params.get("orden");
   const soloHoy = params.get("hoy") === "1";
+  const radio = params.get("radio") ? Number(params.get("radio")) : null;
+  const calif = params.get("calif") ? Number(params.get("calif")) : null;
+  const [hojaAbierta, setHojaAbierta] = useState(false);
+  const cuentaAvanzados = (categoria ? 1 : 0) + (radio !== null ? 1 : 0) + (calif !== null ? 1 : 0) + (soloHoy ? 1 : 0);
   const cercaDeMi = params.get("lat") !== null && params.get("lng") !== null;
   const [buscandoUbicacion, setBuscandoUbicacion] = useState(false);
   const [errorUbicacion, setErrorUbicacion] = useState<string | null>(null);
@@ -96,6 +84,43 @@ export function Filtros() {
     );
   }
 
+  // «Aplicar» de la hoja: la distancia necesita la ubicación del cliente (se pide solo si hace falta).
+  function aplicarHoja(f: FiltrosAvanzados) {
+    const base = {
+      categoria: f.categoria,
+      calif: f.calif !== null ? String(f.calif) : null,
+      hoy: f.hoy ? "1" : null,
+    };
+    if (f.radio === null) {
+      aplicar({ ...base, radio: null });
+      setHojaAbierta(false);
+      return;
+    }
+    if (cercaDeMi) {
+      aplicar({ ...base, radio: String(f.radio) });
+      setHojaAbierta(false);
+      return;
+    }
+    if (!("geolocation" in navigator)) {
+      setErrorUbicacion("Tu navegador no soporta geolocalización.");
+      return;
+    }
+    setBuscandoUbicacion(true);
+    setErrorUbicacion(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setBuscandoUbicacion(false);
+        aplicar({ ...base, radio: String(f.radio), lat: String(pos.coords.latitude), lng: String(pos.coords.longitude), ciudad: null });
+        setHojaAbierta(false);
+      },
+      () => {
+        setBuscandoUbicacion(false);
+        setErrorUbicacion("No pudimos acceder a tu ubicación — revisa los permisos del navegador para filtrar por distancia.");
+      },
+      { timeout: 8000 }
+    );
+  }
+
   return (
     <div className="mb-6 flex flex-col gap-3">
       <label className="sn-input focus-within:shadow-hard">
@@ -119,8 +144,11 @@ export function Filtros() {
         <Chip activo={cercaDeMi} onClick={alternarCercaDeMi}>
           {buscandoUbicacion ? "Ubicándote..." : "Cerca de mí"}
         </Chip>
-        <Chip activo={soloHoy} onClick={() => aplicar({ hoy: soloHoy ? null : "1" })}>
-          Disponible hoy
+        <Chip activo={cuentaAvanzados > 0} onClick={() => setHojaAbierta(true)}>
+          <span className="inline-flex items-center gap-2">
+            <SlidersHorizontal aria-hidden className="size-4" strokeWidth={2} strokeLinecap="square" />
+            Filtros · {cuentaAvanzados}
+          </span>
         </Chip>
         {ORDENES.map((o) => (
           <Chip
@@ -144,6 +172,16 @@ export function Filtros() {
           </Chip>
         ))}
       </ChipGroup>
+
+      {hojaAbierta ? (
+        <HojaFiltros
+          inicial={{ categoria, radio: radio !== null && Number.isFinite(radio) ? radio : null, calif: calif !== null && Number.isFinite(calif) ? calif : null, hoy: soloHoy }}
+          tieneUbicacion={cercaDeMi}
+          coords={cercaDeMi ? { lat: Number(params.get("lat")), lng: Number(params.get("lng")) } : null}
+          onCerrar={() => setHojaAbierta(false)}
+          onAplicar={aplicarHoja}
+        />
+      ) : null}
     </div>
   );
 }
