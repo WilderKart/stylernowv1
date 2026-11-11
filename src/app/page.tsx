@@ -1,6 +1,7 @@
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
 import { Filtros } from "@/components/marketplace/filtros";
+import { SeleccionMapaProvider, ZonaFiltros } from "@/components/marketplace/seleccion-mapa";
 import { MapaMarketplaceLazy } from "@/components/marketplace/mapa-marketplace-lazy";
 import { NegocioCard } from "@/components/marketplace/negocio-card";
 import { Sello } from "@/components/marketplace/sello";
@@ -64,7 +65,7 @@ export default async function HomePage(props: PageProps<"/">) {
         radioKm,
         califMin,
         abiertoHoy: soloHoy,
-        limite: 24,
+        limite: vista === "mapa" ? 100 : 24,
       });
       return r.ok
         ? { data: r.data.map((n) => ({ ...n, ciudad: n.ciudad ?? "" })), error: null }
@@ -75,7 +76,7 @@ export default async function HomePage(props: PageProps<"/">) {
       p_ciudad: ciudad,
       p_categoria: categoria,
       p_orden: orden ?? "RELEVANCIA",
-      p_limite: 24,
+      p_limite: vista === "mapa" ? 100 : 24,
       p_lat: lat ? Number(lat) : undefined,
       p_lng: lng ? Number(lng) : undefined,
     });
@@ -122,6 +123,7 @@ export default async function HomePage(props: PageProps<"/">) {
     <div className="flex min-h-dvh flex-col bg-bg pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom))]">
       <Header autenticado={Boolean(user)} etiqueta="01 / Explorar" />
 
+      <SeleccionMapaProvider>
       <main className="mx-auto w-full max-w-5xl flex-1">
         {!hayFiltros && vista === "lista" ? (
           <>
@@ -171,9 +173,12 @@ export default async function HomePage(props: PageProps<"/">) {
         ) : null}
 
         <div className="px-4 pt-4 sm:px-6">
-          <Suspense fallback={<div className="mb-6 h-12 animate-pulse border-2 border-border bg-surface-2" aria-hidden />}>
-            <Filtros />
-          </Suspense>
+          {/* Con un negocio tocado en el mapa, su tarjeta ocupa el lugar de los filtros (X para volver). */}
+          <ZonaFiltros>
+            <Suspense fallback={<div className="mb-6 h-12 animate-pulse border-2 border-border bg-surface-2" aria-hidden />}>
+              <Filtros />
+            </Suspense>
+          </ZonaFiltros>
         </div>
 
         <div className="p-sec flex-wrap gap-3 sm:!px-6">
@@ -250,6 +255,7 @@ export default async function HomePage(props: PageProps<"/">) {
           </>
         )}
       </main>
+      </SeleccionMapaProvider>
 
       <BottomNav />
     </div>
