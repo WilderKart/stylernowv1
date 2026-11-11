@@ -4066,6 +4066,7 @@ export type Database = {
       }
       suscripcion: {
         Row: {
+          activacion_manual: boolean
           aviso_1d_at: string | null
           aviso_3d_at: string | null
           ciclo: string
@@ -4075,6 +4076,9 @@ export type Database = {
           fecha_proximo_cobro: string
           gracia_fin: string | null
           id: string
+          manual_hasta: string | null
+          manual_referencia: string | null
+          manual_tipo: string | null
           metodo_pago_proveedor: string | null
           metodo_pago_ref: string | null
           negocio_id: string
@@ -4088,6 +4092,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          activacion_manual?: boolean
           aviso_1d_at?: string | null
           aviso_3d_at?: string | null
           ciclo?: string
@@ -4097,6 +4102,9 @@ export type Database = {
           fecha_proximo_cobro: string
           gracia_fin?: string | null
           id?: string
+          manual_hasta?: string | null
+          manual_referencia?: string | null
+          manual_tipo?: string | null
           metodo_pago_proveedor?: string | null
           metodo_pago_ref?: string | null
           negocio_id: string
@@ -4112,6 +4120,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          activacion_manual?: boolean
           aviso_1d_at?: string | null
           aviso_3d_at?: string | null
           ciclo?: string
@@ -4121,6 +4130,9 @@ export type Database = {
           fecha_proximo_cobro?: string
           gracia_fin?: string | null
           id?: string
+          manual_hasta?: string | null
+          manual_referencia?: string | null
+          manual_tipo?: string | null
           metodo_pago_proveedor?: string | null
           metodo_pago_ref?: string | null
           negocio_id?: string
@@ -5183,6 +5195,49 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_activar_negocio_manual: {
+        Args: {
+          p_dias?: number
+          p_estado: string
+          p_motivo: string
+          p_negocio_id: string
+          p_plan: Database["public"]["Enums"]["plan_codigo"]
+          p_referencia?: string
+          p_tipo: string
+        }
+        Returns: {
+          activacion_manual: boolean
+          aviso_1d_at: string | null
+          aviso_3d_at: string | null
+          ciclo: string
+          created_at: string
+          estado: Database["public"]["Enums"]["suscripcion_estado"]
+          fecha_inicio_ciclo: string
+          fecha_proximo_cobro: string
+          gracia_fin: string | null
+          id: string
+          manual_hasta: string | null
+          manual_referencia: string | null
+          manual_tipo: string | null
+          metodo_pago_proveedor: string | null
+          metodo_pago_ref: string | null
+          negocio_id: string
+          pais_codigo: string
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"] | null
+          prueba_fin: string | null
+          prueba_inicio: string | null
+          reintentos_fallo_count: number
+          suspendido_causa: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "suscripcion"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_dashboard_resumen: { Args: never; Returns: Json }
       admin_set_addon_precio: {
         Args: { p_addon: string; p_pais: string; p_precio: number }
@@ -5614,6 +5669,7 @@ export type Database = {
       cancelar_downgrade_programado: {
         Args: { p_negocio_id: string }
         Returns: {
+          activacion_manual: boolean
           aviso_1d_at: string | null
           aviso_3d_at: string | null
           ciclo: string
@@ -5623,6 +5679,9 @@ export type Database = {
           fecha_proximo_cobro: string
           gracia_fin: string | null
           id: string
+          manual_hasta: string | null
+          manual_referencia: string | null
+          manual_tipo: string | null
           metodo_pago_proveedor: string | null
           metodo_pago_ref: string | null
           negocio_id: string
@@ -6546,6 +6605,7 @@ export type Database = {
           p_plan_codigo: Database["public"]["Enums"]["plan_codigo"]
         }
         Returns: {
+          activacion_manual: boolean
           aviso_1d_at: string | null
           aviso_3d_at: string | null
           ciclo: string
@@ -6555,6 +6615,9 @@ export type Database = {
           fecha_proximo_cobro: string
           gracia_fin: string | null
           id: string
+          manual_hasta: string | null
+          manual_referencia: string | null
+          manual_tipo: string | null
           metodo_pago_proveedor: string | null
           metodo_pago_ref: string | null
           negocio_id: string
@@ -6981,6 +7044,7 @@ export type Database = {
           p_telefono_hash: string
         }
         Returns: {
+          activacion_manual: boolean
           aviso_1d_at: string | null
           aviso_3d_at: string | null
           ciclo: string
@@ -6990,6 +7054,9 @@ export type Database = {
           fecha_proximo_cobro: string
           gracia_fin: string | null
           id: string
+          manual_hasta: string | null
+          manual_referencia: string | null
+          manual_tipo: string | null
           metodo_pago_proveedor: string | null
           metodo_pago_ref: string | null
           negocio_id: string
@@ -7128,6 +7195,7 @@ export type Database = {
       marcar_negocio_en_mora: {
         Args: { p_motivo: string; p_negocio_id: string }
         Returns: {
+          activacion_manual: boolean
           aviso_1d_at: string | null
           aviso_3d_at: string | null
           ciclo: string
@@ -7137,6 +7205,9 @@ export type Database = {
           fecha_proximo_cobro: string
           gracia_fin: string | null
           id: string
+          manual_hasta: string | null
+          manual_referencia: string | null
+          manual_tipo: string | null
           metodo_pago_proveedor: string | null
           metodo_pago_ref: string | null
           negocio_id: string
@@ -7808,6 +7879,7 @@ export type Database = {
       registrar_resultado_cobro: {
         Args: { p_exito: boolean; p_motivo?: string; p_negocio_id: string }
         Returns: {
+          activacion_manual: boolean
           aviso_1d_at: string | null
           aviso_3d_at: string | null
           ciclo: string
@@ -7817,6 +7889,9 @@ export type Database = {
           fecha_proximo_cobro: string
           gracia_fin: string | null
           id: string
+          manual_hasta: string | null
+          manual_referencia: string | null
+          manual_tipo: string | null
           metodo_pago_proveedor: string | null
           metodo_pago_ref: string | null
           negocio_id: string
@@ -8114,6 +8189,7 @@ export type Database = {
           p_plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"]
         }
         Returns: {
+          activacion_manual: boolean
           aviso_1d_at: string | null
           aviso_3d_at: string | null
           ciclo: string
@@ -8123,6 +8199,9 @@ export type Database = {
           fecha_proximo_cobro: string
           gracia_fin: string | null
           id: string
+          manual_hasta: string | null
+          manual_referencia: string | null
+          manual_tipo: string | null
           metodo_pago_proveedor: string | null
           metodo_pago_ref: string | null
           negocio_id: string
