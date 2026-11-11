@@ -24,7 +24,7 @@ Se encontraron y **corrigieron en código** 4 problemas reales (pendientes de de
 | H4 | Sin cabeceras de seguridad (X-Frame-Options, nosniff, HSTS, Referrer-Policy, Permissions-Policy, frame-ancestors); `X-Powered-By` visible | Media-Baja · 4.3 | **Vulnerable → corregido en código** |
 | H5 | `aplicar_evento_pago` no comparaba el monto cobrado con `pago.monto` | Baja-Media · 4.8 (defensa en profundidad; hoy el monto sale de `pago.monto` al crear la preferencia) | **Vulnerable → mitigado en `sincronizar.ts`** |
 | H6 | Gift card: PIN de 4 dígitos sin bloqueo por intentos; PIN generado con `random()`; el registro de PIN erróneo se pierde por el `RAISE` | Media · 5.9 | **Vulnerable (abierto)** |
-| H7 | `marketplace_buscar` sin tope de `p_limite` y costosa, ejecutable por anónimos | Media-Baja · 5.3 (DoS por consumo) | **Vulnerable (abierto)** |
+| H7 | `marketplace_buscar` sin tope de `p_limite` y costosa, ejecutable por anónimos | Media-Baja · 5.3 (DoS por consumo) | **Parcial:** tope de 100 filas aplicado (migración 104); falta rate limiting en el borde |
 | H8 | `registrar_clic_patrocinado` / `registrar_impresion_patrocinada` escriben sin validar quién llama (fraude de clics) | Media · 5.3 | **Vulnerable (riesgo aceptado, abierto)** |
 | H9 | Anónimos leen `negocio.owner_user_id`, `email_contacto`, `telefono_contacto` y `resena.cliente_id` | Baja · 3.7 | **Vulnerable (decisión de producto)** |
 | H10 | Migración 100 (anonimización de cuenta) sin aplicar: la eliminación de cuenta no ejecuta | Media (cumplimiento) | **Pendiente (permiso)** |
@@ -62,7 +62,7 @@ Corrección (`src/lib/auth/destino-seguro.ts`): rechaza `\` y caracteres de cont
 Control positivo: `redimir_gift_card` usa `FOR UPDATE`, por lo que dos canjes simultáneos no cobran dos veces (revisión de código; no ejecuté prueba de carrera real).
 
 ### H7 — `marketplace_buscar` (abierto)
-Ejecutable por `anon` (necesario para la home). `p_limite=999999999` se acepta. Tras la migración 103 el coste bajó de ~2,7 s a ~0,4 s, pero sigue siendo una consulta costosa sin rate limit: un anónimo puede encadenar llamadas.
+Ejecutable por `anon` (necesario para la home). `p_limite=999999999` se acepta. Tras la migración 103 el coste bajó de ~2,7 s a ~0,4 s y la migración 104 limita la respuesta a 100 filas, pero el cómputo sigue siendo costoso y sin rate limit: un anónimo puede encadenar llamadas (falta la regla de Firewall de R2).
 
 ### H8 — Publicidad (abierto, ya conocido)
 Las dos funciones de registro están en la lista permitida para `anon` y no validan al llamador: se puede inflar el gasto de la campaña de un competidor.
