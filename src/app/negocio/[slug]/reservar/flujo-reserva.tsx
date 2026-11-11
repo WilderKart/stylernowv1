@@ -2,13 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 import { Chip, EmptyState, Label, Meta, Num, Photo, Status, Tier } from "@/components/brutal";
+import { SlotsPorFranja } from "@/components/negocio/horas-agrupadas";
 import { FOTOS_RESPALDO, nivelATier } from "@/components/negocio/nivel";
-import { duracion, fechaCorta, fechaHoraLarga, hora, hoyISO, sumarDias } from "@/lib/formato";
+import { duracion, fechaCorta, fechaHoraLarga, fechaISO, hora, hoyISO, sumarDias } from "@/lib/formato";
 import { calcularSenaEstimada, resumenPoliticaCancelacion, type ConfigSena } from "@/lib/pagos/sena";
 import { cn, formatCOP } from "@/lib/utils";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
 import { crearReservaAction, obtenerSlots, unirseListaEspera, type Slot } from "./actions";
 
 const DIAS_VISIBLES = 14;
@@ -69,11 +70,13 @@ export function FlujoReserva({
   combos: Combo[];
 }) {
   const router = useRouter();
+  const staffInicial = useSearchParams().get("staff");
 
   const [paso, setPaso] = useState(1);
   const [sedeId, setSedeId] = useState(sedes[0]?.id ?? "");
   const [servicioIds, setServicioIds] = useState<string[]>([]);
   const [staffId, setStaffId] = useState<string | null>(null);
+  const [staffInicialAplicado, setStaffInicialAplicado] = useState(false);
   const [fecha, setFecha] = useState(() => hoyISO(sedes[0]?.zona_horaria));
   const [slot, setSlot] = useState<Slot | null>(null);
   const [inicioDias, setInicioDias] = useState(0);
@@ -100,9 +103,10 @@ export function FlujoReserva({
   const profesional = staff.find((p) => p.staff_id === staffId) ?? null;
 
   // La carga corre dentro de una transición: el estado se actualiza al resolver la
-  // consulta, nunca de forma síncrona dentro del efecto.
-  const cargarSlots = useCallback(() => {
-    if (!sede || servicioIds.length === 0) return;
+  // consulta, nunca de forma síncrona dentro del efecto. Volver al paso 3 (p. ej. tras
+  // SLOT_NO_DISPONIBLE) re-dispara el efecto y refresca el grid.
+  useEffect(() => {
+    if (paso !== 3 || !sede || servicioIds.length === 0) return;
     iniciarCarga(async () => {
       try {
         const nuevos = await obtenerSlots({ sedeId: sede.id, servicioIds, fecha, staffId });
@@ -113,18 +117,21 @@ export function FlujoReserva({
         setSlots([]);
       }
     });
-  }, [sede, servicioIds, fecha, staffId]);
-
-  useEffect(() => {
-    if (paso === 3) cargarSlots();
-  }, [paso, cargarSlots]);
+  }, [paso, sede, servicioIds, fecha, staffId]);
 
   /** Cambiar los Servicios cambia la duración: el horario elegido deja de ser válido. */
   function alternarServicio(id: string) {
+    const nuevos = servicioIds.includes(id) ? servicioIds.filter((x) => x !== id) : [...servicioIds, id];
+    cambiarServicios(nuevos);
+  }
+
+  /** Un profesional preseleccionado (desde su perfil) que no presta todos los
+   * servicios elegidos vuelve a "cualquiera disponible". */
+  function cambiarServicios(nuevos: string[]) {
     setSlot(null);
-    setServicioIds((previos) =>
-      previos.includes(id) ? previos.filter((x) => x !== id) : [...previos, id]
-    );
+    setServicioIds(nuevos);
+    const actual = staff.find((p) => p.staff_id === staffId);
+    if (actual && !nuevos.every((sid) => actual.servicio_ids.includes(sid))) setStaffId(null);
   }
 
   /** Un combo (Módulo 2.5) es solo un atajo de selección — reemplaza la
@@ -133,8 +140,7 @@ export function FlujoReserva({
    * individual (docs/TECH_DEBT_REGISTER.md: el override del combo todavía
    * no está conectado ahí), así que esto no cambia ningún cálculo. */
   function elegirCombo(combo: Combo) {
-    setSlot(null);
-    setServicioIds(combo.servicio_ids);
+    cambiarServicios(combo.servicio_ids);
   }
 
   async function confirmar() {
@@ -163,7 +169,6 @@ export function FlujoReserva({
       // El grid vuelve actualizado, no se deja al Cliente reintentando a ciegas.
       setSlot(null);
       setPaso(3);
-      void cargarSlots();
     }
     if (resultado.codigo === "NO_AUTENTICADO") {
       router.push(`/login?next=/negocio/${negocio.slug}/reservar`);
@@ -378,8 +383,8 @@ export function FlujoReserva({
                 {staffCompatible.map((p, i) => {
                   const activo = staffId === p.staff_id;
                   return (
+                    <div key={p.staff_id}>
                     <button
-                      key={p.staff_id}
                       type="button"
                       onClick={() => {
                         setStaffId(p.staff_id);
@@ -400,6 +405,13 @@ export function FlujoReserva({
                         </div>
                       </div>
                     </button>
+                    <Link
+                      href={`/negocio/${negocio.slug}/profesional/${p.staff_id}`}
+                      className="sn-label inline-flex min-h-12 items-center underline"
+                    >
+                      Ver perfil de {p.nombre} ↗
+                    </Link>
+                    </div>
                   );
                 })}
               </div>
@@ -492,20 +504,7 @@ export function FlujoReserva({
               ) : (
                 <>
                   {/* Los ocupados se muestran tachados, no ausentes (02-UX/05_Booking.md). */}
-                  <div className="sn-slots">
-                    {slots.map((s) => (
-                      <button
-                        key={s.hora_inicio}
-                        type="button"
-                        disabled={!s.disponible}
-                        onClick={() => setSlot(s)}
-                        aria-pressed={slot?.hora_inicio === s.hora_inicio}
-                        className={cn("sn-slot", slot?.hora_inicio === s.hora_inicio && "is-selected")}
-                      >
-                        {hora(s.hora_inicio, tz)}
-                      </button>
-                    ))}
-                  </div>
+                  <SlotsPorFranja slots={slots} tz={tz} elegido={slot?.hora_inicio ?? null} onElegir={setSlot} />
 
                   {libres.length === 0 ? (
                     <div className="mt-4 border-2 border-line p-4 text-center">
@@ -536,7 +535,30 @@ export function FlujoReserva({
               <span className="sn-hot">tu turno.</span>
             </h1>
 
-            <dl className="m-0 border-t-2 border-line">
+            <div className="px-4 pb-4">
+              <div className="sn-ticket">
+                <div className="sn-ticket__top">
+                  <div className="sn-ticket__date">
+                    <span className="sn-meta">{fechaCorta(fechaISO(slot.hora_inicio, tz), tz).split(" ")[2]?.replace(".", "")}</span>
+                    <b>{Number(fechaISO(slot.hora_inicio, tz).slice(8, 10))}</b>
+                  </div>
+                  <div className="sn-ticket__main min-w-0">
+                    <Status tone="warn">Pendiente de pago</Status>
+                    <h3 className="poster-5 m-0 break-words">{seleccionados.map((s) => s.nombre).join(" + ")}</h3>
+                    <span className="sn-meta break-words">
+                      {profesional ? profesional.nombre : "Profesional por asignar"} · {hora(slot.hora_inicio, tz)} · {sede?.nombre}
+                    </span>
+                  </div>
+                </div>
+                <div className="sn-ticket__perf" />
+                <div className="sn-ticket__foot">
+                  <span className="sn-label">Total</span>
+                  <span className="sn-fig text-[22px]">{formatCOP(montoTotal)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t-2 border-line">
               {[
                 ["Servicios", seleccionados.map((s) => s.nombre).join(" + ")],
                 ["Profesional", profesional ? profesional.nombre : "Se asigna al confirmar"],
@@ -545,19 +567,19 @@ export function FlujoReserva({
                 ["Duración", duracion(minutosTotal)],
               ].map(([k, v]) => (
                 <div key={k} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-grid-soft px-4 py-3">
-                  <dt className="sn-meta">{k}</dt>
-                  <dd className="body m-0 min-w-0 text-right font-bold break-words capitalize">{v}</dd>
+                  <span className="sn-meta">{k}</span>
+                  <span className="body min-w-0 text-right font-bold break-words capitalize">{v}</span>
                 </div>
               ))}
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-grid-soft px-4 py-3">
-                <dt className="sn-meta">Total del servicio</dt>
-                <dd className="sn-price m-0">{formatCOP(montoTotal)}</dd>
+                <span className="sn-meta">Total del servicio</span>
+                <span className="sn-price">{formatCOP(montoTotal)}</span>
               </div>
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b-2 border-line bg-signal px-4 py-3 text-ink">
-                <dt className="sn-label">Seña a pagar ahora</dt>
-                <dd className="sn-fig m-0 text-[22px]">{formatCOP(sena)}</dd>
+                <span className="sn-label">Seña a pagar ahora</span>
+                <span className="sn-fig text-[22px]">{formatCOP(sena)}</span>
               </div>
-            </dl>
+            </div>
             {sena < montoTotal ? (
               <p className="sn-meta m-0 px-4 pt-2">El saldo de {formatCOP(montoTotal - sena)} lo pagás en el local.</p>
             ) : null}
@@ -593,6 +615,12 @@ export function FlujoReserva({
             disabled={!puedeAvanzar}
             onClick={() => {
               setError(null);
+              // Profesional preseleccionado desde su perfil: se aplica al salir del paso 1,
+              // solo si presta todos los servicios elegidos.
+              if (paso === 1 && staffInicial && !staffInicialAplicado) {
+                setStaffInicialAplicado(true);
+                if (staffCompatible.some((p) => p.staff_id === staffInicial)) setStaffId(staffInicial);
+              }
               setPaso((p) => p + 1);
             }}
           >

@@ -10,6 +10,7 @@ const ITEMS = [
   { href: "/admin/moderacion", etiqueta: "Moderación" },
   { href: "/admin/lealtad", etiqueta: "Lealtad" },
   { href: "/admin/ai", etiqueta: "AI Center" },
+  { href: "/admin/planes", etiqueta: "Planes" },
   { href: "/admin/configuracion", etiqueta: "Configuración" },
   { href: "/admin/soporte", etiqueta: "Soporte" },
   { href: "/admin/auditoria", etiqueta: "Auditoría" },

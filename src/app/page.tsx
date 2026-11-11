@@ -7,7 +7,6 @@ import { Sello } from "@/components/marketplace/sello";
 import { EmptyState, Marquee, Num } from "@/components/brutal";
 import { hoyISO } from "@/lib/formato";
 import { createClient } from "@/lib/supabase/server";
-import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -231,14 +230,6 @@ export default async function HomePage(props: PageProps<"/">) {
             ) : null}
           </>
         )}
-
-        <Link
-          href="/lealtad"
-          className="sn-block-signal m-4 flex min-h-12 items-center justify-between gap-3 border-2 border-ink p-4 no-underline sm:mx-6"
-        >
-          <span className="poster-4 break-words">Tus puntos y recompensas</span>
-          <ArrowUpRight aria-hidden className="size-6 shrink-0" strokeWidth={2} strokeLinecap="square" strokeLinejoin="miter" />
-        </Link>
       </main>
 
       <BottomNav />

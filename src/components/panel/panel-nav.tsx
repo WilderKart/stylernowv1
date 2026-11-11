@@ -36,6 +36,7 @@ export function PanelNav({ rol }: { rol: RolPanel }) {
     ...(rol === "BARBERIA" ? [{ href: "/panel/lealtad", etiqueta: "Lealtad" }] : []),
     ...(rol === "BARBERIA" ? [{ href: "/panel/ia", etiqueta: "IA" }] : []),
     ...(rol === "BARBERIA" ? [{ href: "/panel/wallet", etiqueta: "Wallet" }] : []),
+    ...(rol === "BARBERIA" ? [{ href: "/panel/marca", etiqueta: "Mi Marca" }] : []),
     ...(rol === "BARBERIA" ? [{ href: "/panel/suscripcion", etiqueta: "Mi Plan" }] : []),
     { href: "/panel/soporte", etiqueta: "Soporte" },
     ...(rol === "BARBERIA" ? [{ href: "/panel/auditoria", etiqueta: "Auditoría" }] : []),

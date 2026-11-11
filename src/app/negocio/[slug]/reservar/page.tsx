@@ -12,6 +12,8 @@ export const metadata = {
 
 export default async function ReservarPage(props: PageProps<"/negocio/[slug]/reservar">) {
   const { slug } = await props.params;
+  const { staff: staffParam } = await props.searchParams;
+  const staffPreseleccionado = typeof staffParam === "string" ? staffParam : null;
   const supabase = await createClient();
 
   const {
@@ -19,7 +21,9 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
   } = await supabase.auth.getUser();
 
   // 02-UX/05_Booking.md: exclusivo de Cliente autenticado, no existe modo invitado.
-  if (!user) redirect(`/login?next=/negocio/${slug}/reservar`);
+  if (!user) redirect(
+      `/login?next=${encodeURIComponent(`/negocio/${slug}/reservar${staffPreseleccionado ? `?staff=${staffPreseleccionado}` : ""}`)}`
+    );
 
   const { data: negocio } = await supabase
     .from("negocio")

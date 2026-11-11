@@ -17,6 +17,7 @@ svg.lucide{width:20px;height:20px;stroke-width:var(--icon-stroke);stroke-linecap
 .sn-block-ink{background:var(--ink);color:var(--paper)}
 .sn-block-paper{background:var(--paper);color:var(--ink)}
 .sn-block-signal{background:var(--signal);color:var(--ink)}
+.sn-block-signal .sn-meta,.sn-block-signal .sn-label{color:var(--ink)}
 
 /* Botón */
 .sn-btn{display:inline-flex;align-items:center;justify-content:space-between;gap:var(--space-3);min-height:var(--touch-min);padding:0 var(--space-4);border:var(--border-thick) solid var(--line);font:700 12px/16px var(--sn-font-mono);letter-spacing:.72px;text-transform:uppercase;cursor:pointer;position:relative;transition:transform var(--dur-fast) var(--ease-snap),box-shadow var(--dur-fast) var(--ease-snap)}
@@ -220,7 +221,7 @@ svg.lucide{width:20px;height:20px;stroke-width:var(--icon-stroke);stroke-linecap
 .sn-seg button[aria-pressed="true"]{background:var(--signal);color:var(--ink)}
 .sn-seg button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .sn-seg svg.lucide{width:16px;height:16px}
-.sn-switch{all:unset;cursor:pointer;width:64px;height:32px;border:var(--border-thick) solid var(--line);background:var(--bg);position:relative;display:inline-flex}
+.sn-switch{all:unset;flex:none;cursor:pointer;width:64px;height:32px;border:var(--border-thick) solid var(--line);background:var(--bg);position:relative;display:inline-flex}
 .sn-switch::before{content:"OFF";position:absolute;right:6px;top:7px;font:700 10px/14px var(--sn-font-mono);color:var(--text-muted)}
 .sn-switch::after{content:"";position:absolute;top:2px;left:2px;width:24px;height:24px;background:var(--text);transition:transform var(--dur-base) var(--ease-snap)}
 .sn-switch[aria-checked="true"]{background:var(--signal)}

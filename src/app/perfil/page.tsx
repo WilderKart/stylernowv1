@@ -2,7 +2,7 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { Avatar } from "@/components/brutal";
 import { Fila, Filas, Pantalla, Sec, Top } from "@/app/lealtad/ui-cliente";
 import { formatCOP } from "@/lib/utils";
-import { CalendarDays, Gift, Star, Ticket } from "lucide-react";
+import { ArrowUpRight, CalendarDays, Gift, Star, Ticket } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -56,18 +56,34 @@ export default async function PerfilPage(props: PageProps<"/perfil">) {
         </div>
       </div>
 
-      <div className="sn-gridcols grid-cols-3 border-b-2 border-border">
+      <section aria-label="Lealtad" className="sn-block-signal m-4 border-2 border-ink shadow-[var(--sn-shadow-hard)]">
+        <Link href="/lealtad" className="flex min-h-12 items-center justify-between gap-3 p-4 text-ink no-underline">
+          <div className="min-w-0">
+            <span className="sn-label">Lealtad</span>
+            <p className="poster-3 break-words">Tus puntos y recompensas</p>
+          </div>
+          <ArrowUpRight aria-hidden className="size-6 shrink-0" strokeWidth={2} strokeLinecap="square" strokeLinejoin="miter" />
+        </Link>
+        <div className="grid grid-cols-2 border-t-2 border-ink">
+          <div className="min-w-0 border-r-2 border-ink p-4">
+            <span className="sn-meta">Puntos</span>
+            <div className="sn-fig text-2xl">{totalPuntos}</div>
+          </div>
+          <div className="min-w-0 p-4">
+            <span className="sn-meta">Saldo</span>
+            <div className="sn-fig truncate text-2xl">{formatCOP(saldo)}</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 border-t-2 border-ink">
+          <Link href="/gift-cards" className="flex min-h-12 items-center justify-center border-r-2 border-ink p-2 text-center text-ink no-underline sn-label">Gift cards</Link>
+          <Link href="/membresias" className="flex min-h-12 items-center justify-center p-2 text-center text-ink no-underline sn-label">Membresías</Link>
+        </div>
+      </section>
+
+      <div className="sn-gridcols grid-cols-1 border-b-2 border-border">
         <Link href="/mis-reservas" className="min-w-0 text-text no-underline">
           <span className="sn-meta">Citas</span>
           <div className="sn-fig text-2xl">{totalCitas ?? 0}</div>
-        </Link>
-        <Link href="/lealtad" className="min-w-0 text-text no-underline">
-          <span className="sn-meta">Puntos</span>
-          <div className="sn-fig text-2xl">{totalPuntos}</div>
-        </Link>
-        <Link href="/lealtad" className="min-w-0 text-text no-underline">
-          <span className="sn-meta">Saldo</span>
-          <div className="sn-fig truncate text-2xl">{formatCOP(saldo)}</div>
         </Link>
       </div>
 

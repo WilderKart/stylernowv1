@@ -54,6 +54,21 @@ export interface MiSuscripcion {
   fechaProximoCobro: string;
   planCodigoDestino: string | null;
   suspendidoCausa: string | null;
+  ciclo: "MENSUAL" | "ANUAL";
+  paisCodigo: string;
+  pruebaFin: string | null;
+  graciaFin: string | null;
+  activacionManual: boolean;
+  manualTipo: string | null;
+  manualHasta: string | null;
+  /** Días enteros que faltan (calculados en servidor); null si no aplica. */
+  diasPrueba: number | null;
+  diasGracia: number | null;
+}
+
+function diasHasta(fecha: string | null): number | null {
+  if (!fecha) return null;
+  return Math.max(0, Math.ceil((new Date(fecha).getTime() - Date.now()) / 86_400_000));
 }
 
 export async function obtenerCatalogoPlanes(): Promise<Resultado<PlanCatalogo[]>> {
@@ -86,10 +101,38 @@ export async function obtenerMiSuscripcion(negocioId: string): Promise<Resultado
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("suscripcion")
-      .select("plan_codigo, estado, fecha_proximo_cobro, plan_codigo_destino, suspendido_causa")
+      .select(
+        "plan_codigo, estado, fecha_proximo_cobro, plan_codigo_destino, suspendido_causa, ciclo, pais_codigo, prueba_fin, gracia_fin, activacion_manual, manual_tipo, manual_hasta"
+      )
       .eq("negocio_id", negocioId)
-      .single();
+      .maybeSingle();
     if (error) return { ok: false, error: error.message };
+
+    // Negocio sin fila de suscripción (anterior al modelo de planes): se trata como "requiere plan".
+    // No es un error: la pantalla le muestra cómo elegir plan.
+    if (!data) {
+      const { data: negocio } = await supabase.from("negocio").select("plan_codigo, pais_codigo").eq("id", negocioId).maybeSingle();
+      return {
+        ok: true,
+        data: {
+          planCodigo: negocio?.plan_codigo ?? "RAVEN",
+          estado: "REQUIERE_PLAN",
+          fechaProximoCobro: new Date().toISOString(),
+          planCodigoDestino: null,
+          suspendidoCausa: null,
+          ciclo: "MENSUAL",
+          paisCodigo: negocio?.pais_codigo ?? "CO",
+          pruebaFin: null,
+          graciaFin: null,
+          activacionManual: false,
+          manualTipo: null,
+          manualHasta: null,
+          diasPrueba: null,
+          diasGracia: null,
+        },
+      };
+    }
+
     return {
       ok: true,
       data: {
@@ -98,6 +141,15 @@ export async function obtenerMiSuscripcion(negocioId: string): Promise<Resultado
         fechaProximoCobro: data.fecha_proximo_cobro,
         planCodigoDestino: data.plan_codigo_destino,
         suspendidoCausa: data.suspendido_causa,
+        ciclo: data.ciclo === "ANUAL" ? "ANUAL" : "MENSUAL",
+        paisCodigo: data.pais_codigo,
+        pruebaFin: data.prueba_fin,
+        graciaFin: data.gracia_fin,
+        activacionManual: data.activacion_manual,
+        manualTipo: data.manual_tipo,
+        manualHasta: data.manual_hasta,
+        diasPrueba: data.estado === "TRIAL" ? diasHasta(data.prueba_fin) : null,
+        diasGracia: data.estado === "EN_MORA" ? diasHasta(data.gracia_fin) : null,
       },
     };
   } catch (e) {

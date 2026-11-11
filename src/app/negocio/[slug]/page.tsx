@@ -1,12 +1,14 @@
 import { Label, Marquee, Meta, Num, Photo, ProCard, Stars, Status } from "@/components/brutal";
 import { FOTOS_RESPALDO, FOTO_NEGOCIO_RESPALDO, nivelATier } from "@/components/negocio/nivel";
-import { duracion } from "@/lib/formato";
+import { horarioDeHoy } from "@/components/negocio/horario";
+import { duracion, TZ_POR_DEFECTO } from "@/lib/formato";
 import { resumenPoliticaCancelacion } from "@/lib/pagos/sena";
 import { createClient } from "@/lib/supabase/server";
 import { formatCOP } from "@/lib/utils";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { obtenerMarcaPublica } from "@/lib/marca/obtener-marca";
 import { esFavorito } from "./actions";
 import { BotonCompartir } from "./boton-compartir";
 import { BotonFavorito } from "./boton-favorito";
@@ -31,7 +33,7 @@ async function cargarNegocio(slug: string) {
     await Promise.all([
       supabase
         .from("sede")
-        .select("id, nombre, direccion, ciudad, latitud, longitud, zona_horaria")
+        .select("id, nombre, direccion, ciudad, latitud, longitud, zona_horaria, horario_base")
         .eq("negocio_id", negocio.id)
         .eq("cerrada_permanente", false)
         .order("created_at"),
@@ -96,6 +98,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
 
   const { negocio, sedes, servicios, staff, resenas, promedio } = datos;
   const sede = sedes[0];
+  const horarioHoy = sede ? horarioDeHoy(sede.horario_base, sede.zona_horaria ?? TZ_POR_DEFECTO) : null;
   const favoritoInicial = await esFavorito(negocio.id);
 
   // Conversión_normalizada (08-Growth-Monetization/01_Marketplace_Algorithm.md)
@@ -173,11 +176,19 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
   };
 
   const sinDisponibilidad = servicios.length === 0 || sedes.length === 0;
+  const marca = await obtenerMarcaPublica(negocio.id);
   const partesNombre = negocio.nombre.split(" ");
   const mitad = Math.ceil(partesNombre.length / 2);
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-bg">
+    <div
+      className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-bg"
+      // Mi Marca (add-on): el negocio redefine su acento y su tinta; los colores ya vienen validados #RRGGBB.
+      style={marca ? ({ "--signal": marca.colorPrimario, "--ink": marca.colorSecundario } as React.CSSProperties) : undefined}
+    >
+      {marca?.slogan ? (
+        <p className="sn-label bg-signal px-4 py-2 text-ink">{marca.slogan}</p>
+      ) : null}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -250,6 +261,12 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
             <p className="body-sm m-0 mt-1 break-words">
               {sede.direccion} · {sede.ciudad}
             </p>
+            {horarioHoy ? (
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <span className="sn-label">{horarioHoy.etiqueta}</span>
+                {horarioHoy.abiertoAhora ? <Status tone="ok">Abierto ahora</Status> : null}
+              </div>
+            ) : null}
             {sede.latitud && sede.longitud ? (
               <a
                 href={`https://www.google.com/maps/search/?api=1&query=${sede.latitud},${sede.longitud}`}
@@ -315,6 +332,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
               {staff.map((p, i) => (
                 <ProCard
                   key={p.staff_id}
+                  href={`/negocio/${negocio.slug}/profesional/${p.staff_id}`}
                   name={p.nombre}
                   role={p.especialidad ?? undefined}
                   tier={nivelATier(p.nivel)}
