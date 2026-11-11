@@ -141,6 +141,20 @@ bloquea, el desarrollo sigue avanzando en paralelo sin esperar respuesta.
 - **Recomendación:** construir esto requiere decidir primero el motor de entrega (Email vía Resend, ya usado en el proyecto para otros fines, es el candidato más cercano) antes de que el tracking tenga algo real que medir — es una decisión de alcance/infraestructura, no una tabla adicional.
 - **Bloquea:** No — el resto del ROI de IA ya es real y útil sin esto.
 
+## ADR-015: habilitar el Custom Access Token Hook de Supabase (Session Version)
+
+- **Contexto:** `perfil.session_version` (migraciones 081-083) ya existe y ya se incrementa en cambio de contraseña, recuperación, traslado, suspensión y revocación de Guardian — pero para que invalide sesiones de verdad, el valor debe viajar como claim del JWT, lo cual requiere habilitar un "Customize Access Token (Auth) Hook" en Supabase Dashboard → Authentication → Hooks, apuntando a una función Postgres que lea `session_version`. Es un toggle de Dashboard, no algo que una migración pueda activar.
+- **Impacto:** hoy `session_version` se incrementa correctamente pero no se verifica todavía contra el JWT — una sesión existente sigue siendo válida hasta su expiración natural (~1h) incluso después de un cambio de contraseña o una suspensión (aunque RLS igual bloquea el acceso a datos nuevos en ese lapso, ver `docs/IDENTITY_AUDIT_REPORT.md` Fase 1.5/6).
+- **Recomendación:** el fundador (o quien tenga acceso al Dashboard) habilita el hook; el código para leerlo del lado de `requireRole()`/`proxy.ts` se agrega en la fase de Session Registry.
+- **Bloquea:** No — es un endurecimiento adicional, no una vulnerabilidad nueva.
+
+## ADR-015: ¿SuperSU puede ser también dueño de un Negocio (Barbería)?
+
+- **Contexto:** la auditoría de identidad pre-Password Platform (`docs/IDENTITY_AUDIT_REPORT.md`) encontró que el código no impide ni contempla que una cuenta con `perfil.es_supersu=true` sea al mismo tiempo `negocio.owner_user_id` de un negocio real — `requireSuperSU()` solo verifica `es_supersu`, sin chequear si esa misma persona también tiene un negocio propio.
+- **Impacto:** hoy es un caso de borde teórico (ningún SuperSU real del equipo tiene además un negocio registrado), pero no hay una regla escrita en `01_Roles.md` que lo prohíba o permita explícitamente.
+- **Recomendación:** el fundador define si esto debe bloquearse explícitamente (un SuperSU nunca puede crear/poseer un `negocio`) o si es un caso de borde aceptable sin regla especial.
+- **Bloquea:** No — no impide construir Password Platform ni ninguna fase de ADR-015.
+
 ## Cómo agregar una entrada
 Si te encontrás con algo que de verdad no podés resolver sin que el
 fundador decida (falta una API key, hay una contradicción real en la
