@@ -1,6 +1,7 @@
 "use server";
 
 import { crearPreferencia } from "@/lib/pagos/mercadopago";
+import { leerPagoPropio } from "@/lib/pagos/leer-pago-propio";
 import { sincronizarPago } from "@/lib/pagos/sincronizar";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -87,9 +88,16 @@ export type EstadoCompraGiftCard = { pago: "PENDIENTE" | "APROBADO" | "RECHAZADO
 
 export async function consultarEstadoCompraGiftCard(pagoId: string): Promise<EstadoCompraGiftCard> {
   const supabase = await createClient();
-  const { data: pago } = await supabase.from("pago").select("estado, metadata").eq("id", pagoId).maybeSingle();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { pago: "SIN_PAGO", giftCardId: null };
 
-  if (pago && pago.estado === "PENDIENTE") {
+  // El comprador no puede leer `pago` por RLS (no tiene reserva): se lee en servidor y se verifica que sea suyo.
+  const pago = await leerPagoPropio(pagoId, user.id, "GIFT_CARD");
+  if (!pago) return { pago: "SIN_PAGO", giftCardId: null };
+
+  if (pago.estado === "PENDIENTE") {
     try {
       await sincronizarPago(pagoId);
     } catch (e) {
@@ -97,7 +105,7 @@ export async function consultarEstadoCompraGiftCard(pagoId: string): Promise<Est
     }
   }
 
-  const { data: actualizado } = await supabase.from("pago").select("estado, metadata").eq("id", pagoId).maybeSingle();
+  const actualizado = await leerPagoPropio(pagoId, user.id, "GIFT_CARD");
   if (!actualizado) return { pago: "SIN_PAGO", giftCardId: null };
 
   const giftCardId = (actualizado.metadata as { gift_card_id?: string } | null)?.gift_card_id ?? null;

@@ -1,6 +1,7 @@
 "use server";
 
 import { crearPreferencia } from "@/lib/pagos/mercadopago";
+import { leerPagoPropio } from "@/lib/pagos/leer-pago-propio";
 import { sincronizarPago } from "@/lib/pagos/sincronizar";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -60,9 +61,16 @@ export type EstadoCompraMembresia = { pago: "PENDIENTE" | "APROBADO" | "RECHAZAD
 
 export async function consultarEstadoCompraMembresia(pagoId: string): Promise<EstadoCompraMembresia> {
   const supabase = await createClient();
-  const { data: pago } = await supabase.from("pago").select("estado, negocio_id, metadata").eq("id", pagoId).maybeSingle();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { pago: "SIN_PAGO", membresiaId: null };
 
-  if (pago && pago.estado === "PENDIENTE") {
+  // El comprador no puede leer `pago` por RLS (no tiene reserva): se lee en servidor y se verifica que sea suyo.
+  const pago = await leerPagoPropio(pagoId, user.id, "MEMBRESIA");
+  if (!pago) return { pago: "SIN_PAGO", membresiaId: null };
+
+  if (pago.estado === "PENDIENTE") {
     try {
       await sincronizarPago(pagoId);
     } catch (e) {
@@ -70,19 +78,16 @@ export async function consultarEstadoCompraMembresia(pagoId: string): Promise<Es
     }
   }
 
-  const { data: actualizado } = await supabase.from("pago").select("estado, negocio_id, metadata").eq("id", pagoId).maybeSingle();
+  const actualizado = await leerPagoPropio(pagoId, user.id, "MEMBRESIA");
   if (!actualizado) return { pago: "SIN_PAGO", membresiaId: null };
 
   if (actualizado.estado === "APROBADO") {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
     const planId = (actualizado.metadata as { plan_id?: string } | null)?.plan_id;
     const { data: membresia } = await supabase
       .from("cliente_membresia")
       .select("id")
       .eq("plan_id", planId ?? "")
-      .eq("cliente_id", user?.id ?? "")
+      .eq("cliente_id", user.id)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
