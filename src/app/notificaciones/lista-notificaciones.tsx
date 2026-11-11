@@ -22,11 +22,14 @@ const ICONOS: Record<TipoNotificacion, typeof Clock> = {
   SISTEMA: Bell,
 };
 
-/** Destino al tocar. Las citas viven en /mis-reservas (aún sin ruta de detalle propia en el registro). */
+/** Destino al tocar: cada aviso abre la pantalla exacta (detalle de la cita, chat o calificación). */
 function destino(n: Notificacion): string | null {
   if (n.tipo === "OFERTA") return "/ofertas";
   if (n.tipo === "SISTEMA") return null;
-  return n.reserva_id ? "/mis-reservas" : null;
+  if (!n.reserva_id) return null;
+  if (n.tipo === "CHAT_MENSAJE") return `/reserva/${n.reserva_id}/chat`;
+  if (n.tipo === "CALIFICAR_VISITA") return `/reserva/${n.reserva_id}/calificar`;
+  return `/reserva/${n.reserva_id}`;
 }
 
 const TZ = "America/Bogota";
