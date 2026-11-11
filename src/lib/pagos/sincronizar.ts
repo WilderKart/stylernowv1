@@ -27,6 +27,23 @@ async function aplicar(pagoId: string, pagoPasarela: PagoPasarela): Promise<Resu
 
   if (pagoPasarela.estado === "PENDIENTE") return { estado: "PENDIENTE" };
 
+  // Defensa en profundidad: nunca se aprueba un cobro cuyo monto en la pasarela no coincide con el que
+  // nosotros fijamos al crear la preferencia (el monto sale siempre de `pago.monto`, nunca del cliente).
+  // Tolerancia de 1 unidad por el redondeo de `unit_price`. Se deja constancia para revisión manual.
+  if (pagoPasarela.estado === "APROBADO") {
+    const { data: esperado } = await admin.from("pago").select("monto, estado").eq("id", pagoId).maybeSingle();
+    if (esperado && esperado.estado !== "APROBADO" && Math.abs(Math.round(Number(esperado.monto)) - pagoPasarela.monto) > 1) {
+      await admin.from("evento_auditoria").insert({
+        entidad_tipo: "pago",
+        entidad_id: pagoId,
+        accion: "PAGO_MONTO_NO_COINCIDE",
+        actor_tipo: "SISTEMA",
+        payload_despues: { esperado: Number(esperado.monto), recibido: pagoPasarela.monto, id_transaccion: pagoPasarela.id },
+      });
+      return { estado: "SIN_CAMBIOS", motivo: "MONTO_NO_COINCIDE" };
+    }
+  }
+
   const { data, error } = await admin.rpc("aplicar_evento_pago", {
     p_pago_id: pagoId,
     p_id_transaccion: pagoPasarela.id,

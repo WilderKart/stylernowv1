@@ -181,8 +181,8 @@ export function VistaAgenda({
         </Card>
       ) : null}
 
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <Button size="sm" variant="secondary" onClick={() => setFecha((f) => sumarDias(f, vista === "dia" ? -1 : -7))}>
             ←
           </Button>

@@ -191,7 +191,9 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
       ) : null}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        // Los textos (nombre, dirección, servicios) los escribe el negocio: se escapa "<" para que ningún valor pueda
+        // cerrar la etiqueta <script> (XSS almacenado). < es JSON válido y los buscadores lo leen igual.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
 
       <main className="flex-1">
