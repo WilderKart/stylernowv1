@@ -444,6 +444,47 @@ export type Database = {
         }
         Relationships: []
       }
+      beneficio_marca: {
+        Row: {
+          activo: boolean
+          created_at: string
+          descripcion: string | null
+          id: string
+          marca_id: string
+          pais: string | null
+          titulo: string
+          vigente_hasta: string | null
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          marca_id: string
+          pais?: string | null
+          titulo: string
+          vigente_hasta?: string | null
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          marca_id?: string
+          pais?: string | null
+          titulo?: string
+          vigente_hasta?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficio_marca_marca_id_fkey"
+            columns: ["marca_id"]
+            isOneToOne: false
+            referencedRelation: "marca_aliada"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bloqueo_ausencia: {
         Row: {
           fecha_fin: string
@@ -653,6 +694,127 @@ export type Database = {
           },
         ]
       }
+      chat_conversacion: {
+        Row: {
+          cliente_id: string
+          created_at: string
+          id: string
+          negocio_id: string
+          reserva_id: string
+        }
+        Insert: {
+          cliente_id: string
+          created_at?: string
+          id?: string
+          negocio_id: string
+          reserva_id: string
+        }
+        Update: {
+          cliente_id?: string
+          created_at?: string
+          id?: string
+          negocio_id?: string
+          reserva_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_conversacion_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_conversacion_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_conversacion_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: true
+            referencedRelation: "reserva"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_lectura: {
+        Row: {
+          conversacion_id: string
+          leido_hasta: string
+          usuario_id: string
+        }
+        Insert: {
+          conversacion_id: string
+          leido_hasta: string
+          usuario_id: string
+        }
+        Update: {
+          conversacion_id?: string
+          leido_hasta?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_lectura_conversacion_id_fkey"
+            columns: ["conversacion_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversacion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_lectura_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_mensaje: {
+        Row: {
+          autor_id: string
+          autor_rol: string
+          conversacion_id: string
+          created_at: string
+          cuerpo: string
+          id: string
+        }
+        Insert: {
+          autor_id: string
+          autor_rol: string
+          conversacion_id: string
+          created_at?: string
+          cuerpo: string
+          id?: string
+        }
+        Update: {
+          autor_id?: string
+          autor_rol?: string
+          conversacion_id?: string
+          created_at?: string
+          cuerpo?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_mensaje_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_mensaje_conversacion_id_fkey"
+            columns: ["conversacion_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversacion"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ciudad_habilitada: {
         Row: {
           ciudad: string
@@ -825,35 +987,120 @@ export type Database = {
           },
         ]
       }
+      cliente_preferencia: {
+        Row: {
+          onboarding_completo: boolean
+          permiso_notificaciones: string | null
+          permiso_ubicacion: string | null
+          updated_at: string
+          usuario_id: string
+        }
+        Insert: {
+          onboarding_completo?: boolean
+          permiso_notificaciones?: string | null
+          permiso_ubicacion?: string | null
+          updated_at?: string
+          usuario_id: string
+        }
+        Update: {
+          onboarding_completo?: boolean
+          permiso_notificaciones?: string | null
+          permiso_ubicacion?: string | null
+          updated_at?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cliente_preferencia_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: true
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       configuracion_plataforma: {
         Row: {
+          app_version_actual: string | null
+          app_version_minima: string | null
           comision_plataforma_pct_default: number
           cpc_destacado_cop: number
           cpc_pin_cop: number
           cpm_pin_cop: number
           id: boolean
+          mantenimiento_activo: boolean
+          mantenimiento_fin_estimado: string | null
+          mantenimiento_inicio: string | null
+          mantenimiento_mensaje: string | null
           updated_at: string
           updated_by: string | null
         }
         Insert: {
+          app_version_actual?: string | null
+          app_version_minima?: string | null
           comision_plataforma_pct_default?: number
           cpc_destacado_cop?: number
           cpc_pin_cop?: number
           cpm_pin_cop?: number
           id?: boolean
+          mantenimiento_activo?: boolean
+          mantenimiento_fin_estimado?: string | null
+          mantenimiento_inicio?: string | null
+          mantenimiento_mensaje?: string | null
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
+          app_version_actual?: string | null
+          app_version_minima?: string | null
           comision_plataforma_pct_default?: number
           cpc_destacado_cop?: number
           cpc_pin_cop?: number
           cpm_pin_cop?: number
           id?: boolean
+          mantenimiento_activo?: boolean
+          mantenimiento_fin_estimado?: string | null
+          mantenimiento_inicio?: string | null
+          mantenimiento_mensaje?: string | null
           updated_at?: string
           updated_by?: string | null
         }
         Relationships: []
+      }
+      consentimiento_evento: {
+        Row: {
+          created_at: string
+          id: string
+          origen: string
+          otorgado: boolean
+          proposito: string
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          origen: string
+          otorgado: boolean
+          proposito: string
+          usuario_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          origen?: string
+          otorgado?: boolean
+          proposito?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consentimiento_evento_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       corporativo_consumo: {
         Row: {
@@ -1779,6 +2026,27 @@ export type Database = {
           },
         ]
       }
+      marca_aliada: {
+        Row: {
+          activa: boolean
+          created_at: string
+          id: string
+          nombre: string
+        }
+        Insert: {
+          activa?: boolean
+          created_at?: string
+          id?: string
+          nombre: string
+        }
+        Update: {
+          activa?: boolean
+          created_at?: string
+          id?: string
+          nombre?: string
+        }
+        Relationships: []
+      }
       membresia_plan: {
         Row: {
           activo: boolean
@@ -2272,6 +2540,120 @@ export type Database = {
           },
         ]
       }
+      notificacion_usuario: {
+        Row: {
+          created_at: string
+          cuerpo: string
+          dedupe_key: string | null
+          id: string
+          leida_at: string | null
+          negocio_id: string | null
+          reserva_id: string | null
+          tipo: string
+          titulo: string
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string
+          cuerpo: string
+          dedupe_key?: string | null
+          id?: string
+          leida_at?: string | null
+          negocio_id?: string | null
+          reserva_id?: string | null
+          tipo: string
+          titulo: string
+          usuario_id: string
+        }
+        Update: {
+          created_at?: string
+          cuerpo?: string
+          dedupe_key?: string | null
+          id?: string
+          leida_at?: string | null
+          negocio_id?: string | null
+          reserva_id?: string | null
+          tipo?: string
+          titulo?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacion_usuario_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacion_usuario_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reserva"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacion_usuario_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oferta_negocio: {
+        Row: {
+          activa: boolean
+          created_at: string
+          descripcion: string | null
+          dias_semana: number[] | null
+          id: string
+          negocio_id: string
+          tipo_descuento: string
+          titulo: string
+          updated_at: string
+          valor: number | null
+          vigente_desde: string
+          vigente_hasta: string | null
+        }
+        Insert: {
+          activa?: boolean
+          created_at?: string
+          descripcion?: string | null
+          dias_semana?: number[] | null
+          id?: string
+          negocio_id: string
+          tipo_descuento: string
+          titulo: string
+          updated_at?: string
+          valor?: number | null
+          vigente_desde?: string
+          vigente_hasta?: string | null
+        }
+        Update: {
+          activa?: boolean
+          created_at?: string
+          descripcion?: string | null
+          dias_semana?: number[] | null
+          id?: string
+          negocio_id?: string
+          tipo_descuento?: string
+          titulo?: string
+          updated_at?: string
+          valor?: number | null
+          vigente_desde?: string
+          vigente_hasta?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oferta_negocio_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pago: {
         Row: {
           comision_plataforma_monto: number | null
@@ -2446,7 +2828,9 @@ export type Database = {
           es_supersu: boolean
           fecha_nacimiento: string | null
           id: string
+          locale: string
           nombre: string
+          pais: string | null
           password_establecida: boolean
           session_version: number
           telefono: string | null
@@ -2462,7 +2846,9 @@ export type Database = {
           es_supersu?: boolean
           fecha_nacimiento?: string | null
           id: string
+          locale?: string
           nombre: string
+          pais?: string | null
           password_establecida?: boolean
           session_version?: number
           telefono?: string | null
@@ -2478,7 +2864,9 @@ export type Database = {
           es_supersu?: boolean
           fecha_nacimiento?: string | null
           id?: string
+          locale?: string
           nombre?: string
+          pais?: string | null
           password_establecida?: boolean
           session_version?: number
           telefono?: string | null
@@ -2882,6 +3270,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      purga_storage_pendiente: {
+        Row: {
+          bucket: string
+          created_at: string
+          id: string
+          ruta: string
+        }
+        Insert: {
+          bucket: string
+          created_at?: string
+          id?: string
+          ruta: string
+        }
+        Update: {
+          bucket?: string
+          created_at?: string
+          id?: string
+          ruta?: string
+        }
+        Relationships: []
       }
       recompensa_regla: {
         Row: {
@@ -3389,9 +3798,12 @@ export type Database = {
       reserva_foto: {
         Row: {
           cliente_id: string
+          compartida: boolean
+          compartida_at: string | null
           consentimiento: boolean
           created_at: string
           id: string
+          momento: string | null
           negocio_id: string
           reserva_id: string
           subido_por: string
@@ -3399,9 +3811,12 @@ export type Database = {
         }
         Insert: {
           cliente_id: string
+          compartida?: boolean
+          compartida_at?: string | null
           consentimiento: boolean
           created_at?: string
           id?: string
+          momento?: string | null
           negocio_id: string
           reserva_id: string
           subido_por: string
@@ -3409,9 +3824,12 @@ export type Database = {
         }
         Update: {
           cliente_id?: string
+          compartida?: boolean
+          compartida_at?: string | null
           consentimiento?: boolean
           created_at?: string
           id?: string
+          momento?: string | null
           negocio_id?: string
           reserva_id?: string
           subido_por?: string
@@ -3871,6 +4289,94 @@ export type Database = {
             columns: ["servicio_id"]
             isOneToOne: false
             referencedRelation: "servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      solicitud_cuenta: {
+        Row: {
+          auth_cerrada: boolean
+          cancelada_at: string | null
+          created_at: string
+          ejecutada_at: string | null
+          error: string | null
+          estado: string
+          id: string
+          intentos: number
+          programada_para: string | null
+          tipo: string
+          usuario_id: string
+        }
+        Insert: {
+          auth_cerrada?: boolean
+          cancelada_at?: string | null
+          created_at?: string
+          ejecutada_at?: string | null
+          error?: string | null
+          estado: string
+          id?: string
+          intentos?: number
+          programada_para?: string | null
+          tipo: string
+          usuario_id: string
+        }
+        Update: {
+          auth_cerrada?: boolean
+          cancelada_at?: string | null
+          created_at?: string
+          ejecutada_at?: string | null
+          error?: string | null
+          estado?: string
+          id?: string
+          intentos?: number
+          programada_para?: string | null
+          tipo?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitud_cuenta_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      solicitud_devolucion_saldo: {
+        Row: {
+          cliente_id: string
+          created_at: string
+          estado: string
+          id: string
+          monto: number
+          origen: string
+          resuelta_at: string | null
+        }
+        Insert: {
+          cliente_id: string
+          created_at?: string
+          estado?: string
+          id?: string
+          monto: number
+          origen?: string
+          resuelta_at?: string | null
+        }
+        Update: {
+          cliente_id?: string
+          created_at?: string
+          estado?: string
+          id?: string
+          monto?: number
+          origen?: string
+          resuelta_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitud_devolucion_saldo_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
             referencedColumns: ["id"]
           },
         ]
@@ -4825,6 +5331,20 @@ export type Database = {
       }
     }
     Functions: {
+      _chat_rol: { Args: { p_reserva_id: string }; Returns: string }
+      _consentimiento_registrar: {
+        Args: {
+          p_origen: string
+          p_otorgado: boolean
+          p_proposito: string
+          p_usuario: string
+        }
+        Returns: boolean
+      }
+      _consentimiento_vigente: {
+        Args: { p_proposito: string; p_usuario: string }
+        Returns: boolean
+      }
       _lealtad_acreditar: {
         Args: {
           p_cliente_id: string
@@ -4839,6 +5359,20 @@ export type Database = {
         Returns: undefined
       }
       _lealtad_wallet_id: { Args: { p_cliente_id: string }; Returns: string }
+      _notificar: {
+        Args: {
+          p_cuerpo_en: string
+          p_cuerpo_es: string
+          p_dedupe?: string
+          p_negocio?: string
+          p_reserva?: string
+          p_tipo: string
+          p_titulo_en: string
+          p_titulo_es: string
+          p_usuario: string
+        }
+        Returns: undefined
+      }
       _pipeline_ai_atribuir_conversion: {
         Args: { p_evento: Json }
         Returns: undefined
@@ -5025,11 +5559,17 @@ export type Database = {
       actualizar_comision_plataforma_global: {
         Args: { p_pct: number }
         Returns: {
+          app_version_actual: string | null
+          app_version_minima: string | null
           comision_plataforma_pct_default: number
           cpc_destacado_cop: number
           cpc_pin_cop: number
           cpm_pin_cop: number
           id: boolean
+          mantenimiento_activo: boolean
+          mantenimiento_fin_estimado: string | null
+          mantenimiento_inicio: string | null
+          mantenimiento_mensaje: string | null
           updated_at: string
           updated_by: string | null
         }
@@ -5060,6 +5600,13 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      actualizar_idioma_region: {
+        Args: { p_locale: string; p_pais: string }
+        Returns: {
+          locale: string
+          pais: string
+        }[]
       }
       actualizar_modelo_config_ia: {
         Args: {
@@ -5180,11 +5727,17 @@ export type Database = {
       actualizar_tarifas_ads: {
         Args: { p_cpc_destacado: number; p_cpc_pin: number; p_cpm_pin: number }
         Returns: {
+          app_version_actual: string | null
+          app_version_minima: string | null
           comision_plataforma_pct_default: number
           cpc_destacado_cop: number
           cpc_pin_cop: number
           cpm_pin_cop: number
           id: boolean
+          mantenimiento_activo: boolean
+          mantenimiento_fin_estimado: string | null
+          mantenimiento_inicio: string | null
+          mantenimiento_mensaje: string | null
           updated_at: string
           updated_by: string | null
         }
@@ -5634,6 +6187,11 @@ export type Database = {
           tipo: string
         }[]
       }
+      beneficios_marcas: { Args: never; Returns: Json }
+      beneficios_marcas_consentir: {
+        Args: { p_otorgado: boolean }
+        Returns: Json
+      }
       bloquear_gift_card: {
         Args: { p_gift_card_id: string; p_motivo: string }
         Returns: {
@@ -5665,6 +6223,34 @@ export type Database = {
       calcular_sena: {
         Args: { p_monto_total: number; p_negocio_id: string }
         Returns: number
+      }
+      calificar_visita: {
+        Args: {
+          p_calificacion: number
+          p_comentario?: string
+          p_reserva_id: string
+        }
+        Returns: {
+          calificacion: number
+          cliente_id: string
+          comentario: string | null
+          created_at: string
+          estado: Database["public"]["Enums"]["resena_estado"]
+          id: string
+          moderado_motivo: string | null
+          moderado_por: string | null
+          negocio_id: string
+          reserva_id: string
+          respuesta_negocio: string | null
+          staff_id: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "resena"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       cancelar_downgrade_programado: {
         Args: { p_negocio_id: string }
@@ -5701,6 +6287,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      cancelar_eliminacion_cuenta: { Args: never; Returns: boolean }
       cancelar_invitacion: {
         Args: { p_invitacion_id: string }
         Returns: undefined
@@ -5866,8 +6453,79 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      chat_enviar: {
+        Args: { p_cuerpo: string; p_reserva_id: string }
+        Returns: {
+          autor_rol: string
+          created_at: string
+          cuerpo: string
+          es_mio: boolean
+          id: string
+        }[]
+      }
+      chat_listar: {
+        Args: { p_antes?: string; p_limite?: number; p_reserva_id: string }
+        Returns: {
+          autor_rol: string
+          created_at: string
+          cuerpo: string
+          es_mio: boolean
+          id: string
+          leido_por_otro: boolean
+        }[]
+      }
+      chat_marcar_leido: { Args: { p_reserva_id: string }; Returns: boolean }
       cierre_caja_dia: {
         Args: { p_fecha?: string; p_negocio_id: string; p_sede_id?: string }
+        Returns: Json
+      }
+      cliente_crear_ticket: {
+        Args: { p_categoria: string; p_mensaje: string; p_reserva_id?: string }
+        Returns: {
+          asunto: string
+          creado_por: string
+          created_at: string
+          estado: Database["public"]["Enums"]["ticket_soporte_estado"]
+          id: string
+          negocio_id: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ticket_soporte"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      cliente_listar_tickets: {
+        Args: { p_limite?: number }
+        Returns: {
+          asunto: string
+          categoria: string
+          codigo: string
+          created_at: string
+          estado: string
+          ticket_id: string
+          updated_at: string
+        }[]
+      }
+      cliente_ticket_mensajes: {
+        Args: { p_ticket_id: string }
+        Returns: {
+          actor_tipo: string
+          created_at: string
+          es_mio: boolean
+          id: string
+          mensaje: string
+        }[]
+      }
+      completar_registro: {
+        Args: {
+          p_locale?: string
+          p_marketing?: boolean
+          p_nombre: string
+          p_pais: string
+        }
         Returns: Json
       }
       completar_venta_pos: {
@@ -6785,6 +7443,18 @@ export type Database = {
         Args: { p_sede_id: string }
         Returns: undefined
       }
+      estado_sistema: {
+        Args: never
+        Returns: {
+          ahora: string
+          fin_estimado: string
+          inicio: string
+          mantenimiento: boolean
+          mensaje: string
+          version_actual: string
+          version_minima: string
+        }[]
+      }
       evaluar_ascenso_vip_automatico: {
         Args: { p_cliente_id: string; p_negocio_id: string }
         Returns: {
@@ -6812,6 +7482,7 @@ export type Database = {
         }[]
       }
       expirar_reservas_vencidas: { Args: never; Returns: number }
+      exportar_mis_datos: { Args: never; Returns: Json }
       finalizar_atencion_reserva: {
         Args: { p_reserva_id: string }
         Returns: {
@@ -6918,6 +7589,10 @@ export type Database = {
         }
       }
       fundador_cupos_restantes: { Args: { p_pais: string }; Returns: number }
+      generar_recordatorios_cita: {
+        Args: { p_ventana_horas?: number }
+        Returns: number
+      }
       generar_roi_snapshot_mensual: { Args: never; Returns: Json }
       guardar_marca_negocio: {
         Args: {
@@ -6968,6 +7643,26 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "ai_memoria_negocio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      guardar_permisos: {
+        Args: {
+          p_completar?: boolean
+          p_notificaciones: string
+          p_ubicacion: string
+        }
+        Returns: {
+          onboarding_completo: boolean
+          permiso_notificaciones: string | null
+          permiso_ubicacion: string | null
+          updated_at: string
+          usuario_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "cliente_preferencia"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -7192,6 +7887,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      marcar_llegada: {
+        Args: { p_lat?: number; p_lng?: number; p_reserva_id: string }
+        Returns: string
+      }
       marcar_negocio_en_mora: {
         Args: { p_motivo: string; p_negocio_id: string }
         Returns: {
@@ -7257,6 +7956,41 @@ export type Database = {
           total_resenas: number
         }[]
       }
+      marketplace_buscar_filtrado: {
+        Args: {
+          p_abierto_hoy?: boolean
+          p_calif_min?: number
+          p_categoria?: string
+          p_ciudad?: string
+          p_lat?: number
+          p_limite?: number
+          p_lng?: number
+          p_offset?: number
+          p_orden?: string
+          p_radio_km?: number
+          p_texto?: string
+        }
+        Returns: {
+          calificacion: number
+          campana_id: string
+          categoria: string[]
+          ciudad: string
+          descripcion: string
+          distancia_km: number
+          id: string
+          logo_url: string
+          nombre: string
+          patrocinado: boolean
+          precio_desde: number
+          proxima_disponibilidad: string
+          sede_id: string
+          sede_latitud: number
+          sede_longitud: number
+          slug: string
+          total_count: number
+          total_resenas: number
+        }[]
+      }
       marketplace_ciudades_disponibles: {
         Args: never
         Returns: {
@@ -7286,6 +8020,7 @@ export type Database = {
           negocio_nombre: string
         }[]
       }
+      mi_cita_detalle: { Args: { p_reserva_id: string }; Returns: Json }
       mi_familia: {
         Args: never
         Returns: {
@@ -7306,6 +8041,24 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      mi_look_compartir: {
+        Args: { p_compartir: boolean; p_foto_id: string }
+        Returns: boolean
+      }
+      mi_look_listar: {
+        Args: { p_limite?: number }
+        Returns: {
+          compartida: boolean
+          foto_id: string
+          hora_inicio: string
+          momento: string
+          negocio_nombre: string
+          reserva_id: string
+          servicios: string
+          staff_nombre: string
+          url: string
+        }[]
+      }
       mi_nivel_vip: {
         Args: { p_negocio_id: string }
         Returns: {
@@ -7314,6 +8067,7 @@ export type Database = {
           orden: number
         }[]
       }
+      mi_saldo: { Args: never; Returns: Json }
       mi_vinculo: {
         Args: never
         Returns: {
@@ -7335,6 +8089,18 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      mis_pagos: {
+        Args: { p_filtro?: string; p_limite?: number }
+        Returns: {
+          categoria: string
+          concepto: string
+          estado: string
+          fecha: string
+          monto: number
+          negocio_nombre: string
+          referencia_id: string
+        }[]
+      }
       mis_referidos: {
         Args: never
         Returns: {
@@ -7345,6 +8111,7 @@ export type Database = {
           monto_recompensa: number
         }[]
       }
+      mis_referidos_detalle: { Args: never; Returns: Json }
       mis_referidos_staff: {
         Args: { p_negocio_id: string }
         Returns: {
@@ -7431,6 +8198,22 @@ export type Database = {
         Args: { p_negocio_id: string }
         Returns: boolean
       }
+      notificacion_marcar_leida: { Args: { p_id: string }; Returns: boolean }
+      notificaciones_listar: {
+        Args: { p_limite?: number; p_solo_no_leidas?: boolean }
+        Returns: {
+          created_at: string
+          cuerpo: string
+          id: string
+          leida: boolean
+          negocio_id: string
+          reserva_id: string
+          tipo: string
+          titulo: string
+        }[]
+      }
+      notificaciones_marcar_todas_leidas: { Args: never; Returns: number }
+      notificaciones_no_leidas: { Args: never; Returns: number }
       obtener_mi_codigo_referido: {
         Args: never
         Returns: {
@@ -7445,6 +8228,29 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      obtener_preferencias: { Args: never; Returns: Json }
+      ofertas_cercanas: {
+        Args: {
+          p_lat?: number
+          p_limite?: number
+          p_lng?: number
+          p_radio_km?: number
+        }
+        Returns: {
+          descripcion: string
+          dias_semana: number[]
+          distancia_km: number
+          negocio_id: string
+          negocio_nombre: string
+          oferta_id: string
+          sede_id: string
+          slug: string
+          tipo_descuento: string
+          titulo: string
+          valor: number
+          vigente_hasta: string
+        }[]
       }
       olvidar_memoria_ia: { Args: { p_memoria_id: string }; Returns: undefined }
       otorgar_creditos_plan_mensual: { Args: never; Returns: Json }
@@ -7475,6 +8281,31 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      privacidad_estado: {
+        Args: never
+        Returns: {
+          desde: string
+          otorgado: boolean
+          proposito: string
+        }[]
+      }
+      privacidad_guardar: {
+        Args: { p_preferencias: Json }
+        Returns: {
+          desde: string
+          otorgado: boolean
+          proposito: string
+        }[]
+      }
+      privacidad_historial: {
+        Args: { p_limite?: number }
+        Returns: {
+          fecha: string
+          proposito: string
+          tipo: string
+          valor: string
+        }[]
       }
       promover_guardian: {
         Args: { p_vinculo_id: string }
@@ -8088,6 +8919,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      resumen_eliminacion_cuenta: { Args: never; Returns: Json }
       retirar_empleado_corporativo: {
         Args: { p_cliente_id: string; p_cuenta_id: string }
         Returns: undefined
@@ -8183,6 +9015,24 @@ export type Database = {
           staff_id: string
         }[]
       }
+      solicitar_devolucion_saldo: {
+        Args: { p_monto?: number }
+        Returns: {
+          cliente_id: string
+          created_at: string
+          estado: string
+          id: string
+          monto: number
+          origen: string
+          resuelta_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "solicitud_devolucion_saldo"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       solicitar_downgrade_plan: {
         Args: {
           p_negocio_id: string
@@ -8217,6 +9067,28 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "suscripcion"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      solicitar_eliminacion_cuenta: {
+        Args: { p_confirmacion: string }
+        Returns: {
+          auth_cerrada: boolean
+          cancelada_at: string | null
+          created_at: string
+          ejecutada_at: string | null
+          error: string | null
+          estado: string
+          id: string
+          intentos: number
+          programada_para: string | null
+          tipo: string
+          usuario_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "solicitud_cuenta"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -8270,6 +9142,38 @@ export type Database = {
       staff_mis_propinas: {
         Args: { p_desde?: string; p_hasta?: string }
         Returns: number
+      }
+      staff_perfil_publico: {
+        Args: { p_negocio_id: string; p_staff_id: string }
+        Returns: Json
+      }
+      staff_resenas_publicas: {
+        Args: {
+          p_limite?: number
+          p_negocio_id: string
+          p_offset?: number
+          p_staff_id: string
+        }
+        Returns: {
+          calificacion: number
+          cliente_nombre: string
+          comentario: string
+          created_at: string
+          id: string
+          respuesta_negocio: string
+          servicios: string
+        }[]
+      }
+      supersu_configurar_sistema: {
+        Args: {
+          p_fin_estimado?: string
+          p_inicio?: string
+          p_mantenimiento: boolean
+          p_mensaje?: string
+          p_version_actual?: string
+          p_version_minima?: string
+        }
+        Returns: undefined
       }
       suscribirse_membresia: {
         Args: { p_plan_id: string }

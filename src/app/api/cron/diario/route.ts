@@ -53,5 +53,68 @@ export async function GET(request: NextRequest) {
     resultado.suscripciones = { error: e instanceof Error ? e.message : "error inesperado" };
   }
 
+  // --- Cliente (C01 / C15): tareas defensivas; un fallo aquí no afecta a las anteriores. ---
+  try {
+    const { data, error } = await admin.rpc("generar_recordatorios_cita", { p_ventana_horas: 24 });
+    resultado.recordatorios_cita = error ? { error: error.message } : data;
+  } catch (e) {
+    resultado.recordatorios_cita = { error: e instanceof Error ? e.message : "error inesperado" };
+  }
+
+  try {
+    resultado.eliminacion_cuentas = await procesarEliminacionesCuenta(admin);
+  } catch (e) {
+    resultado.eliminacion_cuentas = { error: e instanceof Error ? e.message : "error inesperado" };
+  }
+
   return Response.json({ ok: true, ejecutado_at: new Date().toISOString(), ...resultado });
+}
+
+type AdminClient = ReturnType<typeof createAdminClient>;
+type RpcSinTipos = {
+  rpc: (n: string, a?: object) => Promise<{ data: unknown; error: { message: string } | null }>;
+};
+
+/**
+ * Eliminación de cuentas de cliente tras el periodo de gracia (migraciones 099/100):
+ * 1) RPC `procesar_eliminaciones_cuenta` anonimiza datos del cliente en la BD;
+ * 2) la cuenta de acceso se inhabilita con la Admin API de Auth (soft delete: sin login, email liberado);
+ * 3) se purgan del storage las fotos My Look encoladas.
+ * Si la migración 100 aún no está aplicada, el RPC falla y se reporta sin romper el cron.
+ */
+async function procesarEliminacionesCuenta(admin: AdminClient) {
+  const out: Record<string, unknown> = {};
+  const sinTipos = admin as unknown as RpcSinTipos;
+
+  const { data: proc, error: eProc } = await sinTipos.rpc("procesar_eliminaciones_cuenta", { p_limite: 20 });
+  out.anonimizacion = eProc ? { error: eProc.message } : proc;
+
+  const { data: pendientes } = await admin
+    .from("solicitud_cuenta")
+    .select("id, usuario_id")
+    .eq("tipo", "ELIMINACION")
+    .eq("estado", "EJECUTADA")
+    .eq("auth_cerrada", false)
+    .limit(20);
+  let cerradas = 0;
+  for (const s of pendientes ?? []) {
+    const { error } = await admin.auth.admin.deleteUser(s.usuario_id, true);
+    if (!error) {
+      await sinTipos.rpc("marcar_auth_cerrada", { p_solicitud_id: s.id });
+      cerradas += 1;
+    }
+  }
+  out.auth_cerradas = cerradas;
+
+  const { data: archivos } = await admin.from("purga_storage_pendiente").select("id, bucket, ruta").limit(100);
+  let purgados = 0;
+  for (const a of archivos ?? []) {
+    const { error } = await admin.storage.from(a.bucket).remove([a.ruta]);
+    if (!error) {
+      await admin.from("purga_storage_pendiente").delete().eq("id", a.id);
+      purgados += 1;
+    }
+  }
+  out.archivos_purgados = purgados;
+  return out;
 }

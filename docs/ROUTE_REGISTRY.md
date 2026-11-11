@@ -10,6 +10,8 @@ Fuente de verdad ejecutable: el archivo `.ts`, nunca este documento.
 | `/legal` | Sí | — | proxy.ts |
 | `/negocio` | Sí | — | proxy.ts |
 | `/onboarding` | Sí | — | proxy.ts |
+| `/mantenimiento` | Sí | — | proxy.ts |
+| `/para-negocios` | Sí | — | proxy.ts |
 | `/auth/callback` | Sí | — | proxy.ts |
 | `/perfil` | No | cliente, staff, guardian, barberia | proxy.ts |
 | `/favoritos` | No | cliente | proxy.ts |
@@ -17,6 +19,15 @@ Fuente de verdad ejecutable: el archivo `.ts`, nunca este documento.
 | `/lealtad` | No | cliente | proxy.ts |
 | `/login/recuperar` | No | cliente, staff, guardian, barberia | proxy.ts |
 | `/membresias` | No | cliente | proxy.ts |
+| `/notificaciones` | No | cliente | proxy.ts |
+| `/ajustes` | No | cliente | proxy.ts |
+| `/ayuda` | No | cliente | proxy.ts |
+| `/privacidad` | No | cliente | proxy.ts |
+| `/cuenta` | No | cliente | proxy.ts |
+| `/mi-look` | No | cliente | proxy.ts |
+| `/pagos` | No | cliente | proxy.ts |
+| `/referidos` | No | cliente | proxy.ts |
+| `/ofertas` | No | cliente | proxy.ts |
 | `/gift-cards` | No | cliente | proxy.ts |
 | `/checkout/membresia` | No | cliente | proxy.ts |
 | `/reserva` | No | cliente | proxy.ts |
@@ -34,6 +45,7 @@ Fuente de verdad ejecutable: el archivo `.ts`, nunca este documento.
 | `/panel/auditoria` | No | barberia, guardian | proxy.ts |
 | `/panel/wallet` | No | barberia, guardian | proxy.ts |
 | `/panel/ads` | No | barberia, guardian | proxy.ts |
+| `/panel/marca` | No | barberia | proxy.ts |
 | `/panel/suscripcion` | No | barberia, guardian | proxy.ts |
 | `/panel/reportes` | No | barberia, guardian | proxy.ts |
 | `/panel/lealtad` | No | barberia, guardian | proxy.ts |

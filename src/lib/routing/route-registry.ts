@@ -22,6 +22,7 @@ export const RUTAS: RutaRegistro[] = [
   { path: "/legal", publica: true, dinamica: true },
   { path: "/negocio", publica: true, dinamica: true },
   { path: "/onboarding", publica: true },
+  { path: "/mantenimiento", publica: true },
   // Landing B2B (W01): precios por país, cupos fundador y alta del negocio. Pública.
   { path: "/para-negocios", publica: true },
   // El usuario llega acá SIN sesión todavía (magic link, recuperación de
@@ -39,6 +40,16 @@ export const RUTAS: RutaRegistro[] = [
   { path: "/lealtad", publica: false, roles: ["cliente"] },
   { path: "/login/recuperar", publica: false, roles: ["cliente", "staff", "guardian", "barberia"] },
   { path: "/membresias", publica: false, roles: ["cliente"] },
+  // Pantallas del cliente C01-C17 (prototipo StylerNow-codigo)
+  { path: "/notificaciones", publica: false, roles: ["cliente"] },
+  { path: "/ajustes", publica: false, roles: ["cliente"] },
+  { path: "/ayuda", publica: false, roles: ["cliente"] },
+  { path: "/privacidad", publica: false, roles: ["cliente"] },
+  { path: "/cuenta", publica: false, roles: ["cliente"] },
+  { path: "/mi-look", publica: false, roles: ["cliente"] },
+  { path: "/pagos", publica: false, roles: ["cliente"] },
+  { path: "/referidos", publica: false, roles: ["cliente"] },
+  { path: "/ofertas", publica: false, roles: ["cliente"] },
   { path: "/gift-cards", publica: false, roles: ["cliente"] },
   { path: "/checkout/membresia", publica: false, roles: ["cliente"], dinamica: true },
   { path: "/reserva", publica: false, roles: ["cliente"], dinamica: true },
