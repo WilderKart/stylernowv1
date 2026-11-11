@@ -69,7 +69,7 @@ export async function iniciarPagoSena(reservaId: string): Promise<ResultadoInici
   try {
     const preferencia = await crearPreferencia({
       pagoId: pago.id,
-      titulo: `Seña · ${nombreNegocio}`,
+      titulo: `Anticipo · ${nombreNegocio}`,
       monto: Number(pago.monto),
       emailPagador: user.email,
       urlRetorno: `${sitio}/reserva/${reservaId}?desde=pago`,

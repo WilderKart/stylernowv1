@@ -22,7 +22,7 @@ const SLIDES = [
   {
     title: (
       <>
-        Paga tu seña
+        Paga tu anticipo
         <br />y <span className="sn-hot">asegura tu turno.</span>
       </>
     ),

@@ -193,7 +193,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
       <Filas>
         <Fila
           icono={<Ticket aria-hidden className="size-5" />}
-          titulo="Seña a pagar"
+          titulo="Anticipo a pagar"
           meta="Se descuenta del total el día de la cita"
           derecha={<span className="sn-price">{formatCOP(resumen.montoSena)}</span>}
         />
@@ -233,7 +233,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
       {/* Un solo botón de pago, deshabilitado tras el primer tap (05-API/01_Standards.md). */}
       <Pie>
         <Button size="lg" className="w-full" loading={iniciando} disabled={iniciando} onClick={pagar}>
-          Pagar seña {formatCOP(resumen.montoSena)}
+          Pagar anticipo {formatCOP(resumen.montoSena)}
         </Button>
       </Pie>
     </Pantalla>

@@ -685,7 +685,7 @@ function PanelCita({
           <div className="mt-5 flex flex-col gap-3">
             <Input label="Motivo (opcional)" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
             <p className="text-[11.5px] text-text-faint">
-              Cancelar desde el negocio siempre reembolsa el 100% de la Seña al Cliente.
+              Cancelar desde el negocio siempre reembolsa el 100% del Anticipo al Cliente.
             </p>
             <Button variant="danger" loading={cargando} onClick={onConfirmarCancelar}>
               Confirmar cancelación

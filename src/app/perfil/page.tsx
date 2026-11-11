@@ -1,5 +1,4 @@
 import { BottomNav } from "@/components/layout/bottom-nav";
-import { Avatar } from "@/components/brutal";
 import { Fila, Filas, Pantalla, Sec, Top } from "@/app/lealtad/ui-cliente";
 import { formatCOP } from "@/lib/utils";
 import {
@@ -23,6 +22,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { FormularioPerfil } from "./formulario-perfil";
+import { FotoPerfil } from "./foto-perfil";
 import { CambiarContrasena } from "./cambiar-contrasena";
 
 export const metadata = {
@@ -42,7 +42,7 @@ export default async function PerfilPage(props: PageProps<"/perfil">) {
   const [{ data: perfil }, { data: puntos }, { count: totalCitas }, { data: wallet }] = await Promise.all([
     supabase
       .from("perfil")
-      .select("nombre, telefono, email, fecha_nacimiento, categorias_interes, password_establecida")
+      .select("nombre, telefono, email, avatar_url, fecha_nacimiento, categorias_interes, password_establecida")
       .eq("id", user.id)
       .single(),
     supabase
@@ -64,12 +64,12 @@ export default async function PerfilPage(props: PageProps<"/perfil">) {
     <Pantalla className="pb-24">
       <Top titulo="05 / Perfil" />
 
-      <div className="flex items-center gap-4 p-4">
-        <Avatar name={nombre} size="lg" />
+      <div className="flex flex-col gap-3 p-4">
         <div className="min-w-0">
           <p className="poster-3 break-words">{nombre}</p>
           <span className="sn-meta break-all">{perfil?.email ?? user.email}</span>
         </div>
+        <FotoPerfil nombre={nombre} avatarUrl={perfil?.avatar_url ?? null} />
       </div>
 
       <section aria-label="Lealtad" className="sn-block-signal m-4 border-2 border-ink shadow-[var(--sn-shadow-hard)]">
@@ -80,7 +80,8 @@ export default async function PerfilPage(props: PageProps<"/perfil">) {
           </div>
           <ArrowUpRight aria-hidden className="size-6 shrink-0" strokeWidth={2} strokeLinecap="square" strokeLinejoin="miter" />
         </Link>
-        <div className="grid grid-cols-2 border-t-2 border-ink">
+        {/* Puntos y saldo sobre fondo blanco; el resto del bloque queda naranja. */}
+        <div className="grid grid-cols-2 border-t-2 border-ink bg-paper text-ink">
           <div className="min-w-0 border-r-2 border-ink p-4">
             <span className="sn-meta">Puntos</span>
             <div className="sn-fig text-2xl">{totalPuntos}</div>

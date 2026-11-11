@@ -39,7 +39,7 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
   const [{ data: sedes }, { data: servicios }, { data: staff }, { data: combosData }] = await Promise.all([
     supabase
       .from("sede")
-      .select("id, nombre, direccion, zona_horaria")
+      .select("id, nombre, direccion, zona_horaria, ciudad, latitud, longitud")
       .eq("negocio_id", negocio.id)
       .eq("cerrada_permanente", false)
       .eq("cerrada_temporalmente", false)

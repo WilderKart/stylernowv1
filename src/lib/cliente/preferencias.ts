@@ -29,8 +29,9 @@ export async function actualizarIdiomaRegion(pais: Pais, locale: Idioma): Promis
  */
 export function guardarPermisos(ubicacion: EstadoPermiso | null, notificaciones: EstadoPermiso | null, completarOnboarding = true): Promise<Resultado<unknown>> {
   return llamarRpc("guardar_permisos", {
-    ...(ubicacion ? { p_ubicacion: ubicacion } : {}),
-    ...(notificaciones ? { p_notificaciones: notificaciones } : {}),
+    // La función SQL no define default para p_ubicacion/p_notificaciones: PostgREST (PGRST202) exige enviar ambos, aunque sea null.
+    p_ubicacion: ubicacion,
+    p_notificaciones: notificaciones,
     p_completar: completarOnboarding,
   });
 }

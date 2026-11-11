@@ -5,6 +5,7 @@ import { Chip, EmptyState, Label, Meta, Num, Photo, Status, Tier } from "@/compo
 import { SlotsPorFranja } from "@/components/negocio/horas-agrupadas";
 import { FOTOS_RESPALDO, nivelATier } from "@/components/negocio/nivel";
 import { duracion, fechaCorta, fechaHoraLarga, fechaISO, hora, hoyISO, sumarDias } from "@/lib/formato";
+import { AvisoDistancia } from "./aviso-distancia";
 import { calcularSenaEstimada, resumenPoliticaCancelacion, type ConfigSena } from "@/lib/pagos/sena";
 import { cn, formatCOP } from "@/lib/utils";
 import Link from "next/link";
@@ -37,6 +38,9 @@ export interface Sede {
   nombre: string;
   direccion: string;
   zona_horaria: string;
+  ciudad?: string | null;
+  latitud?: number | null;
+  longitud?: number | null;
 }
 
 export interface Combo {
@@ -266,6 +270,9 @@ export function FlujoReserva({
           </li>
         ))}
       </ol>
+
+      {/* Aviso de distancia (no bloquea): evita reservar por error en otra ciudad. */}
+      <AvisoDistancia negocio={negocio.nombre} sede={sede} />
 
       <main className="flex-1 pb-4">
         {/* ── Paso 1 · Servicios ──────────────────────────────────── */}
@@ -588,7 +595,7 @@ export function FlujoReserva({
                 <span className="sn-price">{formatCOP(montoTotal)}</span>
               </div>
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b-2 border-line bg-signal px-4 py-3 text-ink">
-                <span className="sn-label">Seña a pagar ahora</span>
+                <span className="sn-label">Anticipo a pagar ahora</span>
                 <span className="sn-fig text-[22px]">{formatCOP(sena)}</span>
               </div>
             </div>

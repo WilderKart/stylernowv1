@@ -61,7 +61,7 @@ export function VistaCierreCaja({
             <p className="mt-1 text-[22px] font-bold text-text">{formatCOP(cierre.total)}</p>
           </Card>
           <p className="text-[11px] text-text-faint">
-            Incluye Señas, Saldos y Propinas cobrados y aprobados ese día — nunca ajusta discrepancias
+            Incluye Anticipos, Saldos y Propinas cobrados y aprobados ese día — nunca ajusta discrepancias
             automáticamente, solo muestra lo que quedó registrado.
           </p>
         </div>

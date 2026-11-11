@@ -35,10 +35,13 @@ export function ListaReservas({ reservas, ahora }: { reservas: ReservaItem[]; ah
     (r.estado === "CONFIRMADA" || r.estado === "PENDIENTE_PAGO" || r.estado === "EN_CURSO");
   const esCancelada = (r: ReservaItem) => r.estado === "CANCELADA" || r.estado === "NO_SHOW";
 
+  // Próximas: la primera en asistir (día y hora más cercanos) va arriba y las más lejanas al final.
+  // Pasadas y canceladas: la más reciente primero.
+  const porFecha = (a: ReservaItem, b: ReservaItem) => new Date(a.horaInicio).getTime() - new Date(b.horaInicio).getTime();
   const grupos: Record<Pestana, ReservaItem[]> = {
-    proximas: reservas.filter(esProxima),
-    canceladas: reservas.filter((r) => !esProxima(r) && esCancelada(r)),
-    pasadas: reservas.filter((r) => !esProxima(r) && !esCancelada(r)),
+    proximas: reservas.filter(esProxima).sort(porFecha),
+    canceladas: reservas.filter((r) => !esProxima(r) && esCancelada(r)).sort((a, b) => porFecha(b, a)),
+    pasadas: reservas.filter((r) => !esProxima(r) && !esCancelada(r)).sort((a, b) => porFecha(b, a)),
   };
   const visibles = grupos[pestana];
 

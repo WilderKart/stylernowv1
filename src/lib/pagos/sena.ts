@@ -1,5 +1,5 @@
 /**
- * Cálculo de la Seña (03-Business-Rules/03_Payment_Rules.md).
+ * Cálculo del Anticipo (03-Business-Rules/03_Payment_Rules.md).
  *
  * Espejo exacto de la función `calcular_sena` de la migración 008. Existe solo para
  * MOSTRAR el monto antes de confirmar: el valor que se cobra es siempre el que calcula
@@ -21,7 +21,7 @@ export function calcularSenaEstimada(config: ConfigSena, montoTotal: number) {
   const conMinimo = Math.max(base, config.sena_minimo);
   const conMaximo = Math.min(conMinimo, config.sena_maximo);
 
-  // La Seña nunca supera el total, ni siquiera cuando el mínimo del Negocio lo excede.
+  // El Anticipo nunca supera el total, ni siquiera cuando el mínimo del Negocio lo excede.
   return Math.min(conMaximo, montoTotal);
 }
 
@@ -32,9 +32,9 @@ export function resumenPoliticaCancelacion(negocio: {
   reembolso_parcial_pct: number;
 }) {
   return [
-    `Cancelás con más de ${negocio.ventana_reembolso_total_horas} h de anticipación: te devolvemos el 100% de la seña.`,
+    `Cancelás con más de ${negocio.ventana_reembolso_total_horas} h de anticipación: te devolvemos el 100% del anticipo.`,
     `Entre ${negocio.ventana_reembolso_total_horas} h y ${negocio.ventana_reembolso_parcial_horas} h antes: ${negocio.reembolso_parcial_pct}%.`,
-    `Con menos de ${negocio.ventana_reembolso_parcial_horas} h: la seña queda para el negocio por el espacio reservado.`,
+    `Con menos de ${negocio.ventana_reembolso_parcial_horas} h: el anticipo queda para el negocio por el espacio reservado.`,
     "Si el negocio cancela, te devolvemos el 100% siempre, sin importar cuándo.",
   ];
 }

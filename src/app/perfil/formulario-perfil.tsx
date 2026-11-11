@@ -32,8 +32,15 @@ export function FormularioPerfil({
   const [nombre, setNombre] = useState(nombreInicial);
   const [codigoPais, setCodigoPais] = useState(telefonoSeparado.codigo);
   const [telefonoLocal, setTelefonoLocal] = useState(telefonoSeparado.local);
-  const [fechaNacimiento, setFechaNacimiento] = useState(fechaNacimientoInicial);
+  // Cumpleaños: solo día y mes (se pide con calidez y no se exige el año). Si la persona ya tenía una fecha
+  // completa guardada se conserva su año; si no, se guarda con un año de referencia (bisiesto, para admitir 29/02).
+  const partes = /^(\d{4})-(\d{2})-(\d{2})$/.exec(fechaNacimientoInicial);
+  const anioGuardado = partes ? partes[1] : "2000";
+  const [mes, setMes] = useState(partes ? String(Number(partes[2])) : "");
+  const [dia, setDia] = useState(partes ? String(Number(partes[3])) : "");
   const [categorias, setCategorias] = useState<string[]>(categoriasInicial);
+  const diasDelMes = mes ? new Date(2000, Number(mes), 0).getDate() : 31;
+  const fechaNacimiento = mes && dia ? `${anioGuardado}-${mes.padStart(2, "0")}-${dia.padStart(2, "0")}` : "";
 
   const [guardando, setGuardando] = useState(false);
   const [cerrando, setCerrando] = useState(false);
@@ -45,7 +52,7 @@ export function FormularioPerfil({
   // nunca bloquea nada si se deja vacío.
   const faltantes = [
     !telefonoLocal && "celular",
-    !fechaNacimiento && "fecha de nacimiento",
+    !fechaNacimiento && "tu cumpleaños",
     categorias.length === 0 && "tus intereses",
   ].filter(Boolean) as string[];
 
@@ -138,19 +145,50 @@ export function FormularioPerfil({
               inputMode="numeric"
               placeholder="300 000 0000"
               value={telefonoLocal}
-              onChange={(e) => setTelefonoLocal(e.target.value.replace(/D/g, ""))}
+              onChange={(e) => setTelefonoLocal(e.target.value.replace(/\D/g, ""))}
               className="min-h-12 min-w-0 flex-1 basis-40 border-2 border-border bg-bg px-3 text-[15px] text-text outline-none placeholder:text-text-muted focus:shadow-hard"
             />
           </div>
         </div>
 
-        <Input
-          label="Fecha de nacimiento"
-          type="date"
-          max={new Date().toISOString().slice(0, 10)}
-          value={fechaNacimiento}
-          onChange={(e) => setFechaNacimiento(e.target.value)}
-        />
+        <div className="flex flex-col gap-2">
+          <span id="perfil-cumple" className="sn-label">
+            ¿Cuándo cumples años?
+          </span>
+          <div className="flex gap-2" role="group" aria-labelledby="perfil-cumple">
+            <select
+              value={dia}
+              onChange={(e) => setDia(e.target.value)}
+              aria-label="Día de tu cumpleaños"
+              className="min-h-12 min-w-0 flex-1 border-2 border-border bg-bg px-2.5 text-[15px] text-text outline-none focus:shadow-hard"
+            >
+              <option value="">Día</option>
+              {Array.from({ length: diasDelMes }, (_, i) => i + 1).map((d) => (
+                <option key={d} value={String(d)}>
+                  {d}
+                </option>
+              ))}
+            </select>
+            <select
+              value={mes}
+              onChange={(e) => {
+                setMes(e.target.value);
+                const max = e.target.value ? new Date(2000, Number(e.target.value), 0).getDate() : 31;
+                if (Number(dia) > max) setDia(String(max)); // p. ej. 31 → 30 al elegir abril
+              }}
+              aria-label="Mes de tu cumpleaños"
+              className="min-h-12 min-w-0 flex-[2] border-2 border-border bg-bg px-2.5 text-[15px] text-text outline-none focus:shadow-hard"
+            >
+              <option value="">Mes</option>
+              {["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"].map((m, i) => (
+                <option key={m} value={String(i + 1)}>
+                  {m}
+                </option>
+              ))}
+            </select>
+          </div>
+          <p className="sn-help">Solo día y mes: así te sorprendemos ese día. No te pedimos el año.</p>
+        </div>
 
         <div className="flex flex-col gap-2">
           <span className="sn-label">¿Qué te interesa?</span>

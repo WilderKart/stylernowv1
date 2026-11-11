@@ -30,7 +30,7 @@ export const metadata = {
 };
 
 const TITULO = {
-  PENDIENTE_PAGO: "Falta pagar la seña",
+  PENDIENTE_PAGO: "Falta pagar el anticipo",
   CONFIRMADA: "Turno confirmado",
   EN_CURSO: "Tu cita está en curso",
   COMPLETADA: "Cita completada",
@@ -215,7 +215,7 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
           lineas={[cita ? `Ticket ${cita.codigo}` : null, `${staff?.nombre ?? "Por asignar"} · ${hora} – ${horaFin}`, negocio?.nombre ?? "—"].filter((l): l is string => Boolean(l))}
           pie={
             <>
-              <span className="sn-label">{confirmada ? "Seña pagada" : "Seña"}</span>
+              <span className="sn-label">{confirmada ? "Anticipo pagada" : "Anticipo"}</span>
               <span className="sn-price">{formatCOP(Number(reserva.monto_sena))}</span>
             </>
           }
@@ -224,7 +224,7 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
           <p className="body-sm mt-4 break-words">
             {MOTIVOS[reserva.cancelado_motivo as keyof typeof MOTIVOS] ??
               (reserva.cancelado_por === "NEGOCIO"
-                ? "El negocio canceló la cita. Te devolvemos el 100% de la seña."
+                ? "El negocio canceló la cita. Te devolvemos el 100% del anticipo."
                 : "La reserva quedó cancelada.")}
           </p>
         ) : null}
@@ -266,7 +266,7 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
         />
         <Fila
           icono={<Wallet aria-hidden className="size-5" />}
-          titulo="Seña"
+          titulo="Anticipo"
           meta={confirmada && saldoLocal > 0 ? `Pagas ${formatCOP(saldoLocal)} en el local al terminar` : undefined}
           derecha={
             <>
@@ -312,15 +312,15 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
       {confirmada ? (
         <Bloque etiqueta="00 / Política">
           {pct === 0
-            ? "Estás dentro de la ventana sin reembolso: si cancelas ahora, la seña queda para el negocio."
-            : `Si cancelas ahora te devolvemos ${formatCOP(reembolsoEstimado)} (${pct}% de la seña).`}
+            ? "Estás dentro de la ventana sin reembolso: si cancelas ahora, el anticipo queda para el negocio."
+            : `Si cancelas ahora te devolvemos ${formatCOP(reembolsoEstimado)} (${pct}% del anticipo).`}
         </Bloque>
       ) : null}
 
       {reserva.estado === "PENDIENTE_PAGO" ? (
         <Pie>
           <Button asChild size="lg" className="w-full">
-            <Link href={`/reserva/${reserva.id}/pago`}>Pagar seña y confirmar</Link>
+            <Link href={`/reserva/${reserva.id}/pago`}>Pagar anticipo y confirmar</Link>
           </Button>
         </Pie>
       ) : null}

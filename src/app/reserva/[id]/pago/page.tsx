@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { PantallaPago } from "./pantalla-pago";
 
 export const metadata = {
-  title: "Pagar seña",
+  title: "Pagar anticipo",
   robots: { index: false, follow: false },
 };
 

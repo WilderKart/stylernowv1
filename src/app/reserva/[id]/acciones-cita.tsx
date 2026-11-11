@@ -155,7 +155,7 @@ export function Reprogramar({ reservaId, tz }: { reservaId: string; tz: string }
       <Fila
         icono={<CalendarCheck aria-hidden className="size-5" />}
         titulo="Reprogramar"
-        meta="Cambia el día u hora sin perder tu seña"
+        meta="Cambia el día u hora sin perder tu anticipo"
         onClick={() => setAbierto(true)}
       />
     );

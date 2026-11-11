@@ -46,7 +46,7 @@ export function BotonCancelar({
         titulo="Cancelar cita"
         meta={
           reembolsoPct === 0
-            ? "Sin reembolso de la seña en este momento"
+            ? "Sin reembolso del anticipo en este momento"
             : `Te devolvemos ${formatCOP(reembolsoEstimado)} si cancelas ahora`
         }
         peligro
@@ -60,8 +60,8 @@ export function BotonCancelar({
       <h3 className="section">¿Cancelamos tu turno?</h3>
       <p className="body-sm mt-2 break-words">
         {reembolsoPct === 0
-          ? "Estás dentro de la ventana sin reembolso: la seña queda para el negocio por el espacio reservado."
-          : `Te devolvemos ${formatCOP(reembolsoEstimado)} (${reembolsoPct}% de la seña) al mismo medio de pago.`}
+          ? "Estás dentro de la ventana sin reembolso: el anticipo queda para el negocio por el espacio reservado."
+          : `Te devolvemos ${formatCOP(reembolsoEstimado)} (${reembolsoPct}% del anticipo) al mismo medio de pago.`}
       </p>
 
       {error ? (

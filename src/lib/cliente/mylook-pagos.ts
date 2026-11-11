@@ -28,7 +28,10 @@ export async function listarMyLook(limite = 60): Promise<Resultado<FotoMyLook[]>
   const supabase = await createClient();
   const data = await Promise.all(
     r.data.map(async (f) => {
-      const { data: s } = await supabase.storage.from("crm-fotos").createSignedUrl(f.url, 3600);
+      // El panel del negocio guarda hoy la URL pública completa (getPublicUrl) en vez de la ruta del bucket;
+      // el bucket es privado, así que se extrae la ruta para poder firmarla (acepta ambas formas).
+      const ruta = /^https?:\/\//i.test(f.url) ? decodeURIComponent(f.url.split(/\/crm-fotos\//)[1]?.split("?")[0] ?? f.url) : f.url;
+      const { data: s } = await supabase.storage.from("crm-fotos").createSignedUrl(ruta, 3600);
       return { ...f, url_firmada: s?.signedUrl ?? null };
     })
   );

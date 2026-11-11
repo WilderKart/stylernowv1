@@ -5,7 +5,7 @@ import "server-only";
  * pasarela (`pais.pasarela`). Añadir Stripe o Payoneer = completar su adaptador y activar
  * `pais.cobro_recurrente_habilitado`; ningún otro archivo del flujo de planes cambia.
  *
- * Los cobros de reservas (seña) siguen por `src/lib/pagos/mercadopago.ts`; esto es aparte.
+ * Los cobros de reservas (anticipo) siguen por `src/lib/pagos/mercadopago.ts`; esto es aparte.
  */
 export type PasarelaId = "MERCADOPAGO" | "STRIPE" | "PAYONEER" | "MANUAL";
 
