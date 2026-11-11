@@ -165,7 +165,7 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
               hecha.
             </h1>
           </div>
-          <Marquee text={`Nos vemos · ${dm.dia} ${dm.mes} · ${hora}`} tone="ink" />
+          <Marquee text={`Nos vemos el ${dm.dia} ${dm.mes} a las ${hora} ✶ Llega 5 minutos antes ✶ Tu profesional ya te espera`} tone="ink" />
         </>
       ) : (
         <Top titulo="Detalle de cita" volverA="/mis-reservas" />

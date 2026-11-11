@@ -1,3 +1,4 @@
+import { BloquearZoom } from "@/components/pwa/bloquear-zoom";
 import { PwaManager } from "@/components/pwa/pwa-manager";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata, Viewport } from "next";
@@ -42,6 +43,9 @@ export const viewport: Viewport = {
   ],
   width: "device-width",
   initialScale: 1,
+  // Comportamiento de app: sin zoom de página (el contenido nunca debe poder "abrirse" fuera de los bordes).
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: "cover",
 };
 
@@ -55,6 +59,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col bg-bg text-text">
         {children}
+        <BloquearZoom />
         <PwaManager />
         <Toaster />
       </body>
