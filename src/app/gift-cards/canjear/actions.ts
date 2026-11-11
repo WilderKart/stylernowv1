@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 const MENSAJES_ERROR: Record<string, string> = {
   GIFT_CARD_NO_ENCONTRADA: "No encontramos ninguna Gift Card con ese código.",
   PIN_INCORRECTO: "El PIN no es correcto.",
+  DEMASIADOS_INTENTOS: "Demasiados intentos con PIN incorrecto. Esta Gift Card queda bloqueada 15 minutos; intenta de nuevo después.",
 };
 function traducirError(mensaje: string) {
   const clave = Object.keys(MENSAJES_ERROR).find((k) => mensaje.includes(k));
@@ -31,7 +32,8 @@ export async function consultarMiGiftCard(codigo: string, pin: string): Promise<
   const { data, error } = await supabase.rpc("consultar_gift_card", { p_codigo: codigo.trim(), p_pin: pin.trim() });
   if (error) return { ok: false, error: traducirError(error.message) };
   const fila = data?.[0];
-  if (!fila) return { ok: false, error: "No encontramos ninguna Gift Card con ese código." };
+  // Sin filas = código inexistente o PIN incorrecto: no se distingue a propósito (evita adivinar códigos y PIN).
+  if (!fila) return { ok: false, error: "No encontramos una Gift Card con ese código y PIN." };
 
   return {
     ok: true,

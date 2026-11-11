@@ -419,10 +419,11 @@ export function FormularioLogin({
             inputMode="numeric"
             autoComplete="one-time-code"
             maxLength={8}
+            minLength={6}
             required
-            placeholder="00000000"
+            placeholder="000000"
             value={codigo}
-            onChange={(e) => setCodigo(e.target.value)}
+            onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ""))}
             className="h-16 text-center font-display text-[32px] leading-none font-black tracking-[0.3em] [font-stretch:var(--stretch-condensed)]"
           />
           {error ? <ErrorForm>{error}</ErrorForm> : null}

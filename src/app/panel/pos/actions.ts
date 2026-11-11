@@ -25,6 +25,7 @@ const MENSAJES_ERROR: Record<string, string> = {
   MONTO_INVALIDO: "Revisá los montos ingresados.",
   GIFT_CARD_NO_ENCONTRADA: "No encontramos ninguna Gift Card con ese código.",
   PIN_INCORRECTO: "El PIN no es correcto.",
+  DEMASIADOS_INTENTOS: "Demasiados intentos con PIN incorrecto. Esta Gift Card queda bloqueada 15 minutos.",
   YA_CANJEADA: "Esa Gift Card ya fue canjeada.",
   GIFT_CARD_NO_DISPONIBLE: "Esa Gift Card no está disponible para canjear.",
   GIFT_CARD_VENCIDA: "Esa Gift Card ya venció.",
@@ -184,6 +185,7 @@ export async function canjearGiftCardEnPos(codigo: string, pin: string, clienteI
     const { supabase } = await usuarioActual();
     const { data, error } = await supabase.rpc("redimir_gift_card_pos", { p_codigo: codigo.trim(), p_pin: pin.trim(), p_cliente_id: clienteId });
     if (error) return { ok: false, error: traducirError(error.message) };
+    if (data === null || data === undefined) return { ok: false, error: MENSAJES_ERROR.PIN_INCORRECTO ?? "El PIN no es correcto." };
     return { ok: true, data: { montoAcreditado: Number(data) } };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
