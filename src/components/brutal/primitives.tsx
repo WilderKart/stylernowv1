@@ -197,7 +197,8 @@ export function Marquee({
   const item = `${text} ✶ `;
   return (
     <div className={cn("sn-marquee", tone !== "plain" && `sn-marquee--${tone}`, className)} aria-hidden>
-      <div className="sn-marquee__track">
+      {/* Velocidad constante y legible (~60 px/s): la duración crece con el largo del texto. */}
+      <div className="sn-marquee__track" style={{ animationDuration: `${Math.max(45, Math.round(item.length * 1.6))}s` }}>
         {[0, 1, 2, 3].map((i) => (
           <span key={i}>{item.repeat(4)}</span>
         ))}

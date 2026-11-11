@@ -78,7 +78,7 @@
   --dur-base: 160ms;
   --dur-slow: 240ms;
   --dur-reduced: 120ms;
-  --dur-marquee: 18s;
+  --dur-marquee: 60s;
   --dur-seal: 12s;
   --ease-snap: cubic-bezier(0.2, 0, 0, 1);
   --ease-cut: steps(1, end);
@@ -156,10 +156,18 @@
 
 html {
   background: var(--bg);
+  /* Nada se sale por los lados: `clip` recorta sin crear contenedor de scroll (no rompe position: sticky). */
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 body {
   margin: 0;
+  overflow-x: clip;
+  max-width: 100%;
+  /* Sin pellizco ni doble toque para hacer zoom; sí se permite desplazar. */
+  touch-action: pan-x pan-y;
+  overscroll-behavior-x: none;
   background: var(--bg);
   color: var(--text);
   font: 400 15px/22px var(--sn-font-sans);

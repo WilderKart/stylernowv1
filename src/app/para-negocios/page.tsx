@@ -23,7 +23,7 @@ const T = {
     "Reservas con agenda real, recordatorios, caja y clientes en un solo lugar, hecho para barberías, peluquerías, uñas y estética. Reservar es gratis para tus clientes.",
   probar: "Probar 14 días",
   ventas: "Hablar con ventas",
-  marquesina: "BARBERÍAS ✶ PELUQUERÍAS ✶ UÑAS ✶ ESTÉTICA",
+  marquesina: "Menos llamadas ✶ Más citas ✶ Tu agenda siempre llena ✶ Cobra la seña online ✶ Recordatorios automáticos ✶ Clientes que vuelven",
   valorTitulo: "Por qué StylerNow",
   valores: [
     { t: "Te encuentran", d: "Tu perfil aparece en el mapa y recibe reservas de clientes cerca de ti." },

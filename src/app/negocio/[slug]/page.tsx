@@ -249,7 +249,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
           </div>
         </div>
 
-        <Marquee tone="signal" text={`Reserva en línea · ${negocio.ciudad} · Disponibilidad en tiempo real`} />
+        <Marquee tone="signal" text={`Reserva tu turno en ${negocio.ciudad} ✶ Elige profesional y hora ✶ Confirmación al instante ✶ Cancela fácil si cambias de plan`} />
 
         {negocio.descripcion ? (
           <p className="body-sm m-0 px-4 pt-4 break-words">{negocio.descripcion}</p>

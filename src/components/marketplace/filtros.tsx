@@ -1,22 +1,27 @@
 "use client";
 
 import { Chip as ChipBase, ChipGroup } from "@/components/brutal";
+import { CATEGORIAS_NEGOCIO } from "@/lib/categorias-negocio";
 
 import { Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
 /**
- * Catálogo de verticales. El Glossary es explícito: "barbería" nunca es un tipo de
- * dato, solo un valor — por eso vive en una constante y no en un enum de base.
+ * Chips de categoría. Los `valor` salen del registro único (src/lib/categorias-negocio.ts): antes "Uñas" y
+ * "Estética" filtraban por valores que no existen y devolvían vacío. El resto de categorías
+ * (estilismo, grooming…) se encuentran con el buscador de texto.
  */
-const CATEGORIAS = [
-  { valor: "barberia", etiqueta: "Barbería" },
-  { valor: "salon", etiqueta: "Salón" },
-  { valor: "spa", etiqueta: "Spa" },
-  { valor: "unas", etiqueta: "Uñas" },
-  { valor: "estetica", etiqueta: "Estética" },
-];
+const VISIBLES: Record<string, string> = {
+  barberia: "Barbería",
+  salon: "Salón",
+  manicura: "Uñas",
+  lashista: "Pestañas",
+  tatuajes: "Tatuajes",
+  spa: "Spa",
+  masajes: "Masajes",
+};
+const CATEGORIAS = CATEGORIAS_NEGOCIO.filter((c) => c.valor in VISIBLES).map((c) => ({ valor: c.valor, etiqueta: VISIBLES[c.valor] }));
 
 const ORDENES = [
   { valor: "CALIFICACION", etiqueta: "Mejor calificadas" },
@@ -24,7 +29,7 @@ const ORDENES = [
   { valor: "RECIENTE", etiqueta: "Nuevos" },
 ];
 
-export function Filtros({ ciudades }: { ciudades: string[] }) {
+export function Filtros() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -55,7 +60,6 @@ export function Filtros({ ciudades }: { ciudades: string[] }) {
 
   const categoria = params.get("categoria");
   const orden = params.get("orden");
-  const ciudad = params.get("ciudad");
   const soloHoy = params.get("hoy") === "1";
   const cercaDeMi = params.get("lat") !== null && params.get("lng") !== null;
   const [buscandoUbicacion, setBuscandoUbicacion] = useState(false);
@@ -100,7 +104,7 @@ export function Filtros({ ciudades }: { ciudades: string[] }) {
           type="search"
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
-          placeholder="Barbería, uñas, estética"
+          placeholder="Busca por nombre, ciudad o servicio"
           aria-label="Buscar negocios"
         />
       </label>
@@ -140,19 +144,6 @@ export function Filtros({ ciudades }: { ciudades: string[] }) {
           </Chip>
         ))}
       </ChipGroup>
-
-      {ciudades.length > 1 && !cercaDeMi ? (
-        <ChipGroup aria-label="Ciudades" className="!pb-0">
-          <Chip activo={!ciudad} onClick={() => aplicar({ ciudad: null })}>
-            Todas las ciudades
-          </Chip>
-          {ciudades.map((c) => (
-            <Chip key={c} activo={ciudad === c} onClick={() => aplicar({ ciudad: c })}>
-              {c}
-            </Chip>
-          ))}
-        </ChipGroup>
-      ) : null}
     </div>
   );
 }

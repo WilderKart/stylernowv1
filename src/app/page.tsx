@@ -41,7 +41,7 @@ export default async function HomePage(props: PageProps<"/">) {
   const lng = primerValor(params.lng);
   const vista = primerValor(params.vista) === "mapa" ? "mapa" : "lista";
 
-  const [{ data: user }, { data: resultados, error }, { data: ciudadesRaw }, { data: banners }] =
+  const [{ data: user }, { data: resultados, error }, { data: banners }] =
     await Promise.all([
       supabase.auth.getUser().then((r) => ({ data: r.data.user })),
       supabase.rpc("marketplace_buscar", {
@@ -53,16 +53,10 @@ export default async function HomePage(props: PageProps<"/">) {
         p_lat: lat ? Number(lat) : undefined,
         p_lng: lng ? Number(lng) : undefined,
       }),
-      // marketplace_ciudades_disponibles() (Fase 3.2) ya excluye ciudades que
-      // SuperSU deshabilitó desde /admin/configuracion — antes este listado
-      // salía directo de `negocio` y mostraba ciudades ocultas del Marketplace.
-      supabase.rpc("marketplace_ciudades_disponibles"),
       // banner_home (Fase 3.2): RLS pública solo devuelve banners activos y
       // vigentes hoy — sin filtrar nada más acá.
       supabase.from("banner_home").select("id, imagen_url, texto, url_destino").order("orden"),
     ]);
-
-  const ciudades = [...new Set((ciudadesRaw ?? []).map((c) => c.ciudad))].sort();
 
   // Impresiones reales de Marketplace Ads (Módulo 6.2) — una por resultado
   // patrocinado mostrado en esta página. No se espera la respuesta: nunca
@@ -124,7 +118,7 @@ export default async function HomePage(props: PageProps<"/">) {
                 </Link>
               ))}
             </nav>
-            <Marquee text="Reserva · Corta · Repite" tone="ink" />
+            <Marquee text="Reserva en 30 segundos ✶ Sin filas ni llamadas ✶ Tu barbero favorito te espera ✶ Gana puntos en cada corte ✶ Paga seguro desde el celular" tone="ink" />
           </>
         ) : null}
 
@@ -153,7 +147,7 @@ export default async function HomePage(props: PageProps<"/">) {
 
         <div className="px-4 pt-4 sm:px-6">
           <Suspense fallback={<div className="mb-6 h-12 animate-pulse border-2 border-border bg-surface-2" aria-hidden />}>
-            <Filtros ciudades={ciudades} />
+            <Filtros />
           </Suspense>
         </div>
 
