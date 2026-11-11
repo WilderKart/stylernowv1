@@ -122,3 +122,9 @@ Además: PIN mínimo de 6 dígitos y generarlo con `extensions.gen_random_bytes`
 - **Flujo de pago real en sandbox de Mercado Pago** y políticas de storage por usuario (solo se probó el acceso anónimo).
 - **Configuración de Vercel/Cloudflare/Supabase** (firewall, retención de logs, backups, MFA).
 - **Producción:** las correcciones H1–H5 están en la rama `feat/cliente-17-pantallas`; no están en producción hasta fusionar a `main`.
+
+
+## Actualización posterior
+- **/api/ia/exportar:** ahora valida pertenencia al negocio en el servidor (`tiene_acceso_interno`) antes de devolver cualquier archivo. Probado: anónimo 401, cliente 403, dueño de otro negocio 403, id inventado 403, dueño propio 200.
+- **H5/H6/H7:** mitigados (monto del cobro, bloqueo de PIN de gift card, tope de 100 filas).
+- **Pendientes de aplicar por el fundador:** migraciones 100, 107 (membresía congelada) y 108 (proteger plan y comisión del negocio).
