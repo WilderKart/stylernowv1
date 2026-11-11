@@ -13,13 +13,13 @@ import { Toaster as Sonner, type ToasterProps } from "sonner"
  * shadcn/ui `sonner` (ADR-012) — restyleado a los tokens de StylerNow.
  * El template original usa `next-themes` para sincronizar el tema; este
  * proyecto es dark-only por diseño (mockups aprobados, sin toggle de
- * tema), así que se fija `theme="dark"` directamente en vez de agregar
+ * tema), así que se fija `theme="system"` directamente en vez de agregar
  * un ThemeProvider que no tendría ningún otro uso.
  */
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
-      theme="dark"
+      theme="system"
       className="toaster group"
       icons={{
         success: <CircleCheckIcon className="size-4" />,
@@ -30,10 +30,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       style={
         {
-          "--normal-bg": "var(--color-surface)",
-          "--normal-text": "var(--color-text)",
-          "--normal-border": "var(--color-border)",
-          "--border-radius": "var(--radius-control)",
+          "--normal-bg": "var(--paper)",
+          "--normal-text": "var(--ink)",
+          "--normal-border": "var(--ink)",
+          "--border-radius": "0px",
         } as React.CSSProperties
       }
       {...props}

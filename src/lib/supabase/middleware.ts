@@ -2,8 +2,17 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/database";
 
-/** Refresca la sesión de Supabase en cada request (05-API/02_Auth.md: rotación de refresh token). */
-export async function updateSession(request: NextRequest) {
+/**
+ * Refresca la sesión de Supabase en cada request (05-API/02_Auth.md: rotación
+ * de refresh token). Devuelve también el `user` ya resuelto (ADR-015) para
+ * que `proxy.ts` decida público/protegido sin una segunda consulta — nunca
+ * resuelve rol/onboarding/permisos acá, eso sigue siendo 100% server-side
+ * en `requireRole()`.
+ */
+export async function updateSession(request: NextRequest): Promise<{
+  response: NextResponse;
+  user: import("@supabase/supabase-js").User | null;
+}> {
   let supabaseResponse = NextResponse.next({ request });
 
   // El proxy corre en el Edge Runtime, antes de que exista cualquier página o
@@ -19,7 +28,7 @@ export async function updateSession(request: NextRequest) {
       "[proxy] Faltan NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY en este entorno. " +
         "Configuralas en Vercel → Project Settings → Environment Variables y volvé a desplegar."
     );
-    return supabaseResponse;
+    return { response: supabaseResponse, user: null };
   }
 
   const supabase = createServerClient<Database>(
@@ -42,7 +51,9 @@ export async function updateSession(request: NextRequest) {
   );
 
   // No eliminar: refresca el token si expiró (necesario para Server Components).
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  return supabaseResponse;
+  return { response: supabaseResponse, user };
 }

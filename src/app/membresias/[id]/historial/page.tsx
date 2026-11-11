@@ -1,5 +1,5 @@
-import { BarraSuperior } from "@/components/layout/header";
-import { Badge, Card } from "@/components/ui/card";
+import { Fila, Filas, Pantalla, Top } from "@/app/lealtad/ui-cliente";
+import { Status } from "@/components/brutal";
 import { createClient } from "@/lib/supabase/server";
 import { formatCOP } from "@/lib/utils";
 import { notFound, redirect } from "next/navigation";
@@ -25,37 +25,36 @@ export default async function HistorialMembresiaPage(props: PageProps<"/membresi
     .order("created_at", { ascending: false });
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
-      <BarraSuperior titulo="Historial de uso" volverA={`/membresias/${id}`} />
-      <main className="mx-auto w-full max-w-md flex-1 px-5 py-6 sm:px-0">
-        <p className="mb-4 text-[12.5px] text-text-muted">{plan?.nombre}</p>
-        {(usos ?? []).length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-border px-4 py-10 text-center text-[12.5px] text-text-faint">
-            Todavía no usaste ningún beneficio de esta Membresía.
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-2">
+    <Pantalla className="pb-10">
+      <Top titulo="Historial de uso" volverA={`/membresias/${id}`} />
+      <h1 className="poster-4 break-words px-4 pt-4">{plan?.nombre}</h1>
+      {(usos ?? []).length === 0 ? (
+        <div className="p-4">
+          <div className="sn-empty">
+            <p className="section">Aún no usas ningún beneficio de esta membresía.</p>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-4">
+          <Filas>
             {(usos ?? []).map((u) => {
               const reserva = u.reserva as unknown as { hora_inicio: string } | null;
               return (
-                <li key={u.id}>
-                  <Card className="flex items-center justify-between">
-                    <div>
-                      <Badge tone={u.tipo === "SERVICIO_INCLUIDO" ? "accent" : "success"}>
-                        {u.tipo === "SERVICIO_INCLUIDO" ? "Servicio incluido" : "Descuento aplicado"}
-                      </Badge>
-                      <p className="mt-1 text-[11.5px] text-text-faint">
-                        {reserva ? new Date(reserva.hora_inicio).toLocaleDateString("es-CO") : new Date(u.created_at).toLocaleDateString("es-CO")}
-                      </p>
-                    </div>
-                    <p className="text-[13px] font-bold text-text">{formatCOP(Number(u.monto_beneficio))}</p>
-                  </Card>
-                </li>
+                <Fila
+                  key={u.id}
+                  titulo={reserva ? new Date(reserva.hora_inicio).toLocaleDateString("es-CO") : new Date(u.created_at).toLocaleDateString("es-CO")}
+                  meta={
+                    <Status tone={u.tipo === "SERVICIO_INCLUIDO" ? "info" : "ok"} className="self-start">
+                      {u.tipo === "SERVICIO_INCLUIDO" ? "Servicio incluido" : "Descuento aplicado"}
+                    </Status>
+                  }
+                  derecha={<span className="sn-price">{formatCOP(Number(u.monto_beneficio))}</span>}
+                />
               );
             })}
-          </ul>
-        )}
-      </main>
-    </div>
+          </Filas>
+        </div>
+      )}
+    </Pantalla>
   );
 }

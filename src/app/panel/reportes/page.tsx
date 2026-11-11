@@ -1,7 +1,6 @@
 import { PanelNav } from "@/components/panel/panel-nav";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import {
   listarResenas,
   obtenerHorariosMuertos,
@@ -15,10 +14,7 @@ import { VistaReportes } from "./vista-reportes";
 export const metadata = { title: "Reportes" };
 
 export default async function ReportesPage() {
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect("/login?next=/panel/reportes");
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
-  if (contexto.rol === "STAFF") redirect("/panel");
+  const contexto = await verificarAccesoPanel(["BARBERIA", "GUARDIAN"], "/panel/reportes");
 
   const negocioId = contexto.negocioId!;
   const sedeId = contexto.rol === "GUARDIAN" ? contexto.sedeId : null;

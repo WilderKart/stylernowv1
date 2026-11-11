@@ -1,48 +1,223 @@
 @import "tailwindcss";
+@import "../styles/brutalist.css" layer(components);
 
-/* StylerNow — Design tokens. Fuente: mockups aprobados (dark premium + acento ámbar). */
-@theme {
-  --font-display: var(--font-oswald), sans-serif;
-  --font-sans: var(--font-inter), sans-serif;
+/* StylerNow — sistema de diseño brutalista (blanco #FFF / negro #0A0A0A / naranja señal #FF4D00).
+   Fuente de verdad: stylernow-prototipo/css/tokens.css. Tema claro por defecto;
+   oscuro con data-theme="dark" en <html>, igual que el prototipo. */
 
-  --color-bg: #0a0a0a;
-  --color-surface: #141210;
-  --color-surface-2: #1b1815;
-  --color-border: #232220;
-  --color-border-subtle: #1a1815;
-
-  --color-text: #f5f1ea;
-  --color-text-muted: #9c9690;
-  --color-text-faint: #6b6862;
-
-  --color-accent: #e8a23c;
-  --color-accent-soft: rgb(232 162 60 / 0.12);
-  --color-accent-hover: #f5b65c;
-
-  --color-success: #6fcf97;
-  --color-success-soft: rgb(111 207 151 / 0.14);
-  --color-danger: #e5584d;
-  --color-danger-soft: rgb(229 88 77 / 0.14);
-
-  --radius-card: 16px;
-  --radius-control: 13px;
+/* ---- Tokens en tiempo de ejecución (cambian con data-theme) ---- */
+:root,
+[data-theme="light"] {
+  --bg: #ffffff;
+  --surface: #f2f2f2;
+  --surface-2: #e6e6e6;
+  --ink: #0a0a0a;
+  --paper: #ffffff;
+  --signal: #ff4d00;
+  --signal-pressed: #e04400;
+  --text: #0a0a0a;
+  --text-muted: #5c5c5c;
+  --text-faint: #767676;
+  --text-disabled: #8a8a8a;
+  --accent-text: #c23a00;
+  --line: #0a0a0a;
+  --grid: #0a0a0a;
+  --grid-soft: #d4d4d4;
+  --shadow-ink: #0a0a0a;
+  --focus: #ff4d00;
+  --success: #00e07a;
+  --warning: #ffd400;
+  --danger: #ff1f1f;
+  --info: #0a0a0a;
+  --scrim: rgba(10, 10, 10, 0.72);
+  --sn-shadow-hard: 4px 4px 0 0 #0a0a0a;
+  --sn-shadow-hard-sm: 2px 2px 0 0 #0a0a0a;
+  color-scheme: light;
 }
 
-body {
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-sans);
+[data-theme="dark"] {
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface-2: #1e1e1e;
+  --ink: #0a0a0a;
+  --paper: #ffffff;
+  --signal: #ff4d00;
+  --signal-pressed: #e04400;
+  --text: #ffffff;
+  --text-muted: #a3a3a3;
+  --text-faint: #8a8a8a;
+  --text-disabled: #6b6b6b;
+  --accent-text: #ff4d00;
+  --line: #ffffff;
+  --grid: #ffffff;
+  --grid-soft: #2e2e2e;
+  --shadow-ink: #ff4d00;
+  --focus: #ff4d00;
+  --scrim: rgba(0, 0, 0, 0.8);
+  --sn-shadow-hard: 4px 4px 0 0 #ff4d00;
+  --sn-shadow-hard-sm: 2px 2px 0 0 #ff4d00;
+  color-scheme: dark;
 }
 
-* {
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+  --radius-round: 50%;
+  --border-thick: 2px;
+  --border-hair: 1px;
+  --border-sheet: 4px;
+  --dur-fast: 90ms;
+  --dur-base: 160ms;
+  --dur-slow: 240ms;
+  --dur-reduced: 120ms;
+  --dur-marquee: 18s;
+  --dur-seal: 12s;
+  --ease-snap: cubic-bezier(0.2, 0, 0, 1);
+  --ease-cut: steps(1, end);
+  --ease-linear: linear;
+  --touch-min: 48px;
+  --tabbar-height: 64px;
+  --icon-stroke: 2;
+  --stretch-condensed: 62.5%;
+  --stretch-expanded: 125%;
+  /* Fuentes: next/font inyecta --font-archivo y --font-space-mono en <html>. */
+  --sn-font-display: var(--font-archivo), "Arial Narrow", sans-serif;
+  --sn-font-sans: var(--font-archivo), system-ui, sans-serif;
+  --sn-font-mono: var(--font-space-mono), ui-monospace, monospace;
+}
+
+/* ---- Mapeo a Tailwind: los nombres semánticos que ya usa toda la app
+   (bg-bg, text-text, bg-accent, border-border…) ahora apuntan al sistema nuevo ---- */
+@theme inline {
+  --font-display: var(--sn-font-display);
+  --font-sans: var(--sn-font-sans);
+  --font-mono: var(--sn-font-mono);
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--line);
+  --color-border-subtle: var(--grid-soft);
+
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-signal: var(--signal);
+  --color-accent: var(--signal);
+  --color-accent-hover: var(--signal-pressed);
+  --color-accent-soft: color-mix(in srgb, var(--signal) 14%, transparent);
+
+  --color-success: var(--success);
+  --color-success-soft: color-mix(in srgb, var(--success) 18%, transparent);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-danger-soft: color-mix(in srgb, var(--danger) 14%, transparent);
+
+  /* Esquinas 0 en todo el sistema (rounded-full se conserva para avatares/puntos). */
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
+  --radius-card: 0px;
+  --radius-control: 0px;
+
+  /* Sombras duras (sin blur) */
+  --shadow-hard: var(--sn-shadow-hard);
+  --shadow-hard-sm: var(--sn-shadow-hard-sm);
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Esquinas 0 también para valores arbitrarios (rounded-[13px]); solo se
+   exceptúan los elementos explícitamente circulares. Va sin capa para ganar
+   a las utilidades de Tailwind. */
+*:not([class*="rounded-full"]):not(.sn-seal):not(.sn-avatar) {
+  border-radius: 0;
 }
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 99px;
+
+html {
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 15px/22px var(--sn-font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Texto naranja legible: en claro usa el naranja oscuro del prototipo (--accent-text). */
+.text-accent {
+  color: var(--accent-text);
+}
+
+/* Sin barras de scroll visibles, con scroll funcionando. */
+html,
+body,
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Tipografía del prototipo */
+.poster-1 { font-size: 72px; }
+.poster-2 { font-size: 56px; }
+.poster-3 { font-size: 40px; }
+.poster-4 { font-size: 28px; }
+.poster-5 { font-size: 20px; }
+.poster-lg { font-size: 96px; }
+.poster-xl { font-size: 160px; }
+.section { font-size: 22px; line-height: 1.1; }
+.body-lg { font: 400 17px/24px var(--sn-font-sans); }
+.body { font: 400 15px/22px var(--sn-font-sans); }
+.body-sm { font: 400 13px/18px var(--sn-font-sans); }
+.label { font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: 0.72px; }
+.meta { font-size: 11px; line-height: 14px; font-weight: 400; letter-spacing: 0.66px; }
+.figure-sm { font-size: 15px; line-height: 20px; }
+.figure-md { font-size: 22px; line-height: 26px; }
+.figure-lg { font-size: 32px; line-height: 36px; }
+
+/* Títulos grandes nunca se salen del contenedor en móvil */
+@media (max-width: 430px) {
+  .poster-1, .poster-lg, .poster-xl { font-size: clamp(40px, 16vw, 72px); }
+  .poster-2 { font-size: clamp(36px, 13vw, 56px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: var(--dur-reduced) !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: var(--dur-reduced) !important;
+  }
 }

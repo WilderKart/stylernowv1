@@ -1,6 +1,8 @@
 "use client";
 
+import { Meta, Num, Poster } from "@/components/brutal";
 import { Button } from "@/components/ui/button";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 
@@ -23,41 +25,29 @@ export default function ErrorBoundary({
   }, [error]);
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-bg px-6 text-center">
-      <div className="mb-5 flex size-14 items-center justify-center rounded-full bg-danger-soft">
-        <svg
-          viewBox="0 0 24 24"
-          width="26"
-          height="26"
-          fill="none"
-          stroke="#e5584d"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M12 9v4M12 17h.01" />
-          <path d="M10.3 3.9 2.7 17.3A1.8 1.8 0 0 0 4.3 20h15.4a1.8 1.8 0 0 0 1.6-2.7L13.7 3.9a1.8 1.8 0 0 0-3.4 0z" />
-        </svg>
-      </div>
-      <h1 className="font-display mb-2 text-[20px] font-bold uppercase text-text">
-        Algo salió mal
-      </h1>
-      <p className="mb-6 max-w-xs text-[13.5px] leading-relaxed text-text-muted">
-        No pudimos cargar esta pantalla. Podés reintentar — si sigue pasando,
-        contanos qué estabas haciendo.
-      </p>
-      {error.digest ? (
-        <p className="mb-6 font-mono text-[11px] text-text-faint">Ref: {error.digest}</p>
-      ) : null}
-      <div className="flex w-full max-w-xs flex-col gap-2.5">
-        <Button size="lg" onClick={reset} className="w-full">
-          REINTENTAR
+    <div className="flex min-h-dvh flex-col bg-bg">
+      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center gap-3 p-4">
+        <Num>00 / Error</Num>
+        <Poster as="h1" size={2} className="break-words">
+          Algo
+          <br />
+          <span className="sn-hot">falló.</span>
+        </Poster>
+        <p className="body text-text-muted">
+          No pudimos cargar esta pantalla. Podés reintentar — si sigue pasando, contanos qué estabas haciendo.
+        </p>
+        {error.digest ? <Meta>Código: {error.digest}</Meta> : null}
+        <Button size="lg" onClick={reset} className="w-full justify-between">
+          <span>Reintentar</span>
+          <ArrowUpRight className="size-[18px]" aria-hidden />
         </Button>
-        <Button asChild variant="secondary" size="lg" className="w-full">
-          <Link href="/">VOLVER AL INICIO</Link>
+        <Button asChild variant="secondary" size="lg" className="w-full justify-between">
+          <Link href="/">
+            <span>Volver al inicio</span>
+            <ArrowUpRight className="size-[18px]" aria-hidden />
+          </Link>
         </Button>
-      </div>
+      </main>
     </div>
   );
 }

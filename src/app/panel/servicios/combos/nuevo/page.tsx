@@ -1,5 +1,5 @@
 import { BarraSuperior } from "@/components/layout/header";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { FormularioNuevoCombo } from "./formulario-nuevo-combo";
@@ -7,9 +7,7 @@ import { FormularioNuevoCombo } from "./formulario-nuevo-combo";
 export const metadata = { title: "Nuevo combo" };
 
 export default async function NuevoComboPage() {
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect("/login?next=/panel/servicios/combos/nuevo");
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
+  const contexto = await verificarAccesoPanel(["BARBERIA", "GUARDIAN"], "/panel/servicios/combos/nuevo");
   if (!contexto.permisos.gestionarCombos) redirect("/panel/servicios");
 
   const supabase = await createClient();

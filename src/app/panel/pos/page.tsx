@@ -1,16 +1,12 @@
 import { PanelNav } from "@/components/panel/panel-nav";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
-import { redirect } from "next/navigation";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { listarProductos, listarReservasParaCobrar } from "./actions";
 import { ListaPOS } from "./lista-pos";
 
 export const metadata = { title: "Caja" };
 
 export default async function POSPage() {
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect("/login?next=/panel/pos");
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
-  if (contexto.rol === "STAFF") redirect("/panel");
+  const contexto = await verificarAccesoPanel(["BARBERIA", "GUARDIAN"], "/panel/pos");
 
   const negocioId = contexto.negocioId!;
   const sedeId = contexto.rol === "GUARDIAN" ? contexto.sedeId : null;

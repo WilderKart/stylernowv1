@@ -111,14 +111,22 @@ export function ListaCRM({
         <div className="flex gap-2">
           <Link
             href="/panel/crm/segmentos"
-            className="rounded-full border border-border px-4 py-2.5 text-[12.5px] font-bold text-text-muted hover:border-accent/40"
+            className="rounded-none border border-border px-4 py-2.5 text-[12.5px] font-bold text-text-muted hover:border-accent/40"
           >
             Segmentos
           </Link>
           {puedeExportar ? (
-            <Button size="sm" variant="secondary" loading={exportando} onClick={onExportar}>
-              Exportar CSV
-            </Button>
+            <>
+              <Button size="sm" variant="secondary" loading={exportando} onClick={onExportar}>
+                CSV
+              </Button>
+              <Button size="sm" variant="secondary" asChild>
+                <a href="/api/crm/exportar?formato=excel">Excel</a>
+              </Button>
+              <Button size="sm" variant="secondary" asChild>
+                <a href="/api/crm/exportar?formato=pdf">PDF</a>
+              </Button>
+            </>
           ) : null}
         </div>
       </div>
@@ -145,7 +153,7 @@ export function ListaCRM({
           <button
             type="button"
             onClick={() => setSoloVip((v) => !v)}
-            className={`rounded-full border px-3 py-1.5 text-[12px] font-bold ${
+            className={`rounded-none border px-3 py-1.5 text-[12px] font-bold ${
               soloVip ? "border-accent bg-accent-soft text-accent" : "border-border text-text-muted"
             }`}
           >

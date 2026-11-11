@@ -1,15 +1,19 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/card";
-import { duracion, fechaCorta, fechaHoraLarga, hora, hoyISO, sumarDias } from "@/lib/formato";
+import { Chip, EmptyState, Label, Meta, Num, Photo, Status, Tier } from "@/components/brutal";
+import { SlotsPorFranja } from "@/components/negocio/horas-agrupadas";
+import { FOTOS_RESPALDO, nivelATier } from "@/components/negocio/nivel";
+import { duracion, fechaCorta, fechaHoraLarga, fechaISO, hora, hoyISO, sumarDias } from "@/lib/formato";
 import { calcularSenaEstimada, resumenPoliticaCancelacion, type ConfigSena } from "@/lib/pagos/sena";
 import { cn, formatCOP } from "@/lib/utils";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
 import { crearReservaAction, obtenerSlots, unirseListaEspera, type Slot } from "./actions";
 
 const DIAS_VISIBLES = 14;
+const DIAS_POR_VENTANA = 6;
 
 export interface DatosNegocio extends ConfigSena {
   id: string;
@@ -50,7 +54,7 @@ export interface Profesional {
   servicio_ids: string[];
 }
 
-const PASOS = ["Servicios", "Profesional", "Horario", "Resumen"];
+const PASOS = ["Servicio", "Profesional", "Hora", "Resumen"];
 
 export function FlujoReserva({
   negocio,
@@ -66,13 +70,16 @@ export function FlujoReserva({
   combos: Combo[];
 }) {
   const router = useRouter();
+  const staffInicial = useSearchParams().get("staff");
 
   const [paso, setPaso] = useState(1);
   const [sedeId, setSedeId] = useState(sedes[0]?.id ?? "");
   const [servicioIds, setServicioIds] = useState<string[]>([]);
   const [staffId, setStaffId] = useState<string | null>(null);
+  const [staffInicialAplicado, setStaffInicialAplicado] = useState(false);
   const [fecha, setFecha] = useState(() => hoyISO(sedes[0]?.zona_horaria));
   const [slot, setSlot] = useState<Slot | null>(null);
+  const [inicioDias, setInicioDias] = useState(0);
 
   const [slots, setSlots] = useState<Slot[]>([]);
   const [cargandoSlots, iniciarCarga] = useTransition();
@@ -96,9 +103,10 @@ export function FlujoReserva({
   const profesional = staff.find((p) => p.staff_id === staffId) ?? null;
 
   // La carga corre dentro de una transición: el estado se actualiza al resolver la
-  // consulta, nunca de forma síncrona dentro del efecto.
-  const cargarSlots = useCallback(() => {
-    if (!sede || servicioIds.length === 0) return;
+  // consulta, nunca de forma síncrona dentro del efecto. Volver al paso 3 (p. ej. tras
+  // SLOT_NO_DISPONIBLE) re-dispara el efecto y refresca el grid.
+  useEffect(() => {
+    if (paso !== 3 || !sede || servicioIds.length === 0) return;
     iniciarCarga(async () => {
       try {
         const nuevos = await obtenerSlots({ sedeId: sede.id, servicioIds, fecha, staffId });
@@ -109,18 +117,21 @@ export function FlujoReserva({
         setSlots([]);
       }
     });
-  }, [sede, servicioIds, fecha, staffId]);
-
-  useEffect(() => {
-    if (paso === 3) cargarSlots();
-  }, [paso, cargarSlots]);
+  }, [paso, sede, servicioIds, fecha, staffId]);
 
   /** Cambiar los Servicios cambia la duración: el horario elegido deja de ser válido. */
   function alternarServicio(id: string) {
+    const nuevos = servicioIds.includes(id) ? servicioIds.filter((x) => x !== id) : [...servicioIds, id];
+    cambiarServicios(nuevos);
+  }
+
+  /** Un profesional preseleccionado (desde su perfil) que no presta todos los
+   * servicios elegidos vuelve a "cualquiera disponible". */
+  function cambiarServicios(nuevos: string[]) {
     setSlot(null);
-    setServicioIds((previos) =>
-      previos.includes(id) ? previos.filter((x) => x !== id) : [...previos, id]
-    );
+    setServicioIds(nuevos);
+    const actual = staff.find((p) => p.staff_id === staffId);
+    if (actual && !nuevos.every((sid) => actual.servicio_ids.includes(sid))) setStaffId(null);
   }
 
   /** Un combo (Módulo 2.5) es solo un atajo de selección — reemplaza la
@@ -129,8 +140,7 @@ export function FlujoReserva({
    * individual (docs/TECH_DEBT_REGISTER.md: el override del combo todavía
    * no está conectado ahí), así que esto no cambia ningún cálculo. */
   function elegirCombo(combo: Combo) {
-    setSlot(null);
-    setServicioIds(combo.servicio_ids);
+    cambiarServicios(combo.servicio_ids);
   }
 
   async function confirmar() {
@@ -159,7 +169,6 @@ export function FlujoReserva({
       // El grid vuelve actualizado, no se deja al Cliente reintentando a ciegas.
       setSlot(null);
       setPaso(3);
-      void cargarSlots();
     }
     if (resultado.codigo === "NO_AUTENTICADO") {
       router.push(`/login?next=/negocio/${negocio.slug}/reservar`);
@@ -179,57 +188,87 @@ export function FlujoReserva({
   }
 
   const dias = Array.from({ length: DIAS_VISIBLES }, (_, i) => sumarDias(hoyISO(tz), i));
+  const diasVentana = dias.slice(inicioDias, inicioDias + DIAS_POR_VENTANA);
   const libres = slots.filter((s) => s.disponible);
   const puedeAvanzar =
     (paso === 1 && servicioIds.length > 0) ||
     (paso === 2 && staffCompatible.length > 0) ||
     (paso === 3 && slot !== null);
 
-  return (
-    <div className="flex min-h-dvh flex-col pb-32">
-      {/* ── Progreso ──────────────────────────────────────────────── */}
-      <div className="mx-auto w-full max-w-2xl px-5 pt-5 sm:px-10">
-        <ol className="flex items-center gap-1.5">
-          {PASOS.map((nombre, i) => (
-            <li key={nombre} className="flex flex-1 flex-col gap-1.5">
-              <span
-                className={cn(
-                  "h-1 rounded-full transition-colors",
-                  i + 1 <= paso ? "bg-accent" : "bg-border"
-                )}
-              />
-              <span
-                className={cn(
-                  "text-[10.5px] font-bold uppercase tracking-wide",
-                  i + 1 === paso ? "text-accent" : "text-text-faint"
-                )}
-              >
-                {nombre}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </div>
+  const iconoFlecha = (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true">
+      <path d="M7 17 17 7M7 7h10v10" />
+    </svg>
+  );
+  const iconoVolver = (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true">
+      <path d="M19 12H5M12 19l-7-7 7-7" />
+    </svg>
+  );
 
-      <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-6 sm:px-10">
+  function volver() {
+    setError(null);
+    setPaso((p) => p - 1);
+  }
+
+  const bloqueAnticipo = (
+    <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+      <Meta>
+        {paso === 1
+          ? `${seleccionados.length} ${seleccionados.length === 1 ? "servicio" : "servicios"} · ${duracion(minutosTotal)}`
+          : paso === 3 && slot
+            ? `${fechaCorta(fecha, tz)} · ${hora(slot.hora_inicio, tz)}`
+            : `${duracion(minutosTotal)}`}
+      </Meta>
+      <span className="sn-fig text-[22px]">{formatCOP(montoTotal)}</span>
+    </div>
+  );
+
+  return (
+    <div className="flex min-h-dvh flex-col bg-bg">
+      {/* ── Barra superior + progreso ───────────────────────────────── */}
+      <div className="p-top">
+        {paso > 1 ? (
+          <button type="button" onClick={volver} aria-label="Volver al paso anterior" className="sn-iconbtn">
+            {iconoVolver}
+          </button>
+        ) : (
+          <Link href={`/negocio/${negocio.slug}`} aria-label="Volver al negocio" className="sn-iconbtn">
+            {iconoVolver}
+          </Link>
+        )}
+        <span className="sn-num min-w-0 break-words">Reserva · {negocio.nombre}</span>
+        <span className="p-top__r" />
+      </div>
+      <ol className="p-steps m-0 list-none p-0" aria-label="Pasos de la reserva">
+        {PASOS.map((nombre, i) => (
+          <li
+            key={nombre}
+            aria-current={i + 1 === paso ? "step" : undefined}
+            className={cn(
+              "min-w-0 truncate border-r border-grid px-0.5 py-2 text-center font-mono text-[11px] leading-[14px] font-bold tracking-[0.66px] uppercase last:border-r-0",
+              i + 1 === paso && "bg-signal text-ink",
+              i + 1 < paso && "bg-text text-bg"
+            )}
+          >
+            {String(i + 1).padStart(2, "0")} {nombre}
+          </li>
+        ))}
+      </ol>
+
+      <main className="flex-1 pb-4">
         {/* ── Paso 1 · Servicios ──────────────────────────────────── */}
         {paso === 1 ? (
           <section>
-            <h2 className="font-display mb-1 text-[22px] font-bold uppercase text-text">
-              ¿Qué te hacés hoy?
-            </h2>
-            <p className="mb-5 text-[13.5px] text-text-muted">
-              Podés combinar varios servicios en una sola cita.
-            </p>
+            <h1 className="poster-2 px-4 pt-3 pb-4 break-words">
+              ¿Qué te
+              <br />
+              <span className="sn-hot">hacemos?</span>
+            </h1>
 
             {sedes.length > 1 ? (
-              <div className="mb-5">
-                <label
-                  htmlFor="sede"
-                  className="mb-2 block text-[11.5px] font-bold uppercase tracking-wide text-text-muted"
-                >
-                  Sede
-                </label>
+              <div className="sn-field px-4 pb-4">
+                <label htmlFor="sede">Sede</label>
                 <select
                   id="sede"
                   value={sedeId}
@@ -237,7 +276,7 @@ export function FlujoReserva({
                     setSedeId(e.target.value);
                     setSlot(null);
                   }}
-                  className="h-12 w-full rounded-xl border border-border bg-surface px-3 text-[13.5px] text-text outline-none focus:border-accent/60"
+                  className="min-h-12 w-full min-w-0 border-2 border-border bg-bg px-3 text-[15px] text-text outline-none focus:shadow-hard"
                 >
                   {sedes.map((s) => (
                     <option key={s.id} value={s.id}>
@@ -249,32 +288,29 @@ export function FlujoReserva({
             ) : null}
 
             {combos.length > 0 ? (
-              <div className="mb-5">
-                <p className="mb-2 text-[11.5px] font-bold uppercase tracking-wide text-text-muted">
-                  Combos
-                </p>
-                <div className="flex flex-wrap gap-2">
+              <div className="pb-1">
+                <div className="p-sec !pt-0">
+                  <Label>Combos</Label>
+                </div>
+                <div className="p-chips">
                   {combos.map((c) => (
-                    <button
+                    <Chip
                       key={c.id}
-                      type="button"
-                      onClick={() => elegirCombo(c)}
-                      className={cn(
-                        "rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition-colors",
+                      selected={
                         servicioIds.length === c.servicio_ids.length &&
-                          c.servicio_ids.every((id) => servicioIds.includes(id))
-                          ? "border-accent bg-accent-soft text-accent"
-                          : "border-border-subtle bg-surface text-text-muted hover:border-accent/40"
-                      )}
+                        c.servicio_ids.every((id) => servicioIds.includes(id))
+                      }
+                      onClick={() => elegirCombo(c)}
+                      className="!min-h-12 !whitespace-normal"
                     >
                       {c.nombre}
-                    </button>
+                    </Chip>
                   ))}
                 </div>
               </div>
             ) : null}
 
-            <ul className="flex flex-col gap-2">
+            <ul className="m-0 list-none border-t-2 border-line p-0">
               {servicios.map((s) => {
                 const activo = servicioIds.includes(s.id);
                 return (
@@ -284,23 +320,22 @@ export function FlujoReserva({
                       onClick={() => alternarServicio(s.id)}
                       aria-pressed={activo}
                       className={cn(
-                        "flex w-full items-center justify-between gap-3 rounded-2xl border p-3.5 text-left transition-colors",
-                        activo
-                          ? "border-accent bg-accent-soft"
-                          : "border-border-subtle bg-surface hover:border-accent/40"
+                        "flex min-h-[64px] w-full items-center gap-3 border-0 border-b border-grid-soft px-4 py-3.5 text-left text-text",
+                        activo && "bg-signal text-ink"
                       )}
                     >
-                      <span className="min-w-0">
-                        <span className="block text-[14px] font-semibold text-text">
-                          {s.nombre}
-                        </span>
-                        <span className="block text-[12px] text-text-faint">
-                          {duracion(s.duracion_minutos)}
-                        </span>
+                      <span className="grid size-[26px] shrink-0 place-items-center border-2 border-current" aria-hidden="true">
+                        {activo ? (
+                          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="square" strokeLinejoin="miter">
+                            <path d="M4 12l5 5L20 6" />
+                          </svg>
+                        ) : null}
                       </span>
-                      <span className="shrink-0 text-[14px] font-bold text-accent">
-                        {formatCOP(s.precio_base)}
+                      <span className="min-w-0 flex-1">
+                        <b className="body block break-words">{s.nombre}</b>
+                        <span className="sn-meta !text-current">{duracion(s.duracion_minutos)}</span>
                       </span>
+                      <span className="sn-price shrink-0">{formatCOP(s.precio_base)}</span>
                     </button>
                   </li>
                 );
@@ -312,24 +347,20 @@ export function FlujoReserva({
         {/* ── Paso 2 · Profesional ────────────────────────────────── */}
         {paso === 2 ? (
           <section>
-            <h2 className="font-display mb-1 text-[22px] font-bold uppercase text-text">
-              ¿Con quién?
-            </h2>
-            <p className="mb-5 text-[13.5px] text-text-muted">
-              Elegí a tu profesional o dejanos asignarte el primero disponible.
-            </p>
+            <h1 className="poster-2 px-4 pt-3 pb-4 break-words">
+              ¿Con
+              <br />
+              <span className="sn-hot">quién?</span>
+            </h1>
 
             {staffCompatible.length === 0 ? (
-              <div className="rounded-2xl border border-danger/40 bg-danger-soft p-4">
-                <p className="text-[13.5px] font-semibold text-text">
-                  Ningún profesional ofrece esta combinación
-                </p>
-                <p className="mt-1 text-[12.5px] text-text-muted">
-                  Reservá los servicios por separado, en dos citas.
-                </p>
-              </div>
+              <EmptyState
+                big="Sin match."
+                title="Ningún profesional ofrece esta combinación"
+                hint="Reservá los servicios por separado, en dos citas."
+              />
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="p-stack px-4 pb-4">
                 <button
                   type="button"
                   onClick={() => {
@@ -338,69 +369,49 @@ export function FlujoReserva({
                   }}
                   aria-pressed={staffId === null}
                   className={cn(
-                    "flex items-center gap-3 rounded-2xl border p-3.5 text-left transition-colors",
-                    staffId === null
-                      ? "border-accent bg-accent-soft"
-                      : "border-border-subtle bg-surface hover:border-accent/40"
+                    "flex min-h-[72px] w-full items-center justify-between gap-3 border-2 border-line p-4 text-left text-text",
+                    staffId === null && "bg-signal text-ink shadow-hard"
                   )}
                 >
-                  <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent text-bg">
-                    <svg
-                      viewBox="0 0 24 24"
-                      width="18"
-                      height="18"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M13 2L4.5 13.5H11l-1 8.5 9-12h-6.5z" />
-                    </svg>
+                  <span className="min-w-0">
+                    <b className="section block text-base break-words">Cualquiera disponible</b>
+                    <span className="sn-meta !text-current">Te asignamos el primero libre · más horarios</span>
                   </span>
-                  <span>
-                    <span className="block text-[14px] font-bold text-text">
-                      Cualquiera disponible
-                    </span>
-                    <span className="block text-[12px] text-text-muted">
-                      La opción más rápida: más horarios para elegir.
-                    </span>
-                  </span>
+                  {iconoFlecha}
                 </button>
 
-                {staffCompatible.map((p) => {
+                {staffCompatible.map((p, i) => {
                   const activo = staffId === p.staff_id;
                   return (
+                    <div key={p.staff_id}>
                     <button
-                      key={p.staff_id}
                       type="button"
                       onClick={() => {
                         setStaffId(p.staff_id);
                         setSlot(null);
                       }}
                       aria-pressed={activo}
-                      className={cn(
-                        "flex items-center gap-3 rounded-2xl border p-3.5 text-left transition-colors",
-                        activo
-                          ? "border-accent bg-accent-soft"
-                          : "border-border-subtle bg-surface hover:border-accent/40"
-                      )}
+                      className={cn("block w-full text-left", activo && "shadow-hard")}
                     >
-                      <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-2 text-[15px] font-bold text-text-faint">
-                        {p.nombre.charAt(0).toUpperCase()}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[14px] font-semibold text-text">
-                          {p.nombre}
-                        </span>
-                        {p.especialidad ? (
-                          <span className="block truncate text-[12px] text-text-faint">
-                            {p.especialidad}
-                          </span>
-                        ) : null}
-                      </span>
-                      {p.nivel ? <Badge tone="accent">{p.nivel}</Badge> : null}
+                      <div className="sn-pro">
+                        <Photo src={p.foto_url ?? FOTOS_RESPALDO[i % FOTOS_RESPALDO.length]} />
+                        <div className="sn-pro__info">
+                          <span className="sn-meta">{p.especialidad ?? "Profesional"}</span>
+                          <h3 className="sn-pro__name poster-5 break-words">{p.nombre}</h3>
+                          <div className="sn-pro__foot">
+                            {nivelATier(p.nivel) ? <Tier level={nivelATier(p.nivel)!} /> : <span />}
+                            <span className="sn-price">{activo ? "Elegido ✓" : "Elegir ↗"}</span>
+                          </div>
+                        </div>
+                      </div>
                     </button>
+                    <Link
+                      href={`/negocio/${negocio.slug}/profesional/${p.staff_id}`}
+                      className="sn-label inline-flex min-h-12 items-center underline"
+                    >
+                      Ver perfil de {p.nombre} ↗
+                    </Link>
+                    </div>
                   );
                 })}
               </div>
@@ -411,230 +422,217 @@ export function FlujoReserva({
         {/* ── Paso 3 · Horario ────────────────────────────────────── */}
         {paso === 3 ? (
           <section>
-            <h2 className="font-display mb-1 text-[22px] font-bold uppercase text-text">
-              ¿Cuándo?
-            </h2>
-            <p className="mb-4 text-[13.5px] text-text-muted">
-              {duracion(minutosTotal)} · {profesional ? profesional.nombre : "Cualquiera disponible"}
-            </p>
-
-            <div className="-mx-5 mb-5 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0">
-              {dias.map((d) => (
-                <button
-                  key={d}
-                  type="button"
-                  onClick={() => {
-                    setFecha(d);
-                    setSlot(null);
-                  }}
-                  aria-pressed={fecha === d}
-                  className={cn(
-                    "shrink-0 rounded-xl border px-3.5 py-2.5 text-[12.5px] font-semibold capitalize transition-colors",
-                    fecha === d
-                      ? "border-accent bg-accent-soft text-accent"
-                      : "border-border text-text-muted hover:border-accent/40"
-                  )}
-                >
-                  {fechaCorta(d, tz)}
-                </button>
-              ))}
+            <h1 className="poster-2 px-4 pt-3 pb-4 break-words">
+              ¿Cuándo
+              <br />
+              <span className="sn-hot">vienes?</span>
+            </h1>
+            <div className="px-4 pb-2">
+              <Label>
+                {duracion(minutosTotal)} · {profesional ? profesional.nombre : "Cualquiera disponible"}
+              </Label>
             </div>
 
-            {cargandoSlots ? (
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                {Array.from({ length: 8 }, (_, i) => (
-                  <div key={i} className="h-11 animate-pulse rounded-xl bg-surface" />
-                ))}
+            <div className="flex items-center justify-between gap-2 px-4 pb-2">
+              <Chip
+                disabled={inicioDias === 0}
+                onClick={() => setInicioDias((i) => Math.max(0, i - DIAS_POR_VENTANA))}
+                aria-label="Días anteriores"
+              >
+                ← Antes
+              </Chip>
+              <Chip
+                disabled={inicioDias + DIAS_POR_VENTANA >= DIAS_VISIBLES}
+                onClick={() => setInicioDias((i) => Math.min(DIAS_VISIBLES - DIAS_POR_VENTANA, i + DIAS_POR_VENTANA))}
+                aria-label="Días siguientes"
+              >
+                Después →
+              </Chip>
+            </div>
+            <div className="px-4 pb-4">
+              <div className="sn-days">
+                {diasVentana.map((d) => {
+                  const [dSem, ...resto] = fechaCorta(d, tz).split(" ");
+                  return (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => {
+                        setFecha(d);
+                        setSlot(null);
+                      }}
+                      aria-pressed={fecha === d}
+                      aria-label={fechaCorta(d, tz)}
+                      className={cn("sn-day", fecha === d && "is-selected")}
+                    >
+                      {dSem.replace(".", "")}
+                      <b>{resto[0]}</b>
+                    </button>
+                  );
+                })}
               </div>
-            ) : slots.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-border px-4 py-10 text-center">
-                <p className="text-[13.5px] font-semibold text-text">
-                  No hay horarios ese día
-                </p>
-                <p className="mx-auto mt-1 max-w-[280px] text-[12.5px] text-text-faint">
-                  Probá con otra fecha o avisanos y te escribimos apenas se libere un cupo.
-                </p>
-                {avisoEspera ? (
-                  <p className="mt-3 text-[12.5px] font-semibold text-success">{avisoEspera}</p>
-                ) : (
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="mt-4"
-                    onClick={anotarseEnEspera}
-                  >
-                    AVISARME CUANDO HAYA CUPO
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                  {/* Los ocupados se muestran tachados, no ausentes (02-UX/05_Booking.md). */}
-                  {slots.map((s) => {
-                    const elegido = slot?.hora_inicio === s.hora_inicio;
-                    return (
-                      <button
-                        key={s.hora_inicio}
-                        type="button"
-                        disabled={!s.disponible}
-                        onClick={() => setSlot(s)}
-                        className={cn(
-                          "h-11 rounded-xl border text-[13px] font-semibold transition-colors",
-                          !s.disponible &&
-                            "cursor-not-allowed border-border-subtle text-text-faint line-through opacity-60",
-                          s.disponible &&
-                            !elegido &&
-                            "border-border text-text hover:border-accent/50",
-                          elegido && "border-accent bg-accent text-bg"
-                        )}
-                      >
-                        {hora(s.hora_inicio, tz)}
-                      </button>
-                    );
-                  })}
-                </div>
+            </div>
 
-                {libres.length === 0 ? (
-                  <div className="mt-4 rounded-2xl border border-border bg-surface p-4 text-center">
-                    <p className="text-[13px] text-text-muted">
-                      Todos los turnos de ese día están tomados.
-                    </p>
-                    {avisoEspera ? (
-                      <p className="mt-2 text-[12.5px] font-semibold text-success">{avisoEspera}</p>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="mt-3"
-                        onClick={anotarseEnEspera}
-                      >
-                        AVISARME CUANDO HAYA CUPO
-                      </Button>
-                    )}
-                  </div>
-                ) : null}
-              </>
-            )}
+            <div className="sn-row px-4 pb-2">
+              <Label>Horarios</Label>
+              <Meta>· tachado = ocupado</Meta>
+            </div>
+
+            <div className="px-4 pb-4">
+              {cargandoSlots ? (
+                <div className="sn-slots" aria-busy="true" aria-label="Cargando horarios">
+                  {Array.from({ length: 8 }, (_, i) => (
+                    <div key={i} className="sn-slot animate-pulse bg-surface" />
+                  ))}
+                </div>
+              ) : slots.length === 0 ? (
+                <div className="border-2 border-dashed border-line p-6 text-center">
+                  <h3 className="section">No hay horarios ese día</h3>
+                  <p className="sn-meta mx-auto mt-2 max-w-[320px]">
+                    Probá con otra fecha o avisanos y te escribimos apenas se libere un cupo.
+                  </p>
+                  {avisoEspera ? (
+                    <div className="mt-3">
+                      <Status tone="ok">{avisoEspera}</Status>
+                    </div>
+                  ) : (
+                    <Button size="sm" variant="secondary" className="mt-4" onClick={anotarseEnEspera}>
+                      Avisarme cuando haya cupo
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <>
+                  {/* Los ocupados se muestran tachados, no ausentes (02-UX/05_Booking.md). */}
+                  <SlotsPorFranja slots={slots} tz={tz} elegido={slot?.hora_inicio ?? null} onElegir={setSlot} />
+
+                  {libres.length === 0 ? (
+                    <div className="mt-4 border-2 border-line p-4 text-center">
+                      <p className="body-sm m-0">Todos los turnos de ese día están tomados.</p>
+                      {avisoEspera ? (
+                        <div className="mt-3">
+                          <Status tone="ok">{avisoEspera}</Status>
+                        </div>
+                      ) : (
+                        <Button size="sm" variant="secondary" className="mt-3" onClick={anotarseEnEspera}>
+                          Avisarme cuando haya cupo
+                        </Button>
+                      )}
+                    </div>
+                  ) : null}
+                </>
+              )}
+            </div>
           </section>
         ) : null}
 
         {/* ── Paso 4 · Resumen ────────────────────────────────────── */}
         {paso === 4 && slot ? (
           <section>
-            <h2 className="font-display mb-5 text-[22px] font-bold uppercase text-text">
-              Confirmá tu turno
-            </h2>
+            <h1 className="poster-2 px-4 pt-3 pb-4 break-words">
+              Confirma
+              <br />
+              <span className="sn-hot">tu turno.</span>
+            </h1>
 
-            <dl className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-surface p-4">
-              <div className="flex justify-between gap-3">
-                <dt className="text-[12.5px] text-text-muted">Servicios</dt>
-                <dd className="text-right text-[13px] font-semibold text-text">
-                  {seleccionados.map((s) => s.nombre).join(" + ")}
-                </dd>
+            <div className="px-4 pb-4">
+              <div className="sn-ticket">
+                <div className="sn-ticket__top">
+                  <div className="sn-ticket__date">
+                    <span className="sn-meta">{fechaCorta(fechaISO(slot.hora_inicio, tz), tz).split(" ")[2]?.replace(".", "")}</span>
+                    <b>{Number(fechaISO(slot.hora_inicio, tz).slice(8, 10))}</b>
+                  </div>
+                  <div className="sn-ticket__main min-w-0">
+                    <Status tone="warn">Pendiente de pago</Status>
+                    <h3 className="poster-5 m-0 break-words">{seleccionados.map((s) => s.nombre).join(" + ")}</h3>
+                    <span className="sn-meta break-words">
+                      {profesional ? profesional.nombre : "Profesional por asignar"} · {hora(slot.hora_inicio, tz)} · {sede?.nombre}
+                    </span>
+                  </div>
+                </div>
+                <div className="sn-ticket__perf" />
+                <div className="sn-ticket__foot">
+                  <span className="sn-label">Total</span>
+                  <span className="sn-fig text-[22px]">{formatCOP(montoTotal)}</span>
+                </div>
               </div>
-              <div className="flex justify-between gap-3">
-                <dt className="text-[12.5px] text-text-muted">Profesional</dt>
-                <dd className="text-[13px] font-semibold text-text">
-                  {profesional ? profesional.nombre : "Se asigna al confirmar"}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-3">
-                <dt className="text-[12.5px] text-text-muted">Sede</dt>
-                <dd className="text-right text-[13px] font-semibold text-text">
-                  {sede?.nombre}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-3">
-                <dt className="text-[12.5px] text-text-muted">Fecha y hora</dt>
-                <dd className="text-right text-[13px] font-semibold capitalize text-text">
-                  {fechaHoraLarga(slot.hora_inicio, tz)}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-3">
-                <dt className="text-[12.5px] text-text-muted">Duración</dt>
-                <dd className="text-[13px] font-semibold text-text">{duracion(minutosTotal)}</dd>
-              </div>
+            </div>
 
-              <div className="mt-1 border-t border-border-subtle pt-3">
-                <div className="flex justify-between gap-3">
-                  <dt className="text-[12.5px] text-text-muted">Total del servicio</dt>
-                  <dd className="text-[13px] font-semibold text-text">{formatCOP(montoTotal)}</dd>
+            <div className="border-t-2 border-line">
+              {[
+                ["Servicios", seleccionados.map((s) => s.nombre).join(" + ")],
+                ["Profesional", profesional ? profesional.nombre : "Se asigna al confirmar"],
+                ["Sede", sede?.nombre ?? ""],
+                ["Fecha y hora", fechaHoraLarga(slot.hora_inicio, tz)],
+                ["Duración", duracion(minutosTotal)],
+              ].map(([k, v]) => (
+                <div key={k} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-grid-soft px-4 py-3">
+                  <span className="sn-meta">{k}</span>
+                  <span className="body min-w-0 text-right font-bold break-words capitalize">{v}</span>
                 </div>
-                <div className="mt-2 flex items-baseline justify-between gap-3">
-                  <dt className="text-[13px] font-bold text-text">Seña a pagar ahora</dt>
-                  <dd className="font-display text-[20px] font-bold text-accent">
-                    {formatCOP(sena)}
-                  </dd>
-                </div>
-                {sena < montoTotal ? (
-                  <p className="mt-1 text-[11.5px] text-text-faint">
-                    El saldo de {formatCOP(montoTotal - sena)} lo pagás en el local.
-                  </p>
-                ) : null}
+              ))}
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-grid-soft px-4 py-3">
+                <span className="sn-meta">Total del servicio</span>
+                <span className="sn-price">{formatCOP(montoTotal)}</span>
               </div>
-            </dl>
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b-2 border-line bg-signal px-4 py-3 text-ink">
+                <span className="sn-label">Seña a pagar ahora</span>
+                <span className="sn-fig text-[22px]">{formatCOP(sena)}</span>
+              </div>
+            </div>
+            {sena < montoTotal ? (
+              <p className="sn-meta m-0 px-4 pt-2">El saldo de {formatCOP(montoTotal - sena)} lo pagás en el local.</p>
+            ) : null}
 
             {/* Nunca se paga sin ver antes la política de cancelación. */}
-            <div className="mt-4 rounded-2xl border border-border bg-surface-2 p-4">
-              <p className="mb-2 text-[11.5px] font-bold uppercase tracking-wide text-text-muted">
-                Política de cancelación
-              </p>
-              <ul className="flex list-disc flex-col gap-1.5 pl-4">
-                {resumenPoliticaCancelacion(negocio).map((linea) => (
-                  <li key={linea} className="text-[12.5px] leading-relaxed text-text-muted">
-                    {linea}
-                  </li>
-                ))}
-              </ul>
+            <div className="p-sec">
+              <Num>Política de cancelación</Num>
             </div>
+            <ul className="body-sm m-0 flex list-none flex-col gap-1.5 px-4">
+              {resumenPoliticaCancelacion(negocio).map((linea) => (
+                <li key={linea}>{linea}</li>
+              ))}
+            </ul>
           </section>
         ) : null}
 
         {error ? (
-          <p role="alert" className="mt-4 text-[12.5px] font-semibold text-danger">
-            {error}
-          </p>
+          <div className="px-4 pt-4">
+            <Status tone="err" role="alert" className="!whitespace-normal">
+              {error}
+            </Status>
+          </div>
         ) : null}
       </main>
 
-      {/* ── Navegación ────────────────────────────────────────────── */}
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border-subtle bg-bg/95 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:px-10">
-        <div className="mx-auto flex w-full max-w-2xl items-center gap-3">
-          {paso > 1 ? (
-            <Button
-              variant="secondary"
-              size="lg"
-              className="shrink-0 px-5"
-              onClick={() => {
-                setError(null);
-                setPaso((p) => p - 1);
-              }}
-            >
-              ATRÁS
-            </Button>
-          ) : null}
-
-          {paso < 4 ? (
-            <Button
-              size="lg"
-              className="flex-1"
-              disabled={!puedeAvanzar}
-              onClick={() => {
-                setError(null);
-                setPaso((p) => p + 1);
-              }}
-            >
-              {paso === 1 && montoTotal > 0
-                ? `CONTINUAR · ${formatCOP(montoTotal)}`
-                : "CONTINUAR"}
-            </Button>
-          ) : (
-            <Button size="lg" className="flex-1" loading={confirmando} onClick={confirmar}>
-              IR A PAGAR {formatCOP(sena)}
-            </Button>
-          )}
-        </div>
+      {/* ── Barra de acción ───────────────────────────────────────── */}
+      <div className="p-foot">
+        {paso < 4 && (paso === 1 ? montoTotal > 0 : true) ? bloqueAnticipo : null}
+        {paso < 4 ? (
+          <Button
+            size="lg"
+            className="w-full justify-between"
+            disabled={!puedeAvanzar}
+            onClick={() => {
+              setError(null);
+              // Profesional preseleccionado desde su perfil: se aplica al salir del paso 1,
+              // solo si presta todos los servicios elegidos.
+              if (paso === 1 && staffInicial && !staffInicialAplicado) {
+                setStaffInicialAplicado(true);
+                if (staffCompatible.some((p) => p.staff_id === staffInicial)) setStaffId(staffInicial);
+              }
+              setPaso((p) => p + 1);
+            }}
+          >
+            <span>Continuar</span>
+            {iconoFlecha}
+          </Button>
+        ) : (
+          <Button size="lg" className="w-full justify-between" loading={confirmando} onClick={confirmar}>
+            <span>Ir a pagar {formatCOP(sena)}</span>
+            {iconoFlecha}
+          </Button>
+        )}
       </div>
     </div>
   );

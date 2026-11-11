@@ -1,19 +1,15 @@
 import { PanelNav } from "@/components/panel/panel-nav";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import { listarMisCampanas } from "./actions";
 import { VistaAds } from "./vista-ads";
 
 export const metadata = { title: "Publicidad" };
 
 export default async function AdsPage() {
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect("/login?next=/panel/ads");
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
-  // 06_Advertising_System.md, Permisos: "Barbería (Plan Jarl+) crea y
-  // gestiona sus propias campañas" — Guardian/Staff no tienen mención.
-  if (contexto.rol !== "BARBERIA") redirect("/panel");
+  // 06_Advertising_System.md + ADR-015: Ads es decisión de inversión del
+  // negocio — Guardian queda completamente fuera del módulo (ver 01_Roles.md).
+  const contexto = await verificarAccesoPanel(["BARBERIA"], "/panel/ads");
 
   const negocioId = contexto.negocioId!;
   const supabase = await createClient();

@@ -124,8 +124,10 @@ Cliente  (acceso a sus propios recursos, sin jerarquía sobre nadie)
 | Ver sede | 🔒 | 🏢 | 🏢 | 🌐 | 👑 |
 | Crear sede | ❌ | ❌ | ❌ | 🌐 | 👑 |
 | Editar sede | ❌ | ❌ | 🏢 | 🌐 | 👑 |
-| Cerrar temporalmente | ❌ | ❌ | 🏢 | 🌐 | 👑 |
+| Cerrar temporalmente | ❌ | ❌ | ❌¹ | 🌐 | 👑 |
 | Eliminar sede | ❌ | ❌ | ❌ | 🌐 | 👑 |
+
+¹ Corregido por ADR-015 (2026-09-16): cerrar/reabrir una sede impacta Reservas, pagos, Agenda, reputación y su visibilidad en el Marketplace — es una decisión del dueño del negocio, no de quien opera la sede. El código en producción ya lo denegaba a Guardian; esta fila tenía el símbolo incorrecto (🏢) desde la versión original de este documento.
 
 #### Clientes (CRM)
 | Acción | Cliente | Staff | Guardian | Barbería | SuperSU |
@@ -158,13 +160,23 @@ Cliente  (acceso a sus propios recursos, sin jerarquía sobre nadie)
 
 > El módulo de Inventario aparece en esta matriz de permisos porque el negocio lo requiere, pero **no tiene todavía un documento de reglas de negocio ni modelo de datos propio** en la Biblia — es una Decisión abierta registrada en ADL-009: se especificará como módulo completo (entidades, reglas, estados, API) en una fase posterior, priorizada en `01-PRD/04_Roadmap.md`. Esta matriz fija sus permisos por adelantado para que, cuando se construya, no requiera revisar el modelo de roles.
 
+#### Punto de Venta (POS)
+| Acción | Cliente | Staff | Guardian | Barbería | SuperSU |
+|---|:---:|:---:|:---:|:---:|:---:|
+| Ver caja / historial de ventas | ❌ | ❌ | 🏢 | 🌐 | 👑 |
+| Registrar venta | ❌ | ❌ | 🏢 | 🌐 | 👑 |
+
+> Módulo construido después de la versión original de este documento (ADR-015, 2026-09-16) — agregado acá con el mismo criterio ya usado para Inventario (alcance de sede para Guardian, sin distinción de UI adicional).
+
 #### Publicidad y Marketing
 | Acción | Cliente | Staff | Guardian | Barbería | SuperSU |
 |---|:---:|:---:|:---:|:---:|:---:|
-| Ver campañas | ❌ | ❌ | 🏢 | 🌐 | 👑 |
+| Ver campañas | ❌ | ❌ | ❌² | 🌐 | 👑 |
 | Crear campaña | ❌ | ❌ | ❌ | 🌐 | 👑 |
 | Activar anuncios | ❌ | ❌ | ❌ | 🌐 | 👑 |
 | Administrar presupuesto | ❌ | ❌ | ❌ | 🌐 | 👑 |
+
+² Corregido por ADR-015 (2026-09-16): Publicidad/Ads es una decisión de inversión del negocio (Presupuesto ↔ Wallet del negocio), no una operación de sede — Guardian queda completamente fuera del módulo, igual que Suscripción/Facturación/Plan.
 
 Ver `08-Growth-Monetization/06_Advertising_System.md` para el detalle completo de este módulo.
 

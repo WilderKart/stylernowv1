@@ -1,43 +1,52 @@
-import { BarraSuperior } from "@/components/layout/header";
-import { Card } from "@/components/ui/card";
-import Link from "next/link";
+import { Bloque, Fila, Filas, Pantalla, Top } from "@/app/lealtad/ui-cliente";
+import { createClient } from "@/lib/supabase/server";
+import { Gift, Search, Ticket } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export const metadata = { title: "Gift Cards" };
 
-export default function GiftCardsHubPage() {
+export default async function GiftCardsHubPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login?next=/gift-cards");
+
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
-      <BarraSuperior titulo="Gift Cards" volverA="/" />
-      <main className="mx-auto w-full max-w-md flex-1 px-5 py-6 sm:px-0">
-        <p className="mb-6 text-[13px] text-text-muted">
-          Regalá una Gift Card digital para tu Barbería favorita — para vos, para otra persona, o por lote para tu empresa.
-        </p>
+    <Pantalla>
+      <Top titulo="03 / Gift cards" volverA="/lealtad" />
+      <h1 className="poster-3 break-words px-4 pt-4">
+        Regala <span className="sn-hot">estilo.</span>
+      </h1>
+      <p className="body-sm break-words p-4">
+        Regala una gift card digital para tu barbería favorita: para ti, para otra persona o por lote para tu empresa.
+      </p>
 
-        <div className="flex flex-col gap-3">
-          <Link href="/gift-cards/comprar">
-            <Card className="transition-colors hover:border-accent/40">
-              <p className="text-[14px] font-bold text-text">Comprar una Gift Card</p>
-              <p className="mt-0.5 text-[12px] text-text-muted">Elegí el monto, para quién es, y pagá en segundos.</p>
-            </Card>
-          </Link>
-          <Link href="/gift-cards/mis">
-            <Card className="transition-colors hover:border-accent/40">
-              <p className="text-[14px] font-bold text-text">Mis Gift Cards</p>
-              <p className="mt-0.5 text-[12px] text-text-muted">Las que compraste y las que te regalaron.</p>
-            </Card>
-          </Link>
-          <Link href="/gift-cards/canjear">
-            <Card className="transition-colors hover:border-accent/40">
-              <p className="text-[14px] font-bold text-text">Consultar una Gift Card</p>
-              <p className="mt-0.5 text-[12px] text-text-muted">Verificá el saldo antes de presentarla en el local.</p>
-            </Card>
-          </Link>
-        </div>
+      <Filas>
+        <Fila
+          icono={<Gift aria-hidden className="size-5" />}
+          titulo="Comprar una gift card"
+          meta="Elige el monto, para quién es y paga en segundos."
+          href="/gift-cards/comprar"
+        />
+        <Fila
+          icono={<Ticket aria-hidden className="size-5" />}
+          titulo="Mis gift cards"
+          meta="Las que compraste y las que te regalaron."
+          href="/gift-cards/mis"
+        />
+        <Fila
+          icono={<Search aria-hidden className="size-5" />}
+          titulo="Consultar una gift card"
+          meta="Verifica el saldo antes de presentarla en el local."
+          href="/gift-cards/canjear"
+        />
+      </Filas>
 
-        <p className="mt-6 rounded-xl border border-border-subtle bg-surface-2 px-3.5 py-3 text-[11.5px] text-text-faint">
-          El canje de una Gift Card se hace únicamente en el local, cuando el Staff la registra en el momento de tu visita — por seguridad, no se puede canjear a distancia.
-        </p>
-      </main>
-    </div>
+      <Bloque etiqueta="00 / Canje">
+        El canje de una gift card se hace únicamente en el local, cuando el staff la registra en el momento de tu visita. Por
+        seguridad, no se puede canjear a distancia.
+      </Bloque>
+    </Pantalla>
   );
 }

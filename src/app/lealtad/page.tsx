@@ -1,5 +1,5 @@
 import { BottomNav } from "@/components/layout/bottom-nav";
-import { Header } from "@/components/layout/header";
+import { Pantalla, Top } from "@/app/lealtad/ui-cliente";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { obtenerResumenLealtad } from "./actions";
@@ -17,8 +17,8 @@ export default async function LealtadPage() {
   const resumen = await obtenerResumenLealtad();
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg pb-24">
-      <Header autenticado />
+    <Pantalla className="pb-24">
+      <Top titulo="Mi lealtad" volverA="/perfil" />
       <VistaLealtad
         resumenInicial={
           resumen.ok
@@ -28,6 +28,6 @@ export default async function LealtadPage() {
         errorInicial={resumen.ok ? null : resumen.error}
       />
       <BottomNav />
-    </div>
+    </Pantalla>
   );
 }

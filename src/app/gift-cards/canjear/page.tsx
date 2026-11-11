@@ -1,4 +1,4 @@
-import { BarraSuperior } from "@/components/layout/header";
+import { Pantalla, Top } from "@/app/lealtad/ui-cliente";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { VistaConsultarGiftCard } from "./vista-consultar";
@@ -13,9 +13,9 @@ export default async function CanjearGiftCardPage() {
   if (!user) redirect("/login?next=/gift-cards/canjear");
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
-      <BarraSuperior titulo="Consultar Gift Card" volverA="/gift-cards" />
+    <Pantalla>
+      <Top titulo="Consultar gift card" volverA="/gift-cards" />
       <VistaConsultarGiftCard />
-    </div>
+    </Pantalla>
   );
 }

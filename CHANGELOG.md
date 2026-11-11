@@ -7,6 +7,96 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Corregido — CRÍTICO: auto-escalación a SuperSU vía RLS de `perfil` (ADL-036)
+Auditoría formal de seguridad (skill `security-audit`, previa a ADR-015 Fase E)
+encontró que `perfil_update_propio` permitía a cualquier usuario autenticado
+llamar directo a PostgREST (`PATCH /rest/v1/perfil?id=eq.<su-id>` con
+`{"es_supersu": true}`) y auto-promoverse a SuperSU, porque la policy de RLS
+no tenía un `with check` distinto de su `using`. Corregido en la migración
+`084_perfil_columnas_sensibles_trigger.sql` (trigger `BEFORE UPDATE` que
+bloquea cambios a `es_supersu`/`session_version` salvo `is_supersu()` o
+contexto `service_role`). Verificado en vivo contra la cuenta de prueba
+dedicada (revertida al finalizar): escalación bloqueada, autoservicio
+legítimo de `password_establecida` intacto. `tsc`/`eslint`/`next build`
+limpios. El mismo patrón en `negocio`/`sede`/`servicio`/`reserva` queda
+documentado como deuda técnica de alta prioridad (ver ADL-036 y
+`docs/TECH_DEBT_REGISTER.md`) — esas columnas sí las escriben RPCs legítimas
+bajo el JWT del usuario real, así que requieren un fix distinto (bandera
+`set_config()` transaccional), fuera de esta pasada.
+
+### Corregido — `crearContrasena()` permitía sobrescribir una contraseña existente sin la actual (ADL-037)
+La misma auditoría que encontró ADL-036 mostró que `crearContrasena()` solo
+validaba que hubiera sesión activa, nunca si la cuenta ya tenía contraseña
+— cualquier sesión autenticada (incluyendo una secuestrada vía el XSS de
+JSON-LD, ver más abajo) podía fijar una contraseña nueva en silencio,
+convirtiendo un secuestro efímero en acceso persistente. Corregido
+verificando `perfil.password_establecida` del lado del servidor antes de
+proceder.
+
+### Añadido — ADR-015, Fase D: Google OAuth + Identity Provider Platform
+Botón "Continuar con Google" en el login, sobre el mismo `/auth/callback`
+(PKCE) que ya usaban magic link y recuperación — ningún proveedor OAuth
+necesita su propio callback. Interfaz `AuthProvider` con Google activo y
+Apple preparado (`isEnabled()=false`, sin implementar). SuperSU bloqueado
+explícitamente contra login por Google. El rol nunca se decide en el
+proveedor. Auditoría real (`GOOGLE_LOGIN`/`OAUTH_ERROR`/`CALLBACK_INVALIDO`
+en `evento_auditoria`, reutilizado, sin sistema nuevo).
+
+**Regresión real encontrada y corregida en esta misma fase:** `/auth/callback`
+no tenía entrada en el Route Registry desde ADR-015 Fase B — el middleware lo
+trataba como protegido y rompía magic link/recuperación de contraseña
+silenciosamente (no solo Google). `tools/check-auth-coverage.mjs` ahora
+también audita Route Handlers fuera de `/api/**` para que esto no vuelva a
+pasar sin que el build falle.
+
+### Añadido — ADR-015, Fase C: Password Platform Enterprise
+Login por contraseña, creación obligatoria de contraseña tras el primer OTP,
+recuperación (`resetPasswordForEmail`, nunca revela si un email existe),
+cambio de contraseña (exige la actual), historial de últimas 5 (hash
+`scrypt` nativo de Node, sin dependencia nueva), verificación contra Pwned
+Passwords (k-anonimato, fail-open), y rate limiting de OTP/login/recovery
+(`intento_auth` + RPC, sin Redis). `perfil.session_version` preparado y ya
+incrementándose en cambio de contraseña/recuperación/traslado/suspensión/
+revocación de Guardian (migraciones 081-083) — falta solo habilitar el
+Custom Access Token Hook en el Dashboard de Supabase para que invalide JWTs
+de verdad (`docs/PENDING_DECISIONS.md`). Interfaz `AuthProvider` lista para
+Google OAuth sin tocar Password Platform. Documentado en
+`StylerNow_Project_Bible_V3/02-UX/13_Auth_State_Machine.md`. Probado con
+llamadas reales contra Supabase (login, rate limit, RLS de `password_history`,
+Pwned Passwords) — no mockeado.
+
+### Añadido — Auditoría de Identidad pre-Password Platform (`docs/IDENTITY_AUDIT_REPORT.md`)
+Auditoría completa de auth/roles/RLS/sesiones con evidencia real: 5 usuarios
+reales creados vía Supabase Admin API, sesiones reales, ataques simulados
+con `curl` (Cliente→Panel, Guardian→Facturación/Ads/Suscripción, API directa
+sin sesión, cookie/JWT manipulado). Encontró y corrigió una regresión real
+introducida en esta misma sesión: el middleware nuevo redirigía `/api/**` a
+`/login` (307) en vez de dejar que cada Route Handler devolviera su propio
+401 — corregido en `src/proxy.ts`. Documentó (sin corregir automáticamente)
+2 contradicciones más: `05-API/02_Auth.md` describe un modelo de JWT claims
+nunca construido, y no hay regla explícita sobre si SuperSU puede ser
+también dueño de un Negocio (ver `docs/PENDING_DECISIONS.md`). Veredicto:
+Password Platform puede comenzar.
+
+### Corregido — `01_Roles.md`: dos permisos de Guardian con símbolo incorrecto
+"Cerrar sede" y "Ver campañas de Ads" decían 🏢 (alcance de sede) para
+Guardian; el código en producción ya los denegaba por completo. Corregida
+la Biblia para que coincida con el código (ver ADL-033), agregada además
+la sección de POS a la matriz de roles (módulo sin fila propia hasta ahora).
+
+### Añadido — ADR-015: contrato único de identidad (Fase A/B en curso)
+`Contexto`/`Permisos` unificados (`src/lib/auth/tipos.ts`), Permission
+Registry ejecutable transcrito de `01_Roles.md` (`permission-registry.ts`),
+Route Registry (`route-registry.ts`) del que `proxy.ts` ahora depende para
+decidir público/protegido con un 307 real al Edge (antes se resolvía más
+tarde, página por página). `forbidden()`/`authInterrupts` habilitado para
+un 403 real en vez de redirects silenciosos entre superficies. Los 27
+`page.tsx` de `/panel` migrados a un único helper de entrada
+(`verificarAccesoPanel()`) — sin tocar `resolverContexto()`,
+`obtenerContextoStaff()` ni `requireSuperSU()` (ADL-011/015/019 se
+mantienen). Trabajo en curso — sigue con Password Platform, Google OAuth,
+MFA, Session Registry/Version.
+
 ### Añadido — ADR-014, Fase C: Tracking real del ROI de IA
 Cierra el hallazgo honesto del Módulo 6.6: ahora existe un mecanismo real
 que vincula una acción de IA con un resultado de negocio. `ai_interaction`

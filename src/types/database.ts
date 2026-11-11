@@ -7,30 +7,10 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -57,6 +37,38 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "texto_legal"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      addon_precio: {
+        Row: {
+          addon_codigo: string
+          pais_codigo: string
+          precio_mensual: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          addon_codigo: string
+          pais_codigo: string
+          precio_mensual?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          addon_codigo?: string
+          pais_codigo?: string
+          precio_mensual?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "addon_precio_pais_codigo_fkey"
+            columns: ["pais_codigo"]
+            isOneToOne: false
+            referencedRelation: "pais"
+            referencedColumns: ["codigo"]
           },
         ]
       }
@@ -1468,6 +1480,30 @@ export type Database = {
           },
         ]
       }
+      intento_auth: {
+        Row: {
+          created_at: string
+          email: string
+          exitoso: boolean
+          id: string
+          tipo: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          exitoso?: boolean
+          id?: string
+          tipo: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          exitoso?: boolean
+          id?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
       invitacion_staff: {
         Row: {
           comision_pct: number | null
@@ -1937,6 +1973,7 @@ export type Database = {
           onboarding_completo: boolean
           owner_user_id: string
           pago_completo_en_app: boolean
+          pais_codigo: string
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
           puntos_expiracion_meses: number
           puntos_valor_100_cop: number
@@ -1969,6 +2006,7 @@ export type Database = {
           onboarding_completo?: boolean
           owner_user_id: string
           pago_completo_en_app?: boolean
+          pais_codigo?: string
           plan_codigo?: Database["public"]["Enums"]["plan_codigo"]
           puntos_expiracion_meses?: number
           puntos_valor_100_cop?: number
@@ -2001,6 +2039,7 @@ export type Database = {
           onboarding_completo?: boolean
           owner_user_id?: string
           pago_completo_en_app?: boolean
+          pais_codigo?: string
           plan_codigo?: Database["public"]["Enums"]["plan_codigo"]
           puntos_expiracion_meses?: number
           puntos_valor_100_cop?: number
@@ -2015,7 +2054,94 @@ export type Database = {
           ventana_reembolso_parcial_horas?: number
           ventana_reembolso_total_horas?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "negocio_pais_codigo_fkey"
+            columns: ["pais_codigo"]
+            isOneToOne: false
+            referencedRelation: "pais"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      negocio_addon: {
+        Row: {
+          activo: boolean
+          addon_codigo: string
+          cantidad: number
+          desde: string
+          hasta: string | null
+          id: string
+          negocio_id: string
+        }
+        Insert: {
+          activo?: boolean
+          addon_codigo: string
+          cantidad?: number
+          desde?: string
+          hasta?: string | null
+          id?: string
+          negocio_id: string
+        }
+        Update: {
+          activo?: boolean
+          addon_codigo?: string
+          cantidad?: number
+          desde?: string
+          hasta?: string | null
+          id?: string
+          negocio_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "negocio_addon_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      negocio_marca: {
+        Row: {
+          color_primario: string
+          color_secundario: string
+          estado: string
+          logo_url: string | null
+          negocio_id: string
+          nombre_marca: string
+          slogan: string | null
+          updated_at: string
+        }
+        Insert: {
+          color_primario?: string
+          color_secundario?: string
+          estado?: string
+          logo_url?: string | null
+          negocio_id: string
+          nombre_marca: string
+          slogan?: string | null
+          updated_at?: string
+        }
+        Update: {
+          color_primario?: string
+          color_secundario?: string
+          estado?: string
+          logo_url?: string | null
+          negocio_id?: string
+          nombre_marca?: string
+          slogan?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "negocio_marca_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: true
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       negocio_visita_perfil: {
         Row: {
@@ -2234,6 +2360,81 @@ export type Database = {
           },
         ]
       }
+      pais: {
+        Row: {
+          activo: boolean
+          anual_meses_pagados: number
+          cobro_recurrente_habilitado: boolean
+          codigo: string
+          fundador_cupos: number
+          fundador_descuento_pct: number
+          fundador_meses: number
+          impuesto_pct: number | null
+          locale: string
+          moneda: string
+          nombre: string
+          pasarela: string
+          precio_mas_impuesto: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          activo?: boolean
+          anual_meses_pagados?: number
+          cobro_recurrente_habilitado?: boolean
+          codigo: string
+          fundador_cupos?: number
+          fundador_descuento_pct?: number
+          fundador_meses?: number
+          impuesto_pct?: number | null
+          locale: string
+          moneda: string
+          nombre: string
+          pasarela?: string
+          precio_mas_impuesto?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          activo?: boolean
+          anual_meses_pagados?: number
+          cobro_recurrente_habilitado?: boolean
+          codigo?: string
+          fundador_cupos?: number
+          fundador_descuento_pct?: number
+          fundador_meses?: number
+          impuesto_pct?: number | null
+          locale?: string
+          moneda?: string
+          nombre?: string
+          pasarela?: string
+          precio_mas_impuesto?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      password_history: {
+        Row: {
+          created_at: string
+          hash: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          hash: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          hash?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       perfil: {
         Row: {
           avatar_url: string | null
@@ -2246,6 +2447,8 @@ export type Database = {
           fecha_nacimiento: string | null
           id: string
           nombre: string
+          password_establecida: boolean
+          session_version: number
           telefono: string | null
           updated_at: string
         }
@@ -2260,6 +2463,8 @@ export type Database = {
           fecha_nacimiento?: string | null
           id: string
           nombre: string
+          password_establecida?: boolean
+          session_version?: number
           telefono?: string | null
           updated_at?: string
         }
@@ -2274,6 +2479,8 @@ export type Database = {
           fecha_nacimiento?: string | null
           id?: string
           nombre?: string
+          password_establecida?: boolean
+          session_version?: number
           telefono?: string | null
           updated_at?: string
         }
@@ -2327,6 +2534,38 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_caracteristica: {
+        Row: {
+          clave: string
+          habilitado: boolean
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          updated_at: string
+          valor: string | null
+        }
+        Insert: {
+          clave: string
+          habilitado?: boolean
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          updated_at?: string
+          valor?: string | null
+        }
+        Update: {
+          clave?: string
+          habilitado?: boolean
+          plan_codigo?: Database["public"]["Enums"]["plan_codigo"]
+          updated_at?: string
+          valor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_caracteristica_plan_codigo_fkey"
+            columns: ["plan_codigo"]
+            isOneToOne: false
+            referencedRelation: "plan"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
       plan_funcion_ia: {
         Row: {
           funcion: string
@@ -2346,6 +2585,57 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "plan_funcion_ia_plan_codigo_fkey"
+            columns: ["plan_codigo"]
+            isOneToOne: false
+            referencedRelation: "plan"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      plan_precio: {
+        Row: {
+          activo: boolean
+          es_desde: boolean
+          pais_codigo: string
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          precio_mensual: number | null
+          precio_sede_extra: number | null
+          precio_staff_extra: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          activo?: boolean
+          es_desde?: boolean
+          pais_codigo: string
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          precio_mensual?: number | null
+          precio_sede_extra?: number | null
+          precio_staff_extra?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          activo?: boolean
+          es_desde?: boolean
+          pais_codigo?: string
+          plan_codigo?: Database["public"]["Enums"]["plan_codigo"]
+          precio_mensual?: number | null
+          precio_sede_extra?: number | null
+          precio_staff_extra?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_precio_pais_codigo_fkey"
+            columns: ["pais_codigo"]
+            isOneToOne: false
+            referencedRelation: "pais"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "plan_precio_plan_codigo_fkey"
             columns: ["plan_codigo"]
             isOneToOne: false
             referencedRelation: "plan"
@@ -2439,6 +2729,44 @@ export type Database = {
             columns: ["sede_id"]
             isOneToOne: false
             referencedRelation: "sede"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prueba_uso: {
+        Row: {
+          created_at: string
+          dispositivo_hash: string
+          documento_hash: string
+          email_hash: string
+          negocio_id: string
+          owner_user_id: string
+          telefono_hash: string
+        }
+        Insert: {
+          created_at?: string
+          dispositivo_hash: string
+          documento_hash: string
+          email_hash: string
+          negocio_id: string
+          owner_user_id: string
+          telefono_hash: string
+        }
+        Update: {
+          created_at?: string
+          dispositivo_hash?: string
+          documento_hash?: string
+          email_hash?: string
+          negocio_id?: string
+          owner_user_id?: string
+          telefono_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prueba_uso_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: true
+            referencedRelation: "negocio"
             referencedColumns: ["id"]
           },
         ]
@@ -3738,44 +4066,83 @@ export type Database = {
       }
       suscripcion: {
         Row: {
+          activacion_manual: boolean
+          aviso_1d_at: string | null
+          aviso_3d_at: string | null
+          ciclo: string
           created_at: string
           estado: Database["public"]["Enums"]["suscripcion_estado"]
           fecha_inicio_ciclo: string
           fecha_proximo_cobro: string
+          gracia_fin: string | null
           id: string
+          manual_hasta: string | null
+          manual_referencia: string | null
+          manual_tipo: string | null
+          metodo_pago_proveedor: string | null
+          metodo_pago_ref: string | null
           negocio_id: string
+          pais_codigo: string
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
           plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"] | null
+          prueba_fin: string | null
+          prueba_inicio: string | null
           reintentos_fallo_count: number
           suspendido_causa: string | null
           updated_at: string
         }
         Insert: {
+          activacion_manual?: boolean
+          aviso_1d_at?: string | null
+          aviso_3d_at?: string | null
+          ciclo?: string
           created_at?: string
           estado?: Database["public"]["Enums"]["suscripcion_estado"]
           fecha_inicio_ciclo?: string
           fecha_proximo_cobro: string
+          gracia_fin?: string | null
           id?: string
+          manual_hasta?: string | null
+          manual_referencia?: string | null
+          manual_tipo?: string | null
+          metodo_pago_proveedor?: string | null
+          metodo_pago_ref?: string | null
           negocio_id: string
+          pais_codigo?: string
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
           plan_codigo_destino?:
             | Database["public"]["Enums"]["plan_codigo"]
             | null
+          prueba_fin?: string | null
+          prueba_inicio?: string | null
           reintentos_fallo_count?: number
           suspendido_causa?: string | null
           updated_at?: string
         }
         Update: {
+          activacion_manual?: boolean
+          aviso_1d_at?: string | null
+          aviso_3d_at?: string | null
+          ciclo?: string
           created_at?: string
           estado?: Database["public"]["Enums"]["suscripcion_estado"]
           fecha_inicio_ciclo?: string
           fecha_proximo_cobro?: string
+          gracia_fin?: string | null
           id?: string
+          manual_hasta?: string | null
+          manual_referencia?: string | null
+          manual_tipo?: string | null
+          metodo_pago_proveedor?: string | null
+          metodo_pago_ref?: string | null
           negocio_id?: string
+          pais_codigo?: string
           plan_codigo?: Database["public"]["Enums"]["plan_codigo"]
           plan_codigo_destino?:
             | Database["public"]["Enums"]["plan_codigo"]
             | null
+          prueba_fin?: string | null
+          prueba_inicio?: string | null
           reintentos_fallo_count?: number
           suspendido_causa?: string | null
           updated_at?: string
@@ -3789,6 +4156,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "suscripcion_pais_codigo_fkey"
+            columns: ["pais_codigo"]
+            isOneToOne: false
+            referencedRelation: "pais"
+            referencedColumns: ["codigo"]
+          },
+          {
             foreignKeyName: "suscripcion_plan_codigo_destino_fkey"
             columns: ["plan_codigo_destino"]
             isOneToOne: false
@@ -3797,6 +4171,67 @@ export type Database = {
           },
           {
             foreignKeyName: "suscripcion_plan_codigo_fkey"
+            columns: ["plan_codigo"]
+            isOneToOne: false
+            referencedRelation: "plan"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      suscripcion_fundador: {
+        Row: {
+          created_at: string
+          descuento_pct: number
+          estado: string
+          fecha_fin: string
+          fecha_inicio: string
+          id: string
+          negocio_id: string
+          pais_codigo: string
+          perdido_en: string | null
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+        }
+        Insert: {
+          created_at?: string
+          descuento_pct: number
+          estado?: string
+          fecha_fin: string
+          fecha_inicio: string
+          id?: string
+          negocio_id: string
+          pais_codigo: string
+          perdido_en?: string | null
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+        }
+        Update: {
+          created_at?: string
+          descuento_pct?: number
+          estado?: string
+          fecha_fin?: string
+          fecha_inicio?: string
+          id?: string
+          negocio_id?: string
+          pais_codigo?: string
+          perdido_en?: string | null
+          plan_codigo?: Database["public"]["Enums"]["plan_codigo"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suscripcion_fundador_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: true
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suscripcion_fundador_pais_codigo_fkey"
+            columns: ["pais_codigo"]
+            isOneToOne: false
+            referencedRelation: "pais"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "suscripcion_fundador_plan_codigo_fkey"
             columns: ["plan_codigo"]
             isOneToOne: false
             referencedRelation: "plan"
@@ -4437,6 +4872,15 @@ export type Database = {
         Args: { p_evento: Json }
         Returns: undefined
       }
+      _reclamar_fundador: {
+        Args: {
+          p_inicio: string
+          p_negocio: string
+          p_pais: string
+          p_plan: Database["public"]["Enums"]["plan_codigo"]
+        }
+        Returns: boolean
+      }
       _validar_gift_card_para_canje: {
         Args: { p_codigo: string; p_pin: string }
         Returns: {
@@ -4464,6 +4908,15 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      activar_addon_negocio: {
+        Args: {
+          p_activo: boolean
+          p_addon: string
+          p_cantidad?: number
+          p_negocio_id: string
+        }
+        Returns: undefined
       }
       activar_campana: {
         Args: { p_campana_id: string }
@@ -4742,7 +5195,151 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_activar_negocio_manual: {
+        Args: {
+          p_dias?: number
+          p_estado: string
+          p_motivo: string
+          p_negocio_id: string
+          p_plan: Database["public"]["Enums"]["plan_codigo"]
+          p_referencia?: string
+          p_tipo: string
+        }
+        Returns: {
+          activacion_manual: boolean
+          aviso_1d_at: string | null
+          aviso_3d_at: string | null
+          ciclo: string
+          created_at: string
+          estado: Database["public"]["Enums"]["suscripcion_estado"]
+          fecha_inicio_ciclo: string
+          fecha_proximo_cobro: string
+          gracia_fin: string | null
+          id: string
+          manual_hasta: string | null
+          manual_referencia: string | null
+          manual_tipo: string | null
+          metodo_pago_proveedor: string | null
+          metodo_pago_ref: string | null
+          negocio_id: string
+          pais_codigo: string
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"] | null
+          prueba_fin: string | null
+          prueba_inicio: string | null
+          reintentos_fallo_count: number
+          suspendido_causa: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "suscripcion"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_dashboard_resumen: { Args: never; Returns: Json }
+      admin_set_addon_precio: {
+        Args: { p_addon: string; p_pais: string; p_precio: number }
+        Returns: {
+          addon_codigo: string
+          pais_codigo: string
+          precio_mensual: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "addon_precio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_set_pais: {
+        Args: {
+          p_activo: boolean
+          p_cobro_recurrente: boolean
+          p_codigo: string
+          p_fundador_cupos: number
+          p_fundador_descuento_pct: number
+          p_fundador_meses: number
+          p_impuesto_pct: number
+          p_pasarela: string
+          p_precio_mas_impuesto: boolean
+        }
+        Returns: {
+          activo: boolean
+          anual_meses_pagados: number
+          cobro_recurrente_habilitado: boolean
+          codigo: string
+          fundador_cupos: number
+          fundador_descuento_pct: number
+          fundador_meses: number
+          impuesto_pct: number | null
+          locale: string
+          moneda: string
+          nombre: string
+          pasarela: string
+          precio_mas_impuesto: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pais"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_set_plan_caracteristica: {
+        Args: {
+          p_clave: string
+          p_habilitado: boolean
+          p_plan: Database["public"]["Enums"]["plan_codigo"]
+          p_valor: string
+        }
+        Returns: {
+          clave: string
+          habilitado: boolean
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          updated_at: string
+          valor: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "plan_caracteristica"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_set_plan_precio: {
+        Args: {
+          p_activo: boolean
+          p_es_desde: boolean
+          p_pais: string
+          p_plan: Database["public"]["Enums"]["plan_codigo"]
+          p_precio_mensual: number
+          p_precio_sede_extra: number
+          p_precio_staff_extra: number
+        }
+        Returns: {
+          activo: boolean
+          es_desde: boolean
+          pais_codigo: string
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          precio_mensual: number | null
+          precio_sede_extra: number | null
+          precio_staff_extra: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "plan_precio"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       agregar_empleado_corporativo: {
         Args: { p_cliente_id: string; p_cuenta_id: string }
         Returns: {
@@ -4943,6 +5540,7 @@ export type Database = {
           onboarding_completo: boolean
           owner_user_id: string
           pago_completo_en_app: boolean
+          pais_codigo: string
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
           puntos_expiracion_meses: number
           puntos_valor_100_cop: number
@@ -5027,6 +5625,15 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      avisos_prueba_pendientes: {
+        Args: never
+        Returns: {
+          fecha_cobro: string
+          negocio_id: string
+          owner_user_id: string
+          tipo: string
+        }[]
+      }
       bloquear_gift_card: {
         Args: { p_gift_card_id: string; p_motivo: string }
         Returns: {
@@ -5062,14 +5669,27 @@ export type Database = {
       cancelar_downgrade_programado: {
         Args: { p_negocio_id: string }
         Returns: {
+          activacion_manual: boolean
+          aviso_1d_at: string | null
+          aviso_3d_at: string | null
+          ciclo: string
           created_at: string
           estado: Database["public"]["Enums"]["suscripcion_estado"]
           fecha_inicio_ciclo: string
           fecha_proximo_cobro: string
+          gracia_fin: string | null
           id: string
+          manual_hasta: string | null
+          manual_referencia: string | null
+          manual_tipo: string | null
+          metodo_pago_proveedor: string | null
+          metodo_pago_ref: string | null
           negocio_id: string
+          pais_codigo: string
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
           plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"] | null
+          prueba_fin: string | null
+          prueba_inicio: string | null
           reintentos_fallo_count: number
           suspendido_causa: string | null
           updated_at: string
@@ -5128,6 +5748,7 @@ export type Database = {
           onboarding_completo: boolean
           owner_user_id: string
           pago_completo_en_app: boolean
+          pais_codigo: string
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
           puntos_expiracion_meses: number
           puntos_valor_100_cop: number
@@ -5169,6 +5790,7 @@ export type Database = {
           onboarding_completo: boolean
           owner_user_id: string
           pago_completo_en_app: boolean
+          pais_codigo: string
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
           puntos_expiracion_meses: number
           puntos_valor_100_cop: number
@@ -5983,14 +6605,27 @@ export type Database = {
           p_plan_codigo: Database["public"]["Enums"]["plan_codigo"]
         }
         Returns: {
+          activacion_manual: boolean
+          aviso_1d_at: string | null
+          aviso_3d_at: string | null
+          ciclo: string
           created_at: string
           estado: Database["public"]["Enums"]["suscripcion_estado"]
           fecha_inicio_ciclo: string
           fecha_proximo_cobro: string
+          gracia_fin: string | null
           id: string
+          manual_hasta: string | null
+          manual_referencia: string | null
+          manual_tipo: string | null
+          metodo_pago_proveedor: string | null
+          metodo_pago_ref: string | null
           negocio_id: string
+          pais_codigo: string
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
           plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"] | null
+          prueba_fin: string | null
+          prueba_inicio: string | null
           reintentos_fallo_count: number
           suspendido_causa: string | null
           updated_at: string
@@ -6099,6 +6734,10 @@ export type Database = {
         Args: { p_evento_tipo: string; p_payload: Json }
         Returns: Json
       }
+      elegir_pais_negocio: {
+        Args: { p_negocio_id: string; p_pais: string }
+        Returns: undefined
+      }
       eliminar_banner_home: { Args: { p_id: string }; Returns: undefined }
       enviar_negocio_a_aprobacion: {
         Args: { p_negocio_id: string }
@@ -6120,6 +6759,7 @@ export type Database = {
           onboarding_completo: boolean
           owner_user_id: string
           pago_completo_en_app: boolean
+          pais_codigo: string
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
           puntos_expiracion_meses: number
           puntos_valor_100_cop: number
@@ -6255,6 +6895,7 @@ export type Database = {
           onboarding_completo: boolean
           owner_user_id: string
           pago_completo_en_app: boolean
+          pais_codigo: string
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
           puntos_expiracion_meses: number
           puntos_valor_100_cop: number
@@ -6276,7 +6917,35 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      fundador_cupos_restantes: { Args: { p_pais: string }; Returns: number }
       generar_roi_snapshot_mensual: { Args: never; Returns: Json }
+      guardar_marca_negocio: {
+        Args: {
+          p_color_primario: string
+          p_color_secundario: string
+          p_logo_url: string
+          p_negocio_id: string
+          p_nombre: string
+          p_publicar: boolean
+          p_slogan: string
+        }
+        Returns: {
+          color_primario: string
+          color_secundario: string
+          estado: string
+          logo_url: string | null
+          negocio_id: string
+          nombre_marca: string
+          slogan: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "negocio_marca"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       guardar_memoria_ia: {
         Args: {
           p_categoria: string
@@ -6324,6 +6993,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      incrementar_session_version: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       iniciar_atencion_reserva: {
         Args: { p_reserva_id: string }
         Returns: {
@@ -6355,6 +7028,50 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "reserva"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      iniciar_prueba_negocio: {
+        Args: {
+          p_ciclo: string
+          p_dispositivo_hash: string
+          p_documento_hash: string
+          p_metodo_pago_proveedor: string
+          p_metodo_pago_ref: string
+          p_negocio_id: string
+          p_plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          p_telefono_hash: string
+        }
+        Returns: {
+          activacion_manual: boolean
+          aviso_1d_at: string | null
+          aviso_3d_at: string | null
+          ciclo: string
+          created_at: string
+          estado: Database["public"]["Enums"]["suscripcion_estado"]
+          fecha_inicio_ciclo: string
+          fecha_proximo_cobro: string
+          gracia_fin: string | null
+          id: string
+          manual_hasta: string | null
+          manual_referencia: string | null
+          manual_tipo: string | null
+          metodo_pago_proveedor: string | null
+          metodo_pago_ref: string | null
+          negocio_id: string
+          pais_codigo: string
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"] | null
+          prueba_fin: string | null
+          prueba_inicio: string | null
+          reintentos_fallo_count: number
+          suspendido_causa: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "suscripcion"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -6451,6 +7168,11 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      mantenimiento_suscripciones: { Args: never; Returns: Json }
+      marcar_aviso_prueba: {
+        Args: { p_negocio_id: string; p_tipo: string }
+        Returns: undefined
+      }
       marcar_fraude_revisado: {
         Args: { p_evento_id: string }
         Returns: {
@@ -6473,14 +7195,27 @@ export type Database = {
       marcar_negocio_en_mora: {
         Args: { p_motivo: string; p_negocio_id: string }
         Returns: {
+          activacion_manual: boolean
+          aviso_1d_at: string | null
+          aviso_3d_at: string | null
+          ciclo: string
           created_at: string
           estado: Database["public"]["Enums"]["suscripcion_estado"]
           fecha_inicio_ciclo: string
           fecha_proximo_cobro: string
+          gracia_fin: string | null
           id: string
+          manual_hasta: string | null
+          manual_referencia: string | null
+          manual_tipo: string | null
+          metodo_pago_proveedor: string | null
+          metodo_pago_ref: string | null
           negocio_id: string
+          pais_codigo: string
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
           plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"] | null
+          prueba_fin: string | null
+          prueba_inicio: string | null
           reintentos_fallo_count: number
           suspendido_causa: string | null
           updated_at: string
@@ -6657,6 +7392,14 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      negocio_funcion_valor: {
+        Args: { p_clave: string; p_negocio_id: string }
+        Returns: string
+      }
+      negocio_puede_recibir_reservas: {
+        Args: { p_negocio_id: string }
+        Returns: boolean
+      }
       negocio_resenas_publicas: {
         Args: { p_limite?: number; p_negocio_id: string }
         Returns: {
@@ -6679,6 +7422,14 @@ export type Database = {
           servicio_ids: string[]
           staff_id: string
         }[]
+      }
+      negocio_tiene_funcion: {
+        Args: { p_clave: string; p_negocio_id: string }
+        Returns: boolean
+      }
+      negocio_visible_en_mapa: {
+        Args: { p_negocio_id: string }
+        Returns: boolean
       }
       obtener_mi_codigo_referido: {
         Args: never
@@ -6745,6 +7496,17 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      pruebas_por_cobrar: {
+        Args: never
+        Returns: {
+          ciclo: string
+          metodo_pago_proveedor: string
+          metodo_pago_ref: string
+          negocio_id: string
+          pais_codigo: string
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+        }[]
       }
       publicar_texto_legal: {
         Args: {
@@ -6839,6 +7601,7 @@ export type Database = {
           onboarding_completo: boolean
           owner_user_id: string
           pago_completo_en_app: boolean
+          pais_codigo: string
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
           puntos_expiracion_meses: number
           puntos_valor_100_cop: number
@@ -6940,6 +7703,7 @@ export type Database = {
           onboarding_completo: boolean
           owner_user_id: string
           pago_completo_en_app: boolean
+          pais_codigo: string
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
           puntos_expiracion_meses: number
           puntos_valor_100_cop: number
@@ -7037,6 +7801,10 @@ export type Database = {
         Args: { p_campana_id: string }
         Returns: undefined
       }
+      registrar_intento_auth: {
+        Args: { p_email: string; p_exitoso: boolean; p_tipo: string }
+        Returns: undefined
+      }
       registrar_movimiento_inventario: {
         Args: {
           p_cantidad: number
@@ -7104,6 +7872,41 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "staff_referido"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      registrar_resultado_cobro: {
+        Args: { p_exito: boolean; p_motivo?: string; p_negocio_id: string }
+        Returns: {
+          activacion_manual: boolean
+          aviso_1d_at: string | null
+          aviso_3d_at: string | null
+          ciclo: string
+          created_at: string
+          estado: Database["public"]["Enums"]["suscripcion_estado"]
+          fecha_inicio_ciclo: string
+          fecha_proximo_cobro: string
+          gracia_fin: string | null
+          id: string
+          manual_hasta: string | null
+          manual_referencia: string | null
+          manual_tipo: string | null
+          metodo_pago_proveedor: string | null
+          metodo_pago_ref: string | null
+          negocio_id: string
+          pais_codigo: string
+          plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+          plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"] | null
+          prueba_fin: string | null
+          prueba_inicio: string | null
+          reintentos_fallo_count: number
+          suspendido_causa: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "suscripcion"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -7386,14 +8189,27 @@ export type Database = {
           p_plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"]
         }
         Returns: {
+          activacion_manual: boolean
+          aviso_1d_at: string | null
+          aviso_3d_at: string | null
+          ciclo: string
           created_at: string
           estado: Database["public"]["Enums"]["suscripcion_estado"]
           fecha_inicio_ciclo: string
           fecha_proximo_cobro: string
+          gracia_fin: string | null
           id: string
+          manual_hasta: string | null
+          manual_referencia: string | null
+          manual_tipo: string | null
+          metodo_pago_proveedor: string | null
+          metodo_pago_ref: string | null
           negocio_id: string
+          pais_codigo: string
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
           plan_codigo_destino: Database["public"]["Enums"]["plan_codigo"] | null
+          prueba_fin: string | null
+          prueba_inicio: string | null
           reintentos_fallo_count: number
           suspendido_causa: string | null
           updated_at: string
@@ -7505,6 +8321,7 @@ export type Database = {
           onboarding_completo: boolean
           owner_user_id: string
           pago_completo_en_app: boolean
+          pais_codigo: string
           plan_codigo: Database["public"]["Enums"]["plan_codigo"]
           puntos_expiracion_meses: number
           puntos_valor_100_cop: number
@@ -7569,6 +8386,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      verificar_rate_limit_auth: {
+        Args: { p_email: string; p_tipo: string }
+        Returns: undefined
       }
     }
     Enums: {
@@ -7650,7 +8471,13 @@ export type Database = {
         | "NO_SHOW"
       servicio_estado: "ACTIVO" | "INACTIVO"
       solicitud_reposicion_estado: "PENDIENTE" | "ATENDIDA" | "CANCELADA"
-      suscripcion_estado: "ACTIVA" | "EN_MORA" | "SUSPENDIDA" | "CANCELADA"
+      suscripcion_estado:
+        | "ACTIVA"
+        | "EN_MORA"
+        | "SUSPENDIDA"
+        | "CANCELADA"
+        | "TRIAL"
+        | "REQUIERE_PLAN"
       temporada_estado: "EN_CURSO" | "CERRADA" | "CONSOLIDADA"
       ticket_soporte_estado: "ABIERTO" | "EN_PROCESO" | "RESUELTO"
       vinculo_estado: "INVITADO" | "ACTIVO" | "SUSPENDIDO" | "RETIRADO"
@@ -7669,12 +8496,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -7698,11 +8525,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -7723,11 +8550,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -7748,11 +8575,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -7765,11 +8592,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -7779,9 +8606,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       campana_estado: [
@@ -7872,11 +8696,17 @@ export const Constants = {
       ],
       servicio_estado: ["ACTIVO", "INACTIVO"],
       solicitud_reposicion_estado: ["PENDIENTE", "ATENDIDA", "CANCELADA"],
-      suscripcion_estado: ["ACTIVA", "EN_MORA", "SUSPENDIDA", "CANCELADA"],
+      suscripcion_estado: [
+        "ACTIVA",
+        "EN_MORA",
+        "SUSPENDIDA",
+        "CANCELADA",
+        "TRIAL",
+        "REQUIERE_PLAN",
+      ],
       temporada_estado: ["EN_CURSO", "CERRADA", "CONSOLIDADA"],
       ticket_soporte_estado: ["ABIERTO", "EN_PROCESO", "RESUELTO"],
       vinculo_estado: ["INVITADO", "ACTIVO", "SUSPENDIDO", "RETIRADO"],
     },
   },
 } as const
-

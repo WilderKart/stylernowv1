@@ -3,6 +3,8 @@ import { Header } from "@/components/layout/header";
 import { Filtros } from "@/components/marketplace/filtros";
 import { MapaMarketplaceLazy } from "@/components/marketplace/mapa-marketplace-lazy";
 import { NegocioCard } from "@/components/marketplace/negocio-card";
+import { Sello } from "@/components/marketplace/sello";
+import { EmptyState, Marquee, Num } from "@/components/brutal";
 import { hoyISO } from "@/lib/formato";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -13,6 +15,14 @@ export const metadata = {
   description:
     "Encuentra barberías, salones y spas cerca de ti y reserva tu turno en segundos.",
 };
+
+// Atajos de categoría del Home (los valores son los mismos de Filtros).
+const CATEGORIAS_HOME = [
+  { valor: "barberia", etiqueta: "Barbería" },
+  { valor: "unas", etiqueta: "Uñas" },
+  { valor: "estetica", etiqueta: "Estética" },
+  { valor: "salon", etiqueta: "Peluquería" },
+];
 
 function primerValor(v: string | string[] | undefined) {
   return Array.isArray(v) ? v[0] : v;
@@ -85,91 +95,140 @@ export default async function HomePage(props: PageProps<"/">) {
     return `?${siguiente.toString()}`;
   }
 
-  return (
-    <div className="flex min-h-dvh flex-col bg-bg pb-24">
-      <Header autenticado={Boolean(user)} />
+  const patrocinados = vista === "lista" && !hayFiltros ? negocios.filter((n) => n.patrocinado) : [];
+  const resto = patrocinados.length > 0 ? negocios.filter((n) => !n.patrocinado) : negocios;
+  const grilla = "grid grid-cols-1 gap-3 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-3";
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-6 sm:px-10">
+  return (
+    <div className="flex min-h-dvh flex-col bg-bg pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom))]">
+      <Header autenticado={Boolean(user)} etiqueta="01 / Explorar" />
+
+      <main className="mx-auto w-full max-w-5xl flex-1">
+        {!hayFiltros && vista === "lista" ? (
+          <>
+            <div className="relative">
+              <h1 className="poster-1 px-4 pb-4 pt-3 sm:px-6">
+                Tu barbero.
+                <br />
+                Tu hora.
+                <br />
+                <span className="sn-hot">Sin fila.</span>
+              </h1>
+              <Sello className="absolute bottom-3 right-4" />
+            </div>
+            <nav aria-label="Categorías" className="p-grid2 sm:!grid-cols-4">
+              {CATEGORIAS_HOME.map((c, i) => (
+                <Link key={c.valor} href={`/?categoria=${c.valor}`} className="min-h-12 no-underline">
+                  <Num>{String(i + 1).padStart(2, "0")} /</Num>
+                  <span className="section !text-[13px]">{c.etiqueta}</span>
+                </Link>
+              ))}
+            </nav>
+            <Marquee text="Reserva · Corta · Repite" tone="ink" />
+          </>
+        ) : null}
+
         {banners && banners.length > 0 ? (
-          <div className="mb-6 flex gap-3 overflow-x-auto">
-            {banners.map((b) =>
-              b.url_destino ? (
-                <a key={b.id} href={b.url_destino} className="relative block h-32 min-w-[280px] shrink-0 overflow-hidden rounded-2xl bg-surface-2 sm:min-w-[360px]">
+          <div className="grid grid-cols-1 gap-3 px-4 pt-4 sm:grid-cols-2 sm:px-6">
+            {banners.map((b) => {
+              const contenido = (
+                <>
                   {/* eslint-disable-next-line @next/next/no-img-element -- imagen editorial de SuperSU, URL arbitraria (no forma parte del set de dominios optimizables de next/image) */}
-                  <img src={b.imagen_url} alt={b.texto ?? ""} className="size-full object-cover" />
-                  {b.texto ? (
-                    <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2 text-[12.5px] font-semibold text-white">
-                      {b.texto}
-                    </span>
-                  ) : null}
+                  <img src={b.imagen_url} alt={b.texto ?? ""} className="h-32 w-full object-cover grayscale" />
+                  {b.texto ? <span className="sn-label block bg-ink px-3 py-2 text-paper">{b.texto}</span> : null}
+                </>
+              );
+              return b.url_destino ? (
+                <a key={b.id} href={b.url_destino} className="block min-w-0 border-2 border-border no-underline">
+                  {contenido}
                 </a>
               ) : (
-                <div key={b.id} className="relative h-32 min-w-[280px] shrink-0 overflow-hidden rounded-2xl bg-surface-2 sm:min-w-[360px]">
-                  {/* eslint-disable-next-line @next/next/no-img-element -- imagen editorial de SuperSU, URL arbitraria */}
-                  <img src={b.imagen_url} alt={b.texto ?? ""} className="size-full object-cover" />
-                  {b.texto ? (
-                    <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2 text-[12.5px] font-semibold text-white">
-                      {b.texto}
-                    </span>
-                  ) : null}
+                <div key={b.id} className="min-w-0 border-2 border-border">
+                  {contenido}
                 </div>
-              )
-            )}
+              );
+            })}
           </div>
         ) : null}
 
-        <Suspense fallback={<div className="mb-6 h-[50px] rounded-2xl bg-surface" />}>
-          <Filtros ciudades={ciudades} />
-        </Suspense>
+        <div className="px-4 pt-4 sm:px-6">
+          <Suspense fallback={<div className="mb-6 h-12 animate-pulse border-2 border-border bg-surface-2" aria-hidden />}>
+            <Filtros ciudades={ciudades} />
+          </Suspense>
+        </div>
 
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="font-display text-base font-semibold uppercase tracking-wide text-text">
-            {hayFiltros ? "Resultados" : "Negocios destacados"}
-          </h2>
+        <div className="p-sec flex-wrap gap-3 sm:!px-6">
+          <span className="sn-num">
+            {hayFiltros ? "02 / Resultados" : vista === "mapa" ? "02 / Mapa" : "02 / Negocios destacados"}
+          </span>
           {/* Vista alternable lista/mapa (02-UX/04_Marketplace.md) — el resto
               de los filtros de la URL se conservan al alternar. */}
-          <div className="flex shrink-0 gap-1 rounded-full border border-border p-1">
+          <div className="flex gap-2" role="group" aria-label="Vista">
             <Link
               href={urlConVista("lista")}
-              className={`rounded-full px-3 py-1 text-[11.5px] font-bold ${vista === "lista" ? "bg-accent text-bg" : "text-text-muted"}`}
+              aria-current={vista === "lista" ? "true" : undefined}
+              className={`sn-chip !min-h-12 no-underline ${vista === "lista" ? "is-selected" : ""}`}
             >
               Lista
             </Link>
             <Link
               href={urlConVista("mapa")}
-              className={`rounded-full px-3 py-1 text-[11.5px] font-bold ${vista === "mapa" ? "bg-accent text-bg" : "text-text-muted"}`}
+              aria-current={vista === "mapa" ? "true" : undefined}
+              className={`sn-chip !min-h-12 no-underline ${vista === "mapa" ? "is-selected" : ""}`}
             >
-              Mapa
+              Mapa ↗
             </Link>
           </div>
         </div>
 
         {error ? (
-          <div className="rounded-2xl border border-danger/40 bg-danger-soft p-5 text-center">
-            <p className="text-sm font-semibold text-text">No pudimos cargar el listado</p>
-            <p className="mt-1 text-xs text-text-muted">{error.message}</p>
+          <div className="px-4 sm:px-6">
+            <EmptyState big="Error" title="No pudimos cargar el listado" hint={error.message} action={<Link href="/" className="sn-chip !min-h-12 no-underline">Reintentar</Link>} />
           </div>
         ) : negocios.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
-            <p className="mb-1 text-sm font-semibold text-text">
-              {hayFiltros
-                ? "Ningún negocio coincide con tu búsqueda"
-                : "Aún no hay negocios activos por aquí"}
-            </p>
-            <p className="max-w-[300px] text-xs text-text-faint">
-              {hayFiltros
-                ? "Probá quitando algún filtro o buscando por otro nombre."
-                : "Los negocios aprobados por SuperSU aparecerán en este listado automáticamente."}
-            </p>
+          <div className="px-4 sm:px-6">
+            <EmptyState
+              big="0"
+              title={hayFiltros ? "Ningún negocio coincide con tu búsqueda" : "Aún no hay negocios activos por aquí"}
+              hint={
+                hayFiltros
+                  ? "Probá quitando algún filtro o buscando por otro nombre."
+                  : "Los negocios aprobados por SuperSU aparecerán en este listado automáticamente."
+              }
+              action={hayFiltros ? <Link href="/" className="sn-chip !min-h-12 no-underline">Quitar filtros</Link> : undefined}
+            />
           </div>
         ) : vista === "mapa" ? (
           <MapaMarketplaceLazy negocios={negocios} centroInicial={lat && lng ? { lat: Number(lat), lng: Number(lng) } : null} />
         ) : (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {negocios.map((n) => (
-              <NegocioCard key={n.id} negocio={n} />
-            ))}
-          </div>
+          <>
+            {patrocinados.length > 0 ? (
+              <>
+                <div className="p-sec sm:!px-6">
+                  <span className="sn-num">03 / Patrocinado</span>
+                </div>
+                <div className={grilla}>
+                  {patrocinados.map((n, i) => (
+                    <NegocioCard key={n.id} negocio={n} index={i + 1} />
+                  ))}
+                </div>
+              </>
+            ) : null}
+            {resto.length > 0 ? (
+              <>
+                {patrocinados.length > 0 ? (
+                  <div className="p-sec sm:!px-6">
+                    <span className="sn-num">04 / {lat && lng ? "Cerca de ti" : "Todos"}</span>
+                  </div>
+                ) : null}
+                <div className={grilla}>
+                  {resto.map((n, i) => (
+                    <NegocioCard key={n.id} negocio={n} index={i + 1} />
+                  ))}
+                </div>
+              </>
+            ) : null}
+          </>
         )}
       </main>
 

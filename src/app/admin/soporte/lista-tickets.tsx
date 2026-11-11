@@ -42,7 +42,7 @@ export function ListaTickets({ ticketsIniciales, errorInicial }: { ticketsInicia
             key={f.valor}
             type="button"
             onClick={() => onFiltrar(f.valor)}
-            className={`rounded-full border px-3 py-1.5 text-[11.5px] font-bold ${
+            className={`rounded-none border px-3 py-1.5 text-[11.5px] font-bold ${
               filtro === f.valor ? "border-accent bg-accent-soft text-accent" : "border-border text-text-muted"
             }`}
           >

@@ -1,6 +1,5 @@
 import { PanelNav } from "@/components/panel/panel-nav";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
-import { redirect } from "next/navigation";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import {
   listarConsumoIa,
   listarFuncionesHabilitadasNegocio,
@@ -15,13 +14,10 @@ import { VistaAiWorkspace } from "./vista-ai-workspace";
 export const metadata = { title: "IA" };
 
 export default async function PanelIaPage() {
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect("/login?next=/panel/ia");
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
   // AI Memory, Prompt Library y compra de créditos son decisiones a nivel
   // Negocio (mismo alcance que Wallet/Mi Plan) — Guardian/Staff no gestionan
   // esto (ADR-013: "el propietario podrá... guardar/aprobar/olvidar").
-  if (contexto.rol !== "BARBERIA") redirect("/panel");
+  const contexto = await verificarAccesoPanel(["BARBERIA"], "/panel/ia");
 
   const negocioId = contexto.negocioId!;
   const [saldo, consumo, paquetes, memoria, prompts, roi, funciones] = await Promise.all([

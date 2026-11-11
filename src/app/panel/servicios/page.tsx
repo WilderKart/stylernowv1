@@ -1,11 +1,10 @@
 import { PanelNav } from "@/components/panel/panel-nav";
 import { Badge, Card } from "@/components/ui/card";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { createClient } from "@/lib/supabase/server";
 import { duracion } from "@/lib/formato";
 import { formatCOP } from "@/lib/utils";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 export const metadata = { title: "Servicios" };
 
@@ -16,12 +15,7 @@ const CATEGORIA_TEXTO: Record<string, string> = {
 };
 
 export default async function ServiciosPage() {
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect("/login?next=/panel/servicios");
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
-  // Servicios es un catálogo de todo el negocio (no tiene sede propia) —
-  // un Staff plano todavía no administra nada acá (Fase 4).
-  if (contexto.rol === "STAFF") redirect("/panel");
+  const contexto = await verificarAccesoPanel(["BARBERIA", "GUARDIAN"], "/panel/servicios");
 
   const negocioId = contexto.negocioId!;
   const supabase = await createClient();
@@ -70,7 +64,7 @@ export default async function ServiciosPage() {
           {contexto.permisos.crearServicio ? (
             <Link
               href="/panel/servicios/nuevo"
-              className="shrink-0 rounded-full bg-accent px-4 py-2.5 text-[12.5px] font-bold text-bg hover:bg-accent-hover"
+              className="shrink-0 rounded-none bg-accent px-4 py-2.5 text-[12.5px] font-bold text-ink hover:bg-accent-hover"
             >
               + NUEVO SERVICIO
             </Link>

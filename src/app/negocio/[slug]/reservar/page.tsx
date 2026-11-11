@@ -1,5 +1,6 @@
-import { BarraSuperior } from "@/components/layout/header";
+import { EmptyState } from "@/components/brutal";
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { FlujoReserva } from "./flujo-reserva";
 
@@ -11,6 +12,8 @@ export const metadata = {
 
 export default async function ReservarPage(props: PageProps<"/negocio/[slug]/reservar">) {
   const { slug } = await props.params;
+  const { staff: staffParam } = await props.searchParams;
+  const staffPreseleccionado = typeof staffParam === "string" ? staffParam : null;
   const supabase = await createClient();
 
   const {
@@ -18,7 +21,9 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
   } = await supabase.auth.getUser();
 
   // 02-UX/05_Booking.md: exclusivo de Cliente autenticado, no existe modo invitado.
-  if (!user) redirect(`/login?next=/negocio/${slug}/reservar`);
+  if (!user) redirect(
+      `/login?next=${encodeURIComponent(`/negocio/${slug}/reservar${staffPreseleccionado ? `?staff=${staffPreseleccionado}` : ""}`)}`
+    );
 
   const { data: negocio } = await supabase
     .from("negocio")
@@ -67,21 +72,26 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
 
   if (!sedes?.length || !servicios?.length) {
     return (
-      <div className="flex min-h-dvh flex-col bg-bg">
-        <BarraSuperior titulo={negocio.nombre} volverA={`/negocio/${slug}`} />
-        <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
-          <p className="text-sm font-semibold text-text">Este negocio aún no acepta reservas</p>
-          <p className="mt-1 max-w-[300px] text-xs text-text-faint">
-            Le falta publicar sus servicios o su sede. Volvé a intentarlo más tarde.
-          </p>
+      <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-bg">
+        <div className="p-top">
+          <Link href={`/negocio/${slug}`} aria-label="Volver" className="sn-iconbtn">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </Link>
+          <span className="sn-num">Reserva · {negocio.nombre}</span>
         </div>
+        <EmptyState
+          big="Sin turnos."
+          title="Este negocio aún no acepta reservas"
+          hint="Le falta publicar sus servicios o su sede. Volvé a intentarlo más tarde."
+        />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
-      <BarraSuperior titulo={negocio.nombre} volverA={`/negocio/${slug}`} />
+    <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-bg">
       <FlujoReserva
         negocio={negocio}
         sedes={sedes}

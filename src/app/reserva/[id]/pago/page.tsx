@@ -1,4 +1,3 @@
-import { BarraSuperior } from "@/components/layout/header";
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { PantallaPago } from "./pantalla-pago";
@@ -43,24 +42,19 @@ export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
   );
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
-      <BarraSuperior
-        titulo="Pagar seña"
-        volverA={negocio ? `/negocio/${negocio.slug}/reservar` : "/"}
-      />
-      <PantallaPago
-        resumen={{
-          reservaId: reserva.id,
-          negocio: negocio?.nombre ?? "StylerNow",
-          servicios: servicios.join(" + "),
-          profesional: staff?.nombre ?? "Profesional asignado",
-          horaInicio: reserva.hora_inicio,
-          zonaHoraria: sede?.zona_horaria ?? "America/Bogota",
-          montoTotal: Number(reserva.monto_total),
-          montoSena: Number(reserva.monto_sena),
-          expiraAt: reserva.expira_at,
-        }}
-      />
-    </div>
+    <PantallaPago
+      volverA={negocio ? `/negocio/${negocio.slug}/reservar` : "/"}
+      resumen={{
+        reservaId: reserva.id,
+        negocio: negocio?.nombre ?? "StylerNow",
+        servicios: servicios.join(" + "),
+        profesional: staff?.nombre ?? "Profesional asignado",
+        horaInicio: reserva.hora_inicio,
+        zonaHoraria: sede?.zona_horaria ?? "America/Bogota",
+        montoTotal: Number(reserva.monto_total),
+        montoSena: Number(reserva.monto_sena),
+        expiraAt: reserva.expira_at,
+      }}
+    />
   );
 }

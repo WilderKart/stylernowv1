@@ -183,7 +183,7 @@ const FluidOrb = ({
   return (
     <div
       data-slot="fluid-orb"
-      className={cn('relative overflow-hidden rounded-full', className)}
+      className={cn('relative overflow-hidden rounded-none', className)}
       style={{
         width: size,
         height: size,

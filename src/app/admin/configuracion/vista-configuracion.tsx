@@ -215,7 +215,7 @@ function SeccionCiudades({ ciudadesIniciales }: { ciudadesIniciales: CiudadAdmin
                 type="button"
                 disabled={actualizando === c.ciudad}
                 onClick={() => toggle(c.ciudad, !c.habilitada)}
-                className={`rounded-full px-3 py-1 text-[11px] font-bold ${
+                className={`rounded-none px-3 py-1 text-[11px] font-bold ${
                   c.habilitada ? "bg-success-soft text-success" : "bg-danger-soft text-danger"
                 }`}
               >
@@ -473,7 +473,7 @@ function SeccionTextosLegales({ textosIniciales }: { textosIniciales: TextoLegal
       <p className="mb-3 text-[12px] text-text-faint">
         Cada publicación crea una versión nueva — nunca sobreescribe lo que un usuario ya aceptó. Si marcás &ldquo;cambio material&rdquo;, se le pide re-aceptar en su próximo inicio de sesión.
       </p>
-      <div className="mb-3 flex gap-1 rounded-full border border-border p-1" style={{ width: "fit-content" }}>
+      <div className="mb-3 flex gap-1 rounded-none border border-border p-1" style={{ width: "fit-content" }}>
         {TIPOS_LEGALES.map((t) => (
           <button
             key={t.valor}
@@ -482,7 +482,7 @@ function SeccionTextosLegales({ textosIniciales }: { textosIniciales: TextoLegal
               setTipoActivo(t.valor);
               setEditando(false);
             }}
-            className={`rounded-full px-3 py-1 text-[11.5px] font-bold ${tipoActivo === t.valor ? "bg-accent text-bg" : "text-text-muted"}`}
+            className={`rounded-none px-3 py-1 text-[11.5px] font-bold ${tipoActivo === t.valor ? "bg-accent text-ink" : "text-text-muted"}`}
           >
             {t.etiqueta}
           </button>

@@ -120,7 +120,7 @@ export function VistaInventario({
             </select>
           ) : null}
           {puedeConfigurarReglas ? (
-            <Link href="/panel/inventario/consumo" className="rounded-full border border-border px-3.5 py-2 text-[12px] font-bold text-text-muted hover:border-accent/40">
+            <Link href="/panel/inventario/consumo" className="rounded-none border border-border px-3.5 py-2 text-[12px] font-bold text-text-muted hover:border-accent/40">
               Consumo por Servicio
             </Link>
           ) : null}

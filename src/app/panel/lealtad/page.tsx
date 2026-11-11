@@ -1,6 +1,5 @@
 import { PanelNav } from "@/components/panel/panel-nav";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
-import { redirect } from "next/navigation";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import {
   listarCampanasSellos,
   listarCuentasCorporativas,
@@ -19,10 +18,7 @@ import { VistaLealtadPanel } from "./vista-lealtad-panel";
 export const metadata = { title: "Lealtad" };
 
 export default async function LealtadPanelPage() {
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect("/login?next=/panel/lealtad");
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
-  if (contexto.rol !== "BARBERIA") redirect("/panel");
+  const contexto = await verificarAccesoPanel(["BARBERIA"], "/panel/lealtad");
 
   const negocioId = contexto.negocioId!;
 

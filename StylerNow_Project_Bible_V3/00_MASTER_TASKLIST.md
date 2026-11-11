@@ -2429,10 +2429,46 @@ memoria persistente de sesión (`security_invoker` en vistas sobre RLS).
 
 ---
 
-**Próximo módulo a ejecutar: ADR-014, Fase D — Exportación PDF/Excel
-(CSV ya existe desde el Módulo 6.6) — única fase de ADR-014 sin cerrar.
+**ADR-014, Fase D — Exportación PDF/Excel: cerrada (Reportes, IA, CRM).**
 Motor WhatsApp sigue bloqueado sin credenciales de WhatsApp Business API
-(ver `docs/PENDING_DECISIONS.md`).**
+(ver `docs/PENDING_DECISIONS.md`).
+
+## ADR-015 — Identity Platform Upgrade v1.2 (Zero Trust), en curso
+
+Contrato único `Contexto` (`src/lib/auth/tipos.ts`), Permission Registry
+ejecutable transcrito completo de `01_Roles.md` (`permission-registry.ts`,
+corrigió 2 símbolos incorrectos del documento — ver ADL-033), Route
+Registry (`route-registry.ts`) del que `proxy.ts` depende para 307 real al
+Edge, `forbidden()`/`authInterrupts` para 403 real, y capa de compatibilidad
+`verificarAccesoPanel()` (los 27 `page.tsx` de `/panel` migrados, sin tocar
+`resolverContexto()`/`obtenerContextoStaff()`/`requireSuperSU()` — ADL-011/
+015/019 se mantienen). La migración completa a un `Contexto` unificado de
+punta a punta (`RolPanel` en mayúscula → eliminado, `PanelNav` tipado por
+Permission Registry) queda documentada como trabajo futuro en
+`ADR_016_Authorization_Refactor.md`, ver también `docs/AUTH_MIGRATION_QUEUE.md`.
+
+**Siguiente en ADR-015:** Password Platform, Google OAuth, MFA SuperSU,
+Session Registry, Session Version, Device Trust, Identity Timeline, Identity
+Event Bus, Impersonación auditada.
+
+**Auditoría previa completa** (`docs/IDENTITY_AUDIT_REPORT.md`, 2026-09-16):
+verificado con usuarios y sesiones reales (no solo lectura de código) que el
+aislamiento de datos por rol se sostiene en Panel/Admin/Staff/RLS. Encontró
+y corrigió una regresión real de esta sesión (`/api/**` redirigía a `/login`
+en vez de devolver 401 propio). Veredicto: Password Platform puede empezar.
+
+**ADR-015, Fase C — Password Platform: cerrada.** Login/recovery/cambio de
+contraseña, historial, rate limiting, Session Version preparado, interfaz
+`AuthProvider` lista. Ver `StylerNow_Project_Bible_V3/02-UX/13_Auth_State_Machine.md`.
+
+**ADR-015, Fase D — Google OAuth + Identity Provider Platform: cerrada.**
+Ver `StylerNow_Project_Bible_V3/Identity_Provider_Platform.md`. Encontró y
+corrigió una regresión real de Fase B (`/auth/callback` sin registrar,
+rompía magic link/recovery) — `check-auth-coverage.mjs` ahora también cubre
+Route Handlers fuera de `/api/**`.
+
+**Siguiente:** Session Registry completo, Device Trust, MFA SuperSU,
+Identity Timeline, Identity Event Bus, Impersonación auditada.
 
 ---
 

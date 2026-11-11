@@ -38,7 +38,7 @@ export function VistaAuditoriaAdmin({ eventosIniciales, errorInicial }: { evento
             key={a.valor}
             type="button"
             onClick={() => onFiltrar(a.valor)}
-            className={`rounded-full border px-3 py-1.5 text-[11.5px] font-bold ${
+            className={`rounded-none border px-3 py-1.5 text-[11.5px] font-bold ${
               actorTipo === a.valor ? "border-accent bg-accent-soft text-accent" : "border-border text-text-muted"
             }`}
           >

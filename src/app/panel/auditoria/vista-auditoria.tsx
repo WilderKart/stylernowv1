@@ -42,7 +42,7 @@ export function VistaAuditoria({ eventosIniciales, errorInicial }: { eventosInic
             key={e.valor}
             type="button"
             onClick={() => onFiltrar(e.valor)}
-            className={`rounded-full border px-3 py-1.5 text-[11.5px] font-bold ${
+            className={`rounded-none border px-3 py-1.5 text-[11.5px] font-bold ${
               filtro === e.valor ? "border-accent bg-accent-soft text-accent" : "border-border text-text-muted"
             }`}
           >

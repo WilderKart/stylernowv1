@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/card";
 import { useState } from "react";
+import { ActivacionManual } from "./activacion-manual";
 import {
   aprobarNegocio,
   cancelarNegocio,
@@ -73,7 +74,7 @@ export function ListaNegocios({ negociosIniciales, errorInicial }: { negociosIni
             key={f.valor}
             type="button"
             onClick={() => onFiltrar(f.valor)}
-            className={`rounded-full border px-3 py-1.5 text-[11.5px] font-bold ${
+            className={`rounded-none border px-3 py-1.5 text-[11.5px] font-bold ${
               filtro === f.valor ? "border-accent bg-accent-soft text-accent" : "border-border text-text-muted"
             }`}
           >
@@ -188,6 +189,9 @@ export function ListaNegocios({ negociosIniciales, errorInicial }: { negociosIni
                   >
                     Dar de baja
                   </Button>
+                ) : null}
+                {n.estado === "ACTIVO" ? (
+                  <ActivacionManual negocioId={n.id} nombre={n.nombre} planActual={n.planCodigo} onHecho={() => onFiltrar(filtro)} />
                 ) : null}
               </div>
             </li>

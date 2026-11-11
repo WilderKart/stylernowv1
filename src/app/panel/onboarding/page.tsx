@@ -1,4 +1,5 @@
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { listarPaisesActivos, obtenerCatalogoPais } from "@/lib/planes/catalogo";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Wizard } from "./wizard";
@@ -22,7 +23,7 @@ export default async function OnboardingNegocioPage() {
   const { data: negocio } = await supabase
     .from("negocio")
     .select(
-      "id, nombre, categoria, ciudad, descripcion, logo_url, telefono_contacto, email_contacto, plan_codigo, onboarding_completo, estado"
+      "id, nombre, categoria, ciudad, descripcion, logo_url, telefono_contacto, email_contacto, plan_codigo, onboarding_completo, estado, pais_codigo"
     )
     .eq("owner_user_id", user.id)
     .maybeSingle();
@@ -58,6 +59,11 @@ export default async function OnboardingNegocioPage() {
         ])
       : [{ data: null }, { data: [] }, { data: null }, { data: [] }];
 
+  const paises = await listarPaisesActivos();
+  const catalogos = (await Promise.all(paises.map((p) => obtenerCatalogoPais(p.codigo)))).filter(
+    (c): c is NonNullable<typeof c> => c !== null,
+  );
+
   return (
     <Wizard
       perfilEmail={user.email ?? ""}
@@ -66,6 +72,7 @@ export default async function OnboardingNegocioPage() {
       serviciosIniciales={servicios ?? []}
       planInicial={suscripcion?.plan_codigo ?? null}
       invitacionesIniciales={invitaciones ?? []}
+      catalogos={catalogos}
     />
   );
 }

@@ -1,4 +1,4 @@
-import { BarraSuperior } from "@/components/layout/header";
+import { Pantalla, Top } from "@/app/lealtad/ui-cliente";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { FormularioGiftCard } from "./formulario-gift-card";
@@ -21,9 +21,9 @@ export default async function ComprarGiftCardPage(props: PageProps<"/gift-cards/
     : { data: null };
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
-      <BarraSuperior titulo="Comprar Gift Card" volverA="/gift-cards" />
+    <Pantalla>
+      <Top titulo="Comprar gift card" volverA="/gift-cards" />
       <FormularioGiftCard negocioPreseleccionado={negocioPreseleccionado} pagoIdRetorno={pagoIdRetorno} />
-    </div>
+    </Pantalla>
   );
 }

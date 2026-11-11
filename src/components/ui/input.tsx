@@ -14,7 +14,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="flex flex-col gap-2">
         {label ? (
-          <label htmlFor={inputId} className="text-[11.5px] font-bold tracking-wide text-text-muted uppercase">
+          <label htmlFor={inputId} className="font-mono text-xs leading-4 font-bold tracking-[0.72px] text-text uppercase">
             {label}
           </label>
         ) : null}
@@ -24,16 +24,21 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             ref={ref}
             className={cn(
-              "h-[52px] w-full rounded-[13px] border border-border bg-surface px-4 text-[14.5px] text-text",
-              "placeholder:text-text-faint outline-none transition-colors focus:border-accent/60",
+              "min-h-12 w-full min-w-0 border-2 border-border bg-bg px-3 text-[15px] leading-[22px] text-text",
+              "placeholder:text-text-muted outline-none focus:shadow-hard",
+              "disabled:border-dashed disabled:border-text-disabled disabled:bg-surface disabled:text-text-disabled",
               leadingIcon && "pl-11",
-              error && "border-danger/60",
+              error && "border-danger shadow-[4px_4px_0_0_var(--danger)]",
               className
             )}
             {...props}
           />
         </div>
-        {error ? <span className="text-xs text-danger">{error}</span> : null}
+        {error ? (
+          <span role="alert" className="self-start bg-danger px-1.5 py-0.5 font-mono text-[11px] leading-[14px] tracking-[0.66px] text-ink uppercase">
+            {error}
+          </span>
+        ) : null}
       </div>
     );
   }

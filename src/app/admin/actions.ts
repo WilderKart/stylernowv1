@@ -23,6 +23,11 @@ const MENSAJES_ERROR: Record<string, string> = {
   MOTIVO_REQUERIDO: "Tenés que indicar un motivo.",
   CAUSA_INVALIDA: "Causa de suspensión inválida.",
   SUSPENSION_POR_INFRACCION_REQUIERE_REACTIVACION_EXPLICITA: "Esta suspensión fue por infracción — usá 'Reactivar', no 'Forzar reactivación por pago externo'.",
+  ESTADO_INVALIDO: "Estado de plan inválido.",
+  TIPO_INVALIDO: "Elige el tipo de activación (transferencia, cortesía o contingencia de pasarela).",
+  DIAS_REQUERIDOS_EN_TRIAL: "Indica cuántos días dura la prueba.",
+  DIAS_INVALIDOS: "Los días deben estar entre 1 y 730.",
+  REFERENCIA_REQUERIDA_EN_TRANSFERENCIA: "Una activación por transferencia exige el número o comprobante de referencia.",
   RESENA_NO_REPORTABLE: "Esa reseña ya fue reportada o eliminada.",
   RESENA_NO_EN_COLA: "Esa reseña ya no está pendiente de moderación.",
 };
@@ -206,6 +211,43 @@ export async function cancelarNegocio(negocioId: string, motivo: string): Promis
 }
 
 // ── Moderación de reseñas ────────────────────────────────────────────────
+
+export interface ActivacionManualInput {
+  negocioId: string;
+  /** TRIAL o ACTIVA activan; REQUIERE_PLAN revierte una activación manual. */
+  estado: "TRIAL" | "ACTIVA" | "REQUIERE_PLAN";
+  plan: "RAVEN" | "JARL" | "VALHALLA" | "ALLFATHER";
+  tipo: "TRANSFERENCIA" | "CORTESIA" | "CONTINGENCIA_PASARELA" | null;
+  motivo: string;
+  /** Vigencia en días; vacío = sin vencimiento (solo ACTIVA). */
+  dias: number | null;
+  referencia: string | null;
+}
+
+/**
+ * Plan de contingencia: SuperSU activa a mano un negocio cuando la pasarela falla, pago por
+ * transferencia directa (Nequi/bancos) o cortesía a clientes piloto. Queda auditado con motivo
+ * y el cron nunca intenta cobrarlo. Si tiene vigencia, vuelve solo a REQUIERE_PLAN al vencer.
+ */
+export async function activarPlanManual(d: ActivacionManualInput): Promise<Resultado> {
+  try {
+    const { supabase } = await usuarioActual();
+    const { error } = await supabase.rpc("admin_activar_negocio_manual", {
+      p_negocio_id: d.negocioId,
+      p_estado: d.estado,
+      p_plan: d.plan,
+      p_tipo: d.tipo ?? "", // al revertir no aplica; la función lo ignora
+      p_motivo: d.motivo,
+      p_dias: d.dias ?? undefined,
+      p_referencia: d.referencia?.trim() || undefined,
+    });
+    if (error) return { ok: false, error: traducirError(error.message) };
+    revalidatePath("/admin/negocios");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
 
 export interface ResenaModeracion {
   id: string;

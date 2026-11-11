@@ -1,6 +1,6 @@
 import { PanelNav } from "@/components/panel/panel-nav";
 import { Badge, Card } from "@/components/ui/card";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -8,14 +8,10 @@ import { redirect } from "next/navigation";
 export const metadata = { title: "Sedes" };
 
 export default async function SedesPage() {
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect("/login?next=/panel/sedes");
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
+  const contexto = await verificarAccesoPanel(["BARBERIA", "GUARDIAN"], "/panel/sedes");
   // Guardian no gestiona una lista de sedes ajenas — administra la propia
   // desde su Resumen (ADR-006). Esta pantalla es exclusiva de Barbería.
   if (contexto.rol === "GUARDIAN") redirect(`/panel/sedes/${contexto.sedeId}`);
-  // Staff plano no administra sedes en absoluto (03-Business-Rules/01_Roles.md).
-  if (contexto.rol === "STAFF") redirect("/panel");
 
   const supabase = await createClient();
   const negocioId = contexto.negocioId!;
@@ -53,13 +49,13 @@ export default async function SedesPage() {
             </p>
           </div>
           {limiteAlcanzado ? (
-            <span className="rounded-full border border-border px-4 py-2.5 text-[12px] font-semibold text-text-faint">
+            <span className="rounded-none border border-border px-4 py-2.5 text-[12px] font-semibold text-text-faint">
               Límite del plan alcanzado
             </span>
           ) : (
             <Link
               href="/panel/sedes/nueva"
-              className="shrink-0 rounded-full bg-accent px-4 py-2.5 text-[12.5px] font-bold text-bg hover:bg-accent-hover"
+              className="shrink-0 rounded-none bg-accent px-4 py-2.5 text-[12.5px] font-bold text-ink hover:bg-accent-hover"
             >
               + NUEVA SEDE
             </Link>

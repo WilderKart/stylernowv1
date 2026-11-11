@@ -1,14 +1,12 @@
 import { BarraSuperior } from "@/components/layout/header";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { redirect } from "next/navigation";
 import { FormularioNuevoServicio } from "./formulario-nuevo-servicio";
 
 export const metadata = { title: "Nuevo servicio" };
 
 export default async function NuevoServicioPage() {
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect("/login?next=/panel/servicios/nuevo");
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
+  const contexto = await verificarAccesoPanel(["BARBERIA", "GUARDIAN"], "/panel/servicios/nuevo");
   // Crear servicio es exclusivo de Barbería (03-Business-Rules/01_Roles.md).
   if (!contexto.permisos.crearServicio) redirect("/panel/servicios");
 

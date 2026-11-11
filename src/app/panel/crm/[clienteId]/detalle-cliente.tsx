@@ -195,7 +195,7 @@ export function DetalleCliente({
               key={e}
               type="button"
               onClick={() => onQuitarEtiqueta(e)}
-              className="rounded-full bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-text-muted hover:bg-danger-soft hover:text-danger"
+              className="rounded-none bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-text-muted hover:bg-danger-soft hover:text-danger"
               title="Tocá para quitar"
             >
               {e} ×
@@ -391,7 +391,7 @@ function SeccionFotos({
               <button
                 type="button"
                 onClick={() => onEliminar(f.id)}
-                className="absolute right-1 top-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white opacity-0 group-hover:opacity-100"
+                className="absolute right-1 top-1 rounded-none bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white opacity-0 group-hover:opacity-100"
               >
                 Quitar
               </button>

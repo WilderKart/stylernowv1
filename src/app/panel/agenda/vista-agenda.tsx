@@ -198,18 +198,18 @@ export function VistaAgenda({
               : `Semana del ${lunesDeLaSemana(fecha)}`}
           </p>
         </div>
-        <div className="flex gap-1 rounded-full border border-border p-1">
+        <div className="flex gap-1 rounded-none border border-border p-1">
           <button
             type="button"
             onClick={() => setVista("dia")}
-            className={`rounded-full px-3 py-1 text-[11.5px] font-bold ${vista === "dia" ? "bg-accent text-bg" : "text-text-muted"}`}
+            className={`rounded-none px-3 py-1 text-[11.5px] font-bold ${vista === "dia" ? "bg-accent text-ink" : "text-text-muted"}`}
           >
             Día
           </button>
           <button
             type="button"
             onClick={() => setVista("semana")}
-            className={`rounded-full px-3 py-1 text-[11.5px] font-bold ${vista === "semana" ? "bg-accent text-bg" : "text-text-muted"}`}
+            className={`rounded-none px-3 py-1 text-[11.5px] font-bold ${vista === "semana" ? "bg-accent text-ink" : "text-text-muted"}`}
           >
             Semana
           </button>
@@ -644,7 +644,7 @@ function PanelCita({
                     key={s.horaInicio}
                     type="button"
                     onClick={() => setHoraElegida(s.horaInicio)}
-                    className={`rounded-full border px-3 py-1.5 text-[12px] font-semibold ${
+                    className={`rounded-none border px-3 py-1.5 text-[12px] font-semibold ${
                       horaElegida === s.horaInicio ? "border-accent bg-accent-soft text-accent" : "border-border text-text-muted"
                     }`}
                   >
@@ -872,7 +872,7 @@ function FormularioNuevaCita({
                   key={s.horaInicio}
                   type="button"
                   onClick={() => setHoraElegida(s.horaInicio)}
-                  className={`rounded-full border px-3 py-1.5 text-[12px] font-semibold ${
+                  className={`rounded-none border px-3 py-1.5 text-[12px] font-semibold ${
                     horaElegida === s.horaInicio ? "border-accent bg-accent-soft text-accent" : "border-border text-text-muted"
                   }`}
                 >

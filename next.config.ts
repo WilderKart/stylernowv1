@@ -7,6 +7,12 @@ const hostSupabase = process.env.NEXT_PUBLIC_SUPABASE_URL
   : null;
 
 const nextConfig: NextConfig = {
+  // ADR-015: habilita forbidden()/unauthorized() de next/navigation — un
+  // 403/401 real (no un notFound() disfrazado) cuando requireRole() detecta
+  // una superficie ajena, en vez de redirigir silenciosamente a otra parte.
+  experimental: {
+    authInterrupts: true,
+  },
   images: {
     remotePatterns: hostSupabase
       ? [

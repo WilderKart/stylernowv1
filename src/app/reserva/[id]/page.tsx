@@ -1,10 +1,23 @@
-import { BarraSuperior } from "@/components/layout/header";
+import {
+  Bloque,
+  diaYMes,
+  EstadoReservaStatus,
+  Fila,
+  Filas,
+  horaCorta,
+  Pantalla,
+  Pie,
+  Sec,
+  TicketCita,
+  Top,
+} from "@/app/lealtad/ui-cliente";
+import { Marquee, Status } from "@/components/brutal";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/card";
 import { duracion, fechaHoraLarga } from "@/lib/formato";
 import { sincronizarPago } from "@/lib/pagos/sincronizar";
 import { createClient } from "@/lib/supabase/server";
 import { formatCOP } from "@/lib/utils";
+import { CalendarPlus, Check, Clock, MapPin, Receipt, Store, Wallet } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { BotonCancelar } from "./boton-cancelar";
@@ -16,7 +29,7 @@ export const metadata = {
 
 const TITULO = {
   PENDIENTE_PAGO: "Falta pagar la seña",
-  CONFIRMADA: "¡Turno confirmado!",
+  CONFIRMADA: "Turno confirmado",
   EN_CURSO: "Tu cita está en curso",
   COMPLETADA: "Cita completada",
   CANCELADA: "Reserva cancelada",
@@ -129,141 +142,141 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
     negocio
   );
 
+  const dm = diaYMes(reserva.hora_inicio, tz);
+  const hora = horaCorta(reserva.hora_inicio, tz);
+  const horaFin = horaCorta(reserva.hora_fin, tz);
+  const nombresServicios =
+    servicios
+      .map((s) => s?.nombre)
+      .filter(Boolean)
+      .join(" + ") || "Servicio";
+  const recienConfirmada = confirmada && query.desde === "pago";
+  const saldoLocal = Number(reserva.monto_total) - Number(reserva.monto_sena);
+
   return (
-    <div className="flex min-h-dvh flex-col bg-bg pb-10">
-      <BarraSuperior titulo="Tu reserva" volverA="/mis-reservas" />
+    <Pantalla className="pb-10">
+      {recienConfirmada ? (
+        <>
+          <div className="sn-block-signal !bg-signal !text-ink border-b-2 border-ink px-4 pt-5 pb-6">
+            <span className="sn-num !text-ink">00 / Listo</span>
+            <h1 className="poster-1 mt-2.5 break-words">
+              Reserva
+              <br />
+              hecha.
+            </h1>
+          </div>
+          <Marquee text={`Nos vemos · ${dm.dia} ${dm.mes} · ${hora}`} tone="ink" />
+        </>
+      ) : (
+        <Top titulo="Detalle de cita" volverA="/mis-reservas" />
+      )}
 
-      <main className="mx-auto w-full max-w-md flex-1 px-5 py-6 sm:px-0">
-        <div className="mb-6 text-center">
-          {confirmada ? (
-            <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-success-soft">
-              <svg
-                viewBox="0 0 24 24"
-                width="26"
-                height="26"
-                fill="none"
-                stroke="#6fcf97"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M5 12.5l4.5 4.5L19 7.5" />
-              </svg>
-            </div>
-          ) : null}
-          <h1 className="font-display text-[24px] font-bold uppercase leading-tight text-text">
-            {TITULO[reserva.estado]}
-          </h1>
-          {reserva.estado === "CANCELADA" ? (
-            <p className="mx-auto mt-2 max-w-[300px] text-[13px] leading-relaxed text-text-muted">
-              {MOTIVOS[reserva.cancelado_motivo as keyof typeof MOTIVOS] ??
-                (reserva.cancelado_por === "NEGOCIO"
-                  ? "El negocio canceló la cita. Te devolvemos el 100% de la seña."
-                  : "La reserva quedó cancelada.")}
-            </p>
-          ) : null}
-        </div>
-
-        <dl className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-surface p-4">
-          <div className="flex items-center justify-between gap-3">
-            <dt className="text-[12.5px] text-text-muted">Negocio</dt>
-            <dd className="text-right text-[13px] font-semibold text-text">
-              {negocio ? (
-                <Link href={`/negocio/${negocio.slug}`} className="hover:text-accent">
-                  {negocio.nombre}
-                </Link>
-              ) : (
-                "—"
-              )}
-            </dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-[12.5px] text-text-muted">Servicios</dt>
-            <dd className="text-right text-[13px] font-semibold text-text">
-              {servicios.map((s) => s?.nombre).join(" + ")}
-            </dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-[12.5px] text-text-muted">Profesional</dt>
-            <dd className="text-[13px] font-semibold text-text">{staff?.nombre ?? "Por asignar"}</dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-[12.5px] text-text-muted">Cuándo</dt>
-            <dd className="text-right text-[13px] font-semibold capitalize text-text">
-              {fechaHoraLarga(reserva.hora_inicio, tz)}
-            </dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-[12.5px] text-text-muted">Duración</dt>
-            <dd className="text-[13px] font-semibold text-text">{duracion(minutos)}</dd>
-          </div>
-          {sede ? (
-            <div className="flex justify-between gap-3">
-              <dt className="text-[12.5px] text-text-muted">Dónde</dt>
-              <dd className="text-right text-[13px] font-semibold text-text">
-                {sede.nombre}
-                <span className="block text-[11.5px] font-normal text-text-faint">
-                  {sede.direccion}
-                </span>
-              </dd>
-            </div>
-          ) : null}
-
-          <div className="mt-1 border-t border-border-subtle pt-3">
-            <div className="flex justify-between gap-3">
-              <dt className="text-[12.5px] text-text-muted">Total del servicio</dt>
-              <dd className="text-[13px] font-semibold text-text">
-                {formatCOP(Number(reserva.monto_total))}
-              </dd>
-            </div>
-            <div className="mt-2 flex items-center justify-between gap-3">
-              <dt className="text-[12.5px] text-text-muted">Seña</dt>
-              <dd className="flex items-center gap-2">
-                <span className="text-[13px] font-semibold text-text">
-                  {formatCOP(Number(reserva.monto_sena))}
-                </span>
-                <Badge tone={confirmada ? "success" : "neutral"}>
-                  {confirmada ? "PAGADA" : "PENDIENTE"}
-                </Badge>
-              </dd>
-            </div>
-            {confirmada && Number(reserva.monto_sena) < Number(reserva.monto_total) ? (
-              <p className="mt-1.5 text-[11.5px] text-text-faint">
-                Pagás {formatCOP(Number(reserva.monto_total) - Number(reserva.monto_sena))} en el
-                local al terminar.
-              </p>
-            ) : null}
-          </div>
-        </dl>
-
-        <div className="mt-5 flex flex-col gap-2.5">
-          {reserva.estado === "PENDIENTE_PAGO" ? (
-            <Button asChild size="lg" className="w-full">
-              <Link href={`/reserva/${reserva.id}/pago`}>PAGAR SEÑA Y CONFIRMAR</Link>
-            </Button>
-          ) : null}
-
-          {confirmada ? (
+      <div className="p-4">
+        {!recienConfirmada ? <h1 className="poster-3 mb-4 break-words">{TITULO[reserva.estado]}</h1> : null}
+        <TicketCita
+          dia={dm.dia}
+          mes={dm.mes}
+          estado={<EstadoReservaStatus estado={reserva.estado} />}
+          titulo={nombresServicios}
+          lineas={[`${staff?.nombre ?? "Por asignar"} · ${hora} – ${horaFin}`, negocio?.nombre ?? "—"]}
+          pie={
             <>
-              <Button asChild variant="secondary" size="lg" className="w-full">
-                <a href={`/reserva/${reserva.id}/ics`}>AGREGAR A MI CALENDARIO</a>
-              </Button>
-              <BotonCancelar
-                reservaId={reserva.id}
-                reembolsoEstimado={reembolsoEstimado}
-                reembolsoPct={pct}
-              />
+              <span className="sn-label">{confirmada ? "Seña pagada" : "Seña"}</span>
+              <span className="sn-price">{formatCOP(Number(reserva.monto_sena))}</span>
             </>
-          ) : null}
+          }
+        />
+        {reserva.estado === "CANCELADA" ? (
+          <p className="body-sm mt-4 break-words">
+            {MOTIVOS[reserva.cancelado_motivo as keyof typeof MOTIVOS] ??
+              (reserva.cancelado_por === "NEGOCIO"
+                ? "El negocio canceló la cita. Te devolvemos el 100% de la seña."
+                : "La reserva quedó cancelada.")}
+          </p>
+        ) : null}
+      </div>
 
-          {reserva.estado === "CANCELADA" && negocio ? (
+      <Filas>
+        <Fila
+          icono={<Store aria-hidden className="size-5" />}
+          titulo={negocio?.nombre ?? "—"}
+          meta={`${servicios.length > 1 ? "Servicios" : "Servicio"} · ${duracion(minutos)}`}
+          href={negocio ? `/negocio/${negocio.slug}` : undefined}
+        />
+        {sede ? (
+          <Fila icono={<MapPin aria-hidden className="size-5" />} titulo="Dónde" meta={`${sede.nombre} · ${sede.direccion}`} />
+        ) : null}
+        <Fila
+          icono={<Clock aria-hidden className="size-5" />}
+          titulo="Cuándo"
+          meta={<span className="capitalize">{fechaHoraLarga(reserva.hora_inicio, tz)}</span>}
+        />
+        <Fila
+          icono={<Receipt aria-hidden className="size-5" />}
+          titulo="Total del servicio"
+          derecha={<span className="sn-price">{formatCOP(Number(reserva.monto_total))}</span>}
+        />
+        <Fila
+          icono={<Wallet aria-hidden className="size-5" />}
+          titulo="Seña"
+          meta={confirmada && saldoLocal > 0 ? `Pagas ${formatCOP(saldoLocal)} en el local al terminar` : undefined}
+          derecha={
+            <>
+              <span className="sn-price">{formatCOP(Number(reserva.monto_sena))}</span>
+              <Status tone={confirmada ? "ok" : "warn"} icon={confirmada ? <Check aria-hidden className="size-3.5" /> : undefined}>
+                {confirmada ? "Pagada" : "Pendiente"}
+              </Status>
+            </>
+          }
+        />
+        {confirmada ? (
+          <Fila
+            icono={<CalendarPlus aria-hidden className="size-5" />}
+            titulo="Agregar al calendario"
+            meta="Google, Apple, Outlook"
+            href={`/reserva/${reserva.id}/ics`}
+            external
+          />
+        ) : null}
+        {confirmada ? (
+          <BotonCancelar reservaId={reserva.id} reembolsoEstimado={reembolsoEstimado} reembolsoPct={pct} />
+        ) : null}
+      </Filas>
+
+      {confirmada ? (
+        <Bloque etiqueta="00 / Política">
+          {pct === 0
+            ? "Estás dentro de la ventana sin reembolso: si cancelas ahora, la seña queda para el negocio."
+            : `Si cancelas ahora te devolvemos ${formatCOP(reembolsoEstimado)} (${pct}% de la seña).`}
+        </Bloque>
+      ) : null}
+
+      {reserva.estado === "PENDIENTE_PAGO" ? (
+        <Pie>
+          <Button asChild size="lg" className="w-full">
+            <Link href={`/reserva/${reserva.id}/pago`}>Pagar seña y confirmar</Link>
+          </Button>
+        </Pie>
+      ) : null}
+
+      {reserva.estado === "CANCELADA" && negocio ? (
+        <>
+          <Sec>01 / Siguiente</Sec>
+          <div className="px-4">
             <Button asChild variant="secondary" size="lg" className="w-full">
-              <Link href={`/negocio/${negocio.slug}/reservar`}>BUSCAR OTRO HORARIO</Link>
+              <Link href={`/negocio/${negocio.slug}/reservar`}>Buscar otro horario</Link>
             </Button>
-          ) : null}
+          </div>
+        </>
+      ) : null}
+
+      {recienConfirmada ? (
+        <div className="flex flex-col gap-3 p-4">
+          <Button asChild size="lg" className="w-full">
+            <Link href="/mis-reservas">Ver mis citas</Link>
+          </Button>
         </div>
-      </main>
-    </div>
+      ) : null}
+    </Pantalla>
   );
 }

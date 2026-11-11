@@ -479,7 +479,7 @@ export function EmojiReaction({
                 aria-orientation="horizontal"
                 onKeyDown={onMenuKeyDown}
                 className={cn(
-                  "relative flex items-center rounded-full",
+                  "relative flex items-center rounded-none",
                   SURFACE,
                   s.pill,
                 )}
@@ -512,7 +512,7 @@ export function EmojiReaction({
                       event.detail === 0 &&
                       react(name, event.currentTarget.getBoundingClientRect())
                     }
-                    className="relative z-10 rounded-full p-1 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="relative z-10 rounded-none p-1 outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     initial={reduced ? false : { scale: 0.4, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{
@@ -580,7 +580,7 @@ export function EmojiReaction({
             asChild
               ? undefined
               : cn(
-                  "relative z-10 grid place-items-center rounded-full text-text/60 transition-colors hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  "relative z-10 grid place-items-center rounded-none text-text/60 transition-colors hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   SURFACE,
                   s.trigger,
                 )

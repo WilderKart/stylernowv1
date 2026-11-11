@@ -1,17 +1,14 @@
 import { BarraSuperior } from "@/components/layout/header";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { createClient } from "@/lib/supabase/server";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { DetalleSede } from "./detalle-sede";
 
 export const metadata = { title: "Detalle de sede" };
 
 export default async function SedeDetallePage(props: PageProps<"/panel/sedes/[id]">) {
   const { id } = await props.params;
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect(`/login?next=/panel/sedes/${id}`);
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
-  if (contexto.rol === "STAFF") redirect("/panel");
+  const contexto = await verificarAccesoPanel(["BARBERIA", "GUARDIAN"], `/panel/sedes/${id}`);
 
   const supabase = await createClient();
 

@@ -22,5 +22,13 @@ export async function requireSuperSU() {
   const { data: perfil } = await supabase.from("perfil").select("es_supersu, nombre").eq("id", user.id).maybeSingle();
   if (!perfil?.es_supersu) redirect("/panel");
 
+  // ADR-015, Fase D: SuperSU nunca entra con Google — solo correo + contraseña
+  // (+ MFA, fase siguiente). Si esta cuenta autenticó vía Google, se cierra la
+  // sesión y se manda de nuevo a /login en vez de dejarla pasar.
+  if (user.app_metadata?.provider === "google") {
+    await supabase.auth.signOut();
+    redirect("/login?next=/admin&error=supersu_requiere_password");
+  }
+
   return { userId: user.id, nombre: perfil.nombre };
 }

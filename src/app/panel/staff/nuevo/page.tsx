@@ -1,5 +1,5 @@
 import { BarraSuperior } from "@/components/layout/header";
-import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { FormularioInvitacion } from "./formulario-invitacion";
@@ -7,9 +7,7 @@ import { FormularioInvitacion } from "./formulario-invitacion";
 export const metadata = { title: "Invitar Staff" };
 
 export default async function InvitarStaffPage() {
-  const contexto = await resolverContexto();
-  if (!contexto.userId) redirect("/login?next=/panel/staff/nuevo");
-  if (contexto.rol === "NINGUNO") redirect("/panel/onboarding");
+  const contexto = await verificarAccesoPanel(["BARBERIA", "GUARDIAN"], "/panel/staff/nuevo");
   // Invitar Staff es exclusivo de Barbería (03-Business-Rules/01_Roles.md).
   if (!contexto.permisos.invitarStaff) redirect("/panel/staff");
 

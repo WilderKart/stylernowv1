@@ -1,3 +1,4 @@
+import { ejecutarCicloSuscripciones } from "@/lib/planes/ciclo-suscripciones";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { NextRequest } from "next/server";
 
@@ -45,6 +46,12 @@ export async function GET(request: NextRequest) {
 
   const { data: roiSnapshot, error: e4 } = await admin.rpc("generar_roi_snapshot_mensual");
   resultado.roi_ia_snapshot = e4 ? { error: e4.message } : roiSnapshot;
+
+  try {
+    resultado.suscripciones = await ejecutarCicloSuscripciones();
+  } catch (e) {
+    resultado.suscripciones = { error: e instanceof Error ? e.message : "error inesperado" };
+  }
 
   return Response.json({ ok: true, ejecutado_at: new Date().toISOString(), ...resultado });
 }

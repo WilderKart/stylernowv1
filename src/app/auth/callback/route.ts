@@ -1,5 +1,6 @@
 import { registrarAceptacionLegal } from "@/lib/auth/aceptacion-legal";
 import { destinoSeguro } from "@/lib/auth/destino-seguro";
+import { registrarEventoIdentidad } from "@/lib/auth/identity-events";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -27,10 +28,23 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      // Fase D: Google (y cualquier proveedor OAuth futuro) comparte este
+      // mismo intercambio PKCE — se distingue del magic link/recovery por
+      // `app_metadata.provider`, nunca por una rama de código separada.
+      if (data.user.app_metadata?.provider === "google") {
+        await registrarEventoIdentidad("GOOGLE_LOGIN", data.user.id, { email: data.user.email ?? null });
+      }
+
       // El botón del correo ya implica la misma aceptación que exige el paso 1 del
       // formulario (enviarCodigo la valida server-side antes de mandar el correo);
       // se registra acá porque este camino nunca pasa por verificarCodigo.
       const { pendientesMateriales } = await registrarAceptacionLegal(supabase, data.user.id);
+
+      // ADR-015: el link de recuperación de contraseña (`solicitarRecuperacion()`,
+      // next=/login/recuperar) nunca debe quedar atrapado detrás del desvío de
+      // "completar perfil" — resetear la contraseña es más urgente y no requiere
+      // tener teléfono cargado.
+      const esRecuperacion = next === "/login/recuperar";
 
       // Mismo desvío de una sola vez que el flujo de código tipeado: sin teléfono
       // todavía, primero completa el perfil (02-UX/02_Onboarding.md).
@@ -40,15 +54,27 @@ export async function GET(request: NextRequest) {
         .eq("id", data.user.id)
         .single();
 
-      const destino = perfil?.telefono ? next : "/perfil?bienvenida=1";
+      const destino = esRecuperacion || perfil?.telefono ? next : "/perfil?bienvenida=1";
       // Mismo bloqueo que el flujo de código tipeado (login/formulario.tsx): un
       // cambio legal material pendiente se resuelve antes que cualquier otro
-      // destino (02-UX/10_Super_Admin.md).
-      if (pendientesMateriales.length > 0) {
+      // destino (02-UX/10_Super_Admin.md) — salvo recuperación de contraseña,
+      // que nunca debe quedar bloqueada por esto.
+      if (!esRecuperacion && pendientesMateriales.length > 0) {
         return NextResponse.redirect(`${origin}/legal/aceptar?next=${encodeURIComponent(destino)}`);
       }
       return NextResponse.redirect(`${origin}${destino}`);
     }
+    // El intercambio falló (código expirado o ya canjeado) — sin `user.id`
+    // todavía, se audita sin actor.
+    await registrarEventoIdentidad("CALLBACK_INVALIDO", null, { error: error?.message });
+  } else if (searchParams.get("error")) {
+    // Supabase redirige acá con `?error=...` (sin `code`) cuando el propio
+    // proveedor OAuth rechaza el login (ej. el usuario cancela el consentimiento
+    // de Google) — nunca llega a `exchangeCodeForSession`.
+    await registrarEventoIdentidad("OAUTH_ERROR", null, {
+      error: searchParams.get("error"),
+      descripcion: searchParams.get("error_description"),
+    });
   }
 
   // Código inválido, expirado o ya canjeado (ej. clickeado dos veces, o un escaneo

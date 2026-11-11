@@ -73,7 +73,7 @@ export function VistaHiloTicketAdmin({
             type="button"
             disabled={cambiando || ticket.estado === e}
             onClick={() => cambiarEstado(e)}
-            className={`rounded-full border px-3 py-1.5 text-[11px] font-bold disabled:opacity-40 ${
+            className={`rounded-none border px-3 py-1.5 text-[11px] font-bold disabled:opacity-40 ${
               ticket.estado === e ? "border-accent bg-accent-soft text-accent" : "border-border text-text-muted"
             }`}
           >

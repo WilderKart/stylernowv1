@@ -1,5 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { derivarPermisosPanel } from "@/lib/auth/permission-registry";
+import type { Permisos } from "@/lib/auth/tipos";
 
 /**
  * Resolutor central de autorización del Panel Negocio — ADR-006 (Guardian
@@ -22,46 +24,13 @@ export type RolPanel = "BARBERIA" | "GUARDIAN" | "STAFF" | "NINGUNO";
 /** Estado crudo del vínculo Staff–Negocio, cuando existe uno. */
 export type EstadoVinculoPanel = "ACTIVO" | "SUSPENDIDO" | "INVITADO" | "RETIRADO" | null;
 
-export interface PermisosPanel {
-  verTodasLasSedes: boolean;
-  crearSede: boolean;
-  eliminarSede: boolean;
-  cerrarReabrirSede: boolean;
-  marcarSedePrincipal: boolean;
-  trasladarStaff: boolean;
-  editarSedePropia: boolean;
-  verConfiguracionGlobal: boolean;
-  verFacturacion: boolean;
-  // Módulo 2.4 — Gestión de Staff (03-Business-Rules/01_Roles.md: todas
-  // exclusivas de Barbería salvo cambiarHorarioOtroStaff, que también es 🏢
-  // para Guardian — reservado para cuando exista el módulo de Agenda).
-  invitarStaff: boolean;
-  cancelarInvitacionStaff: boolean;
-  promoverGuardian: boolean;
-  revocarGuardian: boolean;
-  suspenderStaff: boolean;
-  reactivarStaff: boolean;
-  retirarStaff: boolean;
-  cambiarHorarioOtroStaff: boolean;
-  // Módulo 2.5 — Servicios (03-Business-Rules/01_Roles.md: "Editar duración"
-  // y "Activar/Desactivar" son 🏢 Guardian, "Crear" y "Cambiar precio" son
-  // 🌐 exclusivo Barbería — reforzado también por un trigger de base de
-  // datos, no solo por esta capa de conveniencia).
-  crearServicio: boolean;
-  cambiarPrecioServicio: boolean;
-  editarServicio: boolean;
-  activarDesactivarServicio: boolean;
-  // Combos y asignación de Staff a Servicio no están en la matriz oficial;
-  // se tratan como decisión de precio/empaquetado — exclusivo Barbería,
-  // igual que "Cambiar precio" (mismo criterio ya usado por
-  // servicio_combo_write_barberia / staff_servicio_write_barberia en RLS).
-  gestionarCombos: boolean;
-  asignarStaffServicio: boolean;
-  // Módulo 2.7 — CRM. Ver/agregar notas/etiquetar son 🏢 Guardian y 🌐
-  // Barbería por igual (sin distinción de UI); "Exportar clientes" es
-  // exclusivo de Barbería (03-Business-Rules/01_Roles.md).
-  exportarClientes: boolean;
-}
+/**
+ * ADR-015: alias del contrato único `Permisos` (`src/lib/auth/tipos.ts`),
+ * ahora derivado de `permission-registry.ts` en vez de codificarse a mano acá
+ * — se mantiene el nombre `PermisosPanel` para no tocar los 25+ call sites
+ * existentes (`contexto.permisos.X`).
+ */
+export type PermisosPanel = Permisos;
 
 export interface ContextoUsuario {
   userId: string | null;
@@ -140,32 +109,7 @@ export async function resolverContexto(): Promise<ContextoUsuario> {
       staffVinculoId: null,
       esGuardian: false,
       estadoVinculo: null,
-      permisos: {
-        verTodasLasSedes: true,
-        crearSede: true,
-        eliminarSede: true,
-        cerrarReabrirSede: true,
-        marcarSedePrincipal: true,
-        trasladarStaff: true,
-        editarSedePropia: true,
-        verConfiguracionGlobal: true,
-        verFacturacion: true,
-        invitarStaff: true,
-        cancelarInvitacionStaff: true,
-        promoverGuardian: true,
-        revocarGuardian: true,
-        suspenderStaff: true,
-        reactivarStaff: true,
-        retirarStaff: true,
-        cambiarHorarioOtroStaff: true,
-        crearServicio: true,
-        cambiarPrecioServicio: true,
-        editarServicio: true,
-        activarDesactivarServicio: true,
-        gestionarCombos: true,
-        asignarStaffServicio: true,
-        exportarClientes: true,
-      },
+      permisos: derivarPermisosPanel("barberia"),
     };
   }
 
@@ -192,32 +136,7 @@ export async function resolverContexto(): Promise<ContextoUsuario> {
         staffVinculoId: vinculo.id,
         esGuardian: true,
         estadoVinculo: "ACTIVO",
-        permisos: {
-          verTodasLasSedes: false,
-          crearSede: false,
-          eliminarSede: false,
-          cerrarReabrirSede: false,
-          marcarSedePrincipal: false,
-          trasladarStaff: false,
-          editarSedePropia: true,
-          verConfiguracionGlobal: false,
-          verFacturacion: false,
-          invitarStaff: false,
-          cancelarInvitacionStaff: false,
-          promoverGuardian: false,
-          revocarGuardian: false,
-          suspenderStaff: false,
-          reactivarStaff: false,
-          retirarStaff: false,
-          cambiarHorarioOtroStaff: true,
-          crearServicio: false,
-          cambiarPrecioServicio: false,
-          editarServicio: true,
-          activarDesactivarServicio: true,
-          gestionarCombos: false,
-          asignarStaffServicio: false,
-          exportarClientes: false,
-        },
+        permisos: derivarPermisosPanel("guardian"),
       };
     }
 

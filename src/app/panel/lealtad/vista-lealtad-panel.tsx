@@ -67,7 +67,7 @@ export function VistaLealtadPanel(props: {
             key={t}
             type="button"
             onClick={() => setTab(t)}
-            className={`rounded-full border px-3 py-1.5 text-[11.5px] font-bold ${tab === t ? "border-accent bg-accent-soft text-accent" : "border-border text-text-muted"}`}
+            className={`rounded-none border px-3 py-1.5 text-[11.5px] font-bold ${tab === t ? "border-accent bg-accent-soft text-accent" : "border-border text-text-muted"}`}
           >
             {t}
           </button>
