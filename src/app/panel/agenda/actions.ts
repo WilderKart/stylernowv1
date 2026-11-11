@@ -148,7 +148,12 @@ export async function crearBloqueo(datos: {
       fecha_fin: datos.fechaFin,
       motivo: datos.motivo || null,
     });
-    if (error) return { ok: false, error: error.message };
+    if (error) {
+      return {
+        ok: false,
+        error: error.code === "23514" ? "La fecha de fin debe ser posterior a la de inicio." : error.message,
+      };
+    }
     revalidatePath("/panel/agenda");
     return { ok: true };
   } catch (e) {

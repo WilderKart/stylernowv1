@@ -65,8 +65,15 @@ export function HojaFiltros({
   }, []);
 
   // Conteo en vivo con retardo; ignora respuestas viejas.
+  const sinConteo = f.radio !== null && !coords;
   useEffect(() => {
     let vigente = true;
+    // Con distancia pero sin ubicación el conteo ignoraría el radio (número falso): se oculta hasta tenerla.
+    if (f.radio !== null && !coords) {
+      return () => {
+        vigente = false;
+      };
+    }
     const t = setTimeout(async () => {
       const n = await contarResultadosAction({
         categoria: f.categoria ?? undefined,
@@ -179,7 +186,7 @@ export function HojaFiltros({
             Limpiar
           </button>
           <button type="button" className="sn-btn sn-btn--primary min-w-0" onClick={() => onAplicar(f)}>
-            Aplicar{total !== null ? ` · ${total}` : ""} ↗
+            Aplicar{total !== null && !sinConteo ? ` · ${total}` : ""} ↗
           </button>
         </div>
       </div>

@@ -377,8 +377,11 @@ function DiaGrid({
               }}
             >
               {bloqueosStaff.map((b) => {
-                const inicioSlot = Math.max(0, slotDe(b.fechaInicio));
-                const finSlot = Math.min(totalSlots, slotDe(b.fechaFin) || totalSlots);
+                // Bloqueos multi-día (vacaciones): se recortan al día mostrado (UTC-5 fijo) en vez de usar solo la hora del día.
+                const diaIni = new Date(`${fecha}T00:00:00-05:00`).getTime();
+                const slotEnDia = (iso: string) => Math.floor(((new Date(iso).getTime() - diaIni) / 60000 - inicio) / 30);
+                const inicioSlot = Math.max(0, slotEnDia(b.fechaInicio));
+                const finSlot = Math.min(totalSlots, slotEnDia(b.fechaFin));
                 if (finSlot <= inicioSlot) return null;
                 return (
                   <button
