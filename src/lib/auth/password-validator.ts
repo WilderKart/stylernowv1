@@ -17,7 +17,7 @@ export async function validarContrasenaNueva(
   if (!politica.ok) return politica;
 
   if (await passwordFueUsadaAntes(userId, password)) {
-    return { ok: false, error: `No podés reutilizar ninguna de tus últimas ${POLITICA_PASSWORD.noReutilizarUltimas} contraseñas.` };
+    return { ok: false, error: `No puedes reutilizar ninguna de tus últimas ${POLITICA_PASSWORD.noReutilizarUltimas} contraseñas.` };
   }
   return { ok: true };
 }

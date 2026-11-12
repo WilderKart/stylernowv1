@@ -7,6 +7,11 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Cierre de bloqueantes de la auditoría (2026-11-12)
+- Migración `114`: gating por plan dentro de las RPC de membresías y fidelización; `congelar_membresia` y `crear_pago_sena` sin carreras; `negocio` sin columnas sensibles para anon; familias sin recursión; `avatars` sin listado público.
+- Interfaz: Lealtad bloquea por plan con aviso de mejora; paginación de la home; mosaicos corregidos; voseo eliminado; inglés en pantallas de cliente (`src/lib/i18n`, cookie `sn_idioma`).
+- Operación: 21 pruebas Vitest, CI en GitHub Actions, `robots`/`sitemap`/Open Graph, banner de cookies y analítica con consentimiento, `.env.example` completo, script de limpieza de datos de prueba.
+
 ### Plan competitivo (2026-11-11) — Fase A + primeras funciones
 - **Planes v3** (`docs/PLANES_CORREGIDOS_v3.md`): Essential / Studio / Prestige / Signature sustituyen a Raven / Jarl / Valhalla / Allfather. El codigo de la app ya usa los nombres nuevos; la migracion `109` (renombra el enum, precios 69.900/139.900/279.900/desde 599.000, limites, WhatsApp 150/400/1.000/2.500, matriz de funciones, sin marca de agua) queda **escrita y sin aplicar**: se aplica junto con el despliegue.
 - **6.2 Funciones por plan en RLS**: migracion `110` (politicas restrictivas sobre membresias, fidelizacion y My Look). Sin aplicar.

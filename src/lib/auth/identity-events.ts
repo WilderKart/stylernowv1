@@ -28,7 +28,7 @@ export async function registrarEventoIdentidad(
     entidad_tipo: "identidad",
     entidad_id: actorId,
     accion: evento,
-    actor_tipo: "CLIENTE", // Evento a nivel de cuenta — el rol de negocio no aplica acá.
+    actor_tipo: "CLIENTE", // Evento a nivel de cuenta — el rol de negocio no aplica aquí.
     actor_id: actorId,
     payload_despues: detalle ?? undefined,
   });

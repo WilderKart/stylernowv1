@@ -5,11 +5,13 @@ import { Input } from "@/components/ui/input";
 import { ArrowUpRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useT } from "@/lib/i18n/proveedor";
 import { ErrorForm } from "../_componentes/pantalla-auth";
 import { restablecerContrasena } from "../actions";
 
 export function VistaRecuperar() {
   const router = useRouter();
+  const t = useT();
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,7 +20,7 @@ export function VistaRecuperar() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (password !== confirmar) {
-      setError("Las contraseñas no coinciden.");
+      setError(t("login.no_coinciden"));
       return;
     }
     setLoading(true);
@@ -36,7 +38,7 @@ export function VistaRecuperar() {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-3">
       <Input
-        label="Contraseña nueva"
+        label={t("login.contrasena_nueva")}
         type="password"
         required
         autoComplete="new-password"
@@ -44,7 +46,7 @@ export function VistaRecuperar() {
         onChange={(e) => setPassword(e.target.value)}
       />
       <Input
-        label="Confirmar contraseña"
+        label={t("login.confirmar")}
         type="password"
         required
         autoComplete="new-password"
@@ -52,11 +54,11 @@ export function VistaRecuperar() {
         onChange={(e) => setConfirmar(e.target.value)}
       />
       <p className="p-note normal-case">
-        Mínimo 12 caracteres, con mayúscula, minúscula, número y símbolo.
+        {t("login.nota_pw")}
       </p>
       {error ? <ErrorForm>{error}</ErrorForm> : null}
       <Button type="submit" size="lg" loading={loading} className="w-full justify-between">
-        <span>Guardar contraseña</span>
+        <span>{t("login.guardar_pw")}</span>
         <ArrowUpRight className="size-[18px]" aria-hidden />
       </Button>
     </form>

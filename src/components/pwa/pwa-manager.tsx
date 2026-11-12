@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, useTransition } from "react";
+import { useT } from "@/lib/i18n/proveedor";
 
 const CLAVE_VISITAS = "stylernow_visitas";
 const CLAVE_DESCARTADO = "stylernow_pwa_descartado_hasta";
@@ -26,6 +27,7 @@ function yaInstalada() {
  * (02-UX/03_Client_PWA.md). Se monta una vez en el layout raíz.
  */
 export function PwaManager() {
+  const t = useT();
   const [eventoDiferido, setEventoDiferido] = useState<EventoInstalacion | null>(null);
   const [mostrarBanner, setMostrarBanner] = useState(false);
   const [esIosDetectado, setEsIosDetectado] = useState(false);
@@ -119,24 +121,24 @@ export function PwaManager() {
           </svg>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-bold text-text">Instalá StylerNow</p>
+          <p className="text-[13px] font-bold text-text">{t("pwa.instala")}</p>
           <p className="truncate text-[11.5px] text-text-faint">
             {esIosDetectado
-              ? "Tocá Compartir y luego “Agregar a inicio”"
-              : "Acceso directo, sin ocupar espacio de más"}
+              ? t("pwa.ios")
+              : t("pwa.acceso")}
           </p>
         </div>
         {esIosDetectado ? (
           <Button size="sm" variant="secondary" onClick={() => descartar()}>
-            Entendido
+            {t("pwa.entendido")}
           </Button>
         ) : (
           <>
             <Button size="sm" variant="ghost" onClick={() => descartar()}>
-              Ahora no
+              {t("pwa.ahora_no")}
             </Button>
             <Button size="sm" onClick={instalar}>
-              Instalar
+              {t("pwa.instalar")}
             </Button>
           </>
         )}

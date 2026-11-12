@@ -8,13 +8,13 @@ type Resultado<T = undefined> =
   | { ok: false; error: string };
 
 const MENSAJES_ERROR: Record<string, string> = {
-  NO_AUTORIZADO: "No tenés permiso sobre esta campaña.",
+  NO_AUTORIZADO: "No tienes permiso sobre esta campaña.",
   FORMATO_NO_DISPONIBLE: "Ese formato no está disponible todavía.",
-  UNIDAD_COBRO_INVALIDA: "Elegí una unidad de cobro válida.",
+  UNIDAD_COBRO_INVALIDA: "Elige una unidad de cobro válida.",
   DESTACADO_SOLO_CPC: "El formato Destacado solo se cobra por clic (CPC).",
   PRESUPUESTO_DIARIO_INVALIDO: "El presupuesto diario debe ser mayor a 0.",
   PRESUPUESTO_TOTAL_INVALIDO: "El presupuesto total es obligatorio y debe ser al menos el presupuesto diario.",
-  PLAN_INSUFICIENTE: "Necesitás el Plan Studio o superior para crear campañas publicitarias.",
+  PLAN_INSUFICIENTE: "Necesitas el Plan Studio o superior para crear campañas publicitarias.",
   CAMPANA_NO_ENCONTRADA: "No encontramos esa campaña.",
   TRANSICION_INVALIDA: "Esa campaña no está en un estado que permita esta acción.",
   SALDO_INSUFICIENTE: "Tu Wallet no tiene saldo suficiente para cubrir al menos un día de presupuesto.",

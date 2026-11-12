@@ -89,7 +89,7 @@ async function viaPanel(rolesSolicitados: Rol[], next?: string): Promise<Context
   // Onboarding: únicamente aplica a Barbería, nunca a Guardian.
   // (La verificación de `negocio.onboarding_completo` en sí ya vive en cada
   // página que la necesita, vía `resolverContexto()` + su propia consulta —
-  // acá solo se documenta la regla para que quede explícita y auditable.)
+  // aquí solo se documenta la regla para que quede explícita y auditable.)
 
   return {
     userId: contexto.userId,

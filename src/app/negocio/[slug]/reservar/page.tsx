@@ -3,15 +3,17 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { FlujoReserva } from "./flujo-reserva";
+import { obtenerT } from "@/lib/i18n/servidor";
 
-export const metadata = {
-  title: "Reservar turno",
+export async function generateMetadata() {
+  const t = await obtenerT();
   // El flujo depende de la sesión y de disponibilidad en vivo: no debe indexarse.
-  robots: { index: false, follow: false },
-};
+  return { title: t("res.meta"), robots: { index: false, follow: false } };
+}
 
 export default async function ReservarPage(props: PageProps<"/negocio/[slug]/reservar">) {
   const { slug } = await props.params;
+  const t = await obtenerT();
   const { staff: staffParam } = await props.searchParams;
   const staffPreseleccionado = typeof staffParam === "string" ? staffParam : null;
   const supabase = await createClient();
@@ -74,17 +76,17 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
     return (
       <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-bg">
         <div className="p-top">
-          <Link href={`/negocio/${slug}`} aria-label="Volver" className="sn-iconbtn">
+          <Link href={`/negocio/${slug}`} aria-label={t("comun.volver")} className="sn-iconbtn">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true">
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
           </Link>
-          <span className="sn-num">Reserva · {negocio.nombre}</span>
+          <span className="sn-num">{t("res.reserva_negocio", { nombre: negocio.nombre })}</span>
         </div>
         <EmptyState
-          big="Sin turnos."
-          title="Este negocio aún no acepta reservas"
-          hint="Le falta publicar sus servicios o su sede. Volvé a intentarlo más tarde."
+          big={t("res.sin_turnos")}
+          title={t("res.no_acepta")}
+          hint={t("res.no_acepta_hint")}
         />
       </div>
     );

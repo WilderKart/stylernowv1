@@ -17,9 +17,9 @@ async function usuarioActual() {
 }
 
 const MENSAJES_ERROR: Record<string, string> = {
-  NO_AUTORIZADO: "No tenés permiso sobre este Staff.",
+  NO_AUTORIZADO: "No tienes permiso sobre este Staff.",
   PLAN_LIMIT_EXCEEDED:
-    "Tu plan no permite más Staff. Hacé un upgrade para sumar otro cupo (01-PRD/03_Monetization.md).",
+    "Tu plan no permite más Staff. Haz un upgrade para sumar otro cupo (01-PRD/03_Monetization.md).",
   SEDE_NO_PERTENECE_AL_NEGOCIO: "Esa sede no pertenece a este negocio.",
   YA_TIENE_VINCULO_ACTIVO: "Ese correo ya pertenece a un Staff activo en otro negocio.",
   INVITACION_NO_PENDIENTE: "Esa invitación ya no está pendiente.",
@@ -28,7 +28,7 @@ const MENSAJES_ERROR: Record<string, string> = {
   STAFF_NO_ACTIVO: "Ese Staff no está activo.",
   STAFF_NO_SUSPENDIDO: "Ese Staff no está suspendido.",
   STAFF_YA_RETIRADO: "Ese Staff ya no pertenece al negocio.",
-  FALTA_SEDE_ACTIVA: "Este Staff todavía no tiene una sede asignada — trasladalo a una sede antes de promoverlo.",
+  FALTA_SEDE_ACTIVA: "Este Staff todavía no tiene una sede asignada — trasládalo a una sede antes de promoverlo.",
   YA_ES_GUARDIAN: "Ese Staff ya tiene el perfil Guardian.",
   NO_ES_GUARDIAN: "Ese Staff no tiene el perfil Guardian.",
 };
@@ -251,7 +251,7 @@ async function notificarInvitacion(email: string, nombreNegocio: string, invitac
         from: "StylerNow <notificaciones@mail.stylernow.com>",
         to: email,
         subject: `Te invitaron a unirte a ${nombreNegocio} en StylerNow`,
-        html: `<h2>Te invitaron a StylerNow</h2><p>${nombreNegocio} te invitó a unirte como Staff. Ingresá con este mismo correo (${email}) y <a href="${url}">aceptá o rechazá la invitación acá</a>.</p>`,
+        html: `<h2>Te invitaron a StylerNow</h2><p>${nombreNegocio} te invitó a unirte como Staff. Ingresa con este mismo correo (${email}) y <a href="${url}">acepta o rechaza la invitación aquí</a>.</p>`,
       }),
     });
   } catch {
@@ -350,7 +350,7 @@ export interface EventoHistorial {
  * temporada cerrada). Un único punto de lectura — ninguna otra pantalla
  * vuelve a consultar estas tablas a mano para mostrar historial de Staff.
  * La parte de Nivel llega vacía hasta que exista el cierre de temporada
- * (Fase 6, ADL-009) — es un hueco real del roadmap, no un bug acá.
+ * (Fase 6, ADL-009) — es un hueco real del roadmap, no un bug aquí.
  */
 export async function obtenerHistorialStaff(vinculoId: string): Promise<Resultado<EventoHistorial[]>> {
   try {

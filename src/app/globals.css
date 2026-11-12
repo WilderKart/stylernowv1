@@ -17,7 +17,7 @@
   --signal-pressed: #e04400;
   --text: #0a0a0a;
   --text-muted: #5c5c5c;
-  --text-faint: #767676;
+  --text-faint: #6b6b6b; /* 4.76:1 sobre #f2f2f2 (antes #767676: 4.06) */
   --text-disabled: #8a8a8a;
   --accent-text: #c23a00;
   --line: #0a0a0a;

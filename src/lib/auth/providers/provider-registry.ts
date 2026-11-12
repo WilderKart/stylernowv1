@@ -2,7 +2,7 @@ import { googleProvider } from "@/lib/auth/providers/google-provider";
 import { appleProvider } from "@/lib/auth/providers/apple-provider";
 import type { AuthProvider } from "@/lib/auth/providers/tipos";
 
-/** Proveedores OAuth reales (comparten `/auth/callback`) — agregar uno nuevo es agregarlo acá. */
+/** Proveedores OAuth reales (comparten `/auth/callback`) — agregar uno nuevo es agregarlo aquí. */
 export const PROVEEDORES_OAUTH: AuthProvider[] = [googleProvider, appleProvider];
 
 export function obtenerProveedor(id: string): AuthProvider | undefined {

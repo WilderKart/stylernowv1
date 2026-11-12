@@ -28,7 +28,7 @@ export async function alternarFavorito(negocioId: string, slug: string): Promise
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user) return { ok: false, error: "Iniciá sesión para guardar favoritos." };
+    if (!user) return { ok: false, error: "Inicia sesión para guardar favoritos." };
 
     const { data: existente } = await supabase
       .from("favorito_negocio")

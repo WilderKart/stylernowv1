@@ -21,7 +21,7 @@ import {
 } from "./actions";
 
 // Debe coincidir con el check constraint de ai_memoria_negocio.categoria
-// (migración 064) — vive acá, no en actions.ts, porque un archivo "use
+// (migración 064) — vive aquí, no en actions.ts, porque un archivo "use
 // server" solo puede exportar funciones async.
 const CATEGORIAS_MEMORIA_IA = [
   "TONO",
@@ -138,7 +138,7 @@ export function VistaAiWorkspace({
                   type="button"
                   disabled={comprando === p.id || !!pagoPendienteId}
                   onClick={() => onComprar(p.id)}
-                  className="w-full rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold uppercase text-white disabled:opacity-50"
+                  className="w-full rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold uppercase text-ink disabled:opacity-50"
                 >
                   {comprando === p.id ? "Abriendo..." : pagoPendienteId ? "Esperando pago..." : "Comprar"}
                 </button>
@@ -146,7 +146,7 @@ export function VistaAiWorkspace({
             ))}
           </div>
         )}
-        <p className="mt-2 text-[10.5px] text-text-faint">Para paquetes Enterprise, contactá a soporte — se cotizan manualmente.</p>
+        <p className="mt-2 text-[10.5px] text-text-faint">Para paquetes Enterprise, contacta a soporte — se cotizan manualmente.</p>
       </section>
 
       <SeccionMemoria negocioId={negocioId} memoriaInicial={memoriaInicial} />
@@ -268,7 +268,7 @@ function SeccionMemoria({ negocioId, memoriaInicial }: { negocioId: string; memo
     <section className="mb-8">
       <h2 className="font-display mb-1 text-[13px] font-bold uppercase text-text">Memoria de IA</h2>
       <p className="mb-3 text-[11px] text-text-faint">
-        Lo que la IA recuerda de tu Negocio para personalizar sus respuestas — vos decidís qué guarda, aprobás o hacés olvidar.
+        Lo que la IA recuerda de tu Negocio para personalizar sus respuestas — tú decides qué guarda, apruebas o haces olvidar.
       </p>
       <div className="flex flex-col gap-2">
         {CATEGORIAS_MEMORIA_IA.map((categoria) => {
@@ -314,7 +314,7 @@ function SeccionMemoria({ negocioId, memoriaInicial }: { negocioId: string; memo
                     className="w-full rounded-lg border border-border bg-bg p-2 font-mono text-[11px] text-text"
                   />
                   <div className="mt-2 flex gap-2">
-                    <button type="button" disabled={pendiente} onClick={() => guardar(categoria)} className="rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold uppercase text-white disabled:opacity-50">
+                    <button type="button" disabled={pendiente} onClick={() => guardar(categoria)} className="rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold uppercase text-ink disabled:opacity-50">
                       Guardar nueva versión
                     </button>
                     <button type="button" onClick={() => setEditando(null)} className="text-[11px] font-bold uppercase text-text-faint">
@@ -356,7 +356,7 @@ function SeccionPrompts({ negocioId, promptsIniciales }: { negocioId: string; pr
   const [pendiente, iniciarTransicion] = useTransition();
 
   function crear() {
-    if (!nombre.trim() || !contenido.trim()) { toast.error("Completá nombre y contenido."); return; }
+    if (!nombre.trim() || !contenido.trim()) { toast.error("Completa nombre y contenido."); return; }
     iniciarTransicion(async () => {
       const r = await crearPromptIa(negocioId, "PROPIO", categoria, nombre, contenido);
       if (!r.ok) { toast.error(r.error); return; }
@@ -381,13 +381,13 @@ function SeccionPrompts({ negocioId, promptsIniciales }: { negocioId: string; pr
           <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre del prompt" className="mb-2 w-full rounded-lg border border-border bg-bg px-2 py-1.5 text-[12px] text-text" />
           <input value={categoria} onChange={(e) => setCategoria(e.target.value)} placeholder="Categoría" className="mb-2 w-full rounded-lg border border-border bg-bg px-2 py-1.5 text-[12px] text-text" />
           <textarea value={contenido} onChange={(e) => setContenido(e.target.value)} rows={3} placeholder="Contenido del prompt" className="mb-2 w-full rounded-lg border border-border bg-bg p-2 text-[12px] text-text" />
-          <button type="button" disabled={pendiente} onClick={crear} className="rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold uppercase text-white disabled:opacity-50">
+          <button type="button" disabled={pendiente} onClick={crear} className="rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold uppercase text-ink disabled:opacity-50">
             Guardar
           </button>
         </Card>
       ) : null}
       {prompts.length === 0 ? (
-        <p className="text-[12px] text-text-faint">Todavía no tenés prompts guardados.</p>
+        <p className="text-[12px] text-text-faint">Todavía no tienes prompts guardados.</p>
       ) : (
         <ul className="flex flex-col gap-1.5">
           {prompts.map((p) => (

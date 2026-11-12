@@ -14,6 +14,7 @@ import {
   iniciarCompraGiftCard,
   type NegocioBusqueda,
 } from "./actions";
+import { useT } from "@/lib/i18n/proveedor";
 
 const MONTOS_RAPIDOS = [30000, 50000, 100000, 150000];
 const INTERVALO_POLLING_MS = 4_000;
@@ -25,6 +26,7 @@ export function FormularioGiftCard({
   negocioPreseleccionado: NegocioBusqueda | null;
   pagoIdRetorno: string | null;
 }) {
+  const tr = useT();
   const [negocio, setNegocio] = useState<NegocioBusqueda | null>(negocioPreseleccionado);
   const [busqueda, setBusqueda] = useState("");
   const [resultados, setResultados] = useState<NegocioBusqueda[]>([]);
@@ -65,19 +67,19 @@ export function FormularioGiftCard({
         setComprada(true);
       } else if (estado.pago === "RECHAZADO") {
         setEsperando(false);
-        toast.error("El pago fue rechazado. Puedes intentar de nuevo con otro medio.");
+        toast.error(tr("gc.err_rechazado"));
       }
     }, INTERVALO_POLLING_MS);
     return () => clearInterval(intervalo);
-  }, [pagoId]);
+  }, [pagoId, tr]);
 
   const montoFinal = montoCustom ? Number(montoCustom) : monto;
 
   async function comprar() {
-    if (!negocio) return toast.error("Elige para qué negocio es la Gift Card.");
-    if (!montoFinal || montoFinal <= 0) return toast.error("Elige un monto válido.");
-    if (pin.length < 4) return toast.error("El PIN debe tener al menos 4 dígitos.");
-    if (paraOtro && !destinatarioNombre.trim()) return toast.error("Escribe el nombre del destinatario.");
+    if (!negocio) return toast.error(tr("gc.err_negocio"));
+    if (!montoFinal || montoFinal <= 0) return toast.error(tr("gc.err_monto"));
+    if (pin.length < 4) return toast.error(tr("gc.err_pin"));
+    if (paraOtro && !destinatarioNombre.trim()) return toast.error(tr("gc.err_destinatario"));
 
     setIniciando(true);
     const r = await iniciarCompraGiftCard({
@@ -99,21 +101,20 @@ export function FormularioGiftCard({
     return (
       <main className="flex flex-1 flex-col">
         <div className="sn-block-signal !bg-signal !text-ink border-b-2 border-ink px-4 pt-5 pb-6">
-          <span className="sn-num !text-ink">00 / Listo</span>
+          <span className="sn-num !text-ink">{tr("gc.listo")}</span>
           <h2 className="poster-2 mt-2.5 break-words">
-            Gift card
+            {tr("gc.comprada_1")}
             <br />
-            comprada.
+            {tr("gc.comprada_2")}
           </h2>
         </div>
         <p className="body-sm break-words p-4">
-          Comparte el código con {paraOtro ? destinatarioNombre || "el destinatario" : "quien la va a usar"} junto con el PIN que
-          elegiste. Se canjea presentándola en el local.
+          {tr("gc.comparte", { quien: paraOtro ? destinatarioNombre || tr("gc.destinatario_def") : tr("gc.quien_usa") })}
         </p>
         <div className="flex-1" />
         <Pie>
           <Button asChild size="lg" className="w-full">
-            <Link href="/gift-cards/mis">Ver mis gift cards</Link>
+            <Link href="/gift-cards/mis">{tr("gc.ver_mis")}</Link>
           </Button>
         </Pie>
       </main>
@@ -124,21 +125,21 @@ export function FormularioGiftCard({
     <main className="flex flex-1 flex-col">
       <div className="flex flex-col gap-6 p-4">
         <section className="flex flex-col gap-2">
-          <span className="sn-num">01 / ¿Para qué negocio?</span>
+          <span className="sn-num">{tr("gc.sec_negocio")}</span>
           {negocio ? (
             <div className="flex flex-wrap items-center justify-between gap-3 border-2 border-border p-3">
               <span className="section break-words">{negocio.nombre}</span>
               <Button variant="secondary" size="sm" onClick={() => setNegocio(null)}>
-                Cambiar
+                {tr("gc.cambiar")}
               </Button>
             </div>
           ) : (
             <>
               <Input
-                aria-label="Buscar barbería"
+                aria-label={tr("gc.buscar_aria")}
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
-                placeholder="Busca una barbería..."
+                placeholder={tr("gc.buscar_ph")}
               />
               {resultados.length > 0 ? (
                 <ul className="border-2 border-border">
@@ -164,7 +165,7 @@ export function FormularioGiftCard({
         </section>
 
         <section className="flex flex-col gap-2">
-          <span className="sn-num">02 / Monto</span>
+          <span className="sn-num">{tr("gc.sec_monto")}</span>
           <ChipGroup>
             {MONTOS_RAPIDOS.map((m) => (
               <Chip
@@ -180,43 +181,43 @@ export function FormularioGiftCard({
             ))}
           </ChipGroup>
           <Input
-            aria-label="Otro monto"
+            aria-label={tr("gc.otro_monto")}
             type="number"
             min={1000}
             value={montoCustom}
             onChange={(e) => setMontoCustom(e.target.value)}
-            placeholder="Otro monto"
+            placeholder={tr("gc.otro_monto")}
           />
         </section>
 
         <section className="flex flex-col gap-3">
-          <span className="sn-num">03 / ¿Para quién?</span>
+          <span className="sn-num">{tr("gc.sec_para")}</span>
           <Segmented<"yo" | "otro">
-            aria-label="Destinatario"
+            aria-label={tr("gc.destinatario")}
             className="flex [&>button]:min-w-0 [&>button]:flex-1"
             value={paraOtro ? "otro" : "yo"}
             onChange={(v) => setParaOtro(v === "otro")}
             options={[
-              { value: "yo", label: "Para mí" },
-              { value: "otro", label: "Para otra persona" },
+              { value: "yo", label: tr("gc.para_mi") },
+              { value: "otro", label: tr("gc.para_otra") },
             ]}
           />
           {paraOtro ? (
             <div className="flex flex-col gap-3">
               <Input
-                label="Nombre del destinatario"
+                label={tr("gc.nombre_dest")}
                 value={destinatarioNombre}
                 onChange={(e) => setDestinatarioNombre(e.target.value)}
               />
               <Input
-                label="Email del destinatario (opcional)"
+                label={tr("gc.email_dest")}
                 type="email"
                 value={destinatarioEmail}
                 onChange={(e) => setDestinatarioEmail(e.target.value)}
               />
               <div className="flex flex-col gap-2">
                 <label htmlFor="gc-mensaje" className="font-mono text-xs leading-4 font-bold tracking-[0.72px] uppercase">
-                  Mensaje (opcional)
+                  {tr("gc.mensaje")}
                 </label>
                 <textarea
                   id="gc-mensaje"
@@ -231,28 +232,28 @@ export function FormularioGiftCard({
         </section>
 
         <section className="flex flex-col gap-2">
-          <span className="sn-num">04 / PIN</span>
+          <span className="sn-num">{tr("gc.sec_pin")}</span>
           <Input
-            label="Elige un PIN de 4 a 6 dígitos"
+            label={tr("gc.elige_pin")}
             value={pin}
             onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
             inputMode="numeric"
             placeholder="••••"
           />
-          <p className="sn-help">Debes compartir el código y este PIN con quien la use. No se envía automáticamente.</p>
+          <p className="sn-help">{tr("gc.pin_ayuda")}</p>
         </section>
 
         {esperando ? (
           <div role="status" className="flex items-center gap-3 border-2 border-border p-4">
             <span aria-hidden className="size-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
-            <span className="section">Esperando la confirmación…</span>
+            <span className="section">{tr("gc.esperando")}</span>
           </div>
         ) : null}
         {esperando && esperaLarga ? (
           <p className="sn-help" role="status">
-            Está tardando más de lo normal. Si ya pagaste, tu gift card se activa sola: revísala en{" "}
+            {tr("gc.tardando")}{" "}
             <a className="underline" href="/gift-cards/mis">
-              Mis gift cards
+              {tr("gc.mis")}
             </a>
             .
           </p>
@@ -262,7 +263,7 @@ export function FormularioGiftCard({
       <div className="flex-1" />
       <Pie>
         <Button size="lg" className="w-full" loading={iniciando || esperando} disabled={iniciando || esperando} onClick={comprar}>
-          {montoFinal ? `Pagar ${formatCOP(montoFinal)}` : "Pagar"}
+          {montoFinal ? tr("gc.pagar_monto", { monto: formatCOP(montoFinal) }) : tr("gc.pagar")}
         </Button>
       </Pie>
     </main>

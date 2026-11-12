@@ -9,6 +9,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TAM_PAGINA_RESENAS } from "./constantes";
 import { ResenasLista } from "./resenas-lista";
+import { obtenerT } from "@/lib/i18n/servidor";
+import type { Traductor } from "@/lib/i18n/diccionario";
 
 /**
  * Perfil público de un profesional (C05). Datos de `negocio_staff_publico` (vínculo ACTIVO con el
@@ -51,7 +53,7 @@ async function cargarProfesional(slug: string, staffId: string) {
 }
 
 /** Próximos horarios libres del profesional (hoy + 2 días) con la misma RPC del flujo de reserva. */
-async function cargarHorarios(negocioId: string, staffId: string, servicioId: string | undefined) {
+async function cargarHorarios(negocioId: string, staffId: string, servicioId: string | undefined, t: Traductor) {
   if (!servicioId) return [];
   try {
     const supabase = await createClient();
@@ -78,7 +80,7 @@ async function cargarHorarios(negocioId: string, staffId: string, servicioId: st
       for (const sl of r.data ?? []) {
         if (!sl.disponible || new Date(sl.hora_inicio).getTime() <= ahora) continue;
         const f = fechaISO(sl.hora_inicio, tz);
-        out.push({ dia: i === 0 ? "HOY" : i === 1 ? "MAÑ" : `${f.slice(8)}/${f.slice(5, 7)}`, hora: hora(sl.hora_inicio, tz) });
+        out.push({ dia: i === 0 ? t("prof.hoy") : i === 1 ? t("prof.man") : `${f.slice(8)}/${f.slice(5, 7)}`, hora: hora(sl.hora_inicio, tz) });
       }
     });
     return out.slice(0, 8);
@@ -91,16 +93,18 @@ export async function generateMetadata(
   props: PageProps<"/negocio/[slug]/profesional/[staffId]">
 ): Promise<Metadata> {
   const { slug, staffId } = await props.params;
+  const t = await obtenerT();
   const datos = await cargarProfesional(slug, staffId);
-  if (!datos) return { title: "Profesional no disponible" };
+  if (!datos) return { title: t("prof.no_disponible") };
   return {
     title: `${datos.profesional.nombre} · ${datos.negocio.nombre}`,
-    description: `Reserva con ${datos.profesional.nombre} en ${datos.negocio.nombre}.`,
+    description: t("prof.desc", { nombre: datos.profesional.nombre, negocio: datos.negocio.nombre }),
   };
 }
 
 export default async function ProfesionalPage(props: PageProps<"/negocio/[slug]/profesional/[staffId]">) {
   const { slug, staffId } = await props.params;
+  const t = await obtenerT();
   const datos = await cargarProfesional(slug, staffId);
   if (!datos) notFound();
 
@@ -108,7 +112,7 @@ export default async function ProfesionalPage(props: PageProps<"/negocio/[slug]/
   const [perfilR, resenasR, horarios] = await Promise.all([
     obtenerPerfilProfesional(negocio.id, staffId),
     listarResenasProfesional(negocio.id, staffId, { limite: TAM_PAGINA_RESENAS, offset: 0 }),
-    cargarHorarios(negocio.id, staffId, servicios[0]?.id),
+    cargarHorarios(negocio.id, staffId, servicios[0]?.id, t),
   ]);
   const perfil = perfilR.ok ? perfilR.data : null;
   const resenas = resenasR.ok ? resenasR.data : [];
@@ -136,7 +140,7 @@ export default async function ProfesionalPage(props: PageProps<"/negocio/[slug]/
           />
           <Link
             href={`/negocio/${negocio.slug}`}
-            aria-label={`Volver a ${negocio.nombre}`}
+            aria-label={t("prof.volver_a", { nombre: negocio.nombre })}
             className="sn-iconbtn absolute top-2 left-2 border-2 border-ink bg-paper text-ink"
           >
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true">
@@ -148,7 +152,7 @@ export default async function ProfesionalPage(props: PageProps<"/negocio/[slug]/
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 px-4 pt-4">
           {tier ? <Tier level={tier} /> : null}
           <Meta>
-            {profesional.especialidad ?? "Profesional"} · {negocio.nombre}
+            {profesional.especialidad ?? t("prof.profesional")} · {negocio.nombre}
             {perfil?.negocio.ciudad ? ` · ${perfil.negocio.ciudad}` : ""}
           </Meta>
         </div>
@@ -156,15 +160,15 @@ export default async function ProfesionalPage(props: PageProps<"/negocio/[slug]/
 
         <div className="sn-gridcols grid-cols-3 border-b-2 border-line">
           <div className="min-w-0">
-            <Meta>Cortes</Meta>
+            <Meta>{t("prof.cortes")}</Meta>
             <div className="sn-fig text-[22px]">{perfil ? perfil.cortes.toLocaleString("es-CO") : "—"}</div>
           </div>
           <div className="min-w-0">
-            <Meta>Años</Meta>
+            <Meta>{t("prof.anios")}</Meta>
             <div className="sn-fig text-[22px]">{perfil ? perfil.anios : "—"}</div>
           </div>
           <div className="min-w-0">
-            <Meta>Nota · {totalResenas}</Meta>
+            <Meta>{t("prof.nota", { n: totalResenas })}</Meta>
             <div className="sn-fig text-[22px]">{notaTxt}</div>
           </div>
         </div>
@@ -172,16 +176,16 @@ export default async function ProfesionalPage(props: PageProps<"/negocio/[slug]/
         {perfil?.bio ? <p className="body m-0 px-4 py-4 break-words">{perfil.bio}</p> : null}
 
         <div className="p-sec">
-          <Num>01 / Próximos horarios</Num>
+          <Num>{t("prof.sec_horarios")}</Num>
           {puedeReservar ? (
             <Link href={reservarHref} className="sn-label no-underline">
-              AGENDA ↗
+              {t("prof.agenda")}
             </Link>
           ) : null}
         </div>
         {horarios.length === 0 ? (
           <div className="mx-4 mb-4 border-2 border-dashed border-line p-4 text-center">
-            <Meta>Sin horarios libres en los próximos días. Revisa la agenda completa.</Meta>
+            <Meta>{t("prof.sin_horarios")}</Meta>
           </div>
         ) : (
           <div className="p-chips">
@@ -194,23 +198,23 @@ export default async function ProfesionalPage(props: PageProps<"/negocio/[slug]/
         )}
 
         <div className="p-sec">
-          <Num>02 / Portafolio</Num>
+          <Num>{t("prof.sec_portafolio")}</Num>
           <Meta>
-            {portafolio.length} {portafolio.length === 1 ? "trabajo" : "trabajos"}
+            {portafolio.length === 1 ? t("prof.n_trabajo", { n: portafolio.length }) : t("prof.n_trabajos", { n: portafolio.length })}
           </Meta>
         </div>
         {portafolio.length === 0 ? (
           <div className="mx-4 mb-4 border-2 border-dashed border-line p-6 text-center">
-            <Meta>Todavía no hay trabajos compartidos por clientes.</Meta>
+            <Meta>{t("prof.sin_portafolio")}</Meta>
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-0.5 px-4 pb-4">
             {portafolio.map((f) => (
               <div key={f.foto_id} className="relative aspect-square min-w-0 overflow-hidden border-2 border-line">
-                <Photo src={f.url} alt={`Trabajo de ${profesional.nombre}`} className="h-full w-full grayscale" />
+                <Photo src={f.url} alt={t("prof.trabajo_de", { nombre: profesional.nombre })} className="h-full w-full grayscale" />
                 {f.momento ? (
                   <span className="sn-label absolute bottom-0 left-0 bg-ink px-1.5 py-0.5 text-[10px] text-paper">
-                    {f.momento === "ANTES" ? "ANTES" : "DESPUÉS"}
+                    {f.momento === "ANTES" ? t("prof.antes") : t("prof.despues")}
                   </span>
                 ) : null}
               </div>
@@ -224,7 +228,7 @@ export default async function ProfesionalPage(props: PageProps<"/negocio/[slug]/
         ) : null}
 
         <div className="p-sec">
-          <Num>03 / Reseñas de {primerNombre}</Num>
+          <Num>{t("prof.sec_resenas", { nombre: primerNombre })}</Num>
           <Meta>{totalResenas}</Meta>
         </div>
         {totalResenas > 0 && nota !== null && dist ? (
@@ -232,7 +236,7 @@ export default async function ProfesionalPage(props: PageProps<"/negocio/[slug]/
             <div>
               <div className="sn-fig text-[40px]">{notaTxt}</div>
               <Stars value={nota} />
-              <Meta className="block">de 5 · {totalResenas} reseñas</Meta>
+              <Meta className="block">{t("prof.de_5", { n: totalResenas })}</Meta>
             </div>
             <div className="flex min-w-[180px] flex-1 flex-col gap-1">
               {(["5", "4", "3", "2", "1"] as const).map((k) => (
@@ -250,11 +254,11 @@ export default async function ProfesionalPage(props: PageProps<"/negocio/[slug]/
         <ResenasLista slug={negocio.slug} staffId={profesional.staff_id} iniciales={resenas} total={totalResenas || resenas.length} />
 
         <div className="p-sec">
-          <Num>04 / Servicios que realiza</Num>
+          <Num>{t("prof.sec_servicios")}</Num>
         </div>
         {servicios.length === 0 ? (
           <div className="mx-4 mb-4 border-2 border-dashed border-line p-6 text-center">
-            <Meta>Este profesional todavía no tiene servicios publicados.</Meta>
+            <Meta>{t("prof.sin_servicios")}</Meta>
           </div>
         ) : (
           <ul className="m-0 mb-4 list-none border-t-2 border-line p-0">
@@ -277,20 +281,20 @@ export default async function ProfesionalPage(props: PageProps<"/negocio/[slug]/
       <div className="p-foot flex items-center gap-3">
         {desde !== null ? (
           <div className="shrink-0">
-            <Meta className="block">Desde</Meta>
+            <Meta className="block">{t("prof.desde")}</Meta>
             <span className="sn-price">{formatCOP(desde)}</span>
           </div>
         ) : null}
         {puedeReservar ? (
           <Link href={reservarHref} className="sn-btn sn-btn--primary min-w-0 flex-1">
-            <span className="min-w-0 break-words">Reservar con {primerNombre}</span>
+            <span className="min-w-0 break-words">{t("prof.reservar_con", { nombre: primerNombre })}</span>
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true">
               <path d="M7 17 17 7M7 7h10v10" />
             </svg>
           </Link>
         ) : (
           <span className="sn-btn sn-btn--secondary min-w-0 flex-1 justify-center" aria-disabled="true">
-            Sin servicios para reservar
+            {t("prof.sin_servicios_reservar")}
           </span>
         )}
       </div>

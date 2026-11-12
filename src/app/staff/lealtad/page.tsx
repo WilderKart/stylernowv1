@@ -35,7 +35,7 @@ export default async function StaffLealtadPage() {
           </ul>
         ) : (
           <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-[12.5px] text-text-faint">
-            Todavía no registraste ningún Cliente referido. Pedile a tu Barbería el link para registrarlos.
+            Todavía no registraste ningún Cliente referido. Pídele a tu Barbería el link para registrarlos.
           </p>
         )}
       </section>

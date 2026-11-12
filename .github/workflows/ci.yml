@@ -1,0 +1,52 @@
+name: CI
+
+# Cada PR y cada push a main: tipos, lint, cobertura de autorización, pruebas unitarias y build.
+# No usa secretos reales: el build recibe valores de relleno (la app no se conecta a nada durante `next build`).
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ejemplo.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: anon-de-relleno
+      SUPABASE_SECRET_KEY: secreta-de-relleno
+      NEXT_PUBLIC_SITE_URL: https://ejemplo.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Tipos
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Cobertura de autorización (rutas privadas con guardia explícita)
+        run: npm run check:auth
+      - name: Pruebas unitarias
+        run: npm test
+      - name: Build
+        run: npm run build
+
+  auditoria-dependencias:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Solo avisa (no bloquea): el hallazgo conocido de `uuid` (vía exceljs) es moderado.
+      - run: npm audit --omit=dev --audit-level=high

@@ -2,23 +2,25 @@ import { Num, Poster } from "@/components/brutal";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
+import { obtenerT } from "@/lib/i18n/servidor";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const t = await obtenerT();
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
       <main className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center gap-3 p-4">
-        <Num>00 / 404</Num>
+        <Num>{t("nf.codigo")}</Num>
         <Poster as="h1" size={2} className="break-words">
-          Aquí no
+          {t("nf.1")}
           <br />
-          <span className="sn-hot">hay nada.</span>
+          <span className="sn-hot">{t("nf.2")}</span>
         </Poster>
         <p className="body text-text-muted">
-          Esta página no existe o se movió. El link puede estar roto o el negocio que buscabas ya no está disponible.
+          {t("nf.txt")}
         </p>
         <Button asChild variant="secondary" size="lg" className="w-full justify-between">
           <Link href="/">
-            <span>Volver al inicio</span>
+            <span>{t("err.volver_inicio")}</span>
             <ArrowUpRight className="size-[18px]" aria-hidden />
           </Link>
         </Button>

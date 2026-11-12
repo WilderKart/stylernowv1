@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { useT } from "@/lib/i18n/proveedor";
 
 const CLAVE = "stylernow_splash_visto";
 const DURACION_MS = 1600;
@@ -10,6 +11,7 @@ const DURACION_MS = 1600;
  * bloqueado (navegación privada): en ese caso no se muestra, para no repetirlo en cada carga.
  */
 export function SplashArranque() {
+  const t = useT();
   const [visible, setVisible] = useState(false);
   const [, iniciar] = useTransition();
 
@@ -25,8 +27,8 @@ export function SplashArranque() {
     }
     if (!primera) return;
     iniciar(() => setVisible(true));
-    const t = window.setTimeout(() => setVisible(false), DURACION_MS);
-    return () => window.clearTimeout(t);
+    const temporizador = window.setTimeout(() => setVisible(false), DURACION_MS);
+    return () => window.clearTimeout(temporizador);
   }, [iniciar]);
 
   if (!visible) return null;
@@ -71,14 +73,14 @@ export function SplashArranque() {
         <div className="sn-splash-marq inline-flex">
           {[0, 1].map((i) => (
             <span key={i} className="sn-label pr-6">
-              Reserva · Corta · Repite · Reserva · Corta · Repite · Reserva · Corta · Repite ·
+              {t("splash.marquee")}
             </span>
           ))}
         </div>
       </div>
 
       <div className="flex items-center justify-between px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <span aria-label="Cargando" role="status" className="flex gap-1.5">
+        <span aria-label={t("splash.cargando")} role="status" className="flex gap-1.5">
           <span className="sn-splash-punto size-2.5 bg-signal" />
           <span className="sn-splash-punto size-2.5 bg-signal [animation-delay:.24s]" />
           <span className="sn-splash-punto size-2.5 bg-signal [animation-delay:.48s]" />

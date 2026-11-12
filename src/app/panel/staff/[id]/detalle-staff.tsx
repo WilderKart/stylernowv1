@@ -79,7 +79,7 @@ export function DetalleStaff({
     ejecutar(() => revocarGuardian(staff.vinculo_id!));
   }
   async function onSuspender() {
-    const motivo = prompt(`¿Por qué suspendés a ${staff.nombre}? (opcional)`) ?? undefined;
+    const motivo = prompt(`¿Por qué suspendes a ${staff.nombre}? (opcional)`) ?? undefined;
     ejecutar(() => suspenderStaff(staff.vinculo_id!, motivo));
   }
   async function onReactivar() {
@@ -159,7 +159,7 @@ export function DetalleStaff({
         </dl>
         {permisos.suspenderStaff ? (
           <p className="mt-3 text-[11px] text-text-faint">
-            Configurar comisiones vive en el módulo de Finanzas (2.10) — acá solo se muestra.
+            Configurar comisiones vive en el módulo de Finanzas (2.10) — aquí solo se muestra.
           </p>
         ) : null}
       </Card>
@@ -221,7 +221,7 @@ export function DetalleStaff({
       {suspendido ? (
         <Card className="mb-6 border-danger/30 bg-danger-soft">
           <p className="text-[12.5px] text-text-muted">
-            Este Staff no puede acceder ni operar hasta que lo reactivés. Su historial y su
+            Este Staff no puede acceder ni operar hasta que lo reactives. Su historial y su
             Nivel se conservan intactos.
           </p>
         </Card>

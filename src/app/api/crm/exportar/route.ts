@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
   const contexto = await resolverContexto();
   if (!contexto.userId) return new Response("No autorizado", { status: 401 });
   if (!contexto.permisos.exportarClientes || !contexto.negocioId) {
-    return new Response("No tenés permiso para exportar clientes.", { status: 403 });
+    return new Response("No tienes permiso para exportar clientes.", { status: 403 });
   }
 
   const supabase = await createClient();

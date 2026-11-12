@@ -5,7 +5,7 @@ import type { Permisos, Rol } from "./tipos";
  * maestra de `StylerNow_Project_Bible_V3/03-Business-Rules/01_Roles.md` (14
  * módulos). `docs/PERMISSION_REGISTRY.md` se GENERA desde este archivo — no
  * se edita a mano. Un permiso nuevo se agrega primero en `01_Roles.md`, y
- * después acá; nunca al revés.
+ * después aquí; nunca al revés.
  *
  * `alcance` refleja la leyenda del documento fuente:
  *   "ninguno" = ❌ · "propio" = 🔒 · "sede" = 🏢 · "negocio" = 🌐 · "total" = 👑
@@ -14,7 +14,7 @@ import type { Permisos, Rol } from "./tipos";
  * porque son específicas de la implementación (marcar sede principal,
  * combos, asignación Staff↔Servicio) — ya documentadas como "mismo criterio
  * que Cambiar precio: exclusivo Barbería" en comentarios existentes del
- * código (`panel/servicios/page.tsx`, tasklist). Se registran acá con ese
+ * código (`panel/servicios/page.tsx`, tasklist). Se registran aquí con ese
  * mismo alcance para no perder la trazabilidad.
  */
 

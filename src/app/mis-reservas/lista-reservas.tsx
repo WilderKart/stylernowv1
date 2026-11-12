@@ -3,6 +3,7 @@
 import { Segmented } from "@/components/brutal";
 import { diaYMes, EstadoReservaStatus, horaCorta, TicketCita, type EstadoReserva } from "@/app/lealtad/ui-cliente";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n/proveedor";
 import { formatCOP } from "@/lib/utils";
 import Link from "next/link";
 import { useState } from "react";
@@ -20,14 +21,15 @@ export interface ReservaItem {
 
 type Pestana = "proximas" | "pasadas" | "canceladas";
 
-const VACIO: Record<Pestana, string> = {
-  proximas: "No tienes citas próximas.",
-  pasadas: "Aún no tienes citas pasadas.",
-  canceladas: "No tienes citas canceladas.",
-};
+const VACIO = {
+  proximas: "citas.vacio_proximas",
+  pasadas: "citas.vacio_pasadas",
+  canceladas: "citas.vacio_canceladas",
+} as const;
 
 /** Separa por momento y estado en el render (el servidor entrega la fecha actual como `ahora`). */
 export function ListaReservas({ reservas, ahora }: { reservas: ReservaItem[]; ahora: number }) {
+  const t = useT();
   const [pestana, setPestana] = useState<Pestana>("proximas");
 
   const esProxima = (r: ReservaItem) =>
@@ -49,14 +51,14 @@ export function ListaReservas({ reservas, ahora }: { reservas: ReservaItem[]; ah
     <>
       <div className="px-4 pb-4">
         <Segmented<Pestana>
-          aria-label="Filtrar citas"
+          aria-label={t("citas.filtrar")}
           className="flex [&>button]:min-w-0 [&>button]:flex-1"
           value={pestana}
           onChange={setPestana}
           options={[
-            { value: "proximas", label: `Próximas${grupos.proximas.length ? ` · ${grupos.proximas.length}` : ""}` },
-            { value: "pasadas", label: "Pasadas" },
-            { value: "canceladas", label: "Canceladas" },
+            { value: "proximas", label: `${t("citas.proximas")}${grupos.proximas.length ? ` · ${grupos.proximas.length}` : ""}` },
+            { value: "pasadas", label: t("citas.pasadas") },
+            { value: "canceladas", label: t("citas.canceladas") },
           ]}
         />
       </div>
@@ -64,10 +66,10 @@ export function ListaReservas({ reservas, ahora }: { reservas: ReservaItem[]; ah
       {visibles.length === 0 ? (
         <div className="px-4 pb-4">
           <div className="sn-empty">
-            <p className="section">{VACIO[pestana]}</p>
+            <p className="section">{t(VACIO[pestana])}</p>
             {pestana === "proximas" ? (
               <Button asChild>
-                <Link href="/">Explorar negocios</Link>
+                <Link href="/">{t("citas.explorar")}</Link>
               </Button>
             ) : null}
           </div>
@@ -83,7 +85,7 @@ export function ListaReservas({ reservas, ahora }: { reservas: ReservaItem[]; ah
                   dia={dm.dia}
                   mes={dm.mes}
                   estado={<EstadoReservaStatus estado={r.estado} />}
-                  titulo={r.servicios || "Servicio"}
+                  titulo={r.servicios || t("citas.servicio")}
                   lineas={[
                     `${r.profesional ? `${r.profesional} · ` : ""}${horaCorta(r.horaInicio, r.zonaHoraria)} · ${r.negocio}`,
                     formatCOP(r.montoTotal),

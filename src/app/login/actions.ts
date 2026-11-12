@@ -14,7 +14,7 @@ import { headers } from "next/headers";
  * Dominio de la request actual, no un valor fijo de env: Vercel sirve este proyecto
  * bajo más de un alias (el corto y el largo con el hash del team), y el link del
  * correo tiene que volver exactamente por donde entró el usuario. Cualquier alias
- * que se use acá debe estar en Supabase → Authentication → URL Configuration →
+ * que se use aquí debe estar en Supabase → Authentication → URL Configuration →
  * Redirect URLs, si no Supabase rechaza el `emailRedirectTo`.
  */
 async function origenActual() {
@@ -26,13 +26,13 @@ async function origenActual() {
 
 export async function enviarCodigo(email: string, siguiente: string, aceptaTerminos: boolean) {
   // Zero-trust: el checkbox del formulario es solo la primera barrera. Sin esta
-  // validación acá, cualquiera podía llamar a esta action directo (sin pasar por
+  // validación aquí, cualquiera podía llamar a esta action directo (sin pasar por
   // la UI) y saltarse el consentimiento exigido por 06-Security/04_Compliance_
   // Colombia.md.
   if (!aceptaTerminos) {
     return {
       ok: false as const,
-      error: "Debés aceptar los Términos y la Política de Tratamiento de Datos.",
+      error: "Debes aceptar los Términos y la Política de Tratamiento de Datos.",
     };
   }
 
@@ -52,7 +52,7 @@ export async function enviarCodigo(email: string, siguiente: string, aceptaTermi
     email,
     options: {
       shouldCreateUser: true,
-      // El link "Iniciar sesión" del correo vuelve acá en vez de a la home directo,
+      // El link "Iniciar sesión" del correo vuelve aquí en vez de a la home directo,
       // para que el intercambio de código realmente cree la sesión (src/app/auth/callback).
       emailRedirectTo: `${await origenActual()}/auth/callback?next=${encodeURIComponent(siguiente)}`,
     },
@@ -125,11 +125,11 @@ export async function crearContrasena(password: string) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false as const, error: "Sesión inválida — volvé a iniciar sesión." };
+  if (!user) return { ok: false as const, error: "Sesión inválida — vuelve a iniciar sesión." };
 
   const { data: perfil } = await supabase.from("perfil").select("password_establecida").eq("id", user.id).single();
   if (perfil?.password_establecida) {
-    return { ok: false as const, error: "Ya tenés una contraseña — usá 'Cambiar contraseña' e ingresá la actual." };
+    return { ok: false as const, error: "Ya tienes una contraseña — usa 'Cambiar contraseña' e ingresa la actual." };
   }
 
   const validacion = await validarContrasenaNueva(user.id, password);
@@ -145,7 +145,7 @@ export async function crearContrasena(password: string) {
 }
 
 /**
- * Fase D — el rol NUNCA se decide acá ni en Google: `login()` solo devuelve
+ * Fase D — el rol NUNCA se decide aquí ni en Google: `login()` solo devuelve
  * la URL de Google, el intercambio real pasa por `/auth/callback` (mismo
  * camino que magic link/recovery), y el rol se deriva después, igual que con
  * OTP o password. `siguiente` viaja como `next` en el `redirectTo` para que
@@ -199,7 +199,7 @@ export async function restablecerContrasena(password: string) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false as const, error: "El enlace de recuperación expiró — solicitá uno nuevo." };
+  if (!user) return { ok: false as const, error: "El enlace de recuperación expiró — solicita uno nuevo." };
 
   const validacion = await validarContrasenaNueva(user.id, password);
   if (!validacion.ok) return validacion;

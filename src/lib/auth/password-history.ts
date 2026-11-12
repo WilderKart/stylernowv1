@@ -10,7 +10,7 @@ const scryptAsync = promisify(scrypt);
  * `password_history` guarda SOLO hashes (nunca la contraseña) y existe
  * exclusivamente para comparar "no reutilizar las últimas N" — Supabase/
  * GoTrue no expone el hash real que usa para autenticar, así que este es un
- * hash independiente, calculado acá, que nunca se usa para loguear a nadie.
+ * hash independiente, calculado aquí, que nunca se usa para loguear a nadie.
  * Tabla con RLS deny-by-default (migración 081) — se accede solo vía
  * `createAdminClient()`, igual que `evento_auditoria`.
  */

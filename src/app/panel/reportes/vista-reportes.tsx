@@ -267,7 +267,7 @@ function SeccionResenas({ resenasIniciales }: { resenasIniciales: ResenaRecibida
   }
 
   async function onReportar(resenaId: string) {
-    const motivo = prompt("¿Por qué querés reportar esta reseña? (lenguaje abusivo, contenido falso, etc.)");
+    const motivo = prompt("¿Por qué quieres reportar esta reseña? (lenguaje abusivo, contenido falso, etc.)");
     if (!motivo) return;
     setError(null);
     const res = await reportarResena(resenaId, motivo);
@@ -302,7 +302,7 @@ function SeccionResenas({ resenasIniciales }: { resenasIniciales: ResenaRecibida
                   <textarea
                     value={texto}
                     onChange={(e) => setTexto(e.target.value)}
-                    placeholder="Escribí tu respuesta pública..."
+                    placeholder="Escribe tu respuesta pública..."
                     className="min-h-[70px] rounded-xl border border-border bg-bg p-2.5 text-[12.5px] text-text outline-none focus:border-accent/60"
                   />
                   <div className="flex gap-2">

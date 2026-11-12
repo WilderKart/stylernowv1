@@ -6,10 +6,15 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { listarMisFavoritos } from "./actions";
+import { obtenerT } from "@/lib/i18n/servidor";
 
-export const metadata = { title: "Mis Favoritos" };
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("fav.meta") };
+}
 
 export default async function FavoritosPage() {
+  const t = await obtenerT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -20,25 +25,25 @@ export default async function FavoritosPage() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom))]">
-      <Header autenticado etiqueta="04 / Favoritos" />
+      <Header autenticado etiqueta={t("fav.etiqueta")} />
       <main className="mx-auto w-full max-w-5xl flex-1">
         <h1 className="poster-1 px-4 pb-4 pt-3 sm:px-6">
-          Tus
+          {t("fav.t1")}
           <br />
-          <span className="sn-hot">fijos.</span>
+          <span className="sn-hot">{t("fav.t2")}</span>
         </h1>
         <div className="p-sec sm:!px-6">
-          <Num>01 / Negocios</Num>
+          <Num>{t("fav.sec")}</Num>
         </div>
         {negocios.length === 0 ? (
           <div className="px-4 sm:px-6">
             <EmptyState
               big="0"
-              title="Todavía no guardaste ningún negocio"
-              hint="Tocá el corazón en el perfil de un negocio para guardarlo acá y encontrarlo rápido después."
+              title={t("fav.vacio")}
+              hint={t("fav.vacio_hint")}
               action={
                 <Link href="/" className="sn-chip !min-h-12 no-underline">
-                  Explorar negocios ↗
+                  {t("fav.explorar")}
                 </Link>
               }
             />

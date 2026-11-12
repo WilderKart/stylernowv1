@@ -25,7 +25,7 @@ export default async function ConsumoPage() {
       <BarraSuperior titulo="Consumo por Servicio" volverA="/panel/inventario" />
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-6 sm:px-10">
         <p className="mb-4 text-[12.5px] text-text-muted">
-          Definí qué Productos consume automáticamente cada Servicio al completarse (ej. “Corte”
+          Define qué Productos consume automáticamente cada Servicio al completarse (ej. “Corte”
           gasta 5 ml de “Shampoo”) — el stock se descuenta solo al cerrar la venta en Caja.
         </p>
         <EditorConsumo

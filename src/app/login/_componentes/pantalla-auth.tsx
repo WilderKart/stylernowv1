@@ -1,4 +1,5 @@
 import { Num, Poster } from "@/components/brutal";
+import { useT } from "@/lib/i18n/proveedor";
 import { cn } from "@/lib/utils";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
@@ -28,16 +29,17 @@ export function PantallaAuth({
   ancho?: string;
   children: React.ReactNode;
 }) {
+  const t = useT();
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
       <main className={cn("mx-auto flex w-full flex-1 flex-col", ancho)}>
         <div className="sticky top-0 z-[3] flex min-h-[52px] items-center justify-between gap-2 border-b border-[var(--grid)] bg-bg py-1 pr-2 pl-1">
           {onVolver ? (
-            <button type="button" onClick={onVolver} className="sn-iconbtn" aria-label="Volver">
+            <button type="button" onClick={onVolver} className="sn-iconbtn" aria-label={t("comun.volver")}>
               <ChevronLeft />
             </button>
           ) : (
-            <Link href={volver ?? "/"} className="sn-iconbtn" aria-label="Volver">
+            <Link href={volver ?? "/"} className="sn-iconbtn" aria-label={t("comun.volver")}>
               <ChevronLeft />
             </Link>
           )}

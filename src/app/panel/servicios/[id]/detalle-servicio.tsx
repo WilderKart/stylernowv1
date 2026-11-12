@@ -73,13 +73,13 @@ export function DetalleServicio({
               </p>
               <p className="mt-1 text-[12px] text-text-muted">
                 El motor de reservas exige que al menos un Staff esté asignado explícitamente —
-                asigná a alguien de la lista de abajo para que el servicio sea reservable.
+                asigna a alguien de la lista de abajo para que el servicio sea reservable.
               </p>
             </Card>
           ) : null}
           {staffAsignable.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-border px-4 py-6 text-center text-[12.5px] text-text-faint">
-              Todavía no tenés Staff activo para asignar a este servicio.
+              Todavía no tienes Staff activo para asignar a este servicio.
             </p>
           ) : (
             <ul className="flex flex-col gap-2">

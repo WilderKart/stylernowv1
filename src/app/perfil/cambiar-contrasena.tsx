@@ -5,6 +5,7 @@ import { ErrorAviso } from "@/app/lealtad/ui-cliente";
 import { Panel } from "@/components/brutal";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { useT } from "@/lib/i18n/proveedor";
 import { toast } from "sonner";
 import { cambiarContrasena, crearContrasena } from "@/app/login/actions";
 
@@ -14,6 +15,7 @@ import { cambiarContrasena, crearContrasena } from "@/app/login/actions";
  * pide "actual", porque no existe una) en vez de `cambiarContrasena()`.
  */
 export function CambiarContrasena({ passwordEstablecida }: { passwordEstablecida: boolean }) {
+  const t = useT();
   const [abierto, setAbierto] = useState(false);
   const [actual, setActual] = useState("");
   const [nueva, setNueva] = useState("");
@@ -24,7 +26,7 @@ export function CambiarContrasena({ passwordEstablecida }: { passwordEstablecida
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (nueva !== confirmar) {
-      setError("Las contraseñas nuevas no coinciden.");
+      setError(t("pw.no_coinciden"));
       return;
     }
     setLoading(true);
@@ -35,7 +37,7 @@ export function CambiarContrasena({ passwordEstablecida }: { passwordEstablecida
       setError(res.error);
       return;
     }
-    toast.success(passwordEstablecida ? "Contraseña actualizada." : "Contraseña creada — ya puedes entrar con ella.");
+    toast.success(passwordEstablecida ? t("pw.actualizada") : t("pw.creada"));
     setAbierto(false);
     setActual("");
     setNueva("");
@@ -50,11 +52,11 @@ export function CambiarContrasena({ passwordEstablecida }: { passwordEstablecida
           onClick={() => setAbierto(true)}
           className="flex min-h-14 w-full items-center justify-between gap-3 p-4 text-left"
         >
-          <span className="section">{passwordEstablecida ? "Cambiar contraseña" : "Crear contraseña"}</span>
-          <span className="sn-label">Editar</span>
+          <span className="section">{passwordEstablecida ? t("pw.cambiar") : t("pw.crear")}</span>
+          <span className="sn-label">{t("pw.editar")}</span>
         </button>
         {!passwordEstablecida ? (
-          <p className="sn-help px-4 pb-4">Entraste con Google. Crea una contraseña para poder entrar también sin ella.</p>
+          <p className="sn-help px-4 pb-4">{t("pw.google")}</p>
         ) : null}
       </Panel>
     );
@@ -63,10 +65,10 @@ export function CambiarContrasena({ passwordEstablecida }: { passwordEstablecida
   return (
     <Panel className="p-4">
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <h3 className="section">{passwordEstablecida ? "Cambiar contraseña" : "Crear contraseña"}</h3>
+        <h3 className="section">{passwordEstablecida ? t("pw.cambiar") : t("pw.crear")}</h3>
         {passwordEstablecida ? (
           <Input
-            label="Contraseña actual"
+            label={t("pw.actual")}
             type="password"
             required
             autoComplete="current-password"
@@ -75,7 +77,7 @@ export function CambiarContrasena({ passwordEstablecida }: { passwordEstablecida
           />
         ) : null}
         <Input
-          label="Contraseña nueva"
+          label={t("pw.nueva")}
           type="password"
           required
           autoComplete="new-password"
@@ -83,21 +85,21 @@ export function CambiarContrasena({ passwordEstablecida }: { passwordEstablecida
           onChange={(e) => setNueva(e.target.value)}
         />
         <Input
-          label="Confirmar contraseña nueva"
+          label={t("pw.confirmar_nueva")}
           type="password"
           required
           autoComplete="new-password"
           value={confirmar}
           onChange={(e) => setConfirmar(e.target.value)}
         />
-        <p className="sn-help">Mínimo 12 caracteres, con mayúscula, minúscula, número y símbolo.</p>
+        <p className="sn-help">{t("pw.reglas")}</p>
         {error ? <ErrorAviso>{error}</ErrorAviso> : null}
         <div className="flex flex-wrap gap-3">
           <Button type="button" variant="secondary" onClick={() => setAbierto(false)}>
-            Cancelar
+            {t("comun.cancelar")}
           </Button>
           <Button type="submit" loading={loading} className="min-w-0 flex-1">
-            Guardar
+            {t("comun.guardar")}
           </Button>
         </div>
       </form>

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useT } from "@/lib/i18n/proveedor";
 
 /** Copiar el código y compartir la invitación. Solo usa el código (que ya llegó del servidor). */
 export function CopiarInvitar({ codigo }: { codigo: string }) {
+  const t = useT();
   const [copiado, setCopiado] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
 
@@ -14,19 +16,19 @@ export function CopiarInvitar({ codigo }: { codigo: string }) {
       setAviso(null);
       setTimeout(() => setCopiado(false), 2000);
     } catch {
-      setAviso("No pudimos copiar. Selecciona el código y cópialo a mano.");
+      setAviso(t("ref.err_copiar"));
     }
   }
 
   async function compartir() {
-    const texto = `Usa mi código ${codigo} en StylerNow y los dos ganamos saldo cuando completes tu primera cita.`;
+    const texto = t("ref.texto_invitar", { codigo });
     const url = typeof window !== "undefined" ? window.location.origin : "";
     try {
       if (navigator.share) {
         await navigator.share({ title: "StylerNow", text: texto, url });
       } else {
         await navigator.clipboard.writeText(`${texto} ${url}`);
-        setAviso("Invitación copiada. Pégala en tu chat.");
+        setAviso(t("ref.copiada"));
       }
     } catch {
       /* el usuario canceló */
@@ -43,11 +45,11 @@ export function CopiarInvitar({ codigo }: { codigo: string }) {
           className={`sn-btn ${copiado ? "sn-btn--primary" : "sn-btn--secondary"}`}
           style={copiado ? { background: "var(--success)" } : undefined}
         >
-          <span aria-live="polite">{copiado ? "Copiado" : "Copiar"}</span>
+          <span aria-live="polite">{copiado ? t("ref.copiado") : t("ref.copiar")}</span>
         </button>
       </div>
       <button type="button" onClick={compartir} className="sn-btn sn-btn--primary sn-btn--block">
-        <span>Compartir invitación</span>
+        <span>{t("ref.compartir")}</span>
         <span aria-hidden>↗</span>
       </button>
       {aviso ? (

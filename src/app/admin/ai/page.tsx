@@ -23,7 +23,7 @@ export default async function AdminAiPage() {
       <h1 className="font-display mb-1 text-[22px] font-bold uppercase text-text">AI Center</h1>
       <p className="mb-6 text-[12px] text-text-faint">
         AI Pricing Engine, Cost Optimizer, paquetes de créditos y funciones por Plan — ADR-013. &quot;StylerNow nunca
-        subsidia IA&quot;: todo costo acá definido se cobra al Negocio en créditos.
+        subsidia IA&quot;: todo costo aquí definido se cobra al Negocio en créditos.
       </p>
       <VistaAiCenter
         accionesIniciales={acciones.ok ? acciones.data : []}

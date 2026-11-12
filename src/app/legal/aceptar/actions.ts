@@ -13,7 +13,7 @@ export async function aceptarPendientes(): Promise<{ ok: boolean; error?: string
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Tenés que iniciar sesión de nuevo." };
+  if (!user) return { ok: false, error: "Tienes que iniciar sesión de nuevo." };
 
   const { pendientesMateriales } = await registrarAceptacionLegal(supabase, user.id);
   await aceptarTextosLegales(

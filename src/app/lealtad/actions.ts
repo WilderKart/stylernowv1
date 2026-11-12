@@ -14,12 +14,12 @@ const MENSAJES_ERROR: Record<string, string> = {
   GIFT_CARD_NO_DISPONIBLE: "Esa Gift Card no está disponible para canjear.",
   GIFT_CARD_VENCIDA: "Esa Gift Card ya venció.",
   CODIGO_INVALIDO: "Ese código de referido no existe.",
-  NO_PUEDES_REFERIRTE_A_TI_MISMO: "No podés usar tu propio código de referido.",
+  NO_PUEDES_REFERIRTE_A_TI_MISMO: "No puedes usar tu propio código de referido.",
   YA_FUE_REFERIDO: "Tu cuenta ya fue registrada como referida antes.",
-  YA_PERTENECE_A_UNA_FAMILIA: "Ya pertenecés a un grupo familiar.",
+  YA_PERTENECE_A_UNA_FAMILIA: "Ya perteneces a un grupo familiar.",
   CLIENTE_YA_EN_UNA_FAMILIA: "Esa persona ya pertenece a otra familia.",
   LIMITE_MIEMBROS_ALCANZADO: "Tu grupo familiar ya llegó al límite de miembros.",
-  SALDO_INSUFICIENTE: "No tenés saldo suficiente en tu StylerWallet.",
+  SALDO_INSUFICIENTE: "No tienes saldo suficiente en tu StylerWallet.",
   MONTO_INVALIDO: "Monto inválido.",
 };
 

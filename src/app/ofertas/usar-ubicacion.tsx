@@ -3,16 +3,18 @@
 import { ErrorAviso } from "@/app/lealtad/ui-cliente";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useT } from "@/lib/i18n/proveedor";
 
 /** Pide la ubicación al navegador (solo para calcular distancias) y recarga la lista con lat/lng. */
 export function UsarUbicacion() {
   const router = useRouter();
+  const t = useT();
   const [buscando, setBuscando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function pedir() {
     if (!navigator.geolocation) {
-      setError("Tu navegador no permite usar la ubicación.");
+      setError(t("of.sin_ubic"));
       return;
     }
     setBuscando(true);
@@ -24,7 +26,7 @@ export function UsarUbicacion() {
       },
       () => {
         setBuscando(false);
-        setError("No pudimos obtener tu ubicación. Revisa el permiso del navegador.");
+        setError(t("of.err_ubic"));
       },
       { timeout: 10000, maximumAge: 300000 }
     );
@@ -33,7 +35,7 @@ export function UsarUbicacion() {
   return (
     <div className="flex flex-col gap-2 px-4 pb-3">
       <button type="button" onClick={pedir} disabled={buscando} className={`sn-btn sn-btn--secondary sn-btn--block ${buscando ? "is-loading" : ""}`}>
-        <span className="sn-btn__txt">Usar mi ubicación</span>
+        <span className="sn-btn__txt">{t("of.usar_ubic")}</span>
         <span aria-hidden>↗</span>
       </button>
       {error ? <ErrorAviso>{error}</ErrorAviso> : null}

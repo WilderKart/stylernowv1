@@ -27,7 +27,7 @@ export default async function InvitarStaffPage() {
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-6 sm:px-10">
         {!sedes || sedes.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-border px-4 py-10 text-center text-[12.5px] text-text-faint">
-            Necesitás al menos una sede operativa antes de invitar Staff.
+            Necesitas al menos una sede operativa antes de invitar Staff.
           </p>
         ) : (
           <FormularioInvitacion negocioId={contexto.negocioId!} sedes={sedes} />

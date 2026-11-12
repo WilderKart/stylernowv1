@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Wizard } from "./wizard";
 
-export const metadata = { title: "Registrá tu negocio" };
+export const metadata = { title: "Registra tu negocio" };
 
 export default async function OnboardingNegocioPage() {
   const supabase = await createClient();
@@ -15,7 +15,7 @@ export default async function OnboardingNegocioPage() {
 
   // Un Guardian ya pertenece a un negocio existente como Staff — este wizard
   // es exclusivo para dar de alta un negocio NUEVO como Barbería (ADR-006).
-  // Sin esta guarda, un Guardian sin negocio propio podría arrancar acá un
+  // Sin esta guarda, un Guardian sin negocio propio podría arrancar aquí un
   // registro nuevo como si fuera dueño, lo cual contradice su rol real.
   const contexto = await resolverContexto();
   if (contexto.rol === "GUARDIAN") redirect("/panel");

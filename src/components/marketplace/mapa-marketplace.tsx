@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/lib/i18n/proveedor";
 import { cn } from "@/lib/utils";
 import {
   AttributionControl,
@@ -57,6 +58,7 @@ export function MapaMarketplace({
   const yoRef = useRef<Marker | null>(null);
   const { seleccionado, seleccionar } = useSeleccionMapa();
   const [pines, setPines] = useState<Pin[]>([]);
+  const t = useT();
   const [zoom, setZoom] = useState(5);
   const [listo, setListo] = useState(false);
 
@@ -138,10 +140,10 @@ export function MapaMarketplace({
     const el = document.createElement("span");
     el.className = "sn-pin sn-pin--me";
     el.style.cssText = "position:relative;transform:none;display:block";
-    el.setAttribute("aria-label", "Tu ubicación");
+    el.setAttribute("aria-label", t("mapa.tu_ubicacion"));
     yoRef.current = new Marker({ element: el }).setLngLat([lngCentro, latCentro]).addTo(mapa);
     mapa.flyTo({ center: [lngCentro, latCentro], zoom: ZOOM_CERCA_DE_MI, essential: true });
-  }, [latCentro, lngCentro, listo]);
+  }, [latCentro, lngCentro, listo, t]);
 
   // 4) Al seleccionar un pin se centra suavemente en él.
   useEffect(() => {
@@ -162,12 +164,12 @@ export function MapaMarketplace({
         <div ref={contenedorRef} className="size-full" />
         {sinUbicacion ? (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-bg/90 px-6 text-center">
-            <p className="sn-label">Ninguno de estos negocios registró su ubicación todavía.</p>
+            <p className="sn-label">{t("mapa.sin_ubicacion")}</p>
           </div>
         ) : null}
       </div>
       {!seleccionado ? (
-        <p className="sn-meta border-2 border-t-0 border-border p-3">Toca un pin para ver el negocio</p>
+        <p className="sn-meta border-2 border-t-0 border-border p-3">{t("mapa.toca_pin")}</p>
       ) : null}
       {pines.map(({ n, el }) =>
         createPortal(

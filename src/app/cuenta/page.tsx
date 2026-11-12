@@ -2,11 +2,12 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { resumenEliminacion } from "@/lib/cliente/cuenta";
 import { VistaCuenta } from "./vista-cuenta";
+import { obtenerT } from "@/lib/i18n/servidor";
 
-export const metadata = {
-  title: "Datos y cuenta",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("cta.meta"), robots: { index: false, follow: false } };
+}
 
 export default async function CuentaPage() {
   // Guard de sesión en el servidor (defensa en profundidad además del proxy).

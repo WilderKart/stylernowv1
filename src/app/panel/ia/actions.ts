@@ -12,12 +12,12 @@ type Resultado<T = undefined> =
   | { ok: false; error: string };
 
 const MENSAJES_ERROR: Record<string, string> = {
-  NO_AUTORIZADO: "No tenés permiso sobre este negocio.",
+  NO_AUTORIZADO: "No tienes permiso sobre este negocio.",
   ACCION_IA_NO_CONFIGURADA: "Esa función de IA no está configurada.",
   FUNCION_NO_INCLUIDA_EN_PLAN: "Esa función no está incluida en tu Plan actual.",
-  CREDITOS_INSUFICIENTES: "No tenés créditos suficientes — comprá un paquete de recarga.",
+  CREDITOS_INSUFICIENTES: "No tienes créditos suficientes — compra un paquete de recarga.",
   PAQUETE_NO_DISPONIBLE_AUTOSERVICIO: "Ese paquete requiere cotización manual con el equipo de StylerNow.",
-  TIPO_NO_PERMITIDO_DESDE_NEGOCIO: "Ese tipo de prompt no se puede crear desde acá.",
+  TIPO_NO_PERMITIDO_DESDE_NEGOCIO: "Ese tipo de prompt no se puede crear desde aquí.",
 };
 function traducirError(mensaje: string) {
   const clave = Object.keys(MENSAJES_ERROR).find((k) => mensaje.includes(k));
@@ -96,7 +96,7 @@ export async function comprarPaqueteIa(negocioId: string, paqueteId: string): Pr
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, mensaje: "Iniciá sesión de nuevo." };
+  if (!user) return { ok: false, mensaje: "Inicia sesión de nuevo." };
 
   const { data: pago, error } = await supabase.rpc("comprar_paquete_creditos_ia", {
     p_negocio_id: negocioId,
@@ -125,7 +125,7 @@ export async function comprarPaqueteIa(negocioId: string, paqueteId: string): Pr
 
     return { ok: true, url: preferencia.url, pagoId: pago.id };
   } catch (e) {
-    return { ok: false, mensaje: e instanceof Error ? e.message : "La pasarela no respondió. Intentá de nuevo." };
+    return { ok: false, mensaje: e instanceof Error ? e.message : "La pasarela no respondió. Intenta de nuevo." };
   }
 }
 
@@ -255,7 +255,7 @@ export async function crearPromptIa(
 
 // ── ROI Dashboard IA — solo métricas reales, medibles hoy ───────────────────
 // Las métricas de atribución (clientes recuperados, reservas generadas por
-// IA, ventas atribuidas, tiempo ahorrado) NO se incluyen acá: no existe
+// IA, ventas atribuidas, tiempo ahorrado) NO se incluyen aquí: no existe
 // todavía ningún mecanismo de trazabilidad que vincule una sugerencia/acción
 // de IA con un resultado de negocio posterior (ver TECH_DEBT_REGISTER.md).
 // Se reportan honestamente como "no medible todavía" en la UI en vez de

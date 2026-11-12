@@ -2,10 +2,15 @@ import { Bloque, Fila, Filas, Pantalla, Top } from "@/app/lealtad/ui-cliente";
 import { createClient } from "@/lib/supabase/server";
 import { Gift, Search, Ticket } from "lucide-react";
 import { redirect } from "next/navigation";
+import { obtenerT } from "@/lib/i18n/servidor";
 
-export const metadata = { title: "Gift Cards" };
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("gc.meta") };
+}
 
 export default async function GiftCardsHubPage() {
+  const t = await obtenerT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -14,38 +19,37 @@ export default async function GiftCardsHubPage() {
 
   return (
     <Pantalla>
-      <Top titulo="03 / Gift cards" volverA="/lealtad" />
+      <Top titulo={t("gc.top")} volverA="/lealtad" />
       <h1 className="poster-3 break-words px-4 pt-4">
-        Regala <span className="sn-hot">estilo.</span>
+        {t("gc.regala_1")} <span className="sn-hot">{t("gc.regala_2")}</span>
       </h1>
       <p className="body-sm break-words p-4">
-        Regala una gift card digital para tu barbería favorita: para ti, para otra persona o por lote para tu empresa.
+        {t("gc.hub_txt")}
       </p>
 
       <Filas>
         <Fila
           icono={<Gift aria-hidden className="size-5" />}
-          titulo="Comprar una gift card"
-          meta="Elige el monto, para quién es y paga en segundos."
+          titulo={t("gc.comprar")}
+          meta={t("gc.comprar_meta")}
           href="/gift-cards/comprar"
         />
         <Fila
           icono={<Ticket aria-hidden className="size-5" />}
-          titulo="Mis gift cards"
-          meta="Las que compraste y las que te regalaron."
+          titulo={t("gc.mis")}
+          meta={t("gc.mis_meta")}
           href="/gift-cards/mis"
         />
         <Fila
           icono={<Search aria-hidden className="size-5" />}
-          titulo="Consultar una gift card"
-          meta="Verifica el saldo antes de presentarla en el local."
+          titulo={t("gc.consultar")}
+          meta={t("gc.consultar_meta")}
           href="/gift-cards/canjear"
         />
       </Filas>
 
-      <Bloque etiqueta="00 / Canje">
-        El canje de una gift card se hace únicamente en el local, cuando el staff la registra en el momento de tu visita. Por
-        seguridad, no se puede canjear a distancia.
+      <Bloque etiqueta={t("gc.canje")}>
+        {t("gc.canje_txt")}
       </Bloque>
     </Pantalla>
   );

@@ -6,22 +6,29 @@ import { formatCOP } from "@/lib/utils";
 import { Check, Clock, X } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { obtenerIdioma, obtenerT } from "@/lib/i18n/servidor";
+import type { Clave } from "@/lib/i18n/diccionario";
 
-export const metadata = { title: "Mis Gift Cards" };
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("gc.mis_meta_pag") };
+}
 
-const ESTADO: Record<string, { tone: "ok" | "warn" | "err" | "info"; etiqueta: string; icono: typeof Check }> = {
-  ACTIVA: { tone: "ok", etiqueta: "Lista para usar", icono: Check },
-  BLOQUEADA: { tone: "warn", etiqueta: "Procesando pago", icono: Clock },
-  CANJEADA: { tone: "info", etiqueta: "Ya canjeada", icono: Check },
-  VENCIDA: { tone: "err", etiqueta: "Vencida", icono: X },
+const ESTADO: Record<string, { tone: "ok" | "warn" | "err" | "info"; etiqueta: Clave; icono: typeof Check }> = {
+  ACTIVA: { tone: "ok", etiqueta: "gc.est_activa", icono: Check },
+  BLOQUEADA: { tone: "warn", etiqueta: "gc.est_bloqueada", icono: Clock },
+  CANJEADA: { tone: "info", etiqueta: "gc.est_canjeada", icono: Check },
+  VENCIDA: { tone: "err", etiqueta: "gc.est_vencida", icono: X },
 };
 
 /** El "día" del ticket muestra el monto abreviado (50 + MIL), como en el prototipo. */
-function montoTicket(monto: number) {
-  return monto >= 1000 ? { dia: String(Math.round(monto / 1000)), mes: "Mil" } : { dia: String(monto), mes: "COP" };
+function montoTicket(monto: number, mil: string) {
+  return monto >= 1000 ? { dia: String(Math.round(monto / 1000)), mes: mil } : { dia: String(monto), mes: "COP" };
 }
 
 export default async function MisGiftCardsPage() {
+  const t = await obtenerT();
+  const idioma = await obtenerIdioma();
   const supabase = await createClient();
   const {
     data: { user },
@@ -37,14 +44,14 @@ export default async function MisGiftCardsPage() {
 
   return (
     <Pantalla className="pb-10">
-      <Top titulo="Mis gift cards" volverA="/gift-cards" />
+      <Top titulo={t("gc.mis")} volverA="/gift-cards" />
       <div className="flex flex-col gap-4 p-4">
-        {error ? <ErrorAviso>No pudimos cargar tus gift cards. Intenta de nuevo.</ErrorAviso> : null}
+        {error ? <ErrorAviso>{t("gc.err_cargar")}</ErrorAviso> : null}
         {(giftCards ?? []).length === 0 && !error ? (
           <div className="sn-empty">
-            <p className="section">Aún no tienes ninguna gift card.</p>
+            <p className="section">{t("gc.ninguna")}</p>
             <Button asChild>
-              <Link href="/gift-cards/comprar">Comprar una</Link>
+              <Link href="/gift-cards/comprar">{t("gc.comprar_una")}</Link>
             </Button>
           </div>
         ) : (
@@ -52,32 +59,31 @@ export default async function MisGiftCardsPage() {
             {(giftCards ?? []).map((g) => {
               const negocio = g.negocio as unknown as { nombre: string } | null;
               const esCompradaPorMi = g.comprador_id === user.id;
-              const e = ESTADO[g.estado] ?? { tone: "info" as const, etiqueta: g.estado, icono: Clock };
+              const e = ESTADO[g.estado] ?? { tone: "info" as const, etiqueta: null, icono: Clock };
               const Icono = e.icono;
-              const t = montoTicket(Number(g.monto_original));
+              const mt = montoTicket(Number(g.monto_original), t("gc.mil"));
               return (
                 <li key={g.id}>
                   <TicketCita
-                    dia={t.dia}
-                    mes={t.mes}
+                    dia={mt.dia}
+                    mes={mt.mes}
                     estado={
                       <Status tone={e.tone} icon={<Icono aria-hidden className="size-3.5" />}>
-                        {e.etiqueta}
+                        {e.etiqueta ? t(e.etiqueta) : g.estado}
                       </Status>
                     }
-                    titulo={`Gift card · ${negocio?.nombre ?? ""}`}
+                    titulo={t("gc.titulo_negocio", { negocio: negocio?.nombre ?? "" })}
                     lineas={[
                       <span key="c" className="font-mono font-bold">
                         {g.codigo}
                       </span>,
-                      !esCompradaPorMi ? `Regalo${g.mensaje ? `: "${g.mensaje}"` : ""}` : null,
-                      g.fecha_expiracion ? `Vence el ${new Date(g.fecha_expiracion).toLocaleDateString("es-CO")}` : null,
+                      !esCompradaPorMi ? (g.mensaje ? t("gc.regalo_msg", { mensaje: g.mensaje }) : t("gc.regalo")) : null,
+                      g.fecha_expiracion ? t("gc.vence", { fecha: new Date(g.fecha_expiracion).toLocaleDateString(idioma === "en" ? "en-US" : "es-CO") }) : null,
                     ].filter(Boolean)}
                     pie={
                       <>
                         <span className="sn-label">
-                          Saldo
-                          {Number(g.saldo_actual) !== Number(g.monto_original) ? ` · de ${formatCOP(Number(g.monto_original))}` : ""}
+                          {Number(g.saldo_actual) !== Number(g.monto_original) ? t("gc.saldo_de", { monto: formatCOP(Number(g.monto_original)) }) : t("gc.saldo")}
                         </span>
                         <span className="sn-price">{formatCOP(Number(g.saldo_actual))}</span>
                       </>

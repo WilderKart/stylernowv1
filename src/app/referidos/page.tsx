@@ -6,16 +6,20 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CopiarInvitar } from "./copiar-invitar";
+import { obtenerT } from "@/lib/i18n/servidor";
 
-export const metadata = { title: "Referidos", robots: { index: false, follow: false } };
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("ref.meta"), robots: { index: false, follow: false } };
+}
 
 const TZ = "America/Bogota";
 
-const ESTADOS: Record<string, { etiqueta: string; fondo: string; borde: boolean }> = {
-  CITA_HECHA: { etiqueta: "Cita hecha", fondo: "var(--success)", borde: true },
-  REGISTRADO: { etiqueta: "Registrado", fondo: "var(--warning)", borde: true },
-  EXPIRADO: { etiqueta: "Expirado", fondo: "transparent", borde: false },
-};
+const ESTADOS = {
+  CITA_HECHA: { etiqueta: "ref.e_cita_hecha", fondo: "var(--success)", borde: true },
+  REGISTRADO: { etiqueta: "ref.e_registrado", fondo: "var(--warning)", borde: true },
+  EXPIRADO: { etiqueta: "ref.e_expirado", fondo: "transparent", borde: false },
+} as const;
 
 function iniciales(nombre: string) {
   if (nombre === "Cliente anónimo") return "··";
@@ -28,6 +32,7 @@ function iniciales(nombre: string) {
 }
 
 export default async function ReferidosPage() {
+  const t = await obtenerT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -38,14 +43,14 @@ export default async function ReferidosPage() {
 
   return (
     <Pantalla className="pb-10">
-      <Top titulo="/Perfil/Referidos" volverA="/perfil" />
+      <Top titulo={t("ref.top")} volverA="/perfil" />
 
       <div className="p-4">
         <h1 className="poster-2 break-words">
-          Invita. <span className="sn-hot">Gana.</span>
+          {t("ref.t1")} <span className="sn-hot">{t("ref.t2")}</span>
         </h1>
         <p className="body-sm mt-2 break-words">
-          Tú y tu amigo reciben <b>saldo</b> cuando completa su primera cita.
+          {t("ref.txt_1")} <b>{t("ref.txt_saldo")}</b> {t("ref.txt_2")}
         </p>
       </div>
 
@@ -55,37 +60,37 @@ export default async function ReferidosPage() {
         </div>
       ) : (
         <>
-          <section aria-label="Tu código" className="mx-4 flex flex-col gap-3 border-2 border-line p-4 shadow-[var(--sn-shadow-hard)]">
-            <span className="sn-num">01 / Tu código</span>
+          <section aria-label={t("ref.tu_codigo_aria")} className="mx-4 flex flex-col gap-3 border-2 border-line p-4 shadow-[var(--sn-shadow-hard)]">
+            <span className="sn-num">{t("ref.sec_codigo")}</span>
             <CopiarInvitar codigo={res.data.codigo} />
           </section>
 
           <div className="mt-4 grid grid-cols-3 border-y-2 border-line">
             <div className="min-w-0 border-r border-border p-3">
-              <span className="sn-meta">Invitados</span>
+              <span className="sn-meta">{t("ref.invitados")}</span>
               <div className="sn-fig text-2xl">{res.data.invitados}</div>
             </div>
             <div className="min-w-0 border-r border-border p-3">
-              <span className="sn-meta">Con cita</span>
+              <span className="sn-meta">{t("ref.con_cita")}</span>
               <div className="sn-fig text-2xl">{res.data.con_cita}</div>
             </div>
             <div className="min-w-0 p-3">
-              <span className="sn-meta">Ganado</span>
+              <span className="sn-meta">{t("ref.ganado")}</span>
               <div className="sn-fig break-words text-lg min-[380px]:text-2xl">{formatCOP(Number(res.data.ganado))}</div>
             </div>
           </div>
 
           <div className="p-sec">
-            <h2 className="sn-num">02 / Tus invitados</h2>
+            <h2 className="sn-num">{t("ref.sec_invitados")}</h2>
           </div>
           {res.data.lista.length === 0 ? (
             <div className="px-4">
-              <EmptyState big="Aún nadie" title="Todavía no invitas a nadie" hint="Comparte tu código con un amigo para empezar a ganar saldo." />
+              <EmptyState big={t("ref.aun_nadie")} title={t("ref.nadie_titulo")} hint={t("ref.nadie_hint")} />
             </div>
           ) : (
             <div className="border-t-2 border-border">
               {res.data.lista.map((p) => {
-                const e = ESTADOS[p.estado] ?? ESTADOS.EXPIRADO;
+                const e = ESTADOS[p.estado as keyof typeof ESTADOS] ?? ESTADOS.EXPIRADO;
                 const { dia, mes } = diaYMes(p.se_unio_at, TZ);
                 return (
                   <div key={p.referido_id} className="p-row">
@@ -93,14 +98,14 @@ export default async function ReferidosPage() {
                     <span className="p-row__t">
                       <b className="break-words">{p.nombre}</b>
                       <span className="sn-meta">
-                        Se unió {Number(dia)} {mes.toUpperCase()}
+                        {t("ref.se_unio", { dia: Number(dia), mes: mes.toUpperCase() })}
                       </span>
                     </span>
                     <span
                       className={`sn-label shrink-0 px-2 py-1 ${e.borde ? "border-2 border-ink text-ink" : "border-2 border-line"}`}
                       style={{ background: e.fondo }}
                     >
-                      {e.etiqueta}
+                      {t(e.etiqueta)}
                     </span>
                   </div>
                 );
@@ -111,7 +116,7 @@ export default async function ReferidosPage() {
       )}
 
       <Link href="/legal/terminos" className="sn-label mx-4 mt-6 inline-flex min-h-12 items-center underline">
-        Condiciones del programa ↗
+        {t("ref.condiciones")}
       </Link>
     </Pantalla>
   );

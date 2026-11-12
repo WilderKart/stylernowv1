@@ -1,9 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { obtenerT } from "@/lib/i18n/servidor";
 import { Hot, PantallaAuth } from "../_componentes/pantalla-auth";
 import { VistaRecuperar } from "./vista-recuperar";
 
-export const metadata = { title: "Recuperar contraseña" };
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("login.meta_recuperar") };
+}
 
 /**
  * Destino de `solicitarRecuperacion()` (vía `/auth/callback`). Requiere la
@@ -11,6 +15,7 @@ export const metadata = { title: "Recuperar contraseña" };
  * nunca acepta un token propio del cliente ni la contraseña vieja.
  */
 export default async function RecuperarPage() {
+  const t = await obtenerT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -19,16 +24,16 @@ export default async function RecuperarPage() {
 
   return (
     <PantallaAuth
-      indice="07 / Recuperar"
+      indice={t("login.i_recuperar7")}
       volver="/login"
       titulo={
         <>
-          Nueva
+          {t("login.t_nueva_1")}
           <br />
-          <Hot>contraseña.</Hot>
+          <Hot>{t("login.t_nueva_2")}</Hot>
         </>
       }
-      intro="Elegí una contraseña nueva para tu cuenta."
+      intro={t("login.intro_nueva")}
     >
       <VistaRecuperar />
     </PantallaAuth>

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { consultarEstadoSistemaAction } from "./actions";
+import { useT } from "@/lib/i18n/proveedor";
 
 /** Rutas que nunca se redirigen: el propio aviso, el acceso (incluido el de SuperSU), el panel de SuperSU y la legal. */
 const EXENTAS = ["/mantenimiento", "/login", "/auth", "/admin", "/api", "/legal"];
@@ -31,6 +32,7 @@ function compararVersion(a: string, b: string) {
  */
 export function EstadoSistema() {
   const ruta = usePathname();
+  const t = useT();
   const router = useRouter();
   const rutaRef = useRef(ruta);
   const [hayVersion, setHayVersion] = useState(false);
@@ -97,17 +99,17 @@ export function EstadoSistema() {
       className="fixed inset-x-0 bottom-0 z-[80] border-t-2 border-ink bg-paper px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-ink"
     >
       <div className="mx-auto flex max-w-xl flex-col gap-3">
-        <span className="sn-num">02 / Actualización</span>
+        <span className="sn-num">{t("sis.sec")}</span>
         <h2 id="sn-nueva-version" className="poster-4">
-          Nueva versión<span className="sn-hot">.</span>
+          {t("sis.nueva")}<span className="sn-hot">.</span>
         </h2>
-        <p className="body-sm">Hay mejoras listas. Actualiza para seguir reservando sin problemas.</p>
+        <p className="body-sm">{t("sis.txt")}</p>
         <div className="flex flex-wrap gap-3">
           <Button variant="secondary" className="min-w-[8rem] flex-1 text-ink" onClick={() => setDescartado(true)}>
-            Más tarde
+            {t("sis.mas_tarde")}
           </Button>
           <Button className="min-w-[8rem] flex-1" onClick={() => window.location.reload()}>
-            Actualizar <span aria-hidden>↗</span>
+            {t("sis.actualizar")} <span aria-hidden>↗</span>
           </Button>
         </div>
       </div>

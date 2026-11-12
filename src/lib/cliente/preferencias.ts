@@ -1,4 +1,5 @@
 import "server-only";
+import { fijarIdioma } from "@/lib/i18n/servidor";
 import { llamarRpc, type Resultado } from "./base";
 
 /** C11 Idioma y región, C12 Permisos, C17 Registro. Idiomas: es|en. Países: CO|US|MX|ES. */
@@ -20,7 +21,9 @@ export const obtenerPreferencias = (): Promise<Resultado<Preferencias>> => llama
 export async function actualizarIdiomaRegion(pais: Pais, locale: Idioma): Promise<Resultado<{ pais: Pais; locale: Idioma }>> {
   const r = await llamarRpc<{ pais: Pais; locale: Idioma }[]>("actualizar_idioma_region", { p_pais: pais, p_locale: locale });
   if (!r.ok) return r;
-  return r.data[0] ? { ok: true, data: r.data[0] } : { ok: false, codigo: "PERFIL_NO_ENCONTRADO", error: "No encontramos tu perfil." };
+  if (!r.data[0]) return { ok: false, codigo: "PERFIL_NO_ENCONTRADO", error: "No encontramos tu perfil." };
+  await fijarIdioma(r.data[0].locale); // la interfaz cambia de idioma en el siguiente render
+  return { ok: true, data: r.data[0] };
 }
 
 /**

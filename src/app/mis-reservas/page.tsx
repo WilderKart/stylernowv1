@@ -2,12 +2,13 @@ import { Top, Pantalla } from "@/app/lealtad/ui-cliente";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { obtenerT } from "@/lib/i18n/servidor";
 import { ListaReservas, type ReservaItem } from "./lista-reservas";
 
-export const metadata = {
-  title: "Mis reservas",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("citas.meta"), robots: { index: false, follow: false } };
+}
 
 /** Momento del render en el servidor, para separar próximas de pasadas. */
 function ahoraMs() {
@@ -15,6 +16,7 @@ function ahoraMs() {
 }
 
 export default async function MisReservasPage() {
+  const t = await obtenerT();
   const supabase = await createClient();
 
   const {
@@ -51,16 +53,16 @@ export default async function MisReservasPage() {
 
   return (
     <Pantalla className="pb-24">
-      <Top titulo="03 / Citas" />
+      <Top titulo={t("citas.top")} />
       <h1 className="poster-2 break-words px-4 pt-3 pb-4">
-        Tus
+        {t("citas.t1")}
         <br />
-        <span className="sn-hot">citas.</span>
+        <span className="sn-hot">{t("citas.t2")}</span>
       </h1>
 
       {error ? (
         <p role="alert" className="sn-help sn-help--error mx-4 mb-4">
-          No pudimos cargar tus citas. Revisa tu conexión e intenta de nuevo.
+          {t("citas.error")}
         </p>
       ) : null}
 

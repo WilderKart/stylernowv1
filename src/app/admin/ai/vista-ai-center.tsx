@@ -212,7 +212,7 @@ function FilaAccionCosto({ accion, disabled, onGuardar }: { accion: AccionCostoI
           type="button"
           disabled={disabled}
           onClick={() => onGuardar(accion, costo, activo)}
-          className="rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold uppercase text-white disabled:opacity-50"
+          className="rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold uppercase text-ink disabled:opacity-50"
         >
           Guardar
         </button>
@@ -246,7 +246,7 @@ function FilaModelo({ modelo, disabled, onGuardar }: { modelo: ModeloIa; disable
           type="button"
           disabled={disabled}
           onClick={() => onGuardar(modelo, orden, activo)}
-          className="rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold uppercase text-white disabled:opacity-50"
+          className="rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold uppercase text-ink disabled:opacity-50"
         >
           Guardar
         </button>
@@ -287,7 +287,7 @@ function FilaPaquete({ paquete, disabled, onGuardar }: { paquete: PaqueteIa; dis
           type="button"
           disabled={disabled}
           onClick={() => onGuardar(paquete, precio, activo)}
-          className="rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold uppercase text-white disabled:opacity-50"
+          className="rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold uppercase text-ink disabled:opacity-50"
         >
           Guardar
         </button>
@@ -330,7 +330,7 @@ function SimuladorCosto() {
           <span className="text-[10.5px] font-bold uppercase text-text-faint">Clientes</span>
           <input type="number" min={0} value={numClientes} onChange={(e) => setNumClientes(Number(e.target.value))} className="w-24 rounded-lg border border-border bg-bg px-2 py-1.5 text-[12px] text-text" />
         </label>
-        <button type="button" disabled={pendiente} onClick={simular} className="rounded-lg bg-accent px-4 py-1.5 text-[11.5px] font-bold uppercase text-white disabled:opacity-50">
+        <button type="button" disabled={pendiente} onClick={simular} className="rounded-lg bg-accent px-4 py-1.5 text-[11.5px] font-bold uppercase text-ink disabled:opacity-50">
           Simular
         </button>
       </div>

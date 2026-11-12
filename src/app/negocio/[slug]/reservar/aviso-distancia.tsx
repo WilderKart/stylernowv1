@@ -3,6 +3,7 @@
 import { MapPin } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useT } from "@/lib/i18n/proveedor";
 
 /** Más allá de esta distancia (km) se avisa; dentro de un área metropolitana no estorba. */
 const UMBRAL_KM = 50;
@@ -27,6 +28,7 @@ export function AvisoDistancia({
   negocio: string;
   sede: { latitud?: number | null; longitud?: number | null; ciudad?: string | null; nombre: string } | undefined;
 }) {
+  const t = useT();
   const [km, setKm] = useState<number | null>(null);
   const [yoLat, setYoLat] = useState<number | null>(null);
   const [yoLng, setYoLng] = useState<number | null>(null);
@@ -65,19 +67,18 @@ export function AvisoDistancia({
   return (
     <div role="alert" className="flex flex-col gap-2 border-b-2 border-ink bg-warning px-4 py-3 text-ink">
       <p className="sn-label flex items-center gap-2">
-        <MapPin aria-hidden className="size-4 shrink-0" /> Estás a unos {Math.round(km)} km
+        <MapPin aria-hidden className="size-4 shrink-0" /> {t("res.aviso_km", { km: Math.round(km) })}
       </p>
       <p className="body-sm break-words">
-        ¿Seguro que quieres reservar en {lugar}? Queda un poco lejos de donde estás ahora. Es solo un aviso para que no te
-        equivoques; si viajas a esa ciudad, sigue con tu reserva.
+        {t("res.aviso_txt", { lugar })}
       </p>
       <div className="flex flex-wrap gap-2">
         <button type="button" onClick={() => setCerrado(true)} className="sn-chip is-selected !min-h-12">
-          Sí, es mi plan
+          {t("res.si_mi_plan")}
         </button>
         {yoLat !== null && yoLng !== null ? (
           <Link href={`/?lat=${yoLat.toFixed(4)}&lng=${yoLng.toFixed(4)}`} className="sn-chip !min-h-12 no-underline">
-            Ver negocios cerca de mí
+            {t("res.ver_cerca")}
           </Link>
         ) : null}
       </div>

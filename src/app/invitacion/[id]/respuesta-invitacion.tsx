@@ -37,7 +37,7 @@ export function RespuestaInvitacion({
   if (expirada) {
     return (
       <p className="mt-6 rounded-2xl border border-dashed border-border px-4 py-6 text-[12.5px] text-text-faint">
-        Esta invitación expiró. Pedile a quien te invitó que te envíe una nueva.
+        Esta invitación expiró. Pídele a quien te invitó que te envíe una nueva.
       </p>
     );
   }

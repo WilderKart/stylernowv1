@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useT } from "@/lib/i18n/proveedor";
 import { Casilla } from "@/components/privacidad/casilla";
 import { ArrowUpRight, Check, ChevronDown } from "lucide-react";
 import Link from "next/link";
@@ -42,6 +43,7 @@ export function FormularioLogin({
   emailSesion?: string;
 }) {
   const router = useRouter();
+  const t = useT();
   const [step, setStep] = useState<Paso>(registroPendiente ? "registro" : "email");
   const [email, setEmail] = useState(emailSesion ?? "");
   const [nombre, setNombre] = useState("");
@@ -104,7 +106,7 @@ export function FormularioLogin({
   async function onEnviarCodigo(e: React.FormEvent) {
     e.preventDefault();
     if (!aceptaTerminos) {
-      setError("Debes aceptar la Política de Tratamiento de Datos para continuar.");
+      setError(t("login.err_terminos"));
       return;
     }
     setLoading(true);
@@ -216,7 +218,7 @@ export function FormularioLogin({
 
   async function onSolicitarRecuperacion() {
     if (!email) {
-      setError("Ingresá tu correo primero.");
+      setError(t("login.err_correo_primero"));
       return;
     }
     setLoading(true);
@@ -229,64 +231,64 @@ export function FormularioLogin({
   const titulos: Record<Paso, React.ReactNode> = {
     email: (
       <>
-        Entra.
+        {t("login.t_email_1")}
         <br />
-        Reserva.
+        {t("login.t_email_2")}
         <br />
-        <Hot>Listo.</Hot>
+        <Hot>{t("login.t_email_3")}</Hot>
       </>
     ),
     password: (
       <>
-        Hola de
+        {t("login.t_pw_1")}
         <br />
-        <Hot>nuevo.</Hot>
+        <Hot>{t("login.t_pw_2")}</Hot>
       </>
     ),
     codigo: (
       <>
-        Revisa
+        {t("login.t_cod_1")}
         <br />
-        tu <Hot>correo.</Hot>
+        {t("login.t_cod_tu")} <Hot>{t("login.t_cod_correo")}</Hot>
       </>
     ),
     registro: (
       <>
-        Crea tu
+        {t("login.t_reg_1")}
         <br />
-        <Hot>cuenta.</Hot>
+        <Hot>{t("login.t_reg_2")}</Hot>
       </>
     ),
     "crear-password": (
       <>
-        Crea tu
+        {t("login.t_reg_1")}
         <br />
-        <Hot>contraseña.</Hot>
+        <Hot>{t("login.t_cpw_2")}</Hot>
       </>
     ),
     "recovery-enviado": (
       <>
-        Enlace
+        {t("login.t_rec_1")}
         <br />
-        <Hot>enviado.</Hot>
+        <Hot>{t("login.t_rec_2")}</Hot>
       </>
     ),
   };
   const indices: Record<Paso, string> = {
-    email: "04 / Ingreso",
-    password: "04 / Ingreso",
-    codigo: "05 / Verificación",
-    registro: "06 / Registro",
-    "crear-password": "07 / Contraseña",
-    "recovery-enviado": "08 / Recuperar",
+    email: t("login.i_ingreso"),
+    password: t("login.i_ingreso"),
+    codigo: t("login.i_verificacion"),
+    registro: t("login.i_registro"),
+    "crear-password": t("login.i_password"),
+    "recovery-enviado": t("login.i_recuperar"),
   };
   const intros: Record<Paso, string> = {
-    email: "Ingresa tu correo para reservar tu próxima cita.",
-    password: `Ingresá tu contraseña para ${email}.`,
-    codigo: `Te enviamos un código a ${email}.`,
-    registro: "Un minuto. Así el negocio sabe a quién espera.",
-    "crear-password": "Ya verificamos tu correo — creá una contraseña para tu cuenta.",
-    "recovery-enviado": `Si ${email} tiene una cuenta, te enviamos un enlace para recuperarla.`,
+    email: t("login.intro_email"),
+    password: email ? t("login.intro_pw_email", { email }) : t("login.intro_pw"),
+    codigo: t("login.intro_codigo", { email }),
+    registro: t("login.intro_registro"),
+    "crear-password": t("login.intro_cpw"),
+    "recovery-enviado": t("login.intro_recovery", { email }),
   };
 
   const botonGoogle = (
@@ -299,7 +301,7 @@ export function FormularioLogin({
           <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
           <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
         </svg>
-        Continuar con Google
+        {t("login.google")}
       </span>
       <ArrowUpRight className="size-[18px]" aria-hidden />
     </Button>
@@ -316,10 +318,10 @@ export function FormularioLogin({
       {step === "email" ? (
         <form onSubmit={onEnviarCodigo} className="flex flex-col gap-3">
           <Input
-            label="Correo electrónico"
+            label={t("login.correo")}
             type="email"
             required
-            placeholder="tucorreo@ejemplo.com"
+            placeholder={t("login.correo_ph")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -339,24 +341,24 @@ export function FormularioLogin({
             </span>
             <span className="flex min-w-0 flex-col gap-1">
               <span className="body-sm break-words">
-                Acepto los{" "}
+                {t("login.acepto_1")}{" "}
                 <Link href="/legal/terminos" className="font-bold underline underline-offset-2">
-                  Términos
+                  {t("login.terminos")}
                 </Link>{" "}
-                y la{" "}
+                {t("login.y_la")}{" "}
                 <Link href="/legal/politica-de-datos" className="font-bold underline underline-offset-2">
-                  Política de Tratamiento de Datos
+                  {t("login.politica_datos")}
                 </Link>{" "}
-                de StylerNow.
+                {t("login.de_stylernow")}
               </span>
-              <span className="sn-meta text-[var(--accent-text)]">Obligatoria</span>
+              <span className="sn-meta text-[var(--accent-text)]">{t("login.obligatoria")}</span>
             </span>
           </label>
 
           {error ? <ErrorForm>{error}</ErrorForm> : null}
 
           <Button type="submit" size="lg" loading={loading} className="w-full justify-between">
-            <span>Enviar código</span>
+            <span>{t("login.enviar_codigo")}</span>
             <ArrowUpRight className="size-[18px]" aria-hidden />
           </Button>
 
@@ -368,10 +370,10 @@ export function FormularioLogin({
             }}
             className={claseEnlace}
           >
-            Ya tengo cuenta — entrar con contraseña ↗
+            {t("login.ya_tengo_cuenta")}
           </button>
 
-          <Separador>o</Separador>
+          <Separador>{t("login.o")}</Separador>
           {botonGoogle}
         </form>
       ) : null}
@@ -379,14 +381,14 @@ export function FormularioLogin({
       {step === "password" ? (
         <form onSubmit={onIniciarConPassword} className="flex flex-col gap-3">
           <Input
-            label="Correo electrónico"
+            label={t("login.correo")}
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <Input
-            label="Contraseña"
+            label={t("login.contrasena")}
             type="password"
             required
             autoComplete="current-password"
@@ -395,19 +397,19 @@ export function FormularioLogin({
           />
           {error ? <ErrorForm>{error}</ErrorForm> : null}
           <Button type="submit" size="lg" loading={loading} className="w-full justify-between">
-            <span>Entrar</span>
+            <span>{t("login.entrar")}</span>
             <ArrowUpRight className="size-[18px]" aria-hidden />
           </Button>
           <div className="flex flex-wrap justify-between gap-x-4">
             <button type="button" onClick={onSolicitarRecuperacion} className={claseEnlace}>
-              No puedo entrar ↗
+              {t("login.no_puedo")}
             </button>
             <button type="button" onClick={volverAPasoEmail} className={claseEnlace}>
-              Usar código por correo ↗
+              {t("login.usar_codigo")}
             </button>
           </div>
 
-          <Separador>o</Separador>
+          <Separador>{t("login.o")}</Separador>
           {botonGoogle}
         </form>
       ) : null}
@@ -415,7 +417,7 @@ export function FormularioLogin({
       {step === "codigo" ? (
         <form onSubmit={onVerificarCodigo} className="flex flex-col gap-3">
           <Input
-            label="Código de acceso"
+            label={t("login.codigo_acceso")}
             inputMode="numeric"
             autoComplete="one-time-code"
             maxLength={8}
@@ -428,34 +430,34 @@ export function FormularioLogin({
           />
           {error ? <ErrorForm>{error}</ErrorForm> : null}
           <Button type="submit" size="lg" loading={loading} className="w-full justify-between">
-            <span>Verificar</span>
+            <span>{t("login.verificar")}</span>
             <ArrowUpRight className="size-[18px]" aria-hidden />
           </Button>
           <p className="p-note normal-case">
-            También podés entrar con un solo click desde el botón “Iniciar sesión” que te llegó en el mismo correo — no hace falta tipear el código.
+            {t("login.nota_click")}
           </p>
           <button type="button" onClick={volverAPasoEmail} className={claseEnlace}>
-            Cambiar correo ↗
+            {t("login.cambiar_correo")}
           </button>
         </form>
       ) : null}
 
       {step === "registro" ? (
         <form onSubmit={onCrearCuenta} className="flex flex-col gap-3.5">
-          <Input label="01 / Correo · Verificado" type="email" value={email} readOnly />
+          <Input label={t("login.reg_correo")} type="email" value={email} readOnly />
           <Input
-            label="02 / Nombre y apellido"
+            label={t("login.reg_nombre")}
             autoComplete="name"
             required
             minLength={2}
             maxLength={80}
-            placeholder="Como quieres que te llamen"
+            placeholder={t("login.reg_nombre_ph")}
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
           />
           <div className="flex flex-col gap-2">
             <label htmlFor="registro-pais" className="font-mono text-xs leading-4 font-bold tracking-[0.72px] text-text uppercase">
-              03 / País
+              {t("login.reg_pais")}
             </label>
             <div className="relative">
               <select
@@ -464,10 +466,10 @@ export function FormularioLogin({
                 onChange={(e) => setPais(e.target.value)}
                 className="min-h-12 w-full appearance-none border-2 border-border bg-bg py-0 pr-11 pl-3 text-[15px] text-text outline-none focus:shadow-hard"
               >
-                <option value="CO">Colombia · CO</option>
-                <option value="US">Estados Unidos · US</option>
-                <option value="MX">México · MX</option>
-                <option value="ES">España · ES</option>
+                <option value="CO">{t("login.pais_co")}</option>
+                <option value="US">{t("login.pais_us")}</option>
+                <option value="MX">{t("login.pais_mx")}</option>
+                <option value="ES">{t("login.pais_es")}</option>
               </select>
               <ChevronDown aria-hidden className="pointer-events-none absolute top-3.5 right-3.5 size-5" />
             </div>
@@ -476,24 +478,24 @@ export function FormularioLogin({
             caja
             checked={marketing}
             onChange={setMarketing}
-            etiqueta="OPCIONAL"
-            descripcion="Quiero recibir novedades y ofertas de StylerNow por correo. Me puedo dar de baja cuando quiera."
+            etiqueta={t("login.opcional")}
+            descripcion={t("login.marketing")}
             className="mt-1"
           />
           {error ? <ErrorForm>{error}</ErrorForm> : null}
           <p className="body-sm text-text-muted">
-            Al crear tu cuenta aceptas los{" "}
+            {t("login.al_crear")}{" "}
             <Link href="/legal/terminos" className="font-bold text-[var(--accent-text)] underline underline-offset-2">
-              Términos
+              {t("login.terminos")}
             </Link>{" "}
-            y la{" "}
+            {t("login.y_la")}{" "}
             <Link href="/legal/politica-de-datos" className="font-bold text-[var(--accent-text)] underline underline-offset-2">
-              Política de privacidad
+              {t("login.politica_priv")}
             </Link>
             .
           </p>
           <Button type="submit" size="lg" loading={loading} disabled={nombre.trim().length < 2} className="w-full justify-between">
-            <span>Crear cuenta</span>
+            <span>{t("login.crear_cuenta")}</span>
             <ArrowUpRight className="size-[18px]" aria-hidden />
           </Button>
         </form>
@@ -502,7 +504,7 @@ export function FormularioLogin({
       {step === "crear-password" ? (
         <form onSubmit={onCrearContrasena} className="flex flex-col gap-3">
           <Input
-            label="Contraseña nueva"
+            label={t("login.contrasena_nueva")}
             type="password"
             required
             autoComplete="new-password"
@@ -510,11 +512,11 @@ export function FormularioLogin({
             onChange={(e) => setPassword(e.target.value)}
           />
           <p className="p-note normal-case">
-            Mínimo 12 caracteres, con mayúscula, minúscula, número y símbolo. La vas a poder usar en vez del código por correo la próxima vez.
+            {t("login.nota_pw_larga")}
           </p>
           {error ? <ErrorForm>{error}</ErrorForm> : null}
           <Button type="submit" size="lg" loading={loading} className="w-full justify-between">
-            <span>Guardar y entrar</span>
+            <span>{t("login.guardar_entrar")}</span>
             <ArrowUpRight className="size-[18px]" aria-hidden />
           </Button>
         </form>
@@ -522,7 +524,7 @@ export function FormularioLogin({
 
       {step === "recovery-enviado" ? (
         <button type="button" onClick={volverAPasoEmail} className={claseEnlace}>
-          Volver ↗
+          {t("login.volver_enlace")}
         </button>
       ) : null}
     </PantallaAuth>

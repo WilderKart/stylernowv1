@@ -26,18 +26,21 @@ export async function actualizarPerfil(datos: {
   const nombre = datos.nombre.trim();
   const telefonoLocal = datos.telefonoLocal.replace(/\D/g, "");
 
+  if (nombre.length > 80) {
+    return { ok: false, error: "El nombre es muy largo (máximo 80 caracteres)." };
+  }
   if (nombre.length < 2) {
     return { ok: false, error: "El nombre es muy corto." };
   }
   if (telefonoLocal && (telefonoLocal.length < 6 || telefonoLocal.length > 12)) {
-    return { ok: false, error: "Revisá el número de celular." };
+    return { ok: false, error: "Revisa el número de celular." };
   }
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Tu sesión expiró. Volvé a iniciar sesión." };
+  if (!user) return { ok: false, error: "Tu sesión expiró. Vuelve a iniciar sesión." };
 
   const { error } = await supabase
     .from("perfil")

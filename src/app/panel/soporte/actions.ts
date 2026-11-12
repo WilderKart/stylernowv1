@@ -17,10 +17,10 @@ async function usuarioActual() {
 }
 
 const MENSAJES_ERROR: Record<string, string> = {
-  ASUNTO_REQUERIDO: "Escribí un asunto para tu ticket.",
+  ASUNTO_REQUERIDO: "Escribe un asunto para tu ticket.",
   MENSAJE_REQUERIDO: "El mensaje no puede estar vacío.",
   TICKET_NO_ENCONTRADO: "No encontramos ese ticket.",
-  NO_AUTORIZADO: "No tenés permiso sobre ese ticket.",
+  NO_AUTORIZADO: "No tienes permiso sobre ese ticket.",
 };
 
 function traducirError(mensaje: string) {

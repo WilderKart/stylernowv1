@@ -175,7 +175,7 @@ export async function chatJSON<T>(mensajes: MensajeChat[], opciones: { nivel?: 1
   } catch {
     return await intentar([
       ...mensajes,
-      { role: "user", content: "Respondé ÚNICAMENTE con el JSON solicitado, sin texto adicional, sin markdown." },
+      { role: "user", content: "Responde ÚNICAMENTE con el JSON solicitado, sin texto adicional, sin markdown." },
     ]);
   }
 }

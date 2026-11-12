@@ -8,6 +8,7 @@ import { History } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { cancelarMiMembresia, congelarMiMembresia, reactivarMiMembresia } from "./actions";
+import { useIdioma, useT } from "@/lib/i18n/proveedor";
 
 const ESTADO_TONO: Record<string, "ok" | "warn" | "err" | "info"> = {
   ACTIVA: "ok",
@@ -16,13 +17,13 @@ const ESTADO_TONO: Record<string, "ok" | "warn" | "err" | "info"> = {
   CANCELADA: "err",
   VENCIDA: "err",
 };
-const ESTADO_ETIQUETA: Record<string, string> = {
-  ACTIVA: "Activa",
-  PROXIMA_A_VENCER: "Próxima a vencer",
-  SUSPENDIDA: "Congelada",
-  CANCELADA: "Cancelada",
-  VENCIDA: "Vencida",
-};
+const ESTADO_ETIQUETA = {
+  ACTIVA: "mm.est_activa",
+  PROXIMA_A_VENCER: "mm.est_proxima",
+  SUSPENDIDA: "mm.est_suspendida",
+  CANCELADA: "mm.est_cancelada",
+  VENCIDA: "mm.est_vencida",
+} as const;
 
 interface Plan {
   nombre: string;
@@ -46,16 +47,18 @@ interface Membresia {
 }
 
 export function VistaMiMembresia({ membresia, negocioNombre }: { membresia: Membresia; negocioNombre: string }) {
+  const t = useT();
+  const loc = useIdioma() === "en" ? "en-US" : "es-CO";
   const plan = membresia.plan as unknown as Plan;
   const [pendiente, iniciarTransicion] = useTransition();
   const [mostrarCongelar, setMostrarCongelar] = useState(false);
 
   function cancelar() {
-    if (!confirm("¿Cancelar tu Membresía? Dejarás de recibir sus beneficios al terminar el ciclo actual.")) return;
+    if (!confirm(t("mm.confirm_cancelar"))) return;
     iniciarTransicion(async () => {
       const r = await cancelarMiMembresia(membresia.id);
       if (!r.ok) { toast.error(r.error); return; }
-      toast.success("Membresía cancelada.");
+      toast.success(t("mm.cancelada"));
       window.location.reload();
     });
   }
@@ -64,7 +67,7 @@ export function VistaMiMembresia({ membresia, negocioNombre }: { membresia: Memb
     iniciarTransicion(async () => {
       const r = await congelarMiMembresia(membresia.id, dias);
       if (!r.ok) { toast.error(r.error); return; }
-      toast.success(`Membresía congelada por ${dias} días.`);
+      toast.success(t("mm.congelada_dias", { dias }));
       setMostrarCongelar(false);
       window.location.reload();
     });
@@ -74,7 +77,7 @@ export function VistaMiMembresia({ membresia, negocioNombre }: { membresia: Memb
     iniciarTransicion(async () => {
       const r = await reactivarMiMembresia(membresia.id);
       if (!r.ok) { toast.error(r.error); return; }
-      toast.success("Membresía reactivada.");
+      toast.success(t("mm.reactivada"));
       window.location.reload();
     });
   }
@@ -88,19 +91,19 @@ export function VistaMiMembresia({ membresia, negocioNombre }: { membresia: Memb
     <main className="flex flex-1 flex-col pb-10">
       <div className="p-4">
         <TicketCita
-          dia={cobro.toLocaleDateString("es-CO", { day: "2-digit" })}
-          mes={cobro.toLocaleDateString("es-CO", { month: "short" }).replace(".", "")}
-          estado={<Status tone={ESTADO_TONO[membresia.estado] ?? "info"}>{ESTADO_ETIQUETA[membresia.estado] ?? membresia.estado}</Status>}
+          dia={cobro.toLocaleDateString(loc, { day: "2-digit" })}
+          mes={cobro.toLocaleDateString(loc, { month: "short" }).replace(".", "")}
+          estado={<Status tone={ESTADO_TONO[membresia.estado] ?? "info"}>{ESTADO_ETIQUETA[membresia.estado as keyof typeof ESTADO_ETIQUETA] ? t(ESTADO_ETIQUETA[membresia.estado as keyof typeof ESTADO_ETIQUETA]) : membresia.estado}</Status>}
           titulo={plan.nombre}
           lineas={[
             negocioNombre,
-            `Próximo cobro: ${cobro.toLocaleDateString("es-CO")}`,
-            membresia.congelada_hasta ? `Congelada hasta: ${new Date(membresia.congelada_hasta).toLocaleDateString("es-CO")}` : null,
+            t("mm.proximo_cobro_f", { fecha: cobro.toLocaleDateString(loc) }),
+            membresia.congelada_hasta ? t("mm.congelada_hasta", { fecha: new Date(membresia.congelada_hasta).toLocaleDateString(loc) }) : null,
           ].filter(Boolean)}
           pie={
             <>
               <span className="sn-label">
-                Cada {plan.duracion_meses} mes{plan.duracion_meses > 1 ? "es" : ""}
+                {plan.duracion_meses > 1 ? t("mm.cada_meses", { n: plan.duracion_meses }) : t("mm.cada_mes", { n: plan.duracion_meses })}
               </span>
               <span className="sn-price">{formatCOP(Number(plan.precio))}</span>
             </>
@@ -108,10 +111,10 @@ export function VistaMiMembresia({ membresia, negocioNombre }: { membresia: Memb
         />
       </div>
 
-      <Sec>01 / Uso este mes</Sec>
+      <Sec>{t("mm.sec_uso")}</Sec>
       <Filas>
         <Fila
-          titulo={plan.limite_usos_mes ? "Usos disponibles" : "Usos (sin límite)"}
+          titulo={plan.limite_usos_mes ? t("mm.usos_disp") : t("mm.usos_sin_limite")}
           derecha={
             <span className="sn-fig text-[22px]">
               {membresia.usos_mes_actual}
@@ -119,33 +122,33 @@ export function VistaMiMembresia({ membresia, negocioNombre }: { membresia: Memb
             </span>
           }
         />
-        <Fila icono={<History aria-hidden className="size-5" />} titulo="Historial de uso" href={`/membresias/${membresia.id}/historial`} />
+        <Fila icono={<History aria-hidden className="size-5" />} titulo={t("mm.historial_uso")} href={`/membresias/${membresia.id}/historial`} />
       </Filas>
 
-      <Sec>02 / Gestionar</Sec>
+      <Sec>{t("mm.sec_gestionar")}</Sec>
       <div className="flex flex-col gap-3 px-4">
         {puedeReactivar ? (
           <Button variant="secondary" size="lg" disabled={pendiente} onClick={reactivar}>
-            Reactivar membresía
+            {t("mm.reactivar")}
           </Button>
         ) : puedeCongelar ? (
           mostrarCongelar ? (
             <div className="flex flex-wrap gap-3">
               {[7, 15, 30].filter((d) => d <= plan.congelacion_max_dias).map((d) => (
                 <Button key={d} variant="secondary" className="min-w-0 flex-1" disabled={pendiente} onClick={() => congelar(d as 7 | 15 | 30)}>
-                  {d} días
+                  {t("mm.n_dias", { n: d })}
                 </Button>
               ))}
             </div>
           ) : (
             <Button variant="secondary" size="lg" onClick={() => setMostrarCongelar(true)}>
-              Congelar membresía
+              {t("mm.congelar")}
             </Button>
           )
         ) : null}
         {puedeCancelar ? (
           <Button variant="danger" size="lg" disabled={pendiente} onClick={cancelar}>
-            Cancelar membresía
+            {t("mm.cancelar")}
           </Button>
         ) : null}
       </div>

@@ -21,6 +21,7 @@ import { formatCOP } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { consultarEstadoPago, iniciarPagoSena } from "./actions";
+import { useT } from "@/lib/i18n/proveedor";
 
 /** Tras este tiempo sin confirmación se avisa que puede cerrar la app (02-UX/06_Payments.md). */
 const TIMEOUT_UX_MS = 30_000;
@@ -39,28 +40,29 @@ export interface ResumenPago {
 }
 
 function Cuenta({ expiraAt }: { expiraAt: string }) {
+  const t = useT();
   const [restante, setRestante] = useState(() =>
     Math.max(0, new Date(expiraAt).getTime() - Date.now())
   );
 
   useEffect(() => {
-    const t = setInterval(
+    const temporizador = setInterval(
       () => setRestante(Math.max(0, new Date(expiraAt).getTime() - Date.now())),
       1000
     );
-    return () => clearInterval(t);
+    return () => clearInterval(temporizador);
   }, [expiraAt]);
 
   const min = Math.floor(restante / 60000);
   const seg = Math.floor((restante % 60000) / 1000);
 
   if (restante <= 0) {
-    return <ErrorAviso>La reserva del horario expiró. Vuelve a elegir un turno.</ErrorAviso>;
+    return <ErrorAviso>{t("pago.expiro")}</ErrorAviso>;
   }
 
   return (
     <p className="sn-meta">
-      Te guardamos el horario por{" "}
+      {t("pago.guardamos")}{" "}
       <span className="font-bold tabular-nums text-text">
         {min}:{String(seg).padStart(2, "0")}
       </span>
@@ -70,6 +72,7 @@ function Cuenta({ expiraAt }: { expiraAt: string }) {
 
 export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volverA: string }) {
   const router = useRouter();
+  const t = useT();
   const [iniciando, setIniciando] = useState(false);
   const [esperando, setEsperando] = useState(false);
   const [demorado, setDemorado] = useState(false);
@@ -89,7 +92,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
       }
       if (estado.pago === "RECHAZADO") {
         setEsperando(false);
-        setError("El pago fue rechazado. Puedes intentar de nuevo con otro medio.");
+        setError(t("pago.rechazado"));
       }
       if (estado.reserva === "CANCELADA" && !yaRedirigido.current) {
         yaRedirigido.current = true;
@@ -98,12 +101,12 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
     }, INTERVALO_POLLING_MS);
 
     return () => clearInterval(intervalo);
-  }, [resumen.reservaId, router]);
+  }, [resumen.reservaId, router, t]);
 
   useEffect(() => {
     if (!esperando) return;
-    const t = setTimeout(() => setDemorado(true), TIMEOUT_UX_MS);
-    return () => clearTimeout(t);
+    const temporizador = setTimeout(() => setDemorado(true), TIMEOUT_UX_MS);
+    return () => clearTimeout(temporizador);
   }, [esperando]);
 
   async function pagar() {
@@ -134,20 +137,20 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
   if (esperando) {
     return (
       <Pantalla className="sn-block-ink !bg-ink !text-paper justify-center gap-6 px-4 py-6" role="status" aria-live="polite">
-        <span className="sn-num !text-signal">00 / Pagando</span>
+        <span className="sn-num !text-signal">{t("pago.pagando")}</span>
         <p className="poster-1 break-words !text-paper">
-          Un
+          {t("pago.un_1")}
           <br />
-          <span className="sn-hot">momento.</span>
+          <span className="sn-hot">{t("pago.un_2")}</span>
         </p>
-        <Barra pct={68} etiqueta="Confirmando el pago" className="!h-5 !border-paper" />
-        <p className="body m-0 text-[#D4D4D4]">Confirmando tu pago con Mercado Pago. No cierres la app.</p>
+        <Barra pct={68} etiqueta={t("pago.confirmando_aria")} className="!h-5 !border-paper" />
+        <p className="body m-0 text-[#D4D4D4]">{t("pago.confirmando_mp")}</p>
         {demorado ? (
           <p className="body-sm m-0 text-[#D4D4D4]">
-            Está tardando más de lo normal. Puedes cerrar la app con tranquilidad: te avisamos apenas se confirme el pago.
+            {t("pago.tardando")}
           </p>
         ) : null}
-        <span className="sn-meta !text-[#A3A3A3]">Pago seguro · StylerNow no guarda los datos de tu tarjeta</span>
+        <span className="sn-meta !text-[#A3A3A3]">{t("pago.seguro")}</span>
         {error ? <ErrorAviso>{error}</ErrorAviso> : null}
       </Pantalla>
     );
@@ -155,13 +158,13 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
 
   return (
     <Pantalla>
-      <Top titulo="Reserva · Resumen" volverA={volverA} />
-      <div className="p-steps" aria-label="Pasos de la reserva">
-        <span className="is-done">01 Servicio</span>
-        <span className="is-done">02 Profesional</span>
-        <span className="is-done">03 Hora</span>
+      <Top titulo={t("pago.top")} volverA={volverA} />
+      <div className="p-steps" aria-label={t("pago.pasos")}>
+        <span className="is-done">{t("pago.p1")}</span>
+        <span className="is-done">{t("pago.p2")}</span>
+        <span className="is-done">{t("pago.p3")}</span>
         <span className="is-on" aria-current="step">
-          04 Pago
+          {t("pago.p4")}
         </span>
       </div>
 
@@ -171,14 +174,14 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
           mes={dm.mes}
           estado={
             <Status tone="warn" icon={<Clock aria-hidden className="size-3.5" />}>
-              Pendiente de pago
+              {t("estado.pendiente_pago")}
             </Status>
           }
           titulo={resumen.servicios}
           lineas={[`${resumen.profesional} · ${hora} · ${resumen.negocio}`]}
           pie={
             <>
-              <span className="sn-label">Total</span>
+              <span className="sn-label">{t("res.total")}</span>
               <span className="sn-fig text-[22px]">{formatCOP(resumen.montoTotal)}</span>
             </>
           }
@@ -193,34 +196,34 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
       <Filas>
         <Fila
           icono={<Ticket aria-hidden className="size-5" />}
-          titulo="Anticipo a pagar"
-          meta="Se descuenta del total el día de la cita"
+          titulo={t("pago.anticipo_pagar")}
+          meta={t("pago.se_descuenta")}
           derecha={<span className="sn-price">{formatCOP(resumen.montoSena)}</span>}
         />
         {saldoLocal > 0 ? (
           <Fila
             icono={<Wallet aria-hidden className="size-5" />}
-            titulo="Pagas en el local"
+            titulo={t("pago.pagas_local")}
             derecha={<span className="sn-price">{formatCOP(saldoLocal)}</span>}
           />
         ) : null}
       </Filas>
 
-      <Sec>01 / Método de pago</Sec>
+      <Sec>{t("pago.sec_metodo")}</Sec>
       <Filas>
         <Fila
           icono={<ShieldCheck aria-hidden className="size-5" />}
           titulo="Mercado Pago"
-          meta="Tarjeta de crédito o débito, PSE y billeteras habilitadas. Eliges el medio en el siguiente paso."
+          meta={t("pago.mp_meta")}
           derecha={
             <Status tone="ok" icon={<Check aria-hidden className="size-3.5" />}>
-              Elegido
+              {t("pago.elegido")}
             </Status>
           }
         />
       </Filas>
-      <Bloque etiqueta="00 / Seguridad">
-        Pago seguro procesado por Mercado Pago. StylerNow no almacena los datos de tu tarjeta en ningún momento.
+      <Bloque etiqueta={t("pago.sec_seguridad")}>
+        {t("pago.seguridad_txt")}
       </Bloque>
 
       {error ? (
@@ -233,7 +236,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
       {/* Un solo botón de pago, deshabilitado tras el primer tap (05-API/01_Standards.md). */}
       <Pie>
         <Button size="lg" className="w-full" loading={iniciando} disabled={iniciando} onClick={pagar}>
-          Pagar anticipo {formatCOP(resumen.montoSena)}
+          {t("pago.pagar_anticipo", { monto: formatCOP(resumen.montoSena) })}
         </Button>
       </Pie>
     </Pantalla>

@@ -3,11 +3,12 @@ import { obtenerPreferencias } from "@/lib/cliente/preferencias";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { FormIdiomaRegion } from "./form-idioma-region";
+import { obtenerT } from "@/lib/i18n/servidor";
 
-export const metadata = {
-  title: "Idioma y región",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("aj.meta_idioma"), robots: { index: false, follow: false } };
+}
 
 export default async function IdiomaRegionPage() {
   const supabase = await createClient();

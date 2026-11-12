@@ -6,7 +6,7 @@ import type { Database } from "@/types/database";
  * Refresca la sesión de Supabase en cada request (05-API/02_Auth.md: rotación
  * de refresh token). Devuelve también el `user` ya resuelto (ADR-015) para
  * que `proxy.ts` decida público/protegido sin una segunda consulta — nunca
- * resuelve rol/onboarding/permisos acá, eso sigue siendo 100% server-side
+ * resuelve rol/onboarding/permisos aquí, eso sigue siendo 100% server-side
  * en `requireRole()`.
  */
 export async function updateSession(request: NextRequest, requestHeaders?: Headers): Promise<{
@@ -27,7 +27,7 @@ export async function updateSession(request: NextRequest, requestHeaders?: Heade
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     console.error(
       "[proxy] Faltan NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY en este entorno. " +
-        "Configuralas en Vercel → Project Settings → Environment Variables y volvé a desplegar."
+        "Configuralas en Vercel → Project Settings → Environment Variables y vuelve a desplegar."
     );
     return { response: supabaseResponse, user: null };
   }

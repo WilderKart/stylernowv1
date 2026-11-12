@@ -72,9 +72,9 @@ export async function crearReservaAction(args: {
       codigo,
       mensaje:
         codigo === "SLOT_NO_DISPONIBLE"
-          ? "Ese horario acaba de ocuparse. Elegí otro, ya actualizamos la lista."
+          ? "Ese horario acaba de ocuparse. Elige otro, ya actualizamos la lista."
           : codigo === "NO_AUTENTICADO"
-            ? "Tu sesión expiró. Volvé a iniciar sesión para reservar."
+            ? "Tu sesión expiró. Vuelve a iniciar sesión para reservar."
             : error.message,
     };
   }
@@ -96,7 +96,7 @@ export async function unirseListaEspera(args: {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return { ok: false, mensaje: "Iniciá sesión para unirte a la lista de espera." };
+  if (!user) return { ok: false, mensaje: "Inicia sesión para unirte a la lista de espera." };
 
   const { error } = await supabase.from("lista_espera").insert({
     cliente_id: user.id,

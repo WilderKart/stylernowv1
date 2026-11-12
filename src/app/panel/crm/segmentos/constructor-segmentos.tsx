@@ -83,9 +83,9 @@ export function ConstructorSegmentos({
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-6 sm:px-10">
       <p className="mb-4 text-[12.5px] text-text-muted">
-        Combiná filtros para armar una lista de Clientes — útil para campañas de
+        Combina filtros para armar una lista de Clientes — útil para campañas de
         notificación cuando ese módulo exista (Fase 6). Los segmentos siempre excluyen
-        a quien retiró su consentimiento de marketing, salvo que lo desactives acá para
+        a quien retiró su consentimiento de marketing, salvo que lo desactives aquí para
         solo mirar la lista.
       </p>
 
@@ -183,7 +183,7 @@ export function ConstructorSegmentos({
       ) : (
         <Card className="border-dashed">
           <p className="text-center text-[12.5px] text-text-faint">
-            Elegí una plantilla o armá un filtro personalizado para ver la lista.
+            Elige una plantilla o arma un filtro personalizado para ver la lista.
           </p>
         </Card>
       )}

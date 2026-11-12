@@ -32,7 +32,7 @@ export function resumenPoliticaCancelacion(negocio: {
   reembolso_parcial_pct: number;
 }) {
   return [
-    `Cancelás con más de ${negocio.ventana_reembolso_total_horas} h de anticipación: te devolvemos el 100% del anticipo.`,
+    `Cancelas con más de ${negocio.ventana_reembolso_total_horas} h de anticipación: te devolvemos el 100% del anticipo.`,
     `Entre ${negocio.ventana_reembolso_total_horas} h y ${negocio.ventana_reembolso_parcial_horas} h antes: ${negocio.reembolso_parcial_pct}%.`,
     `Con menos de ${negocio.ventana_reembolso_parcial_horas} h: el anticipo queda para el negocio por el espacio reservado.`,
     "Si el negocio cancela, te devolvemos el 100% siempre, sin importar cuándo.",

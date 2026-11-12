@@ -6,6 +6,7 @@ import { SlotsPorFranja } from "@/components/negocio/horas-agrupadas";
 import { FOTOS_RESPALDO, nivelATier } from "@/components/negocio/nivel";
 import { duracion, fechaCorta, fechaHoraLarga, fechaISO, hora, hoyISO, sumarDias } from "@/lib/formato";
 import { AvisoDistancia } from "./aviso-distancia";
+import { useT } from "@/lib/i18n/proveedor";
 import { calcularSenaEstimada, resumenPoliticaCancelacion, type ConfigSena } from "@/lib/pagos/sena";
 import { cn, formatCOP } from "@/lib/utils";
 import Link from "next/link";
@@ -58,7 +59,7 @@ export interface Profesional {
   servicio_ids: string[];
 }
 
-const PASOS = ["Servicio", "Profesional", "Hora", "Resumen"];
+const PASOS = ["res.paso_servicio", "res.paso_profesional", "res.paso_hora", "res.paso_resumen"] as const;
 
 export function FlujoReserva({
   negocio,
@@ -74,6 +75,7 @@ export function FlujoReserva({
   combos: Combo[];
 }) {
   const router = useRouter();
+  const t = useT();
   const staffInicial = useSearchParams().get("staff");
 
   const [paso, setPaso] = useState(1);
@@ -128,10 +130,11 @@ export function FlujoReserva({
           }
         }
       } catch (e) {
-        setError(e instanceof Error ? e.message : "No pudimos cargar los horarios.");
+        setError(e instanceof Error ? e.message : t("res.err_horarios"));
         setSlots([]);
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- t es estable por idioma
   }, [paso, sede, servicioIds, fecha, staffId]);
 
   /** Cambiar los Servicios cambia la duración: el horario elegido deja de ser válido. */
@@ -230,7 +233,7 @@ export function FlujoReserva({
     <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
       <Meta>
         {paso === 1
-          ? `${seleccionados.length} ${seleccionados.length === 1 ? "servicio" : "servicios"} · ${duracion(minutosTotal)}`
+          ? `${seleccionados.length === 1 ? t("res.n_servicio", { n: seleccionados.length }) : t("res.n_servicios", { n: seleccionados.length })} · ${duracion(minutosTotal)}`
           : paso === 3 && slot
             ? `${fechaCorta(fecha, tz)} · ${hora(slot.hora_inicio, tz)}`
             : `${duracion(minutosTotal)}`}
@@ -244,18 +247,18 @@ export function FlujoReserva({
       {/* ── Barra superior + progreso ───────────────────────────────── */}
       <div className="p-top">
         {paso > 1 ? (
-          <button type="button" onClick={volver} aria-label="Volver al paso anterior" className="sn-iconbtn">
+          <button type="button" onClick={volver} aria-label={t("res.volver_paso")} className="sn-iconbtn">
             {iconoVolver}
           </button>
         ) : (
-          <Link href={`/negocio/${negocio.slug}`} aria-label="Volver al negocio" className="sn-iconbtn">
+          <Link href={`/negocio/${negocio.slug}`} aria-label={t("res.volver_negocio")} className="sn-iconbtn">
             {iconoVolver}
           </Link>
         )}
-        <span className="sn-num min-w-0 break-words">Reserva · {negocio.nombre}</span>
+        <span className="sn-num min-w-0 break-words">{t("res.reserva_negocio", { nombre: negocio.nombre })}</span>
         <span className="p-top__r" />
       </div>
-      <ol className="p-steps m-0 list-none p-0" aria-label="Pasos de la reserva">
+      <ol className="p-steps m-0 list-none p-0" aria-label={t("res.pasos")}>
         {PASOS.map((nombre, i) => (
           <li
             key={nombre}
@@ -266,7 +269,7 @@ export function FlujoReserva({
               i + 1 < paso && "bg-text text-bg"
             )}
           >
-            {String(i + 1).padStart(2, "0")} {nombre}
+            {String(i + 1).padStart(2, "0")} {t(nombre)}
           </li>
         ))}
       </ol>
@@ -279,14 +282,14 @@ export function FlujoReserva({
         {paso === 1 ? (
           <section>
             <h1 className="poster-2 px-4 pt-3 pb-4 break-words">
-              ¿Qué te
+              {t("res.t1_1")}
               <br />
-              <span className="sn-hot">hacemos?</span>
+              <span className="sn-hot">{t("res.t1_2")}</span>
             </h1>
 
             {sedes.length > 1 ? (
               <div className="sn-field px-4 pb-4">
-                <label htmlFor="sede">Sede</label>
+                <label htmlFor="sede">{t("res.sede")}</label>
                 <select
                   id="sede"
                   value={sedeId}
@@ -308,7 +311,7 @@ export function FlujoReserva({
             {combos.length > 0 ? (
               <div className="pb-1">
                 <div className="p-sec !pt-0">
-                  <Label>Combos</Label>
+                  <Label>{t("res.combos")}</Label>
                 </div>
                 <div className="p-chips">
                   {combos.map((c) => (
@@ -366,16 +369,16 @@ export function FlujoReserva({
         {paso === 2 ? (
           <section>
             <h1 className="poster-2 px-4 pt-3 pb-4 break-words">
-              ¿Con
+              {t("res.t2_1")}
               <br />
-              <span className="sn-hot">quién?</span>
+              <span className="sn-hot">{t("res.t2_2")}</span>
             </h1>
 
             {staffCompatible.length === 0 ? (
               <EmptyState
-                big="Sin match."
-                title="Ningún profesional ofrece esta combinación"
-                hint="Reservá los servicios por separado, en dos citas."
+                big={t("res.sin_match")}
+                title={t("res.sin_match_titulo")}
+                hint={t("res.sin_match_hint")}
               />
             ) : (
               <div className="p-stack px-4 pb-4">
@@ -392,8 +395,8 @@ export function FlujoReserva({
                   )}
                 >
                   <span className="min-w-0">
-                    <b className="section block text-base break-words">Cualquiera disponible</b>
-                    <span className="sn-meta !text-current">Te asignamos el primero libre · más horarios</span>
+                    <b className="section block text-base break-words">{t("res.cualquiera")}</b>
+                    <span className="sn-meta !text-current">{t("res.cualquiera_meta")}</span>
                   </span>
                   {iconoFlecha}
                 </button>
@@ -414,11 +417,11 @@ export function FlujoReserva({
                       <div className="sn-pro">
                         <Photo src={p.foto_url ?? FOTOS_RESPALDO[i % FOTOS_RESPALDO.length]} />
                         <div className="sn-pro__info">
-                          <span className="sn-meta">{p.especialidad ?? "Profesional"}</span>
+                          <span className="sn-meta">{p.especialidad ?? t("res.profesional")}</span>
                           <h3 className="sn-pro__name poster-5 break-words">{p.nombre}</h3>
                           <div className="sn-pro__foot">
                             {nivelATier(p.nivel) ? <Tier level={nivelATier(p.nivel)!} /> : <span />}
-                            <span className="sn-price">{activo ? "Elegido ✓" : "Elegir ↗"}</span>
+                            <span className="sn-price">{activo ? t("res.elegido") : t("res.elegir")}</span>
                           </div>
                         </div>
                       </div>
@@ -427,7 +430,7 @@ export function FlujoReserva({
                       href={`/negocio/${negocio.slug}/profesional/${p.staff_id}`}
                       className="sn-label inline-flex min-h-12 items-center underline"
                     >
-                      Ver perfil de {p.nombre} ↗
+                      {t("res.ver_perfil", { nombre: p.nombre })}
                     </Link>
                     </div>
                   );
@@ -441,13 +444,13 @@ export function FlujoReserva({
         {paso === 3 ? (
           <section>
             <h1 className="poster-2 px-4 pt-3 pb-4 break-words">
-              ¿Cuándo
+              {t("res.t3_1")}
               <br />
-              <span className="sn-hot">vienes?</span>
+              <span className="sn-hot">{t("res.t3_2")}</span>
             </h1>
             <div className="px-4 pb-2">
               <Label>
-                {duracion(minutosTotal)} · {profesional ? profesional.nombre : "Cualquiera disponible"}
+                {duracion(minutosTotal)} · {profesional ? profesional.nombre : t("res.cualquiera")}
               </Label>
             </div>
 
@@ -455,16 +458,16 @@ export function FlujoReserva({
               <Chip
                 disabled={inicioDias === 0}
                 onClick={() => setInicioDias((i) => Math.max(0, i - DIAS_POR_VENTANA))}
-                aria-label="Días anteriores"
+                aria-label={t("res.dias_anteriores")}
               >
-                ← Antes
+                {t("res.antes")}
               </Chip>
               <Chip
                 disabled={inicioDias + DIAS_POR_VENTANA >= DIAS_VISIBLES}
                 onClick={() => setInicioDias((i) => Math.min(DIAS_VISIBLES - DIAS_POR_VENTANA, i + DIAS_POR_VENTANA))}
-                aria-label="Días siguientes"
+                aria-label={t("res.dias_siguientes")}
               >
-                Después →
+                {t("res.despues")}
               </Chip>
             </div>
             <div className="px-4 pb-4">
@@ -493,22 +496,22 @@ export function FlujoReserva({
             </div>
 
             <div className="sn-row px-4 pb-2">
-              <Label>Horarios</Label>
-              <Meta>· tachado = ocupado</Meta>
+              <Label>{t("res.horarios")}</Label>
+              <Meta>{t("res.tachado")}</Meta>
             </div>
 
             <div className="px-4 pb-4">
               {cargandoSlots ? (
-                <div className="sn-slots" aria-busy="true" aria-label="Cargando horarios">
+                <div className="sn-slots" aria-busy="true" aria-label={t("res.cargando_horarios")}>
                   {Array.from({ length: 8 }, (_, i) => (
                     <div key={i} className="sn-slot animate-pulse bg-surface" />
                   ))}
                 </div>
               ) : slots.length === 0 ? (
                 <div className="border-2 border-dashed border-line p-6 text-center">
-                  <h3 className="section">No hay horarios ese día</h3>
+                  <h3 className="section">{t("res.no_horarios")}</h3>
                   <p className="sn-meta mx-auto mt-2 max-w-[320px]">
-                    Probá con otra fecha o avisanos y te escribimos apenas se libere un cupo.
+                    {t("res.no_horarios_hint")}
                   </p>
                   {avisoEspera ? (
                     <div className="mt-3">
@@ -516,7 +519,7 @@ export function FlujoReserva({
                     </div>
                   ) : (
                     <Button size="sm" variant="secondary" className="mt-4" onClick={anotarseEnEspera}>
-                      Avisarme cuando haya cupo
+                      {t("res.avisarme")}
                     </Button>
                   )}
                 </div>
@@ -527,14 +530,14 @@ export function FlujoReserva({
 
                   {libres.length === 0 ? (
                     <div className="mt-4 border-2 border-line p-4 text-center">
-                      <p className="body-sm m-0">Todos los turnos de ese día están tomados.</p>
+                      <p className="body-sm m-0">{t("res.todos_tomados")}</p>
                       {avisoEspera ? (
                         <div className="mt-3">
                           <Status tone="ok">{avisoEspera}</Status>
                         </div>
                       ) : (
                         <Button size="sm" variant="secondary" className="mt-3" onClick={anotarseEnEspera}>
-                          Avisarme cuando haya cupo
+                          {t("res.avisarme")}
                         </Button>
                       )}
                     </div>
@@ -549,9 +552,9 @@ export function FlujoReserva({
         {paso === 4 && slot ? (
           <section>
             <h1 className="poster-2 px-4 pt-3 pb-4 break-words">
-              Confirma
+              {t("res.t4_1")}
               <br />
-              <span className="sn-hot">tu turno.</span>
+              <span className="sn-hot">{t("res.t4_2")}</span>
             </h1>
 
             <div className="px-4 pb-4">
@@ -562,16 +565,16 @@ export function FlujoReserva({
                     <b>{Number(fechaISO(slot.hora_inicio, tz).slice(8, 10))}</b>
                   </div>
                   <div className="sn-ticket__main min-w-0">
-                    <Status tone="warn">Pendiente de pago</Status>
+                    <Status tone="warn">{t("estado.pendiente_pago")}</Status>
                     <h3 className="poster-5 m-0 break-words">{seleccionados.map((s) => s.nombre).join(" + ")}</h3>
                     <span className="sn-meta break-words">
-                      {profesional ? profesional.nombre : "Profesional por asignar"} · {hora(slot.hora_inicio, tz)} · {sede?.nombre}
+                      {profesional ? profesional.nombre : t("res.por_asignar")} · {hora(slot.hora_inicio, tz)} · {sede?.nombre}
                     </span>
                   </div>
                 </div>
                 <div className="sn-ticket__perf" />
                 <div className="sn-ticket__foot">
-                  <span className="sn-label">Total</span>
+                  <span className="sn-label">{t("res.total")}</span>
                   <span className="sn-fig text-[22px]">{formatCOP(montoTotal)}</span>
                 </div>
               </div>
@@ -579,11 +582,11 @@ export function FlujoReserva({
 
             <div className="border-t-2 border-line">
               {[
-                ["Servicios", seleccionados.map((s) => s.nombre).join(" + ")],
-                ["Profesional", profesional ? profesional.nombre : "Se asigna al confirmar"],
-                ["Sede", sede?.nombre ?? ""],
-                ["Fecha y hora", fechaHoraLarga(slot.hora_inicio, tz)],
-                ["Duración", duracion(minutosTotal)],
+                [t("res.k_servicios"), seleccionados.map((s) => s.nombre).join(" + ")],
+                [t("res.k_profesional"), profesional ? profesional.nombre : t("res.se_asigna")],
+                [t("res.k_sede"), sede?.nombre ?? ""],
+                [t("res.k_fecha"), fechaHoraLarga(slot.hora_inicio, tz)],
+                [t("res.k_duracion"), duracion(minutosTotal)],
               ].map(([k, v]) => (
                 <div key={k} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-grid-soft px-4 py-3">
                   <span className="sn-meta">{k}</span>
@@ -591,21 +594,21 @@ export function FlujoReserva({
                 </div>
               ))}
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-grid-soft px-4 py-3">
-                <span className="sn-meta">Total del servicio</span>
+                <span className="sn-meta">{t("res.total_servicio")}</span>
                 <span className="sn-price">{formatCOP(montoTotal)}</span>
               </div>
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b-2 border-line bg-signal px-4 py-3 text-ink">
-                <span className="sn-label">Anticipo a pagar ahora</span>
+                <span className="sn-label">{t("res.anticipo_ahora")}</span>
                 <span className="sn-fig text-[22px]">{formatCOP(sena)}</span>
               </div>
             </div>
             {sena < montoTotal ? (
-              <p className="sn-meta m-0 px-4 pt-2">El saldo de {formatCOP(montoTotal - sena)} lo pagás en el local.</p>
+              <p className="sn-meta m-0 px-4 pt-2">{t("res.saldo_local", { monto: formatCOP(montoTotal - sena) })}</p>
             ) : null}
 
             {/* Nunca se paga sin ver antes la política de cancelación. */}
             <div className="p-sec">
-              <Num>Política de cancelación</Num>
+              <Num>{t("res.politica")}</Num>
             </div>
             <ul className="body-sm m-0 flex list-none flex-col gap-1.5 px-4">
               {resumenPoliticaCancelacion(negocio).map((linea) => (
@@ -643,12 +646,12 @@ export function FlujoReserva({
               setPaso((p) => p + 1);
             }}
           >
-            <span>Continuar</span>
+            <span>{t("comun.continuar")}</span>
             {iconoFlecha}
           </Button>
         ) : (
           <Button size="lg" className="w-full justify-between" loading={confirmando} onClick={confirmar}>
-            <span>Ir a pagar {formatCOP(sena)}</span>
+            <span>{t("res.ir_pagar", { monto: formatCOP(sena) })}</span>
             {iconoFlecha}
           </Button>
         )}

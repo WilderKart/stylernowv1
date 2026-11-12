@@ -6,7 +6,7 @@ import { esRutaPublica } from "@/lib/routing/route-registry";
  * ADR-015 — middleware liviano y consciente del Route Registry: decide
  * público/protegido con un import estático (`route-registry.ts`, cero DB) y
  * redirige a `/login` si falta sesión en una ruta protegida. Nunca resuelve
- * rol, onboarding ni permisos acá — eso vive 100% en `requireRole()`
+ * rol, onboarding ni permisos aquí — eso vive 100% en `requireRole()`
  * server-side (Edge Middleware no debe cargar con una consulta a DB).
  */
 /**
@@ -47,7 +47,7 @@ export async function proxy(request: NextRequest) {
   // ADR-015 auditoría (2026-09-16, evidencia real con curl+sesión): las
   // rutas /api/** (Route Handlers) NUNCA pasan por el redirect a /login —
   // ya devuelven su propio 401/403 real (verificado: sin cookie → 401,
-  // Guardian sin permiso → 403). Redirigirlas acá las rompía: un consumidor
+  // Guardian sin permiso → 403). Redirigirlas aquí las rompía: un consumidor
   // de API recibía un 307 a una página HTML en vez del 401 esperado.
   if (pathname.startsWith("/api/")) return response;
 
@@ -62,6 +62,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|.*\\.(?:svg|png|jpg|jpeg|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|webp|ico)$).*)",
   ],
 };

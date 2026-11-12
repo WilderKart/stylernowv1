@@ -1,5 +1,7 @@
 import { Num, Photo, Status } from "@/components/brutal";
-import { proximaDisponibilidad } from "@/lib/formato";
+import { hora } from "@/lib/formato";
+import { obtenerT } from "@/lib/i18n/servidor";
+import type { Traductor } from "@/lib/i18n/diccionario";
 import { cn, formatCOP } from "@/lib/utils";
 import Link from "next/link";
 import { fotoNegocio } from "./foto-respaldo";
@@ -26,7 +28,16 @@ export interface NegocioTarjeta {
  * foto usa una imagen de respaldo del sistema, nunca un espacio roto
  * (02-UX/04_Marketplace.md, caso límite). `patrocinado` = tarjeta destacada en naranja.
  */
-export function NegocioCard({
+/** "Disponible ahora" / "Disponible en 20 min" / "Próximo turno 15:30" según la próxima disponibilidad. */
+function etiquetaDisponibilidad(instante: string | null, t: Traductor) {
+  if (!instante) return null;
+  const minutos = Math.round((new Date(instante).getTime() - Date.now()) / 60000);
+  if (minutos <= 0) return t("disp.ahora");
+  if (minutos < 60) return t("disp.en_min", { n: minutos });
+  return t("disp.proximo", { hora: hora(instante) });
+}
+
+export async function NegocioCard({
   negocio,
   index,
   className,
@@ -35,7 +46,8 @@ export function NegocioCard({
   index?: number;
   className?: string;
 }) {
-  const disponibilidad = proximaDisponibilidad(negocio.proxima_disponibilidad);
+  const t = await obtenerT();
+  const disponibilidad = etiquetaDisponibilidad(negocio.proxima_disponibilidad, t);
 
   const href =
     negocio.patrocinado && negocio.campana_id
@@ -47,7 +59,7 @@ export function NegocioCard({
       href={href}
       className={cn("sn-shop relative min-w-0 text-text no-underline", negocio.patrocinado && "is-featured", className)}
     >
-      {negocio.patrocinado ? <span className="p-spons">Patrocinado</span> : null}
+      {negocio.patrocinado ? <span className="p-spons">{t("card.patrocinado")}</span> : null}
       <Photo src={fotoNegocio(negocio.id, negocio.logo_url)} className="!h-[110px]" />
       <div className="sn-shop__body">
         {index != null ? <Num>{String(index).padStart(2, "0")} /</Num> : <span />}
@@ -63,10 +75,10 @@ export function NegocioCard({
         ) : null}
         <div className="sn-shop__foot gap-2">
           <span className="sn-price">
-            {negocio.total_resenas > 0 ? `★ ${negocio.calificacion.toFixed(1).replace(".", ",")}` : "NUEVO"}
+            {negocio.total_resenas > 0 ? `★ ${negocio.calificacion.toFixed(1).replace(".", ",")}` : t("card.nuevo")}
           </span>
           {negocio.precio_desde !== null ? (
-            <span className="sn-price text-right">Desde {formatCOP(negocio.precio_desde)} ↗</span>
+            <span className="sn-price text-right">{t("card.desde", { precio: formatCOP(negocio.precio_desde) })} ↗</span>
           ) : (
             <span className="sn-price">↗</span>
           )}

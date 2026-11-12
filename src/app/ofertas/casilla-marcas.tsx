@@ -5,9 +5,11 @@ import { Check } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { cambiarConsentimientoMarcas } from "./actions";
+import { useT } from "@/lib/i18n/proveedor";
 
 /** Casilla APARTE, opcional y nunca premarcada: parte del estado real guardado en la BD. */
 export function CasillaMarcas({ activoInicial }: { activoInicial: boolean }) {
+  const t = useT();
   const [activo, setActivo] = useState(activoInicial);
   const [error, setError] = useState<string | null>(null);
   const [pendiente, iniciar] = useTransition();
@@ -41,9 +43,9 @@ export function CasillaMarcas({ activoInicial }: { activoInicial: boolean }) {
           {activo ? <Check className="size-4" strokeWidth={3} /> : null}
         </span>
         <span className="body-sm min-w-0 break-words">
-          Quiero recibir beneficios de marcas aliadas de cuidado personal. Compartimos solo tu nombre y ciudad, nunca tu teléfono ni tu correo. Puedes retirarlo en{" "}
+          {t("of.casilla")}{" "}
           <Link href="/privacidad" className="underline">
-            Privacidad ↗
+            {t("of.privacidad")}
           </Link>
         </span>
       </label>

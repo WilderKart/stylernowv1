@@ -4,10 +4,15 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { obtenerResumenLealtad } from "./actions";
 import { VistaLealtad } from "./vista-lealtad";
+import { obtenerT } from "@/lib/i18n/servidor";
 
-export const metadata = { title: "Mi Lealtad" };
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("ll.meta") };
+}
 
 export default async function LealtadPage() {
+  const t = await obtenerT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -18,7 +23,7 @@ export default async function LealtadPage() {
 
   return (
     <Pantalla className="pb-24">
-      <Top titulo="Mi lealtad" volverA="/perfil" />
+      <Top titulo={t("ll.top")} volverA="/perfil" />
       <VistaLealtad
         resumenInicial={
           resumen.ok

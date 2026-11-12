@@ -9,14 +9,17 @@ import { cn } from "@/lib/utils";
 import { ChevronLeft, Send } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useT } from "@/lib/i18n/proveedor";
+import { useIdioma } from "@/lib/i18n/proveedor";
+import type { Traductor } from "@/lib/i18n/diccionario";
 import { enviarMensajeAction, listarMensajesAction, marcarLeidoAction } from "../actions-cita";
 
-const RAPIDOS = ["Voy en camino", "Llego 10 min tarde", "Gracias"];
+const RAPIDOS = ["chat.rapido_camino", "chat.rapido_tarde", "chat.rapido_gracias"] as const;
 const POLL_MS = 5000;
 
-function etiquetaDia(iso: string, tz: string) {
-  if (fechaISO(iso, tz) === fechaISO(new Date(), tz)) return "Hoy";
-  return new Intl.DateTimeFormat("es-CO", { timeZone: tz, day: "numeric", month: "short" }).format(new Date(iso)).toUpperCase();
+function etiquetaDia(iso: string, tz: string, t: Traductor, locale: string) {
+  if (fechaISO(iso, tz) === fechaISO(new Date(), tz)) return t("chat.hoy");
+  return new Intl.DateTimeFormat(locale, { timeZone: tz, day: "numeric", month: "short" }).format(new Date(iso)).toUpperCase();
 }
 
 export function ChatCliente({
@@ -38,6 +41,8 @@ export function ChatCliente({
   iniciales: MensajeChat[];
   errorInicial: string | null;
 }) {
+  const t = useT();
+  const idioma = useIdioma();
   const [mensajes, setMensajes] = useState<MensajeChat[]>(iniciales);
   const [borrador, setBorrador] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -65,10 +70,10 @@ export function ChatCliente({
 
   // Polling cada ~5 s mientras la pestaña está visible (no hay realtime).
   useEffect(() => {
-    const t = setInterval(() => {
+    const temporizador = setInterval(() => {
       if (document.visibilityState === "visible") void refrescar();
     }, POLL_MS);
-    return () => clearInterval(t);
+    return () => clearInterval(temporizador);
   }, [refrescar]);
 
   // Marcar leído al abrir y cuando llega un mensaje nuevo del negocio.
@@ -94,7 +99,7 @@ export function ChatCliente({
       setMensajes((prev) => (prev.some((m) => m.id === r.data.id) ? prev : [...prev, r.data]));
       setBorrador("");
     } catch {
-      setError("No pudimos enviar el mensaje. Revisa tu conexión.");
+      setError(t("chat.err_enviar"));
     } finally {
       setEnviando(false);
     }
@@ -103,13 +108,13 @@ export function ChatCliente({
   return (
     <Pantalla className="h-dvh min-h-0">
       <div className="p-top">
-        <Link href={`/reserva/${reservaId}`} className="sn-iconbtn" aria-label="Volver">
+        <Link href={`/reserva/${reservaId}`} className="sn-iconbtn" aria-label={t("comun.volver")}>
           <ChevronLeft aria-hidden />
         </Link>
         <Avatar name={negocio} src={logo} size="sm" />
         <div className="min-w-0 flex-1">
           <b className="block truncate uppercase">{negocio}</b>
-          <span className="sn-meta block truncate">Chat de tu cita</span>
+          <span className="sn-meta block truncate">{t("chat.de_tu_cita")}</span>
         </div>
       </div>
 
@@ -123,13 +128,13 @@ export function ChatCliente({
         </span>
       </Link>
 
-      <div role="log" aria-label="Conversación" aria-live="polite" className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4">
+      <div role="log" aria-label={t("chat.conversacion")} aria-live="polite" className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4">
         {mensajes.length === 0 ? (
-          <p className="sn-meta m-auto max-w-[28ch] text-center">Aún no hay mensajes. Escríbele al negocio sobre tu cita.</p>
+          <p className="sn-meta m-auto max-w-[28ch] text-center">{t("chat.sin_mensajes")}</p>
         ) : null}
         {mensajes.map((m, i) => {
           const separador =
-            i === 0 || fechaISO(m.created_at, tz) !== fechaISO(mensajes[i - 1].created_at, tz) ? etiquetaDia(m.created_at, tz) : null;
+            i === 0 || fechaISO(m.created_at, tz) !== fechaISO(mensajes[i - 1].created_at, tz) ? etiquetaDia(m.created_at, tz, t, idioma === "en" ? "en-US" : "es-CO") : null;
           return (
             <div key={m.id} className="flex flex-col gap-3">
               {separador ? (
@@ -150,7 +155,7 @@ export function ChatCliente({
                 </div>
                 <span className="sn-meta">
                   {horaCorta(m.created_at, tz)}
-                  {m.es_mio && m.leido_por_otro ? " · Leído" : ""}
+                  {m.es_mio && m.leido_por_otro ? t("chat.leido") : ""}
                 </span>
               </div>
             </div>
@@ -161,7 +166,7 @@ export function ChatCliente({
 
       {sinRed ? (
         <p role="status" className="sn-meta px-4 pb-2">
-          Sin conexión: reintentando…
+          {t("chat.sin_conexion")}
         </p>
       ) : null}
       {error ? (
@@ -173,9 +178,9 @@ export function ChatCliente({
       {habilitado ? (
         <>
           <div className="flex flex-wrap gap-2 px-4 pb-2">
-            {RAPIDOS.map((t) => (
-              <button key={t} type="button" className="sn-chip" disabled={enviando} onClick={() => enviar(t)}>
-                {t}
+            {RAPIDOS.map((r) => (
+              <button key={r} type="button" className="sn-chip" disabled={enviando} onClick={() => enviar(t(r))}>
+                {t(r)}
               </button>
             ))}
           </div>
@@ -187,7 +192,7 @@ export function ChatCliente({
             className="flex items-stretch gap-2 border-t-2 border-border bg-bg p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
           >
             <label htmlFor="msg" className="sr-only">
-              Mensaje
+              {t("chat.mensaje")}
             </label>
             <div className="sn-input min-w-0 flex-1">
               <input
@@ -196,17 +201,17 @@ export function ChatCliente({
                 maxLength={1000}
                 autoComplete="off"
                 onChange={(e) => setBorrador(e.target.value)}
-                placeholder="Escribe un mensaje…"
+                placeholder={t("chat.escribe")}
               />
             </div>
-            <Button type="submit" size="md" aria-label="Enviar" loading={enviando} disabled={!borrador.trim()}>
-              Enviar
+            <Button type="submit" size="md" aria-label={t("chat.enviar")} loading={enviando} disabled={!borrador.trim()}>
+              {t("chat.enviar")}
               <Send aria-hidden className="size-[18px]" />
             </Button>
           </form>
         </>
       ) : (
-        <p className="sn-meta border-t-2 border-border p-4 text-center">El chat de esta cita ya está cerrado.</p>
+        <p className="sn-meta border-t-2 border-border p-4 text-center">{t("chat.cerrado")}</p>
       )}
     </Pantalla>
   );

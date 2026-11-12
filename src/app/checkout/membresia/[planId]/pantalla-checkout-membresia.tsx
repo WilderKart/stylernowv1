@@ -8,6 +8,7 @@ import { formatCOP } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { consultarEstadoCompraMembresia, iniciarCompraMembresia } from "./actions";
+import { useT } from "@/lib/i18n/proveedor";
 
 const INTERVALO_POLLING_MS = 4_000;
 
@@ -21,6 +22,7 @@ export interface ResumenCompraMembresia {
 
 export function PantallaCheckoutMembresia({ resumen }: { resumen: ResumenCompraMembresia }) {
   const router = useRouter();
+  const t = useT();
   const searchParams = useSearchParams();
   const [iniciando, setIniciando] = useState(false);
   const [pagoId, setPagoId] = useState<string | null>(searchParams.get("pagoId"));
@@ -37,11 +39,11 @@ export function PantallaCheckoutMembresia({ resumen }: { resumen: ResumenCompraM
         router.replace(`/membresias/${estado.membresiaId}`);
       } else if (estado.pago === "RECHAZADO") {
         setEsperando(false);
-        setError("El pago fue rechazado. Puedes intentar de nuevo con otro medio.");
+        setError(t("pago.rechazado"));
       }
     }, INTERVALO_POLLING_MS);
     return () => clearInterval(intervalo);
-  }, [pagoId, router]);
+  }, [pagoId, router, t]);
 
   async function comprar() {
     setIniciando(true);
@@ -57,15 +59,15 @@ export function PantallaCheckoutMembresia({ resumen }: { resumen: ResumenCompraM
   if (esperando) {
     return (
       <main className="sn-block-ink !bg-ink !text-paper flex flex-1 flex-col justify-center gap-6 px-4 py-6" role="status" aria-live="polite">
-        <span className="sn-num !text-signal">00 / Pagando</span>
+        <span className="sn-num !text-signal">{t("pago.pagando")}</span>
         <p className="poster-1 break-words !text-paper">
-          Un
+          {t("pago.un_1")}
           <br />
-          <span className="sn-hot">momento.</span>
+          <span className="sn-hot">{t("pago.un_2")}</span>
         </p>
-        <Barra pct={68} etiqueta="Confirmando el pago" className="!h-5 !border-paper" />
-        <p className="body m-0 text-[#D4D4D4]">Confirmando tu pago con Mercado Pago. No cierres la app.</p>
-        <span className="sn-meta !text-[#A3A3A3]">Pago seguro · StylerNow no guarda los datos de tu tarjeta</span>
+        <Barra pct={68} etiqueta={t("pago.confirmando_aria")} className="!h-5 !border-paper" />
+        <p className="body m-0 text-[#D4D4D4]">{t("pago.confirmando_mp")}</p>
+        <span className="sn-meta !text-[#A3A3A3]">{t("pago.seguro")}</span>
       </main>
     );
   }
@@ -75,38 +77,38 @@ export function PantallaCheckoutMembresia({ resumen }: { resumen: ResumenCompraM
       <div className="p-4">
         <TicketCita
           dia={String(resumen.duracionMeses)}
-          mes={resumen.duracionMeses > 1 ? "Meses" : "Mes"}
+          mes={resumen.duracionMeses > 1 ? t("co.meses") : t("co.mes")}
           estado={
             <Status tone="warn" icon={<Clock aria-hidden className="size-3.5" />}>
-              Pendiente de pago
+              {t("estado.pendiente_pago")}
             </Status>
           }
           titulo={resumen.nombrePlan}
-          lineas={[resumen.negocio, `Se renueva cada ${resumen.duracionMeses} mes${resumen.duracionMeses > 1 ? "es" : ""}`]}
+          lineas={[resumen.negocio, resumen.duracionMeses > 1 ? t("co.renueva_n", { n: resumen.duracionMeses }) : t("co.renueva", { n: resumen.duracionMeses })]}
           pie={
             <>
-              <span className="sn-label">Total a pagar</span>
+              <span className="sn-label">{t("co.total")}</span>
               <span className="sn-fig text-[22px]">{formatCOP(resumen.precio)}</span>
             </>
           }
         />
       </div>
 
-      <Sec>01 / Método de pago</Sec>
+      <Sec>{t("pago.sec_metodo")}</Sec>
       <Filas>
         <Fila
           icono={<ShieldCheck aria-hidden className="size-5" />}
           titulo="Mercado Pago"
-          meta="Eliges el medio en el siguiente paso."
+          meta={t("co.mp_meta")}
           derecha={
             <Status tone="ok" icon={<Check aria-hidden className="size-3.5" />}>
-              Elegido
+              {t("pago.elegido")}
             </Status>
           }
         />
       </Filas>
-      <Bloque etiqueta="00 / Seguridad">
-        Pago seguro procesado por Mercado Pago. StylerNow no almacena los datos de tu tarjeta en ningún momento.
+      <Bloque etiqueta={t("pago.sec_seguridad")}>
+        {t("pago.seguridad_txt")}
       </Bloque>
 
       {error ? (
@@ -118,7 +120,7 @@ export function PantallaCheckoutMembresia({ resumen }: { resumen: ResumenCompraM
       <div className="flex-1" />
       <Pie>
         <Button size="lg" className="w-full" loading={iniciando} disabled={iniciando} onClick={comprar}>
-          Pagar {formatCOP(resumen.precio)}
+          {t("co.pagar", { monto: formatCOP(resumen.precio) })}
         </Button>
       </Pie>
     </main>

@@ -30,7 +30,7 @@ export function VistaSoporte({
   const [error, setError] = useState(errorInicial);
 
   async function crear() {
-    if (!asunto.trim() || !mensaje.trim()) return setError("Completá el asunto y el mensaje.");
+    if (!asunto.trim() || !mensaje.trim()) return setError("Completa el asunto y el mensaje.");
     setGuardando(true);
     setError(null);
     const res = await crearTicket(asunto, mensaje, negocioId);
@@ -63,7 +63,7 @@ export function VistaSoporte({
               value={mensaje}
               onChange={(e) => setMensaje(e.target.value)}
               className="min-h-[100px] rounded-xl border border-border bg-bg p-3 text-[13px] text-text outline-none focus:border-accent/60"
-              placeholder="Contanos el detalle de tu consulta o problema..."
+              placeholder="Cuéntanos el detalle de tu consulta o problema..."
             />
           </div>
           <Button size="sm" loading={guardando} onClick={crear}>

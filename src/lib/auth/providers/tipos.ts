@@ -3,7 +3,7 @@
  * y (en el futuro) Apple/Microsoft/GitHub implementan exactamente esta
  * interfaz — agregar uno nuevo nunca debe requerir tocar `login/actions.ts`,
  * `/auth/callback`, ni ningún guard (`requireRole`/`resolverContexto`/etc.).
- * El rol de la persona NUNCA sale de acá — un proveedor solo autentica,
+ * El rol de la persona NUNCA sale de aquí — un proveedor solo autentica,
  * el rol siempre se deriva después de `negocio`/`vinculo_staff_negocio`/
  * `perfil.es_supersu`, igual que con OTP o password.
  */

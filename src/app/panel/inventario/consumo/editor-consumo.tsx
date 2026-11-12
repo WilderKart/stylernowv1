@@ -47,7 +47,7 @@ export function EditorConsumo({
   if (servicios.length === 0 || productos.length === 0) {
     return (
       <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-[12.5px] text-text-faint">
-        Necesitás al menos un Servicio activo y un Producto activo para configurar consumo.
+        Necesitas al menos un Servicio activo y un Producto activo para configurar consumo.
       </p>
     );
   }

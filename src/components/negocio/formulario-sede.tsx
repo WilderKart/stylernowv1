@@ -97,7 +97,7 @@ export function FormularioSede({
 
   function usarUbicacionActual() {
     if (!("geolocation" in navigator)) {
-      setError("Tu navegador no soporta geolocalización — podés seguir sin esto.");
+      setError("Tu navegador no soporta geolocalización — puedes seguir sin esto.");
       return;
     }
     setBuscandoUbicacion(true);
@@ -107,7 +107,7 @@ export function FormularioSede({
         setBuscandoUbicacion(false);
       },
       () => {
-        setError("No pudimos acceder a tu ubicación — revisá los permisos del navegador.");
+        setError("No pudimos acceder a tu ubicación — revisa los permisos del navegador.");
         setBuscandoUbicacion(false);
       },
       { timeout: 10000 }
@@ -117,7 +117,7 @@ export function FormularioSede({
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!Object.values(horario).some((d) => d.abierto)) {
-      setError("Marcá al menos un día como abierto.");
+      setError("Marca al menos un día como abierto.");
       return;
     }
     setGuardando(true);

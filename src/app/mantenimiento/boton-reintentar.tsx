@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { consultarEstadoSistemaAction } from "@/components/sistema/actions";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { useT } from "@/lib/i18n/proveedor";
 
 export function BotonReintentar() {
   const router = useRouter();
+  const t = useT();
   const [pendiente, iniciar] = useTransition();
   const [sigue, setSigue] = useState(false);
 
@@ -31,11 +33,11 @@ export function BotonReintentar() {
     <div className="flex flex-col gap-3">
       {sigue ? (
         <p role="status" className="sn-meta">
-          Seguimos en mantenimiento. Inténtalo en unos minutos.
+          {t("mant.sigue")}
         </p>
       ) : null}
       <Button size="lg" className="w-full justify-between" loading={pendiente} onClick={reintentar}>
-        <span>Reintentar</span> <span aria-hidden>↗</span>
+        <span>{t("comun.reintentar")}</span> <span aria-hidden>↗</span>
       </Button>
     </div>
   );

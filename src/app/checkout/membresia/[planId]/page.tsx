@@ -2,11 +2,16 @@ import { Pantalla, Top } from "@/app/lealtad/ui-cliente";
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { PantallaCheckoutMembresia } from "./pantalla-checkout-membresia";
+import { obtenerT } from "@/lib/i18n/servidor";
 
-export const metadata = { title: "Comprar Membresía", robots: { index: false, follow: false } };
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("co.meta"), robots: { index: false, follow: false } };
+}
 
 export default async function CheckoutMembresiaPage(props: PageProps<"/checkout/membresia/[planId]">) {
   const { planId } = await props.params;
+  const t = await obtenerT();
   const supabase = await createClient();
 
   const {
@@ -26,7 +31,7 @@ export default async function CheckoutMembresiaPage(props: PageProps<"/checkout/
 
   return (
     <Pantalla>
-      <Top titulo="Comprar membresía" volverA={negocio ? `/negocio/${negocio.slug}/membresias/${plan.id}` : "/"} />
+      <Top titulo={t("co.top")} volverA={negocio ? `/negocio/${negocio.slug}/membresias/${plan.id}` : "/"} />
       <PantallaCheckoutMembresia
         resumen={{
           planId: plan.id,

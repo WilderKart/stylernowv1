@@ -17,12 +17,12 @@ async function usuarioActual() {
 }
 
 const MENSAJES_ERROR: Record<string, string> = {
-  NO_AUTORIZADO: "No tenés permiso de SuperSU.",
+  NO_AUTORIZADO: "No tienes permiso de SuperSU.",
   NEGOCIO_NO_ENCONTRADO: "No encontramos ese negocio.",
   TRANSICION_INVALIDA: "Ese negocio no está en un estado que permita esta acción.",
-  MOTIVO_REQUERIDO: "Tenés que indicar un motivo.",
+  MOTIVO_REQUERIDO: "Tienes que indicar un motivo.",
   CAUSA_INVALIDA: "Causa de suspensión inválida.",
-  SUSPENSION_POR_INFRACCION_REQUIERE_REACTIVACION_EXPLICITA: "Esta suspensión fue por infracción — usá 'Reactivar', no 'Forzar reactivación por pago externo'.",
+  SUSPENSION_POR_INFRACCION_REQUIERE_REACTIVACION_EXPLICITA: "Esta suspensión fue por infracción — usa 'Reactivar', no 'Forzar reactivación por pago externo'.",
   ESTADO_INVALIDO: "Estado de plan inválido.",
   TIPO_INVALIDO: "Elige el tipo de activación (transferencia, cortesía o contingencia de pasarela).",
   DIAS_REQUERIDOS_EN_TRIAL: "Indica cuántos días dura la prueba.",

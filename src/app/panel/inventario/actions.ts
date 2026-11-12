@@ -17,7 +17,7 @@ async function usuarioActual() {
 }
 
 const MENSAJES_ERROR: Record<string, string> = {
-  NO_AUTORIZADO: "No tenés permiso sobre esta sede.",
+  NO_AUTORIZADO: "No tienes permiso sobre esta sede.",
   CANTIDAD_INVALIDA: "La cantidad debe ser mayor a 0.",
   PRODUCTO_NO_ENCONTRADO: "No encontramos ese producto.",
   SEDE_NO_PERTENECE_AL_NEGOCIO: "Esa sede no pertenece a este negocio.",

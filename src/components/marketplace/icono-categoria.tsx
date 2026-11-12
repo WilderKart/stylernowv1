@@ -1,26 +1,27 @@
+import type { Clave as ClaveTexto } from "@/lib/i18n/diccionario";
 import { Eye, Flower2, Hand, HandHeart, PenTool, Scissors, Sparkles, Store } from "lucide-react";
 
 /**
  * Icono y nombre del tipo de negocio, para que se reconozca de un vistazo en el mapa y en las tarjetas.
  * Las claves son las del registro único (src/lib/categorias-negocio.ts).
  */
-const CATEGORIAS = {
-  barberia: { Icono: Scissors, etiqueta: "Barbería" },
-  grooming: { Icono: Scissors, etiqueta: "Grooming" },
-  salon: { Icono: Sparkles, etiqueta: "Salón" },
-  estilismo: { Icono: Sparkles, etiqueta: "Estilismo" },
-  manicura: { Icono: Hand, etiqueta: "Uñas" },
-  lashista: { Icono: Eye, etiqueta: "Pestañas" },
-  tatuajes: { Icono: PenTool, etiqueta: "Tatuajes" },
-  spa: { Icono: Flower2, etiqueta: "Spa" },
-  masajes: { Icono: HandHeart, etiqueta: "Masajes" },
-} as const;
+const CATEGORIAS: Record<string, { Icono: typeof Store; etiqueta: ClaveTexto }> = {
+  barberia: { Icono: Scissors, etiqueta: "cat.barberia" },
+  grooming: { Icono: Scissors, etiqueta: "cat.grooming" },
+  salon: { Icono: Sparkles, etiqueta: "cat.salon" },
+  estilismo: { Icono: Sparkles, etiqueta: "cat.estilismo" },
+  manicura: { Icono: Hand, etiqueta: "cat.manicura" },
+  lashista: { Icono: Eye, etiqueta: "cat.lashista" },
+  tatuajes: { Icono: PenTool, etiqueta: "cat.tatuajes" },
+  spa: { Icono: Flower2, etiqueta: "cat.spa" },
+  masajes: { Icono: HandHeart, etiqueta: "cat.masajes" },
+};
 
-type Clave = keyof typeof CATEGORIAS;
+type Clave = string;
 
 function datos(categoria: string[] | null | undefined) {
   const clave = (categoria ?? []).find((c): c is Clave => c in CATEGORIAS);
-  return clave ? CATEGORIAS[clave] : { Icono: Store, etiqueta: "Negocio" };
+  return clave ? CATEGORIAS[clave] : { Icono: Store, etiqueta: "cat.negocio" as ClaveTexto };
 }
 
 export function etiquetaCategoria(categoria: string[] | null | undefined) {

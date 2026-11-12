@@ -18,29 +18,31 @@ import { obtenerDetalleCita } from "@/lib/cliente/citas";
 import { sincronizarPago } from "@/lib/pagos/sincronizar";
 import { createClient } from "@/lib/supabase/server";
 import { formatCOP } from "@/lib/utils";
+import type { Traductor } from "@/lib/i18n/diccionario";
 import { CalendarPlus, Check, Clock, MapPin, MessageSquare, Navigation, Receipt, Star, Store, Wallet } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { BotonLlegue, FilaCompartir, Reprogramar } from "./acciones-cita";
 import { BotonCancelar } from "./boton-cancelar";
+import { obtenerT } from "@/lib/i18n/servidor";
 
-export const metadata = {
-  title: "Tu reserva",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("rv.meta"), robots: { index: false, follow: false } };
+}
 
 const TITULO = {
-  PENDIENTE_PAGO: "Falta pagar el anticipo",
-  CONFIRMADA: "Turno confirmado",
-  EN_CURSO: "Tu cita está en curso",
-  COMPLETADA: "Cita completada",
-  CANCELADA: "Reserva cancelada",
-  NO_SHOW: "No asististe a la cita",
+  PENDIENTE_PAGO: "rv.titulo_pendiente",
+  CONFIRMADA: "rv.titulo_confirmada",
+  EN_CURSO: "rv.titulo_en_curso",
+  COMPLETADA: "rv.titulo_completada",
+  CANCELADA: "rv.titulo_cancelada",
+  NO_SHOW: "rv.titulo_no_show",
 } as const;
 
 const MOTIVOS = {
-  PAGO_EXPIRADO: "No se completó el pago dentro de los 10 minutos y el horario se liberó.",
-  PAGO_RECHAZADO: "La pasarela rechazó el pago, así que el horario volvió a estar disponible.",
+  PAGO_EXPIRADO: "rv.motivo_expirado",
+  PAGO_RECHAZADO: "rv.motivo_rechazado",
 } as const;
 
 /**
@@ -70,11 +72,11 @@ function estimarReembolso(
 }
 
 /** "EN 1 H 04 MIN" hasta la cita, o null si ya empezó. */
-function cuentaAtras(horaInicio: string) {
+function cuentaAtras(horaInicio: string, t: Traductor) {
   const m = Math.floor((new Date(horaInicio).getTime() - Date.now()) / 60_000);
   if (m <= 0) return null;
-  if (m >= 1440) return `EN ${Math.floor(m / 1440)} D ${Math.floor((m % 1440) / 60)} H`;
-  return `EN ${Math.floor(m / 60)} H ${String(m % 60).padStart(2, "0")} MIN`;
+  if (m >= 1440) return t("rv.cuenta_dias", { d: Math.floor(m / 1440), h: Math.floor((m % 1440) / 60) });
+  return t("rv.cuenta_horas", { h: Math.floor(m / 60), m: String(m % 60).padStart(2, "0") });
 }
 
 async function cargar(id: string) {
@@ -94,6 +96,7 @@ async function cargar(id: string) {
 
 export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
   const { id } = await props.params;
+  const t = await obtenerT();
   const query = await props.searchParams;
   const supabase = await createClient();
 
@@ -159,7 +162,7 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
     servicios
       .map((s) => s?.nombre)
       .filter(Boolean)
-      .join(" + ") || "Servicio";
+      .join(" + ") || t("rv.servicio");
   const recienConfirmada = confirmada && query.desde === "pago";
   const saldoLocal = Number(reserva.monto_total) - Number(reserva.monto_sena);
 
@@ -167,7 +170,7 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
   // Si falla, la pantalla sigue mostrando el detalle básico sin las acciones extra.
   const det = await obtenerDetalleCita(id);
   const cita = det.ok ? det.data : null;
-  const cuentaRegresiva = confirmada ? cuentaAtras(reserva.hora_inicio) : null;
+  const cuentaRegresiva = confirmada ? cuentaAtras(reserva.hora_inicio, t) : null;
   const destinoMapa =
     cita?.sede.latitud != null && cita.sede.longitud != null
       ? `${cita.sede.latitud},${cita.sede.longitud}`
@@ -178,7 +181,7 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
     ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destinoMapa)}`
     : null;
   const textoCompartir = [
-    `${nombresServicios} en ${negocio?.nombre ?? "StylerNow"}`,
+    t("rv.texto_compartir", { servicios: nombresServicios, negocio: negocio?.nombre ?? "StylerNow" }),
     `${fechaHoraLarga(reserva.hora_inicio, tz)}`,
     sede ? `${sede.nombre} · ${sede.direccion}` : null,
     enlaceMapa,
@@ -192,40 +195,41 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
       {recienConfirmada ? (
         <>
           <div className="sn-block-signal !bg-signal !text-ink border-b-2 border-ink px-4 pt-5 pb-6">
-            <span className="sn-num !text-ink">00 / Listo</span>
+            <span className="sn-num !text-ink">{t("rv.listo")}</span>
             <h1 className="poster-1 mt-2.5 break-words">
-              Reserva
+              {t("rv.hecha_1")}
               <br />
-              hecha.
+              {t("rv.hecha_2")}
             </h1>
           </div>
-          <Marquee text={`Nos vemos el ${dm.dia} ${dm.mes} a las ${hora} ✶ Llega 5 minutos antes ✶ Tu profesional ya te espera`} tone="ink" />
+          <Marquee text={t("rv.marquee", { dia: dm.dia, mes: dm.mes, hora })} tone="ink" />
         </>
       ) : (
-        <Top titulo="Detalle de cita" volverA="/mis-reservas" />
+        <Top titulo={t("rv.detalle_cita")} volverA="/mis-reservas" />
       )}
 
       <div className="p-4">
-        {!recienConfirmada ? <h1 className="poster-3 mb-4 break-words">{TITULO[reserva.estado]}</h1> : null}
+        {!recienConfirmada ? <h1 className="poster-3 mb-4 break-words">{t(TITULO[reserva.estado])}</h1> : null}
         <TicketCita
           dia={dm.dia}
           mes={dm.mes}
           estado={<EstadoReservaStatus estado={reserva.estado} />}
           titulo={nombresServicios}
-          lineas={[cita ? `Ticket ${cita.codigo}` : null, `${staff?.nombre ?? "Por asignar"} · ${hora} – ${horaFin}`, negocio?.nombre ?? "—"].filter((l): l is string => Boolean(l))}
+          lineas={[cita ? t("rv.ticket", { codigo: cita.codigo }) : null, `${staff?.nombre ?? t("rv.por_asignar")} · ${hora} – ${horaFin}`, negocio?.nombre ?? "—"].filter((l): l is string => Boolean(l))}
           pie={
             <>
-              <span className="sn-label">{confirmada ? "Anticipo pagada" : "Anticipo"}</span>
+              <span className="sn-label">{confirmada ? t("rv.anticipo_pagada") : t("rv.anticipo")}</span>
               <span className="sn-price">{formatCOP(Number(reserva.monto_sena))}</span>
             </>
           }
         />
         {reserva.estado === "CANCELADA" ? (
           <p className="body-sm mt-4 break-words">
-            {MOTIVOS[reserva.cancelado_motivo as keyof typeof MOTIVOS] ??
-              (reserva.cancelado_por === "NEGOCIO"
-                ? "El negocio canceló la cita. Te devolvemos el 100% del anticipo."
-                : "La reserva quedó cancelada.")}
+            {MOTIVOS[reserva.cancelado_motivo as keyof typeof MOTIVOS]
+              ? t(MOTIVOS[reserva.cancelado_motivo as keyof typeof MOTIVOS])
+              : reserva.cancelado_por === "NEGOCIO"
+                ? t("rv.neg_cancelo")
+                : t("rv.cancelada_generica")}
           </p>
         ) : null}
       </div>
@@ -234,7 +238,7 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
         <div role="status" className="mx-4 mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 border-2 border-border p-3">
           <Clock aria-hidden className="size-5 shrink-0" />
           <span className="sn-label">{cuentaRegresiva}</span>
-          <span className="sn-meta">Llega 5 minutos antes.</span>
+          <span className="sn-meta">{t("rv.llega_antes")}</span>
         </div>
       ) : null}
 
@@ -248,31 +252,31 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
         <Fila
           icono={<Store aria-hidden className="size-5" />}
           titulo={negocio?.nombre ?? "—"}
-          meta={`${servicios.length > 1 ? "Servicios" : "Servicio"} · ${duracion(minutos)}`}
+          meta={`${servicios.length > 1 ? t("rv.servicios_lbl") : t("rv.servicio")} · ${duracion(minutos)}`}
           href={negocio ? `/negocio/${negocio.slug}` : undefined}
         />
         {sede ? (
-          <Fila icono={<MapPin aria-hidden className="size-5" />} titulo="Dónde" meta={`${sede.nombre} · ${sede.direccion}`} />
+          <Fila icono={<MapPin aria-hidden className="size-5" />} titulo={t("rv.donde")} meta={`${sede.nombre} · ${sede.direccion}`} />
         ) : null}
         <Fila
           icono={<Clock aria-hidden className="size-5" />}
-          titulo="Cuándo"
+          titulo={t("rv.cuando")}
           meta={<span className="capitalize">{fechaHoraLarga(reserva.hora_inicio, tz)}</span>}
         />
         <Fila
           icono={<Receipt aria-hidden className="size-5" />}
-          titulo="Total del servicio"
+          titulo={t("rv.total_servicio")}
           derecha={<span className="sn-price">{formatCOP(Number(reserva.monto_total))}</span>}
         />
         <Fila
           icono={<Wallet aria-hidden className="size-5" />}
-          titulo="Anticipo"
-          meta={confirmada && saldoLocal > 0 ? `Pagas ${formatCOP(saldoLocal)} en el local al terminar` : undefined}
+          titulo={t("rv.anticipo")}
+          meta={confirmada && saldoLocal > 0 ? t("rv.pagas_local", { monto: formatCOP(saldoLocal) }) : undefined}
           derecha={
             <>
               <span className="sn-price">{formatCOP(Number(reserva.monto_sena))}</span>
               <Status tone={confirmada ? "ok" : "warn"} icon={confirmada ? <Check aria-hidden className="size-3.5" /> : undefined}>
-                {confirmada ? "Pagada" : "Pendiente"}
+                {confirmada ? t("rv.pagada") : t("rv.pendiente")}
               </Status>
             </>
           }
@@ -280,29 +284,29 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
         {confirmada ? (
           <Fila
             icono={<CalendarPlus aria-hidden className="size-5" />}
-            titulo="Agregar al calendario"
-            meta="Google, Apple, Outlook"
+            titulo={t("rv.add_cal")}
+            meta={t("rv.add_cal_meta")}
             href={`/reserva/${reserva.id}/ics`}
             external
           />
         ) : null}
         {cita?.puede_reprogramar ? <Reprogramar reservaId={reserva.id} tz={tz} /> : null}
         {activa && enlaceMapa ? (
-          <Fila icono={<Navigation aria-hidden className="size-5" />} titulo="Cómo llegar" meta="Abre la ruta en tu app de mapas" href={enlaceMapa} external />
+          <Fila icono={<Navigation aria-hidden className="size-5" />} titulo={t("rv.como_llegar")} meta={t("rv.como_llegar_meta")} href={enlaceMapa} external />
         ) : null}
         {activa ? <FilaCompartir texto={textoCompartir} /> : null}
         {cita && reserva.estado !== "PENDIENTE_PAGO" && reserva.estado !== "CANCELADA" ? (
           <Fila
             icono={<MessageSquare aria-hidden className="size-5" />}
-            titulo="Escribir al negocio"
-            meta={cita.chat_habilitado ? "Chat de esta cita" : "El chat de esta cita ya está cerrado"}
+            titulo={t("rv.escribir")}
+            meta={cita.chat_habilitado ? t("rv.chat_de_cita") : t("rv.chat_cerrado")}
             href={cita.chat_habilitado ? `/reserva/${reserva.id}/chat` : undefined}
           />
         ) : null}
         {cita?.puede_calificar ? (
-          <Fila icono={<Star aria-hidden className="size-5" />} titulo="Calificar la visita" meta="Cuéntanos cómo te fue" href={`/reserva/${reserva.id}/calificar`} />
+          <Fila icono={<Star aria-hidden className="size-5" />} titulo={t("rv.calificar")} meta={t("rv.calificar_meta")} href={`/reserva/${reserva.id}/calificar`} />
         ) : cita?.ya_califico ? (
-          <Fila icono={<Check aria-hidden className="size-5" />} titulo="Ya calificaste esta visita" meta="Gracias por tu reseña" />
+          <Fila icono={<Check aria-hidden className="size-5" />} titulo={t("rv.ya_calificaste")} meta={t("rv.gracias_resena")} />
         ) : null}
         {confirmada ? (
           <BotonCancelar reservaId={reserva.id} reembolsoEstimado={reembolsoEstimado} reembolsoPct={pct} />
@@ -310,27 +314,27 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
       </Filas>
 
       {confirmada ? (
-        <Bloque etiqueta="00 / Política">
+        <Bloque etiqueta={t("rv.politica")}>
           {pct === 0
-            ? "Estás dentro de la ventana sin reembolso: si cancelas ahora, el anticipo queda para el negocio."
-            : `Si cancelas ahora te devolvemos ${formatCOP(reembolsoEstimado)} (${pct}% del anticipo).`}
+            ? t("rv.sin_reembolso")
+            : t("rv.con_reembolso", { monto: formatCOP(reembolsoEstimado), pct })}
         </Bloque>
       ) : null}
 
       {reserva.estado === "PENDIENTE_PAGO" ? (
         <Pie>
           <Button asChild size="lg" className="w-full">
-            <Link href={`/reserva/${reserva.id}/pago`}>Pagar anticipo y confirmar</Link>
+            <Link href={`/reserva/${reserva.id}/pago`}>{t("rv.pagar_confirmar")}</Link>
           </Button>
         </Pie>
       ) : null}
 
       {reserva.estado === "CANCELADA" && negocio ? (
         <>
-          <Sec>01 / Siguiente</Sec>
+          <Sec>{t("rv.sec_siguiente")}</Sec>
           <div className="px-4">
             <Button asChild variant="secondary" size="lg" className="w-full">
-              <Link href={`/negocio/${negocio.slug}/reservar`}>Buscar otro horario</Link>
+              <Link href={`/negocio/${negocio.slug}/reservar`}>{t("rv.otro_horario")}</Link>
             </Button>
           </div>
         </>
@@ -339,7 +343,7 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
       {recienConfirmada ? (
         <div className="flex flex-col gap-3 p-4">
           <Button asChild size="lg" className="w-full">
-            <Link href="/mis-reservas">Ver mis citas</Link>
+            <Link href="/mis-reservas">{t("rv.ver_mis_citas")}</Link>
           </Button>
         </div>
       ) : null}

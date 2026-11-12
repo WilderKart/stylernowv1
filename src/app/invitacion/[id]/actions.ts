@@ -7,12 +7,12 @@ type Resultado<T = undefined> =
   | { ok: false; error: string };
 
 const MENSAJES_ERROR: Record<string, string> = {
-  NO_AUTORIZADO: "Esta invitación no es para tu cuenta — iniciá sesión con el correo que la recibió.",
+  NO_AUTORIZADO: "Esta invitación no es para tu cuenta — inicia sesión con el correo que la recibió.",
   INVITACION_NO_ENCONTRADA: "No encontramos esa invitación.",
   INVITACION_NO_PENDIENTE: "Esta invitación ya fue respondida.",
-  INVITACION_EXPIRADA: "Esta invitación expiró — pedile a quien te invitó que te reenvíe una nueva.",
-  YA_TIENE_VINCULO_ACTIVO: "Ya formás parte de otro negocio en StylerNow — un Staff solo puede tener un vínculo activo a la vez.",
-  PLAN_LIMIT_EXCEEDED: "Ese negocio alcanzó el cupo de Staff de su plan justo ahora — probá de nuevo más tarde.",
+  INVITACION_EXPIRADA: "Esta invitación expiró — pídele a quien te invitó que te reenvíe una nueva.",
+  YA_TIENE_VINCULO_ACTIVO: "Ya formas parte de otro negocio en StylerNow — un Staff solo puede tener un vínculo activo a la vez.",
+  PLAN_LIMIT_EXCEEDED: "Ese negocio alcanzó el cupo de Staff de su plan justo ahora — prueba de nuevo más tarde.",
 };
 
 function traducirError(mensaje: string) {

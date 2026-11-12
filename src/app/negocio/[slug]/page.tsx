@@ -13,6 +13,7 @@ import { obtenerMarcaPublica } from "@/lib/marca/obtener-marca";
 import { esFavorito } from "./actions";
 import { BotonCompartir } from "./boton-compartir";
 import { BotonFavorito } from "./boton-favorito";
+import { obtenerT } from "@/lib/i18n/servidor";
 
 async function cargarNegocio(slug: string) {
   const supabase = await createClient();
@@ -68,13 +69,14 @@ export async function generateMetadata(
   props: PageProps<"/negocio/[slug]">
 ): Promise<Metadata> {
   const { slug } = await props.params;
+  const t = await obtenerT();
   const datos = await cargarNegocio(slug);
-  if (!datos) return { title: "Negocio no disponible" };
+  if (!datos) return { title: t("neg.no_disponible") };
 
   const { negocio } = datos;
   const descripcion =
     negocio.descripcion ??
-    `Reserva tu turno en ${negocio.nombre}, ${negocio.ciudad}. Disponibilidad en tiempo real.`;
+    t("neg.desc_defecto", { nombre: negocio.nombre, ciudad: negocio.ciudad });
 
   return {
     title: negocio.nombre,
@@ -92,6 +94,7 @@ export async function generateMetadata(
 
 export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
   const { slug } = await props.params;
+  const t = await obtenerT();
   const searchParams = await props.searchParams;
   const campanaId = typeof searchParams.campana_id === "string" ? searchParams.campana_id : null;
   const datos = await cargarNegocio(slug);
@@ -210,7 +213,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
           />
           <Link
             href="/"
-            aria-label="Volver"
+            aria-label={t("comun.volver")}
             className="sn-iconbtn absolute top-2 left-2 border-2 border-ink bg-paper text-ink"
           >
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true">
@@ -223,7 +226,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
 
         <div className="px-4 pt-3.5 pb-1.5">
           <Num>
-            {negocio.categoria.join(" · ") || "Negocio"} · {negocio.ciudad}
+            {negocio.categoria.join(" · ") || t("cat.negocio")} · {negocio.ciudad}
           </Num>
         </div>
         <h1 className="poster-1 px-4 pb-3 break-words">
@@ -234,28 +237,28 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
         </h1>
         {miNivelVip ? (
           <div className="px-4 pb-3">
-            <Status tone="ok">Sos {miNivelVip} acá</Status>
+            <Status tone="ok">{t("neg.eres_vip", { nivel: miNivelVip })}</Status>
           </div>
         ) : null}
 
         <div className="sn-gridcols grid-cols-3 border-b-2 border-line">
           <div className="min-w-0">
-            <Meta>Rating</Meta>
+            <Meta>{t("neg.rating")}</Meta>
             <div className="sn-fig text-[22px]">
               {resenas.length > 0 ? `★ ${promedio.toFixed(1).replace(".", ",")}` : "—"}
             </div>
           </div>
           <div className="min-w-0">
-            <Meta>Reseñas</Meta>
+            <Meta>{t("neg.resenas")}</Meta>
             <div className="sn-fig text-[22px]">{resenas.length}</div>
           </div>
           <div className="min-w-0">
-            <Meta>Servicios</Meta>
+            <Meta>{t("neg.servicios")}</Meta>
             <div className="sn-fig text-[22px]">{servicios.length}</div>
           </div>
         </div>
 
-        <Marquee tone="signal" text={`Reserva tu turno en ${negocio.ciudad} ✶ Elige profesional y hora ✶ Confirmación al instante ✶ Cancela fácil si cambias de plan`} />
+        <Marquee tone="signal" text={t("neg.marquee", { ciudad: negocio.ciudad })} />
 
         {negocio.descripcion ? (
           <p className="body-sm m-0 px-4 pt-4 break-words">{negocio.descripcion}</p>
@@ -270,7 +273,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
             {horarioHoy ? (
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <span className="sn-label">{horarioHoy.etiqueta}</span>
-                {horarioHoy.abiertoAhora ? <Status tone="ok">Abierto ahora</Status> : null}
+                {horarioHoy.abiertoAhora ? <Status tone="ok">{t("neg.abierto_ahora")}</Status> : null}
               </div>
             ) : null}
             {sede.latitud && sede.longitud ? (
@@ -280,7 +283,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
                 rel="noreferrer"
                 className="sn-label inline-flex min-h-12 items-center underline"
               >
-                Ver en el mapa ↗
+                {t("neg.ver_mapa")}
               </a>
             ) : null}
           </div>
@@ -292,24 +295,24 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
               href={`/negocio/${negocio.slug}/membresias`}
               className="sn-label inline-flex min-h-12 items-center underline"
             >
-              Ver membresías →
+              {t("neg.ver_membresias")}
             </Link>
           ) : null}
           <Link
             href={`/gift-cards/comprar?negocio=${negocio.slug}`}
             className="sn-label inline-flex min-h-12 items-center underline"
           >
-            Regalar gift card →
+            {t("neg.regalar_gift")}
           </Link>
         </div>
 
         {/* ── 01 Servicios ──────────────────────────────────────────── */}
         <div className="p-sec">
-          <Num>01 / Servicios</Num>
+          <Num>{t("neg.sec_servicios")}</Num>
         </div>
         {servicios.length === 0 ? (
           <div className="mx-4 border-2 border-dashed border-line p-6 text-center">
-            <Meta>Este negocio todavía no publicó su lista de servicios.</Meta>
+            <Meta>{t("neg.sin_servicios")}</Meta>
           </div>
         ) : (
           <ul className="m-0 list-none border-t-2 border-line p-0">
@@ -332,7 +335,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
         {staff.length > 0 ? (
           <>
             <div className="p-sec">
-              <Num>02 / Equipo</Num>
+              <Num>{t("neg.sec_equipo")}</Num>
             </div>
             <div className="p-stack px-4">
               {staff.map((p, i) => (
@@ -351,11 +354,11 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
 
         {/* ── 03 Reseñas ────────────────────────────────────────────── */}
         <div className="p-sec">
-          <Num>03 / Reseñas · {resenas.length}</Num>
+          <Num>{t("neg.sec_resenas", { n: resenas.length })}</Num>
         </div>
         {resenas.length === 0 ? (
           <div className="mx-4 border-2 border-dashed border-line p-6 text-center">
-            <Meta>Todavía no hay reseñas. Solo quien completó una cita puede dejar una.</Meta>
+            <Meta>{t("neg.sin_resenas")}</Meta>
           </div>
         ) : (
           <div className="p-stack px-4">
@@ -367,11 +370,11 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
                 </div>
                 <div className="sn-review__body">
                   {r.comentario ? <p className="body-sm m-0 break-words">{r.comentario}</p> : null}
-                  <Meta>Cita verificada</Meta>
+                  <Meta>{t("neg.cita_verificada")}</Meta>
                 </div>
                 {r.respuesta_negocio ? (
                   <div className="sn-review__reply">
-                    <b className="sn-label">Respuesta de {negocio.nombre}</b>
+                    <b className="sn-label">{t("neg.respuesta_de", { nombre: negocio.nombre })}</b>
                     <br />
                     {r.respuesta_negocio}
                   </div>
@@ -383,7 +386,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
 
         {/* ── 04 Política de cancelación ────────────────────────────── */}
         <div className="p-sec">
-          <Num>04 / Política de cancelación</Num>
+          <Num>{t("neg.sec_politica")}</Num>
         </div>
         <ul className="body-sm m-0 mb-4 flex list-none flex-col gap-1.5 px-4">
           {resumenPoliticaCancelacion(negocio).map((linea) => (
@@ -396,11 +399,11 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
       <div className="p-foot">
         {sinDisponibilidad ? (
           <span className="sn-btn sn-btn--secondary w-full justify-center" aria-disabled="true">
-            Sin disponibilidad publicada
+            {t("neg.sin_disponibilidad")}
           </span>
         ) : (
           <Link href={`/negocio/${negocio.slug}/reservar`} className="sn-btn sn-btn--primary w-full">
-            <span>Reservar turno</span>
+            <span>{t("neg.reservar_turno")}</span>
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true">
               <path d="M7 17 17 7M7 7h10v10" />
             </svg>

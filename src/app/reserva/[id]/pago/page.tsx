@@ -1,14 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { PantallaPago } from "./pantalla-pago";
+import { obtenerT } from "@/lib/i18n/servidor";
 
-export const metadata = {
-  title: "Pagar anticipo",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("pago.meta"), robots: { index: false, follow: false } };
+}
 
 export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
   const { id } = await props.params;
+  const t = await obtenerT();
   const supabase = await createClient();
 
   const {
@@ -38,7 +40,7 @@ export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
   const sede = reserva.sede as unknown as { zona_horaria: string } | null;
   const staff = reserva.staff as unknown as { nombre: string } | null;
   const servicios = (reserva.reserva_servicio ?? []).map(
-    (rs) => (rs.servicio as unknown as { nombre: string } | null)?.nombre ?? "Servicio"
+    (rs) => (rs.servicio as unknown as { nombre: string } | null)?.nombre ?? t("rv.servicio")
   );
 
   return (
@@ -48,7 +50,7 @@ export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
         reservaId: reserva.id,
         negocio: negocio?.nombre ?? "StylerNow",
         servicios: servicios.join(" + "),
-        profesional: staff?.nombre ?? "Profesional asignado",
+        profesional: staff?.nombre ?? t("pago.profesional_asignado"),
         horaInicio: reserva.hora_inicio,
         zonaHoraria: sede?.zona_horaria ?? "America/Bogota",
         montoTotal: Number(reserva.monto_total),

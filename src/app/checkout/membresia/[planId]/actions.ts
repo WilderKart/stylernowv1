@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const MENSAJES_ERROR: Record<string, string> = {
   PLAN_NO_DISPONIBLE: "Este plan ya no está disponible.",
-  YA_TIENE_MEMBRESIA_ACTIVA: "Ya tenés una Membresía activa en este Negocio.",
+  YA_TIENE_MEMBRESIA_ACTIVA: "Ya tienes una Membresía activa en este Negocio.",
 };
 function traducirError(mensaje: string) {
   const clave = Object.keys(MENSAJES_ERROR).find((k) => mensaje.includes(k));
@@ -27,7 +27,7 @@ export async function iniciarCompraMembresia(planId: string): Promise<ResultadoI
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, mensaje: "Iniciá sesión para comprar la Membresía." };
+  if (!user) return { ok: false, mensaje: "Inicia sesión para comprar la Membresía." };
 
   const { data: pago, error } = await supabase.rpc("suscribirse_membresia", { p_plan_id: planId });
   if (error) return { ok: false, mensaje: traducirError(error.message) };
@@ -53,7 +53,7 @@ export async function iniciarCompraMembresia(planId: string): Promise<ResultadoI
 
     return { ok: true, url: preferencia.url, pagoId: pago.id };
   } catch (e) {
-    return { ok: false, mensaje: e instanceof Error ? e.message : "La pasarela no respondió. Intentá de nuevo." };
+    return { ok: false, mensaje: e instanceof Error ? e.message : "La pasarela no respondió. Intenta de nuevo." };
   }
 }
 

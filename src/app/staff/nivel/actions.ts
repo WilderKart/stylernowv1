@@ -26,7 +26,7 @@ export async function obtenerMiNivel(): Promise<Resultado<MiNivel & { proximoNiv
     if (!user) throw new Error("NO_AUTENTICADO");
 
     const { data, error } = await supabase.rpc("staff_mi_nivel_actual");
-    if (error) return { ok: false, error: error.message === "SIN_VINCULO_ACTIVO" ? "No tenés un vínculo activo." : error.message };
+    if (error) return { ok: false, error: error.message === "SIN_VINCULO_ACTIVO" ? "No tienes un vínculo activo." : error.message };
 
     const d = data as unknown as MiNivel;
     const proximoNivel = SIGUIENTE[d.nivelActual];

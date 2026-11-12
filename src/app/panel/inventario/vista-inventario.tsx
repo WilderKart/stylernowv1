@@ -166,7 +166,7 @@ export function VistaInventario({
 
       {stock.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-border px-4 py-10 text-center text-[12.5px] text-text-faint">
-          Todavía no tenés productos — creálos desde Caja → Productos.
+          Todavía no tienes productos — créalos desde Caja → Productos.
         </p>
       ) : (
         <ul className="flex flex-col gap-2.5">

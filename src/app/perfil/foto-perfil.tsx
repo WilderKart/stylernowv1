@@ -4,6 +4,7 @@ import { ErrorAviso } from "@/app/lealtad/ui-cliente";
 import { Avatar } from "@/components/brutal";
 import { Camera, Trash2 } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
+import { useT } from "@/lib/i18n/proveedor";
 import { quitarFotoPerfil, subirFotoPerfil } from "./foto-actions";
 
 const MAX_ORIGINAL_BYTES = 10 * 1024 * 1024; // lo que la persona puede elegir: hasta 10 MB
@@ -35,6 +36,7 @@ async function reducir(archivo: File): Promise<Blob | null> {
 
 /** Avatar del perfil con subida opcional de foto (hasta 10 MB). */
 export function FotoPerfil({ nombre, avatarUrl }: { nombre: string; avatarUrl: string | null }) {
+  const t = useT();
   const [url, setUrl] = useState(avatarUrl);
   const [error, setError] = useState<string | null>(null);
   const [pendiente, iniciar] = useTransition();
@@ -45,11 +47,11 @@ export function FotoPerfil({ nombre, avatarUrl }: { nombre: string; avatarUrl: s
     e.target.value = ""; // permite volver a elegir el mismo archivo
     if (!archivo) return;
     setError(null);
-    if (!/^image\/(jpeg|png|webp)$/.test(archivo.type)) return setError("Usa una imagen JPG, PNG o WebP.");
-    if (archivo.size > MAX_ORIGINAL_BYTES) return setError("La foto pesa más de 10 MB. Elige una más liviana.");
+    if (!/^image\/(jpeg|png|webp)$/.test(archivo.type)) return setError(t("foto.formato"));
+    if (archivo.size > MAX_ORIGINAL_BYTES) return setError(t("foto.pesada"));
     iniciar(async () => {
       const reducida = await reducir(archivo);
-      if (!reducida) return setError("No pudimos leer esa imagen. Prueba con otra.");
+      if (!reducida) return setError(t("foto.ilegible"));
       const datos = new FormData();
       datos.append("foto", new File([reducida], "foto.webp", { type: "image/webp" }));
       const r = await subirFotoPerfil(datos);
@@ -77,19 +79,19 @@ export function FotoPerfil({ nombre, avatarUrl }: { nombre: string; avatarUrl: s
             disabled={pendiente}
             onClick={() => entrada.current?.click()}
             className="sn-chip !min-h-12"
-            aria-label={url ? "Cambiar foto de perfil" : "Subir foto de perfil"}
+            aria-label={url ? t("foto.cambiar_aria") : t("foto.subir_aria")}
           >
-            <Camera aria-hidden /> {pendiente ? "Subiendo…" : url ? "Cambiar foto" : "Subir foto"}
+            <Camera aria-hidden /> {pendiente ? t("foto.subiendo") : url ? t("foto.cambiar") : t("foto.subir")}
           </button>
           {url ? (
-            <button type="button" disabled={pendiente} onClick={quitar} className="sn-chip !min-h-12" aria-label="Quitar foto de perfil">
-              <Trash2 aria-hidden /> Quitar
+            <button type="button" disabled={pendiente} onClick={quitar} className="sn-chip !min-h-12" aria-label={t("foto.quitar_aria")}>
+              <Trash2 aria-hidden /> {t("foto.quitar")}
             </button>
           ) : null}
         </div>
       </div>
       <input ref={entrada} type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={elegida} tabIndex={-1} aria-hidden />
-      <p className="sn-help">Opcional · JPG, PNG o WebP · hasta 10 MB</p>
+      <p className="sn-help">{t("foto.ayuda")}</p>
       {error ? <ErrorAviso>{error}</ErrorAviso> : null}
     </div>
   );

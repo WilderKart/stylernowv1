@@ -2,7 +2,7 @@ import type { PlanPais } from "./catalogo";
 
 /**
  * Textos de "qué incluye" por característica. Los datos (qué plan tiene qué) salen de la BD
- * (plan_caracteristica); acá solo viven las etiquetas de presentación, centralizadas para
+ * (plan_caracteristica); aquí solo viven las etiquetas de presentación, centralizadas para
  * traducirlas cuando exista i18n.
  */
 const ETIQUETAS: Record<string, string> = {

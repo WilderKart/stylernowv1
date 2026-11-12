@@ -77,7 +77,7 @@ export function VistaHiloTicket({
         <textarea
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
-          placeholder="Escribí tu mensaje..."
+          placeholder="Escribe tu mensaje..."
           className="min-h-[52px] flex-1 rounded-xl border border-border bg-surface p-3 text-[13px] text-text outline-none focus:border-accent/60"
         />
         <Button loading={enviando} disabled={!texto.trim()} onClick={enviar}>

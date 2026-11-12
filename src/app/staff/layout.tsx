@@ -19,8 +19,8 @@ async function StaffGuardado({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-dvh flex-col items-center justify-center bg-bg px-6 text-center">
         <h1 className="font-display mb-2 text-[18px] font-bold uppercase text-text">Sin vínculos activos</h1>
         <p className="max-w-sm text-[13px] text-text-muted">
-          Todavía no tenés un vínculo activo con ningún negocio en StylerNow. Si te invitaron, revisá tu correo — si
-          creés que esto es un error, contactá al negocio directamente.
+          Todavía no tienes un vínculo activo con ningún negocio en StylerNow. Si te invitaron, revisa tu correo — si
+          crees que esto es un error, contacta al negocio directamente.
         </p>
       </div>
     );
@@ -31,7 +31,7 @@ async function StaffGuardado({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-dvh flex-col items-center justify-center bg-bg px-6 text-center">
         <h1 className="font-display mb-2 text-[18px] font-bold uppercase text-danger">Acceso suspendido</h1>
         <p className="max-w-sm text-[13px] text-text-muted">
-          Tu vínculo con {contexto.negocioNombre} está suspendido temporalmente. Contactá al negocio para más
+          Tu vínculo con {contexto.negocioNombre} está suspendido temporalmente. Contacta al negocio para más
           información.
         </p>
       </div>
@@ -43,7 +43,7 @@ async function StaffGuardado({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-dvh flex-col items-center justify-center bg-bg px-6 text-center">
         <h1 className="font-display mb-2 text-[18px] font-bold uppercase text-text">Invitación pendiente</h1>
         <p className="max-w-sm text-[13px] text-text-muted">
-          {contexto.negocioNombre} te invitó, pero todavía no aceptaste la invitación. Buscá el correo de invitación
+          {contexto.negocioNombre} te invitó, pero todavía no aceptaste la invitación. Busca el correo de invitación
           para confirmar tu ingreso.
         </p>
       </div>

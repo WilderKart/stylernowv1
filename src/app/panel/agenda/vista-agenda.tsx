@@ -387,7 +387,7 @@ function DiaGrid({
                   <button
                     key={b.id}
                     type="button"
-                    title="Tocá para quitar el bloqueo"
+                    title="Toca para quitar el bloqueo"
                     onClick={() => {
                       if (confirm("¿Quitar este bloqueo de horario?")) onQuitarBloqueo(b.id);
                     }}
@@ -433,7 +433,7 @@ function DiaGrid({
         })}
       </div>
       <p className="border-t border-border-subtle p-2 text-center text-[11px] text-text-faint">
-        Arrastrá una cita a otra columna para reasignarla a otro Staff (mismo horario) · tocá una cita para reprogramar, cancelar o ver el detalle.
+        Arrastra una cita a otra columna para reasignarla a otro Staff (mismo horario) · toca una cita para reprogramar, cancelar o ver el detalle.
       </p>
     </div>
   );
@@ -670,7 +670,7 @@ function PanelCita({
               onChange={(e) => setNuevoStaffId(e.target.value)}
               className="h-12 rounded-xl border border-border bg-bg px-3 text-[13.5px] text-text"
             >
-              <option value="">Elegí un Staff...</option>
+              <option value="">Elige un Staff...</option>
               {staff.filter((s) => s.staffId !== cita.staffId).map((s) => (
                 <option key={s.staffId} value={s.staffId}>
                   {s.nombre}
@@ -795,7 +795,7 @@ function FormularioNuevaCita({
               onChange={(e) => onBuscar(e.target.value)}
             />
             <p className="mt-1 text-[11px] text-text-faint">
-              Solo aparecen clientes que ya tuvieron alguna reserva con vos antes.
+              Solo aparecen clientes que ya tuvieron alguna reserva con tú antes.
             </p>
             {buscando ? <p className="mt-1 text-[11.5px] text-text-faint">Buscando...</p> : null}
             {clientes.length > 0 ? (

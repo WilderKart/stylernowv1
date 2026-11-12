@@ -3,6 +3,7 @@
 import { Chip, Switch } from "@/components/brutal";
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useT } from "@/lib/i18n/proveedor";
 import { contarResultadosAction } from "./actions";
 import { CATEGORIAS_FILTRO } from "./categorias-filtro";
 
@@ -41,6 +42,7 @@ export function HojaFiltros({
   onCerrar: () => void;
   onAplicar: (f: FiltrosAvanzados) => void;
 }) {
+  const t = useT();
   const [f, setF] = useState(inicial);
   const [total, setTotal] = useState<number | null>(null);
   const cerrarRef = useRef<HTMLButtonElement>(null);
@@ -93,26 +95,26 @@ export function HojaFiltros({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
-      <button type="button" aria-label="Cerrar filtros" tabIndex={-1} onClick={onCerrar} className="absolute inset-0 bg-[var(--scrim)]" />
+      <button type="button" aria-label={t("hoja.cerrar_filtros")} tabIndex={-1} onClick={onCerrar} className="absolute inset-0 bg-[var(--scrim)]" />
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Filtros"
+        aria-label={t("filtros.filtros")}
         className="sn-sheet relative max-h-[88dvh] max-w-xl overflow-x-hidden overflow-y-auto pb-[calc(var(--space-6)+env(safe-area-inset-bottom))]"
       >
         <div className="sn-sheet__grab" />
         <div className="sn-sheet__head">
           <h2 className="section m-0">
-            Filtros <span className="text-signal">· {cuenta}</span>
+            {t("filtros.filtros")} <span className="text-signal">· {cuenta}</span>
           </h2>
-          <button ref={cerrarRef} type="button" aria-label="Cerrar" onClick={onCerrar} className="sn-iconbtn">
+          <button ref={cerrarRef} type="button" aria-label={t("hoja.cerrar")} onClick={onCerrar} className="sn-iconbtn">
             <X aria-hidden className="size-5" strokeWidth={2} strokeLinecap="square" />
           </button>
         </div>
 
         <div className="flex flex-col gap-5">
           <div>
-            <span className="sn-label mb-2 block">01 / Categoría</span>
+            <span className="sn-label mb-2 block">{t("hoja.categoria")}</span>
             <div className="p-chips !px-0 !pb-0">
               {CATEGORIAS_FILTRO.map((c) => (
                 <Chip
@@ -121,7 +123,7 @@ export function HojaFiltros({
                   onClick={() => setF({ ...f, categoria: f.categoria === c.valor ? null : c.valor })}
                   className="!min-h-12"
                 >
-                  {c.etiqueta}
+                  {t(c.etiqueta)}
                 </Chip>
               ))}
             </div>
@@ -129,8 +131,8 @@ export function HojaFiltros({
 
           <div>
             <label htmlFor="filtro-distancia" className="sn-label mb-2 flex flex-wrap justify-between gap-2">
-              <span>02 / Distancia</span>
-              <span className="text-signal">{DISTANCIAS[idxDist].etiqueta}</span>
+              <span>{t("hoja.distancia")}</span>
+              <span className="text-signal">{DISTANCIAS[idxDist].km === null ? t("hoja.sin_limite") : DISTANCIAS[idxDist].etiqueta}</span>
             </label>
             <input
               id="filtro-distancia"
@@ -150,13 +152,13 @@ export function HojaFiltros({
               <span>10+ KM</span>
             </div>
             {f.radio !== null && !tieneUbicacion ? (
-              <p className="sn-meta mt-2">Al aplicar te pediremos tu ubicación para medir la distancia.</p>
+              <p className="sn-meta mt-2">{t("hoja.pedir_ubicacion")}</p>
             ) : null}
           </div>
 
           <div>
-            <span className="sn-label mb-2 block">03 / Calificación mínima</span>
-            <div role="radiogroup" aria-label="Calificación mínima" className="sn-seg w-full">
+            <span className="sn-label mb-2 block">{t("hoja.calif_min_sec")}</span>
+            <div role="radiogroup" aria-label={t("hoja.calif_min")} className="sn-seg w-full">
               {CALIFS.map((c) => (
                 <button
                   key={c.etiqueta}
@@ -166,7 +168,7 @@ export function HojaFiltros({
                   onClick={() => setF({ ...f, calif: c.valor })}
                   className="min-w-0 flex-1"
                 >
-                  {c.etiqueta}
+                  {c.valor === null ? t("hoja.todas") : c.etiqueta}
                 </button>
               ))}
             </div>
@@ -174,19 +176,19 @@ export function HojaFiltros({
 
           <div className="flex items-center justify-between gap-3 border-2 border-line p-3">
             <span className="min-w-0">
-              <span className="sn-label block">04 / Abierto ahora</span>
-              <span className="body-sm block">Solo negocios con horario disponible hoy.</span>
+              <span className="sn-label block">{t("hoja.abierto_ahora_sec")}</span>
+              <span className="body-sm block">{t("hoja.solo_horario")}</span>
             </span>
-            <Switch checked={f.hoy} onCheckedChange={(v) => setF({ ...f, hoy: v })} aria-label="Abierto ahora" />
+            <Switch checked={f.hoy} onCheckedChange={(v) => setF({ ...f, hoy: v })} aria-label={t("hoja.abierto_ahora")} />
           </div>
         </div>
 
         <div className="mt-5 grid grid-cols-[auto_1fr] gap-3">
           <button type="button" className="sn-btn sn-btn--secondary" onClick={() => setF({ categoria: null, radio: null, calif: null, hoy: false })}>
-            Limpiar
+            {t("hoja.limpiar")}
           </button>
           <button type="button" className="sn-btn sn-btn--primary min-w-0" onClick={() => onAplicar(f)}>
-            Aplicar{total !== null && !sinConteo ? ` · ${total}` : ""} ↗
+            {t("hoja.aplicar")}{total !== null && !sinConteo ? ` · ${total}` : ""} ↗
           </button>
         </div>
       </div>

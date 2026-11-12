@@ -35,14 +35,14 @@ async function usuarioActual() {
 }
 
 const MENSAJES_ERROR: Record<string, string> = {
-  NO_AUTORIZADO: "No tenés permiso sobre esta sede.",
+  NO_AUTORIZADO: "No tienes permiso sobre esta sede.",
   PLAN_LIMIT_EXCEEDED:
-    "Tu plan no permite más sedes. Hacé un upgrade para agregar otra (01-PRD/03_Monetization.md).",
-  ULTIMA_SEDE_OPERATIVA: "No podés cerrar tu única sede operativa — el negocio quedaría sin dónde recibir reservas.",
-  SEDE_CON_RESERVAS_ACTIVAS: "Esta sede tiene reservas activas o futuras. Reprogramalas o esperá a que se completen antes de cerrarla.",
+    "Tu plan no permite más sedes. Haz un upgrade para agregar otra (01-PRD/03_Monetization.md).",
+  ULTIMA_SEDE_OPERATIVA: "No puedes cerrar tu única sede operativa — el negocio quedaría sin dónde recibir reservas.",
+  SEDE_CON_RESERVAS_ACTIVAS: "Esta sede tiene reservas activas o futuras. Reprogramalas o espera a que se completen antes de cerrarla.",
   SEDE_NO_OPERATIVA: "Una sede cerrada no puede marcarse como principal — reabrila primero.",
   SEDE_NO_PERTENECE_AL_NEGOCIO: "Esa sede no pertenece a este negocio.",
-  SEDE_DESTINO_NO_OPERATIVA: "No podés trasladar Staff a una sede cerrada.",
+  SEDE_DESTINO_NO_OPERATIVA: "No puedes trasladar Staff a una sede cerrada.",
 };
 
 function traducirError(mensaje: string) {
@@ -95,7 +95,7 @@ export async function actualizarSede(datos: {
     const { supabase } = await usuarioActual();
     // Update directo bajo RLS (sede_update_barberia_guardian): a diferencia de
     // `negocio`, la política de SELECT de `sede` depende de la tabla `negocio`
-    // (ya committeada), no de sí misma — no aplica acá el problema de
+    // (ya committeada), no de sí misma — no aplica aquí el problema de
     // INSERT...RETURNING que sí afecta a `negocio` (ver actions.ts de onboarding).
     const { error } = await supabase
       .from("sede")

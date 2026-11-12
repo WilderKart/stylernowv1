@@ -8,7 +8,7 @@ type Resultado<T = undefined> =
   | { ok: false; error: string };
 
 const MENSAJES_ERROR: Record<string, string> = {
-  NO_AUTORIZADO: "No tenés permiso para esta acción.",
+  NO_AUTORIZADO: "No tienes permiso para esta acción.",
   COSTO_INVALIDO: "El costo en créditos no puede ser negativo.",
   ACCION_NO_ENCONTRADA: "Esa acción de IA no existe.",
   MODELO_NO_ENCONTRADO: "Ese modelo no existe en la configuración.",

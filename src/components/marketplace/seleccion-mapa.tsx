@@ -1,6 +1,7 @@
 "use client";
 
 import { Photo } from "@/components/brutal";
+import { useT } from "@/lib/i18n/proveedor";
 import { formatCOP } from "@/lib/utils";
 import { X } from "lucide-react";
 import Link from "next/link";
@@ -46,16 +47,17 @@ export function ZonaFiltros({ children }: { children: ReactNode }) {
 }
 
 function TarjetaSeleccion({ negocio: n, onCerrar }: { negocio: NegocioTarjeta; onCerrar: () => void }) {
+  const t = useT();
   const href = n.patrocinado && n.campana_id ? `/negocio/${n.slug}?campana_id=${n.campana_id}` : `/negocio/${n.slug}`;
   return (
-    <section aria-label="Negocio seleccionado" className="mb-6 flex flex-col border-2 border-border bg-bg shadow-hard">
+    <section aria-label={t("mapa.seleccionado")} className="mb-6 flex flex-col border-2 border-border bg-bg shadow-hard">
       {/* Pestaña: tipo de negocio + cerrar */}
       <div className="flex items-center justify-between gap-2 border-b-2 border-border bg-ink pl-3 text-paper">
         <span className="sn-label flex min-w-0 items-center gap-2">
           <IconoCategoria categoria={n.categoria} className="size-4 shrink-0" />
-          <span className="truncate">{etiquetaCategoria(n.categoria)}</span>
+          <span className="truncate">{t(etiquetaCategoria(n.categoria))}</span>
         </span>
-        <button type="button" onClick={onCerrar} aria-label="Cerrar y volver a los filtros" className="sn-iconbtn text-paper">
+        <button type="button" onClick={onCerrar} aria-label={t("mapa.cerrar_volver")} className="sn-iconbtn text-paper">
           <X aria-hidden />
         </button>
       </div>
@@ -65,13 +67,13 @@ function TarjetaSeleccion({ negocio: n, onCerrar }: { negocio: NegocioTarjeta; o
           <span className="poster-5 break-words">{n.nombre}</span>
           <span className="sn-meta truncate">{n.ciudad}</span>
           <span className="sn-price">
-            {n.total_resenas > 0 ? `★ ${n.calificacion.toFixed(1).replace(".", ",")}` : "Nuevo"}
-            {n.precio_desde !== null ? ` · Desde ${formatCOP(n.precio_desde)}` : ""}
+            {n.total_resenas > 0 ? `★ ${n.calificacion.toFixed(1).replace(".", ",")}` : t("card.nuevo_min")}
+            {n.precio_desde !== null ? t("card.desde_precio", { precio: formatCOP(n.precio_desde) }) : ""}
           </span>
         </div>
       </Link>
       <Link href={href} className="sn-btn sn-btn--primary !border-x-0 !border-b-0 !shadow-none">
-        <span>Ver negocio</span>
+        <span>{t("mapa.ver_negocio")}</span>
         <span aria-hidden>↗</span>
       </Link>
     </section>

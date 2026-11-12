@@ -8,6 +8,7 @@ import { formatCOP } from "@/lib/utils";
 import { Check, Clock, X } from "lucide-react";
 import { useState } from "react";
 import { consultarMiGiftCard, type ConsultaGiftCard } from "./actions";
+import { useIdioma, useT } from "@/lib/i18n/proveedor";
 
 const ESTADO_TONO: Record<string, "ok" | "warn" | "err" | "info"> = {
   ACTIVA: "ok",
@@ -17,6 +18,8 @@ const ESTADO_TONO: Record<string, "ok" | "warn" | "err" | "info"> = {
 };
 
 export function VistaConsultarGiftCard() {
+  const t = useT();
+  const loc = useIdioma() === "en" ? "en-US" : "es-CO";
   const [codigo, setCodigo] = useState("");
   const [pin, setPin] = useState("");
   const [cargando, setCargando] = useState(false);
@@ -26,7 +29,7 @@ export function VistaConsultarGiftCard() {
   async function consultar(e: React.FormEvent) {
     e.preventDefault();
     if (!codigo.trim() || !pin.trim()) {
-      setError("Completa el código y el PIN.");
+      setError(t("gc.completa"));
       return;
     }
     setCargando(true);
@@ -47,16 +50,15 @@ export function VistaConsultarGiftCard() {
   return (
     <main className="flex flex-1 flex-col gap-4 p-4">
       <p className="body-sm break-words">
-        Verifica el código y el saldo de tu gift card. Para canjearla, preséntala junto con el PIN en el local: el staff la
-        registra ahí.
+        {t("gc.verifica_txt")}
       </p>
 
       <form onSubmit={consultar} className="flex flex-col gap-4">
         <Input
-          label="Código"
+          label={t("gc.codigo")}
           value={codigo}
           onChange={(e) => setCodigo(e.target.value.toUpperCase())}
-          placeholder="Ej. A1B2C3D4E5"
+          placeholder={t("gc.codigo_ph")}
           autoCapitalize="characters"
         />
         <Input
@@ -69,27 +71,27 @@ export function VistaConsultarGiftCard() {
         />
         {error ? <ErrorAviso>{error}</ErrorAviso> : null}
         <Button type="submit" size="lg" className="w-full" loading={cargando}>
-          Consultar
+          {t("gc.consultar_btn")}
         </Button>
       </form>
 
       {resultado ? (
         <TicketCita
           dia={resultado.montoOriginal >= 1000 ? String(Math.round(resultado.montoOriginal / 1000)) : String(resultado.montoOriginal)}
-          mes={resultado.montoOriginal >= 1000 ? "Mil" : "COP"}
+          mes={resultado.montoOriginal >= 1000 ? t("gc.mil") : "COP"}
           estado={
             <Status tone={tono} icon={<Icono aria-hidden className="size-3.5" />}>
               {resultado.estado}
             </Status>
           }
-          titulo={`Gift card · ${resultado.negocioNombre}`}
+          titulo={t("gc.titulo_negocio", { negocio: resultado.negocioNombre })}
           lineas={[
-            resultado.fechaExpiracion ? `Vence el ${new Date(resultado.fechaExpiracion).toLocaleDateString("es-CO")}` : null,
+            resultado.fechaExpiracion ? t("gc.vence", { fecha: new Date(resultado.fechaExpiracion).toLocaleDateString(loc) }) : null,
           ].filter(Boolean)}
           pie={
             <>
               <span className="sn-label">
-                Saldo{resultado.saldoActual !== resultado.montoOriginal ? ` · de ${formatCOP(resultado.montoOriginal)}` : ""}
+                {resultado.saldoActual !== resultado.montoOriginal ? t("gc.saldo_de", { monto: formatCOP(resultado.montoOriginal) }) : t("gc.saldo")}
               </span>
               <span className="sn-price">{formatCOP(resultado.saldoActual)}</span>
             </>

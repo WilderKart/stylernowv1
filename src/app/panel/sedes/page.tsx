@@ -64,7 +64,7 @@ export default async function SedesPage() {
 
         {!sedes || sedes.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-border px-4 py-10 text-center text-[12.5px] text-text-faint">
-            Todavía no tenés ninguna sede.
+            Todavía no tienes ninguna sede.
           </p>
         ) : (
           <ul className="flex flex-col gap-2.5">

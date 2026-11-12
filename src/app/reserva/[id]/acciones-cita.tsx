@@ -6,19 +6,21 @@ import { fechaCorta, hora, hoyISO, sumarDias } from "@/lib/formato";
 import { CalendarCheck, MapPin, Share2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { useT } from "@/lib/i18n/proveedor";
 import { llegueAction, reprogramarAction, slotsReprogramarAction, type SlotLibre } from "./actions-cita";
 
 /** «LLEGUÉ»: avisa al negocio. Intenta con GPS (validación ≤ 0,5 km); si no hay permiso, avisa sin coordenadas. */
 export function BotonLlegue({ reservaId, checkinAt, tz }: { reservaId: string; checkinAt: string | null; tz: string }) {
   const router = useRouter();
+  const t = useT();
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (checkinAt) {
     return (
       <div role="status" className="border-2 border-border p-4">
-        <span className="sn-label">Ya avisaste tu llegada</span>
-        <p className="sn-meta mt-1">Registrada a las {hora(checkinAt, tz)}. El negocio ya sabe que estás aquí.</p>
+        <span className="sn-label">{t("ac.ya_avisaste")}</span>
+        <p className="sn-meta mt-1">{t("ac.registrada", { hora: hora(checkinAt, tz) })}</p>
       </div>
     );
   }
@@ -39,7 +41,7 @@ export function BotonLlegue({ reservaId, checkinAt, tz }: { reservaId: string; c
       if (!r.ok) return setError(r.error);
       router.refresh();
     } catch {
-      setError("No pudimos avisar. Revisa tu conexión.");
+      setError(t("ac.err_avisar"));
     } finally {
       setCargando(false);
     }
@@ -49,8 +51,8 @@ export function BotonLlegue({ reservaId, checkinAt, tz }: { reservaId: string; c
     <div>
       <Button size="lg" className="w-full justify-between text-left" loading={cargando} onClick={llegue}>
         <span className="flex min-w-0 flex-col gap-1">
-          <span className="text-base">Llegué</span>
-          <span className="sn-meta !text-ink">Avisa al negocio que estás aquí</span>
+          <span className="text-base">{t("ac.llegue")}</span>
+          <span className="sn-meta !text-ink">{t("ac.llegue_meta")}</span>
         </span>
         <MapPin aria-hidden className="size-6 shrink-0" />
       </Button>
@@ -65,25 +67,26 @@ export function BotonLlegue({ reservaId, checkinAt, tz }: { reservaId: string; c
 
 /** Compartir con la Web Share API; si no existe, copia el texto al portapapeles. */
 export function FilaCompartir({ texto }: { texto: string }) {
+  const t = useT();
   const [aviso, setAviso] = useState<string | null>(null);
 
   async function compartir() {
     setAviso(null);
     try {
       if (navigator.share) {
-        await navigator.share({ title: "Mi cita en StylerNow", text: texto });
+        await navigator.share({ title: t("ac.mi_cita"), text: texto });
         return;
       }
       await navigator.clipboard.writeText(texto);
-      setAviso("Copiado al portapapeles");
+      setAviso(t("ac.copiado"));
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") return;
-      setAviso("No pudimos compartir. Copia los datos manualmente.");
+      setAviso(t("ac.err_compartir"));
     }
   }
 
   return (
-    <Fila icono={<Share2 aria-hidden className="size-5" />} titulo="Compartir" meta={aviso ?? "Envía los datos de tu cita"} onClick={compartir} />
+    <Fila icono={<Share2 aria-hidden className="size-5" />} titulo={t("ac.compartir")} meta={aviso ?? t("ac.compartir_meta")} onClick={compartir} />
   );
 }
 
@@ -92,6 +95,7 @@ const DIAS_VISIBLES = 14;
 /** Reprogramar: día (14 días desde hoy) + horas reales del RPC slots_disponibles. */
 export function Reprogramar({ reservaId, tz }: { reservaId: string; tz: string }) {
   const router = useRouter();
+  const t = useT();
   const [abierto, setAbierto] = useState(false);
   const [dia, setDia] = useState<string | null>(null);
   const [slots, setSlots] = useState<SlotLibre[] | null>(null);
@@ -118,7 +122,7 @@ export function Reprogramar({ reservaId, tz }: { reservaId: string; tz: string }
         else setError(r.error);
       })
       .catch(() => {
-        if (mia === peticion.current) setError("No pudimos cargar los horarios. Revisa tu conexión.");
+        if (mia === peticion.current) setError(t("ac.err_horarios"));
       })
       .finally(() => {
         if (mia === peticion.current) setCargandoSlots(false);
@@ -144,7 +148,7 @@ export function Reprogramar({ reservaId, tz }: { reservaId: string; tz: string }
       setAbierto(false);
       router.refresh();
     } catch {
-      setError("No pudimos reprogramar. Revisa tu conexión.");
+      setError(t("ac.err_reprogramar"));
     } finally {
       setGuardando(false);
     }
@@ -154,8 +158,8 @@ export function Reprogramar({ reservaId, tz }: { reservaId: string; tz: string }
     return (
       <Fila
         icono={<CalendarCheck aria-hidden className="size-5" />}
-        titulo="Reprogramar"
-        meta="Cambia el día u hora sin perder tu anticipo"
+        titulo={t("ac.reprogramar")}
+        meta={t("ac.reprogramar_meta")}
         onClick={() => setAbierto(true)}
       />
     );
@@ -163,10 +167,10 @@ export function Reprogramar({ reservaId, tz }: { reservaId: string; tz: string }
 
   return (
     <div className="m-4 border-2 border-border p-4 shadow-hard">
-      <h3 className="section">Elige un nuevo horario</h3>
+      <h3 className="section">{t("ac.nuevo_horario")}</h3>
 
-      <span className="sn-label mt-4 block">01 / Día</span>
-      <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label="Día">
+      <span className="sn-label mt-4 block">{t("ac.sec_dia")}</span>
+      <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label={t("ac.dia")}>
         {dias.map((d) => (
           <button
             key={d}
@@ -183,8 +187,8 @@ export function Reprogramar({ reservaId, tz }: { reservaId: string; tz: string }
 
       {dia ? (
         <>
-          <span className="sn-label mt-4 block">02 / Hora</span>
-          <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label="Hora">
+          <span className="sn-label mt-4 block">{t("ac.sec_hora")}</span>
+          <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label={t("ac.hora")}>
             {cargandoSlots ? Array.from({ length: 6 }).map((_, i) => <span key={i} className="sn-skel h-10 w-20" />) : null}
             {slots?.map((s) => (
               <button
@@ -199,7 +203,7 @@ export function Reprogramar({ reservaId, tz }: { reservaId: string; tz: string }
               </button>
             ))}
           </div>
-          {slots && slots.length === 0 ? <p className="sn-meta mt-2">No hay horarios libres ese día. Prueba con otro.</p> : null}
+          {slots && slots.length === 0 ? <p className="sn-meta mt-2">{t("ac.no_horarios")}</p> : null}
         </>
       ) : null}
 
@@ -211,10 +215,10 @@ export function Reprogramar({ reservaId, tz }: { reservaId: string; tz: string }
 
       <div className="mt-4 flex flex-wrap gap-3">
         <Button variant="secondary" className="min-w-0 flex-1" onClick={() => setAbierto(false)} disabled={guardando}>
-          Volver
+          {t("ac.volver")}
         </Button>
         <Button className="min-w-0 flex-1" disabled={!elegido} loading={guardando} onClick={confirmar}>
-          Confirmar cambio
+          {t("ac.confirmar_cambio")}
         </Button>
       </div>
     </div>

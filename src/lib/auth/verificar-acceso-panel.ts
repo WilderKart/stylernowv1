@@ -13,7 +13,7 @@ import { resolverContexto, type ContextoUsuario, type RolPanel } from "@/lib/aut
  * La migración completa a un `Contexto` unificado en minúscula (eliminar
  * `RolPanel`, `PanelNav` tipado por Permission Registry) queda documentada
  * como trabajo futuro en `ADR_016_Authorization_Refactor.md` — no se ejecuta
- * acá para no arriesgar código de autorización ya verificado.
+ * aquí para no arriesgar código de autorización ya verificado.
  */
 export async function verificarAccesoPanel(
   rolesPermitidos: Array<Extract<RolPanel, "BARBERIA" | "GUARDIAN">>,

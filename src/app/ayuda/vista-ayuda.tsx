@@ -12,10 +12,13 @@ import { useState } from "react";
 import { crearTicketAccion } from "./actions";
 import { EstadoTicket } from "./estado-ticket";
 import { FAQS } from "./faq-data";
+import { useT } from "@/lib/i18n/proveedor";
 
 const TEMAS = ["CITA", "PAGO", "CUENTA", "OTRO"] as const;
+const ETIQUETA_TEMA = { CITA: "ay.tema_cita", PAGO: "ay.tema_pago", CUENTA: "ay.tema_cuenta", OTRO: "ay.tema_otro" } as const;
 
 export function VistaAyuda({ tickets, errorTickets }: { tickets: TicketResumen[]; errorTickets: string | null }) {
+  const t = useT();
   const [q, setQ] = useState("");
   const [abierta, setAbierta] = useState(0);
   const [tema, setTema] = useState<(typeof TEMAS)[number]>("PAGO");
@@ -25,7 +28,7 @@ export function VistaAyuda({ tickets, errorTickets }: { tickets: TicketResumen[]
   const [creado, setCreado] = useState<string | null>(null);
 
   const termino = q.trim().toLowerCase();
-  const faqs = FAQS.map((f, i) => ({ ...f, i })).filter((f) => !termino || `${f.q} ${f.a}`.toLowerCase().includes(termino));
+  const faqs = FAQS.map((f, i) => ({ q: t(f.q), a: t(f.a), i })).filter((f) => !termino || `${f.q} ${f.a}`.toLowerCase().includes(termino));
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
@@ -44,23 +47,23 @@ export function VistaAyuda({ tickets, errorTickets }: { tickets: TicketResumen[]
 
   return (
     <Pantalla className="pb-8">
-      <Top titulo="/PERFIL/AYUDA" volverA="/perfil" />
+      <Top titulo={t("ay.top")} volverA="/perfil" />
 
       <div className="flex flex-col gap-3 px-4 pt-3.5 pb-2.5">
         <Poster as="h1" size={2}>
-          Ayuda<span className="sn-hot">.</span>
+          {t("ay.titulo")}<span className="sn-hot">.</span>
         </Poster>
         <Input
           type="search"
-          aria-label="Buscar en preguntas frecuentes"
-          placeholder="Busca: cancelar, anticipo, reembolso…"
+          aria-label={t("ay.buscar_aria")}
+          placeholder={t("ay.buscar_ph")}
           leadingIcon={<Search aria-hidden className="size-5" />}
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
       </div>
 
-      <Sec derecha={<span className="sn-meta">{`${faqs.length} DE ${FAQS.length}`}</span>}>01 / Preguntas frecuentes</Sec>
+      <Sec derecha={<span className="sn-meta">{t("ay.faqs_n", { n: faqs.length, total: FAQS.length })}</span>}>{t("ay.sec_faq")}</Sec>
       <div className="border-t-2 border-border px-4">
         {faqs.map((f) => {
           const open = abierta === f.i;
@@ -82,27 +85,27 @@ export function VistaAyuda({ tickets, errorTickets }: { tickets: TicketResumen[]
             </div>
           );
         })}
-        {faqs.length === 0 ? <p className="sn-meta py-3">00 / SIN RESULTADOS · ESCRÍBENOS ABAJO</p> : null}
+        {faqs.length === 0 ? <p className="sn-meta py-3">{t("ay.sin_resultados")}</p> : null}
       </div>
 
       <form onSubmit={enviar} className="mx-4 mt-4 flex flex-col gap-2.5 border-2 border-border p-3">
-        <h2 className="sn-num">02 / Crear ticket</h2>
-        <div role="radiogroup" aria-label="Tema" className="flex flex-wrap gap-1.5">
-          {TEMAS.map((t) => (
+        <h2 className="sn-num">{t("ay.sec_ticket")}</h2>
+        <div role="radiogroup" aria-label={t("ay.tema")} className="flex flex-wrap gap-1.5">
+          {TEMAS.map((k) => (
             <button
-              key={t}
+              key={k}
               type="button"
               role="radio"
-              aria-checked={tema === t}
-              onClick={() => setTema(t)}
-              className={cn("sn-chip", tema === t && "is-selected")}
+              aria-checked={tema === k}
+              onClick={() => setTema(k)}
+              className={cn("sn-chip", tema === k && "is-selected")}
             >
-              {t}
+              {t(ETIQUETA_TEMA[k])}
             </button>
           ))}
         </div>
         <label htmlFor="ticket-mensaje" className="sr-only">
-          Cuéntanos qué pasó
+          {t("ay.cuentanos")}
         </label>
         <textarea
           id="ticket-mensaje"
@@ -110,23 +113,23 @@ export function VistaAyuda({ tickets, errorTickets }: { tickets: TicketResumen[]
           onChange={(e) => setMensaje(e.target.value)}
           maxLength={2000}
           rows={3}
-          placeholder="Cuéntanos qué pasó y el número de tu cita."
+          placeholder={t("ay.mensaje_ph")}
           className="min-h-24 w-full resize-none border-2 border-border bg-surface px-2.5 py-2 text-[15px] leading-5 text-text outline-none placeholder:text-text-muted focus:shadow-hard"
         />
         {error ? <ErrorAviso>{error}</ErrorAviso> : null}
         {creado !== null ? (
           <p role="status" className="sn-meta break-words">
-            {`TICKET ${creado} ENVIADO · TE RESPONDEMOS EN MENOS DE 24 HORAS`}
+            {t("ay.ticket_enviado", { codigo: creado })}
           </p>
         ) : null}
         <Button type="submit" size="lg" loading={enviando} disabled={mensaje.trim().length < 5} className="w-full justify-between">
-          <span>Enviar ticket</span>
+          <span>{t("ay.enviar")}</span>
           <ArrowUpRight aria-hidden className="size-[18px]" />
         </Button>
       </form>
 
       <div className="px-4 pt-3.5">
-        <h2 className="sn-num border-b-2 border-border pb-1.5">03 / Tus tickets</h2>
+        <h2 className="sn-num border-b-2 border-border pb-1.5">{t("ay.sec_tickets")}</h2>
         {errorTickets ? (
           <div className="pt-3">
             <ErrorAviso>{errorTickets}</ErrorAviso>
@@ -143,7 +146,7 @@ export function VistaAyuda({ tickets, errorTickets }: { tickets: TicketResumen[]
             <EstadoTicket estado={k.estado} />
           </Link>
         ))}
-        {!errorTickets && tickets.length === 0 ? <p className="sn-meta py-3">00 / AÚN NO TIENES TICKETS</p> : null}
+        {!errorTickets && tickets.length === 0 ? <p className="sn-meta py-3">{t("ay.sin_tickets")}</p> : null}
       </div>
     </Pantalla>
   );

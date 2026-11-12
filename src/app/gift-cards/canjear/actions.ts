@@ -27,7 +27,7 @@ export async function consultarMiGiftCard(codigo: string, pin: string): Promise<
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Iniciá sesión para consultar tu Gift Card." };
+  if (!user) return { ok: false, error: "Inicia sesión para consultar tu Gift Card." };
 
   const { data, error } = await supabase.rpc("consultar_gift_card", { p_codigo: codigo.trim(), p_pin: pin.trim() });
   if (error) return { ok: false, error: traducirError(error.message) };

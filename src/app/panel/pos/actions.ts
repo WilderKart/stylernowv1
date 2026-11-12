@@ -17,12 +17,12 @@ async function usuarioActual() {
 }
 
 const MENSAJES_ERROR: Record<string, string> = {
-  NO_AUTORIZADO: "No tenés permiso para cobrar esta reserva.",
+  NO_AUTORIZADO: "No tienes permiso para cobrar esta reserva.",
   RESERVA_NO_ENCONTRADA: "No encontramos esa reserva.",
   RESERVA_NO_COMPLETABLE: "Esta reserva ya fue cobrada o no está confirmada.",
   PRODUCTO_NO_DISPONIBLE: "Uno de los productos elegidos ya no está disponible.",
-  METODO_PAGO_INVALIDO: "Elegí un método de pago válido.",
-  MONTO_INVALIDO: "Revisá los montos ingresados.",
+  METODO_PAGO_INVALIDO: "Elige un método de pago válido.",
+  MONTO_INVALIDO: "Revisa los montos ingresados.",
   GIFT_CARD_NO_ENCONTRADA: "No encontramos ninguna Gift Card con ese código.",
   PIN_INCORRECTO: "El PIN no es correcto.",
   DEMASIADOS_INTENTOS: "Demasiados intentos con PIN incorrecto. Esta Gift Card queda bloqueada 15 minutos.",
@@ -230,7 +230,7 @@ export async function completarVenta(datos: {
     };
 
     // El ascenso VIP automático (Lealtad, ADR-011) ya no se llama desde
-    // acá: es un handler del Pipeline de Eventos venta_completada
+    // aquí: es un handler del Pipeline de Eventos venta_completada
     // (migración 070-072), ejecutado dentro de la misma transacción de
     // completar_venta_pos() con aislamiento de fallos real.
     revalidatePath("/panel/pos");

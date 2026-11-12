@@ -83,7 +83,7 @@ export function DetalleCliente({
     const res = await crearNota(negocioId, resumen.clienteId, nuevaNota);
     setGuardandoNota(false);
     if (!res.ok) return setError(res.error);
-    setNotas((prev) => [{ id: crypto.randomUUID(), texto: nuevaNota.trim(), createdAt: new Date().toISOString(), autorNombre: "Vos" }, ...prev]);
+    setNotas((prev) => [{ id: crypto.randomUUID(), texto: nuevaNota.trim(), createdAt: new Date().toISOString(), autorNombre: "Tú" }, ...prev]);
     setNuevaNota("");
   }
 
@@ -196,7 +196,7 @@ export function DetalleCliente({
               type="button"
               onClick={() => onQuitarEtiqueta(e)}
               className="rounded-none bg-surface-2 px-2.5 py-1 text-[11px] font-semibold text-text-muted hover:bg-danger-soft hover:text-danger"
-              title="Tocá para quitar"
+              title="Toca para quitar"
             >
               {e} ×
             </button>
@@ -217,7 +217,7 @@ export function DetalleCliente({
       <section className="mb-6">
         <h2 className="font-display mb-2 text-[13px] font-bold uppercase text-text">Notas</h2>
         <div className="mb-3 flex gap-2">
-          <Input placeholder="Escribí una nota privada..." value={nuevaNota} onChange={(e) => setNuevaNota(e.target.value)} />
+          <Input placeholder="Escribe una nota privada..." value={nuevaNota} onChange={(e) => setNuevaNota(e.target.value)} />
           <Button size="sm" loading={guardandoNota} onClick={onCrearNota}>
             Agregar
           </Button>
@@ -315,11 +315,11 @@ function SeccionFotos({
 
   async function onArchivoElegido(archivo: File) {
     if (!reservaId) {
-      onError("Elegí a qué reserva pertenece la foto antes de subirla.");
+      onError("Elige a qué reserva pertenece la foto antes de subirla.");
       return;
     }
     if (!consentimiento) {
-      onError("Marcá el consentimiento explícito del Cliente antes de subir la foto.");
+      onError("Marca el consentimiento explícito del Cliente antes de subir la foto.");
       return;
     }
     setSubiendo(true);

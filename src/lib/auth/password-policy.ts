@@ -46,7 +46,7 @@ export async function validarPolitica(password: string): Promise<{ ok: true } | 
   if (!formato.ok) return formato;
 
   if (await estaComprometida(password)) {
-    return { ok: false, error: "Esta contraseña apareció en filtraciones públicas — elegí otra." };
+    return { ok: false, error: "Esta contraseña apareció en filtraciones públicas — elige otra." };
   }
   return { ok: true };
 }

@@ -2,10 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useT } from "@/lib/i18n/proveedor";
 import { alternarFavorito } from "./actions";
 
 export function BotonFavorito({ negocioId, slug, favoritoInicial }: { negocioId: string; slug: string; favoritoInicial: boolean }) {
   const router = useRouter();
+  const t = useT();
   const [favorito, setFavorito] = useState(favoritoInicial);
   const [cargando, setCargando] = useState(false);
 
@@ -25,7 +27,7 @@ export function BotonFavorito({ negocioId, slug, favoritoInicial }: { negocioId:
       type="button"
       onClick={onClick}
       disabled={cargando}
-      aria-label={favorito ? "Quitar de favoritos" : "Guardar en favoritos"}
+      aria-label={favorito ? t("neg.quitar_fav") : t("neg.guardar_fav")}
       aria-pressed={favorito}
       className="sn-fav disabled:opacity-50"
     >

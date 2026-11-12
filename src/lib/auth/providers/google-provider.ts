@@ -44,7 +44,7 @@ export const googleProvider: AuthProvider = {
       data: { user },
     } = await supabase.auth.getUser();
     const identidad = user?.identities?.find((i) => i.provider === "google");
-    if (!identidad) return { ok: false, error: "No tenés Google vinculado." };
+    if (!identidad) return { ok: false, error: "No tienes Google vinculado." };
     const { error } = await supabase.auth.unlinkIdentity(identidad);
     if (error) return { ok: false, error: error.message };
     return { ok: true };

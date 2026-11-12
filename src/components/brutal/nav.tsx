@@ -5,14 +5,16 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
+import { useT } from "@/lib/i18n/proveedor";
 
 export type TabItem = { href: string; label: string; icon: React.ReactNode; badge?: boolean; match?: "exact" | "prefix" };
 
 /** Barra de pestañas inferior negra (patrón .sn-tabbar). El rol decide los items. */
 export function TabBar({ items, className }: { items: TabItem[]; className?: string }) {
   const pathname = usePathname();
+  const t = useT();
   return (
-    <nav aria-label="Navegación principal" className={cn("sn-tabbar pb-[env(safe-area-inset-bottom)]", className)}>
+    <nav aria-label={t("nav.principal")} className={cn("sn-tabbar pb-[env(safe-area-inset-bottom)]", className)}>
       {items.map((it) => {
         const activo = it.match === "exact" ? pathname === it.href : pathname === it.href || pathname.startsWith(`${it.href}/`);
         return (
@@ -45,11 +47,12 @@ export function ScreenHeader({
   big?: boolean;
   className?: string;
 }) {
+  const t = useT();
   return (
     <header className={cn("sn-header", !big && "sn-header--compact", className)}>
       <div className="sn-header__bar">
         {back ? (
-          <Link href={back} className="sn-iconbtn" aria-label="Volver">
+          <Link href={back} className="sn-iconbtn" aria-label={t("comun.volver")}>
             <ChevronLeft />
           </Link>
         ) : (

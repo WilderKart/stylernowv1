@@ -17,16 +17,16 @@ async function usuarioActual() {
 }
 
 const MENSAJES_ERROR: Record<string, string> = {
-  NO_AUTORIZADO: "No tenés permiso sobre esa reserva.",
+  NO_AUTORIZADO: "No tienes permiso sobre esa reserva.",
   NEGOCIO_NO_DISPONIBLE: "Este negocio no está activo en este momento.",
   CLIENTE_NO_ENCONTRADO: "No encontramos ningún cliente con ese dato.",
-  SLOT_NO_DISPONIBLE: "Ese horario ya no está disponible — elegí otro.",
+  SLOT_NO_DISPONIBLE: "Ese horario ya no está disponible — elige otro.",
   STAFF_NO_DISPONIBLE: "Ese Staff no está disponible en ese horario.",
   RESERVA_NO_ENCONTRADA: "No encontramos esa reserva.",
   RESERVA_NO_REPROGRAMABLE: "Solo se pueden reprogramar reservas confirmadas.",
   RESERVA_NO_REASIGNABLE: "Esa reserva ya no se puede reasignar.",
   RESERVA_NO_CANCELABLE: "Esa reserva ya no se puede cancelar.",
-  FUERA_DE_VENTANA_REPROGRAMACION: "Ya pasó la ventana para reprogramar esta reserva vos mismo — contactá al negocio.",
+  FUERA_DE_VENTANA_REPROGRAMACION: "Ya pasó la ventana para reprogramar esta reserva tú mismo — contacta al negocio.",
 };
 
 function traducirError(mensaje: string) {
@@ -175,7 +175,7 @@ export async function eliminarBloqueo(id: string): Promise<Resultado> {
 
 // ── Buscar cliente existente (para reserva manual) ─────────────────────────
 // RLS (perfil_select_crm_negocio): solo clientes que ya tuvieron al menos
-// una Reserva con este negocio son visibles acá — un cliente genuinamente
+// una Reserva con este negocio son visibles aquí — un cliente genuinamente
 // nuevo todavía no puede buscarse por este camino (docs/PENDING_DECISIONS.md).
 
 export interface ClienteEncontrado {

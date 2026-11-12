@@ -51,12 +51,12 @@ export function VistaAds({
         ) : null}
       </div>
       <p className="mb-6 text-[12px] text-text-faint">
-        Destacá tu negocio en el Marketplace. El gasto se descuenta de tu Wallet en tiempo real, nunca supera tu presupuesto diario.
+        Destaca tu negocio en el Marketplace. El gasto se descuenta de tu Wallet en tiempo real, nunca supera tu presupuesto diario.
       </p>
 
       {planInsuficiente ? (
         <Card className="mb-6 border-accent/30 bg-accent-soft">
-          <p className="text-[12.5px] text-text-muted">Necesitás el Plan Studio o superior para crear campañas publicitarias.</p>
+          <p className="text-[12.5px] text-text-muted">Necesitas el Plan Studio o superior para crear campañas publicitarias.</p>
         </Card>
       ) : null}
 

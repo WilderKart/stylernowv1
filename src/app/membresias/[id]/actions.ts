@@ -8,7 +8,7 @@ type Resultado<T = undefined> =
   | { ok: false; error: string };
 
 const MENSAJES_ERROR: Record<string, string> = {
-  NO_AUTORIZADO: "No tenés permiso sobre esta Membresía.",
+  NO_AUTORIZADO: "No tienes permiso sobre esta Membresía.",
   TRANSICION_INVALIDA: "Esa acción no es posible en el estado actual de tu Membresía.",
   DIAS_CONGELACION_INVALIDOS: "Ese número de días de congelación no está permitido por este plan.",
 };

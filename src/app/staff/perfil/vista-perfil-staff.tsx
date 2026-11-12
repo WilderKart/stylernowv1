@@ -237,7 +237,7 @@ function SeccionBloqueos({ vinculoId, bloqueosIniciales }: { vinculoId: string; 
   const [error, setError] = useState<string | null>(null);
 
   async function crear() {
-    if (!form.fechaInicio || !form.fechaFin) return setError("Completá las fechas de inicio y fin.");
+    if (!form.fechaInicio || !form.fechaFin) return setError("Completa las fechas de inicio y fin.");
     setGuardando(true);
     setError(null);
     const res = await crearMiBloqueo(vinculoId, new Date(form.fechaInicio).toISOString(), new Date(form.fechaFin).toISOString(), form.motivo);

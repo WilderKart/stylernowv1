@@ -59,7 +59,7 @@ export function VistaNivel({
         <h2 className="font-display mb-3 text-[13px] font-bold uppercase text-text">Eventos recientes</h2>
         {datos.eventosRecientes.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-[12.5px] text-text-faint">
-            Todavía no tenés eventos de puntaje esta temporada.
+            Todavía no tienes eventos de puntaje esta temporada.
           </p>
         ) : (
           <ul className="flex flex-col gap-2">

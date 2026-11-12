@@ -9,6 +9,7 @@ import { ArrowDownLeft, ArrowUpRight, Check, Gift, Store, Stamp, Users } from "l
 import Link from "next/link";
 import { useState } from "react";
 import { crearGrupoFamiliar, registrarReferido, type ResumenLealtad } from "./actions";
+import { useIdioma, useT } from "@/lib/i18n/proveedor";
 
 const MEMBRESIA_ESTADO_TONO: Record<string, "ok" | "warn" | "info"> = {
   ACTIVA: "ok",
@@ -16,27 +17,31 @@ const MEMBRESIA_ESTADO_TONO: Record<string, "ok" | "warn" | "info"> = {
   SUSPENDIDA: "info",
 };
 
-const TIPO_ETIQUETA: Record<string, string> = {
-  GIFT_CARD: "Gift Card",
-  REFERIDO: "Referido",
-  CASHBACK: "Cashback",
-  PROMOCION: "Promoción",
-  SELLO_CONVERTIDO: "Sello convertido",
-  VIP_BONO: "Bono VIP",
-  CANJE: "Canje",
-};
+const TIPO_ETIQUETA = {
+  GIFT_CARD: "ll.t_gift",
+  REFERIDO: "ll.t_referido",
+  CASHBACK: "ll.t_cashback",
+  PROMOCION: "ll.t_promocion",
+  SELLO_CONVERTIDO: "ll.t_sello",
+  VIP_BONO: "ll.t_vip",
+  CANJE: "ll.t_canje",
+} as const;
+
+const ESTADO_RAW = { DISPONIBLE: "ll.est_disponible", COMPLETADO: "ll.est_completado" } as const;
 
 export function VistaLealtad({ resumenInicial, errorInicial }: { resumenInicial: ResumenLealtad; errorInicial: string | null }) {
+  const t = useT();
+  const loc = useIdioma() === "en" ? "en-US" : "es-CO";
   const [resumen] = useState(resumenInicial);
   const error = errorInicial;
 
   return (
     <>
       <div className="sn-block-ink !bg-ink !text-paper px-4 py-5">
-        <span className="sn-num !text-signal">01 / StylerWallet</span>
+        <span className="sn-num !text-signal">{t("ll.wallet")}</span>
         <p className="poster-1 mt-1 break-words !text-paper">{formatCOP(resumen.walletSaldo)}</p>
         <span className="sn-meta !text-[#A3A3A3]">
-          Gift cards, referidos, cashback y promociones en un solo saldo, usable en cualquier negocio que lo acepte.
+          {t("ll.wallet_txt")}
         </span>
       </div>
 
@@ -48,7 +53,7 @@ export function VistaLealtad({ resumenInicial, errorInicial }: { resumenInicial:
 
       {resumen.membresias.length > 0 ? (
         <>
-          <Sec derecha={<Link href="/membresias" className="sn-label underline">Ver todas</Link>}>02 / Membresías</Sec>
+          <Sec derecha={<Link href="/membresias" className="sn-label underline">{t("ll.ver_todas")}</Link>}>{t("ll.sec_membresias")}</Sec>
           <Filas>
             {resumen.membresias.slice(0, 3).map((m) => (
               <Fila
@@ -59,7 +64,7 @@ export function VistaLealtad({ resumenInicial, errorInicial }: { resumenInicial:
                 href={`/membresias/${m.id}`}
                 derecha={
                   <Status tone={MEMBRESIA_ESTADO_TONO[m.estado] ?? "info"}>
-                    {m.estado === "SUSPENDIDA" ? "Congelada" : m.estado === "PROXIMA_A_VENCER" ? "Por vencer" : "Activa"}
+                    {m.estado === "SUSPENDIDA" ? t("ll.congelada") : m.estado === "PROXIMA_A_VENCER" ? t("ll.por_vencer") : t("ll.activa")}
                   </Status>
                 }
               />
@@ -68,28 +73,28 @@ export function VistaLealtad({ resumenInicial, errorInicial }: { resumenInicial:
         </>
       ) : null}
 
-      <Sec>03 / Gift cards</Sec>
+      <Sec>{t("ll.sec_gift")}</Sec>
       <Filas>
         {/* Por seguridad (ADR-014, Fase B: canje únicamente desde POS) el canje de una Gift Card
             no es autoservicio remoto: aquí el Cliente solo compra o consulta su saldo. */}
         <Fila
           icono={<Gift aria-hidden className="size-5" />}
-          titulo="Gift cards"
-          meta="Compra una para ti o para regalar, y consulta el saldo de las que ya tienes."
+          titulo={t("perfil.gift_cards")}
+          meta={t("ll.gift_meta")}
           href="/gift-cards"
         />
       </Filas>
 
       {resumen.movimientos.length > 0 ? (
         <>
-          <Sec>04 / Movimientos recientes</Sec>
+          <Sec>{t("ll.sec_mov")}</Sec>
           <Filas>
             {resumen.movimientos.slice(0, 8).map((m) => (
               <Fila
                 key={m.id}
                 icono={m.monto >= 0 ? <ArrowDownLeft aria-hidden className="size-5" /> : <ArrowUpRight aria-hidden className="size-5" />}
-                titulo={TIPO_ETIQUETA[m.tipo] ?? m.tipo}
-                meta={`${new Date(m.createdAt).toLocaleDateString("es-CO")}${m.motivo ? ` · ${m.motivo}` : ""}`}
+                titulo={TIPO_ETIQUETA[m.tipo as keyof typeof TIPO_ETIQUETA] ? t(TIPO_ETIQUETA[m.tipo as keyof typeof TIPO_ETIQUETA]) : m.tipo}
+                meta={`${new Date(m.createdAt).toLocaleDateString(loc)}${m.motivo ? ` · ${m.motivo}` : ""}`}
                 derecha={
                   <span className={m.monto >= 0 ? "sn-price" : "sn-price text-danger"}>
                     {m.monto >= 0 ? "+" : ""}
@@ -106,7 +111,7 @@ export function VistaLealtad({ resumenInicial, errorInicial }: { resumenInicial:
 
       {resumen.sellos.length > 0 ? (
         <>
-          <Sec>06 / Sellos</Sec>
+          <Sec>{t("ll.sec_sellos")}</Sec>
           <Filas>
             {resumen.sellos.map((s) => (
               <div key={s.campanaId} className="flex flex-col gap-2 border-b border-border-subtle px-4 py-3">
@@ -116,9 +121,9 @@ export function VistaLealtad({ resumenInicial, errorInicial }: { resumenInicial:
                     {s.negocioNombre} · {s.campanaNombre}
                   </b>
                 </div>
-                <Barra pct={(s.sellosActuales / s.sellosRequeridos) * 100} etiqueta="Progreso de sellos" />
+                <Barra pct={(s.sellosActuales / s.sellosRequeridos) * 100} etiqueta={t("ll.progreso")} />
                 <span className="sn-meta break-words">
-                  {s.sellosActuales} de {s.sellosRequeridos} · {s.recompensaDescripcion}
+                  {t("ll.sellos_de", { a: s.sellosActuales, b: s.sellosRequeridos, recompensa: s.recompensaDescripcion })}
                 </span>
               </div>
             ))}
@@ -128,7 +133,7 @@ export function VistaLealtad({ resumenInicial, errorInicial }: { resumenInicial:
 
       {resumen.cashback.length > 0 ? (
         <>
-          <Sec>07 / Cashback</Sec>
+          <Sec>{t("ll.sec_cashback")}</Sec>
           <Filas>
             {resumen.cashback.slice(0, 6).map((c) => (
               <Fila
@@ -136,7 +141,7 @@ export function VistaLealtad({ resumenInicial, errorInicial }: { resumenInicial:
                 titulo={c.negocioNombre}
                 derecha={
                   <>
-                    <Status tone={c.estado === "DISPONIBLE" ? "ok" : "info"}>{c.estado}</Status>
+                    <Status tone={c.estado === "DISPONIBLE" ? "ok" : "info"}>{ESTADO_RAW[c.estado as keyof typeof ESTADO_RAW] ? t(ESTADO_RAW[c.estado as keyof typeof ESTADO_RAW]) : c.estado}</Status>
                     <span className="sn-price">{formatCOP(c.monto)}</span>
                   </>
                 }
@@ -152,6 +157,8 @@ export function VistaLealtad({ resumenInicial, errorInicial }: { resumenInicial:
 }
 
 function SeccionReferidos({ codigoReferido, referidos }: { codigoReferido: string | null; referidos: ResumenLealtad["referidos"] }) {
+  const t = useT();
+  const loc = useIdioma() === "en" ? "en-US" : "es-CO";
   const [codigoAUsar, setCodigoAUsar] = useState("");
   const [cargando, setCargando] = useState(false);
   const [mensaje, setMensaje] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
@@ -162,33 +169,33 @@ function SeccionReferidos({ codigoReferido, referidos }: { codigoReferido: strin
     setMensaje(null);
     const res = await registrarReferido(codigoAUsar);
     setCargando(false);
-    setMensaje(res.ok ? { tipo: "ok", texto: "¡Listo! Cuando completes tu primera reserva, tu referente recibe su recompensa." } : { tipo: "error", texto: res.error });
+    setMensaje(res.ok ? { tipo: "ok", texto: t("ll.listo") } : { tipo: "error", texto: res.error });
     if (res.ok) setCodigoAUsar("");
   }
 
   return (
     <>
-      <Sec>05 / Referidos{referidos.length ? ` · ${referidos.length}` : ""}</Sec>
+      <Sec>{t("ll.sec_referidos")}{referidos.length ? ` · ${referidos.length}` : ""}</Sec>
       <div className="mx-4 border-2 border-border shadow-hard">
         <div className="border-b border-border-subtle p-3">
-          <span className="sn-label">Tu código</span>
+          <span className="sn-label">{t("ll.tu_codigo")}</span>
         </div>
         <p className="poster-3 break-all p-3">{codigoReferido ?? "—"}</p>
       </div>
 
       <div className="flex flex-col gap-3 p-4">
-        <p className="body-sm break-words">¿Alguien te compartió un código? Ingrésalo aquí.</p>
+        <p className="body-sm break-words">{t("ll.te_compartieron")}</p>
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-0 flex-1 basis-48">
             <Input
-              aria-label="Código de referido"
-              placeholder="Código de referido"
+              aria-label={t("ll.codigo_ref")}
+              placeholder={t("ll.codigo_ref")}
               value={codigoAUsar}
               onChange={(e) => setCodigoAUsar(e.target.value.toUpperCase())}
             />
           </div>
           <Button loading={cargando} onClick={onUsarCodigo} disabled={!codigoAUsar.trim()}>
-            Usar
+            {t("ll.usar")}
           </Button>
         </div>
         {mensaje ? (
@@ -208,10 +215,10 @@ function SeccionReferidos({ codigoReferido, referidos }: { codigoReferido: strin
             <Fila
               key={r.id}
               icono={<Users aria-hidden className="size-5" />}
-              titulo={new Date(r.createdAt).toLocaleDateString("es-CO")}
+              titulo={new Date(r.createdAt).toLocaleDateString(loc)}
               derecha={
                 <>
-                  <Status tone={r.estado === "COMPLETADO" ? "ok" : "info"}>{r.estado}</Status>
+                  <Status tone={r.estado === "COMPLETADO" ? "ok" : "info"}>{ESTADO_RAW[r.estado as keyof typeof ESTADO_RAW] ? t(ESTADO_RAW[r.estado as keyof typeof ESTADO_RAW]) : r.estado}</Status>
                   {r.montoRecompensa ? <span className="sn-price">{formatCOP(r.montoRecompensa)}</span> : null}
                 </>
               }
@@ -224,6 +231,7 @@ function SeccionReferidos({ codigoReferido, referidos }: { codigoReferido: strin
 }
 
 function SeccionFamilia({ familia, onCreada }: { familia: ResumenLealtad["familia"]; onCreada: () => void }) {
+  const t = useT();
   const [creando, setCreando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -239,9 +247,9 @@ function SeccionFamilia({ familia, onCreada }: { familia: ResumenLealtad["famili
   if (familia) {
     return (
       <>
-        <Sec>08 / Mi familia</Sec>
+        <Sec>{t("ll.sec_mi_familia")}</Sec>
         <Filas>
-          <Fila icono={<Users aria-hidden className="size-5" />} titulo={familia.nombre} meta={`Hasta ${familia.limiteMiembros} miembros`} />
+          <Fila icono={<Users aria-hidden className="size-5" />} titulo={familia.nombre} meta={familia.limiteMiembros != null ? t("ll.hasta_miembros", { n: familia.limiteMiembros }) : t("ll.sin_limite_miembros")} />
         </Filas>
       </>
     );
@@ -249,12 +257,12 @@ function SeccionFamilia({ familia, onCreada }: { familia: ResumenLealtad["famili
 
   return (
     <>
-      <Sec>08 / Paquete familiar</Sec>
+      <Sec>{t("ll.sec_familiar")}</Sec>
       <div className="flex flex-col gap-3 px-4 pb-6">
-        <p className="body-sm break-words">Agrupa a tu familia para compartir beneficios.</p>
+        <p className="body-sm break-words">{t("ll.agrupa")}</p>
         {error ? <ErrorAviso>{error}</ErrorAviso> : null}
         <Button variant="secondary" size="lg" loading={creando} onClick={onCrear}>
-          Crear grupo familiar
+          {t("ll.crear_grupo")}
         </Button>
       </div>
     </>

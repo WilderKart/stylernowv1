@@ -41,7 +41,7 @@ export default async function NuevaSedePage() {
               {plan?.limite_sedes === 1 ? "" : "s"}
             </p>
             <p className="mt-1 text-[12.5px] text-text-muted">
-              Hacé un upgrade de plan para agregar otra sede
+              Haz un upgrade de plan para agregar otra sede
               (01-PRD/03_Monetization.md).
             </p>
           </div>

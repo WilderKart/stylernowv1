@@ -3,11 +3,12 @@ import { redirect } from "next/navigation";
 import { listarTickets, mensajesTicket } from "@/lib/cliente/soporte";
 import { notFound } from "next/navigation";
 import { VistaTicket } from "./vista-ticket";
+import { obtenerT } from "@/lib/i18n/servidor";
 
-export const metadata = {
-  title: "Ticket de soporte",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("ay.tk_meta"), robots: { index: false, follow: false } };
+}
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

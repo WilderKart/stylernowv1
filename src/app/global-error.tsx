@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import { crearTraductor, type Idioma } from "@/lib/i18n/diccionario";
+
+/** Este boundary reemplaza el layout raíz (y su IdiomaProvider): el idioma se lee directo de la cookie. */
+function idiomaDeCookie(): Idioma {
+  return /(?:^|;\s*)sn_idioma=en(?:;|$)/.test(document.cookie) ? "en" : "es";
+}
+const sinSuscripcion = () => () => {};
 
 /**
  * Reemplaza el layout raíz completo (incluido <html>/<body>) si el error
@@ -17,13 +24,15 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const idioma = useSyncExternalStore(sinSuscripcion, idiomaDeCookie, () => "es" as Idioma);
+  const t = crearTraductor(idioma);
   useEffect(() => {
     console.error("[global-error]", error);
   }, [error]);
 
   const mono = "'Space Mono', ui-monospace, Menlo, Consolas, monospace";
   return (
-    <html lang="es">
+    <html lang={idioma}>
       <body
         style={{
           margin: 0,
@@ -47,7 +56,7 @@ export default function GlobalError({
             gap: 12,
           }}
         >
-          <span style={{ font: `700 12px/16px ${mono}`, letterSpacing: 0.72, textTransform: "uppercase" }}>00 / Error</span>
+          <span style={{ font: `700 12px/16px ${mono}`, letterSpacing: 0.72, textTransform: "uppercase" }}>{t("err.codigo")}</span>
           <h1
             style={{
               margin: 0,
@@ -60,16 +69,16 @@ export default function GlobalError({
               overflowWrap: "anywhere",
             }}
           >
-            StylerNow
+            {t("err.global_1")}
             <br />
-            no pudo <span style={{ background: "#FF4D00", padding: "0 4px" }}>cargar.</span>
+            {t("err.global_2")} <span style={{ background: "#FF4D00", padding: "0 4px" }}>{t("err.global_3")}</span>
           </h1>
           <p style={{ margin: 0, fontSize: 15, lineHeight: "22px", color: "#525252" }}>
-            Algo falló al iniciar la aplicación. Reintentá — si persiste, contanos.
+            {t("err.global_txt")}
           </p>
           {error.digest ? (
             <span style={{ font: `400 11px/14px ${mono}`, letterSpacing: 0.66, textTransform: "uppercase", color: "#525252" }}>
-              Código: {error.digest}
+              {t("err.codigo_n", { codigo: error.digest })}
             </span>
           ) : null}
           <button
@@ -90,7 +99,7 @@ export default function GlobalError({
               textAlign: "left",
             }}
           >
-            Reintentar
+            {t("comun.reintentar")}
           </button>
         </main>
       </body>

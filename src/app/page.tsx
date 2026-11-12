@@ -11,19 +11,19 @@ import { registrarEventoAnuncio } from "@/lib/ads/registrar-evento";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Suspense } from "react";
+import { obtenerT } from "@/lib/i18n/servidor";
 
-export const metadata = {
-  title: "Reserva tu cita",
-  description:
-    "Encuentra barberías, salones y spas cerca de ti y reserva tu turno en segundos.",
-};
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("home.meta_titulo"), description: t("home.meta_desc") };
+}
 
 // Atajos de categoría del Home (los valores son los mismos de Filtros).
 const CATEGORIAS_HOME = [
-  { valor: "barberia", etiqueta: "Barbería" },
-  { valor: "unas", etiqueta: "Uñas" },
-  { valor: "estetica", etiqueta: "Estética" },
-  { valor: "salon", etiqueta: "Peluquería" },
+  { valor: "barberia", etiqueta: "home.cat_barberia" as const },
+  { valor: "manicura", etiqueta: "home.cat_unas" as const },
+  { valor: "spa", etiqueta: "home.cat_spa" as const },
+  { valor: "salon", etiqueta: "home.cat_peluqueria" as const },
 ];
 
 function primerValor(v: string | string[] | undefined) {
@@ -32,6 +32,7 @@ function primerValor(v: string | string[] | undefined) {
 
 export default async function HomePage(props: PageProps<"/">) {
   const params = await props.searchParams;
+  const t = await obtenerT();
   const supabase = await createClient();
 
   const texto = primerValor(params.q);
@@ -42,6 +43,11 @@ export default async function HomePage(props: PageProps<"/">) {
   const lat = primerValor(params.lat);
   const lng = primerValor(params.lng);
   const vista = primerValor(params.vista) === "mapa" ? "mapa" : "lista";
+  // Paginación de la lista: 24 por página (se pide 1 extra para saber si hay página siguiente). El mapa trae hasta 100.
+  const TAM_PAGINA = 24;
+  const pagina = Math.min(500, Math.max(1, Math.floor(Number(primerValor(params.pagina))) || 1));
+  const offsetPagina = vista === "lista" ? (pagina - 1) * TAM_PAGINA : 0;
+  const limiteBusqueda = vista === "mapa" ? 100 : TAM_PAGINA + 1;
 
   const radio = Number(primerValor(params.radio));
   const calif = Number(primerValor(params.calif));
@@ -66,7 +72,8 @@ export default async function HomePage(props: PageProps<"/">) {
         radioKm,
         califMin,
         abiertoHoy: soloHoy,
-        limite: vista === "mapa" ? 100 : 24,
+        limite: limiteBusqueda,
+        offset: offsetPagina,
       });
       return r.ok
         ? { data: r.data.map((n) => ({ ...n, ciudad: n.ciudad ?? "" })), error: null }
@@ -77,7 +84,8 @@ export default async function HomePage(props: PageProps<"/">) {
       p_ciudad: ciudad,
       p_categoria: categoria,
       p_orden: orden ?? "RELEVANCIA",
-      p_limite: vista === "mapa" ? 100 : 24,
+      p_limite: limiteBusqueda,
+      p_offset: offsetPagina,
       p_lat: lat ? Number(lat) : undefined,
       p_lng: lng ? Number(lng) : undefined,
     });
@@ -89,7 +97,7 @@ export default async function HomePage(props: PageProps<"/">) {
       supabase.auth.getUser().then((r) => ({ data: r.data.user })),
       busqueda(),
       // banner_home (Fase 3.2): RLS pública solo devuelve banners activos y
-      // vigentes hoy — sin filtrar nada más acá.
+      // vigentes hoy — sin filtrar nada más aquí.
       supabase.from("banner_home").select("id, imagen_url, texto, url_destino").order("orden"),
     ]);
 
@@ -103,7 +111,9 @@ export default async function HomePage(props: PageProps<"/">) {
   }
 
   // "Abierto hoy" lo resuelve la BD con disponibilidad real (marketplace_buscar_filtrado).
-  const negocios = resultados ?? [];
+  const todosLosResultados = resultados ?? [];
+  const hayPaginaSiguiente = vista === "lista" && todosLosResultados.length > TAM_PAGINA;
+  const negocios = hayPaginaSiguiente ? todosLosResultados.slice(0, TAM_PAGINA) : todosLosResultados;
 
   const hayFiltros = Boolean(texto || ciudad || categoria || avanzado);
 
@@ -117,13 +127,24 @@ export default async function HomePage(props: PageProps<"/">) {
     return `?${siguiente.toString()}`;
   }
 
+  function urlPagina(n: number) {
+    const siguiente = new URLSearchParams();
+    for (const [clave, valor] of Object.entries(params)) {
+      if (clave === "pagina" || typeof valor !== "string") continue;
+      siguiente.set(clave, valor);
+    }
+    if (n > 1) siguiente.set("pagina", String(n));
+    const qs = siguiente.toString();
+    return qs ? `/?${qs}` : "/";
+  }
+
   const patrocinados = vista === "lista" && !hayFiltros ? negocios.filter((n) => n.patrocinado) : [];
   const resto = patrocinados.length > 0 ? negocios.filter((n) => !n.patrocinado) : negocios;
   const grilla = "grid grid-cols-1 gap-3 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-3";
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom))]">
-      <Header autenticado={Boolean(user)} etiqueta="01 / Explorar" />
+      <Header autenticado={Boolean(user)} etiqueta={t("home.etiqueta")} />
 
       <SeleccionMapaProvider>
       <main className="mx-auto w-full max-w-5xl flex-1">
@@ -131,23 +152,23 @@ export default async function HomePage(props: PageProps<"/">) {
           <>
             <div className="relative">
               <h1 className="poster-1 px-4 pb-4 pt-3 sm:px-6">
-                Tu barbero.
+                {t("home.titulo_1")}
                 <br />
-                Tu hora.
+                {t("home.titulo_2")}
                 <br />
-                <span className="sn-hot">Sin fila.</span>
+                <span className="sn-hot">{t("home.titulo_3")}</span>
               </h1>
               <Sello className="absolute bottom-3 right-4" />
             </div>
-            <nav aria-label="Categorías" className="p-grid2 sm:!grid-cols-4">
+            <nav aria-label={t("home.categorias")} className="p-grid2 sm:!grid-cols-4">
               {CATEGORIAS_HOME.map((c, i) => (
                 <Link key={c.valor} href={`/?categoria=${c.valor}`} className="min-h-12 no-underline">
                   <Num>{String(i + 1).padStart(2, "0")} /</Num>
-                  <span className="section !text-[13px]">{c.etiqueta}</span>
+                  <span className="section !text-[13px]">{t(c.etiqueta)}</span>
                 </Link>
               ))}
             </nav>
-            <Marquee text="Reserva en 30 segundos ✶ Sin filas ni llamadas ✶ Tu barbero favorito te espera ✶ Gana puntos en cada corte ✶ Paga seguro desde el celular" tone="ink" />
+            <Marquee text={t("home.marquee")} tone="ink" />
           </>
         ) : null}
 
@@ -185,43 +206,43 @@ export default async function HomePage(props: PageProps<"/">) {
 
         <div className="p-sec flex-wrap gap-3 sm:!px-6">
           <span className="sn-num">
-            {hayFiltros ? "02 / Resultados" : vista === "mapa" ? "02 / Mapa" : "02 / Negocios destacados"}
+            {hayFiltros ? t("home.sec_resultados") : vista === "mapa" ? t("home.sec_mapa") : t("home.sec_destacados")}
           </span>
           {/* Vista alternable lista/mapa (02-UX/04_Marketplace.md) — el resto
               de los filtros de la URL se conservan al alternar. */}
-          <div className="flex gap-2" role="group" aria-label="Vista">
+          <div className="flex gap-2" role="group" aria-label={t("home.vista")}>
             <Link
               href={urlConVista("lista")}
               aria-current={vista === "lista" ? "true" : undefined}
               className={`sn-chip !min-h-12 no-underline ${vista === "lista" ? "is-selected" : ""}`}
             >
-              Lista
+              {t("home.lista")}
             </Link>
             <Link
               href={urlConVista("mapa")}
               aria-current={vista === "mapa" ? "true" : undefined}
               className={`sn-chip !min-h-12 no-underline ${vista === "mapa" ? "is-selected" : ""}`}
             >
-              Mapa ↗
+              {t("home.mapa_link")}
             </Link>
           </div>
         </div>
 
         {error ? (
           <div className="px-4 sm:px-6">
-            <EmptyState big="Error" title="No pudimos cargar el listado" hint={error.message} action={<Link href="/" className="sn-chip !min-h-12 no-underline">Reintentar</Link>} />
+            <EmptyState big={t("home.error_big")} title={t("home.error_listado")} hint={error.message} action={<Link href="/" className="sn-chip !min-h-12 no-underline">{t("comun.reintentar")}</Link>} />
           </div>
         ) : negocios.length === 0 ? (
           <div className="px-4 sm:px-6">
             <EmptyState
               big="0"
-              title={hayFiltros ? "Ningún negocio coincide con tu búsqueda" : "Aún no hay negocios activos por aquí"}
+              title={hayFiltros ? t("home.sin_resultados") : t("home.sin_negocios")}
               hint={
                 hayFiltros
-                  ? "Probá quitando algún filtro o buscando por otro nombre."
-                  : "Los negocios aprobados por SuperSU aparecerán en este listado automáticamente."
+                  ? t("home.sin_resultados_hint")
+                  : t("home.sin_negocios_hint")
               }
-              action={hayFiltros ? <Link href="/" className="sn-chip !min-h-12 no-underline">Quitar filtros</Link> : undefined}
+              action={hayFiltros ? <Link href="/" className="sn-chip !min-h-12 no-underline">{t("home.quitar_filtros")}</Link> : undefined}
             />
           </div>
         ) : vista === "mapa" ? (
@@ -231,7 +252,7 @@ export default async function HomePage(props: PageProps<"/">) {
             {patrocinados.length > 0 ? (
               <>
                 <div className="p-sec sm:!px-6">
-                  <span className="sn-num">03 / Patrocinado</span>
+                  <span className="sn-num">{t("home.sec_patrocinado")}</span>
                 </div>
                 <div className={grilla}>
                   {patrocinados.map((n, i) => (
@@ -244,15 +265,34 @@ export default async function HomePage(props: PageProps<"/">) {
               <>
                 {patrocinados.length > 0 ? (
                   <div className="p-sec sm:!px-6">
-                    <span className="sn-num">04 / {lat && lng ? "Cerca de ti" : "Todos"}</span>
+                    <span className="sn-num">{lat && lng ? t("home.sec_cerca") : t("home.sec_todos")}</span>
                   </div>
                 ) : null}
                 <div className={grilla}>
                   {resto.map((n, i) => (
-                    <NegocioCard key={n.id} negocio={n} index={i + 1} />
+                    <NegocioCard key={n.id} negocio={n} index={(pagina - 1) * TAM_PAGINA + i + 1} />
                   ))}
                 </div>
               </>
+            ) : null}
+            {pagina > 1 || hayPaginaSiguiente ? (
+              <nav aria-label={t("home.paginacion")} className="flex items-center justify-between gap-3 px-4 py-6 sm:px-6">
+                {pagina > 1 ? (
+                  <Link href={urlPagina(pagina - 1)} className="sn-chip !min-h-12 no-underline">
+                    {t("home.anteriores")}
+                  </Link>
+                ) : (
+                  <span />
+                )}
+                <span className="sn-num">{t("comun.pagina", { n: pagina })}</span>
+                {hayPaginaSiguiente ? (
+                  <Link href={urlPagina(pagina + 1)} className="sn-chip is-selected !min-h-12 no-underline">
+                    {t("home.ver_mas")}
+                  </Link>
+                ) : (
+                  <span />
+                )}
+              </nav>
             ) : null}
           </>
         )}

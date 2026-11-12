@@ -4,11 +4,12 @@ import { listarNotificaciones } from "@/lib/cliente/notificaciones";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ListaNotificaciones } from "./lista-notificaciones";
+import { obtenerT } from "@/lib/i18n/servidor";
 
-export const metadata = {
-  title: "Avisos",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("not.meta"), robots: { index: false, follow: false } };
+}
 
 /** Momento del render en el servidor, para agrupar por día. */
 function ahoraMs() {
@@ -16,6 +17,7 @@ function ahoraMs() {
 }
 
 export default async function NotificacionesPage() {
+  const t = await obtenerT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -26,7 +28,7 @@ export default async function NotificacionesPage() {
 
   return (
     <Pantalla className="pb-24">
-      <Top titulo="/Notificaciones" volverA="/" />
+      <Top titulo={t("not.top")} volverA="/" />
       <ListaNotificaciones notificaciones={r.ok ? r.data : []} error={r.ok ? null : r.error} ahora={ahoraMs()} />
       <BottomNav />
     </Pantalla>

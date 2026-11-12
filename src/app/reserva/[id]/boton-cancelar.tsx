@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { cancelarReservaAction } from "./actions";
+import { useT } from "@/lib/i18n/proveedor";
 
 /**
  * Cancelación desde la Cliente PWA. Antes de ejecutar muestra cuánto se devuelve
@@ -22,6 +23,7 @@ export function BotonCancelar({
   reembolsoPct: number;
 }) {
   const router = useRouter();
+  const t = useT();
   const [confirmando, setConfirmando] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,11 +45,11 @@ export function BotonCancelar({
     return (
       <Fila
         icono={<X aria-hidden className="size-5" />}
-        titulo="Cancelar cita"
+        titulo={t("canc.cancelar_cita")}
         meta={
           reembolsoPct === 0
-            ? "Sin reembolso del anticipo en este momento"
-            : `Te devolvemos ${formatCOP(reembolsoEstimado)} si cancelas ahora`
+            ? t("canc.sin_reembolso_meta")
+            : t("canc.devolvemos_meta", { monto: formatCOP(reembolsoEstimado) })
         }
         peligro
         onClick={() => setConfirmando(true)}
@@ -57,11 +59,11 @@ export function BotonCancelar({
 
   return (
     <div className="m-4 border-2 border-danger p-4 shadow-hard">
-      <h3 className="section">¿Cancelamos tu turno?</h3>
+      <h3 className="section">{t("canc.cancelamos")}</h3>
       <p className="body-sm mt-2 break-words">
         {reembolsoPct === 0
-          ? "Estás dentro de la ventana sin reembolso: el anticipo queda para el negocio por el espacio reservado."
-          : `Te devolvemos ${formatCOP(reembolsoEstimado)} (${reembolsoPct}% del anticipo) al mismo medio de pago.`}
+          ? t("canc.sin_reembolso")
+          : t("canc.con_reembolso", { monto: formatCOP(reembolsoEstimado), pct: reembolsoPct })}
       </p>
 
       {error ? (
@@ -72,10 +74,10 @@ export function BotonCancelar({
 
       <div className="mt-4 flex flex-wrap gap-3">
         <Button variant="secondary" className="min-w-0 flex-1" onClick={() => setConfirmando(false)} disabled={cargando}>
-          No, mantener
+          {t("canc.no_mantener")}
         </Button>
         <Button variant="danger" className="min-w-0 flex-1" loading={cargando} onClick={cancelar}>
-          Sí, cancelar
+          {t("canc.si_cancelar")}
         </Button>
       </div>
     </div>

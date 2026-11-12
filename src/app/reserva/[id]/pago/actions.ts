@@ -31,7 +31,7 @@ export async function iniciarPagoSena(reservaId: string): Promise<ResultadoInici
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, mensaje: "Iniciá sesión para completar el pago." };
+  if (!user) return { ok: false, mensaje: "Inicia sesión para completar el pago." };
 
   const { data: pago, error } = await supabase.rpc("crear_pago_sena", {
     p_reserva_id: reservaId,
@@ -44,7 +44,7 @@ export async function iniciarPagoSena(reservaId: string): Promise<ResultadoInici
     if (error.message.includes("RESERVA_NO_PAGABLE")) {
       return {
         ok: false,
-        mensaje: "La reserva expiró o cambió de estado. Elegí un horario de nuevo.",
+        mensaje: "La reserva expiró o cambió de estado. Elige un horario de nuevo.",
       };
     }
     return { ok: false, mensaje: error.message };
@@ -93,7 +93,7 @@ export async function iniciarPagoSena(reservaId: string): Promise<ResultadoInici
   } catch (e) {
     return {
       ok: false,
-      mensaje: e instanceof Error ? e.message : "La pasarela no respondió. Intentá de nuevo.",
+      mensaje: e instanceof Error ? e.message : "La pasarela no respondió. Intenta de nuevo.",
     };
   }
 }

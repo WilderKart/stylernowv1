@@ -17,7 +17,7 @@ async function usuarioActual() {
 }
 
 // VIP dinámico por LTV — 07_CRM.md da $500.000 como EJEMPLO de regla, no
-// como umbral fijo de plataforma. Se adopta ese mismo número acá, nunca
+// como umbral fijo de plataforma. Se adopta ese mismo número aquí, nunca
 // guardado (se recalcula en cada lectura, así nunca queda "pegado" tras
 // un reembolso que baje el LTV — caso límite explícito de la Biblia).
 const UMBRAL_VIP = 500000;
@@ -498,7 +498,7 @@ export async function subirFoto(datos: {
   try {
     const { supabase, userId } = await usuarioActual();
     if (!datos.consentimiento) {
-      return { ok: false, error: "Necesitás el consentimiento explícito del Cliente para subir esta foto." };
+      return { ok: false, error: "Necesitas el consentimiento explícito del Cliente para subir esta foto." };
     }
 
     const match = /^data:(image\/\w+);base64,(.+)$/.exec(datos.dataUrl);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useT } from "@/lib/i18n/proveedor";
 
 /**
  * "Compartir" (02-UX/04_Marketplace.md): un link público al mismo `slug`
@@ -9,6 +10,7 @@ import { useState } from "react";
  * portapapeles como respaldo universal.
  */
 export function BotonCompartir({ nombre, slug }: { nombre: string; slug: string }) {
+  const t = useT();
   const [copiado, setCopiado] = useState(false);
 
   async function onClick() {
@@ -31,9 +33,9 @@ export function BotonCompartir({ nombre, slug }: { nombre: string; slug: string 
   }
 
   return (
-    <button type="button" onClick={onClick} aria-label="Compartir" className="sn-fav !right-12">
+    <button type="button" onClick={onClick} aria-label={t("neg.compartir")} className="sn-fav !right-12">
       {copiado ? (
-        <span className="font-mono text-[10px] font-bold uppercase">Copiado</span>
+        <span className="font-mono text-[10px] font-bold uppercase">{t("neg.copiado")}</span>
       ) : (
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true">
           <circle cx="18" cy="5" r="2.5" />

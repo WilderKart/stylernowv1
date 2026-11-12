@@ -1,3 +1,7 @@
+import { AnaliticaConsentida } from "@/components/privacidad/analitica";
+import { BannerCookies } from "@/components/privacidad/banner-cookies";
+import { IdiomaProvider } from "@/lib/i18n/proveedor";
+import { obtenerIdioma } from "@/lib/i18n/servidor";
 import { BloquearZoom } from "@/components/pwa/bloquear-zoom";
 import { PwaManager } from "@/components/pwa/pwa-manager";
 import { SistemaCliente } from "@/components/sistema";
@@ -30,6 +34,17 @@ export const metadata: Metadata = {
   description:
     "El sistema operativo para negocios de citas de belleza, cuidado personal y bienestar en Colombia.",
   manifest: "/manifest.json",
+  metadataBase: new URL((process.env.NEXT_PUBLIC_SITE_URL ?? "https://stylernowv1.vercel.app").replace(/\/$/, "")),
+  openGraph: {
+    type: "website",
+    siteName: "StylerNow",
+    title: "StylerNow",
+    description: "Encuentra barberías, salones y spas cerca de ti y reserva tu turno en segundos.",
+    locale: "es_CO",
+    images: [{ url: "/icons/icon-512.png", width: 512, height: 512, alt: "StylerNow" }],
+  },
+  twitter: { card: "summary", title: "StylerNow", images: ["/icons/icon-512.png"] },
+  icons: { apple: "/icons/icon-192.png" },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -50,20 +65,23 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const idioma = await obtenerIdioma();
   return (
     <html
-      lang="es"
+      lang={idioma}
       data-theme="light"
       suppressHydrationWarning
       className={`${archivo.variable} ${spaceMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-bg text-text">
-        {children}
+        <IdiomaProvider idioma={idioma}>{children}</IdiomaProvider>
         <BloquearZoom />
         <PwaManager />
         <SistemaCliente />
         <Toaster />
+        <BannerCookies />
+        <AnaliticaConsentida />
       </body>
     </html>
   );

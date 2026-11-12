@@ -281,7 +281,7 @@ function ModalCanjeGiftCard({ reservas, onCerrar }: { reservas: ReservaParaCobra
 
   async function canjear() {
     if (!clienteId || !codigo.trim() || !pin.trim()) {
-      toast.error("Completá el Cliente, el código y el PIN.");
+      toast.error("Completa el Cliente, el código y el PIN.");
       return;
     }
     setProcesando(true);

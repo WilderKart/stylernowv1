@@ -3,11 +3,17 @@ import { Status } from "@/components/brutal";
 import { createClient } from "@/lib/supabase/server";
 import { formatCOP } from "@/lib/utils";
 import { notFound, redirect } from "next/navigation";
+import { obtenerIdioma, obtenerT } from "@/lib/i18n/servidor";
 
-export const metadata = { title: "Historial de Membresía" };
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("mm.hist_meta") };
+}
 
 export default async function HistorialMembresiaPage(props: PageProps<"/membresias/[id]/historial">) {
   const { id } = await props.params;
+  const t = await obtenerT();
+  const loc = (await obtenerIdioma()) === "en" ? "en-US" : "es-CO";
   const supabase = await createClient();
   const {
     data: { user },
@@ -26,12 +32,12 @@ export default async function HistorialMembresiaPage(props: PageProps<"/membresi
 
   return (
     <Pantalla className="pb-10">
-      <Top titulo="Historial de uso" volverA={`/membresias/${id}`} />
+      <Top titulo={t("mm.historial_uso")} volverA={`/membresias/${id}`} />
       <h1 className="poster-4 break-words px-4 pt-4">{plan?.nombre}</h1>
       {(usos ?? []).length === 0 ? (
         <div className="p-4">
           <div className="sn-empty">
-            <p className="section">Aún no usas ningún beneficio de esta membresía.</p>
+            <p className="section">{t("mm.hist_vacio")}</p>
           </div>
         </div>
       ) : (
@@ -42,10 +48,10 @@ export default async function HistorialMembresiaPage(props: PageProps<"/membresi
               return (
                 <Fila
                   key={u.id}
-                  titulo={reserva ? new Date(reserva.hora_inicio).toLocaleDateString("es-CO") : new Date(u.created_at).toLocaleDateString("es-CO")}
+                  titulo={reserva ? new Date(reserva.hora_inicio).toLocaleDateString(loc) : new Date(u.created_at).toLocaleDateString(loc)}
                   meta={
                     <Status tone={u.tipo === "SERVICIO_INCLUIDO" ? "info" : "ok"} className="self-start">
-                      {u.tipo === "SERVICIO_INCLUIDO" ? "Servicio incluido" : "Descuento aplicado"}
+                      {u.tipo === "SERVICIO_INCLUIDO" ? t("mm.servicio_incl") : t("mm.descuento_aplicado")}
                     </Status>
                   }
                   derecha={<span className="sn-price">{formatCOP(Number(u.monto_beneficio))}</span>}

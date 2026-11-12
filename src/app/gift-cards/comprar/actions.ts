@@ -7,7 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 const MENSAJES_ERROR: Record<string, string> = {
-  MONTO_INVALIDO: "Elegí un monto válido.",
+  MONTO_INVALIDO: "Elige un monto válido.",
   PIN_INVALIDO: "El PIN debe tener al menos 4 dígitos.",
   NEGOCIO_NO_DISPONIBLE: "Ese Negocio no está disponible.",
 };
@@ -48,7 +48,7 @@ export async function iniciarCompraGiftCard(datos: DatosCompraGiftCard): Promise
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, mensaje: "Iniciá sesión para comprar una Gift Card." };
+  if (!user) return { ok: false, mensaje: "Inicia sesión para comprar una Gift Card." };
 
   const { data: pago, error } = await supabase.rpc("crear_gift_card", {
     p_negocio_id: datos.negocioId,
@@ -80,7 +80,7 @@ export async function iniciarCompraGiftCard(datos: DatosCompraGiftCard): Promise
 
     return { ok: true, url: preferencia.url, pagoId: pago.id };
   } catch (e) {
-    return { ok: false, mensaje: e instanceof Error ? e.message : "La pasarela no respondió. Intentá de nuevo." };
+    return { ok: false, mensaje: e instanceof Error ? e.message : "La pasarela no respondió. Intenta de nuevo." };
   }
 }
 

@@ -9,23 +9,24 @@ import { Bell, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { guardarPermisosAction } from "../actions";
+import { useT } from "@/lib/i18n/proveedor";
 
 type Clave = "ubicacion" | "notificaciones";
 
-const DEFS: { clave: Clave; titulo: string; porque: string; icono: typeof MapPin }[] = [
+const DEFS = [
   {
     clave: "ubicacion",
-    titulo: "Ubicación",
-    porque: "Para mostrarte negocios cerca y activar «Llegué» cuando estés en el local. Solo mientras usas la app.",
+    titulo: "perm.ubicacion",
+    porque: "perm.ubicacion_porque",
     icono: MapPin,
   },
   {
     clave: "notificaciones",
-    titulo: "Notificaciones",
-    porque: "Recordatorios de tu cita y mensajes del negocio. Las ofertas van aparte y son opcionales.",
+    titulo: "perm.notificaciones",
+    porque: "perm.notificaciones_porque",
     icono: Bell,
   },
-];
+] as const;
 
 /** Pide el permiso real al navegador. Devuelve "granted" | "denied" | "unsupported". */
 async function pedirUbicacion(): Promise<"granted" | "denied" | "unsupported"> {
@@ -59,6 +60,7 @@ export function FormPermisos({
   enOnboarding: boolean;
 }) {
   const router = useRouter();
+  const t = useT();
   const enLinea = useEnLinea();
   const [estado, setEstado] = useState<Record<Clave, EstadoPermiso | null>>({
     ubicacion: ubicacionInicial,
@@ -120,9 +122,9 @@ export function FormPermisos({
   return (
     <>
       {enOnboarding ? (
-        <Top titulo="Paso 02 / 02" volverA="/ajustes/idioma-region" />
+        <Top titulo={t("perm.paso_2")} volverA="/ajustes/idioma-region" />
       ) : (
-        <Top titulo="Permisos" volverA="/perfil" />
+        <Top titulo={t("perm.meta")} volverA="/perfil" />
       )}
       {enOnboarding ? (
         <div aria-hidden className="flex gap-1 px-4 pt-3">
@@ -133,9 +135,9 @@ export function FormPermisos({
 
       <div className="flex flex-1 flex-col gap-4 pb-4">
         <h1 className="poster-2 break-words px-4 pt-4">
-          Dos permisos.
+          {t("perm.dos_1")}
           <br />
-          <span className="sn-hot">Nada más.</span>
+          <span className="sn-hot">{t("perm.dos_2")}</span>
         </h1>
 
         <div className="flex flex-col gap-4 px-4">
@@ -155,28 +157,27 @@ export function FormPermisos({
                   <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 id={`perm-${clave}`} className="sn-label break-words">
-                        0{i + 1} / {titulo}
+                        0{i + 1} / {t(titulo)}
                       </h2>
-                      {concedido ? <span className="sn-status sn-status--ok">Permitido</span> : null}
-                      {v === "MAS_TARDE" ? <span className="sn-status sn-status--warn">Más tarde</span> : null}
+                      {concedido ? <span className="sn-status sn-status--ok">{t("perm.permitido")}</span> : null}
+                      {v === "MAS_TARDE" ? <span className="sn-status sn-status--warn">{t("perm.mas_tarde")}</span> : null}
                     </div>
-                    <p className="body-sm break-words text-text-muted">{porque}</p>
+                    <p className="body-sm break-words text-text-muted">{t(porque)}</p>
                   </div>
                 </div>
                 {bloqueado[clave] ? (
                   <p role="status" className="body-sm break-words border-l-4 border-signal pl-3">
-                    Tu navegador no nos dejó activarlo. Para cambiarlo, toca el candado junto a la dirección del sitio (o los ajustes de tu
-                    teléfono, en Aplicaciones, StylerNow) y permite {titulo.toLowerCase()}.
+                    {t("perm.bloqueado", { permiso: t(titulo).toLowerCase() })}
                   </p>
                 ) : null}
                 {concedido ? (
                   <p className="body-sm break-words text-text-muted">
-                    Para revocarlo, hazlo desde el candado del navegador o los ajustes de tu teléfono; aquí no podemos quitarlo por ti.
+                    {t("perm.revocar")}
                   </p>
                 ) : null}
                 <div className="flex flex-wrap gap-3">
                   <Button variant="secondary" className="min-w-[8rem] flex-1" disabled={ocupado !== null || !enLinea} onClick={() => masTarde(clave)}>
-                    Ahora no
+                    {t("perm.ahora_no")}
                   </Button>
                   <Button
                     variant={concedido ? "secondary" : "primary"}
@@ -185,7 +186,7 @@ export function FormPermisos({
                     disabled={concedido || ocupado !== null || !enLinea}
                     onClick={() => permitir(clave)}
                   >
-                    {concedido ? "Listo" : "Permitir"}
+                    {concedido ? t("perm.listo") : t("perm.permitir")}
                   </Button>
                 </div>
               </section>
@@ -196,8 +197,8 @@ export function FormPermisos({
 
       <Pie>
         {error ? <ErrorAviso>{error}</ErrorAviso> : null}
-        {!enLinea ? <p role="status" className="sn-meta">Sin conexión: no podemos guardar ahora.</p> : null}
-        <p className="body-sm text-text-muted">Puedes cambiarlos cuando quieras en los ajustes de tu teléfono.</p>
+        {!enLinea ? <p role="status" className="sn-meta">{t("aj.sin_conexion")}</p> : null}
+        <p className="body-sm text-text-muted">{t("perm.cambiar")}</p>
         <Button
           variant={listo ? "primary" : "secondary"}
           size="lg"
@@ -206,7 +207,7 @@ export function FormPermisos({
           disabled={ocupado !== null || !enLinea}
           onClick={empezar}
         >
-          <span>{enOnboarding ? "Empezar" : "Guardar"}</span> <span aria-hidden>↗</span>
+          <span>{enOnboarding ? t("perm.empezar") : t("perm.guardar")}</span> <span aria-hidden>↗</span>
         </Button>
       </Pie>
     </>

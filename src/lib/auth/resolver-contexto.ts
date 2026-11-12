@@ -10,7 +10,7 @@ import type { Permisos } from "@/lib/auth/tipos";
  *
  * Ninguna pantalla del Panel calcula su propio alcance comparando columnas
  * a mano: todas llaman a `resolverContexto()` una vez y leen `rol`/`sedeId`/
- * `permisos` de acá. Esto es una capa de CONVENIENCIA sobre la autoridad
+ * `permisos` de aquí. Esto es una capa de CONVENIENCIA sobre la autoridad
  * real, que sigue siendo RLS (006, 013) — si este resolutor tuviera un bug,
  * la base de datos igual rechaza la escritura no autorizada.
  *
@@ -26,7 +26,7 @@ export type EstadoVinculoPanel = "ACTIVO" | "SUSPENDIDO" | "INVITADO" | "RETIRAD
 
 /**
  * ADR-015: alias del contrato único `Permisos` (`src/lib/auth/tipos.ts`),
- * ahora derivado de `permission-registry.ts` en vez de codificarse a mano acá
+ * ahora derivado de `permission-registry.ts` en vez de codificarse a mano aquí
  * — se mantiene el nombre `PermisosPanel` para no tocar los 25+ call sites
  * existentes (`contexto.permisos.X`).
  */
@@ -117,7 +117,7 @@ export async function resolverContexto(): Promise<ContextoUsuario> {
   // ADL-009 garantiza que hay como máximo uno). Guardian con sede asignada
   // comparte el Panel Negocio (ADR-006); un Staff plano o un Guardian sin
   // sede activa (edge case: recién promovido antes de tener sede) cae en
-  // rol STAFF — su superficie completa es la App Staff de Fase 4, pero acá
+  // rol STAFF — su superficie completa es la App Staff de Fase 4, pero aquí
   // necesita un destino real (nunca el wizard de "crear negocio").
   const { data: vinculo } = await supabase
     .from("vinculo_staff_negocio")

@@ -9,6 +9,7 @@ import { Bell, CalendarCheck, CalendarClock, CalendarX, Clock, MessageSquare, St
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { useIdioma, useT } from "@/lib/i18n/proveedor";
 import { marcarLeidaAction, marcarTodasLeidasAction } from "./actions";
 
 const ICONOS: Record<TipoNotificacion, typeof Clock> = {
@@ -45,19 +46,19 @@ function grupoDe(iso: string, ahora: number): 0 | 1 | 2 {
   return ahora - t < 7 * DIA ? 1 : 2;
 }
 
-function etiquetaHora(iso: string, ahora: number) {
+function etiquetaHora(iso: string, ahora: number, loc: string) {
   const t = new Date(iso).getTime();
   const g = grupoDe(iso, ahora);
   if (g === 0) {
-    return new Intl.DateTimeFormat("es-CO", { timeZone: TZ, hour: "2-digit", minute: "2-digit", hour12: false }).format(t);
+    return new Intl.DateTimeFormat(loc, { timeZone: TZ, hour: "2-digit", minute: "2-digit", hour12: false }).format(t);
   }
   if (g === 1) {
-    return new Intl.DateTimeFormat("es-CO", { timeZone: TZ, weekday: "short" }).format(t).replace(".", "").toUpperCase();
+    return new Intl.DateTimeFormat(loc, { timeZone: TZ, weekday: "short" }).format(t).replace(".", "").toUpperCase();
   }
-  return new Intl.DateTimeFormat("es-CO", { timeZone: TZ, day: "2-digit", month: "short" }).format(t).replace(".", "").toUpperCase();
+  return new Intl.DateTimeFormat(loc, { timeZone: TZ, day: "2-digit", month: "short" }).format(t).replace(".", "").toUpperCase();
 }
 
-const TITULOS_GRUPO = ["01 / Hoy", "02 / Esta semana", "03 / Antes"];
+const TITULOS_GRUPO = ["not.hoy", "not.semana", "not.antes"] as const;
 
 export function ListaNotificaciones({
   notificaciones,
@@ -69,6 +70,8 @@ export function ListaNotificaciones({
   ahora: number;
 }) {
   const router = useRouter();
+  const t = useT();
+  const idioma = useIdioma();
   const enLinea = useEnLinea();
   const [items, setItems] = useState(notificaciones);
   const [aviso, setAviso] = useState<string | null>(error);
@@ -84,7 +87,7 @@ export function ListaNotificaciones({
       const r = await marcarTodasLeidasAction();
       if (!r.ok) {
         setItems(previo);
-        setAviso(r.error ?? "No pudimos marcarlas. Inténtalo de nuevo.");
+        setAviso(r.error ?? t("not.err_marcar"));
       } else {
         router.refresh();
       }
@@ -110,18 +113,18 @@ export function ListaNotificaciones({
     <>
       <div className="flex flex-wrap items-end justify-between gap-3 px-4 pt-3 pb-4">
         <h1 className="poster-2 break-words">
-          Avisos<span className="sn-hot">.</span>
+          {t("not.avisos")}<span className="sn-hot">.</span>
         </h1>
         {items.length > 0 ? (
           <Button variant="secondary" size="md" onClick={marcarTodas} disabled={sinLeer === 0 || pendiente || !enLinea}>
-            Marcar todo leído
+            {t("not.marcar_todo")}
           </Button>
         ) : null}
       </div>
 
       {!enLinea ? (
         <p role="status" className="sn-status sn-status--warn mx-4 mb-3">
-          <WifiOff aria-hidden /> Sin conexión
+          <WifiOff aria-hidden /> {t("not.sin_conexion")}
         </p>
       ) : null}
       {aviso ? (
@@ -134,13 +137,13 @@ export function ListaNotificaciones({
         <div className="mx-4 mt-2 flex flex-col gap-4 border-2 border-border p-6">
           <span className="sn-num">00 /</span>
           <p className="poster-3">
-            Todo
+            {t("not.todo_1")}
             <br />
-            al día<span className="sn-hot">.</span>
+            {t("not.todo_2")}<span className="sn-hot">.</span>
           </p>
-          <p className="body-sm">Aquí verás confirmaciones, recordatorios de tu cita y mensajes del negocio.</p>
+          <p className="body-sm">{t("not.vacio")}</p>
           <Link href="/" className={cn(buttonVariants({ variant: "primary", size: "lg" }), "w-full no-underline")}>
-            Volver al inicio <span aria-hidden>↗</span>
+            {t("not.volver_inicio")} <span aria-hidden>↗</span>
           </Link>
         </div>
       ) : (
@@ -153,15 +156,15 @@ export function ListaNotificaciones({
               <li key={n.id}>
                 {nuevoGrupo ? (
                   <div className="p-sec">
-                    <h2 className="sn-num">{TITULOS_GRUPO[g]}</h2>
-                    {i === 0 ? <span className="sn-meta">{sinLeer} sin leer</span> : null}
+                    <h2 className="sn-num">{t(TITULOS_GRUPO[g])}</h2>
+                    {i === 0 ? <span className="sn-meta">{t("not.sin_leer_n", { n: sinLeer })}</span> : null}
                   </div>
                 ) : null}
                 <button
                   type="button"
                   onClick={() => abrir(n)}
                   className="p-row w-full cursor-pointer border-0 border-b bg-transparent text-left"
-                  aria-label={`${n.leida ? "Leída" : "Sin leer"}: ${n.titulo}`}
+                  aria-label={`${n.leida ? t("not.leida") : t("not.sin_leer")}: ${n.titulo}`}
                 >
                   <span className={cn("p-row__i", !n.leida && "bg-signal text-ink")}>
                     <Icono aria-hidden className="size-5" />
@@ -171,7 +174,7 @@ export function ListaNotificaciones({
                     <span className="body-sm break-words text-text-muted">{n.cuerpo}</span>
                   </span>
                   <span className="flex flex-none flex-col items-end gap-2">
-                    <span className="sn-meta">{etiquetaHora(n.created_at, ahora)}</span>
+                    <span className="sn-meta">{etiquetaHora(n.created_at, ahora, idioma === "en" ? "en-US" : "es-CO")}</span>
                     <span aria-hidden className={cn("size-3 border-2", n.leida ? "border-border-subtle" : "border-border bg-signal")} />
                   </span>
                 </button>

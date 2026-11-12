@@ -13,7 +13,7 @@ export type ResultadoCancelacion =
  * POST /v1/reservas/{id}/cancelar (05-API/03_Bookings.md).
  *
  * La RPC decide el porcentaje según la ventana de cancelación del Negocio y registra
- * la auditoría; acá solo se ejecuta la devolución contra la pasarela. El monto nunca
+ * la auditoría; aquí solo se ejecuta la devolución contra la pasarela. El monto nunca
  * viene del cliente: lo devuelve la base de datos.
  */
 export async function cancelarReservaAction(
@@ -32,7 +32,7 @@ export async function cancelarReservaAction(
       return { ok: false, mensaje: "Esta reserva ya no se puede cancelar." };
     }
     if (error.message.includes("NO_AUTORIZADO")) {
-      return { ok: false, mensaje: "No tenés permiso para cancelar esta reserva." };
+      return { ok: false, mensaje: "No tienes permiso para cancelar esta reserva." };
     }
     return { ok: false, mensaje: error.message };
   }

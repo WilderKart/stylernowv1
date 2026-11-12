@@ -9,24 +9,27 @@ import { ArrowUpRight, Download, Trash2, TriangleAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { cancelarEliminacionAccion, exportarDatosAccion, solicitarEliminacionAccion } from "./actions";
+import { useIdioma, useT } from "@/lib/i18n/proveedor";
 
-const BLOQUEOS: Record<string, string> = {
-  ES_SUPERSU: "Tu cuenta tiene un rol de plataforma y no se puede eliminar desde aquí.",
-  NEGOCIO_ACTIVO: "Eres dueño de un negocio activo. Cierra o transfiere tu negocio antes de eliminar tu cuenta.",
-  STAFF_ACTIVO: "Tienes un rol activo en un negocio. Pide que te retiren del equipo antes de eliminar tu cuenta.",
-};
+const BLOQUEOS = {
+  ES_SUPERSU: "cta.bl_supersu",
+  NEGOCIO_ACTIVO: "cta.bl_negocio",
+  STAFF_ACTIVO: "cta.bl_staff",
+} as const;
 
-function fechaLarga(iso: string) {
-  return new Intl.DateTimeFormat("es-CO", { timeZone: "America/Bogota", weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(iso));
+function fechaLarga(iso: string, loc: string) {
+  return new Intl.DateTimeFormat(loc, { timeZone: "America/Bogota", weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(iso));
 }
-function fechaDia(iso: string) {
-  return new Intl.DateTimeFormat("es-CO", { timeZone: "America/Bogota", day: "numeric", month: "long", year: "numeric" }).format(new Date(iso));
+function fechaDia(iso: string, loc: string) {
+  return new Intl.DateTimeFormat(loc, { timeZone: "America/Bogota", day: "numeric", month: "long", year: "numeric" }).format(new Date(iso));
 }
 
 const TIT = "font-display text-[28px] leading-[0.9] font-black [font-stretch:var(--stretch-condensed)] uppercase";
 
 export function VistaCuenta({ resumen, error }: { resumen: ResumenEliminacion | null; error: string | null }) {
   const router = useRouter();
+  const t = useT();
+  const loc = useIdioma() === "en" ? "en-US" : "es-CO";
   const [paso, setPaso] = useState<0 | 1 | 2>(0);
   const [texto, setTexto] = useState("");
   const [exportando, setExportando] = useState(false);
@@ -79,7 +82,7 @@ export function VistaCuenta({ resumen, error }: { resumen: ResumenEliminacion | 
       setTimeout(() => URL.revokeObjectURL(url), 1000);
       setExportado(true);
     } catch {
-      setFalloExport("No pudimos preparar la descarga. Inténtalo de nuevo.");
+      setFalloExport(t("cta.err_descarga"));
     }
   }
 
@@ -110,13 +113,13 @@ export function VistaCuenta({ resumen, error }: { resumen: ResumenEliminacion | 
 
   return (
     <Pantalla className="pb-8">
-      <Top titulo="/PERFIL/CUENTA" volverA="/perfil" />
+      <Top titulo={t("cta.top")} volverA="/perfil" />
 
       <div className="px-4 pt-3.5 pb-3.5">
         <Poster as="h1" size={2}>
-          Datos y
+          {t("cta.t1")}
           <br />
-          <span className="sn-hot">Cuenta.</span>
+          <span className="sn-hot">{t("cta.t2")}</span>
         </Poster>
       </div>
 
@@ -130,21 +133,21 @@ export function VistaCuenta({ resumen, error }: { resumen: ResumenEliminacion | 
         <div className="flex flex-col gap-2 p-3.5">
           <div className="flex items-center gap-2.5">
             <Download aria-hidden className="size-[22px]" strokeLinecap="square" />
-            <h2 className="sn-num">01 / Exportar</h2>
+            <h2 className="sn-num">{t("cta.sec_exportar")}</h2>
           </div>
-          <p className={TIT}>Descarga tus datos</p>
+          <p className={TIT}>{t("cta.descarga_titulo")}</p>
           <p className="body-sm break-words text-text-muted">
-            Perfil, citas, reseñas, pagos, fotos de My Look y consentimientos, en un archivo JSON que se descarga al instante en tu dispositivo.
+            {t("cta.descarga_txt")}
           </p>
           {falloExport ? <ErrorAviso>{falloExport}</ErrorAviso> : null}
           {exportado ? (
             <p role="status" className="sn-meta">
-              DESCARGA LISTA · REVISA TU CARPETA DE DESCARGAS
+              {t("cta.descarga_lista")}
             </p>
           ) : null}
         </div>
         <Button type="button" variant="ink" size="lg" loading={exportando} onClick={exportar} className="w-full justify-between border-0 border-t-2 !border-border">
-          <span>Descargar mis datos</span>
+          <span>{t("cta.descargar")}</span>
           <ArrowUpRight aria-hidden className="size-[18px]" />
         </Button>
       </section>
@@ -153,24 +156,24 @@ export function VistaCuenta({ resumen, error }: { resumen: ResumenEliminacion | 
         <div className="flex flex-col gap-2 p-3.5">
           <div className="flex items-center gap-2.5">
             <Trash2 aria-hidden className="size-[22px]" strokeLinecap="square" />
-            <h2 className="sn-num">02 / Eliminar</h2>
+            <h2 className="sn-num">{t("cta.sec_eliminar")}</h2>
           </div>
-          <p className={TIT}>Elimina tu cuenta</p>
+          <p className={TIT}>{t("cta.elimina_titulo")}</p>
           <p className="body-sm break-words text-text-muted">
-            Borramos tu perfil, reseñas, My Look y saldo. Los comprobantes de pago se conservan el tiempo que exige la ley. Tienes {resumen?.dias_gracia ?? 14} días para arrepentirte; pasado ese plazo no se puede deshacer.
+            {t("cta.elimina_txt", { dias: resumen?.dias_gracia ?? 14 })}
           </p>
 
           {resumen?.pendiente ? (
             <p role="status" className="flex items-start gap-2 bg-warning px-2 py-1.5 font-mono text-[11px] leading-[14px] font-bold tracking-[0.66px] break-words text-ink uppercase">
               <TriangleAlert aria-hidden className="mt-px size-4 shrink-0" />
-              {`ELIMINACIÓN PROGRAMADA PARA EL ${fechaDia(resumen.pendiente.programada_para)}. HASTA ENTONCES PUEDES CANCELARLA.`}
+              {t("cta.programada", { fecha: fechaDia(resumen.pendiente.programada_para, loc) })}
             </p>
           ) : bloqueado ? (
-            <ErrorAviso>{BLOQUEOS[resumen?.motivo_bloqueo ?? ""] ?? "Tu cuenta no se puede eliminar desde aquí."}</ErrorAviso>
+            <ErrorAviso>{resumen?.motivo_bloqueo && resumen.motivo_bloqueo in BLOQUEOS ? t(BLOQUEOS[resumen.motivo_bloqueo as keyof typeof BLOQUEOS]) : t("cta.bl_generico")}</ErrorAviso>
           ) : citas.length > 0 || saldo > 0 ? (
             <p className="flex items-start gap-2 bg-warning px-2 py-1.5 font-mono text-[11px] leading-[14px] font-bold tracking-[0.66px] break-words text-ink uppercase">
               <TriangleAlert aria-hidden className="mt-px size-4 shrink-0" />
-              {`AVISO · TIENES ${citas.length} ${citas.length === 1 ? "CITA" : "CITAS"} Y ${formatCOP(saldo)} DE SALDO`}
+              {citas.length === 1 ? t("cta.aviso_cita", { n: citas.length, saldo: formatCOP(saldo) }) : t("cta.aviso_citas", { n: citas.length, saldo: formatCOP(saldo) })}
             </p>
           ) : null}
           {fallo && paso === 0 ? <ErrorAviso>{fallo}</ErrorAviso> : null}
@@ -178,7 +181,7 @@ export function VistaCuenta({ resumen, error }: { resumen: ResumenEliminacion | 
 
         {resumen?.pendiente ? (
           <Button type="button" variant="secondary" size="lg" loading={cancelando} onClick={cancelar} className="w-full justify-between border-0 border-t-2 !border-border">
-            <span>Cancelar eliminación</span>
+            <span>{t("cta.cancelar_elim")}</span>
           </Button>
         ) : (
           <button
@@ -187,7 +190,7 @@ export function VistaCuenta({ resumen, error }: { resumen: ResumenEliminacion | 
             onClick={() => setPaso(1)}
             className="sn-label flex min-h-[52px] w-full items-center border-t-2 border-border px-3.5 text-left text-danger disabled:cursor-not-allowed disabled:text-text-disabled"
           >
-            Eliminar cuenta
+            {t("cta.eliminar_cuenta")}
           </button>
         )}
       </section>
@@ -200,52 +203,52 @@ export function VistaCuenta({ resumen, error }: { resumen: ResumenEliminacion | 
             tabIndex={-1}
             role="alertdialog"
             aria-modal="true"
-            aria-label={`Confirmar eliminación, paso ${paso} de 2`}
+            aria-label={t("cta.aria_confirmar", { paso })}
             className={`fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[92dvh] w-full max-w-xl flex-col gap-3 overflow-y-auto border-t-4 bg-bg px-4 pt-2.5 pb-8 outline-none ${paso === 2 ? "border-danger" : "border-border"}`}
           >
             <span aria-hidden className="h-1.5 w-12 self-center bg-text" />
-            <span className="sn-meta font-bold">{`CONFIRMACIÓN ${paso} DE 2`}</span>
+            <span className="sn-meta font-bold">{t("cta.confirmacion_n", { paso })}</span>
 
             {paso === 1 ? (
               <>
                 <p className="poster-3 break-words">
-                  ¿Eliminar
+                  {t("cta.q1")}
                   <br />
-                  tu cuenta?
+                  {t("cta.q2")}
                 </p>
                 <ul className="flex flex-col border-t border-border">
                   {citas.map((c) => (
                     <li key={c.reserva_id} className="body border-b border-border-subtle py-2 break-words">
-                      {`Se cancela tu cita del ${fechaLarga(c.hora_inicio)} en ${c.negocio}.`}
+                      {t("cta.se_cancela", { fecha: fechaLarga(c.hora_inicio, loc), negocio: c.negocio })}
                     </li>
                   ))}
                   {saldo > 0 ? (
                     <li className="body border-b border-border-subtle py-2 break-words">
-                      {`Tu saldo de ${formatCOP(saldo)} vuelve a ti: creamos la solicitud de devolución.`}
+                      {t("cta.saldo_vuelve", { saldo: formatCOP(saldo) })}
                     </li>
                   ) : null}
-                  <li className="body border-b border-border-subtle py-2 break-words">Tus reseñas quedan como «Cliente anónimo».</li>
-                  <li className="body border-b border-border-subtle py-2 break-words">{`Tienes ${resumen?.dias_gracia ?? 14} días para cancelar la eliminación antes de que sea definitiva.`}</li>
+                  <li className="body border-b border-border-subtle py-2 break-words">{t("cta.resenas_anonimo")}</li>
+                  <li className="body border-b border-border-subtle py-2 break-words">{t("cta.dias_cancelar", { dias: resumen?.dias_gracia ?? 14 })}</li>
                 </ul>
                 <div className="grid grid-cols-2 gap-2.5">
                   <Button type="button" variant="ink" size="lg" onClick={cerrar} className="min-h-14">
-                    No, volver
+                    {t("cta.no_volver")}
                   </Button>
                   <Button type="button" variant="danger" size="lg" onClick={() => setPaso(2)} className="min-h-14 !bg-danger !text-ink">
-                    Sí, continuar
+                    {t("cta.si_continuar")}
                   </Button>
                 </div>
               </>
             ) : (
               <>
                 <p className="poster-3 break-words">
-                  Escribe
+                  {t("cta.escribe")}
                   <br />
                   <span className="bg-danger px-1.5 text-ink">ELIMINAR</span>
                 </p>
-                <p className="body-sm text-text-muted">Para confirmar que eres tú y que entiendes que no se puede deshacer.</p>
+                <p className="body-sm text-text-muted">{t("cta.para_confirmar")}</p>
                 <label htmlFor="confirmacion" className="sn-label">
-                  Confirmación
+                  {t("cta.confirmacion")}
                 </label>
                 <input
                   id="confirmacion"
@@ -258,10 +261,10 @@ export function VistaCuenta({ resumen, error }: { resumen: ResumenEliminacion | 
                 {fallo ? <ErrorAviso>{fallo}</ErrorAviso> : null}
                 <div className="grid grid-cols-[1fr_1.4fr] gap-2.5">
                   <Button type="button" variant="secondary" size="lg" onClick={cerrar} className="min-h-14">
-                    Cancelar
+                    {t("comun.cancelar")}
                   </Button>
                   <Button type="button" variant="danger" size="lg" loading={eliminando} disabled={!listo} onClick={eliminar} className="min-h-14 !bg-danger !text-ink disabled:!bg-surface disabled:!text-text-disabled">
-                    Eliminar para siempre
+                    {t("cta.eliminar_siempre")}
                   </Button>
                 </div>
               </>

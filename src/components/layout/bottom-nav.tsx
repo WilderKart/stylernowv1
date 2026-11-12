@@ -5,6 +5,7 @@ import { Compass, Heart, Map, Ticket, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useT } from "@/lib/i18n/proveedor";
 
 /**
  * Navegación principal de la Cliente PWA (patrón .sn-tabbar del prototipo): barra negra
@@ -16,14 +17,15 @@ import { Suspense } from "react";
 const ICONO = { strokeWidth: 2, strokeLinecap: "square", strokeLinejoin: "miter", "aria-hidden": true } as const;
 
 const ITEMS = [
-  { id: "explorar", href: "/", etiqueta: "Explorar", icono: <Compass {...ICONO} /> },
-  { id: "mapa", href: "/?vista=mapa", etiqueta: "Mapa", icono: <Map {...ICONO} /> },
-  { id: "citas", href: "/mis-reservas", etiqueta: "Citas", icono: <Ticket {...ICONO} /> },
-  { id: "favoritos", href: "/favoritos", etiqueta: "Favoritos", icono: <Heart {...ICONO} /> },
-  { id: "perfil", href: "/perfil", etiqueta: "Perfil", icono: <User {...ICONO} /> },
+  { id: "explorar", href: "/", etiqueta: "nav.explorar", icono: <Compass {...ICONO} /> },
+  { id: "mapa", href: "/?vista=mapa", etiqueta: "nav.mapa", icono: <Map {...ICONO} /> },
+  { id: "citas", href: "/mis-reservas", etiqueta: "nav.citas", icono: <Ticket {...ICONO} /> },
+  { id: "favoritos", href: "/favoritos", etiqueta: "nav.favoritos", icono: <Heart {...ICONO} /> },
+  { id: "perfil", href: "/perfil", etiqueta: "nav.perfil", icono: <User {...ICONO} /> },
 ] as const;
 
 function Barra() {
+  const t = useT();
   const pathname = usePathname();
   const enMapa = useSearchParams().get("vista") === "mapa";
 
@@ -34,7 +36,7 @@ function Barra() {
   }
 
   return (
-    <nav aria-label="Navegación principal" className="sn-tabbar pb-[env(safe-area-inset-bottom)]">
+    <nav aria-label={t("nav.principal")} className="sn-tabbar pb-[env(safe-area-inset-bottom)]">
       {ITEMS.map((it) => {
         const a = activo(it.id, it.href);
         return (
@@ -45,7 +47,7 @@ function Barra() {
             className={cn("sn-tab min-w-0 no-underline", a && "is-active")}
           >
             {it.icono}
-            <span className="max-w-full truncate">{it.etiqueta}</span>
+            <span className="max-w-full truncate">{t(it.etiqueta)}</span>
           </Link>
         );
       })}
@@ -54,9 +56,10 @@ function Barra() {
 }
 
 export function BottomNav() {
+  const t = useT();
   return (
     <div className="fixed inset-x-0 bottom-0 z-30">
-      <Suspense fallback={<nav aria-label="Navegación principal" className="sn-tabbar" />}>
+      <Suspense fallback={<nav aria-label={t("nav.principal")} className="sn-tabbar" />}>
         <Barra />
       </Suspense>
     </div>

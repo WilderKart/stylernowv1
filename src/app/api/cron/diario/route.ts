@@ -8,7 +8,7 @@ import type { NextRequest } from "next/server";
  * Vercel Cron invoca esta ruta con `Authorization: Bearer $CRON_SECRET`
  * automáticamente cuando `CRON_SECRET` está configurado en las variables de
  * entorno del proyecto (https://vercel.com/docs/cron-jobs/manage-cron-jobs) —
- * no requiere ninguna librería adicional, solo verificar ese header acá.
+ * no requiere ninguna librería adicional, solo verificar ese header aquí.
  *
  * Tareas de sistema que hasta esta migración no tenían NINGÚN disparador —
  * existían como RPC pero nadie las llamaba jamás en producción
@@ -21,7 +21,7 @@ import type { NextRequest } from "next/server";
  * (upsert por período: `on conflict (negocio_id, periodo_inicio, periodo_fin)`).
  * Futuros módulos con la misma necesidad (rollover de Temporada, bonos
  * agregados de Puntualidad — ver TECH_DEBT_REGISTER.md, Módulo 4 App Staff)
- * agregan su tarea acá en vez de abrir una infraestructura de cron nueva
+ * agregan su tarea aquí en vez de abrir una infraestructura de cron nueva
  * cada vez.
  */
 export async function GET(request: NextRequest) {

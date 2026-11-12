@@ -87,7 +87,7 @@ export function VistaAgendaStaff({
         <div className="h-40 animate-pulse rounded-2xl border border-border-subtle bg-surface" />
       ) : citas.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-border px-4 py-10 text-center text-[12.5px] text-text-faint">
-          No tenés citas ese día.
+          No tienes citas ese día.
         </p>
       ) : (
         <ul className="flex flex-col gap-2.5">
@@ -108,7 +108,7 @@ export function VistaAgendaStaff({
 
                 {proximoANoShow ? (
                   <p className="mt-2 text-[11.5px] font-bold text-danger">
-                    ⚠ A {Math.max(0, Math.round(minutosParaNoShow!))} min de marcarse como No-Show automático — hacé check-in o avisá al negocio.
+                    ⚠ A {Math.max(0, Math.round(minutosParaNoShow!))} min de marcarse como No-Show automático — haz check-in o avisá al negocio.
                   </p>
                 ) : null}
 

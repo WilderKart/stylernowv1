@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
       // El botón del correo ya implica la misma aceptación que exige el paso 1 del
       // formulario (enviarCodigo la valida server-side antes de mandar el correo);
-      // se registra acá porque este camino nunca pasa por verificarCodigo.
+      // se registra aquí porque este camino nunca pasa por verificarCodigo.
       const { pendientesMateriales } = await registrarAceptacionLegal(supabase, data.user.id);
 
       // ADR-015: el link de recuperación de contraseña (`solicitarRecuperacion()`,
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     // todavía, se audita sin actor.
     await registrarEventoIdentidad("CALLBACK_INVALIDO", null, { error: error?.message });
   } else if (searchParams.get("error")) {
-    // Supabase redirige acá con `?error=...` (sin `code`) cuando el propio
+    // Supabase redirige aquí con `?error=...` (sin `code`) cuando el propio
     // proveedor OAuth rechaza el login (ej. el usuario cancela el consentimiento
     // de Google) — nunca llega a `exchangeCodeForSession`.
     await registrarEventoIdentidad("OAUTH_ERROR", null, {

@@ -1,5 +1,6 @@
 import { PanelNav } from "@/components/panel/panel-nav";
 import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
+import { createClient } from "@/lib/supabase/server";
 import {
   listarCampanasSellos,
   listarCuentasCorporativas,
@@ -22,6 +23,17 @@ export default async function LealtadPanelPage() {
 
   const negocioId = contexto.negocioId!;
 
+  // Funciones incluidas en el plan del negocio (la BD es la fuente de verdad; la RLS y las RPC también las exigen).
+  const supabase = await createClient();
+  const [{ data: tieneMembresias }, { data: tieneFidelizacion }, { data: negocioPlan }] = await Promise.all([
+    supabase.rpc("negocio_tiene_funcion", { p_negocio_id: negocioId, p_clave: "membresias" }),
+    supabase.rpc("negocio_tiene_funcion", { p_negocio_id: negocioId, p_clave: "fidelizacion" }),
+    supabase.from("negocio").select("plan_codigo").eq("id", negocioId).maybeSingle(),
+  ]);
+  const planNombre = negocioPlan?.plan_codigo
+    ? negocioPlan.plan_codigo.charAt(0) + negocioPlan.plan_codigo.slice(1).toLowerCase()
+    : "actual";
+
   const [planes, giftCards, referidoConfig, campanasSellos, reglasCashback, nivelesVip, miembrosVip, familias, cuentasCorp, reglasRecompensa, sugerencias] = await Promise.all([
     listarPlanesMembresia(negocioId),
     listarGiftCards(negocioId),
@@ -41,6 +53,8 @@ export default async function LealtadPanelPage() {
       <PanelNav rol={contexto.rol} />
       <VistaLealtadPanel
         negocioId={negocioId}
+        funciones={{ membresias: tieneMembresias === true, fidelizacion: tieneFidelizacion === true }}
+        planNombre={planNombre}
         planesIniciales={planes.ok ? planes.data : []}
         giftCardsIniciales={giftCards.ok ? giftCards.data : []}
         referidoConfigInicial={referidoConfig.ok ? referidoConfig.data : null}

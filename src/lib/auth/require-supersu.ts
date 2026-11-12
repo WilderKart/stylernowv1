@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
  * separada del Panel Negocio: `02-UX/10_Super_Admin.md` es explícito en
  * que "ninguna acción de este CMS es accesible desde ninguna otra
  * superficie". No reutiliza `resolverContexto()` (ese resolutor es para
- * los roles del lado Negocio — Barbería/Guardian/Staff) — acá el único
+ * los roles del lado Negocio — Barbería/Guardian/Staff) — aquí el único
  * chequeo real es `perfil.es_supersu`, la misma columna que ya usa
  * `is_supersu()` del lado de la base (RLS/RPCs), así nunca hay dos
  * fuentes de verdad distintas sobre quién es SuperSU.

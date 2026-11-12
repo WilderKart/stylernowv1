@@ -17,7 +17,7 @@ async function usuarioActual() {
 }
 
 const MENSAJES_ERROR: Record<string, string> = {
-  NO_AUTORIZADO: "No tenés permiso de SuperSU.",
+  NO_AUTORIZADO: "No tienes permiso de SuperSU.",
   MENSAJE_REQUERIDO: "El mensaje no puede estar vacío.",
   TICKET_NO_ENCONTRADO: "No encontramos ese ticket.",
 };

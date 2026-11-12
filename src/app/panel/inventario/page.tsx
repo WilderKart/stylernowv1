@@ -27,7 +27,7 @@ export default async function InventarioPage(props: PageProps<"/panel/inventario
       <div className="flex min-h-dvh flex-col bg-bg">
         <PanelNav rol={contexto.rol} />
         <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-10 text-center sm:px-10">
-          <p className="text-[12.5px] text-text-faint">Necesitás al menos una sede operativa para usar el Inventario.</p>
+          <p className="text-[12.5px] text-text-faint">Necesitas al menos una sede operativa para usar el Inventario.</p>
         </main>
       </div>
     );

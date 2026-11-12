@@ -37,7 +37,7 @@ export function ListaProductos({ negocioId, productosIniciales }: { negocioId: s
     <div>
       {productos.length === 0 ? (
         <p className="mb-4 rounded-2xl border border-dashed border-border px-4 py-8 text-center text-[12.5px] text-text-faint">
-          Todavía no tenés productos.
+          Todavía no tienes productos.
         </p>
       ) : (
         <ul className="mb-6 flex flex-col gap-2">

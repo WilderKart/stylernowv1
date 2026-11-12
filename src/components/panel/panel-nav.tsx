@@ -13,7 +13,7 @@ import { usePathname } from "next/navigation";
  * aparece para Guardian a propósito (administra la suya desde su propio
  * Resumen, no gestiona una lista de sedes ajenas). A medida que se
  * construyan Dashboard/Agenda/Servicios/CRM/Inventario (Módulos 2.2 y
- * 2.5-2.9), cada uno agrega su propia entrada acá, ya filtrada por
+ * 2.5-2.9), cada uno agrega su propia entrada aquí, ya filtrada por
  * `permisos` — nunca una lista separada "para Guardian".
  */
 export function PanelNav({ rol }: { rol: RolPanel }) {

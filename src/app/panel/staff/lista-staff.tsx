@@ -262,7 +262,7 @@ export function ListaStaff({
         <p className="rounded-2xl border border-dashed border-border px-4 py-10 text-center text-[12.5px] text-text-faint">
           {busqueda || estado !== "TODOS" || esGuardian !== "TODOS" || sedeId
             ? "Ningún Staff coincide con esos filtros."
-            : "Todavía no tenés Staff en el equipo."}
+            : "Todavía no tienes Staff en el equipo."}
         </p>
       ) : (
         <>

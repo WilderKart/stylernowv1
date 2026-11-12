@@ -5,8 +5,13 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BotonCompartir } from "./boton-compartir";
+import { obtenerT } from "@/lib/i18n/servidor";
+import type { Traductor } from "@/lib/i18n/diccionario";
 
-export const metadata = { title: "My Look", robots: { index: false, follow: false } };
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("ml.meta"), robots: { index: false, follow: false } };
+}
 
 const TZ = "America/Bogota";
 
@@ -37,16 +42,17 @@ function fechaCorta(iso: string) {
   return `${Number(dia)} ${mes}`.toUpperCase();
 }
 
-function Foto({ f, etiqueta }: { f: FotoMyLook | null; etiqueta: string }) {
+function Foto({ f, etiqueta, t }: { f: FotoMyLook | null; etiqueta: string; t: Traductor }) {
   return (
     <div className="relative min-w-0 flex-1">
-      <Photo src={f?.url_firmada} alt={f ? `${etiqueta} de tu cita` : ""} className="aspect-[3/4] w-full" />
+      <Photo src={f?.url_firmada} alt={f ? t("ml.antes_de", { etiqueta }) : ""} className="aspect-[3/4] w-full" />
       <span className="p-phl">{etiqueta}</span>
     </div>
   );
 }
 
 export default async function MyLookPage(props: PageProps<"/mi-look">) {
+  const t = await obtenerT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -62,13 +68,13 @@ export default async function MyLookPage(props: PageProps<"/mi-look">) {
 
   return (
     <Pantalla className="pb-10">
-      <Top titulo="/Perfil/My-Look" volverA="/perfil" derecha={<span className="sn-label px-2">Prestige</span>} />
+      <Top titulo={t("ml.top")} volverA="/perfil" derecha={<span className="sn-label px-2">Prestige</span>} />
 
       <div className="p-4">
         <h1 className="poster-2 break-words">
           My Look<span className="sn-hot">.</span>
         </h1>
-        <p className="body-sm mt-2 break-words">Antes y después de cada cita. Solo tú los ves hasta que compartes.</p>
+        <p className="body-sm mt-2 break-words">{t("ml.txt")}</p>
       </div>
 
       {!res.ok ? (
@@ -78,12 +84,12 @@ export default async function MyLookPage(props: PageProps<"/mi-look">) {
       ) : !actual || !base ? (
         <div className="px-4">
           <EmptyState
-            big="Sin fotos"
-            title="Aún no tienes fotos"
-            hint="Cuando tu profesional suba el antes y el después de una cita, con tu consentimiento, aparecerán aquí."
+            big={t("ml.sin_fotos")}
+            title={t("ml.sin_fotos_titulo")}
+            hint={t("ml.sin_fotos_hint")}
             action={
               <Link href="/mis-reservas" className="sn-btn sn-btn--primary sn-btn--block no-underline">
-                <span>Ver mis citas</span>
+                <span>{t("ml.ver_citas")}</span>
                 <span aria-hidden>↗</span>
               </Link>
             }
@@ -91,14 +97,14 @@ export default async function MyLookPage(props: PageProps<"/mi-look">) {
         </div>
       ) : (
         <>
-          <section className="mx-4 border-2 border-line" aria-label="Cita seleccionada">
+          <section className="mx-4 border-2 border-line" aria-label={t("ml.cita_sel")}>
             <div className="flex gap-0.5 border-b-2 border-line bg-line">
-              <Foto f={actual.antes} etiqueta="Antes" />
-              <Foto f={actual.despues} etiqueta="Después" />
+              <Foto f={actual.antes} etiqueta={t("ml.antes")} t={t} />
+              <Foto f={actual.despues} etiqueta={t("ml.despues")} t={t} />
             </div>
             <div className="flex flex-wrap items-end justify-between gap-3 p-3">
               <div className="min-w-0 flex-1 basis-40">
-                <div className="section break-words">{base.servicios ?? "Servicio"}</div>
+                <div className="section break-words">{base.servicios ?? t("citas.servicio")}</div>
                 <div className="sn-meta mt-1 break-words">
                   {fechaCorta(base.hora_inicio)}
                   {base.staff_nombre ? ` · ${base.staff_nombre}` : ""} · {base.negocio_nombre}
@@ -109,9 +115,9 @@ export default async function MyLookPage(props: PageProps<"/mi-look">) {
           </section>
 
           <div className="p-sec">
-            <h2 className="sn-num">Historial</h2>
+            <h2 className="sn-num">{t("ml.historial")}</h2>
             <span className="sn-label">
-              {citas.length} {citas.length === 1 ? "cita" : "citas"}
+              {citas.length === 1 ? t("ml.n_cita", { n: citas.length }) : t("ml.n_citas", { n: citas.length })}
             </span>
           </div>
           <div className="grid grid-cols-2 gap-3 px-4">

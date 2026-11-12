@@ -3,11 +3,12 @@ import { obtenerPreferencias } from "@/lib/cliente/preferencias";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { FormPermisos } from "./form-permisos";
+import { obtenerT } from "@/lib/i18n/servidor";
 
-export const metadata = {
-  title: "Permisos",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("perm.meta"), robots: { index: false, follow: false } };
+}
 
 export default async function PermisosPage() {
   const supabase = await createClient();

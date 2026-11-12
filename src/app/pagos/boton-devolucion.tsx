@@ -3,8 +3,10 @@
 import { ErrorAviso } from "@/app/lealtad/ui-cliente";
 import { useState, useTransition } from "react";
 import { pedirDevolucion } from "./actions";
+import { useT } from "@/lib/i18n/proveedor";
 
 export function BotonDevolucion({ deshabilitado, montoTexto }: { deshabilitado: boolean; montoTexto: string }) {
+  const t = useT();
   const [confirmando, setConfirmando] = useState(false);
   const [listo, setListo] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +28,7 @@ export function BotonDevolucion({ deshabilitado, montoTexto }: { deshabilitado: 
   if (listo) {
     return (
       <p role="status" className="sn-meta break-words">
-        Solicitud enviada. Te avisaremos cuando se procese tu devolución.
+        {t("pg.solicitud_enviada")}
       </p>
     );
   }
@@ -36,20 +38,20 @@ export function BotonDevolucion({ deshabilitado, montoTexto }: { deshabilitado: 
       {confirmando ? (
         <>
           <p className="body-sm break-words">
-            ¿Pedir la devolución de <b>{montoTexto}</b> a tu medio de pago?
+            {t("pg.pedir_confirm", { monto: montoTexto })}
           </p>
           <div className="grid grid-cols-2 gap-2">
             <button type="button" onClick={confirmar} disabled={pendiente} className={`sn-btn sn-btn--ink ${pendiente ? "is-loading" : ""}`}>
-              <span className="sn-btn__txt">Confirmar</span>
+              <span className="sn-btn__txt">{t("pg.confirmar")}</span>
             </button>
             <button type="button" onClick={() => setConfirmando(false)} disabled={pendiente} className="sn-btn sn-btn--secondary">
-              <span>Cancelar</span>
+              <span>{t("comun.cancelar")}</span>
             </button>
           </div>
         </>
       ) : (
         <button type="button" onClick={() => setConfirmando(true)} disabled={deshabilitado} className="sn-btn sn-btn--secondary">
-          <span>Pedir devolución</span>
+          <span>{t("pg.pedir")}</span>
         </button>
       )}
       {error ? <ErrorAviso>{error}</ErrorAviso> : null}

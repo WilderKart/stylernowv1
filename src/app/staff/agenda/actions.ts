@@ -19,8 +19,8 @@ async function usuarioActual() {
 const MENSAJES_ERROR: Record<string, string> = {
   RESERVA_NO_ENCONTRADA: "No encontramos esa cita.",
   NO_AUTORIZADO: "Esa cita no es tuya.",
-  RESERVA_NO_INICIABLE: "Solo podés hacer check-in de una cita confirmada.",
-  RESERVA_NO_FINALIZABLE: "Solo podés hacer check-out de una cita en curso.",
+  RESERVA_NO_INICIABLE: "Solo puedes hacer check-in de una cita confirmada.",
+  RESERVA_NO_FINALIZABLE: "Solo puedes hacer check-out de una cita en curso.",
 };
 
 function traducirError(mensaje: string) {

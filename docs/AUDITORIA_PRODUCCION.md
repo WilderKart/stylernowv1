@@ -101,3 +101,37 @@ Las estimaciones por zona son juicio de cada auditor con la evidencia que cita; 
 ## 7. Seguro (probado)
 
 114 tablas con RLS y 0 vistas sin `security_invoker`; 27 tablas leídas como otro cliente con 0 filas ajenas; escalada de privilegios, pagos, wallet, gift card, puntos, anuncios y funciones internas bloqueados; carreras que resisten (gift card ×10, PIN ×30, mismo slot ×7, canje de wallet ×8, reactivar ×8); XSS almacenado y open redirect cerrados en producción; CORS sin cabeceras; sin secretos ni source maps en el bundle; cabeceras de seguridad correctas; matriz de acceso por rol (43 rutas × 5 roles) sin fugas; 215 cargas a 390 px y 215 a 1280 px sin errores de consola ni desborde.
+
+
+---
+
+## 8. Estado tras la ronda de correcciones (2026-11-12)
+
+Migración **114** aplicada y validada (gating de RPC por plan, `congelar_membresia` con `FOR UPDATE`, `crear_pago_sena` con candado por reserva, columnas sensibles de `negocio` fuera de anon, familias sin recursión, `avatars` sin listado público, MIME en `soporte-adjuntos`, `search_path` fijo). Migraciones 100 y 107–114 registradas en `schema_migrations`.
+
+| # | Bloqueante / prioridad | Estado |
+|---|---|---|
+| 1 | Funciones por plan saltadas por RPC | **Cerrado** (Essential recibe `FUNCION_NO_INCLUIDA` en 4/4 RPC; Prestige pasa) |
+| 2 | La interfaz no bloquea por plan | **Cerrado** en Lealtad (pestañas con candado + aviso de mejora); falta el mismo tratamiento en otras pantallas |
+| 3 | Carrera en `congelar_membresia` | **Cerrado** (8 simultáneas: 1 éxito, cobro +15 días) |
+| 4 | `crear_pago_sena` no idempotente | **Cerrado** (8 simultáneas: 1 pago pendiente) |
+| 5 | `negocio` legible por anónimos | **Cerrado** (NIT, comisión, owner y contacto privado sin acceso anon; NIT y comisión sin acceso authenticated) |
+| 6 | `MERCADOPAGO_WEBHOOK_SECRET` | **Pendiente (Vercel)** |
+| 7 | Variables de producción | **Documentadas** en `.env.example`; **pendiente confirmarlas en Vercel** |
+| 8 | Familias (recursión RLS) | **Cerrado** (lectura sin error 500) |
+| 9 | Datos de prueba en producción | **Script listo** (`supabase/scripts/limpiar_datos_prueba.sql`), **sin ejecutar**; exige promover antes un SuperSU real |
+| 10 | Sin pruebas ni CI | **Cerrado en lo básico**: 21 pruebas unitarias (Vitest) + `.github/workflows/ci.yml` (tipos, lint, auth, pruebas, build, audit) |
+| 11 | Sin observabilidad | **Parcial**: Vercel Analytics y Speed Insights (solo con consentimiento de cookies). Falta captura de errores (Sentry) |
+| 12 | Legal y cookies | **Parcial**: banner de cookies montado; el texto legal sigue pendiente de revisión |
+| 13 | Zoom bloqueado | **No se toca (decisión del propietario)** |
+| 14 | Migraciones sin registrar | **Cerrado** |
+| P1 | Voseo | **Cerrado** en el código y el diccionario (más de 280 correcciones) |
+| P1 | Inglés | **Hecho** para pantallas de cliente (1.076 claves nuevas); sin traducir: legal, `/para-negocios`, panel, staff, admin, mensajes de servidor y textos de `lib/` |
+| P1 | Mosaicos de la home | **Cerrado** (Uñas, Spa y estética, Barbería, Peluquería devuelven resultados) |
+| P1 | Paginación | **Cerrado** (24 por página, "Ver más", páginas fuera de rango no rompen) |
+| P1 | SEO | **Hecho**: `robots.txt`, `sitemap.xml` (negocios activos), Open Graph y `apple-touch-icon` |
+| P1 | Contraste | **Parcial**: `text-faint` y texto sobre naranja corregidos; falta el rojo de error sobre blanco |
+| P1 | Rendimiento `/panel` | Re-medido: 2,5 a 3,0 s en carga estable (el 22 s era carga concurrente). Sigue sobre el objetivo de 2 s |
+| P1 | CSP estricta, límite de tasa del buscador, contraseñas filtradas | **Pendiente** (Vercel/Supabase) |
+
+Pendientes que NO dependen del código: variables de Vercel, firewall, Sentry (DSN), MFA, revisión legal, activar `CSP_ENFORCE=1`, protección de contraseñas filtradas en Supabase Auth, código OTP de 6 dígitos en Supabase Auth, ejecutar la limpieza de datos de prueba.

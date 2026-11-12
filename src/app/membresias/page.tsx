@@ -3,8 +3,12 @@ import { Status } from "@/components/brutal";
 import { createClient } from "@/lib/supabase/server";
 import { formatCOP } from "@/lib/utils";
 import { redirect } from "next/navigation";
+import { obtenerIdioma, obtenerT } from "@/lib/i18n/servidor";
 
-export const metadata = { title: "Mis Membresías" };
+export async function generateMetadata() {
+  const t = await obtenerT();
+  return { title: t("mm.meta") };
+}
 
 const ESTADO_TONO: Record<string, "ok" | "warn" | "err" | "info"> = {
   ACTIVA: "ok",
@@ -13,15 +17,17 @@ const ESTADO_TONO: Record<string, "ok" | "warn" | "err" | "info"> = {
   CANCELADA: "err",
   VENCIDA: "err",
 };
-const ESTADO_ETIQUETA: Record<string, string> = {
-  ACTIVA: "Activa",
-  PROXIMA_A_VENCER: "Próxima a vencer",
-  SUSPENDIDA: "Congelada",
-  CANCELADA: "Cancelada",
-  VENCIDA: "Vencida",
-};
+const ESTADO_ETIQUETA = {
+  ACTIVA: "mm.est_activa",
+  PROXIMA_A_VENCER: "mm.est_proxima",
+  SUSPENDIDA: "mm.est_suspendida",
+  CANCELADA: "mm.est_cancelada",
+  VENCIDA: "mm.est_vencida",
+} as const;
 
 export default async function MisMembresiasPage() {
+  const t = await obtenerT();
+  const loc = (await obtenerIdioma()) === "en" ? "en-US" : "es-CO";
   const supabase = await createClient();
   const {
     data: { user },
@@ -36,13 +42,13 @@ export default async function MisMembresiasPage() {
 
   return (
     <Pantalla className="pb-10">
-      <Top titulo="Mis membresías" volverA="/perfil" />
+      <Top titulo={t("mm.top")} volverA="/perfil" />
       <div className="flex flex-col gap-4 p-4">
-        {error ? <ErrorAviso>No pudimos cargar tus membresías. Intenta de nuevo.</ErrorAviso> : null}
+        {error ? <ErrorAviso>{t("mm.err")}</ErrorAviso> : null}
         {(membresias ?? []).length === 0 && !error ? (
           <div className="sn-empty">
-            <p className="section">Aún no tienes ninguna membresía.</p>
-            <p className="sn-meta">Busca tu barbería favorita y mira sus planes.</p>
+            <p className="section">{t("mm.ninguna")}</p>
+            <p className="sn-meta">{t("mm.busca")}</p>
           </div>
         ) : (
           <ul className="p-stack">
@@ -54,11 +60,11 @@ export default async function MisMembresiasPage() {
                 <li key={m.id}>
                   <TicketCita
                     href={`/membresias/${m.id}`}
-                    dia={cobro.toLocaleDateString("es-CO", { day: "2-digit" })}
-                    mes={cobro.toLocaleDateString("es-CO", { month: "short" }).replace(".", "")}
-                    estado={<Status tone={ESTADO_TONO[m.estado] ?? "info"}>{ESTADO_ETIQUETA[m.estado] ?? m.estado}</Status>}
-                    titulo={plan?.nombre ?? "Membresía"}
-                    lineas={[negocio?.nombre ?? "", `${formatCOP(Number(plan?.precio ?? 0))} · próximo cobro`]}
+                    dia={cobro.toLocaleDateString(loc, { day: "2-digit" })}
+                    mes={cobro.toLocaleDateString(loc, { month: "short" }).replace(".", "")}
+                    estado={<Status tone={ESTADO_TONO[m.estado] ?? "info"}>{ESTADO_ETIQUETA[m.estado as keyof typeof ESTADO_ETIQUETA] ? t(ESTADO_ETIQUETA[m.estado as keyof typeof ESTADO_ETIQUETA]) : m.estado}</Status>}
+                    titulo={plan?.nombre ?? t("mm.membresia")}
+                    lineas={[negocio?.nombre ?? "", t("mm.proximo_cobro", { monto: formatCOP(Number(plan?.precio ?? 0)) })]}
                   />
                 </li>
               );

@@ -7,12 +7,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { calificarAction } from "../actions-cita";
+import { useT } from "@/lib/i18n/proveedor";
 
-const PALABRAS = ["Sin calificar", "Mal", "Regular", "Bien", "Muy bien", "Excelente"];
+const PALABRAS = ["cal.sin_calificar", "cal.mal", "cal.regular", "cal.bien", "cal.muy_bien", "cal.excelente"] as const;
 const MAX = 500;
 
 export function FormCalificar({ reservaId }: { reservaId: string }) {
   const router = useRouter();
+  const t = useT();
   const [nota, setNota] = useState(0);
   const [comentario, setComentario] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -30,7 +32,7 @@ export function FormCalificar({ reservaId }: { reservaId: string }) {
       setListo(true);
       router.refresh();
     } catch {
-      setError("No pudimos publicar tu reseña. Revisa tu conexión.");
+      setError(t("cal.err_publicar"));
     } finally {
       setEnviando(false);
     }
@@ -40,11 +42,11 @@ export function FormCalificar({ reservaId }: { reservaId: string }) {
     return (
       <div role="status" className="flex flex-col gap-4 p-4">
         <span className="sn-num flex items-center gap-2">
-          <Check aria-hidden className="size-4" /> Reseña publicada
+          <Check aria-hidden className="size-4" /> {t("cal.publicada")}
         </span>
-        <p className="body-sm">Gracias por contarnos cómo te fue.</p>
+        <p className="body-sm">{t("cal.gracias")}</p>
         <Button asChild size="lg" className="w-full">
-          <Link href={`/reserva/${reservaId}`}>Volver a la cita</Link>
+          <Link href={`/reserva/${reservaId}`}>{t("cal.volver_cita")}</Link>
         </Button>
       </div>
     );
@@ -55,19 +57,19 @@ export function FormCalificar({ reservaId }: { reservaId: string }) {
       <div className="flex flex-col gap-6 px-4 pb-6">
         <div>
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <span className="sn-num">01 / Calificación</span>
+            <span className="sn-num">{t("cal.sec_calif")}</span>
             <span className="sn-label" aria-live="polite">
-              {nota} / 5 · {PALABRAS[nota]}
+              {nota} / 5 · {t(PALABRAS[nota])}
             </span>
           </div>
-          <div className="sn-stars--input mt-2 flex w-full" role="radiogroup" aria-label="Calificación">
+          <div className="sn-stars--input mt-2 flex w-full" role="radiogroup" aria-label={t("cal.calif")}>
             {[1, 2, 3, 4, 5].map((n) => (
               <button
                 key={n}
                 type="button"
                 role="radio"
                 aria-checked={n === nota}
-                aria-label={`${n} de 5`}
+                aria-label={t("cal.n_de_5", { n })}
                 className={`!w-auto flex-1 ${n <= nota ? "is-on" : ""}`}
                 onClick={() => setNota(n)}
               >
@@ -79,8 +81,8 @@ export function FormCalificar({ reservaId }: { reservaId: string }) {
 
         <div className="sn-field">
           <label htmlFor="comentario" className="flex flex-wrap justify-between gap-2">
-            <span>02 / Comentario</span>
-            <span className="text-text-muted">Opcional</span>
+            <span>{t("cal.sec_comentario")}</span>
+            <span className="text-text-muted">{t("cal.opcional")}</span>
           </label>
           <textarea
             id="comentario"
@@ -88,7 +90,7 @@ export function FormCalificar({ reservaId }: { reservaId: string }) {
             maxLength={MAX}
             value={comentario}
             onChange={(e) => setComentario(e.target.value)}
-            placeholder="¿Qué tal el servicio, la puntualidad, el resultado?"
+            placeholder={t("cal.comentario_ph")}
             className="w-full resize-none border-2 border-border bg-bg p-3 text-[15px] leading-[22px] text-text placeholder:text-text-muted focus:shadow-hard focus:outline-none"
           />
           <span className="sn-meta self-end">
@@ -102,9 +104,9 @@ export function FormCalificar({ reservaId }: { reservaId: string }) {
       <div className="mt-auto" />
       <Pie>
         <Button type="submit" size="lg" className="w-full" disabled={nota === 0} loading={enviando}>
-          Publicar reseña ↗
+          {t("cal.publicar")}
         </Button>
-        <span className="sn-meta text-center">Se publica con tu nombre y la inicial del apellido.</span>
+        <span className="sn-meta text-center">{t("cal.se_publica")}</span>
       </Pie>
     </form>
   );

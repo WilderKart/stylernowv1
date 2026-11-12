@@ -62,7 +62,7 @@ export function FormularioCombo({
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (servicioIds.length < 2) {
-      setError("Elegí al menos 2 servicios para el combo.");
+      setError("Elige al menos 2 servicios para el combo.");
       return;
     }
     setGuardando(true);

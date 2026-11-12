@@ -11,19 +11,19 @@ type Resultado<T = undefined> =
   | { ok: false; error: string };
 
 const MENSAJES_ERROR: Record<string, string> = {
-  NO_AUTORIZADO: "No tenés permiso sobre este negocio.",
+  NO_AUTORIZADO: "No tienes permiso sobre este negocio.",
   NEGOCIO_NO_ACTIVO: "Tu negocio debe estar activo para cambiar de Plan.",
-  SUSCRIPCION_NO_ACTIVA: "Tu suscripción no está activa — contactá a soporte.",
+  SUSCRIPCION_NO_ACTIVA: "Tu suscripción no está activa — contacta a soporte.",
   SIGNATURE_REQUIERE_COTIZACION: "Signature se cotiza directamente con el equipo de StylerNow, no es autoservicio.",
   YA_ESTA_EN_ESE_PLAN: "Ya estás en ese Plan.",
-  UPGRADE_YA_EN_PROCESO: "Ya tenés un upgrade pendiente de pago.",
+  UPGRADE_YA_EN_PROCESO: "Ya tienes un upgrade pendiente de pago.",
   NO_ES_UPGRADE: "Ese Plan no es un upgrade respecto al actual.",
   NO_ES_DOWNGRADE: "Ese Plan no es un downgrade respecto al actual.",
   MONTO_INVALIDO: "No se pudo calcular el monto a cobrar.",
-  EXCEDE_LIMITE_SEDES: "Tenés más Sedes activas de las que permite ese Plan — cerrá Sedes hasta llegar al límite antes de programar el downgrade.",
-  EXCEDE_LIMITE_STAFF: "Tenés más Staff activo del que permite ese Plan — retirá Staff hasta llegar al límite antes de programar el downgrade.",
-  SIN_DOWNGRADE_PROGRAMADO: "No tenés ningún downgrade programado para cancelar.",
-  MOTIVO_REQUERIDO: "Tenés que indicar un motivo.",
+  EXCEDE_LIMITE_SEDES: "Tienes más Sedes activas de las que permite ese Plan — cierra Sedes hasta llegar al límite antes de programar el downgrade.",
+  EXCEDE_LIMITE_STAFF: "Tienes más Staff activo del que permite ese Plan — retira Staff hasta llegar al límite antes de programar el downgrade.",
+  SIN_DOWNGRADE_PROGRAMADO: "No tienes ningún downgrade programado para cancelar.",
+  MOTIVO_REQUERIDO: "Tienes que indicar un motivo.",
   TRANSICION_INVALIDA: "Tu negocio no está en un estado que permita esta acción.",
 };
 
@@ -167,7 +167,7 @@ export async function iniciarUpgrade(negocioId: string, planCodigoNuevo: PlanCod
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, mensaje: "Iniciá sesión de nuevo." };
+  if (!user) return { ok: false, mensaje: "Inicia sesión de nuevo." };
 
   const { data: pago, error } = await supabase.rpc("solicitar_upgrade_plan", {
     p_negocio_id: negocioId,
@@ -195,7 +195,7 @@ export async function iniciarUpgrade(negocioId: string, planCodigoNuevo: PlanCod
 
     return { ok: true, url: preferencia.url, pagoId: pago.id };
   } catch (e) {
-    return { ok: false, mensaje: e instanceof Error ? e.message : "La pasarela no respondió. Intentá de nuevo." };
+    return { ok: false, mensaje: e instanceof Error ? e.message : "La pasarela no respondió. Intenta de nuevo." };
   }
 }
 

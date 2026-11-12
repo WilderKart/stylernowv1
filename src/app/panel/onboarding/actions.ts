@@ -42,7 +42,7 @@ export async function crearOActualizarNegocio(datos: {
     const { supabase, userId } = await usuarioActual();
 
     if (datos.categoria.length === 0) {
-      return { ok: false, error: "Elegí al menos una categoría." };
+      return { ok: false, error: "Elige al menos una categoría." };
     }
 
     if (datos.negocioId) {
@@ -66,13 +66,13 @@ export async function crearOActualizarNegocio(datos: {
     // Slug único: nombre + sufijo corto del owner, con reintento simple si
     // por casualidad ya existe (negocio.slug es unique).
     //
-    // El `id` se genera acá, no se deja al DEFAULT de la columna: pedirle a
+    // El `id` se genera aquí, no se deja al DEFAULT de la columna: pedirle a
     // Postgres el registro recién insertado (.select()) exige que la política
     // de SELECT lo autorice, y esa política depende de is_barberia_de(), que
     // vuelve a consultar la MISMA fila que se está insertando — en el mismo
     // comando INSERT ... RETURNING eso falla con "new row violates row-level
     // security policy" incluso con una política trivial `true` (verificado
-    // directo contra Postgres). Generando el id acá evitamos pedir RETURNING.
+    // directo contra Postgres). Generando el id aquí evitamos pedir RETURNING.
     const base = slugify(datos.nombre);
     let slug = base;
     for (let intento = 0; intento < 5; intento++) {
@@ -99,7 +99,7 @@ export async function crearOActualizarNegocio(datos: {
       }
       return { ok: false, error: error.message };
     }
-    return { ok: false, error: "No se pudo generar un identificador único, reintentá." };
+    return { ok: false, error: "No se pudo generar un identificador único, reintenta." };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
   }
@@ -220,7 +220,7 @@ export async function guardarSede(datos: {
 
 // Paso 3 — Servicios: `crearServicio`/`eliminarServicio` viven en
 // `@/app/panel/servicios/actions` desde el Módulo 2.5 — un solo lugar para
-// esa lógica (validaciones de duración/precio/duplicados), reutilizado acá
+// esa lógica (validaciones de duración/precio/duplicados), reutilizado aquí
 // y en el Panel de Servicios completo. El wizard las importa directo.
 
 // ── Paso 4 — Invitar Staff (opcional) ───────────────────────────────────────
@@ -243,7 +243,7 @@ export async function invitarStaff(negocioId: string, email: string, sedeId: str
     });
     if (error) {
       if (error.message.includes("PLAN_LIMIT_EXCEEDED")) {
-        return { ok: false, error: "Tu plan no permite más Staff — podés seguir sin invitar y sumarlo después." };
+        return { ok: false, error: "Tu plan no permite más Staff — puedes seguir sin invitar y sumarlo después." };
       }
       return { ok: false, error: error.message };
     }
@@ -271,7 +271,7 @@ async function notificarInvitacion(email: string, nombreNegocio: string, invitac
         from: "StylerNow <notificaciones@mail.stylernow.com>",
         to: email,
         subject: `Te invitaron a unirte a ${nombreNegocio} en StylerNow`,
-        html: `<h2>Te invitaron a StylerNow</h2><p>${nombreNegocio} te invitó a unirte como Staff. Ingresá con este mismo correo (${email}) y <a href="${url}">aceptá o rechazá la invitación acá</a>.</p>`,
+        html: `<h2>Te invitaron a StylerNow</h2><p>${nombreNegocio} te invitó a unirte como Staff. Ingresa con este mismo correo (${email}) y <a href="${url}">acepta o rechaza la invitación aquí</a>.</p>`,
       }),
     });
   } catch {
@@ -301,10 +301,10 @@ export async function enviarAAprobacion(negocioId: string): Promise<Resultado> {
     });
     if (error) {
       const mensajes: Record<string, string> = {
-        FALTA_SEDE: "Agregá al menos una Sede antes de enviar a aprobación.",
-        FALTA_SERVICIO: "Agregá al menos un Servicio antes de enviar a aprobación.",
-        FALTA_PLAN: "Elegí un Plan antes de enviar a aprobación.",
-        NO_AUTORIZADO: "No tenés permiso sobre este negocio.",
+        FALTA_SEDE: "Agrega al menos una Sede antes de enviar a aprobación.",
+        FALTA_SERVICIO: "Agrega al menos un Servicio antes de enviar a aprobación.",
+        FALTA_PLAN: "Elige un Plan antes de enviar a aprobación.",
+        NO_AUTORIZADO: "No tienes permiso sobre este negocio.",
       };
       const clave = Object.keys(mensajes).find((k) => error.message.includes(k));
       return { ok: false, error: clave ? mensajes[clave] : error.message };

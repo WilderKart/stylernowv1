@@ -102,10 +102,10 @@ export function Wizard({
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-8 pb-28 sm:px-10">
       <h1 className="font-display mb-1.5 text-[24px] font-bold uppercase text-text">
-        Registrá tu negocio
+        Registra tu negocio
       </h1>
       <p className="mb-6 text-[13px] text-text-muted">
-        Guardamos tu progreso — podés cerrar y seguir después desde donde quedaste.
+        Guardamos tu progreso — puedes cerrar y seguir después desde donde quedaste.
       </p>
 
       <ol className="mb-8 flex items-center gap-1.5">
@@ -217,7 +217,7 @@ function PasoDatos({
 
   async function onCambiarLogo(archivo: File) {
     if (!negocio) {
-      setError("Guardá primero los datos del negocio para poder subir un logo.");
+      setError("Guarda primero los datos del negocio para poder subir un logo.");
       return;
     }
     setSubiendoLogo(true);
@@ -259,7 +259,7 @@ function PasoDatos({
 
     if (!planSeleccionado) {
       setGuardando(false);
-      setError("Elegí un plan para continuar.");
+      setError("Elige un plan para continuar.");
       return;
     }
 
@@ -326,7 +326,7 @@ function PasoDatos({
 
       <div>
         <label className="mb-2 block text-[11.5px] font-bold uppercase tracking-wide text-text-muted">
-          Categoría (elegí una o más)
+          Categoría (elige una o más)
         </label>
         <div className="flex flex-wrap gap-2">
           {CATEGORIAS.map((c) => {
@@ -526,7 +526,7 @@ function PasoServicios({
         </ul>
       ) : (
         <p className="rounded-2xl border border-dashed border-border px-4 py-6 text-center text-[12.5px] text-text-faint">
-          Todavía no agregaste ningún servicio. Necesitás al menos uno para poder enviar tu
+          Todavía no agregaste ningún servicio. Necesitas al menos uno para poder enviar tu
           negocio a aprobación.
         </p>
       )}
@@ -592,7 +592,7 @@ function PasoStaff({
   async function onInvitar(e: React.FormEvent) {
     e.preventDefault();
     if (!sedeId) {
-      setError("Agregá una sede antes de invitar Staff.");
+      setError("Agrega una sede antes de invitar Staff.");
       return;
     }
     setInvitando(true);
@@ -629,7 +629,7 @@ function PasoStaff({
   return (
     <div className="flex flex-col gap-5">
       <p className="text-[13px] text-text-muted">
-        Paso opcional — si trabajás solo, podés saltarlo y enviar tu negocio a aprobación
+        Paso opcional — si trabajas solo, puedes saltarlo y enviar tu negocio a aprobación
         igual.
       </p>
 

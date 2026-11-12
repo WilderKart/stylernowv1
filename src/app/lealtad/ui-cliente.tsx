@@ -1,6 +1,6 @@
-import { Status } from "@/components/brutal";
+import { EnlaceVolver, EstadoReservaStatus, PantallaCargandoCliente, VerDetalle } from "./ui-cliente-t";
 import { cn } from "@/lib/utils";
-import { Check, ChevronLeft, ChevronRight, Clock, TriangleAlert, X } from "lucide-react";
+import { ChevronRight, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
@@ -20,9 +20,7 @@ export function Top({ titulo, volverA, derecha }: { titulo: string; volverA?: st
   return (
     <div className="p-top">
       {volverA ? (
-        <Link href={volverA} className="sn-iconbtn" aria-label="Volver">
-          <ChevronLeft aria-hidden />
-        </Link>
+        <EnlaceVolver href={volverA} />
       ) : (
         <span className="w-2" />
       )}
@@ -128,27 +126,8 @@ export function ErrorAviso({ children }: { children: React.ReactNode }) {
   );
 }
 
-const ESTADOS_RESERVA = {
-  PENDIENTE_PAGO: { tone: "warn", etiqueta: "Pendiente de pago", icono: Clock },
-  CONFIRMADA: { tone: "ok", etiqueta: "Confirmada", icono: Check },
-  EN_CURSO: { tone: "info", etiqueta: "En curso", icono: Clock },
-  COMPLETADA: { tone: "info", etiqueta: "Completada", icono: Check },
-  CANCELADA: { tone: "err", etiqueta: "Cancelada", icono: X },
-  NO_SHOW: { tone: "err", etiqueta: "No asististe", icono: X },
-} as const;
-
-export type EstadoReserva = keyof typeof ESTADOS_RESERVA;
-
-/** Estado de una reserva con el color/ícono del prototipo. */
-export function EstadoReservaStatus({ estado }: { estado: EstadoReserva }) {
-  const e = ESTADOS_RESERVA[estado];
-  const Icono = e.icono;
-  return (
-    <Status tone={e.tone} icon={<Icono aria-hidden className="size-3.5" />}>
-      {e.etiqueta}
-    </Status>
-  );
-}
+export { EstadoReservaStatus };
+export type { EstadoReserva } from "./ui-cliente-t";
 
 /** Día y mes cortos ("11", "NOV") en la zona horaria del negocio. */
 export function diaYMes(iso: string, tz: string) {
@@ -206,7 +185,7 @@ export function TicketCita({
           <div className="sn-ticket__foot">
             {pie ?? (
               <>
-                <span className="sn-label">Ver detalle</span>
+                <VerDetalle />
                 <span className="sn-label" aria-hidden>
                   ↗
                 </span>
@@ -238,18 +217,5 @@ export function Barra({ pct, className, etiqueta }: { pct: number; className?: s
 
 /** Esqueleto de carga estándar de las pantallas de Cliente (ADR-012). */
 export function PantallaCargando({ filas = 4 }: { filas?: number }) {
-  return (
-    <Pantalla aria-busy="true" aria-label="Cargando">
-      <div className="p-top">
-        <span className="w-2" />
-        <span className="sn-skel h-4 w-32" />
-      </div>
-      <div className="flex flex-col gap-3 p-4">
-        <div className="sn-skel h-36 w-full" />
-        {Array.from({ length: filas }).map((_, i) => (
-          <div key={i} className="sn-skel h-[60px] w-full" />
-        ))}
-      </div>
-    </Pantalla>
-  );
+  return <PantallaCargandoCliente filas={filas} />;
 }

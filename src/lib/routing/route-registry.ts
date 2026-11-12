@@ -3,9 +3,9 @@ import type { Rol } from "@/lib/auth/tipos";
 /**
  * Fuente única de rutas — ADR-015, Fase B/C. `docs/ROUTE_REGISTRY.md` se
  * GENERA desde este archivo (`scripts/check-route-registry.mjs` también lo
- * usa para fallar el build si una ruta nueva no quedó documentada acá).
+ * usa para fallar el build si una ruta nueva no quedó documentada aquí).
  * `proxy.ts` lo importa en runtime (Edge, sin DB) solo para decidir
- * público/protegido — nunca resuelve rol/onboarding/permisos desde acá.
+ * público/protegido — nunca resuelve rol/onboarding/permisos desde aquí.
  */
 
 export interface RutaRegistro {
@@ -25,7 +25,7 @@ export const RUTAS: RutaRegistro[] = [
   { path: "/mantenimiento", publica: true },
   // Landing B2B (W01): precios por país, cupos fundador y alta del negocio. Pública.
   { path: "/para-negocios", publica: true },
-  // El usuario llega acá SIN sesión todavía (magic link, recuperación de
+  // El usuario llega aquí SIN sesión todavía (magic link, recuperación de
   // contraseña, callback de Google) — esta ruta es justamente quien la crea.
   // Encontrado como regresión real durante ADR-015 Fase D: sin esta entrada,
   // el middleware lo trataba como protegido (fail-closed) y redirigía a
@@ -81,7 +81,7 @@ export const RUTAS: RutaRegistro[] = [
   // SuperSU
   { path: "/admin", publica: false, roles: ["supersu"] },
 
-  // Estáticos/PWA excluidos del matcher de proxy.ts, no necesitan entrada acá.
+  // Estáticos/PWA excluidos del matcher de proxy.ts, no necesitan entrada aquí.
 ];
 
 /** Empareja por prefijo (`/panel/staff/nuevo` matchea la entrada `/panel/staff`). */

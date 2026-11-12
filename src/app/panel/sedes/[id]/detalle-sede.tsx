@@ -56,7 +56,7 @@ export function DetalleSede({
   negocioId: string;
   /** ADR-006: Guardian edita su sede y el horario, pero nunca cierra,
    * elimina, marca principal ni traslada Staff — acciones exclusivas de
-   * Barbería (03-Business-Rules/01_Roles.md). Se ocultan por completo acá,
+   * Barbería (03-Business-Rules/01_Roles.md). Se ocultan por completo aquí,
    * no solo se deshabilitan — y las RPCs las rechazan igual del lado del
    * servidor si alguien las llamara directo. */
   permisos: PermisosPanel;
@@ -193,7 +193,7 @@ export function DetalleSede({
           </ul>
         )}
         <p className="mt-2 text-[11px] text-text-faint">
-          Invitar y gestionar el resto del Staff es el Módulo 2.4 — acá solo se administra
+          Invitar y gestionar el resto del Staff es el Módulo 2.4 — aquí solo se administra
           quién ya pertenece a esta sede.
         </p>
       </section>

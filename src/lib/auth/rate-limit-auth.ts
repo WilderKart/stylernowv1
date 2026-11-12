@@ -14,7 +14,7 @@ export async function verificarRateLimitAuth(email: string, tipo: TipoIntentoAut
   const admin = createAdminClient();
   const { error } = await admin.rpc("verificar_rate_limit_auth", { p_email: email, p_tipo: tipo });
   if (error?.message.includes("RATE_LIMIT_EXCEDIDO")) {
-    return { ok: false, error: "Demasiados intentos. Esperá unos minutos antes de volver a intentar." };
+    return { ok: false, error: "Demasiados intentos. Espera unos minutos antes de volver a intentar." };
   }
   if (error) return { ok: false, error: error.message };
   return { ok: true };

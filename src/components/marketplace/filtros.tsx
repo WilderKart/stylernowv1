@@ -6,14 +6,16 @@ import { HojaFiltros, type FiltrosAvanzados } from "./hoja-filtros";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
+import { useT } from "@/lib/i18n/proveedor";
 
 const ORDENES = [
-  { valor: "CALIFICACION", etiqueta: "Mejor calificadas" },
-  { valor: "PRECIO", etiqueta: "Precio" },
-  { valor: "RECIENTE", etiqueta: "Nuevos" },
+  { valor: "CALIFICACION", etiqueta: "filtros.mejor_calificadas" as const },
+  { valor: "PRECIO", etiqueta: "filtros.precio" as const },
+  { valor: "RECIENTE", etiqueta: "filtros.nuevos" as const },
 ];
 
 export function Filtros() {
+  const t = useT();
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -37,8 +39,8 @@ export function Filtros() {
   useEffect(() => {
     const actual = params.get("q") ?? "";
     if (texto === actual) return;
-    const t = setTimeout(() => aplicar({ q: texto || null }), 350);
-    return () => clearTimeout(t);
+    const temporizador = setTimeout(() => aplicar({ q: texto || null }), 350);
+    return () => clearTimeout(temporizador);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [texto]);
 
@@ -63,7 +65,7 @@ export function Filtros() {
       return;
     }
     if (!("geolocation" in navigator)) {
-      setErrorUbicacion("Tu navegador no soporta geolocalización.");
+      setErrorUbicacion(t("filtros.sin_geo"));
       return;
     }
     setBuscandoUbicacion(true);
@@ -78,7 +80,7 @@ export function Filtros() {
       },
       () => {
         setBuscandoUbicacion(false);
-        setErrorUbicacion("No pudimos acceder a tu ubicación — revisá los permisos del navegador.");
+        setErrorUbicacion(t("filtros.err_ubicacion"));
       },
       { timeout: 8000 }
     );
@@ -102,7 +104,7 @@ export function Filtros() {
       return;
     }
     if (!("geolocation" in navigator)) {
-      setErrorUbicacion("Tu navegador no soporta geolocalización.");
+      setErrorUbicacion(t("filtros.sin_geo"));
       return;
     }
     setBuscandoUbicacion(true);
@@ -115,7 +117,7 @@ export function Filtros() {
       },
       () => {
         setBuscandoUbicacion(false);
-        setErrorUbicacion("No pudimos acceder a tu ubicación — revisa los permisos del navegador para filtrar por distancia.");
+        setErrorUbicacion(t("filtros.err_ubicacion_dist"));
       },
       { timeout: 8000 }
     );
@@ -129,8 +131,8 @@ export function Filtros() {
           type="search"
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
-          placeholder="Busca por nombre, ciudad o servicio"
-          aria-label="Buscar negocios"
+          placeholder={t("filtros.buscar_ph")}
+          aria-label={t("filtros.buscar_aria")}
         />
       </label>
 
@@ -140,14 +142,14 @@ export function Filtros() {
         </p>
       ) : null}
 
-      <ChipGroup aria-label="Filtros" className="!pb-0">
+      <ChipGroup aria-label={t("filtros.filtros")} className="!pb-0">
         <Chip activo={cercaDeMi} onClick={alternarCercaDeMi}>
-          {buscandoUbicacion ? "Ubicándote..." : "Cerca de mí"}
+          {buscandoUbicacion ? t("filtros.ubicandote") : t("filtros.cerca_de_mi")}
         </Chip>
         <Chip activo={cuentaAvanzados > 0} onClick={() => setHojaAbierta(true)}>
           <span className="inline-flex items-center gap-2">
             <SlidersHorizontal aria-hidden className="size-4" strokeWidth={2} strokeLinecap="square" />
-            Filtros · {cuentaAvanzados}
+            {t("filtros.filtros_n", { n: cuentaAvanzados })}
           </span>
         </Chip>
         {ORDENES.map((o) => (
@@ -156,19 +158,19 @@ export function Filtros() {
             activo={orden === o.valor}
             onClick={() => aplicar({ orden: orden === o.valor ? null : o.valor })}
           >
-            {o.etiqueta}
+            {t(o.etiqueta)}
           </Chip>
         ))}
       </ChipGroup>
 
-      <ChipGroup aria-label="Categorías" className="!pb-0">
+      <ChipGroup aria-label={t("home.categorias")} className="!pb-0">
         {CATEGORIAS.map((c) => (
           <Chip
             key={c.valor}
             activo={categoria === c.valor}
             onClick={() => aplicar({ categoria: categoria === c.valor ? null : c.valor })}
           >
-            {c.etiqueta}
+            {t(c.etiqueta)}
           </Chip>
         ))}
       </ChipGroup>

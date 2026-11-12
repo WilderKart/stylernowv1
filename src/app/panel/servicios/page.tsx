@@ -39,7 +39,7 @@ export default async function ServiciosPage() {
   const inactivos = (servicios ?? []).filter((s) => s.estado !== "ACTIVO");
 
   // El motor de reservas exige staff_servicio explícito por Servicio (nunca
-  // "cualquiera puede atenderlo" por defecto) — se avisa acá para que un
+  // "cualquiera puede atenderlo" por defecto) — se avisa aquí para que un
   // Servicio activo sin nadie asignado no quede invisible como problema.
   const { data: asignaciones } = activos.length
     ? await supabase
@@ -87,7 +87,7 @@ export default async function ServiciosPage() {
 
         {!servicios || servicios.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-border px-4 py-10 text-center text-[12.5px] text-text-faint">
-            Todavía no tenés ningún servicio.
+            Todavía no tienes ningún servicio.
           </p>
         ) : (
           <ul className="mb-8 flex flex-col gap-2.5">
@@ -127,7 +127,7 @@ export default async function ServiciosPage() {
           {!combos || combos.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-border px-4 py-6 text-center text-[12.5px] text-text-faint">
               {contexto.permisos.gestionarCombos
-                ? "Agrupá servicios frecuentes (ej. Corte + Barba) para que el Cliente los elija con un solo toque."
+                ? "Agrupa servicios frecuentes (ej. Corte + Barba) para que el Cliente los elija con un solo toque."
                 : "Solo la Barbería administra combos."}
             </p>
           ) : (

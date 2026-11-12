@@ -9,6 +9,8 @@ import { CODIGOS_PAIS, separarTelefono } from "@/lib/codigos-pais";
 import { Check, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useT } from "@/lib/i18n/proveedor";
+import type { Clave } from "@/lib/i18n/diccionario";
 import { actualizarPerfil, cerrarSesion } from "./actions";
 
 export function FormularioPerfil({
@@ -27,6 +29,7 @@ export function FormularioPerfil({
   bienvenida: boolean;
 }) {
   const router = useRouter();
+  const t = useT();
   const telefonoSeparado = separarTelefono(telefonoInicial);
 
   const [nombre, setNombre] = useState(nombreInicial);
@@ -51,9 +54,9 @@ export function FormularioPerfil({
   // recordatorios, promociones relevantes y futuros beneficios de puntos,
   // nunca bloquea nada si se deja vacío.
   const faltantes = [
-    !telefonoLocal && "celular",
-    !fechaNacimiento && "tu cumpleaños",
-    categorias.length === 0 && "tus intereses",
+    !telefonoLocal && t("fp.celular"),
+    !fechaNacimiento && t("fp.cumple"),
+    categorias.length === 0 && t("fp.intereses"),
   ].filter(Boolean) as string[];
 
   function alternarCategoria(valor: string) {
@@ -92,9 +95,9 @@ export function FormularioPerfil({
     <div className="flex flex-col gap-6">
       {bienvenida ? (
         <div className="border-2 border-border bg-signal p-4 text-ink shadow-hard">
-          <h3 className="section">¡Bienvenido a StylerNow!</h3>
+          <h3 className="section">{t("fp.bienvenido")}</h3>
           <p className="body-sm mt-1.5 break-words">
-            Cuéntanos tu nombre y tu celular para que el negocio pueda avisarte de tu cita. Solo te lo pedimos esta vez.
+            {t("fp.bienvenido_txt")}
           </p>
         </div>
       ) : null}
@@ -103,34 +106,34 @@ export function FormularioPerfil({
         <Panel className="p-4">
           <p className="sn-label flex items-center gap-2">
             <Star aria-hidden className="size-4" />
-            Suma puntos completando tu perfil
+            {t("fp.suma_puntos")}
           </p>
           <p className="body-sm mt-2 break-words">
-            Te falta: {faltantes.join(", ")}. Con estos datos te avisamos de tu cita a tiempo, te llegan promos de negocios
-            que realmente te interesan y quedas listo para sumar puntos.
+            {t("fp.te_falta", { lista: faltantes.join(", ") })}
           </p>
         </Panel>
       ) : null}
 
       <form onSubmit={onGuardar} className="flex flex-col gap-4">
         <Input
-          label="Nombre completo"
+          label={t("fp.nombre")}
           required
           minLength={2}
+          maxLength={80}
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
         />
-        <Input label="Correo" value={email} disabled />
+        <Input label={t("fp.correo")} value={email} disabled />
 
         <div className="flex flex-col gap-2">
           <label htmlFor="perfil-telefono" className="sn-label">
-            Celular (WhatsApp)
+            {t("fp.celular_wa")}
           </label>
           <div className="flex flex-wrap gap-2">
             <select
               value={codigoPais}
               onChange={(e) => setCodigoPais(e.target.value)}
-              aria-label="Código de país"
+              aria-label={t("fp.codigo_pais")}
               className="min-h-12 shrink-0 border-2 border-border bg-bg px-2.5 text-[15px] text-text outline-none focus:shadow-hard"
             >
               {CODIGOS_PAIS.map((c) => (
@@ -153,16 +156,16 @@ export function FormularioPerfil({
 
         <div className="flex flex-col gap-2">
           <span id="perfil-cumple" className="sn-label">
-            ¿Cuándo cumples años?
+            {t("fp.cuando_cumples")}
           </span>
           <div className="flex gap-2" role="group" aria-labelledby="perfil-cumple">
             <select
               value={dia}
               onChange={(e) => setDia(e.target.value)}
-              aria-label="Día de tu cumpleaños"
+              aria-label={t("fp.dia_aria")}
               className="min-h-12 min-w-0 flex-1 border-2 border-border bg-bg px-2.5 text-[15px] text-text outline-none focus:shadow-hard"
             >
-              <option value="">Día</option>
+              <option value="">{t("fp.dia")}</option>
               {Array.from({ length: diasDelMes }, (_, i) => i + 1).map((d) => (
                 <option key={d} value={String(d)}>
                   {d}
@@ -176,46 +179,46 @@ export function FormularioPerfil({
                 const max = e.target.value ? new Date(2000, Number(e.target.value), 0).getDate() : 31;
                 if (Number(dia) > max) setDia(String(max)); // p. ej. 31 → 30 al elegir abril
               }}
-              aria-label="Mes de tu cumpleaños"
+              aria-label={t("fp.mes_aria")}
               className="min-h-12 min-w-0 flex-[2] border-2 border-border bg-bg px-2.5 text-[15px] text-text outline-none focus:shadow-hard"
             >
-              <option value="">Mes</option>
-              {["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"].map((m, i) => (
+              <option value="">{t("fp.mes")}</option>
+              {(["mes.1", "mes.2", "mes.3", "mes.4", "mes.5", "mes.6", "mes.7", "mes.8", "mes.9", "mes.10", "mes.11", "mes.12"] as const).map((m, i) => (
                 <option key={m} value={String(i + 1)}>
-                  {m}
+                  {t(m)}
                 </option>
               ))}
             </select>
           </div>
-          <p className="sn-help">Solo día y mes: así te sorprendemos ese día. No te pedimos el año.</p>
+          <p className="sn-help">{t("fp.cumple_ayuda")}</p>
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="sn-label">¿Qué te interesa?</span>
+          <span className="sn-label">{t("fp.que_te_interesa")}</span>
           <ChipGroup>
             {CATEGORIAS_NEGOCIO.map((c) => (
               <Chip key={c.valor} selected={categorias.includes(c.valor)} onClick={() => alternarCategoria(c.valor)}>
-                {c.etiqueta}
+                {t(`catn.${c.valor}` as Clave)}
               </Chip>
             ))}
           </ChipGroup>
-          <p className="sn-help">Así te mostramos primero los negocios y promociones que más te sirven.</p>
+          <p className="sn-help">{t("fp.intereses_ayuda")}</p>
         </div>
 
         {error ? <ErrorAviso>{error}</ErrorAviso> : null}
         {guardado ? (
           <Status tone="ok" role="status" icon={<Check aria-hidden className="size-3.5" />}>
-            Guardado
+            {t("fp.guardado")}
           </Status>
         ) : null}
 
         <Button type="submit" size="lg" loading={guardando} className="w-full">
-          Guardar cambios
+          {t("fp.guardar_cambios")}
         </Button>
       </form>
 
       <Button variant="secondary" size="lg" loading={cerrando} onClick={onCerrarSesion} className="w-full">
-        Cerrar sesión
+        {t("comun.cerrar_sesion")}
       </Button>
     </div>
   );

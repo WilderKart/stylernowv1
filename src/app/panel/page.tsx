@@ -26,7 +26,7 @@ async function cargarDashboard(negocioId: string, sedeId: string | null) {
     ranking: resRanking.ok ? resRanking.data : [],
     timeline: resTimeline.ok ? resTimeline.data : [],
     erroresParciales:
-      erroresParciales.length > 0 ? ["No pudimos cargar todo el resumen del día — probá recargar."] : [],
+      erroresParciales.length > 0 ? ["No pudimos cargar todo el resumen del día — prueba recargar."] : [],
   };
 }
 
@@ -69,7 +69,7 @@ export default async function PanelPage() {
   // alta de Negocio. `/staff` resuelve su propio contexto de forma
   // independiente (`obtenerContextoStaff()`) y ya maneja suspendido/
   // invitado/sin-vínculo con su propia pantalla, así que no se duplica esa
-  // lógica acá.
+  // lógica aquí.
   if (contexto.rol === "STAFF") {
     redirect("/staff");
   }

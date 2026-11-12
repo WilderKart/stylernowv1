@@ -40,8 +40,21 @@ type Tab = (typeof TABS)[number];
 // llamar una función impura (Date.now) durante el render de un componente.
 const VIGENCIA_CORPORATIVO_DEFAULT = new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 10);
 
+/** Qué función del plan exige cada pestaña (las demás están incluidas en todos los planes). */
+const REQUIERE: Partial<Record<Tab, "membresias" | "fidelizacion">> = {
+  Membresías: "membresias",
+  Sellos: "fidelizacion",
+  Cashback: "fidelizacion",
+  "Club VIP": "fidelizacion",
+  Familias: "fidelizacion",
+  Empresas: "fidelizacion",
+  "Recompensas IA": "fidelizacion",
+};
+
 export function VistaLealtadPanel(props: {
   negocioId: string;
+  funciones: { membresias: boolean; fidelizacion: boolean };
+  planNombre: string;
   planesIniciales: PlanMembresia[];
   giftCardsIniciales: GiftCardAdmin[];
   referidoConfigInicial: ReferidoConfig | null;
@@ -54,7 +67,12 @@ export function VistaLealtadPanel(props: {
   reglasRecompensaIniciales: ReglaRecompensa[];
   sugerenciasIniciales: SugerenciaRecompensa[];
 }) {
-  const [tab, setTab] = useState<Tab>("Membresías");
+  const bloqueada = (t: Tab) => {
+    const f = REQUIERE[t];
+    return f ? !props.funciones[f] : false;
+  };
+  // Abre en la primera pestaña incluida en el plan.
+  const [tab, setTab] = useState<Tab>(() => TABS.find((t) => !(REQUIERE[t] && !props.funciones[REQUIERE[t]!])) ?? "Gift Cards");
 
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-8 sm:px-10">
@@ -69,20 +87,32 @@ export function VistaLealtadPanel(props: {
             onClick={() => setTab(t)}
             className={`rounded-none border px-3 py-1.5 text-[11.5px] font-bold ${tab === t ? "border-accent bg-accent-soft text-accent" : "border-border text-text-muted"}`}
           >
-            {t}
+            {bloqueada(t) ? `🔒 ${t}` : t}
           </button>
         ))}
       </div>
 
-      {tab === "Membresías" ? <TabMembresias negocioId={props.negocioId} planesIniciales={props.planesIniciales} /> : null}
-      {tab === "Gift Cards" ? <TabGiftCards giftCardsIniciales={props.giftCardsIniciales} /> : null}
-      {tab === "Referidos" ? <TabReferidos negocioId={props.negocioId} configInicial={props.referidoConfigInicial} /> : null}
-      {tab === "Sellos" ? <TabSellos negocioId={props.negocioId} campanasIniciales={props.campanasSellosIniciales} /> : null}
-      {tab === "Cashback" ? <TabCashback negocioId={props.negocioId} reglasIniciales={props.reglasCashbackIniciales} /> : null}
-      {tab === "Club VIP" ? <TabVip negocioId={props.negocioId} nivelesIniciales={props.nivelesVipIniciales} miembrosIniciales={props.miembrosVipIniciales} /> : null}
-      {tab === "Familias" ? <TabFamilias familiasIniciales={props.familiasIniciales} /> : null}
-      {tab === "Empresas" ? <TabCorporativo negocioId={props.negocioId} cuentasIniciales={props.cuentasCorpIniciales} /> : null}
-      {tab === "Recompensas IA" ? <TabRecompensas negocioId={props.negocioId} reglasIniciales={props.reglasRecompensaIniciales} sugerenciasIniciales={props.sugerenciasIniciales} /> : null}
+      {bloqueada(tab) ? (
+        <div className="border-2 border-border bg-surface p-5" role="status">
+          <p className="text-[13px] font-bold text-text">{tab} no está incluido en tu plan {props.planNombre}</p>
+          <p className="mt-1.5 text-[12.5px] leading-relaxed text-text-muted">
+            Mejora tu plan para activar {tab.toLowerCase()} y todo el programa de lealtad. Tus clientes no ven esta función hasta que la actives.
+          </p>
+          <a href="/panel/suscripcion" className="mt-3 inline-flex h-11 items-center border-2 border-border bg-accent px-4 text-[12.5px] font-bold uppercase text-ink no-underline">
+            Ver planes y mejorar
+          </a>
+        </div>
+      ) : null}
+
+      {tab === "Membresías" && !bloqueada("Membresías") ? <TabMembresias negocioId={props.negocioId} planesIniciales={props.planesIniciales} /> : null}
+      {tab === "Gift Cards" && !bloqueada("Gift Cards") ? <TabGiftCards giftCardsIniciales={props.giftCardsIniciales} /> : null}
+      {tab === "Referidos" && !bloqueada("Referidos") ? <TabReferidos negocioId={props.negocioId} configInicial={props.referidoConfigInicial} /> : null}
+      {tab === "Sellos" && !bloqueada("Sellos") ? <TabSellos negocioId={props.negocioId} campanasIniciales={props.campanasSellosIniciales} /> : null}
+      {tab === "Cashback" && !bloqueada("Cashback") ? <TabCashback negocioId={props.negocioId} reglasIniciales={props.reglasCashbackIniciales} /> : null}
+      {tab === "Club VIP" && !bloqueada("Club VIP") ? <TabVip negocioId={props.negocioId} nivelesIniciales={props.nivelesVipIniciales} miembrosIniciales={props.miembrosVipIniciales} /> : null}
+      {tab === "Familias" && !bloqueada("Familias") ? <TabFamilias familiasIniciales={props.familiasIniciales} /> : null}
+      {tab === "Empresas" && !bloqueada("Empresas") ? <TabCorporativo negocioId={props.negocioId} cuentasIniciales={props.cuentasCorpIniciales} /> : null}
+      {tab === "Recompensas IA" && !bloqueada("Recompensas IA") ? <TabRecompensas negocioId={props.negocioId} reglasIniciales={props.reglasRecompensaIniciales} sugerenciasIniciales={props.sugerenciasIniciales} /> : null}
     </main>
   );
 }
@@ -186,7 +216,7 @@ function TabGiftCards({ giftCardsIniciales }: { giftCardsIniciales: GiftCardAdmi
 
   return (
     <div>
-      <p className="mb-3 text-[12px] text-text-faint">Las Gift Cards las compra el Cliente desde su propio StylerWallet. Acá solo administrás las emitidas por tu negocio.</p>
+      <p className="mb-3 text-[12px] text-text-faint">Las Gift Cards las compra el Cliente desde su propio StylerWallet. Aquí solo administras las emitidas por tu negocio.</p>
       <ErrorTexto error={error} />
       {giftCards.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-[12.5px] text-text-faint">Todavía no se compró ninguna Gift Card de tu negocio.</p>
@@ -403,7 +433,7 @@ function TabVip({ negocioId, nivelesIniciales, miembrosIniciales }: { negocioId:
       <ErrorTexto error={error} />
       {niveles.length === 0 ? (
         <Card className="mb-4">
-          <p className="mb-2 text-[12px] text-text-faint">Todavía no configuraste niveles VIP. Empezá con los 4 niveles estándar (Bronze/Silver/Gold/Black) — los podés renombrar después.</p>
+          <p className="mb-2 text-[12px] text-text-faint">Todavía no configuraste niveles VIP. Empieza con los 4 niveles estándar (Bronze/Silver/Gold/Black) — los puedes renombrar después.</p>
           <Button size="sm" loading={guardando} onClick={onSembrar}>
             Crear niveles estándar
           </Button>
@@ -621,7 +651,7 @@ function TabRecompensas({ negocioId, reglasIniciales, sugerenciasIniciales }: { 
 
       <h2 className="font-display mb-2 text-[12px] font-bold uppercase text-text">Sugerencias pendientes</h2>
       {pendientes.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-[12.5px] text-text-faint">Sin sugerencias pendientes. Tocá &quot;Buscar oportunidades ahora&quot;.</p>
+        <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-[12.5px] text-text-faint">Sin sugerencias pendientes. Toca &quot;Buscar oportunidades ahora&quot;.</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {pendientes.map((s) => (

@@ -18,13 +18,14 @@ type Resultado<T = undefined> =
   | { ok: false; error: string };
 
 const MENSAJES_ERROR: Record<string, string> = {
-  NO_AUTORIZADO: "No tenés permiso sobre este negocio.",
+  NO_AUTORIZADO: "No tienes permiso sobre este negocio.",
+  FUNCION_NO_INCLUIDA: "Esta función no está incluida en tu plan. Mejora tu plan desde Mi Plan para usarla.",
   PRECIO_INVALIDO: "El precio debe ser mayor a 0.",
-  DURACION_INVALIDA: "Elegí una duración válida.",
+  DURACION_INVALIDA: "Elige una duración válida.",
   CONGELACION_INVALIDA: "El máximo de congelación debe ser 0, 7, 15 o 30 días.",
   SELLOS_REQUERIDOS_INVALIDO: "La cantidad de sellos requeridos debe ser mayor a 0.",
   PORCENTAJE_INVALIDO: "El porcentaje debe estar entre 0 y 100.",
-  RECOMPENSA_REQUERIDA: "Definí un monto o un porcentaje de recompensa.",
+  RECOMPENSA_REQUERIDA: "Define un monto o un porcentaje de recompensa.",
   MONTO_INVALIDO: "Monto inválido.",
   CANTIDAD_INVALIDA: "Cantidad inválida (máximo 500 por lote).",
   ORDEN_INVALIDO: "El orden debe ser mayor a 0.",
@@ -293,13 +294,13 @@ function descripcionPlantilla(disparador: string, contexto: Record<string, unkno
   switch (disparador) {
     case "CLIENTE_INACTIVO":
     case "RIESGO_ABANDONO":
-      return `Cliente sin visitar hace ${(contexto.dias_desde_ultima_visita as number | undefined) ?? "varios"} días — considerá una promoción de reactivación.`;
+      return `Cliente sin visitar hace ${(contexto.dias_desde_ultima_visita as number | undefined) ?? "varios"} días — considera una promoción de reactivación.`;
     case "CUMPLEANOS":
-      return `Hoy es el cumpleaños de ${(contexto.nombre as string | undefined) ?? "este Cliente"} — considerá un regalo o descuento especial.`;
+      return `Hoy es el cumpleaños de ${(contexto.nombre as string | undefined) ?? "este Cliente"} — considera un regalo o descuento especial.`;
     case "OBJETIVO_LOGRADO":
       return `Este Cliente alcanzó el objetivo de sellos de "${(contexto.campana as string | undefined) ?? "una campaña"}".`;
     case "MEJOR_HORARIO":
-      return "Franja con baja ocupación detectada — considerá una promoción en ese horario.";
+      return "Franja con baja ocupación detectada — considera una promoción en ese horario.";
     default:
       return "Oportunidad detectada por el motor de recompensas.";
   }
@@ -329,7 +330,7 @@ async function redactarSugerenciaConIA(negocioId: string, disparador: string, co
       [
         {
           role: "system",
-          content: `Sos el asistente de marketing de una barbería/salón en Colombia usando StylerNow.${tono ? ` Tono de comunicación de este negocio: ${tono}.` : ""} Respondé SOLO con JSON: {"descripcion": "sugerencia breve y accionable en español, máximo 140 caracteres", "justificacion": "por qué, citando el dato concreto, máximo 100 caracteres"}.`,
+          content: `Eres el asistente de marketing de una barbería/salón en Colombia usando StylerNow.${tono ? ` Tono de comunicación de este negocio: ${tono}.` : ""} Responde SOLO con JSON: {"descripcion": "sugerencia breve y accionable en español, máximo 140 caracteres", "justificacion": "por qué, citando el dato concreto, máximo 100 caracteres"}.`,
         },
         { role: "user", content: `Disparador: ${disparador}. Contexto: ${JSON.stringify(contexto)}.` },
       ],

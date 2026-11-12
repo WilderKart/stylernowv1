@@ -9,7 +9,7 @@ export default async function ClientesStaffPage() {
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-8 sm:px-10">
       <h1 className="font-display mb-1 text-[22px] font-bold uppercase text-text">Mis Clientes</h1>
-      <p className="mb-6 text-[12px] text-text-faint">Solo los clientes que vos mismo atendiste — no el listado completo del negocio.</p>
+      <p className="mb-6 text-[12px] text-text-faint">Solo los clientes que tú mismo atendiste — no el listado completo del negocio.</p>
 
       {!res.ok ? (
         <p className="text-[13px] font-semibold text-danger">{res.error}</p>

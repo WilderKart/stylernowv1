@@ -471,7 +471,7 @@ function SeccionTextosLegales({ textosIniciales }: { textosIniciales: TextoLegal
     <section>
       <h2 className="font-display mb-1 text-[14px] font-bold uppercase text-text">Textos legales</h2>
       <p className="mb-3 text-[12px] text-text-faint">
-        Cada publicación crea una versión nueva — nunca sobreescribe lo que un usuario ya aceptó. Si marcás &ldquo;cambio material&rdquo;, se le pide re-aceptar en su próximo inicio de sesión.
+        Cada publicación crea una versión nueva — nunca sobreescribe lo que un usuario ya aceptó. Si marcas &ldquo;cambio material&rdquo;, se le pide re-aceptar en su próximo inicio de sesión.
       </p>
       <div className="mb-3 flex gap-1 rounded-none border border-border p-1" style={{ width: "fit-content" }}>
         {TIPOS_LEGALES.map((t) => (
