@@ -87,7 +87,8 @@ export function FormularioPerfil({
   async function onCerrarSesion() {
     setCerrando(true);
     await cerrarSesion();
-    router.push("/");
+    // replace: la pantalla privada no queda en el historial del navegador.
+    router.replace("/");
     router.refresh();
   }
 

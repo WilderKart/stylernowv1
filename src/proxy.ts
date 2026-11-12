@@ -57,6 +57,12 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(login);
   }
 
+  // Páginas de una sesión iniciada o de una ruta protegida: nunca al caché del navegador ni al bfcache.
+  // Así, tras cerrar sesión, el botón "atrás" no muestra desde memoria datos privados de la pantalla anterior.
+  if (user || !esRutaPublica(pathname)) {
+    response.headers.set("Cache-Control", "private, no-store, max-age=0, must-revalidate");
+  }
+
   return response;
 }
 
