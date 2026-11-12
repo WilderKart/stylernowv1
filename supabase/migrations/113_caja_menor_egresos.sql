@@ -69,7 +69,7 @@ grant execute on function public.anular_egreso_caja(uuid, text) to authenticated
 
 -- Cierre de caja: efectivo esperado = efectivo cobrado - egresos del dia (el fondo inicial lo suma la pantalla).
 -- Misma firma; agrega claves al JSON. Lo digital (tarjeta/datafono) no entra al efectivo esperado.
-create or replace function public.cierre_caja_dia(p_negocio_id uuid, p_sede_id uuid, p_fecha date)
+create or replace function public.cierre_caja_dia(p_negocio_id uuid, p_sede_id uuid default null, p_fecha date default null)
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare
   v_autorizado boolean;
