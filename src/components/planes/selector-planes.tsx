@@ -56,7 +56,7 @@ export function SelectorPlanes({
         {planes.map((p) => {
           const activo = value === p.codigo;
           const cotizar = p.precioMensual === null;
-          const aplicaFundador = hayCupos && p.codigo !== "ALLFATHER" && !cotizar;
+          const aplicaFundador = hayCupos && p.codigo !== "SIGNATURE" && !cotizar;
           const precio =
             p.precioMensual !== null
               ? calcularPrecio({

@@ -18,7 +18,7 @@ import {
   type SimulacionIa,
 } from "./actions";
 
-const PLANES = ["RAVEN", "JARL", "VALHALLA", "ALLFATHER"] as const;
+const PLANES = ["ESSENTIAL", "STUDIO", "PRESTIGE", "SIGNATURE"] as const;
 
 export function VistaAiCenter({
   accionesIniciales,
@@ -297,7 +297,7 @@ function FilaPaquete({ paquete, disabled, onGuardar }: { paquete: PaqueteIa; dis
 }
 
 function SimuladorCosto() {
-  const [plan, setPlan] = useState<(typeof PLANES)[number]>("JARL");
+  const [plan, setPlan] = useState<(typeof PLANES)[number]>("STUDIO");
   const [numStaff, setNumStaff] = useState(3);
   const [numClientes, setNumClientes] = useState(150);
   const [resultado, setResultado] = useState<SimulacionIa | null>(null);

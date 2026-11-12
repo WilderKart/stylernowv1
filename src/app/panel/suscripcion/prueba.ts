@@ -10,7 +10,7 @@ type Resultado = { ok: true } | { ok: false; error: string };
 const MENSAJES: Record<string, string> = {
   NO_AUTORIZADO: "No tienes permiso sobre este negocio.",
   NO_AUTENTICADO: "Inicia sesión para continuar.",
-  ALLFATHER_REQUIERE_COTIZACION: "El plan Allfather se cotiza con nuestro equipo de ventas.",
+  SIGNATURE_REQUIERE_COTIZACION: "El plan Signature se cotiza con nuestro equipo de ventas.",
   CICLO_INVALIDO: "Elige facturación mensual o anual.",
   PAIS_NO_DISPONIBLE: "StylerNow todavía no está disponible en ese país.",
   PLAN_SIN_PRECIO_EN_PAIS: "Ese plan no tiene precio definido en tu país.",
@@ -51,7 +51,7 @@ export async function elegirPais(negocioId: string, pais: string): Promise<Resul
 
 export interface DatosPrueba {
   negocioId: string;
-  plan: "RAVEN" | "JARL" | "VALHALLA";
+  plan: "ESSENTIAL" | "STUDIO" | "PRESTIGE";
   ciclo: "MENSUAL" | "ANUAL";
   telefono: string;
   documento: string;

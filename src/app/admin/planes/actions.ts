@@ -9,7 +9,7 @@ type Resultado<T = undefined> =
   | { ok: false; error: string };
 
 type PlanCodigo = Database["public"]["Enums"]["plan_codigo"];
-const PLANES: PlanCodigo[] = ["RAVEN", "JARL", "VALHALLA", "ALLFATHER"];
+const PLANES: PlanCodigo[] = ["ESSENTIAL", "STUDIO", "PRESTIGE", "SIGNATURE"];
 const PASARELAS = ["MERCADOPAGO", "STRIPE", "PAYONEER", "MANUAL"] as const;
 const PAISES_VALIDOS = ["CO", "US", "MX", "ES"];
 

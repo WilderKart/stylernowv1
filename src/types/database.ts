@@ -9362,7 +9362,7 @@ export type Database = {
         | "PAQUETE_CREDITOS_IA"
         | "PAQUETE_CONVERSACIONES_WHATSAPP"
         | "SUSCRIPCION"
-      plan_codigo: "RAVEN" | "JARL" | "VALHALLA" | "ALLFATHER"
+      plan_codigo: "ESSENTIAL" | "STUDIO" | "PRESTIGE" | "SIGNATURE"
       recurso_estado: "DISPONIBLE" | "FUERA_DE_SERVICIO"
       referido_estado: "PENDIENTE" | "COMPLETADO" | "EXPIRADO"
       resena_estado: "VISIBLE" | "REPORTADA" | "ELIMINADA"
@@ -9586,7 +9586,7 @@ export const Constants = {
         "PAQUETE_CONVERSACIONES_WHATSAPP",
         "SUSCRIPCION",
       ],
-      plan_codigo: ["RAVEN", "JARL", "VALHALLA", "ALLFATHER"],
+      plan_codigo: ["ESSENTIAL", "STUDIO", "PRESTIGE", "SIGNATURE"],
       recurso_estado: ["DISPONIBLE", "FUERA_DE_SERVICIO"],
       referido_estado: ["PENDIENTE", "COMPLETADO", "EXPIRADO"],
       resena_estado: ["VISIBLE", "REPORTADA", "ELIMINADA"],

@@ -53,6 +53,13 @@ export async function GET(request: NextRequest) {
     resultado.suscripciones = { error: e instanceof Error ? e.message : "error inesperado" };
   }
 
+  try {
+    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("limpiar_limite_tasa");
+    resultado.limite_tasa_limpiado = error ? { error: error.message } : data;
+  } catch (e) {
+    resultado.limite_tasa_limpiado = { error: e instanceof Error ? e.message : "error inesperado" };
+  }
+
   // --- Cliente (C01 / C15): tareas defensivas; un fallo aquí no afecta a las anteriores. ---
   try {
     const { data, error } = await admin.rpc("generar_recordatorios_cita", { p_ventana_horas: 24 });

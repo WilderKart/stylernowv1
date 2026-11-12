@@ -7,6 +7,7 @@ import { NegocioCard } from "@/components/marketplace/negocio-card";
 import { Sello } from "@/components/marketplace/sello";
 import { EmptyState, Marquee, Num } from "@/components/brutal";
 import { buscarNegociosFiltrado } from "@/lib/cliente/profesionales";
+import { registrarEventoAnuncio } from "@/lib/ads/registrar-evento";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -97,7 +98,8 @@ export default async function HomePage(props: PageProps<"/">) {
   // debe ralentizar el render de la búsqueda.
   const campanasEnPantalla = [...new Set((resultados ?? []).map((n) => n.campana_id).filter((id): id is string => Boolean(id)))];
   if (campanasEnPantalla.length > 0) {
-    void Promise.all(campanasEnPantalla.map((id) => supabase.rpc("registrar_impresion_patrocinada", { p_campana_id: id })));
+    const { data: { user: usuarioImpresion } } = await supabase.auth.getUser();
+    void Promise.all(campanasEnPantalla.map((id) => registrarEventoAnuncio("IMPRESION", id, null, usuarioImpresion?.id ?? null)));
   }
 
   // "Abierto hoy" lo resuelve la BD con disponibilidad real (marketplace_buscar_filtrado).

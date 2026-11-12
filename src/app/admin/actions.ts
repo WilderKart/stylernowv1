@@ -216,7 +216,7 @@ export interface ActivacionManualInput {
   negocioId: string;
   /** TRIAL o ACTIVA activan; REQUIERE_PLAN revierte una activación manual. */
   estado: "TRIAL" | "ACTIVA" | "REQUIERE_PLAN";
-  plan: "RAVEN" | "JARL" | "VALHALLA" | "ALLFATHER";
+  plan: "ESSENTIAL" | "STUDIO" | "PRESTIGE" | "SIGNATURE";
   tipo: "TRANSFERENCIA" | "CORTESIA" | "CONTINGENCIA_PASARELA" | null;
   motivo: string;
   /** Vigencia en días; vacío = sin vencimiento (solo ACTIVA). */

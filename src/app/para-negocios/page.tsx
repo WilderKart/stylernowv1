@@ -48,7 +48,7 @@ const T = {
     { q: "¿Mis clientes pagan por usar la app?", a: "No. Reservar es gratis para tus clientes." },
     { q: "¿Qué es el cupo fundador?", a: "Un descuento para los primeros negocios de cada país, en planes mensuales, durante un periodo limitado." },
     { q: "¿Puedo cambiar de plan?", a: "Sí. Puedes subir de plan cuando quieras y bajar al inicio del siguiente ciclo." },
-    { q: "Tengo una cadena o franquicia", a: "El plan Allfather se cotiza con nuestro equipo de ventas." },
+    { q: "Tengo una cadena o franquicia", a: "El plan Signature se cotiza con nuestro equipo de ventas." },
   ],
   cierreTitulo: "Empieza hoy",
   legales: [
@@ -74,7 +74,7 @@ function PlanCard({ plan, catalogoPais, hayCupos, urlPrueba }: { plan: PlanPais;
           precioMensual: plan.precioMensual,
           ciclo: "MENSUAL",
           mesesPagadosAnual: catalogoPais.mesesPagadosAnual,
-          descuentoFundadorPct: hayCupos && plan.codigo !== "ALLFATHER" ? catalogoPais.fundadorDescuentoPct : 0,
+          descuentoFundadorPct: hayCupos && plan.codigo !== "SIGNATURE" ? catalogoPais.fundadorDescuentoPct : 0,
         })
       : null;
 

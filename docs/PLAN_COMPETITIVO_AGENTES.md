@@ -8,7 +8,7 @@ Fecha: 2026-11-11 · Propietario: Wilder · Rama de trabajo actual: `feat/client
 
 **Reglas obligatorias del repo**
 1. `AGENTS.md`: esta versión de Next.js tiene cambios de ruptura. Lee la guía pertinente en `node_modules/next/dist/docs/` antes de escribir código de Next.
-2. El prototipo manda en lo visual (`stylernow-prototipo/`). Estilo brutalista: negro sólido, naranja como acento. Nombres de plan fijos (Essential, Studio, Prestige, Signature).
+2. El prototipo manda en lo visual (`stylernow-prototipo/`). Estilo brutalista: negro sólido, naranja como acento. Nombres de plan definitivos (decisión 2026-11-11): Essential, Studio, Prestige, Signature. Sustituyen a Raven/Jarl/Valhalla/Allfather; la migración y el detalle están en `docs/PLANES_CORREGIDOS_v3.md` (sección 7). Esa guía es la fuente de verdad de precios y funciones por plan.
 3. Antes de dar algo por hecho, verifícalo en el código y en la BD. Las tareas de la sección 4 pueden estar ya parcialmente hechas (ver columna "Estado conocido"). No dupliques trabajo: lee primero, y reporta qué ya existe.
 4. Nunca hagas push a `main` ni apliques migraciones a la BD compartida por tu cuenta. Deja la migración escrita en `supabase/migrations/` y avisa a Wilder (hoy hay pendientes: 107 y 108, y la 100).
 5. Informa de forma fiel: si un test falla o un paso se omitió, dilo.
@@ -27,8 +27,8 @@ Fecha: 2026-11-11 · Propietario: Wilder · Rama de trabajo actual: `feat/client
 
 | Escenario | StylerNow | Booksy | Fresha |
 |---|---|---|---|
-| Barbero solo | Essential 59.900 COP | 29,99 USD (~120.000 COP) | Independiente 24.300 COP |
-| 5 barberos | Studio 129.900 COP | 29,99 + 4×20 USD (~440.000) | 5×16.200 = 81.000 COP |
+| Barbero solo | Essential 69.900 COP | 29,99 USD (~120.000 COP) | Independiente 24.300 COP |
+| 5 barberos | Studio 139.900 COP | 29,99 + 4×20 USD (~440.000) | 5×16.200 = 81.000 COP |
 | WhatsApp / SMS | Incluido (150 a 2.500 conv.) | Recordatorios; masivos aparte | 20 SMS gratis, luego 500 COP c/u |
 | Tarjeta / POS | **Falta** | Aparte (2,69 % + 0,30 USD) | Complemento opcional |
 
@@ -41,22 +41,11 @@ Notas:
 
 ---
 
-## 2. Cambios propuestos a la estructura de planes (decisión de Wilder, no implementar sin su OK)
+## 2. Planes y precios: ver el documento de planes
 
-Plan actual (`Estructura planes/Estructura_Planes_StylerNow-v2.xlsx`): Essential 59.900 · Studio 129.900 · Prestige 269.900 · Signature 599.000 COP/mes.
+Precios (decisión 2026-11-11): Essential 69.900 · Studio 139.900 · Prestige 279.900 · Signature **desde** 599.000 (a cotizar; nunca se publica como precio cerrado). La marca de agua en fotos se retira de todos los planes. El detalle de qué incluye cada plan, los extras y la migración de la BD está en `docs/PLANES_CORREGIDOS_v3.md`; no dupliques esa información aquí.
 
-| Tema | Hoy | Propuesta |
-|---|---|---|
-| Fidelización | Desde Prestige | Versión básica desde Studio; avanzada en Prestige+ |
-| Fotos sin marca de agua | Solo Prestige+ | Quitar la restricción (ni Booksy ni Fresha la cobran) |
-| Reportes | No figuran | Básicos en Essential; avanzados desde Studio |
-| Inventario en Essential | No | Inventario básico |
-| Migración de datos | No figura | Gratis y asistida en todos los planes |
-| Cobro con tarjeta/datáfono | No figura | Incluido en todos (el costo lo asume el procesador) |
-| Facturación electrónica DIAN | No figura | Studio+ (integración o conexión con Siigo/Alegra) |
-| Recargas WhatsApp | No existen | Paquetes extra comprables (sección 4.5) |
-
-**Calculadora WhatsApp (hoja 2 del Excel):** solo usa la tarifa de mensajes de utilidad (2,9455 COP). Los recordatorios son de utilidad, pero las campañas son de marketing y cuestan bastante más en Colombia. Verifica la tarifa oficial de Meta para marketing y recalcula el margen del 99 %, o limita la cuota a mensajes de utilidad.
+**WhatsApp (resumen).** Meta cobra por mensaje de plantilla: utilidad ≈ 2,95 COP y marketing ≈ 46 COP (unas 15 veces más; cifras de fuentes secundarias, verifica en la página oficial de Meta). Para proteger la rentabilidad, el marketing masivo va solo por WhatsApp y se limita al 40 % de la cuota mensual de los planes y al 10 % de cada recarga, para sostener un **margen mínimo del 70 %** en WhatsApp (aprobado por Wilder). Los precios de las recargas no cambian; si el costo de WhatsApp de un negocio supera el 30 % de su ingreso, se alerta a Super Admin. Implementa el contador por tipo y el tope en el servidor (sección 4.5 y `PLANES_CORREGIDOS_v3.md`, sección 4).
 
 ---
 
@@ -146,13 +135,13 @@ Lista de espera · formularios de consulta y ficha del cliente · reseñas solic
 
 | # | Tarea | Estado conocido (verifica) |
 |---|---|---|
-| 6.1 | Bloqueo de PIN de gift card (5 intentos fallidos, 15 min) | Hecho en la migración 105. Verifica que esté aplicada y probada |
-| 6.2 | Bloqueo de funciones por plan **en RLS**, no solo en la UI (Essential no debe leer ni escribir Inventario por API) | Migración 108 (proteger plan/comisión) pendiente de aplicar. Falta lo de funciones por plan |
-| 6.3 | Suscripción `TRIAL_QA` para los 93 negocios QA | Pendiente. Script idempotente, solo sobre negocios marcados como QA, nunca sobre negocios reales |
-| 6.4 | `/api/ia/exportar`: comprobar que el usuario autenticado pertenece al negocio **antes** de devolver nada, incluso un archivo vacío | Pendiente |
-| 6.5 | CSP: añadir las cabeceras de scripts que faltaban (con nonces) | Pendiente (cabeceras base ya hechas) |
-| 6.6 | Anuncios: validar la identidad del llamador antes de registrar un clic (hallazgo H8, clic fraudulento) | Pendiente |
-| 6.7 | Rate limiting general; tope de peticiones al buscador público | Tope de `limite` en la migración 104. Falta un límite por IP/tiempo en el borde |
+| 6.1 | Bloqueo de PIN de gift card (5 intentos fallidos, 15 min) | **HECHO**: migración 105 aplicada y probada |
+| 6.2 | Bloqueo de funciones por plan **en RLS**, no solo en la UI (Essential no debe leer ni escribir Inventario por API) | Migraciones 108 (proteger plan/comisión) y 110 (RLS por plan, escrita) pendientes de aplicar |
+| 6.3 | Suscripción `TRIAL_QA` para los 93 negocios QA | **HECHO** (2026-11-11): los 93 negocios de prueba tienen suscripción TRIAL de 14 días. No existe el estado `TRIAL_QA`; si se quiere vigencia larga, usar activación manual |
+| 6.4 | `/api/ia/exportar`: comprobar que el usuario autenticado pertenece al negocio **antes** de devolver nada, incluso un archivo vacío | **HECHO**: valida pertenencia con `tiene_acceso_interno`; probado (401/403/200) |
+| 6.5 | CSP: añadir las cabeceras de scripts que faltaban (con nonces) | **Implementado en modo solo-reporte** (0 violaciones; activar con `CSP_ENFORCE=1`) |
+| 6.6 | Anuncios: validar la identidad del llamador antes de registrar un clic (hallazgo H8, clic fraudulento) | Migración 111 + código escritos; sin aplicar |
+| 6.7 | Rate limiting general; tope de peticiones al buscador público | Tope de `limite` (104) aplicado. Migración 112 + límite en OTP escritos; falta el buscador público (Firewall de Vercel) |
 
 **Detalle de 6.2.** Crea una función de ayuda (por ejemplo `negocio_tiene_funcion(negocio_id, 'inventario')`) que lea el plan vigente del negocio y se use en las políticas RLS de las tablas de cada función bloqueada (inventario, comisiones, turnos, fidelización, My Look, IA, membresías avanzadas). Una sola fuente de verdad: la matriz de planes, en una tabla, no repetida en el código. Prueba negativa obligatoria: con un usuario Essential, llamar por API a inventario debe fallar. Un plan vencido o en periodo de gracia debe tener una regla clara (acordar con Wilder).
 
@@ -204,6 +193,23 @@ Una hoja de comparación (StylerNow frente a Booksy y Fresha) con costos reales 
 - Vía de acceso a Reservar con Google (socio, agregador o enlace puente).
 - FCM u OneSignal para push.
 - Vigencia del saldo comprado de WhatsApp y precios de los paquetes.
-- Ajustes de la estructura de planes (sección 2).
+- Decisiones abiertas de planes: ver `docs/PLANES_CORREGIDOS_v3.md`, sección 8.
 - Alcance y presupuesto del marketplace (5.5).
 - Regla para planes vencidos o en gracia (6.2).
+
+
+## 11. Estado de implementación (actualizado 2026-11-11)
+Verificado en código y BD antes de construir (regla 3):
+| Función | Estado |
+|---|---|
+| 4.1 enlace de reservas (puente) | **Hecho**: bloque "Tu enlace de reservas" en el panel. Reservar con Google real: sin empezar (requiere investigar el programa de socios) |
+| 4.2 Datáfono Mercado Pago Point | No existe. Sin empezar (requiere credenciales OAuth por negocio) |
+| 4.3 Caja menor | **Hecho** (migración 113 sin aplicar + pantalla). Falta la prueba con la migración aplicada |
+| 4.4 Push nativo | No existe (solo `sw.js` base). Sin empezar; decidir FCM vs OneSignal |
+| 4.5 Recargas de WhatsApp | No existe (los planes ya traen la cuota). Sin empezar |
+| 5.1 Importación CSV | No existe. Sin empezar |
+| 5.2 Reportes | Existe parcial (ingresos y ranking, Excel/PDF); faltan retención, ocupación y ausencias |
+| 5.3 Política de cancelación | Existe parcial (ventanas de reembolso por negocio); falta mostrarla con aceptación explícita al reservar y la penalización automática |
+| 5.4 Perfil público y JSON-LD | Existe (JSON-LD ya sin XSS) |
+| 5.6 Lista de espera | Existe en BD y parte de UI |
+| 7.1 a 7.6 UI | 7.1 perfil de profesional y 7.4 filtros en hoja existen; revisar 7.3 y 7.5 |

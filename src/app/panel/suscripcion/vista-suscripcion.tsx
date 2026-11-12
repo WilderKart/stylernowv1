@@ -67,7 +67,7 @@ const T = {
   sinCobro: "El cobro automático aún no está disponible en tu país. Contáctanos y activamos tu plan manualmente.",
   iniciar: "Iniciar prueba",
   hablarVentas: "Hablar con ventas",
-  ventasAllfather: "Allfather se cotiza con nuestro equipo de ventas.",
+  ventasSignature: "Signature se cotiza con nuestro equipo de ventas.",
   upgrade: "Hacer upgrade",
   downgrade: "Programar downgrade",
   cancelarDowngrade: "Cancelar downgrade",
@@ -204,7 +204,7 @@ export function VistaSuscripcion({
 
   async function onIniciarPrueba(e: React.FormEvent) {
     e.preventDefault();
-    if (!seleccion || seleccion === "ALLFATHER") return;
+    if (!seleccion || seleccion === "SIGNATURE") return;
     setProcesando("prueba");
     setErrorPrueba(null);
     const res = await iniciarPrueba({
@@ -234,7 +234,7 @@ export function VistaSuscripcion({
 
   const limiteSedes = planActual?.limiteSedes ?? planActualPais?.limiteSedes ?? null;
   const limiteStaff = planActual?.staffIncluido ?? planActualPais?.staffIncluido ?? null;
-  const cotizaSel = seleccion === "ALLFATHER" || planSel?.precioMensual === null;
+  const cotizaSel = seleccion === "SIGNATURE" || planSel?.precioMensual === null;
   const cobroOk = catalogo?.pais.cobroRecurrenteHabilitado ?? false;
   const enlaceSoporte = (
     <Link href="/panel/soporte" className="font-bold underline underline-offset-2">
@@ -245,10 +245,10 @@ export function VistaSuscripcion({
   function accionCambio() {
     if (!seleccion || seleccion === suscripcion.planCodigo) return null;
     const destino = planes.find((p) => p.codigo === seleccion);
-    if (seleccion === "ALLFATHER" || destino?.precioMensual == null) {
+    if (seleccion === "SIGNATURE" || destino?.precioMensual == null) {
       return (
         <>
-          <p className="text-[13px]">{T.ventasAllfather}</p>
+          <p className="text-[13px]">{T.ventasSignature}</p>
           <Button asChild>
             <Link href="/panel/soporte">{T.hablarVentas}</Link>
           </Button>
@@ -423,7 +423,7 @@ export function VistaSuscripcion({
           {esRequierePlan && seleccion ? (
             cotizaSel ? (
               <Panel className="flex flex-col gap-3 p-4">
-                <p className="text-[13px]">{T.ventasAllfather}</p>
+                <p className="text-[13px]">{T.ventasSignature}</p>
                 <Button asChild>
                   <Link href="/panel/soporte">{T.hablarVentas}</Link>
                 </Button>

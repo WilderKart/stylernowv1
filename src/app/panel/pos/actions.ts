@@ -257,6 +257,20 @@ export interface CierreCaja {
   efectivo: number;
   digital: number;
   total: number;
+  /** Caja menor (migración 113): ausentes (0/[]) mientras la migración no esté aplicada. */
+  egresos: number;
+  efectivoEsperado: number;
+  egresosLista: EgresoCaja[];
+}
+
+export interface EgresoCaja {
+  id: string;
+  monto: number;
+  concepto: string;
+  categoria: string;
+  anulado: boolean;
+  anuladoMotivo: string | null;
+  hora: string;
 }
 
 export async function obtenerCierreCaja(negocioId: string, sedeId?: string | null, fecha?: string): Promise<Resultado<CierreCaja>> {
@@ -268,8 +282,67 @@ export async function obtenerCierreCaja(negocioId: string, sedeId?: string | nul
       p_fecha: fecha ?? undefined,
     });
     if (error) return { ok: false, error: traducirError(error.message) };
-    const r = data as { fecha: string; efectivo: number; digital: number; total: number };
-    return { ok: true, data: { fecha: r.fecha, efectivo: r.efectivo, digital: r.digital, total: r.total } };
+    const r = data as {
+      fecha: string; efectivo: number; digital: number; total: number;
+      egresos?: number; efectivo_esperado?: number;
+      egresos_lista?: { id: string; monto: number; concepto: string; categoria: string; anulado: boolean; anulado_motivo: string | null; hora: string }[];
+    };
+    return {
+      ok: true,
+      data: {
+        fecha: r.fecha, efectivo: r.efectivo, digital: r.digital, total: r.total,
+        egresos: Number(r.egresos ?? 0),
+        efectivoEsperado: Number(r.efectivo_esperado ?? r.efectivo),
+        egresosLista: (r.egresos_lista ?? []).map((e) => ({
+          id: e.id, monto: Number(e.monto), concepto: e.concepto, categoria: e.categoria,
+          anulado: e.anulado, anuladoMotivo: e.anulado_motivo, hora: e.hora,
+        })),
+      },
+    };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
+type RpcSinTipos = { rpc: (n: string, a: object) => Promise<{ data: unknown; error: { message: string } | null }> };
+
+const ERRORES_EGRESO: Record<string, string> = {
+  MONTO_INVALIDO: "El monto debe ser mayor a 0 y menor a 5.000.000.",
+  CONCEPTO_INVALIDO: "Escribe en qué se gastó (mínimo 2 letras).",
+  SEDE_INVALIDA: "La sede no pertenece a este negocio.",
+  NO_AUTORIZADO: "Solo el dueño o el guardián de la sede pueden registrar egresos.",
+  EGRESO_YA_ANULADO: "Ese egreso ya fue anulado.",
+  MOTIVO_REQUERIDO: "Escribe el motivo de la anulación (mínimo 3 letras).",
+};
+
+function errorEgreso(mensaje: string) {
+  const clave = Object.keys(ERRORES_EGRESO).find((k) => mensaje.includes(k));
+  return clave ? ERRORES_EGRESO[clave] : "No se pudo completar la operación.";
+}
+
+/** Caja menor: registra un egreso del día. El monto y la fecha los valida y fija la BD, no esta función. */
+export async function registrarEgresoCaja(datos: { negocioId: string; sedeId: string; monto: number; concepto: string; categoria: string }): Promise<Resultado> {
+  try {
+    const { supabase } = await usuarioActual();
+    const { error } = await (supabase as unknown as RpcSinTipos).rpc("registrar_egreso_caja", {
+      p_negocio_id: datos.negocioId, p_sede_id: datos.sedeId, p_monto: datos.monto, p_concepto: datos.concepto, p_categoria: datos.categoria,
+    });
+    if (error) return { ok: false, error: errorEgreso(error.message) };
+    revalidatePath("/panel/pos/caja");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
+/** Los egresos no se borran: se anulan con motivo y queda auditado. */
+export async function anularEgresoCaja(egresoId: string, motivo: string): Promise<Resultado> {
+  try {
+    const { supabase } = await usuarioActual();
+    const { error } = await (supabase as unknown as RpcSinTipos).rpc("anular_egreso_caja", { p_egreso_id: egresoId, p_motivo: motivo });
+    if (error) return { ok: false, error: errorEgreso(error.message) };
+    revalidatePath("/panel/pos/caja");
+    return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
   }

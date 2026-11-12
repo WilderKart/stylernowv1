@@ -2,7 +2,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { MonedaCodigo } from "./moneda";
 
-export type PlanCodigo = "RAVEN" | "JARL" | "VALHALLA" | "ALLFATHER";
+export type PlanCodigo = "ESSENTIAL" | "STUDIO" | "PRESTIGE" | "SIGNATURE";
 
 export interface PaisPlanes {
   codigo: string;
@@ -61,7 +61,7 @@ export async function obtenerCatalogoPais(paisCodigo: string): Promise<CatalogoP
   if (!pais) return null;
 
   const precioPorPlan = new Map((precios ?? []).map((p) => [p.plan_codigo, p]));
-  const ORDEN: PlanCodigo[] = ["RAVEN", "JARL", "VALHALLA", "ALLFATHER"];
+  const ORDEN: PlanCodigo[] = ["ESSENTIAL", "STUDIO", "PRESTIGE", "SIGNATURE"];
 
   const lista: PlanPais[] = ORDEN.flatMap((codigo) => {
     const base = (planes ?? []).find((p) => p.codigo === codigo);

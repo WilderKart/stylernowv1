@@ -9,11 +9,12 @@ import type { Database } from "@/types/database";
  * resuelve rol/onboarding/permisos acá, eso sigue siendo 100% server-side
  * en `requireRole()`.
  */
-export async function updateSession(request: NextRequest): Promise<{
+export async function updateSession(request: NextRequest, requestHeaders?: Headers): Promise<{
   response: NextResponse;
   user: import("@supabase/supabase-js").User | null;
 }> {
-  let supabaseResponse = NextResponse.next({ request });
+  const reenviar = requestHeaders ? { headers: requestHeaders } : request;
+  let supabaseResponse = NextResponse.next({ request: reenviar });
 
   // El proxy corre en el Edge Runtime, antes de que exista cualquier página o
   // error.tsx que capture una excepción: si faltan estas variables, @supabase/ssr
@@ -41,7 +42,7 @@ export async function updateSession(request: NextRequest): Promise<{
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          supabaseResponse = NextResponse.next({ request });
+          supabaseResponse = NextResponse.next({ request: reenviar });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );

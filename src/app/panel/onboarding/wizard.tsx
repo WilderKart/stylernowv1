@@ -273,7 +273,7 @@ function PasoDatos({
       }
     }
     if (planSeleccionado !== planActual) {
-      const resPlan = await elegirPlan(negocioId, planSeleccionado as "RAVEN" | "JARL" | "VALHALLA");
+      const resPlan = await elegirPlan(negocioId, planSeleccionado as "ESSENTIAL" | "STUDIO" | "PRESTIGE");
       if (!resPlan.ok) {
         setGuardando(false);
         setError(resPlan.error);
@@ -395,11 +395,11 @@ function PasoDatos({
             onChange={(codigo) => setPlanSeleccionado(codigo)}
             ciclo={ciclo}
             onCicloChange={setCiclo}
-            deshabilitadoCodigos={["ALLFATHER"]}
+            deshabilitadoCodigos={["SIGNATURE"]}
           />
         ) : null}
         <p className="sn-meta">
-          Prueba 14 días con método de pago; se cobra al terminar. ¿Cadena o franquicia (Allfather)? Habla con ventas por soporte.
+          Prueba 14 días con método de pago; se cobra al terminar. ¿Cadena o franquicia (Signature)? Habla con ventas por soporte.
         </p>
       </div>
 

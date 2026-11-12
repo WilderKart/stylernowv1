@@ -7,6 +7,7 @@ import { validarContrasenaNueva } from "@/lib/auth/password-validator";
 import { guardarEnHistorial } from "@/lib/auth/password-history";
 import { registrarIntentoAuth, verificarRateLimitAuth } from "@/lib/auth/rate-limit-auth";
 import { googleProvider } from "@/lib/auth/providers/google-provider";
+import { limitar, ipDelLlamador } from "@/lib/rate-limit";
 import { headers } from "next/headers";
 
 /**
@@ -37,6 +38,14 @@ export async function enviarCodigo(email: string, siguiente: string, aceptaTermi
 
   const limite = await verificarRateLimitAuth(email, "otp_envio");
   if (!limite.ok) return { ok: false as const, error: limite.error };
+
+  // Límite por IP y por correo (evita el bombardeo de correos): 5 envíos cada 10 minutos por cada uno.
+  const porIp = await limitar("otp-ip", await ipDelLlamador(), 8, 600);
+  const porCorreo = await limitar("otp-correo", email.trim().toLowerCase(), 5, 600);
+  if (!porIp.ok || !porCorreo.ok) {
+    const espera = Math.max(!porIp.ok ? porIp.retryAfter : 0, !porCorreo.ok ? porCorreo.retryAfter : 0);
+    return { ok: false as const, error: `Demasiados intentos. Espera ${Math.ceil(espera / 60)} min y vuelve a intentarlo.` };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({

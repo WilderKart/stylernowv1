@@ -145,7 +145,7 @@ export async function subirLogo(negocioId: string, dataUrl: string): Promise<Res
 
 export async function elegirPlan(
   negocioId: string,
-  planCodigo: "RAVEN" | "JARL" | "VALHALLA"
+  planCodigo: "ESSENTIAL" | "STUDIO" | "PRESTIGE"
 ): Promise<Resultado> {
   try {
     const { supabase } = await usuarioActual();

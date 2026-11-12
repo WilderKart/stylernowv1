@@ -312,7 +312,7 @@ export async function actualizarPlan(datos: {
   try {
     const { supabase } = await usuarioActual();
     const { error } = await supabase.rpc("actualizar_plan", {
-      p_codigo: datos.codigo as "RAVEN" | "JARL" | "VALHALLA" | "ALLFATHER",
+      p_codigo: datos.codigo as "ESSENTIAL" | "STUDIO" | "PRESTIGE" | "SIGNATURE",
       p_precio_mensual: datos.precioMensual ?? undefined,
       p_limite_sedes: datos.limiteSedes ?? undefined,
       p_staff_incluido: datos.staffIncluido ?? undefined,

@@ -23,7 +23,7 @@ export function ActivacionManual({ negocioId, nombre, planActual, onHecho }: { n
   const [abierto, setAbierto] = useState(false);
   const [estado, setEstado] = useState<"TRIAL" | "ACTIVA" | "REQUIERE_PLAN">("ACTIVA");
   const [plan, setPlan] = useState<ActivacionManualInput["plan"]>(
-    (["RAVEN", "JARL", "VALHALLA", "ALLFATHER"].includes(planActual) ? planActual : "JARL") as ActivacionManualInput["plan"],
+    (["ESSENTIAL", "STUDIO", "PRESTIGE", "SIGNATURE"].includes(planActual) ? planActual : "STUDIO") as ActivacionManualInput["plan"],
   );
   const [tipo, setTipo] = useState<Tipo>("TRANSFERENCIA");
   const [motivo, setMotivo] = useState("");
@@ -84,7 +84,7 @@ export function ActivacionManual({ negocioId, nombre, planActual, onHecho }: { n
           <div>
             <span className="sn-label">Plan</span>
             <ChipGroup className="mt-2">
-              {(["RAVEN", "JARL", "VALHALLA", "ALLFATHER"] as const).map((p) => (
+              {(["ESSENTIAL", "STUDIO", "PRESTIGE", "SIGNATURE"] as const).map((p) => (
                 <Chip key={p} selected={plan === p} onClick={() => setPlan(p)}>
                   {p}
                 </Chip>

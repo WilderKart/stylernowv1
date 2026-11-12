@@ -7,6 +7,16 @@ Cada entrada de módulo referencia su commit y el ítem correspondiente en
 
 ## [No liberado]
 
+### Plan competitivo (2026-11-11) — Fase A + primeras funciones
+- **Planes v3** (`docs/PLANES_CORREGIDOS_v3.md`): Essential / Studio / Prestige / Signature sustituyen a Raven / Jarl / Valhalla / Allfather. El codigo de la app ya usa los nombres nuevos; la migracion `109` (renombra el enum, precios 69.900/139.900/279.900/desde 599.000, limites, WhatsApp 150/400/1.000/2.500, matriz de funciones, sin marca de agua) queda **escrita y sin aplicar**: se aplica junto con el despliegue.
+- **6.2 Funciones por plan en RLS**: migracion `110` (politicas restrictivas sobre membresias, fidelizacion y My Look). Sin aplicar.
+- **6.4** `/api/ia/exportar` valida pertenencia al negocio en el servidor. Hecho y probado.
+- **6.5 CSP con nonce**: `src/proxy.ts`. Por defecto en modo solo-reporte (0 violaciones medidas en 11 rutas); se activa con `CSP_ENFORCE=1` (probado el mapa con CSP estricta: 13/13).
+- **6.6 Anuncios**: migracion `111` + `src/lib/ads/registrar-evento.ts`: el cobro de clics/impresiones solo ocurre en el servidor, con identidad, deduplicacion diaria y tope por huella. Sin aplicar (mientras tanto no se registran eventos, no se cobra).
+- **6.7 Limite de tasa**: migracion `112` + `src/lib/rate-limit.ts`; aplicado al envio de codigos OTP (por IP y por correo). Falta el buscador publico (regla de Firewall de Vercel).
+- **4.3 Caja menor**: migracion `113` (tabla `egreso_caja`, RPC de registrar/anular con auditoria, cierre con efectivo esperado) + pantalla en Cierre de caja. Sin aplicar.
+- **4.1 puente**: bloque "Tu enlace de reservas" con boton de copiar en el panel.
+
 ### Corregido — CRÍTICO: auto-escalación a SuperSU vía RLS de `perfil` (ADL-036)
 Auditoría formal de seguridad (skill `security-audit`, previa a ADR-015 Fase E)
 encontró que `perfil_update_propio` permitía a cualquier usuario autenticado

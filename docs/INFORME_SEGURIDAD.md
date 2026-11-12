@@ -128,3 +128,17 @@ Además: PIN mínimo de 6 dígitos y generarlo con `extensions.gen_random_bytes`
 - **/api/ia/exportar:** ahora valida pertenencia al negocio en el servidor (`tiene_acceso_interno`) antes de devolver cualquier archivo. Probado: anónimo 401, cliente 403, dueño de otro negocio 403, id inventado 403, dueño propio 200.
 - **H5/H6/H7:** mitigados (monto del cobro, bloqueo de PIN de gift card, tope de 100 filas).
 - **Pendientes de aplicar por el fundador:** migraciones 100, 107 (membresía congelada) y 108 (proteger plan y comisión del negocio).
+
+## Actualizacion: Fase A del plan competitivo
+| Tarea | Estado |
+|---|---|
+| 6.1 PIN de gift card | Aplicado (105) y probado |
+| 6.2 Funciones por plan en RLS | Migracion 110 escrita, **sin aplicar** (requiere la 109) |
+| 6.3 TRIAL a los 93 negocios QA | Hecho como estado TRIAL de 14 dias (no existe el estado TRIAL_QA; propuesta: activacion manual si se quiere vigencia larga) |
+| 6.4 /api/ia/exportar | Hecho y probado |
+| 6.5 CSP con nonce | Implementado, modo solo-reporte por defecto; activar con CSP_ENFORCE=1 tras revisar en el entorno real (Google login y checkout no se probaron) |
+| 6.6 Validar llamador en anuncios | Migracion 111 + codigo, **sin aplicar** |
+| 6.7 Limite de tasa | Migracion 112 + OTP protegido; buscador publico pendiente (Firewall de Vercel) |
+| H-nuevo reactivar membresia | Migracion 107 sin aplicar |
+| H-nuevo plan/comision editables por el dueno | Migracion 108 sin aplicar |
+Orden recomendado de aplicacion: 100, 107, 108, 111, 112, 113 (independientes) y luego 109 junto con el despliegue de la rama, y 110 despues de la 109.

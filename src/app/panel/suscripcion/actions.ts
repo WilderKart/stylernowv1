@@ -14,7 +14,7 @@ const MENSAJES_ERROR: Record<string, string> = {
   NO_AUTORIZADO: "No tenés permiso sobre este negocio.",
   NEGOCIO_NO_ACTIVO: "Tu negocio debe estar activo para cambiar de Plan.",
   SUSCRIPCION_NO_ACTIVA: "Tu suscripción no está activa — contactá a soporte.",
-  ALLFATHER_REQUIERE_COTIZACION: "Allfather se cotiza directamente con el equipo de StylerNow, no es autoservicio.",
+  SIGNATURE_REQUIERE_COTIZACION: "Signature se cotiza directamente con el equipo de StylerNow, no es autoservicio.",
   YA_ESTA_EN_ESE_PLAN: "Ya estás en ese Plan.",
   UPGRADE_YA_EN_PROCESO: "Ya tenés un upgrade pendiente de pago.",
   NO_ES_UPGRADE: "Ese Plan no es un upgrade respecto al actual.",
@@ -36,7 +36,7 @@ function urlSitio() {
   return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 }
 
-export type PlanCodigo = "RAVEN" | "JARL" | "VALHALLA" | "ALLFATHER";
+export type PlanCodigo = "ESSENTIAL" | "STUDIO" | "PRESTIGE" | "SIGNATURE";
 
 export interface PlanCatalogo {
   codigo: string;
@@ -115,7 +115,7 @@ export async function obtenerMiSuscripcion(negocioId: string): Promise<Resultado
       return {
         ok: true,
         data: {
-          planCodigo: negocio?.plan_codigo ?? "RAVEN",
+          planCodigo: negocio?.plan_codigo ?? "ESSENTIAL",
           estado: "REQUIERE_PLAN",
           fechaProximoCobro: new Date().toISOString(),
           planCodigoDestino: null,

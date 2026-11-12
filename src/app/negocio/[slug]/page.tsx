@@ -3,6 +3,7 @@ import { FOTOS_RESPALDO, FOTO_NEGOCIO_RESPALDO, nivelATier } from "@/components/
 import { horarioDeHoy } from "@/components/negocio/horario";
 import { duracion, TZ_POR_DEFECTO } from "@/lib/formato";
 import { resumenPoliticaCancelacion } from "@/lib/pagos/sena";
+import { registrarEventoAnuncio } from "@/lib/ads/registrar-evento";
 import { createClient } from "@/lib/supabase/server";
 import { formatCOP } from "@/lib/utils";
 import type { Metadata } from "next";
@@ -137,7 +138,8 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
   // Marketplace Ads (Módulo 6.2): un clic en un resultado patrocinado se
   // cobra en tiempo real contra el Wallet del propio Negocio anunciante.
   if (campanaId) {
-    await supabaseVisita.rpc("registrar_clic_patrocinado", { p_campana_id: campanaId, p_negocio_id: negocio.id });
+    const { data: { user: usuarioClic } } = await supabaseVisita.auth.getUser();
+    await registrarEventoAnuncio("CLIC", campanaId, negocio.id, usuarioClic?.id ?? null);
   }
 
   // schema.org LocalBusiness: requisito explícito de SEO de 02-UX/04_Marketplace.md.

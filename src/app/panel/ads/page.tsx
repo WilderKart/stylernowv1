@@ -23,7 +23,7 @@ export default async function AdsPage() {
       <PanelNav rol={contexto.rol} />
       <VistaAds
         negocioId={negocioId}
-        planInsuficiente={negocio?.plan_codigo === "RAVEN"}
+        planInsuficiente={negocio?.plan_codigo === "ESSENTIAL"}
         campanasIniciales={campanasRes.ok ? campanasRes.data : []}
         errorInicial={campanasRes.ok ? null : campanasRes.error}
       />

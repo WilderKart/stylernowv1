@@ -1,4 +1,5 @@
 import { DashboardResumen } from "@/components/panel/dashboard-resumen";
+import { EnlaceReserva } from "@/components/panel/enlace-reserva";
 import { PanelNav } from "@/components/panel/panel-nav";
 import { Badge, Card } from "@/components/ui/card";
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
@@ -217,6 +218,8 @@ export default async function PanelPage() {
             <path d="M9 6l6 6-6 6" />
           </svg>
         </Link>
+
+        {negocio.estado === "ACTIVO" ? <EnlaceReserva slug={negocio.slug} /> : null}
 
         {metricasLealtad ? <TarjetasLealtad metricas={metricasLealtad} /> : null}
 

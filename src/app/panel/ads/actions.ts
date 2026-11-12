@@ -14,7 +14,7 @@ const MENSAJES_ERROR: Record<string, string> = {
   DESTACADO_SOLO_CPC: "El formato Destacado solo se cobra por clic (CPC).",
   PRESUPUESTO_DIARIO_INVALIDO: "El presupuesto diario debe ser mayor a 0.",
   PRESUPUESTO_TOTAL_INVALIDO: "El presupuesto total es obligatorio y debe ser al menos el presupuesto diario.",
-  PLAN_INSUFICIENTE: "Necesitás el Plan Jarl o superior para crear campañas publicitarias.",
+  PLAN_INSUFICIENTE: "Necesitás el Plan Studio o superior para crear campañas publicitarias.",
   CAMPANA_NO_ENCONTRADA: "No encontramos esa campaña.",
   TRANSICION_INVALIDA: "Esa campaña no está en un estado que permita esta acción.",
   SALDO_INSUFICIENTE: "Tu Wallet no tiene saldo suficiente para cubrir al menos un día de presupuesto.",

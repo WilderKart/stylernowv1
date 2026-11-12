@@ -161,7 +161,7 @@ export async function listarFuncionesPlanIa(): Promise<Resultado<FuncionPlanIa[]
 export async function configurarFuncionPlanIa(planCodigo: string, funcion: string, habilitado: boolean): Promise<Resultado> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("configurar_funcion_plan_ia", {
-    p_plan_codigo: planCodigo as "RAVEN" | "JARL" | "VALHALLA" | "ALLFATHER",
+    p_plan_codigo: planCodigo as "ESSENTIAL" | "STUDIO" | "PRESTIGE" | "SIGNATURE",
     p_funcion: funcion,
     p_habilitado: habilitado,
   });
@@ -184,7 +184,7 @@ export interface SimulacionIa {
 export async function simularConsumoIa(planCodigo: string, numStaff: number, numClientes: number): Promise<Resultado<SimulacionIa>> {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("simular_consumo_ia", {
-    p_plan_codigo: planCodigo as "RAVEN" | "JARL" | "VALHALLA" | "ALLFATHER",
+    p_plan_codigo: planCodigo as "ESSENTIAL" | "STUDIO" | "PRESTIGE" | "SIGNATURE",
     p_num_staff: numStaff,
     p_num_clientes: numClientes,
   });

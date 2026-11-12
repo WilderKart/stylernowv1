@@ -9,8 +9,39 @@ import { esRutaPublica } from "@/lib/routing/route-registry";
  * rol, onboarding ni permisos acá — eso vive 100% en `requireRole()`
  * server-side (Edge Middleware no debe cargar con una consulta a DB).
  */
+/**
+ * CSP con nonce por petición (6.5). Por defecto en modo SOLO REPORTE (no bloquea nada, el navegador anota las
+ * violaciones en la consola): se activa de verdad con CSP_ENFORCE=1 cuando se confirme que no hay violaciones en
+ * mapa, login con Google y checkout. Next lee el nonce del encabezado de la petición y lo aplica a sus scripts.
+ */
+function construirCsp(nonce: string) {
+  const dev = process.env.NODE_ENV === "development";
+  return [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${dev ? " 'unsafe-eval'" : ""}`,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' blob: data: https://*.supabase.co https://tile.openstreetmap.org https://*.tile.openstreetmap.org",
+    "font-src 'self' data:",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://tile.openstreetmap.org https://*.tile.openstreetmap.org",
+    "worker-src 'self' blob:",
+    "child-src 'self' blob:",
+    "manifest-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "frame-ancestors 'none'",
+  ].join("; ");
+}
+
 export async function proxy(request: NextRequest) {
-  const { response, user } = await updateSession(request);
+  const nonce = btoa(crypto.randomUUID());
+  const csp = construirCsp(nonce);
+  const cabeceraCsp = process.env.CSP_ENFORCE === "1" ? "Content-Security-Policy" : "Content-Security-Policy-Report-Only";
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set(cabeceraCsp, csp);
+
+  const { response, user } = await updateSession(request, requestHeaders);
+  response.headers.set(cabeceraCsp, csp);
 
   const { pathname, search } = request.nextUrl;
   // ADR-015 auditoría (2026-09-16, evidencia real con curl+sesión): las
