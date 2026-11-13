@@ -2,6 +2,7 @@ import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ConexionNoDisponible, cuentaDePago } from "./conexiones";
+import { entornoPagos, tiposExcluidosCobroNegocio } from "./entorno";
 import { crearPreferencia, type PreferenciaCreada } from "./mercadopago";
 
 /**
@@ -35,12 +36,15 @@ export async function crearPreferenciaDePago(d: DatosCobro): Promise<Preferencia
     };
   })
     .from("pago")
-    .select("id, monto, estado, marketplace_fee")
+    .select("id, monto, estado, marketplace_fee, entorno")
     .eq("id", d.pagoId)
     .single();
-  const pago = data as { id: string; monto: number; estado: string; marketplace_fee: number | null } | null;
+  const pago = data as { id: string; monto: number; estado: string; marketplace_fee: number | null; entorno: string | null } | null;
   if (!pago) throw new CobroNoDisponible("PAGO_NO_ENCONTRADO");
   if (pago.estado !== "PENDIENTE") throw new CobroNoDisponible("PAGO_YA_PROCESADO");
+  const entorno = entornoPagos();
+  // Un cobro iniciado en un entorno nunca se reintenta en el otro.
+  if (pago.entorno && pago.entorno !== entorno) throw new CobroNoDisponible("PAGO_DE_OTRO_ENTORNO");
 
   let cuenta;
   try {
@@ -68,9 +72,16 @@ export async function crearPreferenciaDePago(d: DatosCobro): Promise<Preferencia
     expiraEn: d.expiraEn ?? null,
     token: cuenta.token,
     marketplaceFee: Number(pago.marketplace_fee ?? 0),
+    // Cobro del negocio (token OAuth del vendedor): sin PSE ni Efecty salvo la prueba aislada de sandbox.
+    excluirTiposPago: cuenta.conexionId ? tiposExcluidosCobroNegocio() : undefined,
   });
 
   // `pago` no tiene política de escritura para roles de producto: lo guarda el servidor.
-  await admin.from("pago").update({ id_preferencia_pasarela: preferencia.id }).eq("id", pago.id);
+  await (admin as unknown as {
+    from: (t: string) => { update: (v: object) => { eq: (c: string, v: string) => Promise<unknown> } };
+  })
+    .from("pago")
+    .update({ id_preferencia_pasarela: preferencia.id, entorno })
+    .eq("id", pago.id);
   return preferencia;
 }

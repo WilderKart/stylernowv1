@@ -112,3 +112,86 @@ export async function guardarPolitica(entrada: PoliticaNegocio): Promise<Resulta
     return { ok: false, error: traducir(e instanceof Error ? e.message : "") };
   }
 }
+
+// ── Anticipo (migración 129) ────────────────────────────────────────────────
+
+export interface ConfigAnticipo {
+  modo: "OBLIGATORIO" | "OPCIONAL" | "NINGUNO";
+  pct: number | null;
+  montoFijo: number | null;
+  minimo: number;
+  maximo: number;
+  pagoCompleto: boolean;
+  cobraEnLinea: boolean;
+}
+
+export async function obtenerAnticipo(): Promise<Resultado<{ anticipo: ConfigAnticipo }>> {
+  try {
+    const { supabase, negocioId } = await sesionDueno();
+    const sinTipos = supabase as unknown as {
+      from: (t: string) => { select: (c: string) => { eq: (c: string, v: string) => { single: () => Promise<{ data: unknown }> } } };
+      rpc: (n: string, a: object) => Promise<{ data: unknown }>;
+    };
+    const [{ data }, { data: enLinea }] = await Promise.all([
+      sinTipos.from("negocio").select("anticipo_modo, sena_pct, sena_monto_fijo, sena_minimo, sena_maximo, pago_completo_en_app").eq("id", negocioId).single(),
+      sinTipos.rpc("negocio_cobra_en_linea", { p_negocio_id: negocioId }),
+    ]);
+    const n = data as Record<string, unknown> | null;
+    if (!n) return { ok: false, error: "No encontramos tu negocio." };
+    return {
+      ok: true,
+      data: {
+        anticipo: {
+          modo: (n.anticipo_modo as ConfigAnticipo["modo"]) ?? "OBLIGATORIO",
+          pct: n.sena_pct == null ? null : Number(n.sena_pct),
+          montoFijo: n.sena_monto_fijo == null ? null : Number(n.sena_monto_fijo),
+          minimo: Number(n.sena_minimo ?? 0),
+          maximo: Number(n.sena_maximo ?? 0),
+          pagoCompleto: Boolean(n.pago_completo_en_app),
+          cobraEnLinea: enLinea === true,
+        },
+      },
+    };
+  } catch (e) {
+    return { ok: false, error: traducir(e instanceof Error ? e.message : "") };
+  }
+}
+
+const esquemaAnticipo = z
+  .object({
+    modo: z.enum(["OBLIGATORIO", "OPCIONAL", "NINGUNO"]),
+    tipo: z.enum(["PORCENTAJE", "FIJO"]),
+    valor: z.number().min(0),
+    minimo: z.number().min(0).max(100_000_000),
+    maximo: z.number().min(0).max(100_000_000),
+    pagoCompleto: z.boolean(),
+  })
+  .strict()
+  .refine((a) => a.maximo >= a.minimo, { message: "ANTICIPO_VALORES_INVALIDOS" })
+  .refine((a) => a.tipo === "FIJO" || a.valor <= 100, { message: "ANTICIPO_VALORES_INVALIDOS" });
+
+/** Guarda el anticipo. La base vuelve a validar y audita antes/después; aplica a reservas nuevas. */
+export async function guardarAnticipo(entrada: z.input<typeof esquemaAnticipo>): Promise<Resultado> {
+  try {
+    const parsed = esquemaAnticipo.safeParse(entrada);
+    if (!parsed.success) return { ok: false, error: "Revisa los valores del anticipo (porcentaje 0–100 y máximo mayor o igual al mínimo)." };
+    const d = parsed.data;
+    const { supabase, negocioId } = await sesionDueno();
+    const { error } = await (supabase as unknown as {
+      rpc: (n: string, a: object) => Promise<{ error: { message: string } | null }>;
+    }).rpc("configurar_anticipo", {
+      p_negocio_id: negocioId,
+      p_modo: d.modo,
+      p_pct: d.tipo === "PORCENTAJE" ? d.valor : null,
+      p_monto_fijo: d.tipo === "FIJO" ? Math.round(d.valor) : null,
+      p_minimo: Math.round(d.minimo),
+      p_maximo: Math.round(d.maximo),
+      p_pago_completo: d.pagoCompleto,
+    });
+    if (error) return { ok: false, error: "No pudimos guardar el anticipo. Revisa los valores." };
+    revalidatePath("/panel/politica");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: traducir(e instanceof Error ? e.message : "") };
+  }
+}

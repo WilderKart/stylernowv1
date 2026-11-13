@@ -200,3 +200,25 @@ async function consultarEstadoLocal(reservaId: string): Promise<EstadoPago> {
     detalle: reserva?.cancelado_motivo ?? null,
   };
 }
+
+/**
+ * Anticipo OPCIONAL (migración 129): el cliente confirma sin pagar. La base verifica que sea su reserva,
+ * que siga pendiente y que el negocio permita el anticipo opcional; el navegador no decide nada.
+ */
+export async function confirmarSinAnticipo(reservaId: string): Promise<{ ok: true } | { ok: false; mensaje: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, mensaje: "Inicia sesión para continuar." };
+  const { error } = await (supabase as unknown as {
+    rpc: (n: string, a: object) => Promise<{ error: { message: string } | null }>;
+  }).rpc("confirmar_reserva_sin_anticipo", { p_reserva_id: reservaId });
+  if (error) {
+    if (error.message.includes("ANTICIPO_OBLIGATORIO")) return { ok: false, mensaje: "Este negocio exige el anticipo para confirmar." };
+    if (error.message.includes("RESERVA_NO_PAGABLE")) return { ok: false, mensaje: "La reserva expiró o cambió de estado. Elige un horario de nuevo." };
+    if (error.message.includes("PAGO_YA_PROCESADO")) return { ok: false, mensaje: "Esta reserva ya está pagada." };
+    return { ok: false, mensaje: "No pudimos confirmar la reserva. Intenta de nuevo." };
+  }
+  return { ok: true };
+}

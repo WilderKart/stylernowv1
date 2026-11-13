@@ -1,5 +1,6 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { entornoPagos, validarTokenParaEntorno } from "./entorno";
 
 /**
  * Adaptador de la pasarela de pago (Mercado Pago · Checkout Pro).
@@ -22,9 +23,9 @@ function tokenPlataforma() {
   return token;
 }
 
-/** Las credenciales TEST- operan sobre el entorno de pruebas de Mercado Pago. */
+/** Entorno de pagos decidido en el servidor (ver entorno.ts). */
 export function esEntornoDePrueba() {
-  return (process.env.MERCADOPAGO_ACCESS_TOKEN ?? "").startsWith("TEST-");
+  return entornoPagos() === "SANDBOX";
 }
 
 /** `token` ausente = cuenta de StylerNow. */
@@ -42,11 +43,14 @@ export class ErrorMercadoPago extends Error {
 
 async function mp<T>(ruta: string, init: RequestInit & { idempotencyKey?: string; token?: TokenPasarela } = {}) {
   const { idempotencyKey, token, ...rest } = init;
+  const bearer = token ?? tokenPlataforma();
+  // Separación de entornos en el servidor: un token de prueba nunca opera en producción.
+  validarTokenParaEntorno(bearer);
   const res = await fetch(`${API}${ruta}`, {
     ...rest,
     cache: "no-store",
     headers: {
-      Authorization: `Bearer ${token ?? tokenPlataforma()}`,
+      Authorization: `Bearer ${bearer}`,
       "Content-Type": "application/json",
       ...(idempotencyKey ? { "X-Idempotency-Key": idempotencyKey } : {}),
       ...rest.headers,
@@ -105,6 +109,8 @@ export interface DatosPreferencia {
   token?: TokenPasarela;
   /** Comisión de StylerNow que retiene Mercado Pago (split 1:1). La fija la base de datos. */
   marketplaceFee?: number;
+  /** Tipos de medio excluidos (p. ej. PSE y Efecty en el split 1:1, no verificados). */
+  excluirTiposPago?: readonly string[];
 }
 
 export async function crearPreferencia(d: DatosPreferencia): Promise<PreferenciaCreada> {
@@ -128,6 +134,9 @@ export async function crearPreferencia(d: DatosPreferencia): Promise<Preferencia
     ...(d.urlWebhook ? { notification_url: d.urlWebhook } : {}),
     ...(d.expiraEn ? { expires: true, expiration_date_to: d.expiraEn } : {}),
     statement_descriptor: "STYLERNOW",
+    ...(d.excluirTiposPago && d.excluirTiposPago.length > 0
+      ? { payment_methods: { excluded_payment_types: d.excluirTiposPago.map((id) => ({ id })) } }
+      : {}),
     // Por defecto 0 (Mercado Pago lo trata igual que omitirlo); solo se envía si es > 0.
     ...(d.token && d.marketplaceFee && d.marketplaceFee > 0 ? { marketplace_fee: Math.round(d.marketplaceFee) } : {}),
   };
@@ -153,15 +162,26 @@ export interface PagoPasarela {
   monto: number;
   referenciaExterna: string | null;
   metodo: string | null;
+  /** Evidencia del proveedor: entorno real, vendedor que recibió el dinero y valores (sin datos del pagador). */
+  liveMode: boolean | null;
+  collectorId: string | null;
+  tipoMetodo: string | null;
+  netoRecibido: number | null;
+  comisiones: { type: string; amount: number }[];
 }
 
-function mapearPago(p: {
+export function mapearPago(p: {
   id: number | string;
   status: string;
   status_detail?: string | null;
   transaction_amount?: number | null;
   external_reference?: string | null;
   payment_method_id?: string | null;
+  payment_type_id?: string | null;
+  live_mode?: boolean | null;
+  collector_id?: number | string | null;
+  transaction_details?: { net_received_amount?: number | null } | null;
+  fee_details?: { type?: string; amount?: number }[] | null;
 }): PagoPasarela {
   return {
     id: String(p.id),
@@ -171,6 +191,11 @@ function mapearPago(p: {
     monto: p.transaction_amount ?? 0,
     referenciaExterna: p.external_reference ?? null,
     metodo: p.payment_method_id ?? null,
+    liveMode: typeof p.live_mode === "boolean" ? p.live_mode : null,
+    collectorId: p.collector_id != null ? String(p.collector_id) : null,
+    tipoMetodo: p.payment_type_id ?? null,
+    netoRecibido: p.transaction_details?.net_received_amount ?? null,
+    comisiones: (p.fee_details ?? []).map((f) => ({ type: String(f.type ?? ""), amount: Number(f.amount ?? 0) })),
   };
 }
 
@@ -179,6 +204,30 @@ export async function obtenerPago(idPago: string, token?: TokenPasarela): Promis
   if (!/^\d{1,20}$/.test(idPago)) throw new Error("ID_TRANSACCION_INVALIDO");
   const p = await mp<Parameters<typeof mapearPago>[0]>(`/v1/payments/${idPago}`, { token });
   return mapearPago(p);
+}
+
+/**
+ * Orden comercial (`merchant_order`, Checkout Pro clásico). NO es la Orders API (`/v1/orders`).
+ * Solo se usa para descubrir los pagos que contiene; el estado de cada pago se vuelve a consultar.
+ */
+export async function obtenerMerchantOrder(id: string, token?: TokenPasarela) {
+  if (!/^\d{1,20}$/.test(id)) throw new Error("ID_MERCHANT_ORDER_INVALIDO");
+  const o = await mp<{ id: number; external_reference?: string | null; payments?: { id: number | string }[] | null }>(
+    `/merchant_orders/${id}`,
+    { token }
+  );
+  return {
+    id: String(o.id),
+    referenciaExterna: o.external_reference ?? null,
+    pagos: (o.payments ?? []).map((p) => String(p.id)).filter((x) => /^\d{1,20}$/.test(x)),
+  };
+}
+
+/** Contracargo: solo interesa a qué pagos afecta (su estado se consulta en /v1/payments). */
+export async function obtenerContracargo(id: string, token?: TokenPasarela) {
+  if (!/^\d{1,20}$/.test(id)) throw new Error("ID_CONTRACARGO_INVALIDO");
+  const c = await mp<{ id: number | string; payments?: (number | string)[] | null }>(`/v1/chargebacks/${id}`, { token });
+  return { id: String(c.id), pagos: (c.payments ?? []).map(String).filter((x) => /^\d{1,20}$/.test(x)) };
 }
 
 /**
@@ -263,4 +312,15 @@ export function verificarFirma(args: {
   const a = Buffer.from(esperado, "utf8");
   const b = Buffer.from(v1, "utf8");
   return a.length === b.length && timingSafeEqual(a, b);
+}
+
+/** ¿El token sigue autorizado? 401/403 = revocado por el vendedor. Nunca registra el token. */
+export async function estadoToken(token: string): Promise<"VIGENTE" | "REVOCADO" | "DESCONOCIDO"> {
+  try {
+    await mp<{ id: number }>("/users/me", { token });
+    return "VIGENTE";
+  } catch (e) {
+    if (e instanceof ErrorMercadoPago && (e.status === 401 || e.status === 403)) return "REVOCADO";
+    return "DESCONOCIDO";
+  }
 }

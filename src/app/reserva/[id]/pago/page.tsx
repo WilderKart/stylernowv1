@@ -24,7 +24,7 @@ export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
     .from("reserva")
     .select(
       `id, estado, hora_inicio, monto_total, monto_sena, expira_at,
-       negocio:negocio_id (nombre, slug, ventana_reembolso_total_horas, ventana_reembolso_parcial_horas, reembolso_parcial_pct),
+       negocio:negocio_id (nombre, slug, ventana_reembolso_total_horas, ventana_reembolso_parcial_horas, reembolso_parcial_pct, anticipo_modo),
        sede:sede_id (zona_horaria),
        staff:staff_id (nombre),
        reserva_servicio (servicio:servicio_id (nombre))`
@@ -43,6 +43,7 @@ export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
     ventana_reembolso_total_horas: number;
     ventana_reembolso_parcial_horas: number;
     reembolso_parcial_pct: number;
+    anticipo_modo?: string;
   } | null;
   const sede = reserva.sede as unknown as { zona_horaria: string } | null;
   const staff = reserva.staff as unknown as { nombre: string } | null;
@@ -66,6 +67,8 @@ export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
         // Solo para mostrar: lo que queda como evidencia lo reconstruye la base de datos
         // (`aceptar_politica_reserva`) con los números del negocio, no este texto.
         politica: negocio ? resumenPoliticaCancelacion(negocio) : [],
+        // Solo para mostrar el botón; la base lo vuelve a verificar al confirmar.
+        anticipoOpcional: negocio?.anticipo_modo === "OPCIONAL",
       }}
     />
   );

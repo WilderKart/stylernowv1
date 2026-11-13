@@ -7,7 +7,7 @@ import { FOTOS_RESPALDO, nivelATier } from "@/components/negocio/nivel";
 import { duracion, fechaCorta, fechaHoraLarga, fechaISO, hora, hoyISO, sumarDias } from "@/lib/formato";
 import { AvisoDistancia } from "./aviso-distancia";
 import { useT } from "@/lib/i18n/proveedor";
-import { calcularSenaEstimada, resumenPoliticaCancelacion, type ConfigSena } from "@/lib/pagos/sena";
+import { calcularSenaServiciosEstimada, resumenPoliticaCancelacion, type ConfigSena } from "@/lib/pagos/sena";
 import { cn, formatCOP } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -32,6 +32,8 @@ export interface Servicio {
   descripcion: string | null;
   duracion_minutos: number;
   precio_base: number;
+  anticipo_pct?: number | null;
+  anticipo_monto_fijo?: number | null;
 }
 
 export interface Sede {
@@ -102,7 +104,7 @@ export function FlujoReserva({
   const seleccionados = servicios.filter((s) => servicioIds.includes(s.id));
   const montoTotal = seleccionados.reduce((a, s) => a + s.precio_base, 0);
   const minutosTotal = seleccionados.reduce((a, s) => a + s.duracion_minutos, 0);
-  const sena = calcularSenaEstimada(negocio, montoTotal);
+  const sena = calcularSenaServiciosEstimada(negocio, seleccionados);
 
   // Solo el Staff que presta TODOS los Servicios del combo puede tomar la Reserva
   // como una sola cita (03-Business-Rules/02_Booking_Rules.md, combos).

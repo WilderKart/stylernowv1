@@ -1,5 +1,6 @@
 import "server-only";
 import { createHash, randomBytes } from "node:crypto";
+import { entornoPagos } from "./entorno";
 
 /**
  * OAuth de vendedor de Mercado Pago (split de pagos 1:1, Colombia). Fuentes oficiales:
@@ -11,7 +12,7 @@ import { createHash, randomBytes } from "node:crypto";
  *  - MERCADOPAGO_CLIENT_ID / MERCADOPAGO_CLIENT_SECRET: app de StylerNow con modelo "Marketplace".
  *  - MERCADOPAGO_OAUTH_PKCE = "0" para desactivar PKCE (por defecto activo: actívalo también en
  *    "Detalles de aplicación"; una vez activo, Mercado Pago lo exige).
- *  - MERCADOPAGO_OAUTH_TEST = "1" para pedir tokens de prueba (sandbox).
+ *  - El modo prueba (test_token) lo decide MERCADOPAGO_ENTORNO (entorno.ts): sandbox por defecto.
  * La redirect URI es `${NEXT_PUBLIC_SITE_URL}/api/pagos/mercadopago/callback` y debe estar
  * registrada igual en la app.
  */
@@ -32,7 +33,8 @@ export function redirectUri() {
 }
 
 const usaPkce = () => process.env.MERCADOPAGO_OAUTH_PKCE !== "0";
-export const esSandbox = () => process.env.MERCADOPAGO_OAUTH_TEST === "1";
+/** Sandbox lo decide el entorno de pagos del servidor (entorno.ts), no una variable aparte. */
+export const esSandbox = () => entornoPagos() === "SANDBOX";
 
 /** state (anti-CSRF) y verificador PKCE, ambos aleatorios de 32 bytes. Solo el hash del state va a la base. */
 export function nuevoEstadoOAuth() {

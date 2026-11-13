@@ -1,5 +1,21 @@
 # Registro de continuidad: Directiva Única Integral
 
+> **Fase "Anticipos y Mercado Pago sandbox" (2026-11-12), solo en local.** No hubo commit ni push de esta fase.
+>
+> **Hecho:**
+> - Migración 129: motor de anticipos (obligatorio, opcional o ninguno; reglas por servicio) y entorno del pago.
+> - Separación sandbox/producción en el servidor (`lib/pagos/entorno.ts`).
+> - Verificación de `live_mode` y del vendedor en cada pago.
+> - PSE y Efecty excluidos en el Split 1:1.
+> - Aviso `mp-connect`.
+> - Configuración del anticipo en `/panel/politica`.
+>
+> **Pruebas:** 11 suites SQL (141 OK), `vitest` 96/96 y build OK. Contra el sandbox real de Mercado Pago, la preferencia con exclusiones funciona; el pago necesita un comprador de prueba.
+>
+> **Bloqueado por:** credenciales de prueba OAuth, cuentas vendedor/comprador de prueba y una URL https de Preview.
+>
+> Ver `docs/INFORME_SANDBOX_MERCADO_PAGO.md` y `docs/GUIA_MERCADO_PAGO_PRODUCCION.md`. Las migraciones de producción siguen en la 128.
+
 > **Actualización 2026-11-12 (directiva de continuidad, "independiente del proveedor de pagos").**
 >
 > **Nuevas migraciones** (verificadas en local, sin aplicar en producción):

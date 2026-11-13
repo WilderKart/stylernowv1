@@ -2,7 +2,8 @@ import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cifrar, descifrar } from "./cifrado";
-import type { TokenPasarela } from "./mercadopago";
+import { entornoPagos } from "./entorno";
+import { estadoToken, type TokenPasarela } from "./mercadopago";
 import { renovarToken } from "./oauth-mercadopago";
 
 /**
@@ -29,6 +30,8 @@ interface FilaConexion {
   access_token_cifrado: string | null;
   refresh_token_cifrado: string | null;
   token_expira_at: string | null;
+  entorno: string | null;
+  cuenta_externa_id: string | null;
 }
 
 /** Renueva cuando falten menos de 15 días (el token dura 180). */
@@ -40,7 +43,7 @@ async function leerConexion(conexionId: string): Promise<FilaConexion | null> {
   const admin = createAdminClient() as unknown as FromSinTipos;
   const { data } = await admin
     .from("conexion_pago_negocio")
-    .select("id, negocio_id, estado, access_token_cifrado, refresh_token_cifrado, token_expira_at")
+    .select("id, negocio_id, estado, access_token_cifrado, refresh_token_cifrado, token_expira_at, entorno, cuenta_externa_id")
     .eq("id", conexionId)
     .maybeSingle();
   return (data as FilaConexion | null) ?? null;
@@ -59,6 +62,10 @@ export async function tokenDeConexion(conexionId: string): Promise<string> {
   const c = await leerConexion(conexionId);
   if (!c || c.estado !== "CONECTADA" || !c.access_token_cifrado) {
     throw new ConexionNoDisponible("CONEXION_PAGO_NO_DISPONIBLE");
+  }
+  // Una conexión de sandbox nunca opera en producción ni al revés (directiva Sandbox, etapa 2).
+  if (c.entorno !== entornoPagos()) {
+    throw new ConexionNoDisponible("CONEXION_DE_OTRO_ENTORNO");
   }
 
   const expira = c.token_expira_at ? new Date(c.token_expira_at).getTime() : 0;
@@ -121,4 +128,68 @@ export async function cuentaDePago(pagoId: string): Promise<CuentaDePago> {
 export async function reportarFalloConexion(conexionId: string | null, status: number, mensaje: string) {
   if (!conexionId) return;
   if (status === 401 || status === 403) await marcar(conexionId, "REVOCADA", mensaje);
+}
+
+/** Cuenta del vendedor (user_id en Mercado Pago) de una conexión: se compara con el collector_id del pago. */
+export async function cuentaVendedorDeConexion(conexionId: string): Promise<string | null> {
+  const c = await leerConexion(conexionId);
+  return c?.cuenta_externa_id ?? null;
+}
+
+/**
+ * Conexiones CONECTADAS de una cuenta de Mercado Pago (user_id del vendedor) en el entorno actual.
+ * La usa el webhook cuando la notificación llega por la URL del panel (sin `?c=`): el `user_id`
+ * de la notificación NO se cree por sí solo; solo dice con qué token consultar, y después se exige
+ * que el `pago` esté ligado a una de estas conexiones y que el collector del pago sea esa cuenta.
+ */
+export async function conexionesDeCuenta(cuentaExternaId: string): Promise<string[]> {
+  if (!/^\d{1,20}$/.test(cuentaExternaId)) return [];
+  const admin = createAdminClient() as unknown as {
+    from: (t: string) => {
+      select: (c: string) => {
+        eq: (c: string, v: string) => { eq: (c: string, v: string) => { eq: (c: string, v: string) => Promise<{ data: unknown[] | null; error: { message: string } | null }> } };
+      };
+    };
+  };
+  const { data, error } = await admin
+    .from("conexion_pago_negocio")
+    .select("id")
+    .eq("cuenta_externa_id", cuentaExternaId)
+    .eq("estado", "CONECTADA")
+    .eq("entorno", entornoPagos());
+  if (error) throw new Error("CONEXIONES_NO_LEIDAS");
+  return ((data ?? []) as { id: string }[]).map((f) => f.id);
+}
+
+/**
+ * Aviso mp-connect (vinculación/desvinculación). No se le cree al aviso: se busca la conexión de esa
+ * cuenta y se consulta a Mercado Pago con su token; solo si el proveedor lo rechaza se marca REVOCADA.
+ */
+export async function revisarConexionPorCuenta(cuentaExternaId: string): Promise<"REVOCADA" | "VIGENTE" | "SIN_CONEXION" | "DESCONOCIDO"> {
+  if (!/^\d{1,20}$/.test(cuentaExternaId)) return "SIN_CONEXION";
+  const admin = createAdminClient() as unknown as {
+    from: (t: string) => {
+      select: (c: string) => { eq: (c: string, v: string) => { eq: (c: string, v: string) => Promise<{ data: unknown[] | null }> } };
+    };
+  };
+  const { data } = await admin.from("conexion_pago_negocio").select("id").eq("cuenta_externa_id", cuentaExternaId).eq("estado", "CONECTADA");
+  const filas = (data ?? []) as { id: string }[];
+  if (filas.length === 0) return "SIN_CONEXION";
+  let resultado: "REVOCADA" | "VIGENTE" | "DESCONOCIDO" = "VIGENTE";
+  for (const f of filas) {
+    let token: string;
+    try {
+      token = await tokenDeConexion(f.id);
+    } catch {
+      continue;
+    }
+    const estado = await estadoToken(token);
+    if (estado === "REVOCADO") {
+      await marcar(f.id, "REVOCADA", "DESVINCULADA_POR_EL_VENDEDOR");
+      resultado = "REVOCADA";
+    } else if (estado === "DESCONOCIDO" && resultado !== "REVOCADA") {
+      resultado = "DESCONOCIDO";
+    }
+  }
+  return resultado;
 }

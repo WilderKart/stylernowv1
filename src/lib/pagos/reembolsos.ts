@@ -36,8 +36,9 @@ async function registrar(
 ) {
   const { data, error: e } = await createAdminClient().rpc("reembolso_registrar_resultado", {
     p_reembolso_id: id,
-    p_estado_pasarela: estadoPasarela ?? undefined,
-    p_id_pasarela: idPasarela ?? undefined,
+    // null explícito: la función usa coalesce(p_id_pasarela, …); un texto vacío borraría el id guardado.
+    p_estado_pasarela: estadoPasarela as string,
+    p_id_pasarela: idPasarela as string,
     p_error: error ?? undefined,
   });
   if (e) throw new Error(`reembolso_registrar_resultado: ${e.message}`);

@@ -30,7 +30,7 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
   const { data: negocio } = await supabase
     .from("negocio")
     .select(
-      "id, nombre, slug, pago_completo_en_app, sena_pct, sena_monto_fijo, sena_minimo, sena_maximo, ventana_reembolso_total_horas, ventana_reembolso_parcial_horas, reembolso_parcial_pct"
+      "id, nombre, slug, pago_completo_en_app, sena_pct, sena_monto_fijo, sena_minimo, sena_maximo, ventana_reembolso_total_horas, ventana_reembolso_parcial_horas, reembolso_parcial_pct, anticipo_modo"
     )
     .eq("slug", slug)
     .eq("estado", "ACTIVO")
@@ -53,7 +53,7 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
       .order("created_at"),
     supabase
       .from("servicio")
-      .select("id, nombre, descripcion, duracion_minutos, precio_base")
+      .select("id, nombre, descripcion, duracion_minutos, precio_base, anticipo_pct, anticipo_monto_fijo")
       .eq("negocio_id", negocio.id)
       .eq("estado", "ACTIVO")
       .order("precio_base"),

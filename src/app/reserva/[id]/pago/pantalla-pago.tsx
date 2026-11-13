@@ -20,7 +20,7 @@ import { Check, Clock, ShieldCheck, Ticket, Wallet } from "lucide-react";
 import { formatCOP } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { consultarEstadoPago, iniciarPagoSena } from "./actions";
+import { confirmarSinAnticipo, consultarEstadoPago, iniciarPagoSena } from "./actions";
 import { useT } from "@/lib/i18n/proveedor";
 
 /** Tras este tiempo sin confirmación se avisa que puede cerrar la app (02-UX/06_Payments.md). */
@@ -38,6 +38,7 @@ export interface ResumenPago {
   montoSena: number;
   expiraAt: string | null;
   politica: string[];
+  anticipoOpcional?: boolean;
 }
 
 function Cuenta({ expiraAt }: { expiraAt: string }) {
@@ -110,6 +111,15 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
     const temporizador = setTimeout(() => setDemorado(true), TIMEOUT_UX_MS);
     return () => clearTimeout(temporizador);
   }, [esperando]);
+
+  async function reservarSinAnticipo() {
+    setIniciando(true);
+    setError(null);
+    const r = await confirmarSinAnticipo(resumen.reservaId);
+    setIniciando(false);
+    if (!r.ok) return setError(r.mensaje);
+    router.replace(`/reserva/${resumen.reservaId}`);
+  }
 
   async function pagar() {
     setIniciando(true);
@@ -257,6 +267,11 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
         <Button size="lg" className="w-full" loading={iniciando} disabled={iniciando || !acepta} onClick={pagar}>
           {t("pago.pagar_anticipo", { monto: formatCOP(resumen.montoSena) })}
         </Button>
+        {resumen.anticipoOpcional ? (
+          <Button variant="secondary" size="lg" className="mt-2 w-full" disabled={iniciando} onClick={reservarSinAnticipo}>
+            {t("pago.sin_anticipo")}
+          </Button>
+        ) : null}
       </Pie>
     </Pantalla>
   );

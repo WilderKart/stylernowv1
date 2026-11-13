@@ -14,51 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      // ── Migración 116 (añadido a mano hasta regenerar los tipos) ──
-      aceptacion_politica_reserva: {
-        Row: {
-          aceptado_at: string
-          cliente_id: string
-          hora_inicio_reserva: string
-          id: string
-          monto_sena: number
-          negocio_id: string
-          politica: Json
-          reserva_id: string
-          terminos_id: string | null
-          texto_aceptado: string
-          version_politica: string
-          zona_horaria: string
-        }
-        Insert: never
-        Update: never
-        Relationships: []
-      }
-      reembolso: {
-        Row: {
-          cliente_id: string | null
-          confirmado_at: string | null
-          created_at: string
-          estado: string
-          id: string
-          id_reembolso_pasarela: string | null
-          idempotency_key: string
-          intentos: number
-          monto: number
-          motivo: string
-          negocio_id: string | null
-          origen: string
-          pago_id: string
-          pct: number
-          reserva_id: string | null
-          solicitado_at: string | null
-          ultimo_error: string | null
-          updated_at: string
-        }
-        Insert: never
-        Update: never
-        Relationships: []
-      }
       aceptacion_legal: {
         Row: {
           aceptado_at: string
@@ -79,6 +34,80 @@ export type Database = {
           {
             foreignKeyName: "aceptacion_legal_texto_legal_id_fkey"
             columns: ["texto_legal_id"]
+            isOneToOne: false
+            referencedRelation: "texto_legal"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aceptacion_politica_reserva: {
+        Row: {
+          aceptado_at: string
+          cliente_id: string
+          hora_inicio_reserva: string
+          id: string
+          monto_sena: number
+          negocio_id: string
+          politica: Json
+          reserva_id: string
+          terminos_id: string | null
+          texto_aceptado: string
+          version_politica: string
+          zona_horaria: string
+        }
+        Insert: {
+          aceptado_at?: string
+          cliente_id: string
+          hora_inicio_reserva: string
+          id?: string
+          monto_sena: number
+          negocio_id: string
+          politica: Json
+          reserva_id: string
+          terminos_id?: string | null
+          texto_aceptado: string
+          version_politica: string
+          zona_horaria: string
+        }
+        Update: {
+          aceptado_at?: string
+          cliente_id?: string
+          hora_inicio_reserva?: string
+          id?: string
+          monto_sena?: number
+          negocio_id?: string
+          politica?: Json
+          reserva_id?: string
+          terminos_id?: string | null
+          texto_aceptado?: string
+          version_politica?: string
+          zona_horaria?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aceptacion_politica_reserva_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aceptacion_politica_reserva_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aceptacion_politica_reserva_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: true
+            referencedRelation: "reserva"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aceptacion_politica_reserva_terminos_id_fkey"
+            columns: ["terminos_id"]
             isOneToOne: false
             referencedRelation: "texto_legal"
             referencedColumns: ["id"]
@@ -443,6 +472,38 @@ export type Database = {
             columns: ["negocio_id"]
             isOneToOne: false
             referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      anuncio_evento_dedupe: {
+        Row: {
+          campana_id: string
+          created_at: string
+          dia: string
+          huella: string
+          tipo: string
+        }
+        Insert: {
+          campana_id: string
+          created_at?: string
+          dia?: string
+          huella: string
+          tipo: string
+        }
+        Update: {
+          campana_id?: string
+          created_at?: string
+          dia?: string
+          huella?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anuncio_evento_dedupe_campana_id_fkey"
+            columns: ["campana_id"]
+            isOneToOne: false
+            referencedRelation: "campana_publicitaria"
             referencedColumns: ["id"]
           },
         ]
@@ -1064,6 +1125,159 @@ export type Database = {
           },
         ]
       }
+      comision_cambio_programado: {
+        Row: {
+          anulado_at: string | null
+          aplicado_at: string | null
+          creado_por: string
+          created_at: string
+          efectivo_desde: string
+          id: string
+          motivo: string
+          negocio_id: string | null
+          negocios_afectados: number | null
+          pct_nuevo: number
+        }
+        Insert: {
+          anulado_at?: string | null
+          aplicado_at?: string | null
+          creado_por: string
+          created_at?: string
+          efectivo_desde: string
+          id?: string
+          motivo: string
+          negocio_id?: string | null
+          negocios_afectados?: number | null
+          pct_nuevo: number
+        }
+        Update: {
+          anulado_at?: string | null
+          aplicado_at?: string | null
+          creado_por?: string
+          created_at?: string
+          efectivo_desde?: string
+          id?: string
+          motivo?: string
+          negocio_id?: string | null
+          negocios_afectados?: number | null
+          pct_nuevo?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comision_cambio_programado_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conexion_pago_evento: {
+        Row: {
+          actor_id: string | null
+          actor_tipo: string
+          conexion_id: string
+          created_at: string
+          detalle: Json | null
+          estado_destino: string
+          estado_origen: string | null
+          id: number
+          negocio_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_tipo: string
+          conexion_id: string
+          created_at?: string
+          detalle?: Json | null
+          estado_destino: string
+          estado_origen?: string | null
+          id?: number
+          negocio_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          actor_tipo?: string
+          conexion_id?: string
+          created_at?: string
+          detalle?: Json | null
+          estado_destino?: string
+          estado_origen?: string | null
+          id?: number
+          negocio_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conexion_pago_evento_conexion_id_fkey"
+            columns: ["conexion_id"]
+            isOneToOne: false
+            referencedRelation: "conexion_pago_negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conexion_pago_negocio: {
+        Row: {
+          access_token_cifrado: string | null
+          conectada_at: string | null
+          created_at: string
+          cuenta_externa_id: string | null
+          entorno: string | null
+          estado: string
+          id: string
+          negocio_id: string
+          proveedor: string
+          refresh_token_cifrado: string | null
+          revocada_at: string | null
+          scopes: string | null
+          token_expira_at: string | null
+          ultimo_error: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token_cifrado?: string | null
+          conectada_at?: string | null
+          created_at?: string
+          cuenta_externa_id?: string | null
+          entorno?: string | null
+          estado?: string
+          id?: string
+          negocio_id: string
+          proveedor?: string
+          refresh_token_cifrado?: string | null
+          revocada_at?: string | null
+          scopes?: string | null
+          token_expira_at?: string | null
+          ultimo_error?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token_cifrado?: string | null
+          conectada_at?: string | null
+          created_at?: string
+          cuenta_externa_id?: string | null
+          entorno?: string | null
+          estado?: string
+          id?: string
+          negocio_id?: string
+          proveedor?: string
+          refresh_token_cifrado?: string | null
+          revocada_at?: string | null
+          scopes?: string | null
+          token_expira_at?: string | null
+          ultimo_error?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conexion_pago_negocio_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       configuracion_plataforma: {
         Row: {
           app_version_actual: string | null
@@ -1077,6 +1291,17 @@ export type Database = {
           mantenimiento_fin_estimado: string | null
           mantenimiento_inicio: string | null
           mantenimiento_mensaje: string | null
+          politica_parcial_min_horas: number
+          politica_pct_parcial_max: number
+          politica_pct_parcial_min: number
+          politica_total_max_horas: number
+          politica_total_min_horas: number
+          prueba_aviso_dias_1: number
+          prueba_aviso_dias_2: number
+          prueba_dias: number
+          prueba_modalidad: string
+          reembolso_max_intentos: number
+          suscripcion_gracia_dias: number
           updated_at: string
           updated_by: string | null
         }
@@ -1092,6 +1317,17 @@ export type Database = {
           mantenimiento_fin_estimado?: string | null
           mantenimiento_inicio?: string | null
           mantenimiento_mensaje?: string | null
+          politica_parcial_min_horas?: number
+          politica_pct_parcial_max?: number
+          politica_pct_parcial_min?: number
+          politica_total_max_horas?: number
+          politica_total_min_horas?: number
+          prueba_aviso_dias_1?: number
+          prueba_aviso_dias_2?: number
+          prueba_dias?: number
+          prueba_modalidad?: string
+          reembolso_max_intentos?: number
+          suscripcion_gracia_dias?: number
           updated_at?: string
           updated_by?: string | null
         }
@@ -1107,6 +1343,17 @@ export type Database = {
           mantenimiento_fin_estimado?: string | null
           mantenimiento_inicio?: string | null
           mantenimiento_mensaje?: string | null
+          politica_parcial_min_horas?: number
+          politica_pct_parcial_max?: number
+          politica_pct_parcial_min?: number
+          politica_total_max_horas?: number
+          politica_total_min_horas?: number
+          prueba_aviso_dias_1?: number
+          prueba_aviso_dias_2?: number
+          prueba_dias?: number
+          prueba_modalidad?: string
+          reembolso_max_intentos?: number
+          suscripcion_gracia_dias?: number
           updated_at?: string
           updated_by?: string | null
         }
@@ -1406,6 +1653,69 @@ export type Database = {
           },
         ]
       }
+      egreso_caja: {
+        Row: {
+          anulado: boolean
+          anulado_at: string | null
+          anulado_motivo: string | null
+          anulado_por: string | null
+          categoria: string
+          concepto: string
+          created_at: string
+          fecha: string
+          id: string
+          monto: number
+          negocio_id: string
+          registrado_por: string
+          sede_id: string
+        }
+        Insert: {
+          anulado?: boolean
+          anulado_at?: string | null
+          anulado_motivo?: string | null
+          anulado_por?: string | null
+          categoria?: string
+          concepto: string
+          created_at?: string
+          fecha?: string
+          id?: string
+          monto: number
+          negocio_id: string
+          registrado_por: string
+          sede_id: string
+        }
+        Update: {
+          anulado?: boolean
+          anulado_at?: string | null
+          anulado_motivo?: string | null
+          anulado_por?: string | null
+          categoria?: string
+          concepto?: string
+          created_at?: string
+          fecha?: string
+          id?: string
+          monto?: number
+          negocio_id?: string
+          registrado_por?: string
+          sede_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "egreso_caja_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "egreso_caja_sede_id_fkey"
+            columns: ["sede_id"]
+            isOneToOne: false
+            referencedRelation: "sede"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evento_auditoria: {
         Row: {
           accion: string
@@ -1418,8 +1728,10 @@ export type Database = {
           impersonated_by: string | null
           motivo: string | null
           negocio_id: string | null
+          origen: string | null
           payload_antes: Json | null
           payload_despues: Json | null
+          request_id: string | null
         }
         Insert: {
           accion: string
@@ -1432,8 +1744,10 @@ export type Database = {
           impersonated_by?: string | null
           motivo?: string | null
           negocio_id?: string | null
+          origen?: string | null
           payload_antes?: Json | null
           payload_despues?: Json | null
+          request_id?: string | null
         }
         Update: {
           accion?: string
@@ -1446,8 +1760,10 @@ export type Database = {
           impersonated_by?: string | null
           motivo?: string | null
           negocio_id?: string | null
+          origen?: string | null
           payload_antes?: Json | null
           payload_despues?: Json | null
+          request_id?: string | null
         }
         Relationships: [
           {
@@ -1653,6 +1969,7 @@ export type Database = {
       }
       gift_card: {
         Row: {
+          bloqueada_hasta: string | null
           codigo: string
           comprador_id: string | null
           corporativo_cuenta_id: string | null
@@ -1663,6 +1980,7 @@ export type Database = {
           estado: Database["public"]["Enums"]["gift_card_estado"]
           fecha_expiracion: string | null
           id: string
+          intentos_pin: number
           lote_id: string | null
           mensaje: string | null
           monto_original: number
@@ -1672,6 +1990,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          bloqueada_hasta?: string | null
           codigo: string
           comprador_id?: string | null
           corporativo_cuenta_id?: string | null
@@ -1682,6 +2001,7 @@ export type Database = {
           estado?: Database["public"]["Enums"]["gift_card_estado"]
           fecha_expiracion?: string | null
           id?: string
+          intentos_pin?: number
           lote_id?: string | null
           mensaje?: string | null
           monto_original: number
@@ -1691,6 +2011,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          bloqueada_hasta?: string | null
           codigo?: string
           comprador_id?: string | null
           corporativo_cuenta_id?: string | null
@@ -1701,6 +2022,7 @@ export type Database = {
           estado?: Database["public"]["Enums"]["gift_card_estado"]
           fecha_expiracion?: string | null
           id?: string
+          intentos_pin?: number
           lote_id?: string | null
           mensaje?: string | null
           monto_original?: number
@@ -1997,6 +2319,120 @@ export type Database = {
           },
         ]
       }
+      libro_movimiento: {
+        Row: {
+          actor_id: string | null
+          actor_tipo: string
+          ajusta_movimiento_id: string | null
+          categoria: string
+          cuenta_recaudo: string | null
+          detalle: Json
+          entidad: string
+          estado: string
+          evento: string
+          id: string
+          id_externo: string | null
+          idempotency_key: string
+          moneda: string
+          monto: number
+          motivo: string | null
+          negocio_id: string | null
+          ocurrido_at: string
+          pago_id: string | null
+          proveedor: string | null
+          reembolso_id: string | null
+          referencia_id: string
+          referencia_tipo: string
+          registrado_at: string
+          reserva_id: string | null
+          sentido: string
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_tipo?: string
+          ajusta_movimiento_id?: string | null
+          categoria: string
+          cuenta_recaudo?: string | null
+          detalle?: Json
+          entidad: string
+          estado: string
+          evento: string
+          id?: string
+          id_externo?: string | null
+          idempotency_key: string
+          moneda?: string
+          monto: number
+          motivo?: string | null
+          negocio_id?: string | null
+          ocurrido_at: string
+          pago_id?: string | null
+          proveedor?: string | null
+          reembolso_id?: string | null
+          referencia_id: string
+          referencia_tipo: string
+          registrado_at?: string
+          reserva_id?: string | null
+          sentido: string
+        }
+        Update: {
+          actor_id?: string | null
+          actor_tipo?: string
+          ajusta_movimiento_id?: string | null
+          categoria?: string
+          cuenta_recaudo?: string | null
+          detalle?: Json
+          entidad?: string
+          estado?: string
+          evento?: string
+          id?: string
+          id_externo?: string | null
+          idempotency_key?: string
+          moneda?: string
+          monto?: number
+          motivo?: string | null
+          negocio_id?: string | null
+          ocurrido_at?: string
+          pago_id?: string | null
+          proveedor?: string | null
+          reembolso_id?: string | null
+          referencia_id?: string
+          referencia_tipo?: string
+          registrado_at?: string
+          reserva_id?: string | null
+          sentido?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "libro_movimiento_ajusta_movimiento_id_fkey"
+            columns: ["ajusta_movimiento_id"]
+            isOneToOne: false
+            referencedRelation: "libro_movimiento"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "libro_movimiento_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      limite_tasa_evento: {
+        Row: {
+          clave: string
+          creado_at: string
+        }
+        Insert: {
+          clave: string
+          creado_at?: string
+        }
+        Update: {
+          clave?: string
+          creado_at?: string
+        }
+        Relationships: []
+      }
       lista_espera: {
         Row: {
           cliente_id: string
@@ -2269,6 +2705,7 @@ export type Database = {
       }
       negocio: {
         Row: {
+          anticipo_modo: string
           categoria: string[]
           ciudad: string
           comision_plataforma_pct: number
@@ -2302,6 +2739,7 @@ export type Database = {
           ventana_reembolso_total_horas: number
         }
         Insert: {
+          anticipo_modo?: string
           categoria?: string[]
           ciudad: string
           comision_plataforma_pct?: number
@@ -2335,6 +2773,7 @@ export type Database = {
           ventana_reembolso_total_horas?: number
         }
         Update: {
+          anticipo_modo?: string
           categoria?: string[]
           ciudad?: string
           comision_plataforma_pct?: number
@@ -2585,6 +3024,293 @@ export type Database = {
           },
         ]
       }
+      notificacion_evento: {
+        Row: {
+          audiencia: string
+          categoria: string
+          codigo: string
+          descripcion_en: string
+          descripcion_es: string
+          esencial: boolean
+        }
+        Insert: {
+          audiencia: string
+          categoria: string
+          codigo: string
+          descripcion_en: string
+          descripcion_es: string
+          esencial?: boolean
+        }
+        Update: {
+          audiencia?: string
+          categoria?: string
+          codigo?: string
+          descripcion_en?: string
+          descripcion_es?: string
+          esencial?: boolean
+        }
+        Relationships: []
+      }
+      notificacion_outbox: {
+        Row: {
+          canal: string
+          categoria: string
+          created_at: string
+          datos: Json
+          enviado_at: string | null
+          estado: string
+          evento: string
+          id: string
+          id_externo: string | null
+          idempotency_key: string
+          idioma: string
+          intentos: number
+          max_intentos: number
+          negocio_id: string | null
+          plantilla: string
+          proximo_intento_at: string | null
+          ultimo_error: string | null
+          updated_at: string
+          usuario_id: string
+        }
+        Insert: {
+          canal: string
+          categoria: string
+          created_at?: string
+          datos?: Json
+          enviado_at?: string | null
+          estado?: string
+          evento: string
+          id?: string
+          id_externo?: string | null
+          idempotency_key: string
+          idioma?: string
+          intentos?: number
+          max_intentos?: number
+          negocio_id?: string | null
+          plantilla: string
+          proximo_intento_at?: string | null
+          ultimo_error?: string | null
+          updated_at?: string
+          usuario_id: string
+        }
+        Update: {
+          canal?: string
+          categoria?: string
+          created_at?: string
+          datos?: Json
+          enviado_at?: string | null
+          estado?: string
+          evento?: string
+          id?: string
+          id_externo?: string | null
+          idempotency_key?: string
+          idioma?: string
+          intentos?: number
+          max_intentos?: number
+          negocio_id?: string | null
+          plantilla?: string
+          proximo_intento_at?: string | null
+          ultimo_error?: string | null
+          updated_at?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacion_outbox_evento_fkey"
+            columns: ["evento"]
+            isOneToOne: false
+            referencedRelation: "notificacion_evento"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "notificacion_outbox_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacion_outbox_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notificacion_outbox_evento: {
+        Row: {
+          created_at: string
+          detalle: string | null
+          estado_destino: string
+          estado_origen: string | null
+          id: number
+          intento: number
+          outbox_id: string
+        }
+        Insert: {
+          created_at?: string
+          detalle?: string | null
+          estado_destino: string
+          estado_origen?: string | null
+          id?: never
+          intento?: number
+          outbox_id: string
+        }
+        Update: {
+          created_at?: string
+          detalle?: string | null
+          estado_destino?: string
+          estado_origen?: string | null
+          id?: never
+          intento?: number
+          outbox_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacion_outbox_evento_outbox_id_fkey"
+            columns: ["outbox_id"]
+            isOneToOne: false
+            referencedRelation: "notificacion_outbox"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notificacion_plantilla: {
+        Row: {
+          activa: boolean
+          asunto: string
+          canal: string
+          codigo: string
+          created_at: string
+          cuerpo: string
+          id: string
+          idioma: string
+          negocio_id: string | null
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          activa?: boolean
+          asunto: string
+          canal: string
+          codigo: string
+          created_at?: string
+          cuerpo: string
+          id?: string
+          idioma: string
+          negocio_id?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          activa?: boolean
+          asunto?: string
+          canal?: string
+          codigo?: string
+          created_at?: string
+          cuerpo?: string
+          id?: string
+          idioma?: string
+          negocio_id?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacion_plantilla_codigo_fkey"
+            columns: ["codigo"]
+            isOneToOne: false
+            referencedRelation: "notificacion_evento"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "notificacion_plantilla_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notificacion_preferencia: {
+        Row: {
+          activo: boolean
+          canal: string
+          evento: string
+          updated_at: string
+          usuario_id: string
+        }
+        Insert: {
+          activo: boolean
+          canal: string
+          evento: string
+          updated_at?: string
+          usuario_id: string
+        }
+        Update: {
+          activo?: boolean
+          canal?: string
+          evento?: string
+          updated_at?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacion_preferencia_evento_fkey"
+            columns: ["evento"]
+            isOneToOne: false
+            referencedRelation: "notificacion_evento"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "notificacion_preferencia_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notificacion_push_suscripcion: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          updated_at: string
+          usuario_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          updated_at?: string
+          usuario_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          updated_at?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacion_push_suscripcion_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notificacion_usuario: {
         Row: {
           created_at: string
@@ -2646,6 +3372,47 @@ export type Database = {
           },
         ]
       }
+      oauth_estado: {
+        Row: {
+          actor_id: string
+          created_at: string
+          expira_at: string
+          negocio_id: string
+          proveedor: string
+          state_hash: string
+          usado_at: string | null
+          verifier_cifrado: string
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          expira_at: string
+          negocio_id: string
+          proveedor?: string
+          state_hash: string
+          usado_at?: string | null
+          verifier_cifrado: string
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          expira_at?: string
+          negocio_id?: string
+          proveedor?: string
+          state_hash?: string
+          usado_at?: string | null
+          verifier_cifrado?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oauth_estado_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       oferta_negocio: {
         Row: {
           activa: boolean
@@ -2702,12 +3469,17 @@ export type Database = {
       pago: {
         Row: {
           comision_plataforma_monto: number | null
+          comision_plataforma_pct: number | null
+          conexion_pago_id: string | null
           created_at: string
+          cuenta_cobro: string | null
+          entorno: string | null
           es_huerfano: boolean
           estado: Database["public"]["Enums"]["pago_estado"]
           id: string
           id_preferencia_pasarela: string | null
           id_transaccion_pasarela: string | null
+          marketplace_fee: number
           metadata: Json
           monto: number
           monto_reembolsado: number
@@ -2723,12 +3495,17 @@ export type Database = {
         }
         Insert: {
           comision_plataforma_monto?: number | null
+          comision_plataforma_pct?: number | null
+          conexion_pago_id?: string | null
           created_at?: string
+          cuenta_cobro?: string | null
+          entorno?: string | null
           es_huerfano?: boolean
           estado?: Database["public"]["Enums"]["pago_estado"]
           id?: string
           id_preferencia_pasarela?: string | null
           id_transaccion_pasarela?: string | null
+          marketplace_fee?: number
           metadata?: Json
           monto: number
           monto_reembolsado?: number
@@ -2744,12 +3521,17 @@ export type Database = {
         }
         Update: {
           comision_plataforma_monto?: number | null
+          comision_plataforma_pct?: number | null
+          conexion_pago_id?: string | null
           created_at?: string
+          cuenta_cobro?: string | null
+          entorno?: string | null
           es_huerfano?: boolean
           estado?: Database["public"]["Enums"]["pago_estado"]
           id?: string
           id_preferencia_pasarela?: string | null
           id_transaccion_pasarela?: string | null
+          marketplace_fee?: number
           metadata?: Json
           monto?: number
           monto_reembolsado?: number
@@ -2764,6 +3546,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "pago_conexion_pago_id_fkey"
+            columns: ["conexion_pago_id"]
+            isOneToOne: false
+            referencedRelation: "conexion_pago_negocio"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pago_negocio_id_fkey"
             columns: ["negocio_id"]
@@ -2877,8 +3666,11 @@ export type Database = {
           nombre: string
           pais: string | null
           password_establecida: boolean
+          registro_pendiente: boolean
           session_version: number
           telefono: string | null
+          telefono_verificado: boolean
+          telefono_verificado_at: string | null
           updated_at: string
         }
         Insert: {
@@ -2895,8 +3687,11 @@ export type Database = {
           nombre: string
           pais?: string | null
           password_establecida?: boolean
+          registro_pendiente?: boolean
           session_version?: number
           telefono?: string | null
+          telefono_verificado?: boolean
+          telefono_verificado_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -2913,8 +3708,11 @@ export type Database = {
           nombre?: string
           pais?: string | null
           password_establecida?: boolean
+          registro_pendiente?: boolean
           session_version?: number
           telefono?: string | null
+          telefono_verificado?: boolean
+          telefono_verificado_at?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -3503,6 +4301,139 @@ export type Database = {
             columns: ["negocio_id"]
             isOneToOne: false
             referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reembolso: {
+        Row: {
+          cliente_id: string | null
+          confirmado_at: string | null
+          created_at: string
+          estado: string
+          id: string
+          id_reembolso_pasarela: string | null
+          idempotency_key: string
+          intentos: number
+          monto: number
+          motivo: string
+          negocio_id: string | null
+          origen: string
+          pago_id: string
+          pct: number
+          reserva_id: string | null
+          solicitado_at: string | null
+          ultimo_error: string | null
+          updated_at: string
+        }
+        Insert: {
+          cliente_id?: string | null
+          confirmado_at?: string | null
+          created_at?: string
+          estado?: string
+          id?: string
+          id_reembolso_pasarela?: string | null
+          idempotency_key: string
+          intentos?: number
+          monto: number
+          motivo: string
+          negocio_id?: string | null
+          origen: string
+          pago_id: string
+          pct: number
+          reserva_id?: string | null
+          solicitado_at?: string | null
+          ultimo_error?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cliente_id?: string | null
+          confirmado_at?: string | null
+          created_at?: string
+          estado?: string
+          id?: string
+          id_reembolso_pasarela?: string | null
+          idempotency_key?: string
+          intentos?: number
+          monto?: number
+          motivo?: string
+          negocio_id?: string | null
+          origen?: string
+          pago_id?: string
+          pct?: number
+          reserva_id?: string | null
+          solicitado_at?: string | null
+          ultimo_error?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reembolso_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reembolso_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reembolso_pago_id_fkey"
+            columns: ["pago_id"]
+            isOneToOne: false
+            referencedRelation: "pago"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reembolso_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reserva"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reembolso_evento: {
+        Row: {
+          actor_id: string | null
+          actor_tipo: string
+          created_at: string
+          detalle: Json | null
+          estado_destino: string
+          estado_origen: string | null
+          id: number
+          reembolso_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_tipo: string
+          created_at?: string
+          detalle?: Json | null
+          estado_destino: string
+          estado_origen?: string | null
+          id?: number
+          reembolso_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          actor_tipo?: string
+          created_at?: string
+          detalle?: Json | null
+          estado_destino?: string
+          estado_origen?: string | null
+          id?: number
+          reembolso_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reembolso_evento_reembolso_id_fkey"
+            columns: ["reembolso_id"]
+            isOneToOne: false
+            referencedRelation: "reembolso"
             referencedColumns: ["id"]
           },
         ]
@@ -4170,6 +5101,8 @@ export type Database = {
       }
       servicio: {
         Row: {
+          anticipo_monto_fijo: number | null
+          anticipo_pct: number | null
           buffer_posterior_minutos: number
           buffer_previo_minutos: number
           categoria_puntaje: Database["public"]["Enums"]["categoria_puntaje"]
@@ -4185,6 +5118,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          anticipo_monto_fijo?: number | null
+          anticipo_pct?: number | null
           buffer_posterior_minutos?: number
           buffer_previo_minutos?: number
           categoria_puntaje?: Database["public"]["Enums"]["categoria_puntaje"]
@@ -4200,6 +5135,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          anticipo_monto_fijo?: number | null
+          anticipo_pct?: number | null
           buffer_posterior_minutos?: number
           buffer_previo_minutos?: number
           categoria_puntaje?: Database["public"]["Enums"]["categoria_puntaje"]
@@ -5236,40 +6173,612 @@ export type Database = {
           },
         ]
       }
+      webhook_evento: {
+        Row: {
+          conexion_id: string | null
+          data_id: string | null
+          id: number
+          procesado_at: string | null
+          proveedor: string
+          recibido_at: string
+          request_id: string
+          resultado: string | null
+          topico: string | null
+        }
+        Insert: {
+          conexion_id?: string | null
+          data_id?: string | null
+          id?: number
+          procesado_at?: string | null
+          proveedor: string
+          recibido_at?: string
+          request_id: string
+          resultado?: string | null
+          topico?: string | null
+        }
+        Update: {
+          conexion_id?: string | null
+          data_id?: string | null
+          id?: number
+          procesado_at?: string | null
+          proveedor?: string
+          recibido_at?: string
+          request_id?: string
+          resultado?: string | null
+          topico?: string | null
+        }
+        Relationships: []
+      }
+      whatsapp_alerta: {
+        Row: {
+          created_at: string
+          id: string
+          negocio_id: string
+          pct_al_disparar: number
+          periodo: string
+          umbral: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          negocio_id: string
+          pct_al_disparar: number
+          periodo: string
+          umbral: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          negocio_id?: string
+          pct_al_disparar?: number
+          periodo?: string
+          umbral?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_alerta_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_campana: {
+        Row: {
+          cancelada_at: string | null
+          categoria: Database["public"]["Enums"]["whatsapp_categoria"]
+          creado_por: string
+          created_at: string
+          destinatarios_estimados: number
+          estado: Database["public"]["Enums"]["whatsapp_campana_estado"]
+          id: string
+          motivo_estado: string | null
+          negocio_id: string
+          nombre: string
+          plantilla_id: string
+          programada_at: string | null
+          segmento: Json
+          updated_at: string
+        }
+        Insert: {
+          cancelada_at?: string | null
+          categoria: Database["public"]["Enums"]["whatsapp_categoria"]
+          creado_por: string
+          created_at?: string
+          destinatarios_estimados?: number
+          estado?: Database["public"]["Enums"]["whatsapp_campana_estado"]
+          id?: string
+          motivo_estado?: string | null
+          negocio_id: string
+          nombre: string
+          plantilla_id: string
+          programada_at?: string | null
+          segmento?: Json
+          updated_at?: string
+        }
+        Update: {
+          cancelada_at?: string | null
+          categoria?: Database["public"]["Enums"]["whatsapp_categoria"]
+          creado_por?: string
+          created_at?: string
+          destinatarios_estimados?: number
+          estado?: Database["public"]["Enums"]["whatsapp_campana_estado"]
+          id?: string
+          motivo_estado?: string | null
+          negocio_id?: string
+          nombre?: string
+          plantilla_id?: string
+          programada_at?: string | null
+          segmento?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_campana_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_campana_plantilla_id_fkey"
+            columns: ["plantilla_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_plantilla"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_compra_recarga: {
+        Row: {
+          acreditada_at: string | null
+          cancelada_at: string | null
+          conversaciones: number
+          created_at: string
+          estado: Database["public"]["Enums"]["whatsapp_compra_estado"]
+          id: string
+          lote_id: string | null
+          meses_vencimiento: number
+          moneda: string
+          negocio_id: string
+          pago_id: string | null
+          paquete_id: string
+          pct_marketing: number
+          precio: number
+          solicitado_por: string
+        }
+        Insert: {
+          acreditada_at?: string | null
+          cancelada_at?: string | null
+          conversaciones: number
+          created_at?: string
+          estado?: Database["public"]["Enums"]["whatsapp_compra_estado"]
+          id?: string
+          lote_id?: string | null
+          meses_vencimiento: number
+          moneda: string
+          negocio_id: string
+          pago_id?: string | null
+          paquete_id: string
+          pct_marketing: number
+          precio: number
+          solicitado_por: string
+        }
+        Update: {
+          acreditada_at?: string | null
+          cancelada_at?: string | null
+          conversaciones?: number
+          created_at?: string
+          estado?: Database["public"]["Enums"]["whatsapp_compra_estado"]
+          id?: string
+          lote_id?: string | null
+          meses_vencimiento?: number
+          moneda?: string
+          negocio_id?: string
+          pago_id?: string | null
+          paquete_id?: string
+          pct_marketing?: number
+          precio?: number
+          solicitado_por?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_compra_recarga_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: true
+            referencedRelation: "whatsapp_conversacion_lote"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_compra_recarga_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_compra_recarga_pago_id_fkey"
+            columns: ["pago_id"]
+            isOneToOne: true
+            referencedRelation: "pago"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_compra_recarga_paquete_id_fkey"
+            columns: ["paquete_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_paquete"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_config: {
+        Row: {
+          estado_conexion: Database["public"]["Enums"]["whatsapp_estado_conexion"]
+          estado_conexion_at: string | null
+          estado_conexion_detalle: string | null
+          id: boolean
+          meses_vencimiento_recarga: number
+          pct_marketing_plan: number
+          pct_marketing_recarga: number
+          proveedor: string | null
+          umbrales_alerta: number[]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          estado_conexion?: Database["public"]["Enums"]["whatsapp_estado_conexion"]
+          estado_conexion_at?: string | null
+          estado_conexion_detalle?: string | null
+          id?: boolean
+          meses_vencimiento_recarga?: number
+          pct_marketing_plan?: number
+          pct_marketing_recarga?: number
+          proveedor?: string | null
+          umbrales_alerta?: number[]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          estado_conexion?: Database["public"]["Enums"]["whatsapp_estado_conexion"]
+          estado_conexion_at?: string | null
+          estado_conexion_detalle?: string | null
+          id?: boolean
+          meses_vencimiento_recarga?: number
+          pct_marketing_plan?: number
+          pct_marketing_recarga?: number
+          proveedor?: string | null
+          umbrales_alerta?: number[]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      whatsapp_consumo: {
+        Row: {
+          cantidad: number
+          categoria: Database["public"]["Enums"]["whatsapp_categoria"]
+          created_at: string
+          id: string
+          lote_id: string
+          mensaje_id: string
+          negocio_id: string
+          tipo: string
+        }
+        Insert: {
+          cantidad?: number
+          categoria: Database["public"]["Enums"]["whatsapp_categoria"]
+          created_at?: string
+          id?: string
+          lote_id: string
+          mensaje_id: string
+          negocio_id: string
+          tipo: string
+        }
+        Update: {
+          cantidad?: number
+          categoria?: Database["public"]["Enums"]["whatsapp_categoria"]
+          created_at?: string
+          id?: string
+          lote_id?: string
+          mensaje_id?: string
+          negocio_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_consumo_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_conversacion_lote"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_consumo_mensaje_id_fkey"
+            columns: ["mensaje_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_mensaje"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_consumo_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_conversacion_lote: {
         Row: {
           cantidad: number
           cantidad_disponible: number
+          compra_id: string | null
           created_at: string
+          cupo_marketing: number
           fecha_expiracion: string
           fecha_otorgamiento: string
           id: string
+          marketing_consumido: number
           negocio_id: string
           origen: string
+          periodo: string | null
         }
         Insert: {
           cantidad: number
           cantidad_disponible: number
+          compra_id?: string | null
           created_at?: string
+          cupo_marketing?: number
           fecha_expiracion: string
           fecha_otorgamiento?: string
           id?: string
+          marketing_consumido?: number
           negocio_id: string
           origen: string
+          periodo?: string | null
         }
         Update: {
           cantidad?: number
           cantidad_disponible?: number
+          compra_id?: string | null
           created_at?: string
+          cupo_marketing?: number
           fecha_expiracion?: string
           fecha_otorgamiento?: string
           id?: string
+          marketing_consumido?: number
           negocio_id?: string
           origen?: string
+          periodo?: string | null
         }
         Relationships: [
           {
+            foreignKeyName: "whatsapp_conversacion_lote_compra_id_fkey"
+            columns: ["compra_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_compra_recarga"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "whatsapp_conversacion_lote_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_mensaje: {
+        Row: {
+          campana_id: string | null
+          categoria: Database["public"]["Enums"]["whatsapp_categoria"]
+          cliente_id: string
+          created_at: string
+          entregado_at: string | null
+          enviado_at: string | null
+          error_codigo: string | null
+          error_detalle: string | null
+          estado: Database["public"]["Enums"]["whatsapp_mensaje_estado"]
+          fallido_at: string | null
+          id: string
+          leido_at: string | null
+          negocio_id: string
+          plantilla_id: string
+          proveedor_mensaje_id: string | null
+          referencia_id: string | null
+          referencia_tipo: string | null
+          telefono: string
+          updated_at: string
+          variables: Json
+        }
+        Insert: {
+          campana_id?: string | null
+          categoria: Database["public"]["Enums"]["whatsapp_categoria"]
+          cliente_id: string
+          created_at?: string
+          entregado_at?: string | null
+          enviado_at?: string | null
+          error_codigo?: string | null
+          error_detalle?: string | null
+          estado?: Database["public"]["Enums"]["whatsapp_mensaje_estado"]
+          fallido_at?: string | null
+          id?: string
+          leido_at?: string | null
+          negocio_id: string
+          plantilla_id: string
+          proveedor_mensaje_id?: string | null
+          referencia_id?: string | null
+          referencia_tipo?: string | null
+          telefono: string
+          updated_at?: string
+          variables?: Json
+        }
+        Update: {
+          campana_id?: string | null
+          categoria?: Database["public"]["Enums"]["whatsapp_categoria"]
+          cliente_id?: string
+          created_at?: string
+          entregado_at?: string | null
+          enviado_at?: string | null
+          error_codigo?: string | null
+          error_detalle?: string | null
+          estado?: Database["public"]["Enums"]["whatsapp_mensaje_estado"]
+          fallido_at?: string | null
+          id?: string
+          leido_at?: string | null
+          negocio_id?: string
+          plantilla_id?: string
+          proveedor_mensaje_id?: string | null
+          referencia_id?: string | null
+          referencia_tipo?: string | null
+          telefono?: string
+          updated_at?: string
+          variables?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_mensaje_campana_id_fkey"
+            columns: ["campana_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_campana"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_mensaje_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_mensaje_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_mensaje_plantilla_id_fkey"
+            columns: ["plantilla_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_plantilla"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_mensaje_evento: {
+        Row: {
+          created_at: string
+          estado: Database["public"]["Enums"]["whatsapp_mensaje_estado"]
+          id: string
+          mensaje_id: string
+          proveedor_payload: Json | null
+        }
+        Insert: {
+          created_at?: string
+          estado: Database["public"]["Enums"]["whatsapp_mensaje_estado"]
+          id?: string
+          mensaje_id: string
+          proveedor_payload?: Json | null
+        }
+        Update: {
+          created_at?: string
+          estado?: Database["public"]["Enums"]["whatsapp_mensaje_estado"]
+          id?: string
+          mensaje_id?: string
+          proveedor_payload?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_mensaje_evento_mensaje_id_fkey"
+            columns: ["mensaje_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_mensaje"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_paquete: {
+        Row: {
+          activo: boolean
+          codigo: string
+          conversaciones: number
+          created_at: string
+          created_by: string | null
+          id: string
+          moneda: string
+          nombre: string
+          precio: number
+          reemplaza_a: string | null
+          version: number
+        }
+        Insert: {
+          activo?: boolean
+          codigo: string
+          conversaciones: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          moneda?: string
+          nombre: string
+          precio: number
+          reemplaza_a?: string | null
+          version?: number
+        }
+        Update: {
+          activo?: boolean
+          codigo?: string
+          conversaciones?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          moneda?: string
+          nombre?: string
+          precio?: number
+          reemplaza_a?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_paquete_reemplaza_a_fkey"
+            columns: ["reemplaza_a"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_paquete"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_plantilla: {
+        Row: {
+          categoria: Database["public"]["Enums"]["whatsapp_categoria"]
+          creado_por: string | null
+          created_at: string
+          cuerpo: string
+          estado: Database["public"]["Enums"]["whatsapp_plantilla_estado"]
+          id: string
+          idioma: string
+          motivo_rechazo: string | null
+          negocio_id: string | null
+          nombre: string
+          proveedor_plantilla_id: string | null
+          updated_at: string
+          variables: Json
+        }
+        Insert: {
+          categoria: Database["public"]["Enums"]["whatsapp_categoria"]
+          creado_por?: string | null
+          created_at?: string
+          cuerpo: string
+          estado?: Database["public"]["Enums"]["whatsapp_plantilla_estado"]
+          id?: string
+          idioma?: string
+          motivo_rechazo?: string | null
+          negocio_id?: string | null
+          nombre: string
+          proveedor_plantilla_id?: string | null
+          updated_at?: string
+          variables?: Json
+        }
+        Update: {
+          categoria?: Database["public"]["Enums"]["whatsapp_categoria"]
+          creado_por?: string | null
+          created_at?: string
+          cuerpo?: string
+          estado?: Database["public"]["Enums"]["whatsapp_plantilla_estado"]
+          id?: string
+          idioma?: string
+          motivo_rechazo?: string | null
+          negocio_id?: string | null
+          nombre?: string
+          proveedor_plantilla_id?: string | null
+          updated_at?: string
+          variables?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_plantilla_negocio_id_fkey"
             columns: ["negocio_id"]
             isOneToOne: false
             referencedRelation: "negocio"
@@ -5376,61 +6885,45 @@ export type Database = {
       }
     }
     Functions: {
-      // ── Migración 116 (añadido a mano hasta regenerar los tipos) ──
-      aceptar_politica_reserva: { Args: { p_reserva_id: string }; Returns: string }
-      configurar_politica_cancelacion: {
+      _anonimizar_cliente: { Args: { p_usuario: string }; Returns: undefined }
+      _auditar: {
         Args: {
-          p_motivo?: string
+          p_accion: string
+          p_antes: Json
+          p_despues: Json
+          p_entidad_id: string
+          p_entidad_tipo: string
+          p_motivo: string
           p_negocio_id: string
-          p_parcial_horas: number
-          p_parcial_pct: number
-          p_total_horas: number
-        }
-        Returns: undefined
-      }
-      admin_set_limites_politica: {
-        Args: {
-          p_max_intentos: number
-          p_motivo: string
-          p_parcial_min: number
-          p_pct_max: number
-          p_pct_min: number
-          p_total_max: number
-          p_total_min: number
-        }
-        Returns: undefined
-      }
-      admin_reintentar_reembolso: { Args: { p_motivo: string; p_reembolso_id: string }; Returns: undefined }
-      marcar_no_show: { Args: { p_motivo?: string; p_reserva_id: string }; Returns: undefined }
-      texto_politica_cancelacion: {
-        Args: { p_parcial: number; p_pct: number; p_total: number }
-        Returns: string
-      }
-      reembolso_tomar_pendientes: {
-        Args: { p_limite?: number }
-        Returns: Database["public"]["Tables"]["reembolso"]["Row"][]
-      }
-      reembolso_registrar_resultado: {
-        Args: {
-          p_error?: string
-          p_estado_pasarela?: string
-          p_id_pasarela?: string
-          p_reembolso_id: string
         }
         Returns: string
       }
-      _reembolso_crear: {
-        Args: {
-          p_actor_tipo: string
-          p_monto: number
-          p_motivo: string
-          p_origen: string
-          p_pago_id: string
-          p_pct: number
-        }
-        Returns: string
+      _auditoria_cabeceras: { Args: never; Returns: Json }
+      _auditoria_es_clave_secreta: {
+        Args: { p_clave: string }
+        Returns: boolean
       }
+      _auditoria_filtrar: {
+        Args: { p: Json; p_cols: string[]; p_excl: string[] }
+        Returns: Json
+      }
+      _auditoria_limpiar: { Args: { p: Json }; Returns: Json }
+      _auditoria_motivo_cabecera: { Args: never; Returns: string }
+      _auditoria_origen: { Args: never; Returns: string }
+      _auditoria_request_id: { Args: never; Returns: string }
       _chat_rol: { Args: { p_reserva_id: string }; Returns: string }
+      _conexion_evento: {
+        Args: {
+          p_actor: string
+          p_actor_tipo: string
+          p_conexion: string
+          p_destino: string
+          p_detalle: Json
+          p_negocio: string
+          p_origen: string
+        }
+        Returns: undefined
+      }
       _consentimiento_registrar: {
         Args: {
           p_origen: string
@@ -5442,6 +6935,24 @@ export type Database = {
       }
       _consentimiento_vigente: {
         Args: { p_proposito: string; p_usuario: string }
+        Returns: boolean
+      }
+      _encolar_notificacion: {
+        Args: {
+          p_canal: string
+          p_clave: string
+          p_datos: Json
+          p_evento: string
+          p_negocio: string
+          p_plantilla?: string
+          p_usuario: string
+        }
+        Returns: string
+      }
+      _familia_miembro: { Args: { p_familia_id: string }; Returns: boolean }
+      _familia_titular: { Args: { p_familia_id: string }; Returns: boolean }
+      _gift_card_pin_ok: {
+        Args: { p_id: string; p_pin: string }
         Returns: boolean
       }
       _lealtad_acreditar: {
@@ -5458,6 +6969,101 @@ export type Database = {
         Returns: undefined
       }
       _lealtad_wallet_id: { Args: { p_cliente_id: string }; Returns: string }
+      _libro_categoria_pago: {
+        Args: { p_tipo: Database["public"]["Enums"]["pago_tipo"] }
+        Returns: string
+      }
+      _libro_desde_pago: {
+        Args: {
+          p: Database["public"]["Tables"]["pago"]["Row"]
+          p_actor: string
+          p_actor_tipo: string
+          p_backfill: boolean
+        }
+        Returns: undefined
+      }
+      _libro_desde_reembolso: {
+        Args: {
+          p_backfill: boolean
+          r: Database["public"]["Tables"]["reembolso"]["Row"]
+        }
+        Returns: undefined
+      }
+      _libro_evidencia_pago: {
+        Args: { p: Database["public"]["Tables"]["pago"]["Row"] }
+        Returns: Json
+      }
+      _libro_moneda: { Args: { p_negocio_id: string }; Returns: string }
+      _libro_proveedor: { Args: { p_pasarela: string }; Returns: string }
+      _libro_registrar: {
+        Args: {
+          p_actor: string
+          p_actor_tipo: string
+          p_categoria: string
+          p_cuenta: string
+          p_detalle: Json
+          p_entidad: string
+          p_estado: string
+          p_evento: string
+          p_id_externo: string
+          p_key: string
+          p_monto: number
+          p_negocio: string
+          p_ocurrido: string
+          p_pago: string
+          p_proveedor: string
+          p_reembolso: string
+          p_ref_id: string
+          p_ref_tipo: string
+          p_reserva: string
+          p_sentido: string
+        }
+        Returns: undefined
+      }
+      _notif_datos_reserva: {
+        Args: {
+          p_para_negocio: boolean
+          p_reserva: Database["public"]["Tables"]["reserva"]["Row"]
+        }
+        Returns: Json
+      }
+      _notif_destinatarios_negocio: {
+        Args: { p_negocio: string; p_staff: string }
+        Returns: string[]
+      }
+      _notif_encolar_canales: {
+        Args: {
+          p_canales: string[]
+          p_clave: string
+          p_datos: Json
+          p_evento: string
+          p_negocio: string
+          p_usuario: string
+        }
+        Returns: number
+      }
+      _notif_endpoint_valido: { Args: { p_endpoint: string }; Returns: boolean }
+      _notif_monto: {
+        Args: { p_monto: number; p_negocio: string }
+        Returns: string
+      }
+      _notif_plantilla: {
+        Args: {
+          p_canal: string
+          p_codigo: string
+          p_idioma: string
+          p_negocio: string
+        }
+        Returns: {
+          asunto: string
+          cuerpo: string
+          version: number
+        }[]
+      }
+      _notif_render_texto: {
+        Args: { p_datos: Json; p_texto: string }
+        Returns: string
+      }
       _notificar: {
         Args: {
           p_cuerpo_en: string
@@ -5514,9 +7120,25 @@ export type Database = {
         }
         Returns: boolean
       }
+      _reembolso_crear: {
+        Args: {
+          p_actor_tipo: string
+          p_monto: number
+          p_motivo: string
+          p_origen: string
+          p_pago_id: string
+          p_pct: number
+        }
+        Returns: string
+      }
+      _sincronizar_registro_pendiente: {
+        Args: { p_pendiente: boolean; p_usuario: string }
+        Returns: undefined
+      }
       _validar_gift_card_para_canje: {
         Args: { p_codigo: string; p_pin: string }
         Returns: {
+          bloqueada_hasta: string | null
           codigo: string
           comprador_id: string | null
           corporativo_cuenta_id: string | null
@@ -5527,6 +7149,7 @@ export type Database = {
           estado: Database["public"]["Enums"]["gift_card_estado"]
           fecha_expiracion: string | null
           id: string
+          intentos_pin: number
           lote_id: string | null
           mensaje: string | null
           monto_original: number
@@ -5541,6 +7164,59 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      _whatsapp_consumir: { Args: { p_mensaje_id: string }; Returns: string }
+      _whatsapp_consumo_periodo: {
+        Args: { p_negocio_id: string; p_periodo: string }
+        Returns: Json
+      }
+      _whatsapp_destinatarios: {
+        Args: {
+          p_categoria: Database["public"]["Enums"]["whatsapp_categoria"]
+          p_negocio_id: string
+          p_segmento: Json
+        }
+        Returns: {
+          dest_cliente_id: string
+          dest_nombre: string
+          dest_telefono: string
+        }[]
+      }
+      _whatsapp_envio_habilitado: { Args: never; Returns: boolean }
+      _whatsapp_evaluar_alertas: {
+        Args: { p_negocio_id: string }
+        Returns: undefined
+      }
+      _whatsapp_otorgar_lote_plan: {
+        Args: { p_negocio_id: string; p_periodo?: string }
+        Returns: string
+      }
+      _whatsapp_periodo_actual: { Args: never; Returns: string }
+      _whatsapp_plan_codigo: {
+        Args: { p_negocio_id: string }
+        Returns: Database["public"]["Enums"]["plan_codigo"]
+      }
+      _whatsapp_plan_incluye: {
+        Args: { p_clave: string; p_negocio_id: string }
+        Returns: boolean
+      }
+      _whatsapp_revertir_consumo: {
+        Args: { p_mensaje_id: string }
+        Returns: boolean
+      }
+      _whatsapp_saldo: { Args: { p_negocio_id: string }; Returns: Json }
+      _whatsapp_transicion_valida: {
+        Args: { p_desde: string; p_hacia: string; p_maquina: string }
+        Returns: boolean
+      }
+      _whatsapp_validar_plantilla: {
+        Args: { p_cuerpo: string; p_variables: Json }
+        Returns: undefined
+      }
+      _whatsapp_validar_segmento: { Args: { p: Json }; Returns: undefined }
+      aceptar_politica_reserva: {
+        Args: { p_reserva_id: string }
+        Returns: string
       }
       activar_addon_negocio: {
         Args: {
@@ -5669,6 +7345,17 @@ export type Database = {
           mantenimiento_fin_estimado: string | null
           mantenimiento_inicio: string | null
           mantenimiento_mensaje: string | null
+          politica_parcial_min_horas: number
+          politica_pct_parcial_max: number
+          politica_pct_parcial_min: number
+          politica_total_max_horas: number
+          politica_total_min_horas: number
+          prueba_aviso_dias_1: number
+          prueba_aviso_dias_2: number
+          prueba_dias: number
+          prueba_modalidad: string
+          reembolso_max_intentos: number
+          suscripcion_gracia_dias: number
           updated_at: string
           updated_by: string | null
         }
@@ -5837,6 +7524,17 @@ export type Database = {
           mantenimiento_fin_estimado: string | null
           mantenimiento_inicio: string | null
           mantenimiento_mensaje: string | null
+          politica_parcial_min_horas: number
+          politica_pct_parcial_max: number
+          politica_pct_parcial_min: number
+          politica_total_max_horas: number
+          politica_total_min_horas: number
+          prueba_aviso_dias_1: number
+          prueba_aviso_dias_2: number
+          prueba_dias: number
+          prueba_modalidad: string
+          reembolso_max_intentos: number
+          suscripcion_gracia_dias: number
           updated_at: string
           updated_by: string | null
         }
@@ -5890,7 +7588,24 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_anular_comision_programada: {
+        Args: { p_id: string; p_motivo: string }
+        Returns: undefined
+      }
       admin_dashboard_resumen: { Args: never; Returns: Json }
+      admin_programar_comision: {
+        Args: {
+          p_efectivo_desde: string
+          p_motivo: string
+          p_negocio_id: string
+          p_pct: number
+        }
+        Returns: string
+      }
+      admin_reintentar_reembolso: {
+        Args: { p_motivo: string; p_reembolso_id: string }
+        Returns: undefined
+      }
       admin_set_addon_precio: {
         Args: { p_addon: string; p_pais: string; p_precio: number }
         Returns: {
@@ -5906,6 +7621,29 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      admin_set_config_prueba: {
+        Args: {
+          p_aviso_1: number
+          p_aviso_2: number
+          p_dias: number
+          p_gracia_dias: number
+          p_modalidad: string
+          p_motivo: string
+        }
+        Returns: undefined
+      }
+      admin_set_limites_politica: {
+        Args: {
+          p_max_intentos: number
+          p_motivo: string
+          p_parcial_min: number
+          p_pct_max: number
+          p_pct_min: number
+          p_total_max: number
+          p_total_min: number
+        }
+        Returns: undefined
       }
       admin_set_pais: {
         Args: {
@@ -6142,6 +7880,11 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      anular_egreso_caja: {
+        Args: { p_egreso_id: string; p_motivo: string }
+        Returns: undefined
+      }
+      aplicar_comisiones_programadas: { Args: never; Returns: number }
       aplicar_evento_pago: {
         Args: {
           p_estado: Database["public"]["Enums"]["pago_estado"]
@@ -6175,6 +7918,7 @@ export type Database = {
       aprobar_negocio: {
         Args: { p_negocio_id: string }
         Returns: {
+          anticipo_modo: string
           categoria: string[]
           ciudad: string
           comision_plataforma_pct: number
@@ -6277,14 +8021,50 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      auditoria_entidades: {
+        Args: { p_negocio_id?: string }
+        Returns: string[]
+      }
+      auditoria_listar: {
+        Args: {
+          p_accion?: string
+          p_desde?: string
+          p_entidad_tipo?: string
+          p_hasta?: string
+          p_limite?: number
+          p_negocio_id?: string
+          p_offset?: number
+        }
+        Returns: {
+          accion: string
+          actor_nombre: string
+          actor_tipo: string
+          created_at: string
+          entidad_id: string
+          entidad_tipo: string
+          id: string
+          motivo: string
+          negocio_id: string
+          negocio_nombre: string
+          origen: string
+          payload_antes: Json
+          payload_despues: Json
+          request_id: string
+        }[]
+      }
       avisos_prueba_pendientes: {
         Args: never
         Returns: {
+          con_tarjeta: boolean
           fecha_cobro: string
           negocio_id: string
           owner_user_id: string
           tipo: string
         }[]
+      }
+      beneficiario_pago: {
+        Args: { p_tipo: Database["public"]["Enums"]["pago_tipo"] }
+        Returns: string
       }
       beneficios_marcas: { Args: never; Returns: Json }
       beneficios_marcas_consentir: {
@@ -6294,6 +8074,7 @@ export type Database = {
       bloquear_gift_card: {
         Args: { p_gift_card_id: string; p_motivo: string }
         Returns: {
+          bloqueada_hasta: string | null
           codigo: string
           comprador_id: string | null
           corporativo_cuenta_id: string | null
@@ -6304,6 +8085,7 @@ export type Database = {
           estado: Database["public"]["Enums"]["gift_card_estado"]
           fecha_expiracion: string | null
           id: string
+          intentos_pin: number
           lote_id: string | null
           mensaje: string | null
           monto_original: number
@@ -6321,6 +8103,14 @@ export type Database = {
       }
       calcular_sena: {
         Args: { p_monto_total: number; p_negocio_id: string }
+        Returns: number
+      }
+      calcular_sena_servicios: {
+        Args: {
+          p_monto_total: number
+          p_negocio_id: string
+          p_servicio_ids: string[]
+        }
         Returns: number
       }
       calificar_visita: {
@@ -6417,6 +8207,7 @@ export type Database = {
       cancelar_negocio_propio: {
         Args: { p_motivo: string; p_negocio_id: string }
         Returns: {
+          anticipo_modo: string
           categoria: string[]
           ciudad: string
           comision_plataforma_pct: number
@@ -6459,6 +8250,7 @@ export type Database = {
       cancelar_negocio_supersu: {
         Args: { p_motivo: string; p_negocio_id: string }
         Returns: {
+          anticipo_modo: string
           categoria: string[]
           ciudad: string
           comision_plataforma_pct: number
@@ -6627,6 +8419,16 @@ export type Database = {
         }
         Returns: Json
       }
+      completar_registro_con_telefono: {
+        Args: {
+          p_locale?: string
+          p_marketing?: boolean
+          p_nombre: string
+          p_pais: string
+          p_telefono: string
+        }
+        Returns: Json
+      }
       completar_venta_pos: {
         Args: {
           p_metodo_pago_propina?: string
@@ -6642,12 +8444,17 @@ export type Database = {
         Args: { p_negocio_id: string; p_paquete_id: string }
         Returns: {
           comision_plataforma_monto: number | null
+          comision_plataforma_pct: number | null
+          conexion_pago_id: string | null
           created_at: string
+          cuenta_cobro: string | null
+          entorno: string | null
           es_huerfano: boolean
           estado: Database["public"]["Enums"]["pago_estado"]
           id: string
           id_preferencia_pasarela: string | null
           id_transaccion_pasarela: string | null
+          marketplace_fee: number
           metadata: Json
           monto: number
           monto_reembolsado: number
@@ -6668,11 +8475,66 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      conexion_desconectar: {
+        Args: { p_motivo?: string; p_negocio_id: string }
+        Returns: undefined
+      }
+      conexion_guardar: {
+        Args: {
+          p_access_cifrado: string
+          p_actor: string
+          p_cuenta_externa: string
+          p_entorno: string
+          p_expira_at: string
+          p_negocio_id: string
+          p_refresh_cifrado: string
+          p_scopes: string
+        }
+        Returns: string
+      }
+      conexion_marcar_estado: {
+        Args: { p_conexion_id: string; p_error: string; p_estado: string }
+        Returns: undefined
+      }
+      conexion_pago_estado: { Args: { p_negocio_id: string }; Returns: Json }
+      conexion_renovar_tokens: {
+        Args: {
+          p_access_cifrado: string
+          p_conexion_id: string
+          p_expira_at: string
+          p_refresh_cifrado: string
+        }
+        Returns: undefined
+      }
+      config_prueba: { Args: never; Returns: Json }
+      configurar_anticipo: {
+        Args: {
+          p_maximo: number
+          p_minimo: number
+          p_modo: string
+          p_monto_fijo: number
+          p_motivo?: string
+          p_negocio_id: string
+          p_pago_completo: boolean
+          p_pct: number
+        }
+        Returns: undefined
+      }
       configurar_funcion_plan_ia: {
         Args: {
           p_funcion: string
           p_habilitado: boolean
           p_plan_codigo: Database["public"]["Enums"]["plan_codigo"]
+        }
+        Returns: undefined
+      }
+      configurar_politica_cancelacion: {
+        Args: {
+          p_motivo?: string
+          p_negocio_id: string
+          p_parcial_horas: number
+          p_parcial_pct: number
+          p_total_horas: number
         }
         Returns: undefined
       }
@@ -6721,6 +8583,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      confirmar_reserva_sin_anticipo: {
+        Args: { p_reserva_id: string }
+        Returns: undefined
       }
       confirmar_sugerencia_recompensa: {
         Args: { p_sugerencia_id: string }
@@ -6784,6 +8650,10 @@ export type Database = {
           p_referencia_tipo?: string
         }
         Returns: Json
+      }
+      consumir_cupo: {
+        Args: { p_clave: string; p_limite: number; p_ventana_seg: number }
+        Returns: number
       }
       crear_banner_home: {
         Args: {
@@ -6921,12 +8791,17 @@ export type Database = {
         }
         Returns: {
           comision_plataforma_monto: number | null
+          comision_plataforma_pct: number | null
+          conexion_pago_id: string | null
           created_at: string
+          cuenta_cobro: string | null
+          entorno: string | null
           es_huerfano: boolean
           estado: Database["public"]["Enums"]["pago_estado"]
           id: string
           id_preferencia_pasarela: string | null
           id_transaccion_pasarela: string | null
+          marketplace_fee: number
           metadata: Json
           monto: number
           monto_reembolsado: number
@@ -7036,12 +8911,17 @@ export type Database = {
         Args: { p_reserva_id: string }
         Returns: {
           comision_plataforma_monto: number | null
+          comision_plataforma_pct: number | null
+          conexion_pago_id: string | null
           created_at: string
+          cuenta_cobro: string | null
+          entorno: string | null
           es_huerfano: boolean
           estado: Database["public"]["Enums"]["pago_estado"]
           id: string
           id_preferencia_pasarela: string | null
           id_transaccion_pasarela: string | null
+          marketplace_fee: number
           metadata: Json
           monto: number
           monto_reembolsado: number
@@ -7412,6 +9292,12 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      cuentas_registro_abandonado: {
+        Args: { p_horas?: number; p_limite?: number }
+        Returns: {
+          usuario_id: string
+        }[]
+      }
       dashboard_ranking_staff_semana: {
         Args: { p_negocio_id: string; p_sede_id?: string }
         Returns: {
@@ -7499,6 +9385,7 @@ export type Database = {
       enviar_negocio_a_aprobacion: {
         Args: { p_negocio_id: string }
         Returns: {
+          anticipo_modo: string
           categoria: string[]
           ciudad: string
           comision_plataforma_pct: number
@@ -7648,6 +9535,7 @@ export type Database = {
       forzar_reactivacion_pago_externo: {
         Args: { p_motivo: string; p_negocio_id: string }
         Returns: {
+          anticipo_modo: string
           categoria: string[]
           ciudad: string
           comision_plataforma_pct: number
@@ -7826,11 +9714,13 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      iniciar_prueba_negocio: {
+      iniciar_prueba_negocio_srv: {
         Args: {
+          p_actor: string
           p_ciclo: string
           p_dispositivo_hash: string
           p_documento_hash: string
+          p_email_hash: string
           p_metodo_pago_proveedor: string
           p_metodo_pago_ref: string
           p_negocio_id: string
@@ -7878,6 +9768,37 @@ export type Database = {
       is_guardian_de_sede: { Args: { p_sede_id: string }; Returns: boolean }
       is_staff_de: { Args: { p_negocio_id: string }; Returns: boolean }
       is_supersu: { Args: never; Returns: boolean }
+      libro_registrar_ajuste: {
+        Args: {
+          p_monto: number
+          p_motivo: string
+          p_movimiento_id: string
+          p_sentido: string
+        }
+        Returns: string
+      }
+      libro_totales: {
+        Args: {
+          p_categoria?: string
+          p_desde?: string
+          p_entidad?: string
+          p_estado?: string
+          p_hasta?: string
+          p_negocio_id?: string
+        }
+        Returns: {
+          cantidad: number
+          categoria: string
+          entidad: string
+          estado: string
+          moneda: string
+          periodo: string
+          sentido: string
+          total: number
+        }[]
+      }
+      limites_politica_cancelacion: { Args: never; Returns: Json }
+      limpiar_limite_tasa: { Args: never; Returns: number }
       listar_eventos_fraude: {
         Args: { p_revisado?: boolean }
         Returns: {
@@ -7963,6 +9884,10 @@ export type Database = {
         }
       }
       mantenimiento_suscripciones: { Args: never; Returns: Json }
+      marcar_auth_cerrada: {
+        Args: { p_solicitud_id: string }
+        Returns: undefined
+      }
       marcar_aviso_prueba: {
         Args: { p_negocio_id: string; p_tipo: string }
         Returns: undefined
@@ -8024,6 +9949,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      marcar_no_show: {
+        Args: { p_motivo?: string; p_reserva_id: string }
+        Returns: undefined
       }
       marketplace_buscar: {
         Args: {
@@ -8258,6 +10187,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      negocio_cobra_en_linea: {
+        Args: { p_negocio_id: string }
+        Returns: boolean
+      }
       negocio_funcion_valor: {
         Args: { p_clave: string; p_negocio_id: string }
         Returns: string
@@ -8297,6 +10230,68 @@ export type Database = {
         Args: { p_negocio_id: string }
         Returns: boolean
       }
+      notif_entregar_panel: { Args: { p_limite?: number }; Returns: number }
+      notif_generar_programadas: {
+        Args: { p_ventana_horas?: number }
+        Returns: Json
+      }
+      notif_outbox_reencolar_no_habilitados: {
+        Args: { p_canal: string; p_max_horas?: number }
+        Returns: number
+      }
+      notif_outbox_registrar: {
+        Args: {
+          p_codigo?: string
+          p_id: string
+          p_id_externo?: string
+          p_ok: boolean
+          p_reintentable?: boolean
+        }
+        Returns: string
+      }
+      notif_outbox_tomar: {
+        Args: { p_canales?: string[]; p_limite?: number }
+        Returns: {
+          asunto: string
+          canal: string
+          categoria: string
+          cuerpo: string
+          datos: Json
+          email: string
+          evento: string
+          id: string
+          idioma: string
+          intentos: number
+          negocio_id: string
+          plantilla: string
+          push_suscripciones: Json
+          usuario_id: string
+        }[]
+      }
+      notif_preferencia_guardar: {
+        Args: { p_activo: boolean; p_canal: string; p_evento: string }
+        Returns: boolean
+      }
+      notif_preferencias_listar: {
+        Args: never
+        Returns: {
+          audiencia: string
+          descripcion: string
+          email_activo: boolean
+          esencial: boolean
+          evento: string
+          push_activo: boolean
+        }[]
+      }
+      notif_push_desuscribir: { Args: { p_endpoint: string }; Returns: boolean }
+      notif_push_eliminar_endpoint: {
+        Args: { p_endpoint: string }
+        Returns: boolean
+      }
+      notif_push_suscribir: {
+        Args: { p_auth: string; p_endpoint: string; p_p256dh: string }
+        Returns: string
+      }
       notificacion_marcar_leida: { Args: { p_id: string }; Returns: boolean }
       notificaciones_listar: {
         Args: { p_limite?: number; p_solo_no_leidas?: boolean }
@@ -8313,6 +10308,22 @@ export type Database = {
       }
       notificaciones_marcar_todas_leidas: { Args: never; Returns: number }
       notificaciones_no_leidas: { Args: never; Returns: number }
+      oauth_consumir: {
+        Args: { p_actor: string; p_state_hash: string }
+        Returns: {
+          negocio_id: string
+          verifier_cifrado: string
+        }[]
+      }
+      oauth_iniciar: {
+        Args: {
+          p_actor: string
+          p_negocio_id: string
+          p_state_hash: string
+          p_verifier_cifrado: string
+        }
+        Returns: undefined
+      }
       obtener_mi_codigo_referido: {
         Args: never
         Returns: {
@@ -8381,6 +10392,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      politica_de_reserva: { Args: { p_reserva_id: string }; Returns: Json }
       privacidad_estado: {
         Args: never
         Returns: {
@@ -8405,6 +10417,10 @@ export type Database = {
           tipo: string
           valor: string
         }[]
+      }
+      procesar_eliminaciones_cuenta: {
+        Args: { p_limite?: number }
+        Returns: Json
       }
       promover_guardian: {
         Args: { p_vinculo_id: string }
@@ -8514,6 +10530,7 @@ export type Database = {
       reactivar_negocio_supersu: {
         Args: { p_negocio_id: string }
         Returns: {
+          anticipo_modo: string
           categoria: string[]
           ciudad: string
           comision_plataforma_pct: number
@@ -8616,6 +10633,7 @@ export type Database = {
       rechazar_negocio: {
         Args: { p_motivo: string; p_negocio_id: string }
         Returns: {
+          anticipo_modo: string
           categoria: string[]
           ciudad: string
           comision_plataforma_pct: number
@@ -8675,6 +10693,44 @@ export type Database = {
         Args: { p_cliente_id: string; p_codigo: string; p_pin: string }
         Returns: number
       }
+      reembolso_registrar_resultado: {
+        Args: {
+          p_error?: string
+          p_estado_pasarela: string
+          p_id_pasarela: string
+          p_reembolso_id: string
+        }
+        Returns: string
+      }
+      reembolso_tomar_pendientes: {
+        Args: { p_limite?: number }
+        Returns: {
+          cliente_id: string | null
+          confirmado_at: string | null
+          created_at: string
+          estado: string
+          id: string
+          id_reembolso_pasarela: string | null
+          idempotency_key: string
+          intentos: number
+          monto: number
+          motivo: string
+          negocio_id: string | null
+          origen: string
+          pago_id: string
+          pct: number
+          reserva_id: string | null
+          solicitado_at: string | null
+          ultimo_error: string | null
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "reembolso"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       reenviar_invitacion: {
         Args: { p_invitacion_id: string }
         Returns: {
@@ -8718,6 +10774,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      registrar_egreso_caja: {
+        Args: {
+          p_categoria?: string
+          p_concepto: string
+          p_monto: number
+          p_negocio_id: string
+          p_sede_id: string
+        }
+        Returns: string
+      }
       registrar_evento_fraude: {
         Args: {
           p_negocio_id?: string
@@ -8726,6 +10792,15 @@ export type Database = {
           p_tipo: string
         }
         Returns: undefined
+      }
+      registrar_evento_patrocinado: {
+        Args: {
+          p_campana_id: string
+          p_huella: string
+          p_negocio_id: string
+          p_tipo: string
+        }
+        Returns: boolean
       }
       registrar_impresion_patrocinada: {
         Args: { p_campana_id: string }
@@ -9199,12 +11274,17 @@ export type Database = {
         }
         Returns: {
           comision_plataforma_monto: number | null
+          comision_plataforma_pct: number | null
+          conexion_pago_id: string | null
           created_at: string
+          cuenta_cobro: string | null
+          entorno: string | null
           es_huerfano: boolean
           estado: Database["public"]["Enums"]["pago_estado"]
           id: string
           id_preferencia_pasarela: string | null
           id_transaccion_pasarela: string | null
+          marketplace_fee: number
           metadata: Json
           monto: number
           monto_reembolsado: number
@@ -9278,12 +11358,17 @@ export type Database = {
         Args: { p_plan_id: string }
         Returns: {
           comision_plataforma_monto: number | null
+          comision_plataforma_pct: number | null
+          conexion_pago_id: string | null
           created_at: string
+          cuenta_cobro: string | null
+          entorno: string | null
           es_huerfano: boolean
           estado: Database["public"]["Enums"]["pago_estado"]
           id: string
           id_preferencia_pasarela: string | null
           id_transaccion_pasarela: string | null
+          marketplace_fee: number
           metadata: Json
           monto: number
           monto_reembolsado: number
@@ -9307,6 +11392,7 @@ export type Database = {
       suspender_negocio: {
         Args: { p_causa?: string; p_motivo: string; p_negocio_id: string }
         Returns: {
+          anticipo_modo: string
           categoria: string[]
           ciudad: string
           comision_plataforma_pct: number
@@ -9367,7 +11453,15 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      telefono_valido_registro: {
+        Args: { p_pais: string; p_telefono: string }
+        Returns: boolean
+      }
       temporada_actual_id: { Args: never; Returns: string }
+      texto_politica_cancelacion: {
+        Args: { p_parcial: number; p_pct: number; p_total: number }
+        Returns: string
+      }
       tiene_acceso_interno: { Args: { p_negocio_id: string }; Returns: boolean }
       trasladar_staff: {
         Args: { p_nueva_sede_id: string; p_vinculo_id: string }
@@ -9393,6 +11487,178 @@ export type Database = {
       verificar_rate_limit_auth: {
         Args: { p_email: string; p_tipo: string }
         Returns: undefined
+      }
+      webhook_marcar_procesado: {
+        Args: { p_proveedor: string; p_request_id: string; p_resultado: string }
+        Returns: undefined
+      }
+      webhook_registrar: {
+        Args: {
+          p_conexion_id: string
+          p_data_id: string
+          p_proveedor: string
+          p_request_id: string
+          p_topico: string
+        }
+        Returns: boolean
+      }
+      whatsapp_acreditar_recarga: {
+        Args: { p_compra_id: string; p_pago_id: string }
+        Returns: string
+      }
+      whatsapp_admin_actualizar_config: {
+        Args: {
+          p_meses_vencimiento_recarga: number
+          p_motivo: string
+          p_pct_marketing_plan: number
+          p_pct_marketing_recarga: number
+          p_proveedor: string
+          p_umbrales_alerta: number[]
+        }
+        Returns: undefined
+      }
+      whatsapp_admin_alternar_paquete: {
+        Args: { p_activo: boolean; p_motivo: string; p_paquete_id: string }
+        Returns: undefined
+      }
+      whatsapp_admin_crear_paquete: {
+        Args: {
+          p_codigo: string
+          p_conversaciones: number
+          p_moneda: string
+          p_motivo: string
+          p_nombre: string
+          p_precio: number
+        }
+        Returns: string
+      }
+      whatsapp_admin_estado_conexion: {
+        Args: { p_estado: string; p_motivo: string }
+        Returns: undefined
+      }
+      whatsapp_admin_resumen: { Args: never; Returns: Json }
+      whatsapp_admin_versionar_paquete: {
+        Args: {
+          p_conversaciones: number
+          p_motivo: string
+          p_nombre: string
+          p_paquete_id: string
+          p_precio: number
+        }
+        Returns: string
+      }
+      whatsapp_campana_cancelar: {
+        Args: { p_campana_id: string }
+        Returns: undefined
+      }
+      whatsapp_campana_crear: {
+        Args: {
+          p_negocio_id: string
+          p_nombre: string
+          p_plantilla_id: string
+          p_programada_at: string
+          p_segmento: Json
+        }
+        Returns: string
+      }
+      whatsapp_campana_programar: {
+        Args: { p_campana_id: string }
+        Returns: string
+      }
+      whatsapp_cancelar_recarga: {
+        Args: { p_compra_id: string }
+        Returns: undefined
+      }
+      whatsapp_otorgar_lote_plan: {
+        Args: { p_negocio_id: string; p_periodo?: string }
+        Returns: string
+      }
+      whatsapp_otorgar_lotes_plan_mes: { Args: never; Returns: number }
+      whatsapp_panel_resumen: { Args: { p_negocio_id: string }; Returns: Json }
+      whatsapp_plantilla_eliminar: {
+        Args: { p_plantilla_id: string }
+        Returns: undefined
+      }
+      whatsapp_plantilla_guardar: {
+        Args: {
+          p_categoria: string
+          p_cuerpo: string
+          p_idioma: string
+          p_negocio_id: string
+          p_nombre: string
+          p_plantilla_id: string
+          p_variables: Json
+        }
+        Returns: string
+      }
+      whatsapp_segmento_contar: {
+        Args: { p_negocio_id: string; p_segmento: Json }
+        Returns: Json
+      }
+      whatsapp_sistema_actualizar_estado: {
+        Args: {
+          p_estado: string
+          p_evidencia: Json
+          p_proveedor_mensaje_id: string
+        }
+        Returns: boolean
+      }
+      whatsapp_sistema_cerrar_campana: {
+        Args: { p_campana_id: string }
+        Returns: boolean
+      }
+      whatsapp_sistema_estado_conexion: {
+        Args: { p_detalle: string; p_estado: string }
+        Returns: undefined
+      }
+      whatsapp_sistema_plantilla_estado: {
+        Args: {
+          p_estado: string
+          p_motivo: string
+          p_plantilla_id: string
+          p_proveedor_plantilla_id: string
+        }
+        Returns: undefined
+      }
+      whatsapp_sistema_preparar_campana: {
+        Args: { p_campana_id: string }
+        Returns: number
+      }
+      whatsapp_sistema_preparar_mensaje_utilidad: {
+        Args: {
+          p_cliente_id: string
+          p_negocio_id: string
+          p_plantilla_id: string
+          p_referencia_id: string
+          p_referencia_tipo: string
+          p_variables: Json
+        }
+        Returns: string
+      }
+      whatsapp_sistema_registrar_envio: {
+        Args: {
+          p_evidencia: Json
+          p_mensaje_id: string
+          p_proveedor_mensaje_id: string
+        }
+        Returns: boolean
+      }
+      whatsapp_sistema_registrar_fallo: {
+        Args: {
+          p_error_codigo: string
+          p_error_detalle: string
+          p_evidencia: Json
+          p_mensaje_id: string
+        }
+        Returns: boolean
+      }
+      whatsapp_sistema_reservar_envio: {
+        Args: { p_mensaje_id: string }
+        Returns: Json
+      }
+      whatsapp_solicitar_recarga: {
+        Args: { p_negocio_id: string; p_paquete_id: string }
+        Returns: string
       }
     }
     Enums: {
@@ -9484,6 +11750,35 @@ export type Database = {
       temporada_estado: "EN_CURSO" | "CERRADA" | "CONSOLIDADA"
       ticket_soporte_estado: "ABIERTO" | "EN_PROCESO" | "RESUELTO"
       vinculo_estado: "INVITADO" | "ACTIVO" | "SUSPENDIDO" | "RETIRADO"
+      whatsapp_campana_estado:
+        | "BORRADOR"
+        | "PROGRAMADA"
+        | "BLOQUEADA_SIN_CONEXION"
+        | "EN_ENVIO"
+        | "COMPLETADA"
+        | "CANCELADA"
+      whatsapp_categoria: "UTILIDAD" | "MARKETING"
+      whatsapp_compra_estado: "PENDIENTE_PAGO" | "ACREDITADA" | "CANCELADA"
+      whatsapp_estado_conexion:
+        | "NO_CONFIGURADO"
+        | "PENDIENTE_CREDENCIALES"
+        | "SANDBOX"
+        | "PRODUCCION"
+        | "SUSPENDIDO"
+        | "REVOCADO"
+        | "ERROR"
+      whatsapp_mensaje_estado:
+        | "PREPARADO"
+        | "BLOQUEADO_SIN_CONEXION"
+        | "ENVIADO"
+        | "ENTREGADO"
+        | "LEIDO"
+        | "FALLIDO"
+      whatsapp_plantilla_estado:
+        | "BORRADOR"
+        | "PENDIENTE_APROBACION"
+        | "APROBADA"
+        | "RECHAZADA"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -9499,12 +11794,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -9528,11 +11823,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -9553,11 +11848,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -9578,11 +11873,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -9595,11 +11890,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never) = never,
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -9710,6 +12005,40 @@ export const Constants = {
       temporada_estado: ["EN_CURSO", "CERRADA", "CONSOLIDADA"],
       ticket_soporte_estado: ["ABIERTO", "EN_PROCESO", "RESUELTO"],
       vinculo_estado: ["INVITADO", "ACTIVO", "SUSPENDIDO", "RETIRADO"],
+      whatsapp_campana_estado: [
+        "BORRADOR",
+        "PROGRAMADA",
+        "BLOQUEADA_SIN_CONEXION",
+        "EN_ENVIO",
+        "COMPLETADA",
+        "CANCELADA",
+      ],
+      whatsapp_categoria: ["UTILIDAD", "MARKETING"],
+      whatsapp_compra_estado: ["PENDIENTE_PAGO", "ACREDITADA", "CANCELADA"],
+      whatsapp_estado_conexion: [
+        "NO_CONFIGURADO",
+        "PENDIENTE_CREDENCIALES",
+        "SANDBOX",
+        "PRODUCCION",
+        "SUSPENDIDO",
+        "REVOCADO",
+        "ERROR",
+      ],
+      whatsapp_mensaje_estado: [
+        "PREPARADO",
+        "BLOQUEADO_SIN_CONEXION",
+        "ENVIADO",
+        "ENTREGADO",
+        "LEIDO",
+        "FALLIDO",
+      ],
+      whatsapp_plantilla_estado: [
+        "BORRADOR",
+        "PENDIENTE_APROBACION",
+        "APROBADA",
+        "RECHAZADA",
+      ],
     },
   },
 } as const
+
