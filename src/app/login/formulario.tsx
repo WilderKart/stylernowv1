@@ -17,6 +17,7 @@ import {
   solicitarRecuperacion,
   verificarCodigo,
 } from "./actions";
+import { EJEMPLO_NACIONAL, INDICATIVO, type PaisRegistro } from "@/lib/telefono-registro";
 import { cancelarRegistro, crearCuentaRegistro, necesitaRegistro } from "./registro-actions";
 
 /**
@@ -48,6 +49,7 @@ export function FormularioLogin({
   const [email, setEmail] = useState(emailSesion ?? "");
   const [nombre, setNombre] = useState("");
   const [pais, setPais] = useState("CO");
+  const [telefono, setTelefono] = useState("");
   const [marketing, setMarketing] = useState(false);
   const [post, setPost] = useState<PostVerificacion>({ faltaContrasena: false, faltaTelefono: false });
   const [password, setPassword] = useState("");
@@ -197,7 +199,7 @@ export function FormularioLogin({
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const res = await crearCuentaRegistro(nombre, pais, marketing);
+    const res = await crearCuentaRegistro(nombre, pais, telefono, marketing);
     setLoading(false);
     if (!res.ok) {
       setError(res.error);
@@ -489,6 +491,32 @@ export function FormularioLogin({
               </select>
               <ChevronDown aria-hidden className="pointer-events-none absolute top-3.5 right-3.5 size-5" />
             </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="registro-telefono" className="font-mono text-xs leading-4 font-bold tracking-[0.72px] text-text uppercase">
+              {t("login.reg_telefono")}
+            </label>
+            <div className="flex min-h-12 w-full border-2 border-border bg-bg focus-within:shadow-hard">
+              <span className="flex items-center border-r-2 border-border px-3 font-mono text-[15px] text-text" aria-hidden>
+                {INDICATIVO[pais as PaisRegistro] ?? ""}
+              </span>
+              <input
+                id="registro-telefono"
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel-national"
+                required
+                maxLength={20}
+                value={telefono}
+                onChange={(e) => setTelefono(e.target.value)}
+                placeholder={EJEMPLO_NACIONAL[pais as PaisRegistro] ?? ""}
+                aria-describedby="registro-telefono-ayuda"
+                className="min-w-0 flex-1 bg-transparent px-3 text-[15px] text-text outline-none"
+              />
+            </div>
+            <p id="registro-telefono-ayuda" className="m-0 text-[12.5px] text-text-muted">
+              {t("login.reg_telefono_ayuda")}
+            </p>
           </div>
           <Casilla
             caja

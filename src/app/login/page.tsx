@@ -21,8 +21,9 @@ export default async function LoginPage(props: PageProps<"/login">) {
 
   if (user) {
     // C17: sesión activa pero registro sin completar (sin país) → se muestra el paso de registro.
+    // Misma señal que el proxy (migración 127): sin esto, un pendiente con país podía entrar en bucle.
     const prefs = await obtenerPreferencias();
-    if (prefs.ok && prefs.data.pais === null) {
+    if (user.app_metadata?.registro_pendiente === true || (prefs.ok && prefs.data.pais === null)) {
       return <FormularioLogin siguiente={siguiente} registroPendiente emailSesion={user.email ?? ""} />;
     }
     redirect(siguiente);

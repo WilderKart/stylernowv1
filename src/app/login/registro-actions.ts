@@ -1,6 +1,7 @@
 "use server";
 
-import { obtenerPreferencias, completarRegistro, type Pais } from "@/lib/cliente/preferencias";
+import { obtenerPreferencias, type Pais } from "@/lib/cliente/preferencias";
+import { telefonoE164, type PaisRegistro } from "@/lib/telefono-registro";
 import { createClient } from "@/lib/supabase/server";
 
 const PAISES: Pais[] = ["CO", "US", "MX", "ES"];
@@ -15,6 +16,7 @@ export async function necesitaRegistro(): Promise<{ necesita: boolean; email: st
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { necesita: false, email: "" };
+  if (user.app_metadata?.registro_pendiente === true) return { necesita: true, email: user.email ?? "" };
   const r = await obtenerPreferencias();
   return { necesita: r.ok ? r.data.pais === null : false, email: user.email ?? "" };
 }
@@ -36,16 +38,36 @@ export async function cancelarRegistro(): Promise<{ ok: true }> {
   return { ok: true };
 }
 
-/** «CREAR CUENTA». `marketing` solo es true si el usuario marcó la casilla (opcional, sin premarcar). */
+/**
+ * «CREAR CUENTA». `marketing` solo es true si el usuario marcó la casilla (opcional, sin premarcar).
+ * El celular se valida aquí y otra vez en la base (migración 128), y se guarda como NO verificado.
+ */
 export async function crearCuentaRegistro(
   nombre: string,
   pais: string,
+  telefono: string,
   marketing: boolean,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const nombreLimpio = (nombre ?? "").trim().replace(/\s+/g, " ");
   if (nombreLimpio.length < 2 || nombreLimpio.length > 80) return { ok: false, error: "El nombre debe tener entre 2 y 80 caracteres." };
   if (!PAISES.includes(pais as Pais)) return { ok: false, error: "País no disponible." };
-  const r = await completarRegistro({ nombre: nombreLimpio, pais: pais as Pais, marketing: marketing === true, locale: "es" });
-  if (!r.ok) return { ok: false, error: r.error };
+  const e164 = telefonoE164(pais as PaisRegistro, String(telefono ?? "").slice(0, 30));
+  if (!e164) return { ok: false, error: "Revisa tu número de celular: debe ser un celular válido del país elegido." };
+
+  const supabase = await createClient();
+  const { error } = await (supabase as unknown as {
+    rpc: (n: string, a: object) => Promise<{ error: { message: string } | null }>;
+  }).rpc("completar_registro_con_telefono", {
+    p_nombre: nombreLimpio,
+    p_pais: pais,
+    p_telefono: e164,
+    p_marketing: marketing === true,
+    p_locale: "es",
+  });
+  if (error) {
+    if (error.message.includes("TELEFONO_INVALIDO")) return { ok: false, error: "Revisa tu número de celular." };
+    if (error.message.includes("NOMBRE_INVALIDO")) return { ok: false, error: "El nombre debe tener entre 2 y 80 caracteres." };
+    return { ok: false, error: "No pudimos crear tu cuenta. Intenta de nuevo." };
+  }
   return { ok: true };
 }

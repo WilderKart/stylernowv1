@@ -47,7 +47,7 @@ end $$;
 -- «Crear cuenta» (completar_registro) completa el registro y lo refleja en app_metadata.
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000a1","role":"authenticated"}', true);
-select public.completar_registro('Usuario Nuevo', 'CO', false, 'es');
+select public.completar_registro_con_telefono('Usuario Nuevo', 'CO', '+573001234567', false, 'es');
 reset role;
 do $$ begin
   if (select registro_pendiente from public.perfil where id = '00000000-0000-0000-0000-0000000000a1') then
