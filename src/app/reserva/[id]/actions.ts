@@ -1,20 +1,25 @@
 "use server";
 
-import { reembolsar } from "@/lib/pagos/mercadopago";
+import { procesarReembolsosSinFallar } from "@/lib/pagos/reembolsos";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export type ResultadoCancelacion =
-  | { ok: true; reembolsoMonto: number; reembolsoPct: number }
+  | {
+      ok: true;
+      reembolsoMonto: number;
+      reembolsoPct: number;
+      /** CONFIRMADA solo cuando la pasarela confirmó; EN_CURSO = solicitada, aún sin confirmar. */
+      devolucion: "CONFIRMADA" | "EN_CURSO" | "NINGUNA";
+    }
   | { ok: false; mensaje: string };
 
 /**
  * POST /v1/reservas/{id}/cancelar (05-API/03_Bookings.md).
  *
- * La RPC decide el porcentaje según la ventana de cancelación del Negocio y registra
- * la auditoría; aquí solo se ejecuta la devolución contra la pasarela. El monto nunca
- * viene del cliente: lo devuelve la base de datos.
+ * La RPC decide el porcentaje según la política que el cliente aceptó al reservar y
+ * encola el reembolso; aquí solo se dispara el worker. El monto nunca viene del cliente.
  */
 export async function cancelarReservaAction(
   reservaId: string,
@@ -38,55 +43,30 @@ export async function cancelarReservaAction(
   }
 
   const r = (data ?? {}) as {
-    pago_id?: string | null;
+    reembolso_id?: string | null;
     reembolso_monto?: number;
     reembolso_pct?: number;
-    motivo_catalogo?: string | null;
   };
 
   const monto = Number(r.reembolso_monto ?? 0);
   const pct = Number(r.reembolso_pct ?? 0);
 
-  if (r.pago_id && monto > 0) {
-    const admin = createAdminClient();
-    const { data: pago } = await admin
-      .from("pago")
-      .select("id, monto, id_transaccion_pasarela")
-      .eq("id", r.pago_id)
-      .single();
-
-    if (pago?.id_transaccion_pasarela) {
-      try {
-        const total = monto >= Number(pago.monto);
-        await reembolsar(pago.id_transaccion_pasarela, total ? undefined : monto);
-
-        await admin
-          .from("pago")
-          .update({
-            estado: total ? "REEMBOLSADO" : "REEMBOLSADO_PARCIAL",
-            monto_reembolsado: monto,
-            motivo_reembolso: r.motivo_catalogo ?? null,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", pago.id);
-        // 02_Commissions.md: revierte proporcionalmente la comisión ya
-        // acreditada al Wallet del Negocio cuando el reembolso se ejecuta.
-        await admin.rpc("revertir_comision_wallet", { p_pago_id: pago.id, p_monto_reembolsado: monto });
-      } catch (e) {
-        // La Reserva ya quedó cancelada: el horario se liberó igual. El reembolso
-        // pendiente queda visible en auditoría para reintento manual.
-        console.error("[cancelación] la pasarela rechazó el reembolso", r.pago_id, e);
-        return {
-          ok: false,
-          mensaje:
-            "Cancelamos la reserva, pero la devolución quedó pendiente. Soporte la resuelve en las próximas horas.",
-        };
-      }
-    }
+  // La RPC ya dejó la solicitud en `reembolso` (ELEGIBLE); el worker la ejecuta y solo
+  // la marca REEMBOLSADO con confirmación de la pasarela. Si falla, queda FALLIDO y se
+  // reintenta: nunca se pierde ni se da por hecha.
+  let devolucion: "CONFIRMADA" | "EN_CURSO" | "NINGUNA" = "NINGUNA";
+  if (r.reembolso_id && monto > 0) {
+    await procesarReembolsosSinFallar();
+    const { data: fila } = await createAdminClient()
+      .from("reembolso")
+      .select("estado")
+      .eq("id", r.reembolso_id)
+      .maybeSingle();
+    devolucion = fila?.estado === "REEMBOLSADO" ? "CONFIRMADA" : "EN_CURSO";
   }
 
   revalidatePath(`/reserva/${reservaId}`);
   revalidatePath("/mis-reservas");
 
-  return { ok: true, reembolsoMonto: monto, reembolsoPct: pct };
+  return { ok: true, reembolsoMonto: monto, reembolsoPct: pct, devolucion };
 }

@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 import { revalidatePath } from "next/cache";
+import { conMotivo, validarMotivo } from "@/lib/auditoria/motivo";
 
 type Resultado<T = undefined> =
   | ({ ok: true } & (T extends undefined ? object : { data: T }))
@@ -26,6 +27,7 @@ const MENSAJES_ERROR: Record<string, string> = {
   NO_AUTORIZADO: "No tienes permiso de SuperSU.",
   PAIS_NO_ENCONTRADO: "No encontramos ese país.",
   NO_AUTENTICADO: "Tu sesión expiró. Vuelve a iniciar sesión.",
+  MOTIVO_REQUERIDO: "Escribe el motivo del cambio (mínimo 5 caracteres). Queda en la auditoría.",
 };
 
 function traducirError(mensaje: string) {
@@ -166,26 +168,31 @@ export interface AjustesPais {
   precioMasImpuesto: boolean;
 }
 
-export async function guardarAjustesPais(a: AjustesPais): Promise<Resultado> {
+export async function guardarAjustesPais(a: AjustesPais, motivo: string): Promise<Resultado> {
   try {
     const { supabase } = await usuarioActual();
+    const m = validarMotivo(motivo);
+    if (!m) return { ok: false, error: MENSAJES_ERROR.MOTIVO_REQUERIDO };
     if (!PAISES_VALIDOS.includes(a.codigo)) return { ok: false, error: "País inválido." };
     if (!(PASARELAS as readonly string[]).includes(a.pasarela)) return { ok: false, error: "Pasarela inválida." };
     if (!(a.fundadorDescuentoPct >= 0 && a.fundadorDescuentoPct <= 100)) return { ok: false, error: "El descuento fundador debe estar entre 0 y 100." };
     if (!Number.isInteger(a.fundadorCupos) || a.fundadorCupos < 0) return { ok: false, error: "Los cupos deben ser un entero de 0 o más." };
     if (!Number.isInteger(a.fundadorMeses) || a.fundadorMeses < 1) return { ok: false, error: "Los meses fundador deben ser al menos 1." };
     if (a.impuestoPct !== null && !(a.impuestoPct >= 0 && a.impuestoPct <= 100)) return { ok: false, error: "El impuesto debe estar entre 0 y 100." };
-    const { error } = await supabase.rpc("admin_set_pais", {
-      p_codigo: a.codigo,
-      p_activo: a.activo,
-      p_pasarela: a.pasarela,
-      p_cobro_recurrente: a.cobroRecurrente,
-      p_fundador_descuento_pct: a.fundadorDescuentoPct,
-      p_fundador_cupos: a.fundadorCupos,
-      p_fundador_meses: a.fundadorMeses,
-      p_impuesto_pct: a.impuestoPct as number,
-      p_precio_mas_impuesto: a.precioMasImpuesto,
-    });
+    const { error } = await conMotivo(
+      supabase.rpc("admin_set_pais", {
+        p_codigo: a.codigo,
+        p_activo: a.activo,
+        p_pasarela: a.pasarela,
+        p_cobro_recurrente: a.cobroRecurrente,
+        p_fundador_descuento_pct: a.fundadorDescuentoPct,
+        p_fundador_cupos: a.fundadorCupos,
+        p_fundador_meses: a.fundadorMeses,
+        p_impuesto_pct: a.impuestoPct as number,
+        p_precio_mas_impuesto: a.precioMasImpuesto,
+      }),
+      m
+    );
     if (error) return { ok: false, error: traducirError(error.message) };
     revalidatePath("/admin/planes");
     return { ok: true };
@@ -194,22 +201,27 @@ export async function guardarAjustesPais(a: AjustesPais): Promise<Resultado> {
   }
 }
 
-export async function guardarPrecioPlan(p: PrecioPlan): Promise<Resultado> {
+export async function guardarPrecioPlan(p: PrecioPlan, motivo: string): Promise<Resultado> {
   try {
     const { supabase } = await usuarioActual();
+    const m = validarMotivo(motivo);
+    if (!m) return { ok: false, error: MENSAJES_ERROR.MOTIVO_REQUERIDO };
     if (!PAISES_VALIDOS.includes(p.pais) || !PLANES.includes(p.plan)) return { ok: false, error: "Plan o país inválido." };
     for (const v of [p.precioMensual, p.precioStaffExtra, p.precioSedeExtra]) {
       if (v !== null && !(Number.isFinite(v) && v >= 0)) return { ok: false, error: "Los precios deben ser números de 0 o más." };
     }
-    const { error } = await supabase.rpc("admin_set_plan_precio", {
-      p_plan: p.plan,
-      p_pais: p.pais,
-      p_precio_mensual: p.precioMensual as number,
-      p_es_desde: p.esDesde,
-      p_precio_staff_extra: p.precioStaffExtra as number,
-      p_precio_sede_extra: p.precioSedeExtra as number,
-      p_activo: p.activo,
-    });
+    const { error } = await conMotivo(
+      supabase.rpc("admin_set_plan_precio", {
+        p_plan: p.plan,
+        p_pais: p.pais,
+        p_precio_mensual: p.precioMensual as number,
+        p_es_desde: p.esDesde,
+        p_precio_staff_extra: p.precioStaffExtra as number,
+        p_precio_sede_extra: p.precioSedeExtra as number,
+        p_activo: p.activo,
+      }),
+      m
+    );
     if (error) return { ok: false, error: traducirError(error.message) };
     revalidatePath("/admin/planes");
     return { ok: true };
@@ -218,12 +230,17 @@ export async function guardarPrecioPlan(p: PrecioPlan): Promise<Resultado> {
   }
 }
 
-export async function guardarPrecioAddon(pais: string, precio: number | null): Promise<Resultado> {
+export async function guardarPrecioAddon(pais: string, precio: number | null, motivo: string): Promise<Resultado> {
   try {
     const { supabase } = await usuarioActual();
+    const m = validarMotivo(motivo);
+    if (!m) return { ok: false, error: MENSAJES_ERROR.MOTIVO_REQUERIDO };
     if (!PAISES_VALIDOS.includes(pais)) return { ok: false, error: "País inválido." };
     if (precio !== null && !(Number.isFinite(precio) && precio >= 0)) return { ok: false, error: "El precio debe ser un número de 0 o más." };
-    const { error } = await supabase.rpc("admin_set_addon_precio", { p_addon: "MI_MARCA", p_pais: pais, p_precio: precio as number });
+    const { error } = await conMotivo(
+      supabase.rpc("admin_set_addon_precio", { p_addon: "MI_MARCA", p_pais: pais, p_precio: precio as number }),
+      m
+    );
     if (error) return { ok: false, error: traducirError(error.message) };
     revalidatePath("/admin/planes");
     return { ok: true };
@@ -232,18 +249,23 @@ export async function guardarPrecioAddon(pais: string, precio: number | null): P
   }
 }
 
-export async function guardarCaracteristica(c: Caracteristica): Promise<Resultado> {
+export async function guardarCaracteristica(c: Caracteristica, motivo: string): Promise<Resultado> {
   try {
     const { supabase } = await usuarioActual();
+    const m = validarMotivo(motivo);
+    if (!m) return { ok: false, error: MENSAJES_ERROR.MOTIVO_REQUERIDO };
     if (!PLANES.includes(c.plan)) return { ok: false, error: "Plan inválido." };
     if (!/^[a-z0-9_]{1,60}$/.test(c.clave)) return { ok: false, error: "Clave inválida." };
     const valor = c.valor && c.valor.trim() ? c.valor.trim().slice(0, 120) : null;
-    const { error } = await supabase.rpc("admin_set_plan_caracteristica", {
-      p_plan: c.plan,
-      p_clave: c.clave,
-      p_habilitado: c.habilitado,
-      p_valor: valor as string,
-    });
+    const { error } = await conMotivo(
+      supabase.rpc("admin_set_plan_caracteristica", {
+        p_plan: c.plan,
+        p_clave: c.clave,
+        p_habilitado: c.habilitado,
+        p_valor: valor as string,
+      }),
+      m
+    );
     if (error) return { ok: false, error: traducirError(error.message) };
     revalidatePath("/admin/planes");
     return { ok: true };

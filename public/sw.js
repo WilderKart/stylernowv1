@@ -35,6 +35,50 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// ── Web Push (migración 124) ────────────────────────────────────────────────
+// El servidor cifra el aviso (RFC 8291); aquí llega ya descifrado como JSON
+// { id, titulo, cuerpo, ruta }. Solo se abren rutas internas del mismo origen.
+const RUTA_INTERNA = /^\/(?!\/)[A-Za-z0-9\-_/]*$/;
+
+function rutaSegura(ruta) {
+  return typeof ruta === "string" && ruta.length <= 200 && RUTA_INTERNA.test(ruta) ? ruta : "/notificaciones";
+}
+
+self.addEventListener("push", (event) => {
+  let datos = {};
+  try {
+    datos = event.data ? event.data.json() : {};
+  } catch {
+    datos = {};
+  }
+  const titulo = typeof datos.titulo === "string" && datos.titulo ? datos.titulo.slice(0, 120) : "StylerNow";
+  const cuerpo = typeof datos.cuerpo === "string" ? datos.cuerpo.slice(0, 300) : "";
+  event.waitUntil(
+    self.registration.showNotification(titulo, {
+      body: cuerpo,
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      tag: typeof datos.id === "string" ? datos.id : undefined,
+      data: { ruta: rutaSegura(datos.ruta) },
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const destino = new URL(rutaSegura(event.notification.data && event.notification.data.ruta), self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((ventanas) => {
+      for (const v of ventanas) {
+        if (v.url.startsWith(self.location.origin) && "focus" in v) {
+          return v.focus().then((f) => (f && "navigate" in f ? f.navigate(destino) : undefined));
+        }
+      }
+      return self.clients.openWindow(destino);
+    })
+  );
+});
+
 function esDatoTransaccional(url) {
   return NUNCA_CACHEAR.some((patron) => patron.test(url));
 }

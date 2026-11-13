@@ -1,8 +1,7 @@
 "use server";
 
-import { crearPreferencia } from "@/lib/pagos/mercadopago";
+import { crearPreferenciaDePago } from "@/lib/pagos/cobro";
 import { sincronizarPago } from "@/lib/pagos/sincronizar";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -64,6 +63,8 @@ export interface MiSuscripcion {
   /** Días enteros que faltan (calculados en servidor); null si no aplica. */
   diasPrueba: number | null;
   diasGracia: number | null;
+  /** La prueba se inició con tarjeta (solo entonces se cobra al terminar). */
+  conTarjeta: boolean;
 }
 
 function diasHasta(fecha: string | null): number | null {
@@ -102,7 +103,7 @@ export async function obtenerMiSuscripcion(negocioId: string): Promise<Resultado
     const { data, error } = await supabase
       .from("suscripcion")
       .select(
-        "plan_codigo, estado, fecha_proximo_cobro, plan_codigo_destino, suspendido_causa, ciclo, pais_codigo, prueba_fin, gracia_fin, activacion_manual, manual_tipo, manual_hasta"
+        "plan_codigo, estado, fecha_proximo_cobro, plan_codigo_destino, suspendido_causa, ciclo, pais_codigo, prueba_fin, gracia_fin, activacion_manual, manual_tipo, manual_hasta, metodo_pago_proveedor"
       )
       .eq("negocio_id", negocioId)
       .maybeSingle();
@@ -129,6 +130,7 @@ export async function obtenerMiSuscripcion(negocioId: string): Promise<Resultado
           manualHasta: null,
           diasPrueba: null,
           diasGracia: null,
+          conTarjeta: false,
         },
       };
     }
@@ -150,6 +152,7 @@ export async function obtenerMiSuscripcion(negocioId: string): Promise<Resultado
         manualHasta: data.manual_hasta,
         diasPrueba: data.estado === "TRIAL" ? diasHasta(data.prueba_fin) : null,
         diasGracia: data.estado === "EN_MORA" ? diasHasta(data.gracia_fin) : null,
+        conTarjeta: Boolean(data.metodo_pago_proveedor),
       },
     };
   } catch (e) {
@@ -179,19 +182,15 @@ export async function iniciarUpgrade(negocioId: string, planCodigoNuevo: PlanCod
   const { data: negocio } = await supabase.from("negocio").select("nombre").eq("id", negocioId).single();
 
   const sitio = urlSitio();
-  const esPublico = sitio.startsWith("https://");
 
   try {
-    const preferencia = await crearPreferencia({
+    // Monto, comisión y cuenta de cobro salen del `pago` en la base (lib/pagos/cobro.ts).
+    const preferencia = await crearPreferenciaDePago({
       pagoId: pago.id,
       titulo: `Upgrade de Plan a ${planCodigoNuevo} · ${negocio?.nombre ?? "StylerNow"}`,
-      monto: Number(pago.monto),
       emailPagador: user.email,
       urlRetorno: `${sitio}/panel/suscripcion?desde=pago`,
-      urlWebhook: esPublico ? `${sitio}/api/webhooks/pasarela/mercadopago` : null,
     });
-
-    await createAdminClient().from("pago").update({ id_preferencia_pasarela: preferencia.id }).eq("id", pago.id);
 
     return { ok: true, url: preferencia.url, pagoId: pago.id };
   } catch (e) {

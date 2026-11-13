@@ -1,3 +1,5 @@
+import { procesarOutbox } from "@/lib/notificaciones/worker";
+import { procesarReembolsosPendientes } from "@/lib/pagos/reembolsos";
 import { ejecutarCicloSuscripciones } from "@/lib/planes/ciclo-suscripciones";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { NextRequest } from "next/server";
@@ -72,6 +74,55 @@ export async function GET(request: NextRequest) {
     resultado.eliminacion_cuentas = await procesarEliminacionesCuenta(admin);
   } catch (e) {
     resultado.eliminacion_cuentas = { error: e instanceof Error ? e.message : "error inesperado" };
+  }
+
+  // Migración 117: cambios de comisión programados por Super Admin cuya fecha llegó.
+  try {
+    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("aplicar_comisiones_programadas");
+    resultado.comisiones_programadas = error ? { error: error.message } : data;
+  } catch (e) {
+    resultado.comisiones_programadas = { error: e instanceof Error ? e.message : "error inesperado" };
+  }
+
+  // Migración 120: lote mensual de conversaciones de WhatsApp de cada plan (idempotente por mes).
+  try {
+    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("whatsapp_otorgar_lotes_plan_mes");
+    resultado.whatsapp_lotes_plan = error ? { error: error.message } : data;
+  } catch (e) {
+    resultado.whatsapp_lotes_plan = { error: e instanceof Error ? e.message : "error inesperado" };
+  }
+
+  // Va al final: la eliminación de cuentas y las cascadas del día también encolan reembolsos.
+  try {
+    resultado.reembolsos = await procesarReembolsosPendientes(50);
+  } catch (e) {
+    resultado.reembolsos = { error: e instanceof Error ? e.message : "error inesperado" };
+  }
+
+  // Migración 124: outbox de notificaciones (email/push/panel). Después de reembolsos, que también encolan avisos.
+  // Sin RESEND_API_KEY / claves VAPID los mensajes quedan CANAL_NO_HABILITADO; nunca se marcan enviados.
+  try {
+    resultado.notificaciones = await procesarOutbox(200);
+  } catch (e) {
+    resultado.notificaciones = { error: e instanceof Error ? e.message : "error inesperado" };
+  }
+
+  // Migración 127: cuentas que validaron el código pero nunca pulsaron «Crear cuenta» (más de 24 h,
+  // sin reservas, negocios, vínculos ni compras). No son cuentas creadas: se elimina el acceso.
+  try {
+    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("cuentas_registro_abandonado", { p_horas: 24, p_limite: 50 });
+    if (error) {
+      resultado.registros_abandonados = { error: error.message };
+    } else {
+      let eliminadas = 0;
+      for (const f of (data ?? []) as { usuario_id: string }[]) {
+        const { error: e } = await admin.auth.admin.deleteUser(f.usuario_id);
+        if (!e) eliminadas += 1;
+      }
+      resultado.registros_abandonados = { eliminadas };
+    }
+  } catch (e) {
+    resultado.registros_abandonados = { error: e instanceof Error ? e.message : "error inesperado" };
   }
 
   return Response.json({ ok: true, ejecutado_at: new Date().toISOString(), ...resultado });

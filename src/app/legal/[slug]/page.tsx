@@ -63,7 +63,8 @@ export default async function LegalPage(props: PageProps<"/legal/[slug]">) {
               {p}
             </h2>
           ) : (
-            <p key={i} className="body text-text-muted break-words">
+            // pre-line: respeta los saltos de línea de las listas (a), (b)… y "- " del texto legal.
+            <p key={i} className="body text-text-muted break-words whitespace-pre-line">
               {p}
             </p>
           );

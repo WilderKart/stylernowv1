@@ -1,4 +1,5 @@
 import "server-only";
+import { procesarReembolsosSinFallar } from "@/lib/pagos/reembolsos";
 import { llamarRpc, type Resultado } from "./base";
 
 /** C03 Detalle de cita, C02 Calificar visita. Reprogramar/cancelar reutilizan los RPC del motor de reservas. */
@@ -65,12 +66,18 @@ export interface ResultadoCancelacion {
   motivo_catalogo: string | null;
 }
 
-/** Cancelar cita (reglas de ventana del negocio). El reembolso contra la pasarela lo procesa el servidor de pagos. */
-export function cancelarCita(reservaId: string, motivo?: string): Promise<Resultado<ResultadoCancelacion>> {
-  return llamarRpc<ResultadoCancelacion>("cancelar_reserva", {
+/**
+ * Cancelar cita con la política que el cliente aceptó al reservar. La RPC encola el
+ * reembolso (tabla `reembolso`); aquí se dispara el worker, que solo lo da por hecho
+ * cuando la pasarela lo confirma.
+ */
+export async function cancelarCita(reservaId: string, motivo?: string): Promise<Resultado<ResultadoCancelacion>> {
+  const r = await llamarRpc<ResultadoCancelacion>("cancelar_reserva", {
     p_reserva_id: reservaId,
     ...(motivo ? { p_motivo: motivo } : {}),
   });
+  if (r.ok) await procesarReembolsosSinFallar();
+  return r;
 }
 
 export interface ResenaCreada {

@@ -7,8 +7,9 @@ import { llamarRpc, type Resultado } from "./base";
  * Mapeo con el diseño: analitica = «Analítica de uso», personalizacion = «Recomendaciones personalizadas»,
  * ofertas_cercanas = «Ofertas de negocios cercanos», beneficios_marcas = «Beneficios de marcas aliadas».
  * marketing_email = novedades de StylerNow por correo (casilla del registro C17; no aparece en las 4 filas de C14).
+ * marketing_whatsapp = promociones de los negocios por WhatsApp (migración 120). Sin este evento, ninguna campaña te llega.
  */
-export type PropositoConsentimiento = "analitica" | "personalizacion" | "ofertas_cercanas" | "beneficios_marcas" | "marketing_email";
+export type PropositoConsentimiento = "analitica" | "personalizacion" | "ofertas_cercanas" | "beneficios_marcas" | "marketing_email" | "marketing_whatsapp";
 
 export interface EstadoConsentimiento {
   proposito: PropositoConsentimiento;

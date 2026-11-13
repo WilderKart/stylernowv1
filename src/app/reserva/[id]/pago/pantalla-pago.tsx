@@ -37,6 +37,7 @@ export interface ResumenPago {
   montoTotal: number;
   montoSena: number;
   expiraAt: string | null;
+  politica: string[];
 }
 
 function Cuenta({ expiraAt }: { expiraAt: string }) {
@@ -77,6 +78,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
   const [esperando, setEsperando] = useState(false);
   const [demorado, setDemorado] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [acepta, setAcepta] = useState(false);
   const yaRedirigido = useRef(false);
 
   // Polling del estado: la confirmación de la pasarela es asíncrona, así que la pantalla
@@ -113,7 +115,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
     setIniciando(true);
     setError(null);
 
-    const r = await iniciarPagoSena(resumen.reservaId);
+    const r = await iniciarPagoSena(resumen.reservaId, acepta);
 
     if (!r.ok) {
       setIniciando(false);
@@ -226,6 +228,23 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
         {t("pago.seguridad_txt")}
       </Bloque>
 
+      <Bloque etiqueta={t("pago.sec_politica")}>
+        <ul className="m-0 list-disc space-y-1 pl-5">
+          {resumen.politica.map((linea) => (
+            <li key={linea}>{linea}</li>
+          ))}
+        </ul>
+        <label className="mt-3 flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            className="mt-1 size-5 shrink-0 accent-current"
+            checked={acepta}
+            onChange={(e) => setAcepta(e.target.checked)}
+          />
+          <span>{t("pago.acepto_politica")}</span>
+        </label>
+      </Bloque>
+
       {error ? (
         <div className="px-4 pt-4">
           <ErrorAviso>{error}</ErrorAviso>
@@ -235,7 +254,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
       <div className="flex-1" />
       {/* Un solo botón de pago, deshabilitado tras el primer tap (05-API/01_Standards.md). */}
       <Pie>
-        <Button size="lg" className="w-full" loading={iniciando} disabled={iniciando} onClick={pagar}>
+        <Button size="lg" className="w-full" loading={iniciando} disabled={iniciando || !acepta} onClick={pagar}>
           {t("pago.pagar_anticipo", { monto: formatCOP(resumen.montoSena) })}
         </Button>
       </Pie>

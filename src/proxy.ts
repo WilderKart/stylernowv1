@@ -38,6 +38,9 @@ export async function proxy(request: NextRequest) {
   const cabeceraCsp = process.env.CSP_ENFORCE === "1" ? "Content-Security-Policy" : "Content-Security-Policy-Report-Only";
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
+  // Id de petición para la auditoría (migración 123): lo genera SIEMPRE el servidor, nunca se acepta
+  // el que mande el navegador. createClient() lo reenvía a PostgREST y la base lo guarda en evento_auditoria.
+  requestHeaders.set("x-request-id", crypto.randomUUID());
   requestHeaders.set(cabeceraCsp, csp);
 
   const { response, user } = await updateSession(request, requestHeaders);
@@ -56,6 +59,16 @@ export async function proxy(request: NextRequest) {
   // de API recibía un 307 a una página HTML en vez del 401 esperado.
   if (pathname.startsWith("/api/")) return response;
 
+  // Registro sin completar (migración 127): la sesión existe desde que se valida el código, pero la
+  // cuenta no está creada hasta «Crear cuenta». Ninguna página abre hasta entonces: todo vuelve al
+  // paso de registro. La marca vive en app_metadata, que el usuario no puede editar, y `user` viene
+  // de getUser() (servidor de Auth), no de una cookie que el navegador pueda alterar.
+  if (user?.app_metadata?.registro_pendiente === true && !rutaPermitidaConRegistroPendiente(pathname)) {
+    const login = new URL("/login", request.url);
+    if (pathname !== "/") login.searchParams.set("next", `${pathname}${search}`);
+    return NextResponse.redirect(login);
+  }
+
   if (!user && !esRutaPublica(pathname)) {
     const login = new URL("/login", request.url);
     login.searchParams.set("next", `${pathname}${search}`);
@@ -69,6 +82,11 @@ export async function proxy(request: NextRequest) {
   }
 
   return response;
+}
+
+/** Con el registro pendiente solo se puede completar el registro, cerrar sesión o leer los textos legales. */
+function rutaPermitidaConRegistroPendiente(pathname: string) {
+  return pathname === "/login" || pathname.startsWith("/login/") || pathname.startsWith("/auth/") || pathname.startsWith("/legal/");
 }
 
 export const config = {

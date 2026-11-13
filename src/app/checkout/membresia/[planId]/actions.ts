@@ -1,9 +1,8 @@
 "use server";
 
-import { crearPreferencia } from "@/lib/pagos/mercadopago";
+import { crearPreferenciaDePago } from "@/lib/pagos/cobro";
 import { leerPagoPropio } from "@/lib/pagos/leer-pago-propio";
 import { sincronizarPago } from "@/lib/pagos/sincronizar";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 const MENSAJES_ERROR: Record<string, string> = {
@@ -37,19 +36,15 @@ export async function iniciarCompraMembresia(planId: string): Promise<ResultadoI
   const negocio = plan?.negocio as unknown as { nombre: string } | null;
 
   const sitio = urlSitio();
-  const esPublico = sitio.startsWith("https://");
 
   try {
-    const preferencia = await crearPreferencia({
+    // Monto, comisión y cuenta de cobro salen del `pago` en la base (lib/pagos/cobro.ts).
+    const preferencia = await crearPreferenciaDePago({
       pagoId: pago.id,
       titulo: `Membresía ${plan?.nombre ?? ""} · ${negocio?.nombre ?? "StylerNow"}`,
-      monto: Number(pago.monto),
       emailPagador: user.email,
       urlRetorno: `${sitio}/checkout/membresia/${planId}?desde=pago&pagoId=${pago.id}`,
-      urlWebhook: esPublico ? `${sitio}/api/webhooks/pasarela/mercadopago` : null,
     });
-
-    await createAdminClient().from("pago").update({ id_preferencia_pasarela: preferencia.id }).eq("id", pago.id);
 
     return { ok: true, url: preferencia.url, pagoId: pago.id };
   } catch (e) {

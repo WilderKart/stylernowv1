@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      // ── Migración 116 (añadido a mano hasta regenerar los tipos) ──
+      aceptacion_politica_reserva: {
+        Row: {
+          aceptado_at: string
+          cliente_id: string
+          hora_inicio_reserva: string
+          id: string
+          monto_sena: number
+          negocio_id: string
+          politica: Json
+          reserva_id: string
+          terminos_id: string | null
+          texto_aceptado: string
+          version_politica: string
+          zona_horaria: string
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      reembolso: {
+        Row: {
+          cliente_id: string | null
+          confirmado_at: string | null
+          created_at: string
+          estado: string
+          id: string
+          id_reembolso_pasarela: string | null
+          idempotency_key: string
+          intentos: number
+          monto: number
+          motivo: string
+          negocio_id: string | null
+          origen: string
+          pago_id: string
+          pct: number
+          reserva_id: string | null
+          solicitado_at: string | null
+          ultimo_error: string | null
+          updated_at: string
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
       aceptacion_legal: {
         Row: {
           aceptado_at: string
@@ -5331,6 +5376,60 @@ export type Database = {
       }
     }
     Functions: {
+      // ── Migración 116 (añadido a mano hasta regenerar los tipos) ──
+      aceptar_politica_reserva: { Args: { p_reserva_id: string }; Returns: string }
+      configurar_politica_cancelacion: {
+        Args: {
+          p_motivo?: string
+          p_negocio_id: string
+          p_parcial_horas: number
+          p_parcial_pct: number
+          p_total_horas: number
+        }
+        Returns: undefined
+      }
+      admin_set_limites_politica: {
+        Args: {
+          p_max_intentos: number
+          p_motivo: string
+          p_parcial_min: number
+          p_pct_max: number
+          p_pct_min: number
+          p_total_max: number
+          p_total_min: number
+        }
+        Returns: undefined
+      }
+      admin_reintentar_reembolso: { Args: { p_motivo: string; p_reembolso_id: string }; Returns: undefined }
+      marcar_no_show: { Args: { p_motivo?: string; p_reserva_id: string }; Returns: undefined }
+      texto_politica_cancelacion: {
+        Args: { p_parcial: number; p_pct: number; p_total: number }
+        Returns: string
+      }
+      reembolso_tomar_pendientes: {
+        Args: { p_limite?: number }
+        Returns: Database["public"]["Tables"]["reembolso"]["Row"][]
+      }
+      reembolso_registrar_resultado: {
+        Args: {
+          p_error?: string
+          p_estado_pasarela?: string
+          p_id_pasarela?: string
+          p_reembolso_id: string
+        }
+        Returns: string
+      }
+      _reembolso_crear: {
+        Args: {
+          p_actor_tipo: string
+          p_monto: number
+          p_motivo: string
+          p_origen: string
+          p_pago_id: string
+          p_pct: number
+        }
+        Returns: string
+      }
       _chat_rol: { Args: { p_reserva_id: string }; Returns: string }
       _consentimiento_registrar: {
         Args: {

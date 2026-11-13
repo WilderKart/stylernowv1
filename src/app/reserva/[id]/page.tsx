@@ -149,10 +149,25 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
   const minutos = servicios.reduce((a, s) => a + (s?.duracion_minutos ?? 0), 0);
   const confirmada = reserva.estado === "CONFIRMADA";
 
+  // Rige la política que el cliente aceptó al pagar (evidencia inmutable, migración 116),
+  // no la vigente hoy: si el negocio la cambió después, no aplica a esta reserva.
+  const [{ data: aceptada }, { data: reembolso }] = await Promise.all([
+    supabase.from("aceptacion_politica_reserva").select("politica").eq("reserva_id", id).maybeSingle(),
+    supabase.from("reembolso").select("estado, monto").eq("reserva_id", id).maybeSingle(),
+  ]);
+  const pol = aceptada?.politica as { total_horas: number; parcial_horas: number; parcial_pct: number } | null;
+  const politicaAplicable = pol
+    ? {
+        ventana_reembolso_total_horas: Number(pol.total_horas),
+        ventana_reembolso_parcial_horas: Number(pol.parcial_horas),
+        reembolso_parcial_pct: Number(pol.parcial_pct),
+      }
+    : negocio;
+
   const { pct, monto: reembolsoEstimado } = estimarReembolso(
     reserva.hora_inicio,
     Number(reserva.monto_sena),
-    negocio
+    politicaAplicable
   );
 
   const dm = diaYMes(reserva.hora_inicio, tz);
@@ -230,6 +245,15 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
               : reserva.cancelado_por === "NEGOCIO"
                 ? t("rv.neg_cancelo")
                 : t("rv.cancelada_generica")}
+          </p>
+        ) : null}
+        {reserva.estado === "CANCELADA" && reembolso ? (
+          <p className="body-sm mt-2 break-words" role="status">
+            {reembolso.estado === "REEMBOLSADO"
+              ? t("rv.reembolso_confirmado", { monto: formatCOP(Number(reembolso.monto)) })
+              : reembolso.estado === "REQUIERE_REVISION"
+                ? t("rv.reembolso_revision", { monto: formatCOP(Number(reembolso.monto)) })
+                : t("rv.reembolso_en_curso", { monto: formatCOP(Number(reembolso.monto)) })}
           </p>
         ) : null}
       </div>

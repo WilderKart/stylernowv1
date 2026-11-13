@@ -11,7 +11,12 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 const API = "https://api.mercadopago.com";
 
-function accessToken() {
+/**
+ * Token de la cuenta de StylerNow. Solo para cobros cuyo beneficiario es la plataforma
+ * (planes, IA, recargas de WhatsApp) y para pagos históricos cobrados en custodia. Los
+ * cobros de un negocio usan el token de SU conexión (`conexiones.ts`), nunca este.
+ */
+function tokenPlataforma() {
   const token = process.env.MERCADOPAGO_ACCESS_TOKEN;
   if (!token) throw new Error("Falta MERCADOPAGO_ACCESS_TOKEN en el entorno.");
   return token;
@@ -22,13 +27,26 @@ export function esEntornoDePrueba() {
   return (process.env.MERCADOPAGO_ACCESS_TOKEN ?? "").startsWith("TEST-");
 }
 
-async function mp<T>(ruta: string, init: RequestInit & { idempotencyKey?: string } = {}) {
-  const { idempotencyKey, ...rest } = init;
+/** `token` ausente = cuenta de StylerNow. */
+export type TokenPasarela = string | undefined;
+
+/** Error de la API con su código HTTP, para distinguir credencial revocada (401/403) de fallas temporales. */
+export class ErrorMercadoPago extends Error {
+  constructor(
+    mensaje: string,
+    readonly status: number
+  ) {
+    super(mensaje);
+  }
+}
+
+async function mp<T>(ruta: string, init: RequestInit & { idempotencyKey?: string; token?: TokenPasarela } = {}) {
+  const { idempotencyKey, token, ...rest } = init;
   const res = await fetch(`${API}${ruta}`, {
     ...rest,
     cache: "no-store",
     headers: {
-      Authorization: `Bearer ${accessToken()}`,
+      Authorization: `Bearer ${token ?? tokenPlataforma()}`,
       "Content-Type": "application/json",
       ...(idempotencyKey ? { "X-Idempotency-Key": idempotencyKey } : {}),
       ...rest.headers,
@@ -37,8 +55,9 @@ async function mp<T>(ruta: string, init: RequestInit & { idempotencyKey?: string
 
   const cuerpo = (await res.json().catch(() => null)) as T & { message?: string };
   if (!res.ok) {
-    throw new Error(
-      `Mercado Pago ${res.status} en ${ruta}: ${cuerpo?.message ?? "error sin detalle"}`
+    throw new ErrorMercadoPago(
+      `Mercado Pago ${res.status} en ${ruta.split("?")[0]}: ${cuerpo?.message ?? "error sin detalle"}`,
+      res.status
     );
   }
   return cuerpo;
@@ -82,6 +101,10 @@ export interface DatosPreferencia {
   urlWebhook?: string | null;
   /** Fin de la ventana de 10 minutos de la Reserva (03-Business-Rules/03_Payment_Rules.md). */
   expiraEn?: string | null;
+  /** Token del vendedor (cobro directo al negocio). Ausente = cuenta de StylerNow. */
+  token?: TokenPasarela;
+  /** Comisión de StylerNow que retiene Mercado Pago (split 1:1). La fija la base de datos. */
+  marketplaceFee?: number;
 }
 
 export async function crearPreferencia(d: DatosPreferencia): Promise<PreferenciaCreada> {
@@ -105,11 +128,13 @@ export async function crearPreferencia(d: DatosPreferencia): Promise<Preferencia
     ...(d.urlWebhook ? { notification_url: d.urlWebhook } : {}),
     ...(d.expiraEn ? { expires: true, expiration_date_to: d.expiraEn } : {}),
     statement_descriptor: "STYLERNOW",
+    // Por defecto 0 (Mercado Pago lo trata igual que omitirlo); solo se envía si es > 0.
+    ...(d.token && d.marketplaceFee && d.marketplaceFee > 0 ? { marketplace_fee: Math.round(d.marketplaceFee) } : {}),
   };
 
   const pref = await mp<{ id: string; init_point?: string; sandbox_init_point?: string }>(
     "/checkout/preferences",
-    { method: "POST", body: JSON.stringify(cuerpo), idempotencyKey: d.pagoId }
+    { method: "POST", body: JSON.stringify(cuerpo), idempotencyKey: d.pagoId, token: d.token }
   );
 
   const url = pref.init_point ?? pref.sandbox_init_point;
@@ -149,8 +174,10 @@ function mapearPago(p: {
   };
 }
 
-export async function obtenerPago(idPago: string): Promise<PagoPasarela> {
-  const p = await mp<Parameters<typeof mapearPago>[0]>(`/v1/payments/${idPago}`);
+export async function obtenerPago(idPago: string, token?: TokenPasarela): Promise<PagoPasarela> {
+  // El id llega del webhook (dato externo): solo dígitos, para que no pueda alterar la ruta de la API.
+  if (!/^\d{1,20}$/.test(idPago)) throw new Error("ID_TRANSACCION_INVALIDO");
+  const p = await mp<Parameters<typeof mapearPago>[0]>(`/v1/payments/${idPago}`, { token });
   return mapearPago(p);
 }
 
@@ -159,9 +186,10 @@ export async function obtenerPago(idPago: string): Promise<PagoPasarela> {
  * cuando no hay webhook disponible (desarrollo local) o cuando el Cliente vuelve
  * del checkout antes de que la notificación llegue.
  */
-export async function buscarPagoPorReferencia(pagoId: string): Promise<PagoPasarela | null> {
+export async function buscarPagoPorReferencia(pagoId: string, token?: TokenPasarela): Promise<PagoPasarela | null> {
   const r = await mp<{ results?: Parameters<typeof mapearPago>[0][] }>(
-    `/v1/payments/search?external_reference=${encodeURIComponent(pagoId)}&sort=date_created&criteria=desc`
+    `/v1/payments/search?external_reference=${encodeURIComponent(pagoId)}&sort=date_created&criteria=desc`,
+    { token }
   );
   const resultados = r.results ?? [];
   if (resultados.length === 0) return null;
@@ -172,15 +200,30 @@ export async function buscarPagoPorReferencia(pagoId: string): Promise<PagoPasar
 
 // ── Reembolsos (03-Business-Rules/03_Payment_Rules.md) ─────────────────────
 
-export async function reembolsar(idPago: string, monto?: number) {
+/**
+ * `claveIdempotencia` debe ser estable entre reintentos del MISMO reembolso (el id de la
+ * fila `reembolso`): si la primera llamada llegó a la pasarela pero su respuesta se perdió,
+ * el reintento devuelve el mismo reembolso en lugar de crear otro.
+ */
+export async function reembolsar(idPago: string, monto?: number, claveIdempotencia?: string, token?: TokenPasarela) {
+  if (!/^\d+$/.test(idPago)) throw new Error("ID_TRANSACCION_INVALIDO");
   return mp<{ id: number; status: string; amount: number }>(`/v1/payments/${idPago}/refunds`, {
     method: "POST",
     body: JSON.stringify(monto ? { amount: Math.round(monto) } : {}),
-    idempotencyKey: `reembolso-${idPago}-${monto ?? "total"}`,
+    idempotencyKey: claveIdempotencia ?? `reembolso-${idPago}-${monto ?? "total"}`,
+    token,
   });
 }
 
+export async function consultarReembolso(idPago: string, idReembolso: string, token?: TokenPasarela) {
+  if (!/^\d+$/.test(idPago) || !/^\d+$/.test(idReembolso)) throw new Error("ID_TRANSACCION_INVALIDO");
+  return mp<{ id: number; status: string; amount: number }>(`/v1/payments/${idPago}/refunds/${idReembolso}`, { token });
+}
+
 // ── Autenticidad del webhook (05-API/06_Webhooks.md) ───────────────────────
+
+/** Antigüedad máxima aceptada para la marca de tiempo firmada de una notificación. */
+const VENTANA_FIRMA_MS = 15 * 60_000;
 
 /**
  * Verifica la firma HMAC del webhook. El manifiesto que firma Mercado Pago es
@@ -207,7 +250,12 @@ export function verificarFirma(args: {
   );
   const ts = partes.ts;
   const v1 = partes.v1;
-  if (!ts || !v1) return false;
+  if (!ts || !v1 || !/^\d{1,16}$/.test(ts)) return false;
+
+  // Anti-replay: una notificación firmada pero vieja (capturada y reenviada) se rechaza.
+  // `ts` puede venir en segundos o milisegundos según la versión de la notificación.
+  const tsMs = ts.length > 11 ? Number(ts) : Number(ts) * 1000;
+  if (!Number.isFinite(tsMs) || Math.abs(Date.now() - tsMs) > VENTANA_FIRMA_MS) return false;
 
   const manifiesto = `id:${args.dataId.toLowerCase()};request-id:${args.requestId ?? ""};ts:${ts};`;
   const esperado = createHmac("sha256", secreto).update(manifiesto).digest("hex");

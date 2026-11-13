@@ -203,7 +203,7 @@ export function DetalleCliente({
           ))}
         </div>
         <div className="flex gap-2">
-          <Input placeholder="Nueva etiqueta..." value={nuevaEtiqueta} onChange={(e) => setNuevaEtiqueta(e.target.value)} />
+          <Input aria-label="Nueva etiqueta" placeholder="Nueva etiqueta..." value={nuevaEtiqueta} onChange={(e) => setNuevaEtiqueta(e.target.value)} />
           <Button size="sm" variant="secondary" loading={guardandoEtiqueta} onClick={onAgregarEtiqueta}>
             Agregar
           </Button>

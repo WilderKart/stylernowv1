@@ -37,12 +37,14 @@ async function enviarAvisos(admin: Admin) {
     if (!email) continue;
     const dias = a.tipo === "1D" ? "mañana" : "en 3 días";
     const fecha = new Date(a.fecha_cobro).toLocaleDateString("es-CO", { day: "numeric", month: "long" });
-    const ok = await enviarCorreo(
-      email,
-      `Tu prueba de StylerNow termina ${dias}`,
-      `<h2>Tu prueba gratuita termina ${dias}</h2><p>El ${fecha} se hará el primer cobro de tu plan con el método de pago que registraste. ` +
-        `Si no quieres continuar, cancela antes desde Plan y facturación.</p>`,
-    );
+    // Sin tarjeta no hay cobro automático: se invita a elegir plan (migración 118).
+    const conTarjeta = (a as { con_tarjeta?: boolean }).con_tarjeta === true;
+    const cuerpo = conTarjeta
+      ? `<h2>Tu prueba gratuita termina ${dias}</h2><p>El ${fecha} se hará el primer cobro de tu plan con el método de pago que registraste. ` +
+        `Si no quieres continuar, cancela antes desde Plan y facturación.</p>`
+      : `<h2>Tu prueba gratuita termina ${dias}</h2><p>El ${fecha} termina tu prueba. No te cobraremos nada: para seguir recibiendo reservas, ` +
+        `elige tu plan desde Plan y facturación.</p>`;
+    const ok = await enviarCorreo(email, `Tu prueba de StylerNow termina ${dias}`, cuerpo);
     if (ok) {
       await admin.rpc("marcar_aviso_prueba", { p_negocio_id: a.negocio_id, p_tipo: a.tipo });
       enviados++;

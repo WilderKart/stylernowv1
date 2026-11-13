@@ -1,3 +1,4 @@
+import { resumenPoliticaCancelacion } from "@/lib/pagos/sena";
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { PantallaPago } from "./pantalla-pago";
@@ -23,7 +24,7 @@ export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
     .from("reserva")
     .select(
       `id, estado, hora_inicio, monto_total, monto_sena, expira_at,
-       negocio:negocio_id (nombre, slug),
+       negocio:negocio_id (nombre, slug, ventana_reembolso_total_horas, ventana_reembolso_parcial_horas, reembolso_parcial_pct),
        sede:sede_id (zona_horaria),
        staff:staff_id (nombre),
        reserva_servicio (servicio:servicio_id (nombre))`
@@ -36,7 +37,13 @@ export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
   // Una Reserva ya confirmada o cancelada no vuelve a la pantalla de cobro.
   if (reserva.estado !== "PENDIENTE_PAGO") redirect(`/reserva/${id}`);
 
-  const negocio = reserva.negocio as unknown as { nombre: string; slug: string } | null;
+  const negocio = reserva.negocio as unknown as {
+    nombre: string;
+    slug: string;
+    ventana_reembolso_total_horas: number;
+    ventana_reembolso_parcial_horas: number;
+    reembolso_parcial_pct: number;
+  } | null;
   const sede = reserva.sede as unknown as { zona_horaria: string } | null;
   const staff = reserva.staff as unknown as { nombre: string } | null;
   const servicios = (reserva.reserva_servicio ?? []).map(
@@ -56,6 +63,9 @@ export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
         montoTotal: Number(reserva.monto_total),
         montoSena: Number(reserva.monto_sena),
         expiraAt: reserva.expira_at,
+        // Solo para mostrar: lo que queda como evidencia lo reconstruye la base de datos
+        // (`aceptar_politica_reserva`) con los números del negocio, no este texto.
+        politica: negocio ? resumenPoliticaCancelacion(negocio) : [],
       }}
     />
   );

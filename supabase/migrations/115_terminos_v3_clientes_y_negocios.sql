@@ -1,0 +1,215 @@
+-- StylerNow — Migración 115: Términos y Condiciones v3 (clientes y negocios)
+--
+-- Reemplaza TERMINOS v2 (solo cliente) por un texto que cubre también al Negocio
+-- (planes, WhatsApp, cobros, responsabilidad). Se publica con cambio_material = true:
+-- todos los usuarios deben aceptarla de nuevo en su próximo ingreso
+-- (src/lib/auth/aceptacion-legal.ts). Fuente editable: docs/legal/TERMINOS_v3_texto.txt
+-- (este archivo se genera desde ese texto; no lo edites a mano).
+--
+-- Alineado con el código de las migraciones 116 (política de cancelación con aceptación,
+-- no-show, reembolsos confirmados por la pasarela), 117 (comisión 0 % por defecto),
+-- 118 (prueba con o sin tarjeta) y 120 (WhatsApp sin envío hasta conectar el proveedor).
+--
+-- Candados antes de publicar (el bloque de abajo los hace cumplir):
+--   1. El texto dice que el Anticipo va directo a la cuenta de Mercado Pago del Negocio.
+--      Eso exige la fase D (conexión OAuth por negocio, tabla public.conexion_pago_negocio).
+--      Si la tabla no existe, NO inserta nada (solo avisa): no se publican términos que el
+--      código todavía no cumple. Se vuelve a correr cuando la fase D esté en producción.
+--   2. Sin marcadores entre corchetes. El NIT "xxxxx" solo emite un aviso.
+--   3. Revisión de un abogado colombiano (no se puede verificar desde aquí).
+
+do $$
+declare
+  v_contenido text := $t$Términos y Condiciones de Uso — StylerNow
+
+1. Quiénes somos y aceptación
+
+StylerNow es una plataforma de reservas y gestión para negocios de belleza, operada por StylerNow, NIT xxxxx, con domicilio en la Carrera 1A # 59-60, Cali, Valle del Cauca, Colombia ("StylerNow", "nosotros"). Estos términos regulan el uso de nuestro sitio web, de la aplicación y de los servicios relacionados (la "Plataforma").
+
+Al crear una cuenta, marcar la casilla de aceptación o usar la Plataforma, aceptas estos términos sin modificaciones, junto con la Política de Tratamiento de Datos Personales. Si no estás de acuerdo, no debes usar la Plataforma. Te recomendamos guardar una copia.
+
+2. Definiciones
+
+Cliente: persona que descubre, reserva y paga Servicios de un Negocio a través de la Plataforma.
+
+Negocio: barbería, salón, spa u otro establecimiento de belleza, cuidado personal o bienestar que ofrece sus Servicios y usa la Plataforma para gestionarlos.
+
+Equipo: barberos, profesionales y demás personas a quienes el Negocio da acceso a la Plataforma.
+
+Servicio: el servicio que presta un Negocio a un Cliente.
+
+Reserva: la cita agendada por un Cliente con un Negocio.
+
+Anticipo: el pago parcial o total del Servicio que el Cliente hace al reservar. Saldo: lo que falta por pagar del Servicio.
+
+Plan: la suscripción mensual o anual que contrata el Negocio.
+
+Usuario: el Cliente o el Negocio. Quien use ambas funciones queda sujeto a todas las reglas que le apliquen.
+
+3. Qué es StylerNow
+
+StylerNow es un intermediario tecnológico. Ofrece (a) un marketplace donde los Clientes descubren Negocios, reservan y pagan el Anticipo de una cita, y (b) un software de gestión (agenda, clientes, caja, inventario, mensajes y otras herramientas) que los Negocios contratan mediante un Plan.
+
+StylerNow no presta los Servicios de belleza ni es parte de la relación entre el Cliente y el Negocio por el Servicio. Esa relación es entre ellos y el Negocio responde por el Servicio.
+
+4. Tu cuenta
+
+El registro y el ingreso se hacen con tu correo electrónico mediante un código de acceso de un solo uso de 6 dígitos, o con tu cuenta de Google.
+
+Eres responsable de mantener la confidencialidad del acceso a tu cuenta y de todo lo que ocurra en ella. No puedes ceder, transferir ni compartir tu cuenta con otra persona. Avísanos de inmediato si sospechas un uso no autorizado. No respondemos por el acceso de terceros que resulte del robo o la apropiación indebida de tu acceso por causas ajenas a nosotros.
+
+Puedes cancelar tu cuenta en cualquier momento. Los efectos de la cancelación se explican en la sección de suspensión y terminación.
+
+La Plataforma es para mayores de 18 años. Un adulto puede reservar para un menor a su cargo y es responsable de esa Reserva y de autorizar el Servicio. No recopilamos a sabiendas datos personales de menores sin la autorización de su representante legal.
+
+5. Reservas y pagos del Cliente
+
+Al reservar aceptas pagar el Anticipo indicado antes de confirmar. El Saldo se paga directamente en el Negocio, salvo que este habilite el pago completo desde la app.
+
+El precio, la duración, la disponibilidad, la descripción y las fotos de cada Servicio los define el Negocio. Las imágenes y descripciones son ilustrativas y el Servicio real puede diferir. Debes presentarte en el lugar del Negocio a la hora de tu Reserva, salvo que el Servicio se preste por medios digitales.
+
+Los pagos en línea se registran y procesan en Mercado Pago, cuyas condiciones también aplican. Los datos de tu tarjeta los guarda Mercado Pago y StylerNow no los almacena. El Anticipo se paga directamente a la cuenta de Mercado Pago del Negocio. Si el Negocio no tiene su cuenta conectada, no se cobran Anticipos en línea para sus Reservas.
+
+6. Cancelación, no presentación y reembolsos del Anticipo
+
+Cada Negocio define su política de cancelación dentro de los límites que fija StylerNow. Antes de pagar verás la política aplicable a tu Reserva y debes aceptarla expresamente para pagar el Anticipo. Guardamos constancia de la versión que aceptaste, con fecha y hora, y esa es la que rige tu Reserva aunque el Negocio la cambie después.
+
+Salvo que el Negocio publique otra dentro de esos límites, la política es: (a) si cancelas con 24 horas o más de anticipación, te devolvemos el 100 % del Anticipo; (b) si cancelas con 2 horas o más pero menos de 24 horas de anticipación, te devolvemos el 50 %; (c) si cancelas con menos de 2 horas de anticipación o no te presentas a la hora acordada, el Anticipo (que puede ser hasta el valor total del Servicio) no es reembolsable y queda para el Negocio por el espacio reservado. Las horas se cuentan hasta la hora de inicio de tu Reserva.
+
+Reprogramar una Reserva depende del acuerdo con el Negocio. Si el Negocio la acepta, el Anticipo se conserva para la nueva fecha.
+
+Siempre tienes derecho al reembolso del 100 % del Anticipo cuando: (a) el Negocio cancela la Reserva o no presta el Servicio; (b) el Negocio cierra su cuenta o es suspendido y tu Reserva no puede atenderse; o (c) se hizo un cobro duplicado, errado o que no autorizaste.
+
+Cuando corresponde un reembolso, la Plataforma lo solicita a Mercado Pago, al mismo medio de pago y desde la cuenta en la que se cobró el Anticipo, y te muestra su estado: solicitado, confirmado o en revisión. Solo lo damos por hecho cuando Mercado Pago lo confirma, y el dinero puede tardar en verse según tu medio de pago. Si Mercado Pago no puede procesarlo (por ejemplo, por falta de saldo en la cuenta del Negocio), el caso queda en revisión y el Negocio sigue obligado a devolverlo. No descontamos del reembolso las tarifas del procesador.
+
+Lo anterior no afecta los derechos irrenunciables que la ley de consumo aplicable te reconozca.
+
+7. Servicios de los Negocios y responsabilidad
+
+Cada Negocio es responsable de la naturaleza, calidad, seguridad e higiene de sus Servicios, de su personal, de sus políticas de reprogramación, cambios y devolución del Saldo, y de que la información que publica sea precisa, completa y no engañosa. Cualquier disputa sobre estos puntos se resuelve con el Negocio.
+
+El Cliente debe informar con anticipación al Negocio cualquier condición médica, alergia o necesidad especial que pueda afectar un Servicio o verse afectada por él (por ejemplo, alergias a tintes o productos).
+
+StylerNow no responde por lesiones, pérdidas o daños derivados de los Servicios del Negocio. Esto no excluye la responsabilidad que la ley no permite excluir.
+
+Las reseñas deben reflejar experiencias reales.
+
+8. Planes y suscripción del Negocio
+
+(a) El Negocio accede a las herramientas mediante un Plan (Essential, Studio, Prestige o Signature), mensual o anual. Cada Plan incluye un número de barberos y sedes, una cuota mensual de mensajes de WhatsApp y las funciones indicadas en la página de planes vigente al contratar. El Plan Signature se cotiza según las necesidades del Negocio y el precio "desde" publicado es solo de referencia. Podemos ofrecer complementos (por ejemplo, barberos o sedes adicionales, Mi Marca, créditos de inteligencia artificial y recargas de WhatsApp), cada uno con su precio.
+
+(b) El Plan se paga por adelantado por cada período, en la moneda y con el tratamiento de impuestos indicados al contratar. Si el cobro recurrente está habilitado, el Plan se renueva automáticamente cada período hasta que lo canceles. Si no lo está, debes pagar cada período para continuar. Los pagos se registran en Mercado Pago: los datos de tu tarjeta los guarda Mercado Pago y StylerNow no los almacena.
+
+(c) Podemos ofrecer una prueba gratuita por la duración indicada al iniciarla, una sola vez por Negocio. Para evitar pruebas repetidas te pedimos teléfono y documento, que guardamos solo como huella cifrada. Según la modalidad vigente, la prueba se inicia sin método de pago o con uno registrado. Si la iniciaste sin método de pago, no se te cobra nada: al terminar debes elegir y pagar un Plan para seguir recibiendo Reservas. Si la iniciaste con un método de pago, te avisamos antes del fin de la prueba y al terminar se cobra el Plan elegido, salvo que canceles antes.
+
+(d) Puedes subir a un Plan superior en cualquier momento pagando solo la diferencia proporcional al tiempo restante. Puedes bajar de Plan o cancelar en cualquier momento, pero lo ya pagado no se reembolsa y conservas el acceso hasta el final del período pagado. En el Plan anual esto aplica también si bajas de Plan, reduces profesionales o cancelas antes de cumplirse el año contado desde la contratación.
+
+(e) Las promociones (como el precio fundador) se rigen por las condiciones publicadas al contratarlas y pueden perderse si cancelas antes del plazo indicado.
+
+(f) Si superas los barberos o sedes incluidos en tu Plan, debes contratar los adicionales o subir de Plan.
+
+(g) Si un cobro del Plan falla, tienes un período de gracia, informado en tu panel, para regularizarlo. Pasado ese período podemos limitar o suspender el acceso y ocultar tu perfil del mapa hasta que lo regularices.
+
+(h) Revisamos los precios de los Planes cada trimestre, sin una fecha fija. En cada revisión el precio puede cambiar o mantenerse. Si cambia, te avisamos con antelación razonable y el nuevo precio rige desde tu siguiente renovación.
+
+9. Obligaciones del Negocio
+
+El Negocio debe mantener actualizada y veraz la información de su perfil (servicios, precios, horarios, equipo y fotos) y cumplir las normas aplicables a su actividad: permisos, higiene y salubridad, impuestos, facturación a sus clientes y publicidad.
+
+El Negocio es responsable del Equipo al que da acceso, de los permisos que le asigna y de la política de cancelación que publique, que debe ser clara.
+
+Solo puede usar los datos de los Clientes para gestionar sus citas y para comunicaciones autorizadas, respetando la Política de Tratamiento de Datos Personales y la ley. No enviará mensajes de marketing a quien no lo haya autorizado.
+
+Debe tener los derechos sobre las fotos, logos y demás contenido que publique, y la autorización de las personas que aparezcan en ellos.
+
+10. Cobros a Clientes, pagos al Negocio y comisiones
+
+Los Anticipos que el Cliente paga a través de la Plataforma se pagan directamente a la cuenta de Mercado Pago del Negocio, que el Negocio conecta a la Plataforma. StylerNow no recibe, custodia ni administra ese dinero, que no es suyo. El Anticipo que no se reembolsa por cancelación o inasistencia del Cliente corresponde al Negocio. Los Planes, complementos, publicidad y recargas de WhatsApp los vende StylerNow y se pagan a la cuenta de StylerNow.
+
+El Negocio es responsable de sus obligaciones tributarias y contables sobre los pagos que recibe, de las tarifas que Mercado Pago le cobre y de los reembolsos que correspondan a sus Clientes. Los contracargos y disputas de un pago se resuelven entre el Negocio y el procesador de pagos. La Plataforma registra los movimientos para que los consultes y exportes, pero ese registro no reemplaza tu contabilidad.
+
+Por defecto, StylerNow no cobra comisión por reserva. Si en el futuro se pacta o se fija una comisión, te la informaremos con antelación, se mostrará en tu panel y aplicará solo a pagos posteriores a su entrada en vigencia.
+
+11. WhatsApp, mensajes y comunicaciones
+
+Aceptas recibir comunicaciones electrónicas (correo, notificaciones en la app y WhatsApp) sobre tu cuenta y tus Reservas, como recordatorios, confirmaciones y cambios. Estas comunicaciones cumplen cualquier requisito legal de que se hagan por escrito. Los mensajes de promoción solo se envían si los autorizas y puedes revocar esa autorización en cualquier momento.
+
+Cada Plan incluye una cuota mensual de mensajes de plantilla de WhatsApp. La cuota distingue los mensajes de aviso (recordatorios y confirmaciones) de los de marketing (promociones y campañas), y estos últimos tienen un tope porcentual de la cuota. Las recargas se consumen después de la cuota del Plan, vencen a los 12 meses de su compra y no son reembolsables. Como los costos y reglas de Meta pueden cambiar, podemos ajustar cuotas, topes y precios de recargas con aviso previo.
+
+El envío de mensajes por WhatsApp se activa cuando la conexión con el proveedor de WhatsApp Business esté habilitada, y tu panel muestra su estado. Mientras no lo esté, puedes preparar plantillas y campañas, pero no se envía ningún mensaje ni se descuenta nada de tu cuota. Las campañas de marketing solo llegan a Clientes que autorizaron recibir promociones por WhatsApp.
+
+El Negocio garantiza que cuenta con la autorización de sus clientes para recibir mensajes y que cumple las políticas de WhatsApp y de Meta. Podemos limitar o suspender el envío si hay abuso, quejas o riesgo para el número de envío.
+
+12. Uso aceptable
+
+No puedes usar la Plataforma para fines ilegales o fraudulentos, para acosar a Negocios, Equipo o Clientes, ni para manipular reseñas o el sistema de reservas.
+
+Tampoco puedes dañar, deshabilitar, sobrecargar o deteriorar la Plataforma; obtener información por medios no previstos (por ejemplo, rastreo automatizado); hacer ingeniería inversa; revender o sublicenciar la Plataforma; ni intentar eludir los límites o bloqueos de tu Plan ni probar vulnerabilidades sin autorización escrita.
+
+13. Propiedad intelectual y contenido
+
+Te otorgamos una licencia limitada, no exclusiva, intransferible y revocable para usar la Plataforma de acuerdo con estos términos. El software, el diseño, las marcas y el contenido de StylerNow son nuestros o de nuestros licenciantes y no adquieres derechos sobre ellos.
+
+El contenido que subes sigue siendo tuyo. Nos autorizas a alojarlo, mostrarlo y procesarlo en la Plataforma (por ejemplo, en tu perfil, el mapa y las reseñas) mientras mantengas tu cuenta y el tiempo necesario después. Eres responsable de que tu contenido no infrinja derechos de terceros.
+
+14. Datos personales
+
+Tratamos tus datos personales conforme a la Política de Tratamiento de Datos Personales, a la Ley 1581 de 2012 y a las normas aplicables en tu país. Para atender tu Reserva compartimos con el Negocio los datos necesarios.
+
+15. Terceros y enlaces
+
+La Plataforma puede enlazar sitios de terceros y depende de servicios de terceros, como procesadores de pago (por ejemplo, Mercado Pago), Google, Meta (WhatsApp) y proveedores de infraestructura. No controlamos sus contenidos ni responden por ellos nuestros términos; aplican los suyos. Compartimos con ellos los datos necesarios para prestar el servicio, conforme a la Política de Tratamiento de Datos Personales.
+
+16. Disponibilidad y límite de responsabilidad
+
+Hacemos esfuerzos razonables para que la Plataforma esté disponible, pero se ofrece "tal como está": puede haber interrupciones por mantenimiento, fallas de terceros o causas fuera de nuestro control, y la información puede contener errores. Podemos mejorar o cambiar sus funciones.
+
+Dentro de lo permitido por la ley, StylerNow no responde por daños indirectos, lucro cesante ni pérdida de datos o de clientes. Nuestra responsabilidad total frente a un Negocio se limita a lo que haya pagado por su Plan en los 12 meses anteriores al hecho y, frente a un Cliente, al valor del Anticipo de la Reserva implicada. Nada de esto limita la responsabilidad que la ley no permite limitar, como el dolo, la culpa grave o los derechos irrenunciables del consumidor.
+
+17. Responsabilidad del Negocio frente a reclamaciones
+
+El Negocio mantendrá indemne a StylerNow, a sus directivos y empleados frente a reclamaciones de terceros (incluidos Clientes y autoridades) derivadas de sus Servicios, del contenido que publique o del incumplimiento de estos términos o de la ley, incluidos los costos razonables de defensa. StylerNow puede asumir la defensa por su cuenta y el Negocio colaborará. Esta sección no aplica a Clientes.
+
+18. Suspensión y terminación
+
+Puedes cancelar tu cuenta cuando quieras. Podemos suspender o cancelar tu acceso, avisándote cuando sea posible, si incumples estos términos, hay fraude, riesgo de seguridad, falta de pago o un requerimiento de autoridad.
+
+Si un Negocio cierra su cuenta o es suspendido, se bloquean sus nuevas Reservas, se cancelan sus Reservas futuras y la Plataforma solicita el reembolso del 100 % de los Anticipos pagados y notifica a cada Cliente. El Negocio sigue obligado a esos reembolsos si Mercado Pago no puede procesarlos. Al terminar, conservamos los datos según la Política de Tratamiento de Datos Personales y las obligaciones legales, como las contables. Las reglas de reembolso de la sección de Planes siguen aplicando.
+
+19. Usuarios internacionales
+
+La Plataforma se opera desde Colombia y está disponible en Colombia, Estados Unidos, México y España. Si accedes desde otro país, eres responsable de cumplir tus leyes locales.
+
+20. Ley aplicable y controversias
+
+Estos términos se rigen por las leyes de Colombia. Antes de acudir a un juez, escríbenos a soporte para intentar resolver la diferencia. Si no se resuelve, las controversias se someterán a los jueces competentes de Cali, Colombia, salvo que la ley de consumo de tu país te permita acudir a tus propios tribunales o a la autoridad de consumo (en Colombia, la Superintendencia de Industria y Comercio), caso en el que prevalece esa norma.
+
+21. Disposiciones generales
+
+No existe sociedad, empresa conjunta, empleo ni agencia entre StylerNow y los Usuarios por el uso de la Plataforma. Cumpliremos los requerimientos de autoridades competentes. Si alguna disposición es inválida o inaplicable, se reemplaza por la válida que más se acerque a su intención y el resto sigue vigente.
+
+Estos términos y la Política de Tratamiento de Datos Personales son el acuerdo completo entre tú y StylerNow sobre la Plataforma. Los registros electrónicos y las copias impresas son admisibles como prueba. No puedes ceder tus derechos sin nuestro consentimiento; nosotros podemos cederlos en una reorganización empresarial notificándote.
+
+22. Cambios en los términos
+
+Podemos actualizar estos términos. Si el cambio es material, te lo notificamos y te pedimos aceptarlo de nuevo antes de continuar usando la Plataforma. La versión vigente reemplaza a las anteriores y está siempre disponible en la Plataforma.
+
+23. Contacto
+
+Para dudas sobre estos términos, contáctanos por los canales de soporte dentro de la Plataforma o en equipo@stylernow.com.$t$;
+begin
+  if to_regclass('public.conexion_pago_negocio') is null then
+    raise notice 'TERMINOS_V3_NO_PUBLICADO: el cobro directo al negocio (fase D) aún no existe; vuelve a correr esta migración cuando exista';
+    return;
+  end if;
+  if v_contenido ~ '\[[A-ZÁÉÍÓÚÑ ]+\]' then
+    raise exception 'TERMINOS_V3_CON_MARCADORES: completa los datos legales antes de publicar';
+  end if;
+  if v_contenido like '%NIT xxxxx%' then
+    raise notice 'TERMINOS_V3: el NIT sigue como xxxxx; actualiza el texto cuando lo tengas';
+  end if;
+
+  insert into public.texto_legal (tipo, version, contenido, cambio_material)
+  values ('TERMINOS', 3, v_contenido, true)
+  on conflict (tipo, version) do nothing;
+end $$;

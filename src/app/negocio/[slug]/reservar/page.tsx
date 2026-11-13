@@ -38,6 +38,11 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
 
   if (!negocio) notFound();
 
+  // Migración 119: sin cuenta de cobro propia conectada, el anticipo en línea es 0 (lo decide la base).
+  const { data: cobraEnLinea } = await (supabase as unknown as {
+    rpc: (n: string, a: object) => Promise<{ data: unknown }>;
+  }).rpc("negocio_cobra_en_linea", { p_negocio_id: negocio.id });
+
   const [{ data: sedes }, { data: servicios }, { data: staff }, { data: combosData }] = await Promise.all([
     supabase
       .from("sede")
@@ -95,7 +100,7 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-bg">
       <FlujoReserva
-        negocio={negocio}
+        negocio={{ ...negocio, cobra_en_linea: cobraEnLinea !== false }}
         sedes={sedes}
         servicios={servicios}
         staff={(staff ?? []).map((p) => ({ ...p, nivel: p.nivel }))}

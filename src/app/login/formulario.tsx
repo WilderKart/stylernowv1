@@ -17,7 +17,7 @@ import {
   solicitarRecuperacion,
   verificarCodigo,
 } from "./actions";
-import { crearCuentaRegistro, necesitaRegistro } from "./registro-actions";
+import { cancelarRegistro, crearCuentaRegistro, necesitaRegistro } from "./registro-actions";
 
 /**
  * Clave de sessionStorage para sobrevivir al paso "codigo" si el usuario cambia de
@@ -95,6 +95,22 @@ export function FormularioLogin({
     } catch {
       /* no crítico */
     }
+  }
+
+  /**
+   * «Atrás» en «Crea tu cuenta»: la cuenta NO se crea. Se cierra la sesión que abrió el código
+   * (el servidor solo lo hace si el registro sigue pendiente) y se vuelve al inicio del login.
+   */
+  async function cancelarRegistroYVolver() {
+    setLoading(true);
+    await cancelarRegistro();
+    setLoading(false);
+    setNombre("");
+    setMarketing(false);
+    setEmail("");
+    volverAPasoEmail();
+    router.replace("/login");
+    router.refresh();
   }
 
   function irADestinoFinal() {
@@ -311,7 +327,7 @@ export function FormularioLogin({
     <PantallaAuth
       indice={indices[step]}
       volver={step === "email" ? "/onboarding" : undefined}
-      onVolver={step === "email" ? undefined : volverAPasoEmail}
+      onVolver={step === "email" ? undefined : step === "registro" ? cancelarRegistroYVolver : volverAPasoEmail}
       titulo={titulos[step]}
       intro={intros[step]}
     >

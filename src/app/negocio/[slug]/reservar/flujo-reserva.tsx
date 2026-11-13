@@ -176,7 +176,8 @@ export function FlujoReserva({
     });
 
     if (resultado.ok) {
-      router.push(`/reserva/${resultado.reservaId}/pago`);
+      // Sin anticipo la base confirma la reserva al crearla (migración 119): no hay pantalla de pago.
+      router.push(sena > 0 ? `/reserva/${resultado.reservaId}/pago` : `/reserva/${resultado.reservaId}`);
       return;
     }
 
@@ -651,7 +652,7 @@ export function FlujoReserva({
           </Button>
         ) : (
           <Button size="lg" className="w-full justify-between" loading={confirmando} onClick={confirmar}>
-            <span>{t("res.ir_pagar", { monto: formatCOP(sena) })}</span>
+            <span>{sena > 0 ? t("res.ir_pagar", { monto: formatCOP(sena) }) : t("res.confirmar_sin_anticipo")}</span>
             {iconoFlecha}
           </Button>
         )}

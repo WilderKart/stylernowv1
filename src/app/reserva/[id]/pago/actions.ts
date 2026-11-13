@@ -1,8 +1,7 @@
 "use server";
 
-import { crearPreferencia } from "@/lib/pagos/mercadopago";
+import { crearPreferenciaDePago } from "@/lib/pagos/cobro";
 import { sincronizarPago } from "@/lib/pagos/sincronizar";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 /** Base pública del sitio, usada por back_urls y notification_url de la pasarela. */
@@ -25,13 +24,33 @@ export type ResultadoInicioPago =
  * No cobra: crea el `pago` en PENDIENTE y devuelve la URL del checkout. El paso a
  * APROBADO ocurre únicamente por confirmación de la pasarela, nunca por esta respuesta.
  */
-export async function iniciarPagoSena(reservaId: string): Promise<ResultadoInicioPago> {
+export async function iniciarPagoSena(
+  reservaId: string,
+  aceptaPolitica: boolean
+): Promise<ResultadoInicioPago> {
   const supabase = await createClient();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, mensaje: "Inicia sesión para completar el pago." };
+
+  // Aceptación expresa de la política de cancelación (Directiva §8). La evidencia (texto,
+  // números, versión de términos, zona horaria) la arma la base de datos desde el negocio;
+  // del navegador solo se recibe la decisión del usuario autenticado. Sin ella, la base
+  // de datos rechaza crear el pago (trigger `trg_pago_sena_exige_aceptacion`).
+  if (aceptaPolitica !== true) {
+    return { ok: false, mensaje: "Debes aceptar la política de cancelación para pagar el anticipo." };
+  }
+  const { error: errorAceptacion } = await supabase.rpc("aceptar_politica_reserva", {
+    p_reserva_id: reservaId,
+  });
+  if (errorAceptacion) {
+    if (errorAceptacion.message.includes("RESERVA_NO_PAGABLE")) {
+      return { ok: false, mensaje: "La reserva expiró o cambió de estado. Elige un horario de nuevo." };
+    }
+    return { ok: false, mensaje: "No pudimos registrar tu aceptación. Intenta de nuevo." };
+  }
 
   const { data: pago, error } = await supabase.rpc("crear_pago_sena", {
     p_reserva_id: reservaId,
@@ -47,7 +66,13 @@ export async function iniciarPagoSena(reservaId: string): Promise<ResultadoInici
         mensaje: "La reserva expiró o cambió de estado. Elige un horario de nuevo.",
       };
     }
-    return { ok: false, mensaje: error.message };
+    if (error.message.includes("NEGOCIO_SIN_CUENTA_PAGO")) {
+      return { ok: false, mensaje: "Este negocio todavía no recibe pagos en línea. Contáctalo para confirmar tu cita." };
+    }
+    if (error.message.includes("POLITICA_NO_ACEPTADA")) {
+      return { ok: false, mensaje: "Debes aceptar la política de cancelación para pagar el anticipo." };
+    }
+    return { ok: false, mensaje: "No pudimos iniciar el pago. Intenta de nuevo." };
   }
   if (!pago) return { ok: false, mensaje: "No se pudo iniciar el cobro." };
 
@@ -62,27 +87,17 @@ export async function iniciarPagoSena(reservaId: string): Promise<ResultadoInici
     (reserva?.negocio as { nombre: string } | null)?.nombre ?? "StylerNow";
 
   const sitio = urlSitio();
-  // Sin URL pública (desarrollo local) la pasarela no puede notificar: la confirmación
-  // llega por `consultarEstadoPago`, que consulta su API directamente.
-  const esPublico = sitio.startsWith("https://");
 
   try {
-    const preferencia = await crearPreferencia({
+    // Se cobra con el token de la cuenta de Mercado Pago DEL NEGOCIO (migración 119): el
+    // anticipo nunca entra a la cuenta de StylerNow. Monto y comisión los fijó la base.
+    const preferencia = await crearPreferenciaDePago({
       pagoId: pago.id,
       titulo: `Anticipo · ${nombreNegocio}`,
-      monto: Number(pago.monto),
       emailPagador: user.email,
       urlRetorno: `${sitio}/reserva/${reservaId}?desde=pago`,
-      urlWebhook: esPublico ? `${sitio}/api/webhooks/pasarela/mercadopago` : null,
       expiraEn: reserva?.expira_at ? isoConOffset(reserva.expira_at) : null,
     });
-
-    // `pago` no tiene política de escritura para roles de producto (06-Security/02_RLS.md):
-    // el id de preferencia lo guarda el servidor con service_role.
-    await createAdminClient()
-      .from("pago")
-      .update({ id_preferencia_pasarela: preferencia.id })
-      .eq("id", pago.id);
 
     return {
       ok: true,

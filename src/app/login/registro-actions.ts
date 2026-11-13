@@ -19,6 +19,23 @@ export async function necesitaRegistro(): Promise<{ necesita: boolean; email: st
   return { necesita: r.ok ? r.data.pais === null : false, email: user.email ?? "" };
 }
 
+/**
+ * «Atrás» en el paso de registro: el usuario no creó la cuenta, así que se cierra la sesión que
+ * abrió la verificación del código y vuelve al inicio del login. Solo actúa si el registro sigue
+ * pendiente (nunca cierra la sesión de una cuenta ya creada). La cuenta de acceso sin registro la
+ * elimina el cron pasado el plazo (migración 127, `cuentas_registro_abandonado`).
+ */
+export async function cancelarRegistro(): Promise<{ ok: true }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user?.app_metadata?.registro_pendiente === true) {
+    await supabase.auth.signOut();
+  }
+  return { ok: true };
+}
+
 /** «CREAR CUENTA». `marketing` solo es true si el usuario marcó la casilla (opcional, sin premarcar). */
 export async function crearCuentaRegistro(
   nombre: string,

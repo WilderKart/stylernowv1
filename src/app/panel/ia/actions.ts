@@ -1,8 +1,7 @@
 "use server";
 
-import { crearPreferencia } from "@/lib/pagos/mercadopago";
+import { crearPreferenciaDePago } from "@/lib/pagos/cobro";
 import { sincronizarPago } from "@/lib/pagos/sincronizar";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { Json } from "@/types/database";
 import { revalidatePath } from "next/cache";
@@ -109,19 +108,15 @@ export async function comprarPaqueteIa(negocioId: string, paqueteId: string): Pr
   const { data: paquete } = await supabase.from("ai_paquete_creditos").select("nombre").eq("id", paqueteId).single();
 
   const sitio = urlSitio();
-  const esPublico = sitio.startsWith("https://");
 
   try {
-    const preferencia = await crearPreferencia({
+    // Monto, comisión y cuenta de cobro salen del `pago` en la base (lib/pagos/cobro.ts).
+    const preferencia = await crearPreferenciaDePago({
       pagoId: pago.id,
       titulo: `Paquete de créditos IA: ${paquete?.nombre ?? ""} · ${negocio?.nombre ?? "StylerNow"}`,
-      monto: Number(pago.monto),
       emailPagador: user.email,
       urlRetorno: `${sitio}/panel/ia?desde=pago`,
-      urlWebhook: esPublico ? `${sitio}/api/webhooks/pasarela/mercadopago` : null,
     });
-
-    await createAdminClient().from("pago").update({ id_preferencia_pasarela: preferencia.id }).eq("id", pago.id);
 
     return { ok: true, url: preferencia.url, pagoId: pago.id };
   } catch (e) {

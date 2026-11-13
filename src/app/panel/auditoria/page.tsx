@@ -1,6 +1,6 @@
 import { PanelNav } from "@/components/panel/panel-nav";
 import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
-import { listarAuditoriaNegocio } from "./actions";
+import { listarAuditoriaNegocio, listarEntidadesNegocio } from "./actions";
 import { VistaAuditoria } from "./vista-auditoria";
 
 export const metadata = { title: "Auditoría" };
@@ -13,12 +13,17 @@ export default async function AuditoriaPage() {
   // pantalla vacía sin explicación.
   const contexto = await verificarAccesoPanel(["BARBERIA"], "/panel/auditoria");
 
-  const res = await listarAuditoriaNegocio();
+  // El negocio NO llega del navegador: la acción lo toma de la sesión y la RPC lo re-verifica.
+  const [res, entidades] = await Promise.all([listarAuditoriaNegocio({ pagina: 1 }), listarEntidadesNegocio()]);
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
       <PanelNav rol={contexto.rol} />
-      <VistaAuditoria eventosIniciales={res.ok ? res.data : []} errorInicial={res.ok ? null : res.error} />
+      <VistaAuditoria
+        inicial={res.ok ? res.data : null}
+        errorInicial={res.ok ? null : res.error}
+        entidades={entidades.ok ? entidades.data : []}
+      />
     </div>
   );
 }

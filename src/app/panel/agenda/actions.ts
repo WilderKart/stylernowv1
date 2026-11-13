@@ -1,5 +1,6 @@
 "use server";
 
+import { procesarReembolsosSinFallar } from "@/lib/pagos/reembolsos";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -336,6 +337,32 @@ export async function cancelarCita(reservaId: string, motivo?: string): Promise<
       p_motivo: motivo || undefined,
     });
     if (error) return { ok: false, error: traducirError(error.message) };
+    // Cancela el negocio: la RPC encoló el reembolso del 100 %; se ejecuta ya.
+    await procesarReembolsosSinFallar();
+    revalidatePath("/panel/agenda");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
+/** No presentación: solo después de la hora de inicio; el anticipo no se devuelve (0 %). */
+export async function marcarNoShow(reservaId: string, motivo?: string): Promise<Resultado> {
+  try {
+    const { supabase } = await usuarioActual();
+    const { error } = await supabase.rpc("marcar_no_show", {
+      p_reserva_id: reservaId,
+      p_motivo: motivo || undefined,
+    });
+    if (error) {
+      if (error.message.includes("NO_SHOW_ANTES_DE_LA_HORA")) {
+        return { ok: false, error: "Solo puedes marcar no presentación después de la hora de la cita." };
+      }
+      if (error.message.includes("TRANSICION_RESERVA_INVALIDA")) {
+        return { ok: false, error: "Solo una cita confirmada puede marcarse como no presentada." };
+      }
+      return { ok: false, error: traducirError(error.message) };
+    }
     revalidatePath("/panel/agenda");
     return { ok: true };
   } catch (e) {

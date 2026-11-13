@@ -104,6 +104,7 @@ export function ConstructorSegmentos({
         <h2 className="font-display mb-2 text-[13px] font-bold uppercase text-text">Personalizado</h2>
         <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-surface p-4">
           <select
+            aria-label="Etiqueta"
             value={etiqueta}
             onChange={(e) => setEtiqueta(e.target.value)}
             className="h-10 rounded-lg border border-border bg-bg px-2 text-[12px] text-text"
@@ -118,6 +119,7 @@ export function ConstructorSegmentos({
           <div className="grid grid-cols-2 gap-2">
             <input
               type="number"
+              aria-label="LTV mínimo"
               placeholder="LTV mínimo"
               value={ltvMin}
               onChange={(e) => setLtvMin(e.target.value)}
@@ -125,6 +127,7 @@ export function ConstructorSegmentos({
             />
             <input
               type="date"
+              aria-label="Sin visitas desde"
               placeholder="Sin visitas desde"
               value={ultimaVisitaAntes}
               onChange={(e) => setUltimaVisitaAntes(e.target.value)}

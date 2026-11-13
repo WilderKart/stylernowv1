@@ -50,5 +50,6 @@ Fuente de verdad ejecutable: el archivo `.ts`, nunca este documento.
 | `/panel/reportes` | No | barberia, guardian | proxy.ts |
 | `/panel/lealtad` | No | barberia, guardian | proxy.ts |
 | `/panel/ia` | No | barberia, guardian | proxy.ts |
+| `/panel/whatsapp` | No | barberia | proxy.ts |
 | `/staff` | No | staff, guardian | proxy.ts |
 | `/admin` | No | supersu | proxy.ts |

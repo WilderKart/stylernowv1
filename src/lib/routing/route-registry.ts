@@ -74,6 +74,11 @@ export const RUTAS: RutaRegistro[] = [
   { path: "/panel/reportes", publica: false, roles: ["barberia", "guardian"] },
   { path: "/panel/lealtad", publica: false, roles: ["barberia", "guardian"] },
   { path: "/panel/ia", publica: false, roles: ["barberia", "guardian"] },
+  // Modulo de WhatsApp (migracion 120): solo el dueño (la pagina usa verificarAccesoPanel(["BARBERIA"])).
+  { path: "/panel/whatsapp", publica: false, roles: ["barberia"] },
+  { path: "/panel/politica", publica: false, roles: ["barberia"] },
+  { path: "/panel/cobros", publica: false, roles: ["barberia"] },
+  { path: "/panel/libro", publica: false, roles: ["barberia"] },
 
   // Staff
   { path: "/staff", publica: false, roles: ["staff", "guardian"] },

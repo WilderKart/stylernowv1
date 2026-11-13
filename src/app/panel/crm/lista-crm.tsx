@@ -138,9 +138,10 @@ export function ListaCRM({
       ) : null}
 
       <div className="mb-4 flex flex-col gap-2.5 rounded-2xl border border-border-subtle bg-surface p-3.5">
-        <Input placeholder="Buscar por nombre o teléfono..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+        <Input aria-label="Buscar cliente por nombre o teléfono" placeholder="Buscar por nombre o teléfono..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
         <div className="flex flex-wrap gap-2">
           <select
+            aria-label="Ordenar clientes"
             value={orden}
             onChange={(e) => setOrden(e.target.value as typeof orden)}
             className="h-9 rounded-lg border border-border bg-bg px-2 text-[12px] text-text outline-none"
@@ -152,6 +153,7 @@ export function ListaCRM({
           </select>
           <button
             type="button"
+            aria-pressed={soloVip}
             onClick={() => setSoloVip((v) => !v)}
             className={`rounded-none border px-3 py-1.5 text-[12px] font-bold ${
               soloVip ? "border-accent bg-accent-soft text-accent" : "border-border text-text-muted"

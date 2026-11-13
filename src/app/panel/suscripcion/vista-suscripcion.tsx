@@ -22,6 +22,7 @@ import {
 } from "./actions";
 import type { FundadorActivo } from "./datos";
 import { iniciarPrueba } from "./prueba";
+import type { ConfigPrueba } from "./config-prueba";
 
 // Textos centralizados para facilitar la traducción posterior.
 const T = {
@@ -42,8 +43,8 @@ const T = {
   soporte: "Escribe a soporte",
   manual: (tipo: string, hasta: string | null) =>
     `Plan activado manualmente por StylerNow (${tipo.toLowerCase()})${hasta ? `, vigente hasta ${hasta}` : ""}.`,
-  prueba: (d: number, fecha: string) =>
-    `Prueba: ${d} ${d === 1 ? "día restante" : "días restantes"} (termina el ${fecha}). Se cobra automáticamente al terminar.`,
+  prueba: (d: number, fecha: string, conTarjeta: boolean) =>
+    `Prueba: ${d} ${d === 1 ? "día restante" : "días restantes"} (termina el ${fecha}). ${conTarjeta ? "Se cobra automáticamente al terminar." : "No se cobra nada: al terminar eliges tu plan para seguir recibiendo reservas."}`,
   proxCobro: "Próximo cobro",
   finPrueba: "Fin de la prueba",
   plan: "Plan",
@@ -58,8 +59,9 @@ const T = {
   aCotizar: "A cotizar",
   fundador: (pct: number, fecha: string) => `Descuento fundador −${pct}% hasta el ${fecha}`,
   elegir: "Elige o cambia tu plan",
-  pruebaTitulo: "Inicia tu prueba de 14 días",
-  pruebaIntro: "Registra tus datos y un método de pago. No se cobra nada hoy: el cobro es automático al terminar la prueba.",
+  pruebaTitulo: (dias: number) => `Inicia tu prueba de ${dias} días`,
+  pruebaIntro: "Sin tarjeta y sin cobros: registra tu teléfono y documento (solo para evitar pruebas repetidas). Al terminar eliges tu plan.",
+  pruebaIntroTarjeta: "Registra tus datos y un método de pago. No se cobra nada hoy: el cobro es automático al terminar la prueba.",
   telefono: "Teléfono",
   documento: "Documento / NIT",
   token: "Método de pago",
@@ -106,6 +108,7 @@ export function VistaSuscripcion({
   catalogo,
   uso,
   fundador,
+  configPrueba,
 }: {
   negocioId: string;
   suscripcionInicial: MiSuscripcion;
@@ -113,6 +116,7 @@ export function VistaSuscripcion({
   catalogo: CatalogoPais | null;
   uso: { sedes: number; staff: number };
   fundador: FundadorActivo | null;
+  configPrueba: ConfigPrueba;
 }) {
   const router = useRouter();
   const [suscripcion, setSuscripcion] = useState(suscripcionInicial);
@@ -214,7 +218,7 @@ export function VistaSuscripcion({
       telefono,
       documento,
       dispositivoId: obtenerDispositivoId(),
-      metodoPagoToken: "", // el SDK de la pasarela aún no está integrado (campo deshabilitado)
+      metodoPagoToken: "", // prueba sin tarjeta; el SDK de tarjeta se integra con la fase de pagos
     });
     setProcesando(null);
     if (!res.ok) return setErrorPrueba(res.error);
@@ -236,6 +240,8 @@ export function VistaSuscripcion({
   const limiteStaff = planActual?.staffIncluido ?? planActualPais?.staffIncluido ?? null;
   const cotizaSel = seleccion === "SIGNATURE" || planSel?.precioMensual === null;
   const cobroOk = catalogo?.pais.cobroRecurrenteHabilitado ?? false;
+  // La modalidad la define Super Admin (migración 118); la base de datos la vuelve a validar.
+  const requiereTarjeta = configPrueba.modalidad === "CON_TARJETA";
   const enlaceSoporte = (
     <Link href="/panel/soporte" className="font-bold underline underline-offset-2">
       {T.soporte}
@@ -357,7 +363,7 @@ export function VistaSuscripcion({
         ) : null}
         {suscripcion.estado === "TRIAL" && suscripcion.diasPrueba !== null && suscripcion.pruebaFin ? (
           <p role="status" className="border-2 border-border p-3 text-[13px]">
-            {T.prueba(suscripcion.diasPrueba, fechaCorta(suscripcion.pruebaFin, locale))}
+            {T.prueba(suscripcion.diasPrueba, fechaCorta(suscripcion.pruebaFin, locale), Boolean(suscripcion.conTarjeta))}
           </p>
         ) : null}
         {suscripcion.estado === "EN_MORA" ? (
@@ -430,25 +436,27 @@ export function VistaSuscripcion({
               </Panel>
             ) : (
               <form onSubmit={onIniciarPrueba} className="p-card flex flex-col gap-4 p-4">
-                <h3 className="section">{T.pruebaTitulo}</h3>
-                <p className="sn-meta">{T.pruebaIntro}</p>
-                {!cobroOk ? (
+                <h3 className="section">{T.pruebaTitulo(configPrueba.dias)}</h3>
+                <p className="sn-meta">{requiereTarjeta ? T.pruebaIntroTarjeta : T.pruebaIntro}</p>
+                {requiereTarjeta && !cobroOk ? (
                   <p role="status" className="border-2 border-border bg-signal p-3 text-[13px] font-bold text-ink">
                     {T.sinCobro} {enlaceSoporte}.
                   </p>
                 ) : null}
                 <Input label={T.telefono} type="tel" inputMode="tel" autoComplete="tel" required value={telefono} onChange={(e) => setTelefono(e.target.value)} />
                 <Input label={T.documento} required value={documento} onChange={(e) => setDocumento(e.target.value)} />
-                <div className="flex flex-col gap-1">
-                  <Input label={T.token} disabled readOnly value="" placeholder="No disponible por ahora" />
-                  <span className="sn-meta">{T.tokenAyuda}</span>
-                </div>
+                {requiereTarjeta ? (
+                  <div className="flex flex-col gap-1">
+                    <Input label={T.token} disabled readOnly value="" placeholder="No disponible por ahora" />
+                    <span className="sn-meta">{T.tokenAyuda}</span>
+                  </div>
+                ) : null}
                 {errorPrueba ? (
                   <p role="alert" className="border-2 border-danger p-3 text-[13px] font-bold text-danger">
                     {errorPrueba}
                   </p>
                 ) : null}
-                <Button type="submit" className="w-full" loading={procesando === "prueba"} disabled={!cobroOk || !telefono.trim() || !documento.trim()}>
+                <Button type="submit" className="w-full" loading={procesando === "prueba"} disabled={(requiereTarjeta && !cobroOk) || !telefono.trim() || !documento.trim()}>
                   {T.iniciar}
                 </Button>
               </form>

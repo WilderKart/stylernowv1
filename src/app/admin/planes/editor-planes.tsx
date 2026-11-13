@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { formatearMoneda } from "@/lib/planes/moneda";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { createContext, useContext, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   guardarAjustesPais,
@@ -28,13 +28,23 @@ const PASARELAS = ["MERCADOPAGO", "STRIPE", "PAYONEER", "MANUAL"];
 const aTexto = (n: number | null) => (n === null ? "" : String(n));
 const aNumero = (s: string): number | null => (s.trim() === "" ? null : Number(s.replace(",", ".")));
 
+/** Motivo del cambio, compartido por todos los formularios del editor (queda en la auditoría). */
+const MotivoContexto = createContext("");
+const MOTIVO_MIN = 5;
+
 /** Ejecuta una acción, muestra toast de éxito o error traducido y refresca los datos del servidor. */
 function useGuardar() {
   const router = useRouter();
+  const motivo = useContext(MotivoContexto);
   const [pendiente, iniciar] = useTransition();
-  function guardar(accion: () => Promise<Res>, exito: string) {
+  function guardar(accion: (motivo: string) => Promise<Res>, exito: string) {
+    const m = motivo.trim();
+    if (m.length < MOTIVO_MIN) {
+      toast.error("Escribe arriba el motivo del cambio (mínimo 5 caracteres). Queda en la auditoría.");
+      return;
+    }
     iniciar(async () => {
-      const r = await accion();
+      const r = await accion(m);
       if (!r.ok) {
         toast.error(r.error);
         return;
@@ -49,38 +59,52 @@ function useGuardar() {
 export function EditorPlanes({ datos }: { datos: DatosPlanes }) {
   const [codigo, setCodigo] = useState(datos.paises[0].codigo);
   const pais = datos.paises.find((p) => p.codigo === codigo) ?? datos.paises[0];
+  const [motivo, setMotivo] = useState("");
 
   return (
-    <div className="flex min-w-0 flex-col gap-8">
-      <ChipGroup aria-label="País">
-        {datos.paises.map((p) => (
-          <Chip key={p.codigo} selected={p.codigo === pais.codigo} onClick={() => setCodigo(p.codigo)}>
-            {p.codigo} · {p.nombre}
-          </Chip>
-        ))}
-      </ChipGroup>
-
-      <AjustesPaisForm key={`aj-${pais.codigo}-${JSON.stringify(pais)}`} pais={pais} />
-
-      <section className="flex flex-col gap-3">
-        <SectionTitle>Precios por plan ({pais.moneda})</SectionTitle>
-        <Meta>Un precio vacío se muestra como PENDIENTE (a cotizar) y no se puede contratar.</Meta>
-        <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2">
-          {datos.planes.map((plan) => {
-            const fila = datos.precios.find((x) => x.plan === plan.codigo && x.pais === pais.codigo);
-            return <PrecioPlanForm key={`${pais.codigo}-${plan.codigo}-${JSON.stringify(fila)}`} pais={pais} plan={plan} fila={fila} />;
-          })}
+    <MotivoContexto.Provider value={motivo}>
+      <div className="flex min-w-0 flex-col gap-8">
+        <div className="flex flex-col gap-1">
+          <Input
+            label="Motivo del cambio (obligatorio)"
+            placeholder="Ej.: ajuste de precio aprobado por gerencia"
+            maxLength={500}
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+          />
+          <Meta>Se guarda en la auditoría junto con el valor anterior y el nuevo de cada cambio que hagas aquí.</Meta>
         </div>
-      </section>
 
-      <AddonForm
-        key={`ad-${pais.codigo}-${datos.addons.find((a) => a.pais === pais.codigo)?.precioMensual ?? "n"}`}
-        pais={pais}
-        precio={datos.addons.find((a) => a.pais === pais.codigo)?.precioMensual ?? null}
-      />
+        <ChipGroup aria-label="País">
+          {datos.paises.map((p) => (
+            <Chip key={p.codigo} selected={p.codigo === pais.codigo} onClick={() => setCodigo(p.codigo)}>
+              {p.codigo} · {p.nombre}
+            </Chip>
+          ))}
+        </ChipGroup>
 
-      <MatrizCaracteristicas planes={datos.planes} caracteristicas={datos.caracteristicas} />
-    </div>
+        <AjustesPaisForm key={`aj-${pais.codigo}-${JSON.stringify(pais)}`} pais={pais} />
+
+        <section className="flex flex-col gap-3">
+          <SectionTitle>Precios por plan ({pais.moneda})</SectionTitle>
+          <Meta>Un precio vacío se muestra como PENDIENTE (a cotizar) y no se puede contratar.</Meta>
+          <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2">
+            {datos.planes.map((plan) => {
+              const fila = datos.precios.find((x) => x.plan === plan.codigo && x.pais === pais.codigo);
+              return <PrecioPlanForm key={`${pais.codigo}-${plan.codigo}-${JSON.stringify(fila)}`} pais={pais} plan={plan} fila={fila} />;
+            })}
+          </div>
+        </section>
+
+        <AddonForm
+          key={`ad-${pais.codigo}-${datos.addons.find((a) => a.pais === pais.codigo)?.precioMensual ?? "n"}`}
+          pais={pais}
+          precio={datos.addons.find((a) => a.pais === pais.codigo)?.precioMensual ?? null}
+        />
+
+        <MatrizCaracteristicas planes={datos.planes} caracteristicas={datos.caracteristicas} />
+      </div>
+    </MotivoContexto.Provider>
   );
 }
 
@@ -114,7 +138,7 @@ function AjustesPaisForm({ pais }: { pais: PaisPlanes }) {
 
   function ejecutar() {
     setConfirmar(null);
-    guardar(() => guardarAjustesPais(armar()), `Ajustes de ${pais.nombre} guardados.`);
+    guardar((m) => guardarAjustesPais(armar(), m), `Ajustes de ${pais.nombre} guardados.`);
   }
 
   function intentar() {
@@ -226,16 +250,19 @@ function PrecioPlanForm({ pais, plan, fila }: { pais: PaisPlanes; plan: PlanBase
 
   function enviar() {
     guardar(
-      () =>
-        guardarPrecioPlan({
-          plan: plan.codigo,
-          pais: pais.codigo,
-          precioMensual: aNumero(mensual),
-          esDesde: desde,
-          precioStaffExtra: aNumero(staff),
-          precioSedeExtra: aNumero(sede),
-          activo,
-        }),
+      (m) =>
+        guardarPrecioPlan(
+          {
+            plan: plan.codigo,
+            pais: pais.codigo,
+            precioMensual: aNumero(mensual),
+            esDesde: desde,
+            precioStaffExtra: aNumero(staff),
+            precioSedeExtra: aNumero(sede),
+            activo,
+          },
+          m
+        ),
       `${plan.nombre} en ${pais.codigo} guardado.`
     );
   }
@@ -280,7 +307,7 @@ function AddonForm({ pais, precio }: { pais: PaisPlanes; precio: number | null }
         <div className="min-w-0 flex-1">
           <Input label={`Precio mensual (${pais.moneda})`} type="number" inputMode="decimal" min={0} step="any" placeholder="PENDIENTE" value={valor} onChange={(e) => setValor(e.target.value)} />
         </div>
-        <Button loading={pendiente} onClick={() => guardar(() => guardarPrecioAddon(pais.codigo, aNumero(valor)), `Mi Marca en ${pais.codigo} guardado.`)}>
+        <Button loading={pendiente} onClick={() => guardar((m) => guardarPrecioAddon(pais.codigo, aNumero(valor), m), `Mi Marca en ${pais.codigo} guardado.`)}>
           Guardar add-on
         </Button>
       </div>
@@ -336,7 +363,7 @@ function FilaCaracteristica({ plan, clave, c }: { plan: PlanBase; clave: string;
         size="sm"
         variant="secondary"
         loading={pendiente}
-        onClick={() => guardar(() => guardarCaracteristica({ plan: plan.codigo, clave, habilitado, valor: valor || null }), `${plan.codigo} · ${clave} guardado.`)}
+        onClick={() => guardar((m) => guardarCaracteristica({ plan: plan.codigo, clave, habilitado, valor: valor || null }, m), `${plan.codigo} · ${clave} guardado.`)}
       >
         Guardar
       </Button>

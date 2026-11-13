@@ -13,13 +13,14 @@ import { guardarPreferenciasPrivacidad } from "./actions";
 import { useIdioma, useT } from "@/lib/i18n/proveedor";
 import type { Traductor } from "@/lib/i18n/diccionario";
 
-type Clave = "analitica" | "personalizacion" | "ofertas_cercanas" | "beneficios_marcas";
+type Clave = "analitica" | "personalizacion" | "ofertas_cercanas" | "beneficios_marcas" | "marketing_whatsapp";
 
 const PROPOSITOS = [
   { k: "analitica", t: "priv.p_analitica", d: "priv.p_analitica_d" },
   { k: "personalizacion", t: "priv.p_personalizacion", d: "priv.p_personalizacion_d" },
   { k: "ofertas_cercanas", t: "priv.p_ofertas", d: "priv.p_ofertas_d" },
   { k: "beneficios_marcas", t: "priv.p_marcas", d: "priv.p_marcas_d" },
+  { k: "marketing_whatsapp", t: "priv.p_whatsapp", d: "priv.p_whatsapp_d" },
 ] as const;
 
 const NOMBRES = {
@@ -28,6 +29,7 @@ const NOMBRES = {
   ofertas_cercanas: "priv.p_ofertas",
   beneficios_marcas: "priv.n_marcas",
   marketing_email: "priv.n_email",
+  marketing_whatsapp: "priv.p_whatsapp",
 } as const satisfies Record<PropositoConsentimiento, string>;
 
 function nombreEvento(e: EventoHistorial, t: Traductor) {
@@ -52,7 +54,7 @@ export function VistaPrivacidad({ estado, historial, error }: { estado: EstadoCo
   const idioma = useIdioma();
   // Sin evento = NO otorgado: el valor inicial sale siempre del backend, nunca premarcado.
   const [valores, setValores] = useState<Record<Clave, boolean>>(() => {
-    const base: Record<Clave, boolean> = { analitica: false, personalizacion: false, ofertas_cercanas: false, beneficios_marcas: false };
+    const base: Record<Clave, boolean> = { analitica: false, personalizacion: false, ofertas_cercanas: false, beneficios_marcas: false, marketing_whatsapp: false };
     for (const e of estado) if (e.proposito in base) base[e.proposito as Clave] = e.otorgado === true;
     return base;
   });
@@ -86,7 +88,7 @@ export function VistaPrivacidad({ estado, historial, error }: { estado: EstadoCo
         </Poster>
       </div>
 
-      <Sec derecha={<span className="sn-meta">{t("priv.activas", { n: activas })}</span>}>{t("priv.sec_para_que")}</Sec>
+      <Sec derecha={<span className="sn-meta">{t("priv.activas", { n: activas, total: PROPOSITOS.length })}</span>}>{t("priv.sec_para_que")}</Sec>
       <div className="border-t-2 border-border px-4">
         {error ? (
           <div className="py-3">

@@ -3,6 +3,7 @@ import { PanelNav } from "@/components/panel/panel-nav";
 import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { obtenerCatalogoPais } from "@/lib/planes/catalogo";
 import { obtenerCatalogoPlanes, obtenerMiSuscripcion } from "./actions";
+import { obtenerConfigPrueba } from "./config-prueba";
 import { obtenerUsoNegocio } from "./datos";
 import { VistaSuscripcion } from "./vista-suscripcion";
 
@@ -14,10 +15,11 @@ export default async function SuscripcionPage() {
   const contexto = await verificarAccesoPanel(["BARBERIA"], "/panel/suscripcion");
   const negocioId = contexto.negocioId!;
 
-  const [suscripcionRes, planesRes, uso] = await Promise.all([
+  const [suscripcionRes, planesRes, uso, configPrueba] = await Promise.all([
     obtenerMiSuscripcion(negocioId),
     obtenerCatalogoPlanes(),
     obtenerUsoNegocio(negocioId),
+    obtenerConfigPrueba(),
   ]);
 
   if (!suscripcionRes.ok) {
@@ -48,6 +50,7 @@ export default async function SuscripcionPage() {
         catalogo={catalogo}
         uso={{ sedes: uso.sedes, staff: uso.staff }}
         fundador={uso.fundador}
+        configPrueba={configPrueba}
       />
     </div>
   );

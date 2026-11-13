@@ -10,6 +10,7 @@ import { useEnLinea } from "@/lib/hooks/use-en-linea";
 import {
   buscarClienteExistente,
   cancelarCita,
+  marcarNoShow,
   crearBloqueo,
   crearCitaManual,
   eliminarBloqueo,
@@ -155,6 +156,7 @@ export function VistaAgenda({
         <div className="flex flex-wrap items-center gap-2">
           {sedes && sedes.length > 1 ? (
             <select
+              aria-label="Sede"
               value={sede.id}
               onChange={(e) => cambiarSede(e.target.value)}
               className="h-9 rounded-lg border border-border bg-bg px-2 text-[12px] text-text outline-none"
@@ -570,6 +572,19 @@ function PanelCita({
     onCambio();
   }
 
+  // Hora de apertura del detalle (no en cada render): solo decide si se muestra el botón.
+  const [yaEmpezo] = useState(() => new Date(cita.horaInicio).getTime() <= Date.now());
+
+  async function onNoShow() {
+    if (!confirm("¿Marcar que el cliente no se presentó? El anticipo no se devuelve.")) return;
+    setCargando(true);
+    setError(null);
+    const res = await marcarNoShow(cita.id, motivo);
+    setCargando(false);
+    if (!res.ok) return setError(res.error);
+    onCambio();
+  }
+
   async function onConfirmarCancelar() {
     setCargando(true);
     setError(null);
@@ -613,6 +628,12 @@ function PanelCita({
                 <Button variant="secondary" onClick={() => setAccion("reasignar")}>
                   Reasignar Staff
                 </Button>
+                {/* Solo después de la hora de inicio; la base de datos lo vuelve a validar. */}
+                {yaEmpezo ? (
+                  <Button variant="secondary" loading={cargando} onClick={onNoShow}>
+                    No se presentó
+                  </Button>
+                ) : null}
               </>
             ) : null}
             {cita.estado !== "COMPLETADA" && cita.estado !== "NO_SHOW" ? (
@@ -666,6 +687,7 @@ function PanelCita({
         ) : accion === "reasignar" ? (
           <div className="mt-5 flex flex-col gap-3">
             <select
+              aria-label="Nuevo profesional"
               value={nuevoStaffId}
               onChange={(e) => setNuevoStaffId(e.target.value)}
               className="h-12 rounded-xl border border-border bg-bg px-3 text-[13.5px] text-text"
@@ -848,6 +870,7 @@ function FormularioNuevaCita({
           <div>
             <label className="mb-1.5 block text-[12px] font-semibold text-text-muted">Staff (opcional)</label>
             <select
+              aria-label="Staff (opcional)"
               value={staffId}
               onChange={(e) => setStaffId(e.target.value)}
               className="h-12 w-full rounded-xl border border-border bg-bg px-3 text-[13.5px] text-text"
@@ -940,6 +963,7 @@ function FormularioBloqueo({
         <p className="mb-4 text-[15px] font-bold text-text">Bloquear horario</p>
         <div className="flex flex-col gap-3">
           <select
+            aria-label="Profesional"
             value={vinculoId}
             onChange={(e) => setVinculoId(e.target.value)}
             className="h-12 rounded-xl border border-border bg-bg px-3 text-[13.5px] text-text"
