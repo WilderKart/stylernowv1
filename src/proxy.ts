@@ -42,6 +42,11 @@ export async function proxy(request: NextRequest) {
 
   const { response, user } = await updateSession(request, requestHeaders);
   response.headers.set(cabeceraCsp, csp);
+  // En modo solo-reporte el navegador ignora frame-ancestors; estas tres sí se aplican siempre (solo en la respuesta,
+  // nunca en la petición: si estuvieran en la petición Next tomaría este CSP sin script-src y no pondría el nonce).
+  if (cabeceraCsp !== "Content-Security-Policy") {
+    response.headers.set("Content-Security-Policy", "frame-ancestors 'none'; base-uri 'self'; object-src 'none'");
+  }
 
   const { pathname, search } = request.nextUrl;
   // ADR-015 auditoría (2026-09-16, evidencia real con curl+sesión): las
