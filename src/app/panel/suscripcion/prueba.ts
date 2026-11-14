@@ -3,8 +3,12 @@
 import { proveedorDe } from "@/lib/pagos/proveedores/adaptadores";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { ipDelLlamador } from "@/lib/rate-limit";
 import { createHmac } from "node:crypto";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+
+const COOKIE_DISPOSITIVO = "sn_disp";
 import { z } from "zod";
 
 type Resultado = { ok: true } | { ok: false; error: string };
@@ -26,7 +30,8 @@ const MENSAJES: Record<string, string> = {
   MODALIDAD_PRUEBA_NO_PERMITIDA: "Por ahora la prueba se inicia sin tarjeta. Registra tu método de pago cuando elijas tu plan.",
   VERIFICACION_INCOMPLETA: "Completa teléfono, documento y verificación del dispositivo para iniciar la prueba.",
   YA_TIENE_SUSCRIPCION: "Tu negocio ya tiene un plan en curso.",
-  PRUEBA_YA_USADA: "Esta prueba ya fue usada (negocio, teléfono, documento, correo o dispositivo). Elige un plan para continuar.",
+  PRUEBA_YA_USADA:
+    "Ya se usó una prueba gratuita con estos datos, este dispositivo o esta red. Para seguir recibiendo reservas, paga tu plan.",
   PAIS_FIJO_CON_PLAN_VIGENTE: "El país no se puede cambiar con un plan en curso. Contacta a soporte.",
   PROVEEDOR_NO_CONFIGURADO: "La pasarela de pago de tu país todavía no está habilitada.",
 };
@@ -63,6 +68,8 @@ const esquemaPrueba = z.object({
   telefono: z.string().trim().regex(/^\+?[0-9\s-]{7,20}$/),
   documento: z.string().trim().regex(/^[0-9A-Za-z.\-]{5,20}$/),
   dispositivoId: z.string().trim().min(16).max(200),
+  /** Rasgos del equipo (navegador, pantalla, zona horaria, idioma). Señal adicional; se guarda solo su HMAC. */
+  equipo: z.string().trim().min(8).max(600),
   /** Vacío = prueba sin tarjeta (modalidad por defecto). */
   metodoPagoToken: z.string().trim().max(500).optional().default(""),
 });
@@ -112,7 +119,24 @@ export async function iniciarPrueba(entrada: DatosPrueba): Promise<Resultado> {
       proveedorId = proveedor.id;
     }
 
-    const { error } = await (createAdminClient() as unknown as RpcSinTipos).rpc("iniciar_prueba_negocio_srv", {
+    // Id de dispositivo: manda la cookie httpOnly (el navegador no puede leerla ni borrarla desde JS); si no
+    // existe, se adopta el id enviado y se fija la cookie por 2 años. Así incógnito/borrar localStorage no basta.
+    const almacen = await cookies();
+    const deCookie = almacen.get(COOKIE_DISPOSITIVO)?.value;
+    const dispositivo = deCookie && /^[A-Za-z0-9-]{16,200}$/.test(deCookie) ? deCookie : d.dispositivoId;
+    if (!deCookie) {
+      almacen.set(COOKIE_DISPOSITIVO, dispositivo, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 730,
+      });
+    }
+    // La IP la ve el servidor (nunca la envía el navegador) y se guarda solo como HMAC.
+    const ip = await ipDelLlamador();
+
+    const { error } = await (createAdminClient() as unknown as RpcSinTipos).rpc("iniciar_prueba_negocio_srv2", {
       p_actor: user.id,
       p_negocio_id: d.negocioId,
       p_plan_codigo: d.plan,
@@ -122,7 +146,9 @@ export async function iniciarPrueba(entrada: DatosPrueba): Promise<Resultado> {
       p_telefono_hash: huella(d.telefono),
       p_documento_hash: huella(d.documento),
       p_email_hash: huella(user.email),
-      p_dispositivo_hash: huella(d.dispositivoId),
+      p_dispositivo_hash: huella(dispositivo),
+      p_ip_hash: huella(`ip:${ip}`),
+      p_equipo_hash: huella(`equipo:${d.equipo}`),
     });
     if (error) return { ok: false, error: traducir(error.message) };
 
