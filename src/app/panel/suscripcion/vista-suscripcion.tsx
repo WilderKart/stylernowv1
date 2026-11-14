@@ -14,9 +14,11 @@ import {
   cancelarDowngradeProgramado,
   cancelarMiNegocio,
   consultarEstadoUpgrade,
+  iniciarPagoPlan,
   iniciarUpgrade,
   solicitarDowngrade,
   type MiSuscripcion,
+  type PagoSuscripcion,
   type PlanCatalogo,
   type PlanCodigo,
 } from "./actions";
@@ -37,14 +39,16 @@ const T = {
     CANCELADA: { tono: "err", texto: "Cancelada" },
   } as Record<string, { tono: "ok" | "warn" | "err" | "info"; texto: string }>,
   requierePlan: "Tu perfil se ve pero no recibe reservas hasta que elijas plan.",
-  enMora: (d: number) => `Tu pago está en mora. Te quedan ${d} ${d === 1 ? "día" : "días"} de gracia antes de que tu negocio se oculte del mapa.`,
+  enMora: (d: number) =>
+    `Tu prueba o tu periodo pagado terminó. Te ${d === 1 ? "queda" : "quedan"} ${d} ${d === 1 ? "día" : "días"} de gracia: sigues recibiendo reservas, pero paga tu plan antes de que termine para no dejar de recibirlas.`,
   suspendida: "Tu negocio está suspendido y oculto del mapa.",
   suspendidaImpago: "Tu negocio está suspendido por impago y oculto del mapa.",
   soporte: "Escribe a soporte",
   manual: (tipo: string, hasta: string | null) =>
     `Plan activado manualmente por StylerNow (${tipo.toLowerCase()})${hasta ? `, vigente hasta ${hasta}` : ""}.`,
-  prueba: (d: number, fecha: string, conTarjeta: boolean) =>
-    `Prueba: ${d} ${d === 1 ? "día restante" : "días restantes"} (termina el ${fecha}). ${conTarjeta ? "Se cobra automáticamente al terminar." : "No se cobra nada: al terminar eliges tu plan para seguir recibiendo reservas."}`,
+  // Migración 133: no hay cobro automático; al terminar la prueba el dueño paga su plan desde aquí.
+  prueba: (d: number, fecha: string) =>
+    `Prueba: ${d} ${d === 1 ? "día restante" : "días restantes"} (termina el ${fecha}). No se cobra nada automáticamente: puedes pagar tu plan cuando quieras y los días de prueba que te queden no se pierden.`,
   proxCobro: "Próximo cobro",
   finPrueba: "Fin de la prueba",
   plan: "Plan",
@@ -61,7 +65,7 @@ const T = {
   elegir: "Elige o cambia tu plan",
   pruebaTitulo: (dias: number) => `Inicia tu prueba de ${dias} días`,
   pruebaIntro: "Sin tarjeta y sin cobros: registra tu teléfono y documento (solo para evitar pruebas repetidas). Al terminar eliges tu plan.",
-  pruebaIntroTarjeta: "Registra tus datos y un método de pago. No se cobra nada hoy: el cobro es automático al terminar la prueba.",
+  pruebaIntroTarjeta: "Registra tus datos. No se cobra nada hoy ni automáticamente: al terminar la prueba pagas tu plan desde aquí.",
   telefono: "Teléfono",
   documento: "Documento / NIT",
   token: "Método de pago",
@@ -79,8 +83,27 @@ const T = {
     "Dar de baja tu negocio es definitivo. Tus reservas futuras se cancelan con reembolso del 100% y no puedes reactivarlo: para volver a operar necesitas un alta nueva.",
   baja: "Dar de baja mi negocio",
   sinCatalogo: "Aún no hay planes disponibles para tu país. Escribe a soporte para activar tu plan.",
-  errorPago: "El pago del upgrade fue rechazado por la pasarela.",
+  errorPago: "El pago fue rechazado por la pasarela. No se cobró nada; puedes intentar de nuevo.",
+  pagarTitulo: (renovar: boolean) => (renovar ? "Renovar mi plan" : "Pagar mi plan"),
+  pagarIntro:
+    "Pagas con Mercado Pago a StylerNow. Tu plan se activa cuando Mercado Pago confirma el pago; no guardamos datos de tu tarjeta ni hacemos cobros automáticos.",
+  pagarBoton: (plan: string, monto: string) => `Pagar ${plan} · ${monto}`,
+  esperando: "Esperando la confirmación de Mercado Pago…",
+  historial: "Historial de pagos del plan",
+  historialVacio: "Todavía no has hecho pagos de plan.",
+  conceptoPlan: "Plan",
+  conceptoUpgrade: "Upgrade",
+  estadosPago: { PENDIENTE: "Pendiente", APROBADO: "Aprobado", RECHAZADO: "Rechazado", REEMBOLSADO: "Reembolsado" } as Record<string, string>,
 };
+
+/** Estados desde los que el dueño puede pagar su plan (la base vuelve a validarlo en solicitar_pago_plan). */
+function puedePagarPlan(s: MiSuscripcion): boolean {
+  if (s.activacionManual) return false;
+  if (s.estado === "TRIAL" || s.estado === "EN_MORA" || s.estado === "REQUIERE_PLAN") return true;
+  if (s.estado === "SUSPENDIDA") return (s.suspendidoCausa ?? "IMPAGO") === "IMPAGO";
+  if (s.estado === "ACTIVA") return new Date(s.fechaProximoCobro).getTime() - Date.now() <= 7 * 86_400_000;
+  return false;
+}
 
 const CLAVE_DISPOSITIVO = "sn_dispositivo_id";
 
@@ -109,6 +132,7 @@ export function VistaSuscripcion({
   uso,
   fundador,
   configPrueba,
+  pagos,
 }: {
   negocioId: string;
   suscripcionInicial: MiSuscripcion;
@@ -117,6 +141,7 @@ export function VistaSuscripcion({
   uso: { sedes: number; staff: number };
   fundador: FundadorActivo | null;
   configPrueba: ConfigPrueba;
+  pagos: PagoSuscripcion[];
 }) {
   const router = useRouter();
   const [suscripcion, setSuscripcion] = useState(suscripcionInicial);
@@ -164,6 +189,16 @@ export function VistaSuscripcion({
     setProcesando(planCodigo);
     setError(null);
     const res = await iniciarUpgrade(negocioId, planCodigo);
+    setProcesando(null);
+    if (!res.ok) return setError(res.mensaje);
+    setPagoPendienteId(res.pagoId);
+    setUrlCheckout(res.url);
+  }
+
+  async function onPagarPlan(planCodigo: PlanCodigo) {
+    setProcesando("pagar-plan");
+    setError(null);
+    const res = await iniciarPagoPlan(negocioId, planCodigo, ciclo);
     setProcesando(null);
     if (!res.ok) return setError(res.mensaje);
     setPagoPendienteId(res.pagoId);
@@ -363,7 +398,7 @@ export function VistaSuscripcion({
         ) : null}
         {suscripcion.estado === "TRIAL" && suscripcion.diasPrueba !== null && suscripcion.pruebaFin ? (
           <p role="status" className="border-2 border-border p-3 text-[13px]">
-            {T.prueba(suscripcion.diasPrueba, fechaCorta(suscripcion.pruebaFin, locale), Boolean(suscripcion.conTarjeta))}
+            {T.prueba(suscripcion.diasPrueba, fechaCorta(suscripcion.pruebaFin, locale))}
           </p>
         ) : null}
         {suscripcion.estado === "EN_MORA" ? (
@@ -463,11 +498,70 @@ export function VistaSuscripcion({
             )
           ) : null}
 
+          {puedePagarPlan(suscripcion) && !(esRequierePlan && !seleccion) ? (() => {
+            // Durante la prueba se paga el plan elegido al iniciarla; en los demás estados, el seleccionado.
+            const codigo = (suscripcion.estado === "TRIAL" || !seleccion ? suscripcion.planCodigo : seleccion) as PlanCodigo;
+            const p = catalogo.planes.find((x) => x.codigo === codigo);
+            if (!p || p.precioMensual == null || codigo === "SIGNATURE") return null;
+            // Monto orientativo: el que se cobra lo calcula la base (solicitar_pago_plan).
+            const precio = calcularPrecio({
+              precioMensual: p.precioMensual,
+              ciclo,
+              mesesPagadosAnual: catalogo.pais.mesesPagadosAnual,
+              descuentoFundadorPct: fundador?.descuentoPct ?? 0,
+            });
+            const monto = formatearMoneda(precio.final, catalogo.pais.moneda, catalogo.pais.locale);
+            return (
+              <Panel className="flex flex-col gap-3 p-4">
+                <h3 className="section">{T.pagarTitulo(suscripcion.estado === "ACTIVA")}</h3>
+                <p className="sn-meta">{T.pagarIntro}</p>
+                {pagoPendienteId ? (
+                  <p role="status" className="border-2 border-border p-3 text-[13px] font-bold">
+                    {T.esperando}
+                  </p>
+                ) : null}
+                <Button className="w-full" loading={procesando === "pagar-plan"} disabled={Boolean(pagoPendienteId)} onClick={() => onPagarPlan(codigo)}>
+                  {T.pagarBoton(p.nombre, monto)}
+                </Button>
+              </Panel>
+            );
+          })() : null}
+
           {suscripcion.estado === "ACTIVA" && seleccion && seleccion !== suscripcion.planCodigo ? (
             <Panel className="flex flex-col gap-3 p-4">{accionCambio()}</Panel>
           ) : null}
         </section>
       )}
+
+      <section className="mb-6">
+        <h2 className="section mb-3">{T.historial}</h2>
+        {pagos.length === 0 ? (
+          <p className="sn-meta">{T.historialVacio}</p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {pagos.map((p) => (
+              <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 border-2 border-border p-3">
+                <div className="min-w-0">
+                  <span className="block text-[14px] font-bold break-words">
+                    {p.concepto === "PLAN" ? T.conceptoPlan : T.conceptoUpgrade}
+                    {p.plan ? ` · ${p.plan}` : ""}
+                    {p.ciclo ? ` · ${p.ciclo === "ANUAL" ? "anual" : "mensual"}` : ""}
+                  </span>
+                  <span className="sn-meta">{fechaCorta(p.fecha, locale)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[14px] font-bold">
+                    {catalogo ? formatearMoneda(p.monto, catalogo.pais.moneda, catalogo.pais.locale) : p.monto}
+                  </span>
+                  <Status tone={p.estado === "APROBADO" ? "ok" : p.estado === "RECHAZADO" ? "err" : "info"}>
+                    {T.estadosPago[p.estado] ?? p.estado}
+                  </Status>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {suscripcion.estado === "ACTIVA" || suscripcion.estado === "SUSPENDIDA" ? (
         <section>

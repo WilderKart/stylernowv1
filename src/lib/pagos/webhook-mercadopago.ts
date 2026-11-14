@@ -31,9 +31,11 @@ const NUMERICO = /^\d{1,20}$/;
 export function normalizarTipo(crudo: string | null | undefined): Tipo {
   const t = (crudo ?? "").trim().toLowerCase();
   if (t === "payment" || t.startsWith("payment.")) return "payment";
-  if (t === "merchant_order" || t === "topic_merchant_order_wh") return "merchant_order";
-  if (t === "chargebacks" || t === "topic_chargebacks_wh") return "chargebacks";
-  if (t === "claims" || t === "topic_claims_integration_wh") return "claims";
+  // Mercado Pago usa varias grafías según el canal (webhook, IPN, simulador): merchant_order(s),
+  // topic_merchant_order_wh, chargebacks/topic_chargebacks_wh, claims/topic_claims_integration_wh.
+  if (t.includes("merchant_order")) return "merchant_order";
+  if (t.includes("chargeback")) return "chargebacks";
+  if (t.includes("claim")) return "claims";
   if (t === "mp-connect") return "mp-connect";
   if (t === "stop_delivery_op_wh" || t === "delivery_cancellation") return "fraude";
   if (t === "order" || t.startsWith("order.")) return "order"; // Orders API: no la usa StylerNow
@@ -80,6 +82,7 @@ export async function procesarWebhookMercadoPago(request: Request): Promise<Resp
     }
     console.error("[webhook mercadopago] firma inválida", {
       tipo,
+      tipoCrudo: tipoCrudo?.slice(0, 40) ?? null,
       dataId: dataId?.slice(0, 40),
       requestId: requestIdHeader,
       diagnostico: diagnosticoFirma({

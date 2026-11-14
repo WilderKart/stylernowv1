@@ -63,6 +63,12 @@ function simuladorMp(fetchReal: typeof fetch): typeof fetch {
     const ruta = new URL(url).pathname;
     const json = (s: number, b: unknown) => new Response(JSON.stringify(b), { status: s, headers: { "content-type": "application/json" } });
     if (!cuenta) return json(401, { message: "invalid token" });
+    if (ruta === "/v1/payments/search") {
+      // Como la API real: cada token solo ve los pagos de su propia cuenta.
+      const ref = new URL(url).searchParams.get("external_reference");
+      const results = [...pagosMp.values()].filter((p) => p.external_reference === ref && String(p.collector_id) === cuenta);
+      return json(200, { results });
+    }
     let m = /^\/v1\/payments\/(\d+)$/.exec(ruta);
     if (m) {
       if (falla500.has(m[1])) return json(500, { message: "internal" });
@@ -169,7 +175,7 @@ describe.skipIf(!ACTIVO)("webhook Mercado Pago · integración con Supabase loca
     psql(`set session_replication_role = replica;
       delete from public.libro_movimiento where negocio_id in ${negs};
       delete from public.evento_auditoria where negocio_id in ${negs} or entidad_id in ('${F.pA1}','${F.pA2}','${F.pA3}','${F.pA4}','${F.pA5}');
-      delete from public.webhook_evento where conexion_id in ('${F.conA}','${F.conB}') or negocio_id in ${negs} or data_id in ('90001','90002','90003','90004','90005','90006','90500','99999','70001','80001','123');
+      delete from public.webhook_evento where conexion_id in ('${F.conA}','${F.conB}') or negocio_id in ${negs} or data_id in ('90001','90002','90003','90004','90005','90006','90500','99999','70001','80001','123','90600','90601','90602','90603','90610');
       delete from public.pago where negocio_id in ${negs};
       delete from public.conexion_pago_evento where conexion_id in ('${F.conA}','${F.conB}');
       delete from public.conexion_pago_negocio where id in ('${F.conA}','${F.conB}');
@@ -287,6 +293,41 @@ describe.skipIf(!ACTIVO)("webhook Mercado Pago · integración con Supabase loca
     expect((await mc.json()).conexion).toBe("SIN_CONEXION");
     const o = await procesar(notificacion({ tipo: "order", dataId: "123" }).request);
     expect((await o.json()).ignorado).toBe("order");
+  });
+
+  it("14 · conciliación del cron: un pendiente sin webhook se confirma; los viejos y los de otro entorno no se tocan", async () => {
+    const [p6, p7, p8, p9] = [id(), id(), id(), id()];
+    psql(`insert into public.pago (id, negocio_id, tipo, monto, estado, pasarela, cuenta_cobro, conexion_pago_id, entorno, id_preferencia_pasarela, created_at) values
+      ('${p6}', '${F.negA}', 'GIFT_CARD', 30000, 'PENDIENTE', 'MERCADOPAGO', 'NEGOCIO', '${F.conA}', 'SANDBOX', 'pref-${p6.slice(0, 8)}', now() - interval '1 hour'),
+      ('${p7}', '${F.negA}', 'GIFT_CARD', 30000, 'PENDIENTE', 'MERCADOPAGO', 'NEGOCIO', '${F.conA}', 'SANDBOX', 'pref-${p7.slice(0, 8)}', now() - interval '8 days'),
+      ('${p8}', '${F.negA}', 'GIFT_CARD', 30000, 'PENDIENTE', 'MERCADOPAGO', 'NEGOCIO', '${F.conA}', 'PRODUCCION', 'pref-${p8.slice(0, 8)}', now() - interval '1 hour'),
+      ('${p9}', '${F.negA}', 'GIFT_CARD', 30000, 'PENDIENTE', 'MERCADOPAGO', 'NEGOCIO', '${F.conA}', 'SANDBOX', 'pref-${p9.slice(0, 8)}', now() - interval '1 minute');`);
+    // Todos tienen un pago aprobado en Mercado Pago; solo p6 cumple la ventana y el entorno.
+    for (const [i, p] of [p6, p7, p8, p9].entries()) pagosMp.set(String(90600 + i), pagoMp(90600 + i, p, "approved", CUENTA_A));
+    // Un pago de A que solo existe en la cuenta de B nunca se confirma (el token de A no lo ve).
+    const p10 = id();
+    psql(`insert into public.pago (id, negocio_id, tipo, monto, estado, pasarela, cuenta_cobro, conexion_pago_id, entorno, id_preferencia_pasarela, created_at) values
+      ('${p10}', '${F.negA}', 'GIFT_CARD', 30000, 'PENDIENTE', 'MERCADOPAGO', 'NEGOCIO', '${F.conA}', 'SANDBOX', 'pref-${p10.slice(0, 8)}', now() - interval '2 hours');`);
+    pagosMp.set("90610", pagoMp(90610, p10, "approved", CUENTA_B));
+
+    const { reconciliarPagosPendientes } = await import("@/lib/pagos/sincronizar");
+    const r = await reconciliarPagosPendientes(200);
+    expect(r.cambiados).toBeGreaterThanOrEqual(1);
+    expect(estadoPago(p6)).toBe("APROBADO");
+    expect(estadoPago(p7)).toBe("PENDIENTE");
+    expect(estadoPago(p8)).toBe("PENDIENTE");
+    expect(estadoPago(p9)).toBe("PENDIENTE");
+    expect(estadoPago(p10)).toBe("PENDIENTE");
+  });
+
+  it("15 · el tipo de evento se normaliza con todas las grafías de Mercado Pago", async () => {
+    const { normalizarTipo } = await import("@/lib/pagos/webhook-mercadopago");
+    for (const t of ["merchant_order", "merchant_orders", "topic_merchant_order_wh"]) expect(normalizarTipo(t)).toBe("merchant_order");
+    for (const t of ["chargebacks", "topic_chargebacks_wh"]) expect(normalizarTipo(t)).toBe("chargebacks");
+    for (const t of ["claims", "topic_claims_integration_wh"]) expect(normalizarTipo(t)).toBe("claims");
+    expect(normalizarTipo("payment")).toBe("payment");
+    expect(normalizarTipo("order")).toBe("order");
+    expect(normalizarTipo("algo-nuevo")).toBe("otro");
   });
 
   it("13 · en producción sin secreto configurado → 503 (no se procesa nada)", async () => {

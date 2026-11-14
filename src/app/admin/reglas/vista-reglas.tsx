@@ -117,8 +117,9 @@ function SeccionPrueba({ p }: { p: DatosReglas["prueba"] }) {
     <Card className="flex flex-col gap-3 p-5">
       <h2 className="section">Prueba gratuita y suscripciones</h2>
       <p className="sn-meta">
-        Sin tarjeta, la prueba no se cobra: al vencer, el negocio pasa a «requiere plan». Con tarjeta, se cobra al
-        terminar solo si el país tiene cobro recurrente habilitado. Aplica a pruebas que se inicien desde ahora.
+        La prueba nunca se cobra automáticamente. Al vencer, el negocio entra en gracia (sigue recibiendo reservas) y paga su
+        plan por Checkout Pro desde «Plan y facturación»; si la gracia termina sin pago, pasa a «requiere plan». Las modalidades
+        con tarjeta están deshabilitadas en esta etapa (sin cobro recurrente). Aplica a pruebas que se inicien desde ahora.
       </p>
       <div className="grid gap-3 sm:grid-cols-3">
         <Input label="Duración (días)" type="number" value={v.dias} onChange={(e) => setV({ ...v, dias: e.target.value })} />
@@ -130,8 +131,8 @@ function SeccionPrueba({ p }: { p: DatosReglas["prueba"] }) {
             onChange={(e) => setV({ ...v, modalidad: e.target.value as typeof v.modalidad })}
           >
             <option value="SIN_TARJETA">Sin tarjeta</option>
-            <option value="CON_TARJETA">Con tarjeta obligatoria</option>
-            <option value="AMBAS">El negocio elige</option>
+            <option value="CON_TARJETA" disabled>Con tarjeta obligatoria (no disponible: sin cobro recurrente)</option>
+            <option value="AMBAS" disabled>El negocio elige (no disponible: sin cobro recurrente)</option>
           </select>
         </label>
         <Input label="Gracia por impago (días)" type="number" value={v.graciaDias} onChange={(e) => setV({ ...v, graciaDias: e.target.value })} />

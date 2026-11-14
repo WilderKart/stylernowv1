@@ -192,6 +192,9 @@ const esquemaPrueba = z
 export async function guardarConfigPrueba(entrada: z.input<typeof esquemaPrueba>): Promise<Resultado> {
   try {
     const d = esquemaPrueba.parse(entrada);
+    // Decisión del propietario (2026-11-14): sin cobro recurrente, solo prueba sin tarjeta. Las otras
+    // modalidades siguen en la base para una etapa futura, pero no se aceptan desde el panel.
+    if (d.modalidad !== "SIN_TARJETA") return { ok: false, error: "En esta etapa la prueba es solo sin tarjeta (no hay cobro recurrente)." };
     const supabase = await sesionSuperSU();
     const { error } = await (supabase as unknown as RpcSinTipos).rpc("admin_set_config_prueba", {
       p_dias: d.dias,

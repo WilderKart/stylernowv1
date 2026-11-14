@@ -24,6 +24,16 @@ const MENSAJES_ERROR: Record<string, string> = {
   SIN_DOWNGRADE_PROGRAMADO: "No tienes ningún downgrade programado para cancelar.",
   MOTIVO_REQUERIDO: "Tienes que indicar un motivo.",
   TRANSICION_INVALIDA: "Tu negocio no está en un estado que permita esta acción.",
+  SUSCRIPCION_CANCELADA: "Tu suscripción está cancelada. Escríbele a soporte para reactivarla.",
+  SUSPENDIDA_POR_INFRACCION: "Tu cuenta está suspendida por una revisión. Escríbele a soporte.",
+  ACTIVACION_MANUAL_VIGENTE: "Tu plan lo activó el equipo de StylerNow. Cuando termine esa activación podrás pagarlo aquí.",
+  AUN_NO_TOCA_RENOVAR: "Podrás renovar tu plan en los 7 días anteriores a su vencimiento.",
+  PLAN_REQUERIDO: "Elige un plan para continuar.",
+  CICLO_INVALIDO: "Elige facturación mensual o anual.",
+  PAIS_SIN_PASARELA: "Todavía no recibimos pagos en línea en tu país. Escríbele a soporte.",
+  PAGO_SUSCRIPCION_EN_PROCESO: "Ya tienes un pago de suscripción en proceso. Espera a que se confirme.",
+  PLAN_SIN_PRECIO: "Ese plan no tiene precio publicado en tu país.",
+  PLAN_REQUIERE_COTIZACION: "Ese plan se cotiza directamente con el equipo de StylerNow.",
 };
 
 function traducirError(mensaje: string) {
@@ -195,6 +205,88 @@ export async function iniciarUpgrade(negocioId: string, planCodigoNuevo: PlanCod
     return { ok: true, url: preferencia.url, pagoId: pago.id };
   } catch (e) {
     return { ok: false, mensaje: e instanceof Error ? e.message : "La pasarela no respondió. Intenta de nuevo." };
+  }
+}
+
+/**
+ * Pago (o renovación) del plan por Checkout Pro, en la cuenta de StylerNow (migración 133).
+ * El monto lo calcula la base (`solicitar_pago_plan`); el estado lo confirma el webhook o la
+ * conciliación, nunca el retorno del navegador. No se guarda ningún dato de tarjeta.
+ */
+export async function iniciarPagoPlan(
+  negocioId: string,
+  planCodigo?: PlanCodigo,
+  ciclo?: "MENSUAL" | "ANUAL"
+): Promise<ResultadoInicioUpgrade> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, mensaje: "Inicia sesión de nuevo." };
+
+  const { data, error } = await (supabase as unknown as {
+    rpc: (n: string, a: object) => Promise<{ data: { id: string; monto: number } | null; error: { message: string } | null }>;
+  }).rpc("solicitar_pago_plan", {
+    p_negocio_id: negocioId,
+    p_plan_codigo: planCodigo ?? null,
+    p_ciclo: ciclo ?? null,
+  });
+  if (error) return { ok: false, mensaje: traducirError(error.message) };
+  if (!data) return { ok: false, mensaje: "No se pudo iniciar el pago." };
+
+  const { data: negocio } = await supabase.from("negocio").select("nombre").eq("id", negocioId).single();
+  try {
+    const preferencia = await crearPreferenciaDePago({
+      pagoId: data.id,
+      titulo: `Plan StylerNow${planCodigo ? ` ${planCodigo}` : ""} · ${negocio?.nombre ?? "tu negocio"}`,
+      emailPagador: user.email,
+      urlRetorno: `${urlSitio()}/panel/suscripcion?desde=pago`,
+    });
+    return { ok: true, url: preferencia.url, pagoId: data.id };
+  } catch (e) {
+    return { ok: false, mensaje: e instanceof Error ? e.message : "La pasarela no respondió. Intenta de nuevo." };
+  }
+}
+
+export interface PagoSuscripcion {
+  id: string;
+  fecha: string;
+  monto: number;
+  estado: string;
+  concepto: "PLAN" | "UPGRADE";
+  plan: string | null;
+  ciclo: string | null;
+}
+
+/** Historial de pagos y renovaciones del plan (solo pagos a StylerNow, nunca los de reservas). */
+export async function listarPagosSuscripcion(negocioId: string): Promise<Resultado<PagoSuscripcion[]>> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("pago")
+      .select("id, created_at, monto, estado, metadata")
+      .eq("negocio_id", negocioId)
+      .eq("tipo", "SUSCRIPCION")
+      .order("created_at", { ascending: false })
+      .limit(24);
+    if (error) return { ok: false, error: "No pudimos leer tu historial de pagos." };
+    return {
+      ok: true,
+      data: (data ?? []).map((p) => {
+        const m = (p.metadata ?? {}) as Record<string, string | undefined>;
+        return {
+          id: p.id,
+          fecha: p.created_at,
+          monto: Number(p.monto),
+          estado: p.estado,
+          concepto: m.concepto === "PLAN" ? "PLAN" : "UPGRADE",
+          plan: m.plan_codigo_nuevo ?? null,
+          ciclo: m.ciclo ?? null,
+        };
+      }),
+    };
+  } catch {
+    return { ok: false, error: "No pudimos leer tu historial de pagos." };
   }
 }
 

@@ -1,5 +1,6 @@
 import { procesarOutbox } from "@/lib/notificaciones/worker";
 import { procesarReembolsosPendientes } from "@/lib/pagos/reembolsos";
+import { reconciliarPagosPendientes } from "@/lib/pagos/sincronizar";
 import { ejecutarCicloSuscripciones } from "@/lib/planes/ciclo-suscripciones";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { NextRequest } from "next/server";
@@ -90,6 +91,14 @@ export async function GET(request: NextRequest) {
     resultado.whatsapp_lotes_plan = error ? { error: error.message } : data;
   } catch (e) {
     resultado.whatsapp_lotes_plan = { error: e instanceof Error ? e.message : "error inesperado" };
+  }
+
+  // Pagos PENDIENTE cuyo webhook no llegó: se reconsultan en Mercado Pago (solo aplica lo que la
+  // pasarela confirma). Antes de reembolsos: un pago tardío de una reserva expirada encola su devolución.
+  try {
+    resultado.conciliacion_pagos = await reconciliarPagosPendientes(30);
+  } catch (e) {
+    resultado.conciliacion_pagos = { error: e instanceof Error ? e.message : "error inesperado" };
   }
 
   // Va al final: la eliminación de cuentas y las cascadas del día también encolan reembolsos.

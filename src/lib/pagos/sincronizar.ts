@@ -3,7 +3,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buscarPagoPorReferencia, obtenerPago, reembolsar, type PagoPasarela } from "./mercadopago";
 import { conexionesDeCuenta, cuentaDePago, cuentaVendedorDeConexion, tokenDeConexion } from "./conexiones";
-import { liveModeCoincide } from "./entorno";
+import { entornoPagos, liveModeCoincide } from "./entorno";
 import { procesarReembolsosSinFallar } from "./reembolsos";
 
 /**
@@ -202,6 +202,67 @@ export async function sincronizarPago(pagoId: string): Promise<ResultadoSincroni
   const pasarela = await buscarPagoPorReferencia(pagoId, cuenta.token);
   if (!pasarela) return { estado: "PENDIENTE" };
   return aplicar(pagoId, pasarela);
+}
+
+export interface ResumenConciliacion {
+  revisados: number;
+  cambiados: number;
+  sinCambio: number;
+  fallidos: number;
+}
+
+/**
+ * Red de seguridad del cron diario: si el webhook no llegó (o falló) y el cliente no volvió a la
+ * pantalla de pago, un `pago` con preferencia creada quedaría PENDIENTE para siempre. Se reconsultan
+ * los pendientes del entorno actual con más de 15 minutos y menos de 7 días, por referencia externa
+ * y con el token de la cuenta que cobró (mismo camino que el retorno del checkout). Nunca crea
+ * cobros ni reembolsa por su cuenta: solo aplica el estado que confirma Mercado Pago.
+ */
+export async function reconciliarPagosPendientes(limite = 30): Promise<ResumenConciliacion> {
+  const resumen: ResumenConciliacion = { revisados: 0, cambiados: 0, sinCambio: 0, fallidos: 0 };
+  const admin = createAdminClient() as unknown as {
+    from: (t: string) => {
+      select: (c: string) => {
+        eq: (c: string, v: string) => {
+          eq: (c: string, v: string) => {
+            not: (c: string, op: string, v: null) => {
+              lt: (c: string, v: string) => {
+                gt: (c: string, v: string) => {
+                  order: (c: string, o: { ascending: boolean }) => { limit: (n: number) => Promise<{ data: { id: string }[] | null; error: { message: string } | null }> };
+                };
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+  const ahora = Date.now();
+  const { data, error } = await admin
+    .from("pago")
+    .select("id")
+    .eq("estado", "PENDIENTE")
+    .eq("entorno", entornoPagos())
+    .not("id_preferencia_pasarela", "is", null)
+    .lt("created_at", new Date(ahora - 15 * 60_000).toISOString())
+    .gt("created_at", new Date(ahora - 7 * 24 * 3_600_000).toISOString())
+    .order("created_at", { ascending: true })
+    .limit(limite);
+  if (error) throw new Error(`reconciliarPagosPendientes: ${error.message}`);
+
+  for (const { id } of data ?? []) {
+    resumen.revisados += 1;
+    try {
+      const r = await sincronizarPago(id);
+      if (r.estado === "PENDIENTE" || r.estado === "SIN_CAMBIOS") resumen.sinCambio += 1;
+      else resumen.cambiados += 1;
+    } catch (e) {
+      // Conexión revocada, pasarela caída…: se reintenta en la siguiente corrida. Sin datos del pagador.
+      resumen.fallidos += 1;
+      console.error("[conciliacion] no se pudo reconsultar el pago", id, e instanceof Error ? e.message : e);
+    }
+  }
+  return resumen;
 }
 
 /**

@@ -38,12 +38,13 @@ async function enviarAvisos(admin: Admin) {
     const dias = a.tipo === "1D" ? "mañana" : "en 3 días";
     const fecha = new Date(a.fecha_cobro).toLocaleDateString("es-CO", { day: "numeric", month: "long" });
     // Sin tarjeta no hay cobro automático: se invita a elegir plan (migración 118).
-    const conTarjeta = (a as { con_tarjeta?: boolean }).con_tarjeta === true;
+    // Sin cobro automático (COBRO_AUTOMATICO_HABILITADO = false), nunca se anuncia un cobro a la tarjeta.
+    const conTarjeta = COBRO_AUTOMATICO_HABILITADO && (a as { con_tarjeta?: boolean }).con_tarjeta === true;
     const cuerpo = conTarjeta
       ? `<h2>Tu prueba gratuita termina ${dias}</h2><p>El ${fecha} se hará el primer cobro de tu plan con el método de pago que registraste. ` +
         `Si no quieres continuar, cancela antes desde Plan y facturación.</p>`
-      : `<h2>Tu prueba gratuita termina ${dias}</h2><p>El ${fecha} termina tu prueba. No te cobraremos nada: para seguir recibiendo reservas, ` +
-        `elige tu plan desde Plan y facturación.</p>`;
+      : `<h2>Tu prueba gratuita termina ${dias}</h2><p>El ${fecha} termina tu prueba. No te cobraremos nada automáticamente: ` +
+        `para seguir recibiendo reservas, paga tu plan desde Plan y facturación. Si no alcanzas, tendrás unos días de gracia.</p>`;
     const ok = await enviarCorreo(email, `Tu prueba de StylerNow termina ${dias}`, cuerpo);
     if (ok) {
       await admin.rpc("marcar_aviso_prueba", { p_negocio_id: a.negocio_id, p_tipo: a.tipo });
@@ -108,10 +109,17 @@ async function cobrarPruebasVencidas(admin: Admin) {
   return resumen;
 }
 
+/**
+ * Decisión del propietario (2026-11-14): sin cobros automáticos ni Preapproval en esta etapa. Al terminar
+ * la prueba, `mantenimiento_suscripciones` (migración 133) la pasa a gracia y el dueño paga su plan por
+ * Checkout Pro. El cobro recurrente queda implementado pero apagado; activarlo exige una decisión nueva.
+ */
+const COBRO_AUTOMATICO_HABILITADO = false;
+
 export async function ejecutarCicloSuscripciones() {
   const admin = createAdminClient();
   const avisos = await enviarAvisos(admin);
-  const cobros = await cobrarPruebasVencidas(admin);
+  const cobros = COBRO_AUTOMATICO_HABILITADO ? await cobrarPruebasVencidas(admin) : { cobradas: 0, fallidas: 0, deshabilitado: true };
   const { data: mantenimiento } = await admin.rpc("mantenimiento_suscripciones");
   return { avisos_enviados: avisos, cobros, mantenimiento };
 }

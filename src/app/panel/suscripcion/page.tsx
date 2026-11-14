@@ -2,7 +2,7 @@ import { EmptyState } from "@/components/brutal";
 import { PanelNav } from "@/components/panel/panel-nav";
 import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { obtenerCatalogoPais } from "@/lib/planes/catalogo";
-import { obtenerCatalogoPlanes, obtenerMiSuscripcion } from "./actions";
+import { listarPagosSuscripcion, obtenerCatalogoPlanes, obtenerMiSuscripcion } from "./actions";
 import { obtenerConfigPrueba } from "./config-prueba";
 import { obtenerUsoNegocio } from "./datos";
 import { VistaSuscripcion } from "./vista-suscripcion";
@@ -15,11 +15,12 @@ export default async function SuscripcionPage() {
   const contexto = await verificarAccesoPanel(["BARBERIA"], "/panel/suscripcion");
   const negocioId = contexto.negocioId!;
 
-  const [suscripcionRes, planesRes, uso, configPrueba] = await Promise.all([
+  const [suscripcionRes, planesRes, uso, configPrueba, pagosRes] = await Promise.all([
     obtenerMiSuscripcion(negocioId),
     obtenerCatalogoPlanes(),
     obtenerUsoNegocio(negocioId),
     obtenerConfigPrueba(),
+    listarPagosSuscripcion(negocioId),
   ]);
 
   if (!suscripcionRes.ok) {
@@ -51,6 +52,7 @@ export default async function SuscripcionPage() {
         uso={{ sedes: uso.sedes, staff: uso.staff }}
         fundador={uso.fundador}
         configPrueba={configPrueba}
+        pagos={pagosRes.ok ? pagosRes.data : []}
       />
     </div>
   );
