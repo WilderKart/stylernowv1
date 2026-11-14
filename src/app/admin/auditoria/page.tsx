@@ -1,3 +1,4 @@
+import { EncabezadoAdmin } from "@/app/admin/_componentes/encabezado-admin";
 import { requireSuperSU } from "@/lib/auth/require-supersu";
 import { listarAuditoriaAdmin, listarEntidadesAdmin } from "./actions";
 import { VistaAuditoriaAdmin } from "./vista-auditoria-admin";
@@ -7,9 +8,9 @@ export default async function AdminAuditoriaPage() {
   const [res, entidades] = await Promise.all([listarAuditoriaAdmin({ pagina: 1 }), listarEntidadesAdmin()]);
 
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-8 sm:px-10">
-      <h1 className="font-display mb-1 text-[22px] font-bold uppercase text-text">Auditoría</h1>
-      <p className="mb-5 text-[12px] text-text-faint">
+    <main className="w-full max-w-3xl min-w-0 flex-1 px-4 py-6 sm:px-8 lg:px-10 lg:py-10">
+      <EncabezadoAdmin seccion="Auditoría" titulo="Registro de" resaltado="cambios." />
+      <p className="-mt-3 mb-6 max-w-3xl text-[13px] text-text-muted">
         Registro inmutable de la plataforma: quién cambió qué, valor anterior y nuevo, motivo y origen.
       </p>
       <VistaAuditoriaAdmin

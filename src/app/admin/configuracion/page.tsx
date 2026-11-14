@@ -1,3 +1,4 @@
+import { EncabezadoAdmin } from "@/app/admin/_componentes/encabezado-admin";
 import {
   listarBanners,
   listarCiudades,
@@ -21,8 +22,8 @@ export default async function AdminConfiguracionPage() {
   ]);
 
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-8 sm:px-10">
-      <h1 className="font-display mb-6 text-[22px] font-bold uppercase text-text">Configuración global</h1>
+    <main className="w-full max-w-5xl min-w-0 flex-1 px-4 py-6 sm:px-8 lg:px-10 lg:py-10">
+      <EncabezadoAdmin seccion="Configuración" titulo="Configuración" resaltado="global." />
       <VistaConfiguracion
         comisionInicial={comision.ok ? comision.data : 8}
         ciudadesIniciales={ciudades.ok ? ciudades.data : []}

@@ -1,3 +1,4 @@
+import { EncabezadoAdmin } from "@/app/admin/_componentes/encabezado-admin";
 import { obtenerResumenAdminWhatsApp } from "./actions";
 import { VistaAdminWhatsApp } from "./vista-admin-whatsapp";
 
@@ -7,8 +8,8 @@ export const metadata = { title: "WhatsApp" };
 export default async function AdminWhatsAppPage() {
   const resumen = await obtenerResumenAdminWhatsApp();
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-8 sm:px-10">
-      <h1 className="font-display mb-6 text-[22px] font-bold uppercase text-text">WhatsApp</h1>
+    <main className="w-full max-w-5xl min-w-0 flex-1 px-4 py-6 sm:px-8 lg:px-10 lg:py-10">
+      <EncabezadoAdmin seccion="WhatsApp" titulo="Mensajería" resaltado="WhatsApp." />
       <VistaAdminWhatsApp resumen={resumen.ok ? resumen.data : null} errorInicial={resumen.ok ? null : resumen.error} />
     </main>
   );

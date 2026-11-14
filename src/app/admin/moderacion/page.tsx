@@ -1,3 +1,4 @@
+import { EncabezadoAdmin } from "@/app/admin/_componentes/encabezado-admin";
 import { listarResenasReportadas } from "../actions";
 import { ColaModeracion } from "./cola-moderacion";
 
@@ -5,8 +6,8 @@ export default async function AdminModeracionPage() {
   const res = await listarResenasReportadas();
 
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-8 sm:px-10">
-      <h1 className="font-display mb-6 text-[22px] font-bold uppercase text-text">Moderación de reseñas</h1>
+    <main className="w-full max-w-3xl min-w-0 flex-1 px-4 py-6 sm:px-8 lg:px-10 lg:py-10">
+      <EncabezadoAdmin seccion="Moderación" titulo="Moderación de" resaltado="reseñas." />
       <ColaModeracion resenasIniciales={res.ok ? res.data : []} errorInicial={res.ok ? null : res.error} />
     </main>
   );

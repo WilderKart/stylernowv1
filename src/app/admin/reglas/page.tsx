@@ -1,4 +1,5 @@
-import { EmptyState, Poster } from "@/components/brutal";
+import { EncabezadoAdmin } from "@/app/admin/_componentes/encabezado-admin";
+import { EmptyState } from "@/components/brutal";
 import { obtenerReglas } from "./actions";
 import { VistaReglas } from "./vista-reglas";
 
@@ -8,10 +9,8 @@ export default async function AdminReglasPage() {
   const res = await obtenerReglas();
 
   return (
-    <main className="mx-auto w-full max-w-5xl min-w-0 flex-1 px-5 py-8 sm:px-10">
-      <Poster as="h1" size={3} className="mb-6 break-words">
-        Reglas operativas
-      </Poster>
+    <main className="w-full max-w-5xl min-w-0 flex-1 px-4 py-6 sm:px-8 lg:px-10 lg:py-10">
+      <EncabezadoAdmin seccion="Reglas y políticas" titulo="Reglas" resaltado="operativas." />
       {res.ok ? (
         <VistaReglas datos={res.data} />
       ) : (

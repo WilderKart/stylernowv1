@@ -1,4 +1,5 @@
-import { EmptyState, Poster } from "@/components/brutal";
+import { EncabezadoAdmin } from "@/app/admin/_componentes/encabezado-admin";
+import { EmptyState } from "@/components/brutal";
 import { VistaLibro } from "@/components/libro/vista-libro";
 import { alcanceLibro, listarMovimientos, TAMANO_PAGINA, totalesLibro } from "@/lib/libro/consultas";
 import { leerFiltros } from "@/lib/libro/filtros";
@@ -16,10 +17,8 @@ export default async function LibroAdminPage(props: { searchParams: Promise<Reco
   );
 
   return (
-    <main className="mx-auto w-full max-w-6xl min-w-0 flex-1 px-5 py-8 sm:px-10">
-      <Poster as="h1" size={3} className="mb-6 break-words">
-        Libro financiero
-      </Poster>
+    <main className="w-full max-w-6xl min-w-0 flex-1 px-4 py-6 sm:px-8 lg:px-10 lg:py-10">
+      <EncabezadoAdmin seccion="Libro contable" titulo="Libro" resaltado="financiero." />
       {contenido}
     </main>
   );

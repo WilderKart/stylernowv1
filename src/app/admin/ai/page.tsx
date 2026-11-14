@@ -1,3 +1,4 @@
+import { EncabezadoAdmin } from "@/app/admin/_componentes/encabezado-admin";
 import {
   listarAccionesCostoIa,
   listarFuncionesPlanIa,
@@ -19,9 +20,9 @@ export default async function AdminAiPage() {
   ]);
 
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-8 sm:px-10">
-      <h1 className="font-display mb-1 text-[22px] font-bold uppercase text-text">AI Center</h1>
-      <p className="mb-6 text-[12px] text-text-faint">
+    <main className="w-full max-w-5xl min-w-0 flex-1 px-4 py-6 sm:px-8 lg:px-10 lg:py-10">
+      <EncabezadoAdmin seccion="IA Center" titulo="Motor de" resaltado="IA." />
+      <p className="-mt-3 mb-6 max-w-3xl text-[13px] text-text-muted">
         AI Pricing Engine, Cost Optimizer, paquetes de créditos y funciones por Plan — ADR-013. &quot;StylerNow nunca
         subsidia IA&quot;: todo costo aquí definido se cobra al Negocio en créditos.
       </p>
