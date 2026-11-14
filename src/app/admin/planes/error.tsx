@@ -2,11 +2,13 @@
 
 import { Meta, Num, Poster } from "@/components/brutal";
 import { Button } from "@/components/ui/button";
+import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 
 export default function ErrorPlanes({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
     console.error("[admin/planes]", error);
+    Sentry.captureException(error, { tags: { limite: "admin-planes" } });
   }, [error]);
 
   return (

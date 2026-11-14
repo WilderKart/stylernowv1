@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs/config";
 
 // Las imágenes de Negocio y avatares viven en Storage de Supabase (migración 007).
 // Solo se habilita ese host y solo la ruta pública de objetos.
@@ -44,4 +45,17 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Sentry: monitoreo de errores. Sin SENTRY_AUTH_TOKEN el build funciona igual (solo omite subir los source maps).
+export default withSentryConfig(nextConfig, {
+  org: "stylernow",
+  project: "stylernow-app",
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  // Los eventos del navegador pasan por src/app/api/monitoring/route.ts (misma origen, sin tocar el CSP).
+  tunnelRoute: "/api/monitoring",
+  // Source maps: se suben a Sentry para ver el código real en los errores y NO se publican con la app.
+  widenClientFileUpload: true,
+  sourcemaps: { deleteSourcemapsAfterUpload: true },
+  // Sin telemetría del propio SDK ni monitores de cron de Vercel (no se usan).
+  telemetry: false,
+});

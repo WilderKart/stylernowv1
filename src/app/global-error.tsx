@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect, useSyncExternalStore } from "react";
 import { crearTraductor, type Idioma } from "@/lib/i18n/diccionario";
 
@@ -28,6 +29,7 @@ export default function GlobalError({
   const t = crearTraductor(idioma);
   useEffect(() => {
     console.error("[global-error]", error);
+    Sentry.captureException(error, { tags: { limite: "global-error" } });
   }, [error]);
 
   const mono = "'Space Mono', ui-monospace, Menlo, Consolas, monospace";

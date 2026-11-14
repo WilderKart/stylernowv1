@@ -2,6 +2,7 @@
 
 import { Meta, Num, Poster } from "@/components/brutal";
 import { Button } from "@/components/ui/button";
+import * as Sentry from "@sentry/nextjs";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
@@ -24,6 +25,7 @@ export default function ErrorBoundary({
   const t = useT();
   useEffect(() => {
     console.error("[error-boundary]", error);
+    Sentry.captureException(error, { tags: { limite: "app" } });
   }, [error]);
 
   return (

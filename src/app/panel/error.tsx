@@ -2,6 +2,7 @@
 
 import { Meta, Num, Poster } from "@/components/brutal";
 import { Button } from "@/components/ui/button";
+import * as Sentry from "@sentry/nextjs";
 import { ArrowUpRight } from "lucide-react";
 import { useEffect } from "react";
 import { useT } from "@/lib/i18n/proveedor";
@@ -15,6 +16,7 @@ export default function ErrorPanel({ error, reset }: { error: Error & { digest?:
   const t = useT();
   useEffect(() => {
     console.error("[panel/error-boundary]", error);
+    Sentry.captureException(error, { tags: { limite: "panel" } });
   }, [error]);
 
   return (
