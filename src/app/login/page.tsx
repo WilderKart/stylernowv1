@@ -20,6 +20,9 @@ export default async function LoginPage(props: PageProps<"/login">) {
   } = await supabase.auth.getUser();
 
   if (user) {
+    // Super Admin (creado desde la base de datos): nunca ve el registro de cliente.
+    const { data: perfil } = await supabase.from("perfil").select("es_supersu").eq("id", user.id).maybeSingle();
+    if (perfil?.es_supersu === true) redirect(siguiente !== "/" ? siguiente : "/admin");
     // C17: sesión activa pero registro sin completar (sin país) → se muestra el paso de registro.
     // Misma señal que el proxy (migración 127): sin esto, un pendiente con país podía entrar en bucle.
     const prefs = await obtenerPreferencias();

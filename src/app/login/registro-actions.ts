@@ -17,6 +17,9 @@ export async function necesitaRegistro(): Promise<{ necesita: boolean; email: st
   } = await supabase.auth.getUser();
   if (!user) return { necesita: false, email: "" };
   if (user.app_metadata?.registro_pendiente === true) return { necesita: true, email: user.email ?? "" };
+  // El Super Admin se crea desde la base de datos: nunca ve el registro de cliente.
+  const { data: perfil } = await supabase.from("perfil").select("es_supersu").eq("id", user.id).maybeSingle();
+  if (perfil?.es_supersu === true) return { necesita: false, email: user.email ?? "" };
   const r = await obtenerPreferencias();
   return { necesita: r.ok ? r.data.pais === null : false, email: user.email ?? "" };
 }

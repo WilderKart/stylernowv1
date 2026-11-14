@@ -121,6 +121,12 @@ export function FormularioLogin({
     router.refresh();
   }
 
+  /** Super Admin: directo a su panel (o al destino pedido), sin pasos de registro de cliente. */
+  function irAlPanelSupersu() {
+    router.replace(siguiente && siguiente !== "/" ? siguiente : "/admin");
+    router.refresh();
+  }
+
   function irADestinoFinal() {
     const destino = pendienteLegales.length > 0 ? `/legal/aceptar?next=${encodeURIComponent(siguiente)}` : siguiente;
     router.replace(destino);
@@ -158,6 +164,10 @@ export function FormularioLogin({
       setError(res.error);
       return;
     }
+    if (res.esSupersu) {
+      irAlPanelSupersu();
+      return;
+    }
     irADestinoFinal();
   }
 
@@ -175,6 +185,10 @@ export function FormularioLogin({
       sessionStorage.removeItem(CLAVE_PASO);
     } catch {
       /* no crítico */
+    }
+    if (res.esSupersu) {
+      irAlPanelSupersu();
+      return;
     }
     setPendienteLegales(res.pendientesLegales);
 

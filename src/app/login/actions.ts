@@ -91,6 +91,12 @@ export async function verificarCodigo(email: string, token: string) {
   let faltaContrasena = false;
   let pendientesLegales: { id: string; tipo: string }[] = [];
 
+  // Super Admin: la cuenta se crea y administra solo desde la base de datos (credenciales en Supabase).
+  // Nunca pasa por el registro de cliente (país, celular, contraseña ni aceptación de términos).
+  if (data.user && (await esSupersuCuenta(supabase, data.user.id))) {
+    return { ok: true as const, faltaTelefono, faltaContrasena, pendientesLegales, esSupersu: true };
+  }
+
   if (data.user) {
     const { pendientesMateriales } = await registrarAceptacionLegal(supabase, data.user.id);
     pendientesLegales = pendientesMateriales.map((t) => ({ id: t.id, tipo: t.tipo }));
@@ -117,7 +123,13 @@ export async function verificarCodigo(email: string, token: string) {
     faltaContrasena = !perfil?.password_establecida;
   }
 
-  return { ok: true as const, faltaTelefono, faltaContrasena, pendientesLegales };
+  return { ok: true as const, faltaTelefono, faltaContrasena, pendientesLegales, esSupersu: false };
+}
+
+/** Lee es_supersu del perfil de la sesión (el valor solo se fija desde la base, migración 136). */
+async function esSupersuCuenta(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
+  const { data } = await supabase.from("perfil").select("es_supersu").eq("id", userId).maybeSingle();
+  return data?.es_supersu === true;
 }
 
 /**
@@ -178,14 +190,14 @@ export async function iniciarSesionConContrasena(email: string, password: string
   if (!limite.ok) return { ok: false as const, error: limite.error };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   await registrarIntentoAuth(email, "password_login", !error);
   // Supabase ya devuelve un mensaje genérico ("Invalid login credentials")
   // que no distingue "no existe" de "contraseña incorrecta" — se conserva
   // tal cual, nunca se reemplaza por algo más específico (evita enumeración
   // de cuentas).
   if (error) return { ok: false as const, error: error.message };
-  return { ok: true as const };
+  return { ok: true as const, esSupersu: data.user ? await esSupersuCuenta(supabase, data.user.id) : false };
 }
 
 export async function solicitarRecuperacion(email: string) {

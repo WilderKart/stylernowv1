@@ -26,6 +26,8 @@ export default async function RegistroPage(props: PageProps<"/registro">) {
   } = await supabase.auth.getUser();
 
   if (user) {
+    const { data: perfil } = await supabase.from("perfil").select("es_supersu").eq("id", user.id).maybeSingle();
+    if (perfil?.es_supersu === true) redirect(siguiente !== "/" ? siguiente : "/admin");
     const prefs = await obtenerPreferencias();
     if (user.app_metadata?.registro_pendiente === true || (prefs.ok && prefs.data.pais === null)) {
       return <FormularioLogin siguiente={siguiente} registroPendiente emailSesion={user.email ?? ""} modo="registro" />;
