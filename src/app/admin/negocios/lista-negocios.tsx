@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/card";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivacionManual } from "./activacion-manual";
 import {
   aprobarNegocio,
@@ -40,8 +40,19 @@ const FILTROS = [
   { valor: "CANCELADO", etiqueta: "Cancelados" },
 ] as const;
 
-export function ListaNegocios({ negociosIniciales, errorInicial }: { negociosIniciales: NegocioAdmin[]; errorInicial: string | null }) {
+export function ListaNegocios({
+  negociosIniciales,
+  errorInicial,
+  destacadoId,
+  textoInicial = "",
+}: {
+  negociosIniciales: NegocioAdmin[];
+  errorInicial: string | null;
+  destacadoId?: string;
+  textoInicial?: string;
+}) {
   const [negocios, setNegocios] = useState(negociosIniciales);
+  const [texto, setTexto] = useState(textoInicial);
   const [filtro, setFiltro] = useState("");
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(errorInicial);
@@ -57,6 +68,14 @@ export function ListaNegocios({ negociosIniciales, errorInicial }: { negociosIni
     setNegocios(res.data);
   }
 
+  // Llegada desde el buscador global: se lleva a la vista el negocio elegido.
+  useEffect(() => {
+    if (destacadoId) document.getElementById(`negocio-${destacadoId}`)?.scrollIntoView({ block: "center" });
+  }, [destacadoId]);
+
+  const t = texto.trim().toLowerCase();
+  const visibles = t ? negocios.filter((n) => `${n.nombre} ${n.ciudad ?? ""}`.toLowerCase().includes(t)) : negocios;
+
   async function ejecutar(negocioId: string, fn: () => Promise<{ ok: boolean; error?: string }>) {
     setAccionando(negocioId);
     setError(null);
@@ -68,6 +87,13 @@ export function ListaNegocios({ negociosIniciales, errorInicial }: { negociosIni
 
   return (
     <div>
+      <input
+        value={texto}
+        onChange={(e) => setTexto(e.target.value)}
+        placeholder="Buscar negocio por nombre o ciudad…"
+        aria-label="Buscar negocio"
+        className="mb-3 h-11 w-full border-2 border-border bg-bg px-3 text-[14px] text-text outline-none placeholder:text-text-faint focus:border-accent"
+      />
       <div className="mb-4 flex flex-wrap gap-1.5">
         {FILTROS.map((f) => (
           <button
@@ -87,14 +113,18 @@ export function ListaNegocios({ negociosIniciales, errorInicial }: { negociosIni
 
       {cargando ? (
         <div className="h-40 animate-pulse rounded-2xl border border-border-subtle bg-surface" />
-      ) : negocios.length === 0 ? (
+      ) : visibles.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-border px-4 py-10 text-center text-[12.5px] text-text-faint">
-          No hay negocios en ese estado.
+          {t ? "Ningún negocio coincide con la búsqueda." : "No hay negocios en ese estado."}
         </p>
       ) : (
         <ul className="flex flex-col gap-2.5">
-          {negocios.map((n) => (
-            <li key={n.id} className="rounded-2xl border border-border-subtle bg-surface p-4">
+          {visibles.map((n) => (
+            <li
+              key={n.id}
+              id={`negocio-${n.id}`}
+              className={`rounded-2xl border bg-surface p-4 ${n.id === destacadoId ? "border-accent ring-2 ring-accent" : "border-border-subtle"}`}
+            >
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-[14px] font-bold text-text">{n.nombre}</p>

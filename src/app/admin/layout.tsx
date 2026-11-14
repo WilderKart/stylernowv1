@@ -1,6 +1,7 @@
 import { requireSuperSU } from "@/lib/auth/require-supersu";
 import { createClient } from "@/lib/supabase/server";
 import { BarraLateralAdmin } from "./barra-lateral";
+import { BarraSuperiorAdmin } from "./barra-superior";
 import { contadoresAdmin } from "./tablero";
 import { Suspense } from "react";
 import CargandoAdmin from "./loading";
@@ -25,7 +26,10 @@ async function AdminGuardado({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col bg-bg lg:flex-row">
       <BarraLateralAdmin email={user?.email ?? ""} nombre={nombre ?? ""} contadores={contadores} />
-      <div className="flex min-w-0 flex-1 flex-col">{children}</div>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <BarraSuperiorAdmin contadores={contadores} />
+        {children}
+      </div>
     </div>
   );
 }

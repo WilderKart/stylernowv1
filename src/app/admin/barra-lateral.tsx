@@ -5,7 +5,12 @@ import { cn } from "@/lib/utils";
 import {
   Activity,
   BookOpen,
+  ChartColumn,
   Crown,
+  HeartPulse,
+  Megaphone,
+  Percent,
+  Users,
   Gift,
   House,
   Layers,
@@ -29,11 +34,17 @@ export type ContadoresAdmin = { negociosPendientes: number; ticketsAbiertos: num
 type Item = { href: string; etiqueta: string; icono: React.ComponentType<{ className?: string }>; contador?: keyof ContadoresAdmin };
 
 const GRUPOS: { titulo?: string; items: Item[] }[] = [
-  { items: [{ href: "/admin", etiqueta: "Inicio", icono: House }] },
+  {
+    items: [
+      { href: "/admin", etiqueta: "Inicio", icono: House },
+      { href: "/admin/reportes", etiqueta: "Reportes", icono: ChartColumn },
+    ],
+  },
   {
     titulo: "Operación",
     items: [
       { href: "/admin/negocios", etiqueta: "Negocios", icono: Store, contador: "negociosPendientes" },
+      { href: "/admin/usuarios", etiqueta: "Usuarios", icono: Users },
       { href: "/admin/soporte", etiqueta: "Soporte", icono: LifeBuoy, contador: "ticketsAbiertos" },
       { href: "/admin/moderacion", etiqueta: "Moderación", icono: ShieldAlert, contador: "resenasReportadas" },
     ],
@@ -42,9 +53,11 @@ const GRUPOS: { titulo?: string; items: Item[] }[] = [
     titulo: "Ingresos y producto",
     items: [
       { href: "/admin/planes", etiqueta: "Planes y suscripciones", icono: Layers },
+      { href: "/admin/comisiones", etiqueta: "Comisiones", icono: Percent },
       { href: "/admin/lealtad", etiqueta: "Lealtad", icono: Gift },
-      { href: "/admin/ai", etiqueta: "IA Center", icono: Sparkles },
+      { href: "/admin/marketing", etiqueta: "Marketing", icono: Megaphone },
       { href: "/admin/whatsapp", etiqueta: "WhatsApp", icono: MessageCircle },
+      { href: "/admin/ai", etiqueta: "IA Center", icono: Sparkles },
     ],
   },
   {
@@ -53,6 +66,7 @@ const GRUPOS: { titulo?: string; items: Item[] }[] = [
       { href: "/admin/reglas", etiqueta: "Reglas y políticas", icono: Scale },
       { href: "/admin/libro", etiqueta: "Libro contable", icono: BookOpen },
       { href: "/admin/auditoria", etiqueta: "Auditoría", icono: Activity },
+      { href: "/admin/sistema", etiqueta: "Estado del sistema", icono: HeartPulse },
       { href: "/admin/configuracion", etiqueta: "Configuración", icono: Settings },
     ],
   },
@@ -186,7 +200,7 @@ export function BarraLateralAdmin(props: { email: string; nombre: string; contad
   // Escape cierra; mientras está abierto, la página de fondo no se desplaza.
   useEffect(() => {
     if (!abierto) return;
-    const alTeclear = (e: KeyboardEvent) => e.key === "Escape" && setAbierto(false);
+    const alTeclear = (e: KeyboardEvent) => e.key === "Escape" && setAbiertoEn(null);
     const previo = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", alTeclear);

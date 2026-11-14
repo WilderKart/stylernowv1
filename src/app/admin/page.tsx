@@ -2,7 +2,6 @@ import { formatCOP } from "@/lib/utils";
 import {
   Activity,
   ArrowRight,
-  ArrowUpRight,
   CalendarDays,
   CircleCheck,
   Layers,
@@ -15,6 +14,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { EncabezadoAdmin } from "./_componentes/encabezado-admin";
+import { leerRango } from "./_componentes/rango";
+import { SelectorFechas } from "./_componentes/selector-fechas";
+import { Caja, GraficaBarras, Kpi, TituloCaja } from "./_componentes/ui-admin";
 import { obtenerResumenAdmin } from "./actions";
 import { contadoresAdmin, obtenerTablero } from "./tablero";
 
@@ -28,79 +30,14 @@ function haceCuanto(iso: string) {
   return `hace ${d} ${d === 1 ? "día" : "días"}`;
 }
 
-/** Tarjeta con borde negro duro y franja naranja a la izquierda (estilo del sistema brutalista). */
-function Caja({ children, className = "", destacada = false }: { children: React.ReactNode; className?: string; destacada?: boolean }) {
-  return (
-    <section
-      className={`min-w-0 border-2 border-border bg-bg ${destacada ? "border-l-[6px] border-l-accent" : ""} ${className}`}
-    >
-      {children}
-    </section>
-  );
-}
-
-function TituloCaja({ children, href, extra }: { children: React.ReactNode; href?: string; extra?: React.ReactNode }) {
-  return (
-    <div className="flex items-center justify-between gap-3 px-4 pt-4 sm:px-5">
-      <h2 className="font-mono text-[12.5px] font-bold uppercase tracking-[0.08em] text-text">{children}</h2>
-      <div className="flex items-center gap-3">
-        {extra}
-        {href && (
-          <Link href={href} className="grid size-8 place-items-center text-text hover:text-accent" aria-label="Ver detalle">
-            <ArrowUpRight className="size-4" aria-hidden />
-          </Link>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Kpi({
-  icono: Icono,
-  etiqueta,
-  valor,
-  nota,
-  href,
-  destacada,
-}: {
-  icono: React.ComponentType<{ className?: string }>;
-  etiqueta: string;
-  valor: string;
-  nota?: string;
-  href: string;
-  destacada?: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      className={`group flex min-w-0 flex-col justify-between gap-3 border-2 border-border bg-bg p-4 transition-shadow hover:shadow-[4px_4px_0_0_var(--shadow-ink)] sm:p-5 ${
-        destacada ? "border-l-[6px] border-l-accent" : ""
-      }`}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <span className="flex items-center gap-2.5">
-          <Icono className="size-5 shrink-0 text-text" aria-hidden />
-          <span className="font-mono text-[11px] font-bold uppercase leading-tight tracking-[0.08em] text-text">{etiqueta}</span>
-        </span>
-        <ArrowUpRight className="size-4 shrink-0 text-text-faint group-hover:text-accent" aria-hidden />
-      </div>
-      <div>
-        <p className="font-display truncate text-[26px] font-black leading-none text-text sm:text-[32px]">{valor}</p>
-        {nota && <p className="mt-1.5 text-[11.5px] font-semibold text-text-muted">{nota}</p>}
-      </div>
-    </Link>
-  );
-}
-
-export default async function AdminDashboardPage() {
-  const [resumen, tablero, contadores] = await Promise.all([obtenerResumenAdmin(), obtenerTablero(), contadoresAdmin()]);
+export default async function AdminDashboardPage(props: PageProps<"/admin">) {
+  const periodo = leerRango(await props.searchParams, "14d");
+  const [resumen, tablero, contadores] = await Promise.all([
+    obtenerResumenAdmin(),
+    obtenerTablero(periodo.desde, periodo.hasta),
+    contadoresAdmin(),
+  ]);
   const r = resumen.ok ? resumen.data : null;
-  // Eje en enteros sin repetidos: el tope se redondea hacia arriba a un múltiplo de 4.
-  const paso = Math.max(1, Math.ceil(Math.max(0, ...tablero.reservas14.map((d) => d.reservas)) / 4));
-  const max = paso * 4;
-  const escala = [4, 3, 2, 1, 0].map((k) => k * paso);
-  const rango = `${tablero.reservas14[0]?.etiqueta ?? ""} – ${tablero.reservas14.at(-1)?.etiqueta ?? ""}`;
-
   const est = tablero.negociosPorEstado;
   const total = tablero.totalNegocios;
   const pct = (n: number) => (total > 0 ? Math.round((n / total) * 100) : 0);
@@ -153,13 +90,10 @@ export default async function AdminDashboardPage() {
         titulo="Control total de la"
         resaltado="plataforma."
         descripcion="Opera, supervisa y escala el ecosistema StylerNow."
-        acciones={
-          <span className="inline-flex items-center gap-2 border-2 border-border px-3 py-2 font-mono text-[11.5px] font-bold uppercase text-text">
-            <CalendarDays className="size-4" aria-hidden />
-            Últimos 14 días
-          </span>
-        }
       />
+      <div className="-mt-2 mb-5">
+        <SelectorFechas ruta="/admin" rango={periodo} />
+      </div>
 
       {!resumen.ok && (
         <p className="mb-4 border-2 border-danger px-4 py-3 text-[12.5px] font-semibold text-danger">{resumen.error}</p>
@@ -175,13 +109,13 @@ export default async function AdminDashboardPage() {
           href="/admin/negocios"
           destacada
         />
-        <Kpi icono={Users} etiqueta="Usuarios totales" valor={String(tablero.usuarios)} nota="Cuentas registradas" href="/admin/auditoria" />
+        <Kpi icono={Users} etiqueta="Usuarios totales" valor={String(tablero.usuarios)} nota="Cuentas registradas" href="/admin/usuarios" />
         <Kpi
           icono={CalendarDays}
-          etiqueta="Reservas (14 días)"
+          etiqueta="Reservas del periodo"
           valor={String(tablero.totalReservas14)}
           nota={`${r?.citasCompletadasMes ?? 0} citas completadas este mes`}
-          href="/admin/libro"
+          href={`/admin/reportes?rango=${periodo.clave}&desde=${periodo.desdeTexto}&hasta=${periodo.hastaTexto}`}
         />
         <Kpi icono={Layers} etiqueta="Ingresos mensuales (MRR)" valor={formatCOP(r?.mrr ?? 0)} nota="Suscripciones activas" href="/admin/planes" />
       </div>
@@ -189,48 +123,28 @@ export default async function AdminDashboardPage() {
       {/* Gráfica + estado de negocios */}
       <div className="mt-4 grid gap-4 sm:mt-5 lg:grid-cols-3">
         <Caja destacada className="lg:col-span-2">
-          <TituloCaja
-            extra={
-              <span className="hidden items-center gap-3 text-[11.5px] text-text-muted sm:flex">
-                <span className="flex items-center gap-1.5">
-                  <span className="size-2.5 bg-accent" aria-hidden /> Reservas
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="size-2.5 bg-border-subtle" aria-hidden /> Cancelaciones
-                </span>
-              </span>
-            }
-          >
+          <TituloCaja href={`/admin/reportes?rango=${periodo.clave}&desde=${periodo.desdeTexto}&hasta=${periodo.hastaTexto}`}>
             Reservas y cancelaciones
           </TituloCaja>
           {tablero.totalReservas14 === 0 ? (
-            <p className="px-5 py-14 text-center text-[13px] text-text-faint">Aún no hay reservas en los últimos 14 días.</p>
+            <p className="px-5 py-14 text-center text-[13px] text-text-faint">No hay reservas en este periodo.</p>
           ) : (
-            <div className="flex gap-2 px-4 pb-4 pt-5 sm:px-5" role="img" aria-label={`Reservas por día: ${tablero.totalReservas14} reservas y ${tablero.totalCanceladas14} cancelaciones en 14 días`}>
-              <div className="flex h-44 flex-col justify-between pb-6 text-right font-mono text-[10px] text-text-faint" aria-hidden>
-                {escala.map((v, i) => (
-                  <span key={i}>{v}</span>
-                ))}
-              </div>
-              <div className="grid flex-1 items-end gap-1 sm:gap-2" style={{ gridTemplateColumns: "repeat(14, minmax(0, 1fr))" }}>
-                {tablero.reservas14.map((d, i) => (
-                  <div key={d.dia} className="flex h-44 min-w-0 flex-col items-center justify-end gap-1" title={`${d.etiqueta}: ${d.reservas} reservas, ${d.canceladas} canceladas`}>
-                    <div className="flex h-full w-full items-end justify-center gap-[2px]">
-                      <span className="w-full max-w-4 bg-accent" style={{ height: `${(d.reservas / max) * 100}%` }} />
-                      <span className="w-full max-w-4 bg-border-subtle" style={{ height: `${(d.canceladas / max) * 100}%` }} />
-                    </div>
-                    <span className={`h-5 font-mono text-[10px] text-text-faint ${i % 2 === 1 ? "invisible sm:visible" : ""}`}>
-                      {d.dia.slice(8)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          {tablero.totalReservas14 > 0 && (
-            <p className="px-4 pb-4 font-mono text-[10.5px] uppercase text-text-faint sm:px-5">
-              Día del mes · {rango} · {tablero.totalReservas14} reservas, {tablero.totalCanceladas14} canceladas
-            </p>
+            <>
+              <GraficaBarras
+                serie={tablero.reservas14.map((d) => ({
+                  etiqueta: d.dia.slice(8),
+                  titulo: `${d.etiqueta}: ${d.reservas} reservas, ${d.canceladas} canceladas`,
+                  valores: [d.reservas, d.canceladas],
+                }))}
+                claves={[
+                  { nombre: "Reservas", color: "bg-accent" },
+                  { nombre: "Cancelaciones", color: "bg-border-subtle" },
+                ]}
+              />
+              <p className="px-4 pb-4 font-mono text-[10.5px] uppercase text-text-faint sm:px-5">
+                Día del mes · {periodo.etiqueta} · {tablero.totalReservas14} reservas, {tablero.totalCanceladas14} canceladas
+              </p>
+            </>
           )}
         </Caja>
 

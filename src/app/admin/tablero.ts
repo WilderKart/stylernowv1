@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { rpcAdmin } from "./_componentes/rpc";
 import type { ContadoresAdmin } from "./barra-lateral";
 
 /**
@@ -8,7 +9,6 @@ import type { ContadoresAdmin } from "./barra-lateral";
  */
 
 const ZONA = "America/Bogota";
-const diaLocal = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: ZONA }).format(d); // AAAA-MM-DD
 
 export async function contadoresAdmin(): Promise<ContadoresAdmin> {
   const supabase = await createClient();
@@ -51,18 +51,17 @@ function tituloAccion(accion: string) {
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
 
-export async function obtenerTablero(): Promise<Tablero> {
+export async function obtenerTablero(desde: Date, hasta: Date): Promise<Tablero> {
   const supabase = await createClient();
-  const hoy = new Date();
-  const desde = new Date(hoy.getTime() - 13 * 86_400_000);
-  desde.setUTCHours(0, 0, 0, 0);
-  // Margen de un día hacia atrás por la zona horaria; luego se agrupa por día de Bogotá.
-  const desdeConsulta = new Date(desde.getTime() - 86_400_000).toISOString();
 
-  const [perf, negs, resv, evts] = await Promise.all([
+  const [perf, negs, serie, evts] = await Promise.all([
     supabase.from("perfil").select("id", { count: "exact", head: true }),
     supabase.from("negocio").select("estado").limit(10_000),
-    supabase.from("reserva").select("created_at, estado").gte("created_at", desdeConsulta).limit(20_000),
+    // Serie diaria agregada en la base (zona horaria de Colombia), migración 137.
+    rpcAdmin<{ serie: { dia: string; reservas: number; canceladas: number }[] }>("admin_reporte", {
+      p_desde: desde.toISOString(),
+      p_hasta: hasta.toISOString(),
+    }),
     supabase
       .from("evento_auditoria")
       .select("id, entidad_tipo, accion, actor_tipo, negocio_id, created_at")
@@ -82,26 +81,14 @@ export async function obtenerTablero(): Promise<Tablero> {
     if (e in negociosPorEstado) negociosPorEstado[e] += 1;
   }
 
-  const dias: DiaReservas[] = [];
-  const indice = new Map<string, DiaReservas>();
-  for (let i = 13; i >= 0; i--) {
-    const d = new Date(hoy.getTime() - i * 86_400_000);
-    const clave = diaLocal(d);
-    const fila = {
-      dia: clave,
-      etiqueta: new Intl.DateTimeFormat("es-CO", { timeZone: ZONA, day: "2-digit", month: "short" }).format(d).replace(".", ""),
-      reservas: 0,
-      canceladas: 0,
-    };
-    dias.push(fila);
-    indice.set(clave, fila);
-  }
-  for (const r of resv.data ?? []) {
-    const fila = indice.get(diaLocal(new Date(r.created_at)));
-    if (!fila) continue;
-    fila.reservas += 1;
-    if (r.estado === "CANCELADA" || r.estado === "NO_SHOW") fila.canceladas += 1;
-  }
+  const dias: DiaReservas[] = (serie.ok ? serie.data.serie : []).map((d) => ({
+    dia: d.dia,
+    etiqueta: new Intl.DateTimeFormat("es-CO", { timeZone: ZONA, day: "2-digit", month: "short" })
+      .format(new Date(`${d.dia}T12:00:00-05:00`))
+      .replace(".", ""),
+    reservas: d.reservas,
+    canceladas: d.canceladas,
+  }));
 
   // Nombres de los negocios de la actividad reciente (una sola consulta).
   const eventos = evts.data ?? [];
