@@ -1,7 +1,7 @@
 import "server-only";
 
 import { ConexionNoDisponible, conexionesDeCuenta, reportarFalloConexion, revisarConexionPorCuenta, tokenDeConexion } from "./conexiones";
-import { ErrorMercadoPago, obtenerContracargo, obtenerMerchantOrder, verificarFirma } from "./mercadopago";
+import { diagnosticoFirma, ErrorMercadoPago, obtenerContracargo, obtenerMerchantOrder, verificarFirma } from "./mercadopago";
 import { sincronizarNotificacion, type OrigenNotificacion, type TrazaSincronizacion } from "./sincronizar";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -78,7 +78,17 @@ export async function procesarWebhookMercadoPago(request: Request): Promise<Resp
       console.warn("[webhook mercadopago] IPN sin firma ignorado", { tipo, requestId: requestIdHeader });
       return Response.json({ recibido: true, ignorado: "SIN_FIRMA" });
     }
-    console.error("[webhook mercadopago] firma inválida", { tipo, dataId: dataId?.slice(0, 40), requestId: requestIdHeader });
+    console.error("[webhook mercadopago] firma inválida", {
+      tipo,
+      dataId: dataId?.slice(0, 40),
+      requestId: requestIdHeader,
+      diagnostico: diagnosticoFirma({
+        firma,
+        requestId: requestIdHeader || null,
+        dataIdUrl: url.searchParams.get("data.id") ?? url.searchParams.get("id"),
+        dataIdCuerpo: cuerpo?.data?.id != null ? String(cuerpo.data.id) : null,
+      }),
+    });
     return new Response("firma inválida", { status: 401 });
   }
   const etiquetaFirma = firmaValida === true ? "VALIDA" : "SIN_SECRETO_LOCAL";

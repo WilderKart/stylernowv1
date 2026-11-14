@@ -1,5 +1,5 @@
 import "server-only";
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { entornoPagos, validarTokenParaEntorno } from "./entorno";
 
 /**
@@ -287,31 +287,93 @@ export function verificarFirma(args: {
   requestId: string | null;
   dataId: string | null;
 }): boolean | null {
-  const secreto = process.env.MERCADOPAGO_WEBHOOK_SECRET;
+  // Se recortan espacios/saltos de línea que suelen colarse al pegar la clave en el panel de Vercel.
+  const secreto = process.env.MERCADOPAGO_WEBHOOK_SECRET?.trim();
   if (!secreto) return null;
   if (!args.firma || !args.dataId) return false;
 
-  const partes = Object.fromEntries(
-    args.firma.split(",").map((p) => {
+  const { ts, v1 } = partesFirma(args.firma);
+  if (!ts || !v1 || !/^\d{1,16}$/.test(ts)) return false;
+
+  // Anti-replay: una notificación firmada pero vieja (capturada y reenviada) se rechaza.
+  if (!tsDentroDeVentana(ts)) return false;
+
+  return hmacCoincide(secreto, manifiestoFirma(args.dataId, args.requestId, ts), v1);
+}
+
+function partesFirma(firma: string): { ts?: string; v1?: string } {
+  return Object.fromEntries(
+    firma.split(",").map((p) => {
       const [k, ...v] = p.split("=");
       return [k.trim(), v.join("=").trim()];
     })
   );
-  const ts = partes.ts;
-  const v1 = partes.v1;
-  if (!ts || !v1 || !/^\d{1,16}$/.test(ts)) return false;
+}
 
-  // Anti-replay: una notificación firmada pero vieja (capturada y reenviada) se rechaza.
-  // `ts` puede venir en segundos o milisegundos según la versión de la notificación.
-  const tsMs = ts.length > 11 ? Number(ts) : Number(ts) * 1000;
-  if (!Number.isFinite(tsMs) || Math.abs(Date.now() - tsMs) > VENTANA_FIRMA_MS) return false;
+/** `ts` puede venir en segundos o milisegundos según la versión de la notificación. */
+function tsEnMs(ts: string): number {
+  return ts.length > 11 ? Number(ts) : Number(ts) * 1000;
+}
 
-  const manifiesto = `id:${args.dataId.toLowerCase()};request-id:${args.requestId ?? ""};ts:${ts};`;
-  const esperado = createHmac("sha256", secreto).update(manifiesto).digest("hex");
+function tsDentroDeVentana(ts: string): boolean {
+  const ms = tsEnMs(ts);
+  return Number.isFinite(ms) && Math.abs(Date.now() - ms) <= VENTANA_FIRMA_MS;
+}
 
-  const a = Buffer.from(esperado, "utf8");
+function manifiestoFirma(dataId: string, requestId: string | null, ts: string): string {
+  return `id:${dataId.toLowerCase()};request-id:${requestId ?? ""};ts:${ts};`;
+}
+
+function hmacCoincide(secreto: string, manifiesto: string, v1: string): boolean {
+  const a = Buffer.from(createHmac("sha256", secreto).update(manifiesto).digest("hex"), "utf8");
   const b = Buffer.from(v1, "utf8");
   return a.length === b.length && timingSafeEqual(a, b);
+}
+
+/**
+ * Diagnóstico de una firma rechazada, para los logs. NUNCA incluye la clave: solo su longitud,
+ * si traía espacios y una huella corta (8 hex de su SHA-256), que permite comparar contra la clave
+ * del panel sin revelarla. Indica además qué variante del manifiesto habría coincidido, si alguna.
+ */
+export function diagnosticoFirma(args: {
+  firma: string | null;
+  requestId: string | null;
+  dataIdUrl: string | null;
+  dataIdCuerpo: string | null;
+}) {
+  const crudo = process.env.MERCADOPAGO_WEBHOOK_SECRET ?? "";
+  const secreto = crudo.trim();
+  const { ts, v1 } = partesFirma(args.firma ?? "");
+  const tsValido = !!ts && /^\d{1,16}$/.test(ts);
+
+  let coincide: string | null = null;
+  if (secreto && tsValido && v1) {
+    const ids = [
+      ["url", args.dataIdUrl],
+      ["cuerpo", args.dataIdCuerpo],
+    ] as const;
+    for (const [origenId, id] of ids) {
+      if (!id) continue;
+      if (hmacCoincide(secreto, manifiestoFirma(id, args.requestId, ts!), v1)) { coincide = `id_${origenId}`; break; }
+      if (hmacCoincide(secreto, `id:${id};request-id:${args.requestId ?? ""};ts:${ts};`, v1)) { coincide = `id_${origenId}_sin_minusculas`; break; }
+      if (hmacCoincide(secreto, `id:${id.toLowerCase()};ts:${ts};`, v1)) { coincide = `id_${origenId}_sin_request_id`; break; }
+    }
+  }
+
+  return {
+    secretoLongitud: secreto.length,
+    secretoTeniaEspacios: crudo.length !== secreto.length,
+    huellaSecreto: secreto ? createHash("sha256").update(secreto).digest("hex").slice(0, 8) : null,
+    firmaPresente: !!args.firma,
+    tsPresente: tsValido,
+    v1Longitud: v1?.length ?? 0,
+    tsEdadSegundos: tsValido ? Math.round((Date.now() - tsEnMs(ts!)) / 1000) : null,
+    tsDentroDeVentana: tsValido ? tsDentroDeVentana(ts!) : false,
+    requestIdPresente: !!args.requestId,
+    dataIdUrlPresente: !!args.dataIdUrl,
+    dataIdCuerpoPresente: !!args.dataIdCuerpo,
+    coincideConVariante: coincide,
+  };
 }
 
 /** ¿El token sigue autorizado? 401/403 = revocado por el vendedor. Nunca registra el token. */

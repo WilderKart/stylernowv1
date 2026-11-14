@@ -68,6 +68,26 @@ describe("firma del webhook de Mercado Pago", () => {
     const { verificarFirma } = await import("@/lib/pagos/mercadopago");
     expect(verificarFirma({ firma: "x", requestId: "r", dataId: "1" })).toBeNull();
   });
+
+  it("tolera espacios o salto de línea alrededor de la clave pegada en el panel", async () => {
+    process.env.MERCADOPAGO_WEBHOOK_SECRET = `  ${secreto}\n`;
+    const { verificarFirma } = await import("@/lib/pagos/mercadopago");
+    const ts = String(Date.now());
+    expect(verificarFirma({ firma: firmar("123", "req-1", ts), requestId: "req-1", dataId: "123" })).toBe(true);
+  });
+
+  it("el diagnóstico de una firma rechazada nunca contiene la clave", async () => {
+    process.env.MERCADOPAGO_WEBHOOK_SECRET = `${secreto} `;
+    const { diagnosticoFirma } = await import("@/lib/pagos/mercadopago");
+    const ts = String(Date.now());
+    const d = diagnosticoFirma({ firma: firmar("123", "", ts, "otra"), requestId: "req-1", dataIdUrl: "123", dataIdCuerpo: "123" });
+    expect(JSON.stringify(d)).not.toContain(secreto);
+    expect(d).toMatchObject({ secretoLongitud: secreto.length, secretoTeniaEspacios: true, tsDentroDeVentana: true, coincideConVariante: null });
+    expect(d.huellaSecreto).toMatch(/^[0-9a-f]{8}$/);
+    // Con la clave correcta pero sin request-id en el manifiesto, el diagnóstico lo señala.
+    const sinReq = `ts=${ts},v1=${createHmac("sha256", secreto).update(`id:123;ts:${ts};`).digest("hex")}`;
+    expect(diagnosticoFirma({ firma: sinReq, requestId: "req-1", dataIdUrl: "123", dataIdCuerpo: null }).coincideConVariante).toBe("id_url_sin_request_id");
+  });
 });
 
 describe("evidencia del proveedor en el pago", () => {
