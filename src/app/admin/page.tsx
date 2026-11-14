@@ -95,8 +95,11 @@ function Kpi({
 export default async function AdminDashboardPage() {
   const [resumen, tablero, contadores] = await Promise.all([obtenerResumenAdmin(), obtenerTablero(), contadoresAdmin()]);
   const r = resumen.ok ? resumen.data : null;
-  const max = Math.max(1, ...tablero.reservas14.map((d) => d.reservas));
-  const escala = [max, Math.round(max * 0.75), Math.round(max * 0.5), Math.round(max * 0.25), 0];
+  // Eje en enteros sin repetidos: el tope se redondea hacia arriba a un múltiplo de 4.
+  const paso = Math.max(1, Math.ceil(Math.max(0, ...tablero.reservas14.map((d) => d.reservas)) / 4));
+  const max = paso * 4;
+  const escala = [4, 3, 2, 1, 0].map((k) => k * paso);
+  const rango = `${tablero.reservas14[0]?.etiqueta ?? ""} – ${tablero.reservas14.at(-1)?.etiqueta ?? ""}`;
 
   const est = tablero.negociosPorEstado;
   const total = tablero.totalNegocios;
@@ -216,13 +219,18 @@ export default async function AdminDashboardPage() {
                       <span className="w-full max-w-4 bg-accent" style={{ height: `${(d.reservas / max) * 100}%` }} />
                       <span className="w-full max-w-4 bg-border-subtle" style={{ height: `${(d.canceladas / max) * 100}%` }} />
                     </div>
-                    <span className={`h-5 truncate font-mono text-[9.5px] text-text-faint ${i % 2 === 1 ? "invisible sm:visible" : ""}`}>
-                      {d.etiqueta}
+                    <span className={`h-5 font-mono text-[10px] text-text-faint ${i % 2 === 1 ? "invisible sm:visible" : ""}`}>
+                      {d.dia.slice(8)}
                     </span>
                   </div>
                 ))}
               </div>
             </div>
+          )}
+          {tablero.totalReservas14 > 0 && (
+            <p className="px-4 pb-4 font-mono text-[10.5px] uppercase text-text-faint sm:px-5">
+              Día del mes · {rango} · {tablero.totalReservas14} reservas, {tablero.totalCanceladas14} canceladas
+            </p>
           )}
         </Caja>
 
