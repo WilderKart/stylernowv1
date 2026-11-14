@@ -38,6 +38,7 @@ const hace = (iso: string | null) => {
   return `hace ${Math.round(min / 1440)} días`;
 };
 const hay = (...nombres: string[]) => nombres.every((n) => !!process.env[n]?.trim());
+const faltan = (...nombres: string[]) => nombres.filter((n) => !process.env[n]?.trim());
 
 /**
  * Estado del sistema con comprobaciones en vivo (cada carga mide de verdad) y lo que registra la base.
@@ -55,6 +56,7 @@ export default async function AdminSistemaPage() {
 
   const base = db.valor && db.valor.ok ? db.valor.data : null;
   const nivelMs = (ms: number): Nivel => (ms > 1500 ? "alerta" : "ok");
+  const faltanMp = faltan("MERCADOPAGO_ACCESS_TOKEN", "MERCADOPAGO_WEBHOOK_SECRET", "MERCADOPAGO_CLIENT_ID", "MERCADOPAGO_CLIENT_SECRET");
 
   const chequeos: Chequeo[] = [
     {
@@ -86,13 +88,13 @@ export default async function AdminSistemaPage() {
     },
     {
       nombre: "Pagos (Mercado Pago)",
-      nivel: !hay("MERCADOPAGO_CLIENT_ID", "MERCADOPAGO_CLIENT_SECRET", "MERCADOPAGO_WEBHOOK_SECRET")
+      nivel: faltanMp.length > 0
         ? "falla"
         : base && (base.webhooks.errores_24h > 0 || base.webhooks.sin_procesar > 0 || base.pagos.pendientes_viejos > 0)
           ? "alerta"
           : "ok",
-      detalle: !hay("MERCADOPAGO_CLIENT_ID", "MERCADOPAGO_CLIENT_SECRET", "MERCADOPAGO_WEBHOOK_SECRET")
-        ? "Faltan credenciales de Mercado Pago"
+      detalle: faltanMp.length > 0
+        ? `Faltan en Vercel: ${faltanMp.join(", ")}${faltanMp.some((n) => n.includes("CLIENT")) ? " (sin ellas las barberías no pueden conectar su cuenta de Mercado Pago)" : ""}`
         : base
           ? `${base.webhooks.recibidos_24h} avisos recibidos en 24 h (${base.webhooks.errores_24h} con error, ${base.webhooks.sin_procesar} sin procesar) · último ${hace(base.webhooks.ultimo)} · ${base.pagos.pendientes_viejos} pagos pendientes de más de 1 h`
           : "Configurado",
