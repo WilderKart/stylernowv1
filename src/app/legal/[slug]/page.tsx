@@ -58,11 +58,19 @@ export default async function LegalPage(props: PageProps<"/legal/[slug]">) {
       <div className="flex flex-col gap-4 border-t-2 border-border pt-4">
         {parrafos.map((p, i) => {
           const esTitulo = /^\d+\.\s/.test(p);
-          return esTitulo ? (
-            <h2 key={i} className="section mt-2 text-[15px] leading-5 break-words">
-              {p}
-            </h2>
-          ) : (
+          if (esTitulo) {
+            // Algunas versiones traen el título y su primer párrafo en el mismo bloque ("1. Aceptación\nAl usar…"):
+            // solo la primera línea es título; el resto es cuerpo (antes se mostraba todo como título en mayúsculas).
+            const [titulo, ...cuerpo] = p.split("\n");
+            const resto = cuerpo.join("\n").trim();
+            return (
+              <div key={i} className="flex flex-col gap-2">
+                <h2 className="section mt-2 text-[15px] leading-5 break-words">{titulo}</h2>
+                {resto ? <p className="body text-text-muted break-words whitespace-pre-line">{resto}</p> : null}
+              </div>
+            );
+          }
+          return (
             // pre-line: respeta los saltos de línea de las listas (a), (b)… y "- " del texto legal.
             <p key={i} className="body text-text-muted break-words whitespace-pre-line">
               {p}

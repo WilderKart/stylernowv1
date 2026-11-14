@@ -63,9 +63,15 @@ export async function Header({ autenticado, etiqueta }: { autenticado: boolean; 
           </Link>
         </>
       ) : (
-        <Link href="/login" className="sn-label flex min-h-12 items-center border-2 border-border px-4 text-text no-underline">
-          {t("header.iniciar_sesion")}
-        </Link>
+        <>
+          {/* Acceso visible al registro de negocios (antes solo existía la URL /para-negocios). */}
+          <Link href="/para-negocios" className="sn-label hidden min-h-12 items-center px-3 text-text no-underline sm:flex">
+            {t("header.para_negocios")}
+          </Link>
+          <Link href="/login" className="sn-label flex min-h-12 items-center border-2 border-border px-4 text-text no-underline">
+            {t("header.iniciar_sesion")}
+          </Link>
+        </>
       )}
     </header>
   );

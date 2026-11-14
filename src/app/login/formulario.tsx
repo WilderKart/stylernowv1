@@ -393,6 +393,12 @@ export function FormularioLogin({
 
           <Separador>{t("login.o")}</Separador>
           {botonGoogle}
+
+          {/* Registro de negocios: antes no había ningún acceso visible a /para-negocios (auditoría 2026-11-14).
+              El profesional no se registra aquí: entra por invitación de su barbería (/invitacion/[id]). */}
+          <Link href="/para-negocios" className={claseEnlace}>
+            {t("login.registrar_negocio")}
+          </Link>
         </form>
       ) : null}
 

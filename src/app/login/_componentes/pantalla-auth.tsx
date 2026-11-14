@@ -1,3 +1,8 @@
+"use client";
+
+// Usa useT() (hook de cliente). Sin esta directiva, las páginas de servidor que lo importan
+// (/legal/[slug], /legal/aceptar, /login/recuperar) fallaban en producción con
+// "Attempted to call useT() from the server" (auditoría 2026-11-14, logs de Vercel).
 import { Num, Poster } from "@/components/brutal";
 import { useT } from "@/lib/i18n/proveedor";
 import { cn } from "@/lib/utils";
