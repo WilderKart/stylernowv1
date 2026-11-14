@@ -367,6 +367,10 @@ export function diagnosticoFirma(args: {
     firmaPresente: !!args.firma,
     tsPresente: tsValido,
     v1Longitud: v1?.length ?? 0,
+    // La firma recibida y su ts no revelan la clave (HMAC); permiten comprobar fuera de línea
+    // qué clave candidata la produjo. Solo se registran cuando la firma ya fue rechazada.
+    tsRecibido: tsValido ? ts : null,
+    v1Recibido: v1 && /^[0-9a-f]{64}$/i.test(v1) ? v1 : null,
     tsEdadSegundos: tsValido ? Math.round((Date.now() - tsEnMs(ts!)) / 1000) : null,
     tsDentroDeVentana: tsValido ? tsDentroDeVentana(ts!) : false,
     requestIdPresente: !!args.requestId,
