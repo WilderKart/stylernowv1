@@ -94,11 +94,17 @@ export async function resolverContexto(): Promise<ContextoUsuario> {
 
   // 1 · ¿Es Barbería (dueño de un negocio)? — 03-Business-Rules/01_Roles.md:
   // acceso total a su propio negocio, todas las sedes.
-  const { data: negocio } = await supabase
+  // No maybeSingle(): si un dueño quedó con más de un negocio (duplicados de un alta reintentada),
+  // maybeSingle fallaba, el rol caía a NINGUNO y el panel lo mandaba de vuelta al asistente.
+  // Se toma el más avanzado (alta completa primero) y, a igualdad, el más antiguo.
+  const { data: negocios } = await supabase
     .from("negocio")
     .select("id")
     .eq("owner_user_id", user.id)
-    .maybeSingle();
+    .order("onboarding_completo", { ascending: false })
+    .order("created_at", { ascending: true })
+    .limit(1);
+  const negocio = negocios?.[0] ?? null;
 
   if (negocio) {
     return {

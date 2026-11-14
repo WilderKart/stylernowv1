@@ -41,10 +41,10 @@ const T = {
   aCotizar: "A cotizar",
   sinPlanes: "Los planes de este país estarán disponibles pronto. Escríbenos y te avisamos.",
   incluye: "Qué incluye",
-  pruebaNota: "Prueba de 14 días con método de pago; el cobro es automático al terminar. Los precios los define cada país.",
+  pruebaNota: "Prueba gratis de 14 días sin tarjeta: no se cobra nada automáticamente. Al terminar pagas tu plan si quieres seguir. Los precios los define cada país.",
   faqTitulo: "Preguntas frecuentes",
   faq: [
-    { q: "¿Cuánto dura la prueba?", a: "14 días. Registras un método de pago y el cobro se hace solo al terminar la prueba; puedes cancelar antes." },
+    { q: "¿Cuánto dura la prueba?", a: "14 días, sin tarjeta y sin cobros automáticos. Te avisamos antes de que termine; si quieres seguir, pagas tu plan desde «Plan y facturación» y tienes unos días de gracia." },
     { q: "¿Mis clientes pagan por usar la app?", a: "No. Reservar es gratis para tus clientes." },
     { q: "¿Qué es el cupo fundador?", a: "Un descuento para los primeros negocios de cada país, en planes mensuales, durante un periodo limitado." },
     { q: "¿Puedo cambiar de plan?", a: "Sí. Puedes subir de plan cuando quieras y bajar al inicio del siguiente ciclo." },
@@ -127,7 +127,8 @@ export default async function ParaNegociosPage(props: { searchParams: Promise<Re
   const paisCodigo = codigosValidos.includes(paisParam) ? paisParam : codigosValidos.includes("CO") ? "CO" : (codigosValidos[0] ?? "CO");
 
   const [catalogo, { data: auth }] = await Promise.all([obtenerCatalogoPais(paisCodigo), supabase.auth.getUser()]);
-  const urlPrueba = auth.user ? "/panel/onboarding" : "/login?next=/panel/onboarding";
+  // Registro separado del ingreso: quien no tiene cuenta empieza por crearla (decisión 2026-11-14).
+  const urlPrueba = auth.user ? "/panel/onboarding" : "/registro?next=/panel/onboarding";
   const hayCupos = (catalogo?.pais.cuposFundadorRestantes ?? 0) > 0;
 
   return (

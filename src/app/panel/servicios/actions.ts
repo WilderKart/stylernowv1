@@ -153,6 +153,58 @@ export async function cambiarEstadoServicio(servicioId: string, activar: boolean
   }
 }
 
+// ── Imagen guía del servicio (migración 134) ─────────────────────────────
+
+const MIME_IMAGEN: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
+
+/**
+ * Sube (o reemplaza) la imagen de un servicio. Solo el dueño del negocio: se verifica aquí contra la base
+ * (servicio → negocio → owner) y otra vez en Storage (política negocio_media_*_barberia sobre la carpeta).
+ * Nunca se confía en un negocioId del navegador: sale del servicio.
+ */
+export async function subirImagenServicio(servicioId: string, dataUrl: string): Promise<Resultado<{ url: string }>> {
+  try {
+    const { supabase, userId } = await usuarioActual();
+    if (!/^[0-9a-f-]{36}$/i.test(servicioId)) return { ok: false, error: "Servicio inválido." };
+
+    const { data: servicio } = await supabase.from("servicio").select("id, negocio_id").eq("id", servicioId).maybeSingle();
+    if (!servicio) return { ok: false, error: "No encontramos ese servicio." };
+    const { data: negocio } = await supabase
+      .from("negocio")
+      .select("id")
+      .eq("id", servicio.negocio_id)
+      .eq("owner_user_id", userId)
+      .maybeSingle();
+    if (!negocio) return { ok: false, error: "Solo el dueño del negocio puede cambiar la imagen." };
+
+    const m = /^data:(image\/(?:png|jpeg|webp));base64,([A-Za-z0-9+/=]+)$/.exec(dataUrl);
+    if (!m) return { ok: false, error: "Usa una imagen PNG, JPG o WebP." };
+    const bytes = Buffer.from(m[2], "base64");
+    if (bytes.byteLength > 5 * 1024 * 1024) return { ok: false, error: "La imagen no puede superar 5 MB." };
+
+    const ruta = `${servicio.negocio_id}/servicios/${servicio.id}.${MIME_IMAGEN[m[1]]}`;
+    const { error: eUp } = await supabase.storage.from("negocio-media").upload(ruta, bytes, { contentType: m[1], upsert: true });
+    if (eUp) return { ok: false, error: "No pudimos subir la imagen. Intenta de nuevo." };
+    const { data: pub } = supabase.storage.from("negocio-media").getPublicUrl(ruta);
+    const url = `${pub.publicUrl}?v=${Date.now()}`;
+
+    const { error } = await (supabase as unknown as {
+      from: (t: string) => { update: (v: object) => { eq: (c: string, v: string) => Promise<{ error: { message: string } | null }> } };
+    })
+      .from("servicio")
+      .update({ imagen_url: url })
+      .eq("id", servicio.id);
+    if (error) return { ok: false, error: "No pudimos guardar la imagen del servicio." };
+
+    revalidatePath("/panel/servicios");
+    revalidatePath(`/panel/servicios/${servicio.id}`);
+    revalidatePath("/panel/onboarding");
+    return { ok: true, data: { url } };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
 // Alias retrocompatible del wizard de onboarding (2.1) — "eliminar" ahí
 // siempre significó desactivar, nunca borrado físico.
 export async function eliminarServicio(servicioId: string): Promise<Resultado> {

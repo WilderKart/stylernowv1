@@ -37,12 +37,18 @@ export function FormularioLogin({
   siguiente,
   registroPendiente,
   emailSesion,
+  modo = "ingresar",
 }: {
   siguiente: string;
   /** Sesión ya activa pero sin registro completado (C17): abre directo el paso de registro. */
   registroPendiente?: boolean;
   emailSesion?: string;
+  /** /login = "ingresar" (solo cuentas existentes); /registro = "registro" (crea la cuenta). */
+  modo?: "ingresar" | "registro";
 }) {
+  const esRegistro = modo === "registro";
+  const paraNegocio = siguiente.startsWith("/panel/onboarding");
+  const [sinCuenta, setSinCuenta] = useState(false);
   const router = useRouter();
   const t = useT();
   const [step, setStep] = useState<Paso>(registroPendiente ? "registro" : "email");
@@ -123,20 +129,24 @@ export function FormularioLogin({
 
   async function onEnviarCodigo(e: React.FormEvent) {
     e.preventDefault();
-    if (!aceptaTerminos) {
+    if (esRegistro && !aceptaTerminos) {
       setError(t("login.err_terminos"));
       return;
     }
     setLoading(true);
     setError(null);
-    const res = await enviarCodigo(email, siguiente, aceptaTerminos);
+    setSinCuenta(false);
+    const res = await enviarCodigo(email, siguiente, esRegistro && aceptaTerminos, modo);
     setLoading(false);
     if (!res.ok) {
+      setSinCuenta("sinCuenta" in res && res.sinCuenta === true);
       setError(res.error);
       return;
     }
     avanzarAPasoCodigo(email);
   }
+
+  const qsSiguiente = siguiente && siguiente !== "/" ? `?next=${encodeURIComponent(siguiente)}` : "";
 
   async function onIniciarConPassword(e: React.FormEvent) {
     e.preventDefault();
@@ -247,7 +257,13 @@ export function FormularioLogin({
   }
 
   const titulos: Record<Paso, React.ReactNode> = {
-    email: (
+    email: esRegistro ? (
+      <>
+        {paraNegocio ? t("login.t_regneg_1") : t("login.t_crear_1")}
+        <br />
+        <Hot>{paraNegocio ? t("login.t_regneg_2") : t("login.t_crear_2")}</Hot>
+      </>
+    ) : (
       <>
         {t("login.t_email_1")}
         <br />
@@ -293,7 +309,7 @@ export function FormularioLogin({
     ),
   };
   const indices: Record<Paso, string> = {
-    email: t("login.i_ingreso"),
+    email: esRegistro ? t("login.i_registro") : t("login.i_ingreso"),
     password: t("login.i_ingreso"),
     codigo: t("login.i_verificacion"),
     registro: t("login.i_registro"),
@@ -301,7 +317,7 @@ export function FormularioLogin({
     "recovery-enviado": t("login.i_recuperar"),
   };
   const intros: Record<Paso, string> = {
-    email: t("login.intro_email"),
+    email: esRegistro ? (paraNegocio ? t("login.intro_regneg") : t("login.intro_crear")) : t("login.intro_ingresar"),
     password: email ? t("login.intro_pw_email", { email }) : t("login.intro_pw"),
     codigo: t("login.intro_codigo", { email }),
     registro: t("login.intro_registro"),
@@ -319,7 +335,7 @@ export function FormularioLogin({
           <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
           <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
         </svg>
-        {t("login.google")}
+        {esRegistro ? t("login.google_registro") : t("login.google")}
       </span>
       <ArrowUpRight className="size-[18px]" aria-hidden />
     </Button>
@@ -335,15 +351,35 @@ export function FormularioLogin({
     >
       {step === "email" ? (
         <form onSubmit={onEnviarCodigo} className="flex flex-col gap-3">
+          {/* Ingreso y registro separados: dos pantallas, cada una con su propósito. */}
+          <nav aria-label={t("login.modo_aria")} className="grid grid-cols-2 border-2 border-border">
+            <Link
+              href={`/login${qsSiguiente}`}
+              aria-current={!esRegistro ? "page" : undefined}
+              className={`sn-label flex min-h-12 items-center justify-center no-underline ${!esRegistro ? "bg-ink text-bg" : "text-text"}`}
+            >
+              {t("login.tab_ingresar")}
+            </Link>
+            <Link
+              href={`/registro${qsSiguiente}`}
+              aria-current={esRegistro ? "page" : undefined}
+              className={`sn-label flex min-h-12 items-center justify-center border-l-2 border-border no-underline ${esRegistro ? "bg-ink text-bg" : "text-text"}`}
+            >
+              {t("login.tab_registro")}
+            </Link>
+          </nav>
+
           <Input
             label={t("login.correo")}
             type="email"
             required
+            autoComplete="email"
             placeholder={t("login.correo_ph")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
 
+          {esRegistro ? (
           <label className="flex cursor-pointer items-start gap-3 border-t-2 border-border py-3 has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--focus)]">
             <input
               type="checkbox"
@@ -372,33 +408,50 @@ export function FormularioLogin({
               <span className="sn-meta text-[var(--accent-text)]">{t("login.obligatoria")}</span>
             </span>
           </label>
+          ) : null}
 
-          {error ? <ErrorForm>{error}</ErrorForm> : null}
+          {error ? (
+            <ErrorForm>
+              {error}
+              {sinCuenta ? (
+                <>
+                  {" "}
+                  <Link href={`/registro${qsSiguiente}`} className="font-bold underline underline-offset-2">
+                    {t("login.crear_con_ese")}
+                  </Link>
+                </>
+              ) : null}
+            </ErrorForm>
+          ) : null}
 
           <Button type="submit" size="lg" loading={loading} className="w-full justify-between">
-            <span>{t("login.enviar_codigo")}</span>
+            <span>{esRegistro ? t("login.crear_enviar_codigo") : t("login.enviar_codigo")}</span>
             <ArrowUpRight className="size-[18px]" aria-hidden />
           </Button>
 
-          <button
-            type="button"
-            onClick={() => {
-              setError(null);
-              setStep("password");
-            }}
-            className={claseEnlace}
-          >
-            {t("login.ya_tengo_cuenta")}
-          </button>
+          {!esRegistro ? (
+            <button
+              type="button"
+              onClick={() => {
+                setError(null);
+                setStep("password");
+              }}
+              className={claseEnlace}
+            >
+              {t("login.entrar_con_contrasena")}
+            </button>
+          ) : null}
 
           <Separador>{t("login.o")}</Separador>
           {botonGoogle}
 
           {/* Registro de negocios: antes no había ningún acceso visible a /para-negocios (auditoría 2026-11-14).
               El profesional no se registra aquí: entra por invitación de su barbería (/invitacion/[id]). */}
-          <Link href="/para-negocios" className={claseEnlace}>
-            {t("login.registrar_negocio")}
-          </Link>
+          {!paraNegocio ? (
+            <Link href="/para-negocios" className={claseEnlace}>
+              {t("login.registrar_negocio")}
+            </Link>
+          ) : null}
         </form>
       ) : null}
 

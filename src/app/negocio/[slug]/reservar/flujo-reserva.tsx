@@ -34,6 +34,8 @@ export interface Servicio {
   precio_base: number;
   anticipo_pct?: number | null;
   anticipo_monto_fijo?: number | null;
+  /** Imagen guía opcional (migración 134). */
+  imagen_url?: string | null;
 }
 
 export interface Sede {
@@ -355,6 +357,10 @@ export function FlujoReserva({
                           </svg>
                         ) : null}
                       </span>
+                      {s.imagen_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element -- imagen guía del servicio (bucket público)
+                        <img src={s.imagen_url} alt="" loading="lazy" className="size-12 shrink-0 border-2 border-border object-cover" />
+                      ) : null}
                       <span className="min-w-0 flex-1">
                         <b className="body block break-words">{s.nombre}</b>
                         <span className="sn-meta !text-current">{duracion(s.duracion_minutos)}</span>

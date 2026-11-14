@@ -53,7 +53,7 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
       .order("created_at"),
     supabase
       .from("servicio")
-      .select("id, nombre, descripcion, duracion_minutos, precio_base, anticipo_pct, anticipo_monto_fijo")
+      .select("id, nombre, descripcion, duracion_minutos, precio_base, anticipo_pct, anticipo_monto_fijo, imagen_url")
       .eq("negocio_id", negocio.id)
       .eq("estado", "ACTIVO")
       .order("precio_base"),

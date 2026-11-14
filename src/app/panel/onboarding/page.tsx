@@ -26,10 +26,13 @@ export default async function OnboardingNegocioPage() {
       "id, nombre, categoria, ciudad, descripcion, logo_url, telefono_contacto, email_contacto, plan_codigo, onboarding_completo, estado, pais_codigo"
     )
     .eq("owner_user_id", user.id)
+    // Mismo criterio que resolverContexto: con negocios duplicados, el más avanzado.
+    .order("onboarding_completo", { ascending: false })
+    .order("created_at", { ascending: true })
+    .limit(1)
     .maybeSingle();
 
-  // Un negocio ya enviado a aprobación no vuelve al wizard — el resumen vive
-  // en /panel (Módulo 2.2, placeholder mientras tanto).
+  // Un negocio ya enviado a aprobación no vuelve al wizard: /panel muestra "En revisión".
   if (negocio?.onboarding_completo) redirect("/panel");
 
   const [{ data: sede }, { data: servicios }, { data: suscripcion }, { data: invitaciones }] =
@@ -46,7 +49,7 @@ export default async function OnboardingNegocioPage() {
             .then((r) => ({ data: r.data })),
           supabase
             .from("servicio")
-            .select("id, nombre, descripcion, duracion_minutos, precio_base")
+            .select("id, nombre, descripcion, duracion_minutos, precio_base, imagen_url")
             .eq("negocio_id", negocio.id)
             .eq("estado", "ACTIVO")
             .order("created_at"),

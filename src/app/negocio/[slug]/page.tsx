@@ -41,7 +41,7 @@ async function cargarNegocio(slug: string) {
         .order("created_at"),
       supabase
         .from("servicio")
-        .select("id, nombre, descripcion, duracion_minutos, precio_base")
+        .select("id, nombre, descripcion, duracion_minutos, precio_base, imagen_url")
         .eq("negocio_id", negocio.id)
         .eq("estado", "ACTIVO")
         .order("precio_base"),
@@ -317,14 +317,20 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
         ) : (
           <ul className="m-0 list-none border-t-2 border-line p-0">
             {servicios.map((s) => (
-              <li key={s.id} className="border-b border-grid-soft px-4 py-3">
-                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                  <b className="body min-w-0 break-words">{s.nombre}</b>
-                  <Meta>{duracion(s.duracion_minutos)}</Meta>
-                </div>
-                {s.descripcion ? <p className="body-sm m-0 mt-1 break-words">{s.descripcion}</p> : null}
-                <div className="mt-2">
-                  <span className="sn-price">{formatCOP(s.precio_base)}</span>
+              <li key={s.id} className="flex gap-3 border-b border-grid-soft px-4 py-3">
+                {s.imagen_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- imagen guía del servicio (bucket público)
+                  <img src={s.imagen_url} alt={s.nombre} loading="lazy" className="size-16 shrink-0 border-2 border-border object-cover" />
+                ) : null}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                    <b className="body min-w-0 break-words">{s.nombre}</b>
+                    <Meta>{duracion(s.duracion_minutos)}</Meta>
+                  </div>
+                  {s.descripcion ? <p className="body-sm m-0 mt-1 break-words">{s.descripcion}</p> : null}
+                  <div className="mt-2">
+                    <span className="sn-price">{formatCOP(s.precio_base)}</span>
+                  </div>
                 </div>
               </li>
             ))}

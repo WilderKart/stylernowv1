@@ -24,7 +24,8 @@ import {
 } from "./actions";
 // Módulo 2.5: un solo lugar para crear/desactivar Servicios (validaciones
 // de duración/precio/duplicados), compartido con el Panel de Servicios.
-import { crearServicio, eliminarServicio } from "@/app/panel/servicios/actions";
+import { crearServicio, eliminarServicio, subirImagenServicio } from "@/app/panel/servicios/actions";
+import { leerComoDataUrl } from "@/lib/imagen/leer-como-data-url";
 
 const PASOS = ["Datos", "Sede", "Servicios", "Staff"];
 
@@ -57,6 +58,7 @@ interface ServicioData {
   descripcion: string | null;
   duracion_minutos: number;
   precio_base: number;
+  imagen_url?: string | null;
 }
 interface InvitacionData {
   id: string;
@@ -98,6 +100,36 @@ export function Wizard({
 
   const pasoMaximoAlcanzado =
     !negocio || !plan ? 1 : !sede ? 2 : servicios.length === 0 ? 3 : 4;
+
+  // Tras enviar a aprobación se muestra una confirmación clara (antes se redirigía a /panel y,
+  // con negocios duplicados, el usuario volvía al primer paso sin saber si se envió).
+  const [enviado, setEnviado] = useState(false);
+  if (enviado) {
+    return (
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-5 py-12 sm:px-10" role="status" aria-live="polite">
+        <span className="sn-label text-accent">Solicitud enviada</span>
+        <h1 className="font-display text-[28px] font-bold uppercase leading-tight text-text">
+          ¡Listo! Recibimos tu negocio
+        </h1>
+        <p className="text-[14px] leading-relaxed text-text-muted">
+          {negocio?.nombre ? <b className="text-text">{negocio.nombre}</b> : "Tu negocio"} quedó en revisión. El equipo de
+          StylerNow lo revisa normalmente en menos de 24 horas hábiles y te avisamos por correo y en la app cuando esté
+          aprobado.
+        </p>
+        <Card>
+          <p className="text-[13px] font-bold text-text">Mientras tanto</p>
+          <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-[12.5px] text-text-muted">
+            <li>Puedes entrar a tu panel para revisar el estado y completar tu perfil.</li>
+            <li>Cuando te aprobemos, activa tu prueba gratis desde «Plan y facturación» (sin tarjeta).</li>
+            <li>Sigues pudiendo usar tu cuenta de cliente para reservar.</li>
+          </ul>
+        </Card>
+        <Button size="lg" className="w-full" onClick={() => router.push("/panel")}>
+          IR A MI PANEL
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-8 pb-28 sm:px-10">
@@ -167,7 +199,10 @@ export function Wizard({
           sedeId={sede?.id ?? null}
           invitaciones={invitaciones}
           onCambio={setInvitaciones}
-          onEnviado={() => router.push("/panel")}
+          onEnviado={() => {
+            setEnviado(true);
+            window.scrollTo({ top: 0 });
+          }}
         />
       ) : null}
     </div>
@@ -210,37 +245,59 @@ function PasoDatos({
   const [guardando, setGuardando] = useState(false);
   const [subiendoLogo, setSubiendoLogo] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorLogo, setErrorLogo] = useState<string | null>(null);
+  // Logo elegido antes de que exista el negocio: se muestra al instante y se sube en cuanto se crea.
+  const [logoPendiente, setLogoPendiente] = useState<string | null>(null);
 
   function alternarCategoria(valor: string) {
     setCategoria((prev) => (prev.includes(valor) ? prev.filter((c) => c !== valor) : [...prev, valor]));
   }
 
-  async function onCambiarLogo(archivo: File) {
-    if (!negocio) {
-      setError("Guarda primero los datos del negocio para poder subir un logo.");
-      return;
-    }
+  async function subirLogoDe(negocioId: string, dataUrl: string) {
     setSubiendoLogo(true);
-    setError(null);
-    const dataUrl: string = await new Promise((resolve, reject) => {
-      const lector = new FileReader();
-      lector.onload = () => resolve(lector.result as string);
-      lector.onerror = reject;
-      lector.readAsDataURL(archivo);
-    });
-    const res = await subirLogo(negocio.id, dataUrl);
+    setErrorLogo(null);
+    const res = await subirLogo(negocioId, dataUrl);
     setSubiendoLogo(false);
     if (!res.ok) {
-      setError(res.error);
-      return;
+      setErrorLogo(res.error);
+      return null;
     }
     setLogoUrl(res.data.url);
+    setLogoPendiente(null);
+    return res.data.url;
+  }
+
+  async function onCambiarLogo(archivo: File) {
+    setErrorLogo(null);
+    // Se comprime en el navegador: el original en base64 superaba el límite de 1 MB de las Server Actions.
+    const leida = await leerComoDataUrl(archivo, 15, 800);
+    if (!leida.ok) {
+      setErrorLogo(leida.error);
+      return;
+    }
+    const dataUrl = leida.dataUrl;
+    // Antes exigía guardar primero el negocio (y el aviso quedaba al final del formulario).
+    if (!negocio) {
+      setLogoPendiente(dataUrl);
+      return;
+    }
+    await subirLogoDe(negocio.id, dataUrl);
   }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setGuardando(true);
     setError(null);
+    // Validaciones ANTES de crear nada: antes el plan se validaba después del INSERT y cada reintento
+    // creaba un negocio nuevo.
+    if (categoria.length === 0) {
+      setError("Elige al menos una categoría.");
+      return;
+    }
+    if (!planSeleccionado) {
+      setError("Elige un plan para continuar.");
+      return;
+    }
+    setGuardando(true);
 
     const res = await crearOActualizarNegocio({
       negocioId: negocio?.id ?? null,
@@ -257,13 +314,27 @@ function PasoDatos({
       return;
     }
 
-    if (!planSeleccionado) {
-      setGuardando(false);
-      setError("Elige un plan para continuar.");
-      return;
-    }
-
     const negocioId = res.data.id;
+    const datosGuardados: NegocioData = {
+      id: negocioId,
+      nombre,
+      categoria,
+      ciudad,
+      descripcion,
+      telefono_contacto: telefono,
+      email_contacto: email,
+      logo_url: logoUrl,
+      plan_codigo: planSeleccionado,
+      onboarding_completo: false,
+      estado: negocio?.estado ?? "PENDIENTE_APROBACION",
+    };
+    // El negocio ya existe: se recuerda YA, para que si el país o el plan fallan, el reintento lo actualice.
+    onGuardado(datosGuardados);
+
+    if (logoPendiente) {
+      const url = await subirLogoDe(negocioId, logoPendiente);
+      if (url) datosGuardados.logo_url = url;
+    }
     if (paisCodigo !== (negocio?.pais_codigo ?? "CO")) {
       const resPais = await elegirPais(negocioId, paisCodigo);
       if (!resPais.ok) {
@@ -283,19 +354,7 @@ function PasoDatos({
     }
 
     setGuardando(false);
-    onGuardado({
-      id: negocioId,
-      nombre,
-      categoria,
-      ciudad,
-      descripcion,
-      telefono_contacto: telefono,
-      email_contacto: email,
-      logo_url: logoUrl,
-      plan_codigo: planSeleccionado,
-      onboarding_completo: false,
-      estado: negocio?.estado ?? "PENDIENTE_APROBACION",
-    });
+    onGuardado(datosGuardados);
     onContinuar();
   }
 
@@ -303,23 +362,29 @@ function PasoDatos({
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
       <div className="flex items-center gap-4">
         <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border bg-surface">
-          {logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- data recién subida, sin loader de Next configurado para esto
-            <img src={logoUrl} alt="" className="size-full object-cover" />
+          {logoPendiente || logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- vista previa local o recién subida, sin loader de Next
+            <img src={logoPendiente ?? logoUrl ?? ""} alt="Logo del negocio" className="size-full object-cover" />
           ) : (
             <span className="text-[10px] text-text-faint">Logo</span>
           )}
         </div>
-        <label className="text-[12.5px] font-semibold text-accent">
-          <input
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            className="hidden"
-            disabled={subiendoLogo}
-            onChange={(e) => e.target.files?.[0] && onCambiarLogo(e.target.files[0])}
-          />
-          {subiendoLogo ? "Subiendo…" : "Subir logo"}
-        </label>
+        <div className="flex min-w-0 flex-col gap-1">
+          <label className="cursor-pointer text-[12.5px] font-semibold text-accent">
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="sr-only"
+              disabled={subiendoLogo}
+              onChange={(e) => e.target.files?.[0] && onCambiarLogo(e.target.files[0])}
+            />
+            {subiendoLogo ? "Subiendo…" : logoPendiente || logoUrl ? "Cambiar logo" : "Subir logo"}
+          </label>
+          <span className="text-[11px] text-text-faint">
+            {logoPendiente ? "Se guarda al continuar." : "PNG, JPG o WebP. La optimizamos automáticamente."}
+          </span>
+          {errorLogo ? <span className="text-[11.5px] text-danger">{errorLogo}</span> : null}
+        </div>
       </div>
 
       <Input label="Nombre del negocio" required value={nombre} onChange={(e) => setNombre(e.target.value)} />
@@ -399,7 +464,8 @@ function PasoDatos({
           />
         ) : null}
         <p className="sn-meta">
-          Prueba 14 días con método de pago; se cobra al terminar. ¿Cadena o franquicia (Signature)? Habla con ventas por soporte.
+          Prueba gratis sin tarjeta: cuando aprobemos tu negocio la activas desde «Plan y facturación» y no se cobra nada
+          automáticamente. ¿Cadena o franquicia (Signature)? Habla con ventas por soporte.
         </p>
       </div>
 
@@ -458,8 +524,17 @@ function PasoServicios({
   const [nombre, setNombre] = useState("");
   const [duracionMinutos, setDuracionMinutos] = useState("30");
   const [precio, setPrecio] = useState("");
+  const [imagen, setImagen] = useState<string | null>(null);
   const [agregando, setAgregando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  async function onElegirImagen(archivo: File | undefined) {
+    if (!archivo) return;
+    const r = await leerComoDataUrl(archivo, 15);
+    if (!r.ok) return setError(r.error);
+    setError(null);
+    setImagen(r.dataUrl);
+  }
 
   async function onAgregar(e: React.FormEvent) {
     e.preventDefault();
@@ -472,11 +547,19 @@ function PasoServicios({
       precioBase: Number(precio),
       descripcion: "",
     });
-    setAgregando(false);
     if (!res.ok) {
+      setAgregando(false);
       setError(res.error);
       return;
     }
+    // Imagen opcional: el servicio ya existe; si la imagen falla, se avisa pero el servicio queda creado.
+    let imagenUrl: string | null = null;
+    if (imagen) {
+      const ri = await subirImagenServicio(res.data.id, imagen);
+      if (ri.ok) imagenUrl = ri.data.url;
+      else setError(`El servicio se creó, pero la imagen no: ${ri.error}`);
+    }
+    setAgregando(false);
     onCambio([
       ...servicios,
       {
@@ -485,11 +568,13 @@ function PasoServicios({
         descripcion: null,
         duracion_minutos: Number(duracionMinutos),
         precio_base: Number(precio),
+        imagen_url: imagenUrl,
       },
     ]);
     setNombre("");
     setDuracionMinutos("30");
     setPrecio("");
+    setImagen(null);
   }
 
   async function onEliminar(id: string) {
@@ -508,7 +593,11 @@ function PasoServicios({
               key={s.id}
               className="flex items-center justify-between gap-3 rounded-2xl border border-border-subtle bg-surface p-3.5"
             >
-              <div className="min-w-0">
+              {s.imagen_url ? (
+                // eslint-disable-next-line @next/next/no-img-element -- miniatura del bucket público
+                <img src={s.imagen_url} alt="" className="size-12 shrink-0 rounded-xl object-cover" />
+              ) : null}
+              <div className="min-w-0 flex-1">
                 <p className="truncate text-[13.5px] font-semibold text-text">{s.nombre}</p>
                 <p className="text-[11.5px] text-text-faint">
                   {duracion(s.duracion_minutos)} · {formatCOP(s.precio_base)}
@@ -553,6 +642,29 @@ function PasoServicios({
             value={precio}
             onChange={(e) => setPrecio(e.target.value)}
           />
+        </div>
+        {/* Imagen guía opcional: ayuda al cliente a reconocer servicios cuyo nombre no conoce. */}
+        <div className="flex items-center gap-3">
+          <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-bg">
+            {imagen ? (
+              // eslint-disable-next-line @next/next/no-img-element -- vista previa local
+              <img src={imagen} alt="Imagen del servicio" className="size-full object-cover" />
+            ) : (
+              <span className="text-[10px] text-text-faint">Foto</span>
+            )}
+          </div>
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <label className="cursor-pointer text-[12.5px] font-semibold text-accent">
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="sr-only"
+                onChange={(e) => onElegirImagen(e.target.files?.[0])}
+              />
+              {imagen ? "Cambiar imagen" : "Agregar imagen (opcional)"}
+            </label>
+            <span className="text-[11px] text-text-faint">Ayuda a tus clientes a reconocer el servicio. La optimizamos automáticamente.</span>
+          </div>
         </div>
         {error ? <p className="text-xs text-danger">{error}</p> : null}
         <Button type="submit" variant="secondary" loading={agregando} className="w-full">

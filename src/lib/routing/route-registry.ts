@@ -19,6 +19,7 @@ export const RUTAS: RutaRegistro[] = [
   // Cliente — públicas
   { path: "/", publica: true },
   { path: "/login", publica: true },
+  { path: "/registro", publica: true },
   { path: "/legal", publica: true, dinamica: true },
   { path: "/negocio", publica: true, dinamica: true },
   { path: "/onboarding", publica: true },

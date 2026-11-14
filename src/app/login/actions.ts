@@ -24,12 +24,23 @@ async function origenActual() {
   return `${proto}://${host}`;
 }
 
-export async function enviarCodigo(email: string, siguiente: string, aceptaTerminos: boolean) {
+/**
+ * Ingreso y registro van separados (decisión del propietario, 2026-11-14):
+ *  - "ingresar": solo cuentas existentes (shouldCreateUser: false). Si el correo no tiene cuenta, se
+ *    devuelve `sinCuenta` para ofrecer el registro; nunca se crea una cuenta desde "Ingresar".
+ *  - "registro": crea la cuenta y exige aceptar Términos y Política de Datos (validado aquí, no solo en la UI).
+ */
+export async function enviarCodigo(
+  email: string,
+  siguiente: string,
+  aceptaTerminos: boolean,
+  modo: "ingresar" | "registro" = "registro"
+) {
   // Zero-trust: el checkbox del formulario es solo la primera barrera. Sin esta
   // validación aquí, cualquiera podía llamar a esta action directo (sin pasar por
   // la UI) y saltarse el consentimiento exigido por 06-Security/04_Compliance_
-  // Colombia.md.
-  if (!aceptaTerminos) {
+  // Colombia.md. Solo aplica al registro: quien ingresa ya aceptó al crear su cuenta.
+  if (modo !== "ingresar" && !aceptaTerminos) {
     return {
       ok: false as const,
       error: "Debes aceptar los Términos y la Política de Tratamiento de Datos.",
@@ -51,13 +62,19 @@ export async function enviarCodigo(email: string, siguiente: string, aceptaTermi
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      shouldCreateUser: true,
+      shouldCreateUser: modo !== "ingresar",
       // El link "Iniciar sesión" del correo vuelve aquí en vez de a la home directo,
       // para que el intercambio de código realmente cree la sesión (src/app/auth/callback).
       emailRedirectTo: `${await origenActual()}/auth/callback?next=${encodeURIComponent(siguiente)}`,
     },
   });
-  if (error) return { ok: false as const, error: error.message };
+  if (error) {
+    // Supabase responde así cuando el correo no tiene cuenta y no se permite crearla desde "Ingresar".
+    if (modo === "ingresar" && /signups? not allowed|user not found|not found/i.test(error.message)) {
+      return { ok: false as const, sinCuenta: true as const, error: "No encontramos una cuenta con ese correo." };
+    }
+    return { ok: false as const, error: error.message };
+  }
   return { ok: true as const };
 }
 

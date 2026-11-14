@@ -3,6 +3,7 @@
 import { crearSede, actualizarSede, type HorarioSemana } from "@/app/panel/sedes/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { direccionDesdeCoordenadas } from "@/lib/geo/direccion-desde-coordenadas";
 import { useState } from "react";
 
 const DIAS: { clave: keyof HorarioSemana; etiqueta: string }[] = [
@@ -101,9 +102,20 @@ export function FormularioSede({
       return;
     }
     setBuscandoUbicacion(true);
+    setError(null);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setCoordenadas({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setCoordenadas({ lat, lng });
+        // Antes solo se guardaban las coordenadas; ahora también se sugieren dirección y ciudad (editables).
+        const r = await direccionDesdeCoordenadas(lat, lng);
+        if (r.ok) {
+          if (r.direccion) setDireccion(r.direccion);
+          if (r.ciudad) setCiudad(r.ciudad);
+        } else {
+          setError(r.error);
+        }
         setBuscandoUbicacion(false);
       },
       () => {
@@ -168,16 +180,15 @@ export function FormularioSede({
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
       <Input label="Nombre de la sede" required value={nombre} onChange={(e) => setNombre(e.target.value)} />
-      <Input label="Dirección" required value={direccion} onChange={(e) => setDireccion(e.target.value)} />
-      <Input label="Ciudad" required value={ciudad} onChange={(e) => setCiudad(e.target.value)} />
 
-      <div className="flex items-center justify-between rounded-2xl border border-border-subtle bg-surface p-3.5">
-        <div>
+      {/* Va antes de Dirección y Ciudad: al usar la ubicación se rellenan esos dos campos (editables). */}
+      <div className="flex items-center justify-between gap-3 rounded-2xl border border-border-subtle bg-surface p-3.5">
+        <div className="min-w-0">
           <p className="text-[13px] font-semibold text-text">Ubicación en el mapa</p>
           <p className="text-[11.5px] text-text-faint">
             {coordenadas
-              ? `${coordenadas.lat.toFixed(5)}, ${coordenadas.lng.toFixed(5)} — capturada`
-              : "Ayuda a que te encuentren en el Marketplace"}
+              ? `${coordenadas.lat.toFixed(5)}, ${coordenadas.lng.toFixed(5)} — capturada. Revisa la dirección sugerida.`
+              : "Usa tu ubicación y llenamos la dirección y la ciudad por ti"}
           </p>
         </div>
         <Button
@@ -190,6 +201,10 @@ export function FormularioSede({
           Usar mi ubicación
         </Button>
       </div>
+      {error && buscandoUbicacion === false && !direccion ? <p className="text-xs text-danger">{error}</p> : null}
+
+      <Input label="Dirección" required value={direccion} onChange={(e) => setDireccion(e.target.value)} />
+      <Input label="Ciudad" required value={ciudad} onChange={(e) => setCiudad(e.target.value)} />
 
       <div>
         <div className="mb-2 flex items-center justify-between">

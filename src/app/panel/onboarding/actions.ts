@@ -63,6 +63,20 @@ export async function crearOActualizarNegocio(datos: {
       return { ok: true, data: { id: datos.negocioId } };
     }
 
+    // Un dueño = un negocio en el alta. Si un reintento del paso 1 llega sin negocioId (un error posterior al
+    // INSERT, doble envío…), se actualiza el negocio que ya tiene en vez de crear otro: en producción quedaron
+    // 3 negocios del mismo dueño y el panel lo devolvía al inicio del asistente (auditoría 2026-11-14).
+    const { data: existentes } = await supabase
+      .from("negocio")
+      .select("id")
+      .eq("owner_user_id", userId)
+      .order("onboarding_completo", { ascending: false })
+      .order("created_at", { ascending: true })
+      .limit(1);
+    if (existentes && existentes.length > 0) {
+      return crearOActualizarNegocio({ ...datos, negocioId: existentes[0].id });
+    }
+
     // Slug único: nombre + sufijo corto del owner, con reintento simple si
     // por casualidad ya existe (negocio.slug es unique).
     //
