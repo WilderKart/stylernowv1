@@ -1,32 +1,14 @@
 "use server";
 
-import { obtenerPreferencias, type Pais } from "@/lib/cliente/preferencias";
+import type { Pais } from "@/lib/cliente/preferencias";
 import { telefonoE164, type PaisRegistro } from "@/lib/telefono-registro";
 import { createClient } from "@/lib/supabase/server";
+import { aceptarTextosLegales, faltaAceptarVigentes, idsTextosVigentes, obtenerPendientesLegales } from "@/lib/auth/aceptacion-legal";
 
 const PAISES: Pais[] = ["CO", "US", "MX", "ES"];
 
 /**
- * ¿Debe ver el paso de registro (C17)? Solo con sesión activa y mientras el perfil no tenga
- * país guardado (completar_registro es lo que lo fija). La identidad sale de la sesión.
- */
-export async function necesitaRegistro(): Promise<{ necesita: boolean; email: string }> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { necesita: false, email: "" };
-  if (user.app_metadata?.registro_pendiente === true) return { necesita: true, email: user.email ?? "" };
-  // El Super Admin se crea desde la base de datos: nunca ve el registro de cliente.
-  const { data: perfil } = await supabase.from("perfil").select("es_supersu").eq("id", user.id).maybeSingle();
-  if (perfil?.es_supersu === true) return { necesita: false, email: user.email ?? "" };
-  const r = await obtenerPreferencias();
-  return { necesita: r.ok ? r.data.pais === null : false, email: user.email ?? "" };
-}
-
-/**
- * «Atrás» en el paso de registro: el usuario no creó la cuenta, así que se cierra la sesión que
- * abrió la verificación del código y vuelve al inicio del login. Solo actúa si el registro sigue
+ * «Atrás» en «Completa tu perfil»: se cierra la sesión y vuelve al inicio del login. Solo actúa si el registro sigue
  * pendiente (nunca cierra la sesión de una cuenta ya creada). La cuenta de acceso sin registro la
  * elimina el cron pasado el plazo (migración 127, `cuentas_registro_abandonado`).
  */
@@ -42,15 +24,19 @@ export async function cancelarRegistro(): Promise<{ ok: true }> {
 }
 
 /**
- * «CREAR CUENTA». `marketing` solo es true si el usuario marcó la casilla (opcional, sin premarcar).
+ * «COMPLETA TU PERFIL» (último paso de toda cuenta nueva, también la creada con Google).
+ * `marketing` solo es true si el usuario marcó la casilla (opcional, sin premarcar).
  * El celular se valida aquí y otra vez en la base (migración 128), y se guarda como NO verificado.
+ * Quien llegó por Google no marcó todavía Términos y Política de Datos: aquí es obligatorio y se
+ * registra (versionado, con hora); quien se registró con contraseña ya los aceptó al registrarse.
  */
 export async function crearCuentaRegistro(
   nombre: string,
   pais: string,
   telefono: string,
   marketing: boolean,
-): Promise<{ ok: true } | { ok: false; error: string }> {
+  aceptaTerminos = false,
+): Promise<{ ok: true; pendientesLegales: boolean } | { ok: false; error: string }> {
   const nombreLimpio = (nombre ?? "").trim().replace(/\s+/g, " ");
   if (nombreLimpio.length < 2 || nombreLimpio.length > 80) return { ok: false, error: "El nombre debe tener entre 2 y 80 caracteres." };
   if (!PAISES.includes(pais as Pais)) return { ok: false, error: "País no disponible." };
@@ -58,6 +44,16 @@ export async function crearCuentaRegistro(
   if (!e164) return { ok: false, error: "Revisa tu número de celular: debe ser un celular válido del país elegido." };
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Tu sesión venció. Vuelve a ingresar." };
+  if (await faltaAceptarVigentes(supabase, user.id)) {
+    if (aceptaTerminos !== true) return { ok: false, error: "Debes aceptar los Términos y la Política de Tratamiento de Datos." };
+    await aceptarTextosLegales(supabase, user.id, await idsTextosVigentes(supabase));
+    await supabase.from("perfil").update({ consentimiento_datos_at: new Date().toISOString() }).eq("id", user.id).is("consentimiento_datos_at", null);
+  }
+
   const { error } = await (supabase as unknown as {
     rpc: (n: string, a: object) => Promise<{ error: { message: string } | null }>;
   }).rpc("completar_registro_con_telefono", {
@@ -70,7 +66,18 @@ export async function crearCuentaRegistro(
   if (error) {
     if (error.message.includes("TELEFONO_INVALIDO")) return { ok: false, error: "Revisa tu número de celular." };
     if (error.message.includes("NOMBRE_INVALIDO")) return { ok: false, error: "El nombre debe tener entre 2 y 80 caracteres." };
-    return { ok: false, error: "No pudimos crear tu cuenta. Intenta de nuevo." };
+    return { ok: false, error: "No pudimos guardar tu perfil. Intenta de nuevo." };
   }
-  return { ok: true };
+  const pendientes = await obtenerPendientesLegales(supabase, user.id);
+  return { ok: true, pendientesLegales: pendientes.length > 0 };
+}
+
+/** ¿El paso de perfil debe pedir la casilla legal? (cuenta nueva por Google que aún no la marcó). */
+export async function requiereAceptacionEnPerfil(): Promise<boolean> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+  return faltaAceptarVigentes(supabase, user.id);
 }

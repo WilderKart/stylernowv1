@@ -113,6 +113,55 @@ export async function obtenerPendientesLegales(
     .map((t) => ({ id: t.id, tipo: t.tipo, version: t.version, contenido: t.contenido }));
 }
 
+/** Ids de la versión vigente de Términos y Política de Datos (la de mayor número de cada tipo). */
+export async function idsTextosVigentes(supabase: Awaited<ReturnType<typeof createClient>>): Promise<string[]> {
+  const { data: textos } = await supabase
+    .from("texto_legal")
+    .select("id, tipo, version")
+    .in("tipo", ["TERMINOS", "POLITICA_DATOS"])
+    .order("version", { ascending: false });
+  const vigentes = new Map<string, string>();
+  for (const t of textos ?? []) if (!vigentes.has(t.tipo)) vigentes.set(t.tipo, t.id);
+  return [...vigentes.values()];
+}
+
+/** ¿Le falta aceptar alguna versión vigente? (cuenta nueva por Google: aún no marcó la casilla). */
+export async function faltaAceptarVigentes(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  usuarioId: string
+): Promise<boolean> {
+  const ids = await idsTextosVigentes(supabase);
+  if (!ids.length) return false;
+  const { data } = await supabase.from("aceptacion_legal").select("texto_legal_id").eq("usuario_id", usuarioId).in("texto_legal_id", ids);
+  return (data?.length ?? 0) < ids.length;
+}
+
+/**
+ * Registro con contraseña (2026-11-15): la casilla se marca ANTES de existir la sesión, así que
+ * `registrarCuenta` guarda en los metadatos de Auth la hora y las versiones exactas aceptadas.
+ * Al verificar el correo (ya con sesión) se convierten en filas de `aceptacion_legal` (con su
+ * `aceptado_at`) y se fija `perfil.consentimiento_datos_at`. Solo se registran versiones que siguen
+ * existiendo; si el texto cambió en medio, la versión nueva queda pendiente y se pide en /legal/aceptar.
+ */
+export async function registrarAceptacionDeRegistro(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  usuario: { id: string; user_metadata?: Record<string, unknown> | null }
+): Promise<boolean> {
+  const meta = usuario.user_metadata ?? {};
+  const ids = Array.isArray(meta.acepta_legal_ids) ? meta.acepta_legal_ids.filter((x): x is string => typeof x === "string") : [];
+  if (typeof meta.acepta_legal_at !== "string" || !ids.length) return false;
+  const vigentes = new Set(await idsTextosVigentes(supabase));
+  const validos = ids.filter((id) => vigentes.has(id));
+  if (!validos.length) return false;
+  await aceptarTextosLegales(supabase, usuario.id, validos);
+  await supabase
+    .from("perfil")
+    .update({ consentimiento_datos_at: meta.acepta_legal_at })
+    .eq("id", usuario.id)
+    .is("consentimiento_datos_at", null);
+  return true;
+}
+
 /** Acepta explícitamente los textos legales pendientes (usado por `/legal/aceptar`). */
 export async function aceptarTextosLegales(
   supabase: Awaited<ReturnType<typeof createClient>>,

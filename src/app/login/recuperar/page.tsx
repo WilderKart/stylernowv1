@@ -20,7 +20,8 @@ export default async function RecuperarPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  // Sin la sesión del enlace (vencido, ya usado u otro navegador): aviso en /login y se pide otro.
+  if (!user) redirect("/login?error=enlace");
 
   return (
     <PantallaAuth

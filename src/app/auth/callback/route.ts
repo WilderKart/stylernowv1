@@ -1,4 +1,4 @@
-import { registrarAceptacionLegal } from "@/lib/auth/aceptacion-legal";
+import { registrarAceptacionDeRegistro, registrarAceptacionLegal } from "@/lib/auth/aceptacion-legal";
 import { destinoSeguro } from "@/lib/auth/destino-seguro";
 import { registrarEventoIdentidad } from "@/lib/auth/identity-events";
 import { createClient } from "@/lib/supabase/server";
@@ -35,16 +35,31 @@ export async function GET(request: NextRequest) {
         await registrarEventoIdentidad("GOOGLE_LOGIN", data.user.id, { email: data.user.email ?? null });
       }
 
-      // El botón del correo ya implica la misma aceptación que exige el paso 1 del
-      // formulario (enviarCodigo la valida server-side antes de mandar el correo);
-      // se registra aquí porque este camino nunca pasa por verificarCodigo.
-      const { pendientesMateriales } = await registrarAceptacionLegal(supabase, data.user.id);
-
+      // Rediseño 2026-11-15: la aceptación legal se registra solo con evidencia real —
+      //  · registro con contraseña confirmado por el enlace del correo: la aceptación marcada en
+      //    el registro (metadatos con hora y versiones) se convierte en filas de aceptacion_legal;
+      //  · cuenta nueva por Google (registro pendiente, sin casilla marcada): NO se acepta nada en
+      //    silencio; la casilla se pide en «Completa tu perfil».
+      // Las cuentas ya registradas siguen aceptando en silencio solo los cambios no materiales.
+      const vinoDelRegistro = await registrarAceptacionDeRegistro(supabase, data.user);
+      const registroPendiente = data.user.app_metadata?.registro_pendiente === true;
+      const { pendientesMateriales } = registroPendiente
+        ? { pendientesMateriales: [] }
+        : await registrarAceptacionLegal(supabase, data.user.id);
       // ADR-015: el link de recuperación de contraseña (`solicitarRecuperacion()`,
       // next=/login/recuperar) nunca debe quedar atrapado detrás del desvío de
       // "completar perfil" — resetear la contraseña es más urgente y no requiere
       // tener teléfono cargado.
       const esRecuperacion = next === "/login/recuperar";
+      // Cuenta nueva (Google o confirmación por enlace): primero «Completa tu perfil», que vive en
+      // /login mientras el registro está pendiente (el proxy solo deja pasar /login, /auth y /legal).
+      // Solo el registro con contraseña deja esos metadatos: la contraseña ya existe.
+      if (vinoDelRegistro && registroPendiente) {
+        await supabase.from("perfil").update({ password_establecida: true }).eq("id", data.user.id);
+      }
+      if (registroPendiente && !esRecuperacion) {
+        return NextResponse.redirect(`${origin}/login?next=${encodeURIComponent(next)}`);
+      }
 
       // Mismo desvío de una sola vez que el flujo de código tipeado: sin teléfono
       // todavía, primero completa el perfil (02-UX/02_Onboarding.md).
