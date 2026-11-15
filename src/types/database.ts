@@ -7259,6 +7259,10 @@ export type Database = {
         }
       }
       actor_tipo_soporte: { Args: { p_negocio_id: string }; Returns: string }
+      ai_acciones_costo_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["public"]["Tables"]["ai_accion_costo"]["Row"][]
+      }
       actualizar_accion_costo_ia: {
         Args: {
           p_accion: string

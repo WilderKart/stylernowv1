@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
 import { revalidatePath } from "next/cache";
 
 type Resultado<T = undefined> =
@@ -31,8 +31,10 @@ export interface AccionCostoIa {
 }
 
 export async function listarAccionesCostoIa(): Promise<Resultado<AccionCostoIa[]>> {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("ai_accion_costo").select("*").order("categoria").order("accion");
+  const g = await autorizarSuperSU();
+  if (!g.ok) return { ok: false, error: g.error };
+  const supabase = g.supabase;
+  const { data, error } = await supabase.rpc("ai_acciones_costo_admin");
   if (error) return { ok: false, error: error.message };
   return {
     ok: true,
@@ -53,7 +55,9 @@ export async function actualizarCostoAccionIa(
   costoCreditos: number,
   activo: boolean
 ): Promise<Resultado> {
-  const supabase = await createClient();
+  const g = await autorizarSuperSU();
+  if (!g.ok) return { ok: false, error: g.error };
+  const supabase = g.supabase;
   const { error } = await supabase.rpc("actualizar_accion_costo_ia", {
     p_accion: accion,
     p_costo_creditos: costoCreditos,
@@ -75,7 +79,9 @@ export interface ModeloIa {
 }
 
 export async function listarModelosIa(): Promise<Resultado<ModeloIa[]>> {
-  const supabase = await createClient();
+  const g = await autorizarSuperSU();
+  if (!g.ok) return { ok: false, error: g.error };
+  const supabase = g.supabase;
   const { data, error } = await supabase.from("ai_modelo_config").select("*").order("orden_preferencia");
   if (error) return { ok: false, error: error.message };
   return {
@@ -92,7 +98,9 @@ export async function listarModelosIa(): Promise<Resultado<ModeloIa[]>> {
 }
 
 export async function actualizarModeloIa(nombre: string, ordenPreferencia: number, activo: boolean): Promise<Resultado> {
-  const supabase = await createClient();
+  const g = await autorizarSuperSU();
+  if (!g.ok) return { ok: false, error: g.error };
+  const supabase = g.supabase;
   const { error } = await supabase.rpc("actualizar_modelo_config_ia", {
     p_nombre: nombre,
     p_orden_preferencia: ordenPreferencia,
@@ -113,7 +121,9 @@ export interface PaqueteIa {
 }
 
 export async function listarPaquetesIa(): Promise<Resultado<PaqueteIa[]>> {
-  const supabase = await createClient();
+  const g = await autorizarSuperSU();
+  if (!g.ok) return { ok: false, error: g.error };
+  const supabase = g.supabase;
   const { data, error } = await supabase.from("ai_paquete_creditos").select("*").order("creditos", { nullsFirst: false });
   if (error) return { ok: false, error: error.message };
   return {
@@ -129,7 +139,9 @@ export async function listarPaquetesIa(): Promise<Resultado<PaqueteIa[]>> {
 }
 
 export async function actualizarPaqueteIa(id: string, precioCop: number | null, activo: boolean): Promise<Resultado> {
-  const supabase = await createClient();
+  const g = await autorizarSuperSU();
+  if (!g.ok) return { ok: false, error: g.error };
+  const supabase = g.supabase;
   const { error } = await supabase.rpc("actualizar_paquete_creditos_ia", {
     p_paquete_id: id,
     // El parámetro SQL acepta NULL (paquete "Enterprise", sin autoservicio) —
@@ -152,14 +164,18 @@ export interface FuncionPlanIa {
 }
 
 export async function listarFuncionesPlanIa(): Promise<Resultado<FuncionPlanIa[]>> {
-  const supabase = await createClient();
+  const g = await autorizarSuperSU();
+  if (!g.ok) return { ok: false, error: g.error };
+  const supabase = g.supabase;
   const { data, error } = await supabase.from("plan_funcion_ia").select("*").order("funcion");
   if (error) return { ok: false, error: error.message };
   return { ok: true, data: data.map((f) => ({ planCodigo: f.plan_codigo, funcion: f.funcion, habilitado: f.habilitado })) };
 }
 
 export async function configurarFuncionPlanIa(planCodigo: string, funcion: string, habilitado: boolean): Promise<Resultado> {
-  const supabase = await createClient();
+  const g = await autorizarSuperSU();
+  if (!g.ok) return { ok: false, error: g.error };
+  const supabase = g.supabase;
   const { error } = await supabase.rpc("configurar_funcion_plan_ia", {
     p_plan_codigo: planCodigo as "ESSENTIAL" | "STUDIO" | "PRESTIGE" | "SIGNATURE",
     p_funcion: funcion,
@@ -182,7 +198,9 @@ export interface SimulacionIa {
 }
 
 export async function simularConsumoIa(planCodigo: string, numStaff: number, numClientes: number): Promise<Resultado<SimulacionIa>> {
-  const supabase = await createClient();
+  const g = await autorizarSuperSU();
+  if (!g.ok) return { ok: false, error: g.error };
+  const supabase = g.supabase;
   const { data, error } = await supabase.rpc("simular_consumo_ia", {
     p_plan_codigo: planCodigo as "ESSENTIAL" | "STUDIO" | "PRESTIGE" | "SIGNATURE",
     p_num_staff: numStaff,
@@ -213,13 +231,15 @@ export interface ResumenConsumoIa {
 }
 
 export async function obtenerResumenConsumoIa(): Promise<Resultado<ResumenConsumoIa>> {
-  const supabase = await createClient();
+  const g = await autorizarSuperSU();
+  if (!g.ok) return { ok: false, error: g.error };
+  const supabase = g.supabase;
   const { data: consumos, error } = await supabase
     .from("credito_ia_consumo")
     .select("negocio_id, funcion, creditos_consumidos");
   if (error) return { ok: false, error: error.message };
 
-  const { data: acciones } = await supabase.from("ai_accion_costo").select("accion, categoria, costo_proveedor_estimado, costo_creditos");
+  const { data: acciones } = await supabase.rpc("ai_acciones_costo_admin");
   const categoriaPorAccion = new Map((acciones ?? []).map((a) => [a.accion, a.categoria]));
   const costoUsdPorAccion = new Map((acciones ?? []).map((a) => [a.accion, Number(a.costo_proveedor_estimado)]));
 

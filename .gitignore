@@ -42,3 +42,9 @@ next-env.d.ts
 
 # Grafo local del MCP de memoria: cache mutable, se regenera por máquina.
 .claude/memory-graph.json
+
+# Credenciales de las cuentas de prueba locales (generadas, nunca versionar)
+.credenciales-pruebas.local
+
+# Clave de cifrado de los respaldos locales (generada, nunca versionar)
+.respaldo-clave.local

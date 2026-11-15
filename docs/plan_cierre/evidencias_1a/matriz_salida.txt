@@ -1,0 +1,216 @@
+Stopped services: [supabase_imgproxy_stylernow-cierre supabase_studio_stylernow-cierre supabase_edge_runtime_stylernow-cierre supabase_analytics_stylernow-cierre supabase_vector_stylernow-cierre supabase_pooler_stylernow-cierre]
+A new version of Supabase CLI is available: v3.1.0 (currently installed v2.106.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+(node:36548) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+{
+ "tablas_analizadas": 89,
+ "tablas_con_datos_de_B": 89,
+ "lectura_tablas_con_filas_de_B_visibles_a_no_autorizados": [
+  {
+   "tabla": "cashback_regla",
+   "visibles_para": [
+    "anon",
+    "intruso",
+    "cliente-a",
+    "dueno-a",
+    "guardian-a",
+    "pro-a1",
+    "pro-a2"
+   ]
+  },
+  {
+   "tabla": "oferta_negocio",
+   "visibles_para": [
+    "intruso",
+    "cliente-a",
+    "dueno-a",
+    "guardian-a",
+    "pro-a1",
+    "pro-a2"
+   ]
+  },
+  {
+   "tabla": "recurso_tipo",
+   "visibles_para": [
+    "anon",
+    "intruso",
+    "cliente-a",
+    "dueno-a",
+    "guardian-a",
+    "pro-a1",
+    "pro-a2"
+   ]
+  },
+  {
+   "tabla": "recurso",
+   "visibles_para": [
+    "anon",
+    "intruso",
+    "cliente-a",
+    "dueno-a",
+    "guardian-a",
+    "pro-a1",
+    "pro-a2"
+   ]
+  },
+  {
+   "tabla": "referido_config",
+   "visibles_para": [
+    "anon",
+    "intruso",
+    "cliente-a",
+    "dueno-a",
+    "guardian-a",
+    "pro-a1",
+    "pro-a2"
+   ]
+  },
+  {
+   "tabla": "resena",
+   "visibles_para": [
+    "anon",
+    "intruso",
+    "cliente-a",
+    "dueno-a",
+    "guardian-a",
+    "pro-a1",
+    "pro-a2"
+   ]
+  },
+  {
+   "tabla": "sede_horario_excepcion",
+   "visibles_para": [
+    "anon",
+    "intruso",
+    "cliente-a",
+    "dueno-a",
+    "guardian-a",
+    "pro-a1",
+    "pro-a2"
+   ]
+  },
+  {
+   "tabla": "sede",
+   "visibles_para": [
+    "anon",
+    "intruso",
+    "cliente-a",
+    "dueno-a",
+    "guardian-a",
+    "pro-a1",
+    "pro-a2"
+   ]
+  },
+  {
+   "tabla": "sello_campana",
+   "visibles_para": [
+    "anon",
+    "intruso",
+    "cliente-a",
+    "dueno-a",
+    "guardian-a",
+    "pro-a1",
+    "pro-a2"
+   ]
+  },
+  {
+   "tabla": "servicio_combo",
+   "visibles_para": [
+    "anon",
+    "intruso",
+    "cliente-a",
+    "dueno-a",
+    "guardian-a",
+    "pro-a1",
+    "pro-a2"
+   ]
+  },
+  {
+   "tabla": "servicio",
+   "visibles_para": [
+    "anon",
+    "intruso",
+    "cliente-a",
+    "dueno-a",
+    "guardian-a",
+    "pro-a1",
+    "pro-a2"
+   ]
+  },
+  {
+   "tabla": "vip_nivel",
+   "visibles_para": [
+    "anon",
+    "intruso",
+    "cliente-a",
+    "dueno-a",
+    "guardian-a",
+    "pro-a1",
+    "pro-a2"
+   ]
+  }
+ ],
+ "escritura_violaciones": [],
+ "borrado_violaciones": [],
+ "insercion_violaciones": [],
+ "rpc_total": 265,
+ "rpc_admin_ejecutadas_por_no_super": [
+  {
+   "f": "is_supersu",
+   "quien": [
+    "anon",
+    "intruso",
+    "cliente-a",
+    "dueno-a",
+    "guardian-a",
+    "pro-a1",
+    "pro-a2"
+   ]
+  }
+ ],
+ "rpc_con_id_de_B_ejecutadas_por_no_autorizados_VOLATILES": [],
+ "rpc_solo_lectura_con_id_de_B_ejecutadas_por_no_autorizados": [
+  "_chat_rol",
+  "actor_tipo_soporte",
+  "calcular_sena_servicios",
+  "calcular_sena",
+  "historial_memoria_ia",
+  "is_barberia_de",
+  "is_guardian_de_negocio",
+  "is_guardian_de_sede",
+  "is_staff_de",
+  "libro_totales",
+  "listar_memoria_ia",
+  "listar_prompts_ia",
+  "listar_sugerencias_recompensa",
+  "mi_nivel_vip",
+  "mis_referidos_staff",
+  "mis_sellos",
+  "negocio_cobra_en_linea",
+  "negocio_funcion_valor",
+  "negocio_puede_recibir_reservas",
+  "negocio_resenas_publicas",
+  "negocio_staff_publico",
+  "negocio_tiene_funcion",
+  "negocio_visible_en_mapa",
+  "slots_disponibles",
+  "staff_perfil_publico",
+  "staff_resenas_publicas",
+  "tiene_acceso_interno"
+ ],
+ "rpc_volatiles_ejecutadas_por_no_autorizados_sin_id_de_B": [
+  "beneficios_marcas_consentir",
+  "cancelar_eliminacion_cuenta",
+  "consultar_gift_card",
+  "exportar_mis_datos",
+  "mis_referidos_detalle",
+  "notif_push_desuscribir",
+  "notificacion_marcar_leida",
+  "notificaciones_marcar_todas_leidas",
+  "obtener_mi_codigo_referido",
+  "privacidad_guardar"
+ ],
+ "control_positivo_dueno_b_ve_sus_filas_tablas": 73,
+ "control_positivo_super_ve_filas": 77
+}

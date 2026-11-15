@@ -1,0 +1,4975 @@
+{
+ "resumen": {
+  "anonimo": {
+   "llamadas": 69,
+   "escrituras_ok": 0,
+   "lecturas_con_datos": 0,
+   "tablas_cambiadas": []
+  },
+  "intruso": {
+   "llamadas": 69,
+   "escrituras_ok": 0,
+   "lecturas_con_datos": 0,
+   "tablas_cambiadas": []
+  },
+  "cliente-a": {
+   "llamadas": 69,
+   "escrituras_ok": 0,
+   "lecturas_con_datos": 0,
+   "tablas_cambiadas": []
+  },
+  "pro-a1": {
+   "llamadas": 69,
+   "escrituras_ok": 0,
+   "lecturas_con_datos": 0,
+   "tablas_cambiadas": []
+  },
+  "guardian-a": {
+   "llamadas": 69,
+   "escrituras_ok": 0,
+   "lecturas_con_datos": 0,
+   "tablas_cambiadas": []
+  },
+  "dueno-a": {
+   "llamadas": 69,
+   "escrituras_ok": 0,
+   "lecturas_con_datos": 0,
+   "tablas_cambiadas": []
+  },
+  "dueno-b": {
+   "llamadas": 69,
+   "escrituras_ok": 0,
+   "lecturas_con_datos": 0,
+   "tablas_cambiadas": []
+  },
+  "super": {
+   "llamadas": 69,
+   "escrituras_ok": 36,
+   "lecturas_con_datos": 23,
+   "tablas_cambiadas": [
+    "auth.users",
+    "public.addon_precio",
+    "public.ai_accion_costo",
+    "public.ai_modelo_config",
+    "public.banner_home",
+    "public.ciudad_habilitada",
+    "public.comision_cambio_programado",
+    "public.configuracion_plataforma",
+    "public.evento_auditoria",
+    "public.negocio",
+    "public.notificacion_outbox",
+    "public.notificacion_outbox_evento",
+    "public.pais",
+    "public.perfil",
+    "public.plan",
+    "public.plan_caracteristica",
+    "public.plan_precio",
+    "public.suscripcion",
+    "public.texto_legal",
+    "public.ticket_mensaje",
+    "public.ticket_soporte",
+    "public.whatsapp_config"
+   ]
+  }
+ },
+ "detalle": [
+  {
+   "actor": "anonimo",
+   "modulo": "actions",
+   "fn": "obtenerResumenAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "actions",
+   "fn": "listarNegocios",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "actions",
+   "fn": "listarResenasReportadas",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "actions",
+   "fn": "aprobarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "actions",
+   "fn": "rechazarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "actions",
+   "fn": "suspenderNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "actions",
+   "fn": "marcarNegocioEnMora",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "actions",
+   "fn": "forzarReactivacionPagoExterno",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "actions",
+   "fn": "reactivarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "actions",
+   "fn": "cancelarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "actions",
+   "fn": "activarPlanManual",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "actions",
+   "fn": "moderarResena",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "ai/actions",
+   "fn": "listarAccionesCostoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "ai/actions",
+   "fn": "listarModelosIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "ai/actions",
+   "fn": "listarPaquetesIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "ai/actions",
+   "fn": "listarFuncionesPlanIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "ai/actions",
+   "fn": "obtenerResumenConsumoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "ai/actions",
+   "fn": "simularConsumoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "ai/actions",
+   "fn": "actualizarCostoAccionIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "ai/actions",
+   "fn": "actualizarModeloIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "ai/actions",
+   "fn": "actualizarPaqueteIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "ai/actions",
+   "fn": "configurarFuncionPlanIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "auditoria/actions",
+   "fn": "listarAuditoriaAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "auditoria/actions",
+   "fn": "listarEntidadesAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "auditoria/actions",
+   "fn": "buscarNegociosAuditoria",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "barra-actions",
+   "fn": "buscarGlobal",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerComisionGlobal",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerTarifasAds",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerMetricasAdsPlataforma",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "configuracion/actions",
+   "fn": "listarCiudades",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "configuracion/actions",
+   "fn": "listarBanners",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "configuracion/actions",
+   "fn": "listarPlanes",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "configuracion/actions",
+   "fn": "listarTextosLegales",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarTarifasAds",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarComisionGlobal",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarCiudad",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "configuracion/actions",
+   "fn": "crearBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "configuracion/actions",
+   "fn": "eliminarBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarPlan",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "configuracion/actions",
+   "fn": "publicarTextoLegal",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "lealtad/actions",
+   "fn": "obtenerMetricasLealtad",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "lealtad/actions",
+   "fn": "listarEventosFraude",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "lealtad/actions",
+   "fn": "marcarFraudeRevisado",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "planes/actions",
+   "fn": "obtenerDatosPlanes",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "planes/actions",
+   "fn": "guardarAjustesPais",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "planes/actions",
+   "fn": "guardarPrecioPlan",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "planes/actions",
+   "fn": "guardarPrecioAddon",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "planes/actions",
+   "fn": "guardarCaracteristica",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "reglas/actions",
+   "fn": "obtenerReglas",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "reglas/actions",
+   "fn": "guardarLimites",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "reglas/actions",
+   "fn": "guardarConfigPrueba",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "reglas/actions",
+   "fn": "programarComision",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "reglas/actions",
+   "fn": "anularComisionProgramada",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "reglas/actions",
+   "fn": "guardarComisionDefault",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "reglas/actions",
+   "fn": "reintentarReembolso",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "soporte/actions",
+   "fn": "listarTicketsAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "soporte/actions",
+   "fn": "obtenerHiloTicketAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "soporte/actions",
+   "fn": "responderTicketAdmin",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "soporte/actions",
+   "fn": "actualizarEstadoTicket",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "usuarios/actions",
+   "fn": "suspenderUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "usuarios/actions",
+   "fn": "cerrarSesionesUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "usuarios/actions",
+   "fn": "reactivarUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "whatsapp/actions",
+   "fn": "obtenerResumenAdminWhatsApp",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "whatsapp/actions",
+   "fn": "actualizarConfigWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "whatsapp/actions",
+   "fn": "cambiarEstadoConexion",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "whatsapp/actions",
+   "fn": "crearPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "whatsapp/actions",
+   "fn": "versionarPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "anonimo",
+   "modulo": "whatsapp/actions",
+   "fn": "alternarPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "actions",
+   "fn": "obtenerResumenAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "actions",
+   "fn": "listarNegocios",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "actions",
+   "fn": "listarResenasReportadas",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "actions",
+   "fn": "aprobarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "actions",
+   "fn": "rechazarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "actions",
+   "fn": "suspenderNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "actions",
+   "fn": "marcarNegocioEnMora",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "actions",
+   "fn": "forzarReactivacionPagoExterno",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "actions",
+   "fn": "reactivarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "actions",
+   "fn": "cancelarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "actions",
+   "fn": "activarPlanManual",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "actions",
+   "fn": "moderarResena",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "ai/actions",
+   "fn": "listarAccionesCostoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "ai/actions",
+   "fn": "listarModelosIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "ai/actions",
+   "fn": "listarPaquetesIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "ai/actions",
+   "fn": "listarFuncionesPlanIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "ai/actions",
+   "fn": "obtenerResumenConsumoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "ai/actions",
+   "fn": "simularConsumoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "ai/actions",
+   "fn": "actualizarCostoAccionIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "ai/actions",
+   "fn": "actualizarModeloIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "ai/actions",
+   "fn": "actualizarPaqueteIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "ai/actions",
+   "fn": "configurarFuncionPlanIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "auditoria/actions",
+   "fn": "listarAuditoriaAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "auditoria/actions",
+   "fn": "listarEntidadesAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "auditoria/actions",
+   "fn": "buscarNegociosAuditoria",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "barra-actions",
+   "fn": "buscarGlobal",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0
+  },
+  {
+   "actor": "intruso",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerComisionGlobal",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerTarifasAds",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerMetricasAdsPlataforma",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "configuracion/actions",
+   "fn": "listarCiudades",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "configuracion/actions",
+   "fn": "listarBanners",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "configuracion/actions",
+   "fn": "listarPlanes",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "configuracion/actions",
+   "fn": "listarTextosLegales",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarTarifasAds",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarComisionGlobal",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarCiudad",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "configuracion/actions",
+   "fn": "crearBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "configuracion/actions",
+   "fn": "eliminarBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarPlan",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "configuracion/actions",
+   "fn": "publicarTextoLegal",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "lealtad/actions",
+   "fn": "obtenerMetricasLealtad",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "lealtad/actions",
+   "fn": "listarEventosFraude",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "lealtad/actions",
+   "fn": "marcarFraudeRevisado",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "planes/actions",
+   "fn": "obtenerDatosPlanes",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "planes/actions",
+   "fn": "guardarAjustesPais",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "planes/actions",
+   "fn": "guardarPrecioPlan",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "planes/actions",
+   "fn": "guardarPrecioAddon",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "planes/actions",
+   "fn": "guardarCaracteristica",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "reglas/actions",
+   "fn": "obtenerReglas",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "reglas/actions",
+   "fn": "guardarLimites",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "reglas/actions",
+   "fn": "guardarConfigPrueba",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "reglas/actions",
+   "fn": "programarComision",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "reglas/actions",
+   "fn": "anularComisionProgramada",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "reglas/actions",
+   "fn": "guardarComisionDefault",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "reglas/actions",
+   "fn": "reintentarReembolso",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "soporte/actions",
+   "fn": "listarTicketsAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "soporte/actions",
+   "fn": "obtenerHiloTicketAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "soporte/actions",
+   "fn": "responderTicketAdmin",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "soporte/actions",
+   "fn": "actualizarEstadoTicket",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "usuarios/actions",
+   "fn": "suspenderUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "usuarios/actions",
+   "fn": "cerrarSesionesUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "usuarios/actions",
+   "fn": "reactivarUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "whatsapp/actions",
+   "fn": "obtenerResumenAdminWhatsApp",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "whatsapp/actions",
+   "fn": "actualizarConfigWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "whatsapp/actions",
+   "fn": "cambiarEstadoConexion",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "whatsapp/actions",
+   "fn": "crearPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "whatsapp/actions",
+   "fn": "versionarPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "intruso",
+   "modulo": "whatsapp/actions",
+   "fn": "alternarPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "actions",
+   "fn": "obtenerResumenAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "actions",
+   "fn": "listarNegocios",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "actions",
+   "fn": "listarResenasReportadas",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "actions",
+   "fn": "aprobarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "actions",
+   "fn": "rechazarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "actions",
+   "fn": "suspenderNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "actions",
+   "fn": "marcarNegocioEnMora",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "actions",
+   "fn": "forzarReactivacionPagoExterno",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "actions",
+   "fn": "reactivarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "actions",
+   "fn": "cancelarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "actions",
+   "fn": "activarPlanManual",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "actions",
+   "fn": "moderarResena",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "ai/actions",
+   "fn": "listarAccionesCostoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "ai/actions",
+   "fn": "listarModelosIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "ai/actions",
+   "fn": "listarPaquetesIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "ai/actions",
+   "fn": "listarFuncionesPlanIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "ai/actions",
+   "fn": "obtenerResumenConsumoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "ai/actions",
+   "fn": "simularConsumoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "ai/actions",
+   "fn": "actualizarCostoAccionIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "ai/actions",
+   "fn": "actualizarModeloIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "ai/actions",
+   "fn": "actualizarPaqueteIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "ai/actions",
+   "fn": "configurarFuncionPlanIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "auditoria/actions",
+   "fn": "listarAuditoriaAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "auditoria/actions",
+   "fn": "listarEntidadesAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "auditoria/actions",
+   "fn": "buscarNegociosAuditoria",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "barra-actions",
+   "fn": "buscarGlobal",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerComisionGlobal",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerTarifasAds",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerMetricasAdsPlataforma",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "configuracion/actions",
+   "fn": "listarCiudades",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "configuracion/actions",
+   "fn": "listarBanners",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "configuracion/actions",
+   "fn": "listarPlanes",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "configuracion/actions",
+   "fn": "listarTextosLegales",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarTarifasAds",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarComisionGlobal",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarCiudad",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "configuracion/actions",
+   "fn": "crearBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "configuracion/actions",
+   "fn": "eliminarBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarPlan",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "configuracion/actions",
+   "fn": "publicarTextoLegal",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "lealtad/actions",
+   "fn": "obtenerMetricasLealtad",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "lealtad/actions",
+   "fn": "listarEventosFraude",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "lealtad/actions",
+   "fn": "marcarFraudeRevisado",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "planes/actions",
+   "fn": "obtenerDatosPlanes",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "planes/actions",
+   "fn": "guardarAjustesPais",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "planes/actions",
+   "fn": "guardarPrecioPlan",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "planes/actions",
+   "fn": "guardarPrecioAddon",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "planes/actions",
+   "fn": "guardarCaracteristica",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "reglas/actions",
+   "fn": "obtenerReglas",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "reglas/actions",
+   "fn": "guardarLimites",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "reglas/actions",
+   "fn": "guardarConfigPrueba",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "reglas/actions",
+   "fn": "programarComision",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "reglas/actions",
+   "fn": "anularComisionProgramada",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "reglas/actions",
+   "fn": "guardarComisionDefault",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "reglas/actions",
+   "fn": "reintentarReembolso",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "soporte/actions",
+   "fn": "listarTicketsAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "soporte/actions",
+   "fn": "obtenerHiloTicketAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "soporte/actions",
+   "fn": "responderTicketAdmin",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "soporte/actions",
+   "fn": "actualizarEstadoTicket",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "usuarios/actions",
+   "fn": "suspenderUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "usuarios/actions",
+   "fn": "cerrarSesionesUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "usuarios/actions",
+   "fn": "reactivarUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "whatsapp/actions",
+   "fn": "obtenerResumenAdminWhatsApp",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "whatsapp/actions",
+   "fn": "actualizarConfigWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "whatsapp/actions",
+   "fn": "cambiarEstadoConexion",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "whatsapp/actions",
+   "fn": "crearPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "whatsapp/actions",
+   "fn": "versionarPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "cliente-a",
+   "modulo": "whatsapp/actions",
+   "fn": "alternarPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "actions",
+   "fn": "obtenerResumenAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "actions",
+   "fn": "listarNegocios",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "actions",
+   "fn": "listarResenasReportadas",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "actions",
+   "fn": "aprobarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "actions",
+   "fn": "rechazarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "actions",
+   "fn": "suspenderNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "actions",
+   "fn": "marcarNegocioEnMora",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "actions",
+   "fn": "forzarReactivacionPagoExterno",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "actions",
+   "fn": "reactivarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "actions",
+   "fn": "cancelarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "actions",
+   "fn": "activarPlanManual",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "actions",
+   "fn": "moderarResena",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "ai/actions",
+   "fn": "listarAccionesCostoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "ai/actions",
+   "fn": "listarModelosIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "ai/actions",
+   "fn": "listarPaquetesIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "ai/actions",
+   "fn": "listarFuncionesPlanIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "ai/actions",
+   "fn": "obtenerResumenConsumoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "ai/actions",
+   "fn": "simularConsumoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "ai/actions",
+   "fn": "actualizarCostoAccionIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "ai/actions",
+   "fn": "actualizarModeloIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "ai/actions",
+   "fn": "actualizarPaqueteIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "ai/actions",
+   "fn": "configurarFuncionPlanIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "auditoria/actions",
+   "fn": "listarAuditoriaAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "auditoria/actions",
+   "fn": "listarEntidadesAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "auditoria/actions",
+   "fn": "buscarNegociosAuditoria",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "barra-actions",
+   "fn": "buscarGlobal",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerComisionGlobal",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerTarifasAds",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerMetricasAdsPlataforma",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "configuracion/actions",
+   "fn": "listarCiudades",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "configuracion/actions",
+   "fn": "listarBanners",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "configuracion/actions",
+   "fn": "listarPlanes",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "configuracion/actions",
+   "fn": "listarTextosLegales",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarTarifasAds",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarComisionGlobal",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarCiudad",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "configuracion/actions",
+   "fn": "crearBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "configuracion/actions",
+   "fn": "eliminarBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarPlan",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "configuracion/actions",
+   "fn": "publicarTextoLegal",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "lealtad/actions",
+   "fn": "obtenerMetricasLealtad",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "lealtad/actions",
+   "fn": "listarEventosFraude",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "lealtad/actions",
+   "fn": "marcarFraudeRevisado",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "planes/actions",
+   "fn": "obtenerDatosPlanes",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "planes/actions",
+   "fn": "guardarAjustesPais",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "planes/actions",
+   "fn": "guardarPrecioPlan",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "planes/actions",
+   "fn": "guardarPrecioAddon",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "planes/actions",
+   "fn": "guardarCaracteristica",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "reglas/actions",
+   "fn": "obtenerReglas",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "reglas/actions",
+   "fn": "guardarLimites",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "reglas/actions",
+   "fn": "guardarConfigPrueba",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "reglas/actions",
+   "fn": "programarComision",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "reglas/actions",
+   "fn": "anularComisionProgramada",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "reglas/actions",
+   "fn": "guardarComisionDefault",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "reglas/actions",
+   "fn": "reintentarReembolso",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "soporte/actions",
+   "fn": "listarTicketsAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "soporte/actions",
+   "fn": "obtenerHiloTicketAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "soporte/actions",
+   "fn": "responderTicketAdmin",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "soporte/actions",
+   "fn": "actualizarEstadoTicket",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "usuarios/actions",
+   "fn": "suspenderUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "usuarios/actions",
+   "fn": "cerrarSesionesUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "usuarios/actions",
+   "fn": "reactivarUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "whatsapp/actions",
+   "fn": "obtenerResumenAdminWhatsApp",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "whatsapp/actions",
+   "fn": "actualizarConfigWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "whatsapp/actions",
+   "fn": "cambiarEstadoConexion",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "whatsapp/actions",
+   "fn": "crearPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "whatsapp/actions",
+   "fn": "versionarPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "pro-a1",
+   "modulo": "whatsapp/actions",
+   "fn": "alternarPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "actions",
+   "fn": "obtenerResumenAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "actions",
+   "fn": "listarNegocios",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "actions",
+   "fn": "listarResenasReportadas",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "actions",
+   "fn": "aprobarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "actions",
+   "fn": "rechazarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "actions",
+   "fn": "suspenderNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "actions",
+   "fn": "marcarNegocioEnMora",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "actions",
+   "fn": "forzarReactivacionPagoExterno",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "actions",
+   "fn": "reactivarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "actions",
+   "fn": "cancelarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "actions",
+   "fn": "activarPlanManual",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "actions",
+   "fn": "moderarResena",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "ai/actions",
+   "fn": "listarAccionesCostoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "ai/actions",
+   "fn": "listarModelosIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "ai/actions",
+   "fn": "listarPaquetesIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "ai/actions",
+   "fn": "listarFuncionesPlanIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "ai/actions",
+   "fn": "obtenerResumenConsumoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "ai/actions",
+   "fn": "simularConsumoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "ai/actions",
+   "fn": "actualizarCostoAccionIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "ai/actions",
+   "fn": "actualizarModeloIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "ai/actions",
+   "fn": "actualizarPaqueteIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "ai/actions",
+   "fn": "configurarFuncionPlanIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "auditoria/actions",
+   "fn": "listarAuditoriaAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "auditoria/actions",
+   "fn": "listarEntidadesAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "auditoria/actions",
+   "fn": "buscarNegociosAuditoria",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "barra-actions",
+   "fn": "buscarGlobal",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerComisionGlobal",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerTarifasAds",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerMetricasAdsPlataforma",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "configuracion/actions",
+   "fn": "listarCiudades",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "configuracion/actions",
+   "fn": "listarBanners",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "configuracion/actions",
+   "fn": "listarPlanes",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "configuracion/actions",
+   "fn": "listarTextosLegales",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarTarifasAds",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarComisionGlobal",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarCiudad",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "configuracion/actions",
+   "fn": "crearBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "configuracion/actions",
+   "fn": "eliminarBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarPlan",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "configuracion/actions",
+   "fn": "publicarTextoLegal",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "lealtad/actions",
+   "fn": "obtenerMetricasLealtad",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "lealtad/actions",
+   "fn": "listarEventosFraude",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "lealtad/actions",
+   "fn": "marcarFraudeRevisado",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "planes/actions",
+   "fn": "obtenerDatosPlanes",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "planes/actions",
+   "fn": "guardarAjustesPais",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "planes/actions",
+   "fn": "guardarPrecioPlan",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "planes/actions",
+   "fn": "guardarPrecioAddon",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "planes/actions",
+   "fn": "guardarCaracteristica",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "reglas/actions",
+   "fn": "obtenerReglas",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "reglas/actions",
+   "fn": "guardarLimites",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "reglas/actions",
+   "fn": "guardarConfigPrueba",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "reglas/actions",
+   "fn": "programarComision",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "reglas/actions",
+   "fn": "anularComisionProgramada",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "reglas/actions",
+   "fn": "guardarComisionDefault",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "reglas/actions",
+   "fn": "reintentarReembolso",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "soporte/actions",
+   "fn": "listarTicketsAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "soporte/actions",
+   "fn": "obtenerHiloTicketAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "soporte/actions",
+   "fn": "responderTicketAdmin",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "soporte/actions",
+   "fn": "actualizarEstadoTicket",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "usuarios/actions",
+   "fn": "suspenderUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "usuarios/actions",
+   "fn": "cerrarSesionesUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "usuarios/actions",
+   "fn": "reactivarUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "whatsapp/actions",
+   "fn": "obtenerResumenAdminWhatsApp",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "whatsapp/actions",
+   "fn": "actualizarConfigWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "whatsapp/actions",
+   "fn": "cambiarEstadoConexion",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "whatsapp/actions",
+   "fn": "crearPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "whatsapp/actions",
+   "fn": "versionarPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "guardian-a",
+   "modulo": "whatsapp/actions",
+   "fn": "alternarPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "actions",
+   "fn": "obtenerResumenAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "actions",
+   "fn": "listarNegocios",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "actions",
+   "fn": "listarResenasReportadas",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "actions",
+   "fn": "aprobarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "actions",
+   "fn": "rechazarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "actions",
+   "fn": "suspenderNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "actions",
+   "fn": "marcarNegocioEnMora",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "actions",
+   "fn": "forzarReactivacionPagoExterno",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "actions",
+   "fn": "reactivarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "actions",
+   "fn": "cancelarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "actions",
+   "fn": "activarPlanManual",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "actions",
+   "fn": "moderarResena",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "ai/actions",
+   "fn": "listarAccionesCostoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "ai/actions",
+   "fn": "listarModelosIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "ai/actions",
+   "fn": "listarPaquetesIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "ai/actions",
+   "fn": "listarFuncionesPlanIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "ai/actions",
+   "fn": "obtenerResumenConsumoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "ai/actions",
+   "fn": "simularConsumoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "ai/actions",
+   "fn": "actualizarCostoAccionIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "ai/actions",
+   "fn": "actualizarModeloIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "ai/actions",
+   "fn": "actualizarPaqueteIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "ai/actions",
+   "fn": "configurarFuncionPlanIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "auditoria/actions",
+   "fn": "listarAuditoriaAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "auditoria/actions",
+   "fn": "listarEntidadesAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "auditoria/actions",
+   "fn": "buscarNegociosAuditoria",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "barra-actions",
+   "fn": "buscarGlobal",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerComisionGlobal",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerTarifasAds",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerMetricasAdsPlataforma",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "configuracion/actions",
+   "fn": "listarCiudades",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "configuracion/actions",
+   "fn": "listarBanners",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "configuracion/actions",
+   "fn": "listarPlanes",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "configuracion/actions",
+   "fn": "listarTextosLegales",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarTarifasAds",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarComisionGlobal",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarCiudad",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "configuracion/actions",
+   "fn": "crearBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "configuracion/actions",
+   "fn": "eliminarBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarPlan",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "configuracion/actions",
+   "fn": "publicarTextoLegal",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "lealtad/actions",
+   "fn": "obtenerMetricasLealtad",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "lealtad/actions",
+   "fn": "listarEventosFraude",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "lealtad/actions",
+   "fn": "marcarFraudeRevisado",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "planes/actions",
+   "fn": "obtenerDatosPlanes",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "planes/actions",
+   "fn": "guardarAjustesPais",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "planes/actions",
+   "fn": "guardarPrecioPlan",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "planes/actions",
+   "fn": "guardarPrecioAddon",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "planes/actions",
+   "fn": "guardarCaracteristica",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "reglas/actions",
+   "fn": "obtenerReglas",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "reglas/actions",
+   "fn": "guardarLimites",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "reglas/actions",
+   "fn": "guardarConfigPrueba",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "reglas/actions",
+   "fn": "programarComision",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "reglas/actions",
+   "fn": "anularComisionProgramada",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "reglas/actions",
+   "fn": "guardarComisionDefault",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "reglas/actions",
+   "fn": "reintentarReembolso",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "soporte/actions",
+   "fn": "listarTicketsAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "soporte/actions",
+   "fn": "obtenerHiloTicketAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "soporte/actions",
+   "fn": "responderTicketAdmin",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "soporte/actions",
+   "fn": "actualizarEstadoTicket",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "usuarios/actions",
+   "fn": "suspenderUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "usuarios/actions",
+   "fn": "cerrarSesionesUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "usuarios/actions",
+   "fn": "reactivarUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "whatsapp/actions",
+   "fn": "obtenerResumenAdminWhatsApp",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "whatsapp/actions",
+   "fn": "actualizarConfigWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "whatsapp/actions",
+   "fn": "cambiarEstadoConexion",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "whatsapp/actions",
+   "fn": "crearPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "whatsapp/actions",
+   "fn": "versionarPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "dueno-a",
+   "modulo": "whatsapp/actions",
+   "fn": "alternarPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "actions",
+   "fn": "obtenerResumenAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "actions",
+   "fn": "listarNegocios",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "actions",
+   "fn": "listarResenasReportadas",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "actions",
+   "fn": "aprobarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "actions",
+   "fn": "rechazarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "actions",
+   "fn": "suspenderNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "actions",
+   "fn": "marcarNegocioEnMora",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "actions",
+   "fn": "forzarReactivacionPagoExterno",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "actions",
+   "fn": "reactivarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "actions",
+   "fn": "cancelarNegocio",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "actions",
+   "fn": "activarPlanManual",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "actions",
+   "fn": "moderarResena",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "ai/actions",
+   "fn": "listarAccionesCostoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "ai/actions",
+   "fn": "listarModelosIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "ai/actions",
+   "fn": "listarPaquetesIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "ai/actions",
+   "fn": "listarFuncionesPlanIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "ai/actions",
+   "fn": "obtenerResumenConsumoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "ai/actions",
+   "fn": "simularConsumoIa",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "ai/actions",
+   "fn": "actualizarCostoAccionIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "ai/actions",
+   "fn": "actualizarModeloIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "ai/actions",
+   "fn": "actualizarPaqueteIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "ai/actions",
+   "fn": "configurarFuncionPlanIa",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "auditoria/actions",
+   "fn": "listarAuditoriaAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "auditoria/actions",
+   "fn": "listarEntidadesAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "auditoria/actions",
+   "fn": "buscarNegociosAuditoria",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "barra-actions",
+   "fn": "buscarGlobal",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerComisionGlobal",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerTarifasAds",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerMetricasAdsPlataforma",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "configuracion/actions",
+   "fn": "listarCiudades",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "configuracion/actions",
+   "fn": "listarBanners",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "configuracion/actions",
+   "fn": "listarPlanes",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "configuracion/actions",
+   "fn": "listarTextosLegales",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarTarifasAds",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarComisionGlobal",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarCiudad",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "configuracion/actions",
+   "fn": "crearBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "configuracion/actions",
+   "fn": "eliminarBanner",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarPlan",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "configuracion/actions",
+   "fn": "publicarTextoLegal",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "lealtad/actions",
+   "fn": "obtenerMetricasLealtad",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "lealtad/actions",
+   "fn": "listarEventosFraude",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "lealtad/actions",
+   "fn": "marcarFraudeRevisado",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "planes/actions",
+   "fn": "obtenerDatosPlanes",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "planes/actions",
+   "fn": "guardarAjustesPais",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "planes/actions",
+   "fn": "guardarPrecioPlan",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "planes/actions",
+   "fn": "guardarPrecioAddon",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "planes/actions",
+   "fn": "guardarCaracteristica",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "reglas/actions",
+   "fn": "obtenerReglas",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "reglas/actions",
+   "fn": "guardarLimites",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "reglas/actions",
+   "fn": "guardarConfigPrueba",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "reglas/actions",
+   "fn": "programarComision",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "reglas/actions",
+   "fn": "anularComisionProgramada",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "reglas/actions",
+   "fn": "guardarComisionDefault",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "reglas/actions",
+   "fn": "reintentarReembolso",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "soporte/actions",
+   "fn": "listarTicketsAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "soporte/actions",
+   "fn": "obtenerHiloTicketAdmin",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "soporte/actions",
+   "fn": "responderTicketAdmin",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "soporte/actions",
+   "fn": "actualizarEstadoTicket",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso de SuperSU."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "usuarios/actions",
+   "fn": "suspenderUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "usuarios/actions",
+   "fn": "cerrarSesionesUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "usuarios/actions",
+   "fn": "reactivarUsuario",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos completar la operación. Intenta de nuevo."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "whatsapp/actions",
+   "fn": "obtenerResumenAdminWhatsApp",
+   "tipo": "lectura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "whatsapp/actions",
+   "fn": "actualizarConfigWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "whatsapp/actions",
+   "fn": "cambiarEstadoConexion",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "whatsapp/actions",
+   "fn": "crearPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "whatsapp/actions",
+   "fn": "versionarPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "dueno-b",
+   "modulo": "whatsapp/actions",
+   "fn": "alternarPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No tienes permiso para esta acción."
+  },
+  {
+   "actor": "super",
+   "modulo": "actions",
+   "fn": "obtenerResumenAdmin",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 5
+  },
+  {
+   "actor": "super",
+   "modulo": "actions",
+   "fn": "listarNegocios",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 10
+  },
+  {
+   "actor": "super",
+   "modulo": "actions",
+   "fn": "listarResenasReportadas",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "actions",
+   "fn": "aprobarNegocio",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "actions",
+   "fn": "rechazarNegocio",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "actions",
+   "fn": "suspenderNegocio",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "actions",
+   "fn": "marcarNegocioEnMora",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "actions",
+   "fn": "forzarReactivacionPagoExterno",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "actions",
+   "fn": "reactivarNegocio",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "actions",
+   "fn": "cancelarNegocio",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "actions",
+   "fn": "activarPlanManual",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "actions",
+   "fn": "moderarResena",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "RESENA_NO_ENCONTRADA"
+  },
+  {
+   "actor": "super",
+   "modulo": "ai/actions",
+   "fn": "listarAccionesCostoIa",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 13
+  },
+  {
+   "actor": "super",
+   "modulo": "ai/actions",
+   "fn": "listarModelosIa",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 5
+  },
+  {
+   "actor": "super",
+   "modulo": "ai/actions",
+   "fn": "listarPaquetesIa",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 4
+  },
+  {
+   "actor": "super",
+   "modulo": "ai/actions",
+   "fn": "listarFuncionesPlanIa",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 39
+  },
+  {
+   "actor": "super",
+   "modulo": "ai/actions",
+   "fn": "obtenerResumenConsumoIa",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 4
+  },
+  {
+   "actor": "super",
+   "modulo": "ai/actions",
+   "fn": "simularConsumoIa",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 7
+  },
+  {
+   "actor": "super",
+   "modulo": "ai/actions",
+   "fn": "actualizarCostoAccionIa",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "ai/actions",
+   "fn": "actualizarModeloIa",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "ai/actions",
+   "fn": "actualizarPaqueteIa",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "ai/actions",
+   "fn": "configurarFuncionPlanIa",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "auditoria/actions",
+   "fn": "listarAuditoriaAdmin",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 3
+  },
+  {
+   "actor": "super",
+   "modulo": "auditoria/actions",
+   "fn": "listarEntidadesAdmin",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 33
+  },
+  {
+   "actor": "super",
+   "modulo": "auditoria/actions",
+   "fn": "buscarNegociosAuditoria",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "barra-actions",
+   "fn": "buscarGlobal",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerComisionGlobal",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 1
+  },
+  {
+   "actor": "super",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerTarifasAds",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 3
+  },
+  {
+   "actor": "super",
+   "modulo": "configuracion/actions",
+   "fn": "obtenerMetricasAdsPlataforma",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 2
+  },
+  {
+   "actor": "super",
+   "modulo": "configuracion/actions",
+   "fn": "listarCiudades",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 1
+  },
+  {
+   "actor": "super",
+   "modulo": "configuracion/actions",
+   "fn": "listarBanners",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 3
+  },
+  {
+   "actor": "super",
+   "modulo": "configuracion/actions",
+   "fn": "listarPlanes",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 4
+  },
+  {
+   "actor": "super",
+   "modulo": "configuracion/actions",
+   "fn": "listarTextosLegales",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 7
+  },
+  {
+   "actor": "super",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarTarifasAds",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarComisionGlobal",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarCiudad",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "configuracion/actions",
+   "fn": "crearBanner",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarBanner",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "configuracion/actions",
+   "fn": "eliminarBanner",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "configuracion/actions",
+   "fn": "actualizarPlan",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "configuracion/actions",
+   "fn": "publicarTextoLegal",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "lealtad/actions",
+   "fn": "obtenerMetricasLealtad",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 11
+  },
+  {
+   "actor": "super",
+   "modulo": "lealtad/actions",
+   "fn": "listarEventosFraude",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "lealtad/actions",
+   "fn": "marcarFraudeRevisado",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "planes/actions",
+   "fn": "obtenerDatosPlanes",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 5
+  },
+  {
+   "actor": "super",
+   "modulo": "planes/actions",
+   "fn": "guardarAjustesPais",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "planes/actions",
+   "fn": "guardarPrecioPlan",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "planes/actions",
+   "fn": "guardarPrecioAddon",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "planes/actions",
+   "fn": "guardarCaracteristica",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "reglas/actions",
+   "fn": "obtenerReglas",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 5
+  },
+  {
+   "actor": "super",
+   "modulo": "reglas/actions",
+   "fn": "guardarLimites",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "reglas/actions",
+   "fn": "guardarConfigPrueba",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "reglas/actions",
+   "fn": "programarComision",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "reglas/actions",
+   "fn": "anularComisionProgramada",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Ese cambio ya se aplicó o ya estaba anulado."
+  },
+  {
+   "actor": "super",
+   "modulo": "reglas/actions",
+   "fn": "guardarComisionDefault",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "reglas/actions",
+   "fn": "reintentarReembolso",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "No pudimos guardar el cambio."
+  },
+  {
+   "actor": "super",
+   "modulo": "soporte/actions",
+   "fn": "listarTicketsAdmin",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 1
+  },
+  {
+   "actor": "super",
+   "modulo": "soporte/actions",
+   "fn": "obtenerHiloTicketAdmin",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 2
+  },
+  {
+   "actor": "super",
+   "modulo": "soporte/actions",
+   "fn": "responderTicketAdmin",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "soporte/actions",
+   "fn": "actualizarEstadoTicket",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "usuarios/actions",
+   "fn": "suspenderUsuario",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "usuarios/actions",
+   "fn": "cerrarSesionesUsuario",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "usuarios/actions",
+   "fn": "reactivarUsuario",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "whatsapp/actions",
+   "fn": "obtenerResumenAdminWhatsApp",
+   "tipo": "lectura",
+   "ok": true,
+   "datos": 5
+  },
+  {
+   "actor": "super",
+   "modulo": "whatsapp/actions",
+   "fn": "actualizarConfigWhatsApp",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  },
+  {
+   "actor": "super",
+   "modulo": "whatsapp/actions",
+   "fn": "cambiarEstadoConexion",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Esa acción no está disponible en el estado actual."
+  },
+  {
+   "actor": "super",
+   "modulo": "whatsapp/actions",
+   "fn": "crearPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Ya existe un paquete con ese código."
+  },
+  {
+   "actor": "super",
+   "modulo": "whatsapp/actions",
+   "fn": "versionarPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": false,
+   "datos": 0,
+   "error": "Ese paquete ya tiene una versión más nueva. Recarga la página."
+  },
+  {
+   "actor": "super",
+   "modulo": "whatsapp/actions",
+   "fn": "alternarPaqueteWhatsApp",
+   "tipo": "escritura",
+   "ok": true,
+   "datos": 0
+  }
+ ]
+}

@@ -1,0 +1,4 @@
+# Las migraciones deben quedar en LF en cualquier sistema (el cuerpo de las funciones SQL se compara textualmente en la 114).
+supabase/migrations/*.sql text eol=lf
+supabase/scripts/*.sql text eol=lf
+*.sh text eol=lf

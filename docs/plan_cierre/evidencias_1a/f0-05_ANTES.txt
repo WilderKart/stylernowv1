@@ -1,0 +1,206 @@
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+ intentar 
+----------
+ 
+(1 row)
+
+
+== F0-05 · resultados por caso ==
+ n  |  actor   |                llamada                 | esperado  | obtenido  |    veredicto    |                                     detalle                                      
+----+----------+----------------------------------------+-----------+-----------+-----------------+----------------------------------------------------------------------------------
+  1 | intruso  | sin negocio, 0%                        | PERMITIDO | PERMITIDO | ok              | 
+  2 | cliente  | sin negocio, 0%                        | PERMITIDO | PERMITIDO | ok              | 
+  3 | intruso  | negocio N, 0%                          | DENEGADO  | PERMITIDO | *** DIFIERE *** | 
+  4 | cliente  | negocio N (con reserva en N), 0%       | PERMITIDO | PERMITIDO | ok              | 
+  5 | cliente  | negocio M (sin relación con M), 0%     | DENEGADO  | PERMITIDO | *** DIFIERE *** | 
+  6 | pro      | negocio N (su negocio), 0%             | PERMITIDO | PERMITIDO | ok              | 
+  7 | pro      | negocio M (otro negocio), 0%           | DENEGADO  | PERMITIDO | *** DIFIERE *** | 
+  8 | guardian | negocio N (su negocio), 0%             | PERMITIDO | PERMITIDO | ok              | 
+  9 | guardian | negocio M (otro negocio), 0%           | DENEGADO  | PERMITIDO | *** DIFIERE *** | 
+ 10 | dueno    | negocio N (propio), 0%                 | PERMITIDO | PERMITIDO | ok              | 
+ 11 | dueno    | negocio M (de otro dueño), 0%          | DENEGADO  | PERMITIDO | *** DIFIERE *** | 
+ 12 | super    | negocio N, 0%                          | PERMITIDO | PERMITIDO | ok              | 
+ 13 | super    | negocio M, 0%                          | PERMITIDO | PERMITIDO | ok              | 
+ 14 | dueno    | negocio inexistente, 0%                | DENEGADO  | DENEGADO  | ok              | insert or update on table "familia_grupo" violates foreign key constraint "famil
+ 15 | super    | negocio inexistente, 0%                | DENEGADO  | DENEGADO  | ok              | insert or update on table "familia_grupo" violates foreign key constraint "famil
+ 16 | cliente  | negocio N, 15%                         | DENEGADO  | PERMITIDO | *** DIFIERE *** | 
+ 17 | cliente  | sin negocio, 15%                       | DENEGADO  | PERMITIDO | *** DIFIERE *** | 
+ 18 | intruso  | negocio N, 15%                         | DENEGADO  | PERMITIDO | *** DIFIERE *** | 
+ 19 | pro      | negocio N, 15%                         | DENEGADO  | PERMITIDO | *** DIFIERE *** | 
+ 20 | guardian | negocio N, 15%                         | DENEGADO  | PERMITIDO | *** DIFIERE *** | 
+ 21 | dueno    | negocio N, 15%                         | PERMITIDO | PERMITIDO | ok              | 
+ 22 | dueno    | negocio M (ajeno), 15%                 | DENEGADO  | PERMITIDO | *** DIFIERE *** | 
+ 23 | super    | negocio N, 15%                         | PERMITIDO | PERMITIDO | ok              | 
+ 24 | dueno    | negocio N, 100%                        | PERMITIDO | PERMITIDO | ok              | 
+ 25 | dueno    | negocio N, 100.01%                     | DENEGADO  | PERMITIDO | *** DIFIERE *** | 
+ 26 | dueno    | negocio N, 999.99%                     | DENEGADO  | PERMITIDO | *** DIFIERE *** | 
+ 27 | dueno    | negocio N, -5%                         | DENEGADO  | PERMITIDO | *** DIFIERE *** | 
+ 28 | super    | negocio N, -5%                         | DENEGADO  | PERMITIDO | *** DIFIERE *** | 
+ 29 | dueno    | negocio N, NULL%                       | DENEGADO  | DENEGADO  | ok              | null value in column "descuento_familiar_pct" of relation "familia_grupo" violat
+ 30 | cliente  | sin negocio, -50% (descuento negativo) | DENEGADO  | PERMITIDO | *** DIFIERE *** | 
+ 31 | anonimo  | sin negocio, 0%                        | DENEGADO  | DENEGADO  | ok              | permission denied for function crear_grupo_familiar
+ 32 | anonimo  | negocio N, 15%                         | DENEGADO  | DENEGADO  | ok              | permission denied for function crear_grupo_familiar
+(32 rows)
+
+  n  |                              llamada                              | esperado | obtenido | veredicto 
+-----+-------------------------------------------------------------------+----------+----------+-----------
+ 101 | INSERT directo en familia_grupo (negocio ajeno, 99%) como intruso | DENEGADO | DENEGADO | ok
+ 102 | UPDATE directo del descuento a 50% por el propio titular          | DENEGADO | DENEGADO | ok
+(2 rows)
+
+ERROR:  FALLA F0-05: 16 casos de RPC y 0 de escritura directa no coinciden con lo esperado
+CONTEXT:  PL/pgSQL function inline_code_block line 7 at RAISE

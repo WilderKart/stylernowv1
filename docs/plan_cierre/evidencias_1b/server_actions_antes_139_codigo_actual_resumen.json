@@ -1,0 +1,1829 @@
+{
+ "VIOLACION": [
+  {
+   "k": "app/cuenta/actions.ts::exportarDatosAccion",
+   "actores": [
+    "cliente-a[lee B]"
+   ],
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/lealtad/actions.ts::registrarEventoFraude",
+   "actores": [
+    "intruso[escribe lealtad_fraude_evento]",
+    "cliente-a[escribe lealtad_fraude_evento]",
+    "pro-a1[escribe lealtad_fraude_evento]",
+    "guardian-a[escribe lealtad_fraude_evento]",
+    "dueno-a[escribe lealtad_fraude_evento]"
+   ],
+   "control": []
+  },
+  {
+   "k": "app/negocio/[slug]/actions.ts::alternarFavorito",
+   "actores": [
+    "intruso[escribe favorito_negocio]",
+    "cliente-a[escribe favorito_negocio]",
+    "pro-a1[escribe favorito_negocio]",
+    "guardian-a[escribe favorito_negocio]",
+    "dueno-a[escribe favorito_negocio]"
+   ],
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::listarServiciosActivos",
+   "actores": [
+    "intruso[lee B]",
+    "cliente-a[lee B]",
+    "pro-a1[lee B]",
+    "guardian-a[lee B]",
+    "dueno-a[lee B]"
+   ],
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/auditoria/actions.ts::listarAuditoriaNegocio",
+   "actores": [
+    "dueno-a[lee B]"
+   ],
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/soporte/actions.ts::listarMisTickets",
+   "actores": [
+    "cliente-a[lee B]"
+   ],
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  }
+ ],
+ "LIMPIA_CON_CONTROL": [
+  {
+   "k": "app/ayuda/actions.ts::responderTicketAccion",
+   "control": [
+    "cliente-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/checkout/membresia/[planId]/actions.ts::consultarEstadoCompraMembresia",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/cuenta/actions.ts::cancelarEliminacionAccion",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/favoritos/actions.ts::listarMisFavoritos",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/gift-cards/comprar/actions.ts::buscarNegociosParaGiftCard",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/gift-cards/comprar/actions.ts::consultarEstadoCompraGiftCard",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/lealtad/actions.ts::obtenerResumenLealtad",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/lealtad/actions.ts::crearGrupoFamiliar",
+   "control": [
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/legal/aceptar/actions.ts::aceptarPendientes",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/login/registro-actions.ts::necesitaRegistro",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/login/registro-actions.ts::cancelarRegistro",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/negocio/[slug]/actions.ts::esFavorito",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/notificaciones/actions.ts::marcarLeidaAction",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/notificaciones/actions.ts::marcarTodasLeidasAction",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/notificaciones/actions.ts::contarNoLeidasAction",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/notificaciones/preferencias-actions.ts::desuscribirPushAction",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/ofertas/actions.ts::cambiarConsentimientoMarcas",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ads/actions.ts::listarMisCampanas",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ads/actions.ts::finalizarCampana",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/ads/actions.ts::obtenerMetricasCampana",
+   "control": [
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::listarCitas",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::listarBloqueos",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::eliminarBloqueo",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::buscarClienteExistente",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::cancelarCita",
+   "control": [
+    "cliente-b"
+   ]
+  },
+  {
+   "k": "app/panel/auditoria/actions.ts::listarEntidadesNegocio",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/cobros/actions.ts::obtenerConexionCobros",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/cobros/actions.ts::desconectarCuentaCobro",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarClientesCRM",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarCumpleanerosDelMes",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::obtenerResumenCliente",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarHistorialCliente",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarNotas",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::crearNota",
+   "control": [
+    "guardian-b",
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::eliminarNota",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarEtiquetasNegocio",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::agregarEtiqueta",
+   "control": [
+    "guardian-b",
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::quitarEtiqueta",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarFotos",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::eliminarFoto",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarReservasCompletadas",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::obtenerBeneficiosLealtadCliente",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/dashboard-actions.ts::obtenerResumenDia",
+   "control": [
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/dashboard-actions.ts::obtenerRankingSemana",
+   "control": [
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/dashboard-actions.ts::obtenerLineaTiempoDia",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/dashboard-actions.ts::obtenerMetricasLealtadNegocio",
+   "control": [
+    "pro-b1",
+    "guardian-b",
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::obtenerSaldoCreditosIa",
+   "control": [
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::listarConsumoIa",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::listarPaquetesDisponiblesIa",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::consultarEstadoCompraIa",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::listarFuncionesHabilitadasNegocio",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::listarMemoriaIa",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::aprobarMemoriaIa",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::olvidarMemoriaIa",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::historialMemoriaIa",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::listarPromptsIa",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::crearPromptIa",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::obtenerRoiIa",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::listarStock",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::ajustarStock",
+   "control": [
+    "guardian-b",
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::configurarStockMinimo",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::listarSolicitudesPendientes",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::cancelarSolicitud",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::listarMovimientos",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::listarConsumoPorServicio",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::configurarConsumo",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::quitarConsumo",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarPlanesMembresia",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::alternarPlanMembresia",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarGiftCards",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::obtenerConfigReferidos",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarCampanasSellos",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarReglasCashback",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarNivelesVip",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarMiembrosVip",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarFamiliasNegocio",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarCuentasCorporativas",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarReglasRecompensa",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarSugerenciasAction",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::generarSugerenciasAction",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::confirmarSugerenciaAction",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/marca/actions.ts::solicitarActivacionMarca",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/onboarding/actions.ts::elegirPlan",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/politica/actions.ts::obtenerPolitica",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/politica/actions.ts::obtenerAnticipo",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/pos/actions.ts::listarProductos",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/pos/actions.ts::crearProducto",
+   "control": [
+    "guardian-b",
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/pos/actions.ts::actualizarProducto",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/pos/actions.ts::cambiarEstadoProducto",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/pos/actions.ts::listarReservasParaCobrar",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/pos/actions.ts::obtenerPuntosDisponibles",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/pos/actions.ts::obtenerCierreCaja",
+   "control": [
+    "guardian-b",
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/reportes/actions.ts::obtenerServiciosTop",
+   "control": [
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/reportes/actions.ts::obtenerMiPosicionMarketplace",
+   "control": [
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/reportes/actions.ts::listarResenas",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/reportes/actions.ts::responderResena",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/reportes/actions.ts::obtenerHorariosMuertos",
+   "control": [
+    "guardian-b",
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::reabrirSede",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::marcarSedePrincipal",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::eliminarExcepcion",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::actualizarServicio",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::cambiarEstadoServicio",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::eliminarServicio",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::listarStaffAsignable",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::alternarStaffServicio",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::cambiarEstadoCombo",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/soporte/actions.ts::obtenerHiloTicket",
+   "control": [
+    "cliente-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/soporte/actions.ts::crearTicket",
+   "control": [
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/soporte/actions.ts::responderTicket",
+   "control": [
+    "cliente-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/staff/actions.ts::listarStaff",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/staff/actions.ts::listarInvitacionesPendientes",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/staff/actions.ts::promoverGuardian",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/staff/actions.ts::retirarStaff",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/staff/actions.ts::obtenerHistorialStaff",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::obtenerCatalogoPlanes",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::obtenerMiSuscripcion",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::listarPagosSuscripcion",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::consultarEstadoUpgrade",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::cancelarMiNegocio",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/wallet/actions.ts::obtenerMiWallet",
+   "control": [
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/wallet/actions.ts::listarMovimientosWallet",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::obtenerResumenWhatsApp",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/perfil/foto-actions.ts::quitarFotoPerfil",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/privacidad/actions.ts::guardarPreferenciasPrivacidad",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/reserva/[id]/actions-cita.ts::listarMensajesAction",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/reserva/[id]/actions-cita.ts::marcarLeidoAction",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/reserva/[id]/pago/actions.ts::consultarEstadoPago",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/staff/agenda/actions.ts::listarMisCitas",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/staff/clientes/actions.ts::listarMisClientes",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/staff/lealtad/actions.ts::obtenerMisReferidosStaff",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/staff/lealtad/actions.ts::obtenerSellosOtorgadosPorMi",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/staff/nivel/actions.ts::obtenerMiNivel",
+   "control": [
+    "pro-b1",
+    "guardian-b"
+   ]
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::obtenerMiPerfilStaff",
+   "control": [
+    "pro-b1",
+    "guardian-b"
+   ]
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::obtenerMisGanancias",
+   "control": [
+    "pro-b1",
+    "super"
+   ]
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::listarMiDisponibilidad",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::listarMisBloqueos",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::eliminarMiBloqueo",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "components/marketplace/actions.ts::contarResultadosAction",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "components/privacidad/acciones-cookies.ts::guardarEleccionCookies",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "components/sistema/actions.ts::consultarEstadoSistemaAction",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  }
+ ],
+ "INCONCLUSA": [
+  {
+   "k": "app/ajustes/actions.ts::guardarIdiomaRegionAction",
+   "error": "País no disponible."
+  },
+  {
+   "k": "app/ajustes/actions.ts::guardarPermisosAction",
+   "error": "Valor de permiso inválido."
+  },
+  {
+   "k": "app/ayuda/actions.ts::crearTicketAccion",
+   "error": "Elige un tema válido."
+  },
+  {
+   "k": "app/checkout/membresia/[planId]/actions.ts::iniciarCompraMembresia",
+   "error": "Inicia sesión para comprar la Membresía."
+  },
+  {
+   "k": "app/cuenta/actions.ts::solicitarEliminacionAccion",
+   "error": "Escribe ELIMINAR para confirmar."
+  },
+  {
+   "k": "app/gift-cards/canjear/actions.ts::consultarMiGiftCard",
+   "error": "Inicia sesión para consultar tu Gift Card."
+  },
+  {
+   "k": "app/gift-cards/comprar/actions.ts::iniciarCompraGiftCard",
+   "error": "Inicia sesión para comprar una Gift Card."
+  },
+  {
+   "k": "app/invitacion/[id]/actions.ts::responderInvitacion",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/lealtad/actions.ts::registrarReferido",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/lealtad/actions.ts::canjearWallet",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/login/actions.ts::crearContrasena",
+   "error": "Sesión inválida — vuelve a iniciar sesión."
+  },
+  {
+   "k": "app/login/actions.ts::restablecerContrasena",
+   "error": "El enlace de recuperación expiró — solicita uno nuevo."
+  },
+  {
+   "k": "app/login/actions.ts::cambiarContrasena",
+   "error": "Sesión inválida."
+  },
+  {
+   "k": "app/membresias/[id]/actions.ts::cancelarMiMembresia",
+   "error": "permission denied for function cancelar_membresia"
+  },
+  {
+   "k": "app/membresias/[id]/actions.ts::congelarMiMembresia",
+   "error": "permission denied for function congelar_membresia"
+  },
+  {
+   "k": "app/membresias/[id]/actions.ts::reactivarMiMembresia",
+   "error": "permission denied for function reactivar_membresia_congelada"
+  },
+  {
+   "k": "app/mi-look/actions.ts::compartirFotos",
+   "error": "Foto inválida."
+  },
+  {
+   "k": "app/negocio/[slug]/profesional/[staffId]/actions.ts::masResenasAction",
+   "error": "Negocio no disponible."
+  },
+  {
+   "k": "app/negocio/[slug]/reservar/actions.ts::obtenerSlots",
+   "error": "Cannot read properties of undefined (reading 'length')"
+  },
+  {
+   "k": "app/negocio/[slug]/reservar/actions.ts::crearReservaAction",
+   "error": "Could not find the function public.crear_reserva without parameters in the schema cache"
+  },
+  {
+   "k": "app/negocio/[slug]/reservar/actions.ts::unirseListaEspera",
+   "error": "Inicia sesión para unirte a la lista de espera."
+  },
+  {
+   "k": "app/notificaciones/preferencias-actions.ts::guardarPreferenciaAction",
+   "error": "Aviso desconocido."
+  },
+  {
+   "k": "app/notificaciones/preferencias-actions.ts::suscribirPushAction",
+   "error": "Este navegador no entregó una suscripción válida."
+  },
+  {
+   "k": "app/pagos/actions.ts::pedirDevolucion",
+   "error": "Algo salió mal. Inténtalo de nuevo."
+  },
+  {
+   "k": "app/panel/ads/actions.ts::crearCampana",
+   "error": "Could not find the function public.crear_campana_publicitaria without parameters in the schema cache"
+  },
+  {
+   "k": "app/panel/ads/actions.ts::activarCampana",
+   "error": "permission denied for function activar_campana"
+  },
+  {
+   "k": "app/panel/ads/actions.ts::pausarCampana",
+   "error": "permission denied for function pausar_campana"
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::crearBloqueo",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::obtenerSlotsAgenda",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::crearCitaManual",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::reprogramarCita",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::reasignarStaff",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::marcarNoShow",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/crm/actions.ts::subirFoto",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::comprarPaqueteIa",
+   "error": "Inicia sesión de nuevo."
+  },
+  {
+   "k": "app/panel/ia/actions.ts::guardarMemoriaIa",
+   "error": "permission denied for function guardar_memoria_ia"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::restaurarVersionMemoriaIa",
+   "error": "permission denied for function restaurar_version_memoria_ia"
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::registrarMovimiento",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::crearSolicitudReposicion",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::atenderSolicitud",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::crearPlanMembresia",
+   "error": "Could not find the function public.crear_plan_membresia without parameters in the schema cache"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::bloquearGiftCardAdmin",
+   "error": "permission denied for function bloquear_gift_card"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::configurarReferidosAction",
+   "error": "Could not find the function public.configurar_referidos without parameters in the schema cache"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::crearCampanaSellosAction",
+   "error": "Could not find the function public.crear_campana_sellos without parameters in the schema cache"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::alternarCampanaSellosAction",
+   "error": "permission denied for function alternar_campana_sellos"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::crearReglaCashbackAction",
+   "error": "Could not find the function public.crear_regla_cashback without parameters in the schema cache"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::alternarReglaCashbackAction",
+   "error": "permission denied for function alternar_regla_cashback"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::sembrarNivelesVipAction",
+   "error": "permission denied for function sembrar_niveles_vip_default"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::crearCuentaCorporativaAction",
+   "error": "Could not find the function public.crear_cuenta_corporativa without parameters in the schema cache"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::crearReglaRecompensaAction",
+   "error": "Could not find the function public.crear_regla_recompensa(p_accion, p_condicion) in the schema cache"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::descartarSugerenciaAction",
+   "error": "permission denied for function descartar_sugerencia_recompensa"
+  },
+  {
+   "k": "app/panel/marca/actions.ts::guardarMarca",
+   "error": "No tienes permiso sobre este negocio."
+  },
+  {
+   "k": "app/panel/marca/actions.ts::subirLogoMarca",
+   "error": "No tienes permiso sobre este negocio."
+  },
+  {
+   "k": "app/panel/onboarding/actions.ts::crearOActualizarNegocio",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/onboarding/actions.ts::subirLogo",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/onboarding/actions.ts::guardarSede",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/onboarding/actions.ts::invitarStaff",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/onboarding/actions.ts::cancelarInvitacion",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/onboarding/actions.ts::enviarAAprobacion",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/politica/actions.ts::guardarPolitica",
+   "error": "No pudimos guardar la política. Intenta de nuevo."
+  },
+  {
+   "k": "app/panel/politica/actions.ts::guardarAnticipo",
+   "error": "Revisa los valores del anticipo (porcentaje 0–100 y máximo mayor o igual al mínimo)."
+  },
+  {
+   "k": "app/panel/pos/actions.ts::canjearGiftCardEnPos",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/pos/actions.ts::completarVenta",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/pos/actions.ts::registrarEgresoCaja",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/pos/actions.ts::anularEgresoCaja",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/reportes/actions.ts::obtenerIngresosPeriodo",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/reportes/actions.ts::obtenerRankingStaffPeriodo",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/reportes/actions.ts::reportarResena",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::crearSede",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::actualizarSede",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::cerrarSedeTemporal",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::eliminarSede",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::trasladarStaff",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::guardarExcepcion",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::crearServicio",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::subirImagenServicio",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::crearCombo",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::actualizarCombo",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/staff/actions.ts::crearInvitacionStaff",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/staff/actions.ts::reenviarInvitacion",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/staff/actions.ts::cancelarInvitacion",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/staff/actions.ts::revocarGuardian",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/staff/actions.ts::suspenderStaff",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/staff/actions.ts::reactivarStaff",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::iniciarUpgrade",
+   "error": "Inicia sesión de nuevo."
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::iniciarPagoPlan",
+   "error": "Inicia sesión de nuevo."
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::solicitarDowngrade",
+   "error": "permission denied for function solicitar_downgrade_plan"
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::cancelarDowngradeProgramado",
+   "error": "permission denied for function cancelar_downgrade_programado"
+  },
+  {
+   "k": "app/panel/suscripcion/prueba.ts::elegirPais",
+   "error": "permission denied for function elegir_pais_negocio"
+  },
+  {
+   "k": "app/panel/suscripcion/prueba.ts::iniciarPrueba",
+   "error": "Completa teléfono, documento y verificación del dispositivo para iniciar la prueba."
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::guardarPlantilla",
+   "error": "Revisa los datos de la plantilla."
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::eliminarPlantilla",
+   "error": "Plantilla inválida."
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::contarSegmento",
+   "error": "Revisa los filtros del segmento."
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::crearCampana",
+   "error": "Revisa los datos de la campaña."
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::programarCampana",
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::cancelarCampana",
+   "error": "Tu sesión expiró. Vuelve a iniciar sesión."
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::solicitarRecarga",
+   "error": "Paquete inválido."
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::cancelarRecarga",
+   "error": "Solicitud inválida."
+  },
+  {
+   "k": "app/perfil/actions.ts::actualizarPerfil",
+   "error": "Cannot read properties of undefined (reading 'trim')"
+  },
+  {
+   "k": "app/perfil/foto-actions.ts::subirFotoPerfil",
+   "error": "Inicia sesión para continuar."
+  },
+  {
+   "k": "app/reserva/[id]/actions-cita.ts::llegueAction",
+   "error": "Algo salió mal. Inténtalo de nuevo."
+  },
+  {
+   "k": "app/reserva/[id]/actions-cita.ts::slotsReprogramarAction",
+   "error": "Algo salió mal. Inténtalo de nuevo."
+  },
+  {
+   "k": "app/reserva/[id]/actions-cita.ts::reprogramarAction",
+   "error": "Algo salió mal. Inténtalo de nuevo."
+  },
+  {
+   "k": "app/reserva/[id]/actions-cita.ts::calificarAction",
+   "error": "Algo salió mal. Inténtalo de nuevo."
+  },
+  {
+   "k": "app/reserva/[id]/actions-cita.ts::enviarMensajeAction",
+   "error": "Algo salió mal. Inténtalo de nuevo."
+  },
+  {
+   "k": "app/reserva/[id]/actions.ts::cancelarReservaAction",
+   "error": "permission denied for function cancelar_reserva"
+  },
+  {
+   "k": "app/reserva/[id]/pago/actions.ts::iniciarPagoSena",
+   "error": "Inicia sesión para completar el pago."
+  },
+  {
+   "k": "app/reserva/[id]/pago/actions.ts::confirmarSinAnticipo",
+   "error": "Inicia sesión para continuar."
+  },
+  {
+   "k": "app/staff/agenda/actions.ts::hacerCheckIn",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/staff/agenda/actions.ts::hacerCheckOut",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::actualizarMiPerfilStaff",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::subirFotoPerfilStaff",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::guardarDiaDisponibilidad",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::crearMiBloqueo",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "lib/geo/direccion-desde-coordenadas.ts::direccionDesdeCoordenadas",
+   "error": "Inicia sesión de nuevo."
+  }
+ ],
+ "NO_EJECUTADA": [
+  {
+   "k": "app/login/actions.ts::enviarCodigo",
+   "estado": "OMITIDA"
+  },
+  {
+   "k": "app/login/actions.ts::verificarCodigo",
+   "estado": "OMITIDA"
+  },
+  {
+   "k": "app/login/actions.ts::iniciarSesionConGoogle",
+   "estado": "OMITIDA"
+  },
+  {
+   "k": "app/login/actions.ts::iniciarSesionConContrasena",
+   "estado": "OMITIDA"
+  },
+  {
+   "k": "app/login/actions.ts::solicitarRecuperacion",
+   "estado": "OMITIDA"
+  },
+  {
+   "k": "app/login/registro-actions.ts::crearCuentaRegistro",
+   "estado": "OMITIDA"
+  },
+  {
+   "k": "app/perfil/actions.ts::cerrarSesion",
+   "estado": "OMITIDA"
+  }
+ ]
+}

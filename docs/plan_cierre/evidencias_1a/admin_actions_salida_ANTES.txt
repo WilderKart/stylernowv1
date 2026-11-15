@@ -1,0 +1,115 @@
+
+ RUN  v3.2.7 C:/Users/karni/Documents/stylernow-cierre
+
+stdout | tests/admin-actions-autorizacion.test.ts > H-008 · Server Actions de /admin con sesión real por actor > matriz acción × actor
+RESUMEN {
+ "anonimo": {
+  "llamadas": 69,
+  "escrituras_ok": 0,
+  "lecturas_con_datos": 4,
+  "tablas_cambiadas": []
+ },
+ "intruso": {
+  "llamadas": 69,
+  "escrituras_ok": 0,
+  "lecturas_con_datos": 10,
+  "tablas_cambiadas": []
+ },
+ "cliente-a": {
+  "llamadas": 69,
+  "escrituras_ok": 1,
+  "lecturas_con_datos": 12,
+  "tablas_cambiadas": [
+   "public.evento_auditoria",
+   "public.ticket_mensaje",
+   "public.ticket_soporte"
+  ]
+ },
+ "pro-a1": {
+  "llamadas": 69,
+  "escrituras_ok": 0,
+  "lecturas_con_datos": 10,
+  "tablas_cambiadas": []
+ },
+ "guardian-a": {
+  "llamadas": 69,
+  "escrituras_ok": 0,
+  "lecturas_con_datos": 10,
+  "tablas_cambiadas": []
+ },
+ "dueno-a": {
+  "llamadas": 69,
+  "escrituras_ok": 0,
+  "lecturas_con_datos": 10,
+  "tablas_cambiadas": []
+ },
+ "dueno-b": {
+  "llamadas": 69,
+  "escrituras_ok": 0,
+  "lecturas_con_datos": 10,
+  "tablas_cambiadas": []
+ },
+ "super": {
+  "llamadas": 69,
+  "escrituras_ok": 37,
+  "lecturas_con_datos": 23,
+  "tablas_cambiadas": [
+   "auth.users",
+   "public.addon_precio",
+   "public.ai_accion_costo",
+   "public.ai_modelo_config",
+   "public.ai_paquete_creditos",
+   "public.banner_home",
+   "public.ciudad_habilitada",
+   "public.comision_cambio_programado",
+   "public.configuracion_plataforma",
+   "public.evento_auditoria",
+   "public.negocio",
+   "public.notificacion_outbox",
+   "public.notificacion_outbox_evento",
+   "public.pais",
+   "public.perfil",
+   "public.plan",
+   "public.plan_caracteristica",
+   "public.plan_precio",
+   "public.suscripcion",
+   "public.texto_legal",
+   "public.ticket_mensaje",
+   "public.ticket_soporte",
+   "public.whatsapp_config",
+   "public.whatsapp_paquete"
+  ]
+ }
+}
+
+ ❯ tests/admin-actions-autorizacion.test.ts (1 test | 1 failed) 76147ms
+   × H-008 · Server Actions de /admin con sesión real por actor > matriz acción × actor 76145ms
+     → anonimo: lecturas con datos: expected 4 to be +0 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/admin-actions-autorizacion.test.ts > H-008 · Server Actions de /admin con sesión real por actor > matriz acción × actor
+AssertionError: anonimo: lecturas con datos: expected 4 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 4
+
+ ❯ tests/admin-actions-autorizacion.test.ts:210:73
+    208|     for (const a of ACTORES.filter((x) => x !== "super")) {
+    209|       expect(resumen[a].escrituras_ok, `${a}: escrituras con ok:true`)…
+    210|       expect(resumen[a].lecturas_con_datos, `${a}: lecturas con datos`…
+       |                                                                         ^
+    211|       expect(resumen[a].tablas_cambiadas, `${a}: tablas cambiadas`).to…
+    212|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  08:16:52
+   Duration  77.10s (transform 330ms, setup 0ms, collect 223ms, tests 76.15s, environment 0ms, prepare 204ms)
+

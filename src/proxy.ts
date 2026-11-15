@@ -40,6 +40,11 @@ export async function proxy(request: NextRequest) {
   requestHeaders.set("x-nonce", nonce);
   // Id de petición para la auditoría (migración 123): lo genera SIEMPRE el servidor, nunca se acepta
   // el que mande el navegador. createClient() lo reenvía a PostgREST y la base lo guarda en evento_auditoria.
+  // El id que mande el cliente (p. ej. Mercado Pago, que lo firma) se conserva aparte; nunca se confía el valor
+  // entrante: se borra siempre antes y solo lo escribe el servidor.
+  requestHeaders.delete("x-request-id-origen");
+  const idEntrante = request.headers.get("x-request-id");
+  if (idEntrante) requestHeaders.set("x-request-id-origen", idEntrante.slice(0, 200));
   requestHeaders.set("x-request-id", crypto.randomUUID());
   requestHeaders.set(cabeceraCsp, csp);
 

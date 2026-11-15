@@ -1,0 +1,17 @@
+OK	aislamiento_multiempresa	NOTICE:  TODAS LAS PRUEBAS DE AISLAMIENTO MULTIEMPRESA PASARON
+OK	anticipos_129	NOTICE:  TODAS LAS PRUEBAS 129 PASARON
+OK	auditoria_123	NOTICE:  TODAS LAS PRUEBAS 123 PASARON
+OK	cobro_directo_119	NOTICE:  TODAS LAS PRUEBAS 119 PASARON
+FALLA	directiva_116_118	ERROR:  FALLA 118: la prueba sin tarjeta vencida debe pasar a REQUIERE_PLAN conservando historial: EN_MORA
+OK	f0_05_crear_grupo_familiar	NOTICE:  OK F0-05: 32 casos de RPC + 2 de escritura directa coinciden con lo esperado
+OK	libro_122	NOTICE:  TODAS LAS PRUEBAS 122 PASARON
+OK	notificaciones_124	NOTICE:  TODAS LAS PRUEBAS 124 PASARON
+OK	prueba_antiabuso_135	NOTICE:  OK 135: red+equipo, límite por red, dispositivo y permisos
+OK	registro_pendiente_127	NOTICE:  TODAS LAS PRUEBAS 127 PASARON
+OK	registro_telefono_128	NOTICE:  TODAS LAS PRUEBAS 128 PASARON
+OK	rendimiento_131	NOTICE:  OK 131: código de referido estable, sin colisiones y solo con sesión
+OK	seguridad_regresion	NOTICE:  TODAS LAS PRUEBAS DE SEGURIDAD PASARON
+OK	suscripcion_133	NOTICE:  OK 133: funciones internas solo para service_role
+OK	webhook_130	NOTICE:  OK 130: reintentos contados, pendiente tras fallo, cerrado tras éxito
+OK	whatsapp_120	NOTICE:  TODAS LAS PRUEBAS DE LA MIGRACION 120 PASARON
+OK	hotfix_staff_nulo_orquestado	NOTICE:  OK hotfix: el dueño conserva su operación legítima

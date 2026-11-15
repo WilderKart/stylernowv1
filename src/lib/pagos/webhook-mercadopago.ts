@@ -65,7 +65,9 @@ export async function procesarWebhookMercadoPago(request: Request): Promise<Resp
     (cuerpo?.data?.id != null ? String(cuerpo.data.id) : null) ??
     url.searchParams.get("id");
   const firma = request.headers.get("x-signature");
-  const requestIdHeader = (request.headers.get("x-request-id") ?? "").slice(0, 200);
+  // El proxy reemplaza `x-request-id` por un id propio (auditoría) y deja el que envió Mercado Pago en
+  // `x-request-id-origen`: la firma se calcula con el id ORIGINAL del proveedor.
+  const requestIdHeader = (request.headers.get("x-request-id-origen") ?? request.headers.get("x-request-id") ?? "").slice(0, 200);
 
   // ── 1 · Autenticidad ────────────────────────────────────────────────────
   const firmaValida = verificarFirma({ firma, requestId: requestIdHeader || null, dataId });

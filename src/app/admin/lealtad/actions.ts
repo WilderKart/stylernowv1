@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
 import { revalidatePath } from "next/cache";
 
 type Resultado<T = undefined> =
@@ -22,7 +22,9 @@ export interface MetricasLealtad {
 }
 
 export async function obtenerMetricasLealtad(): Promise<Resultado<MetricasLealtad>> {
-  const supabase = await createClient();
+  const g = await autorizarSuperSU();
+  if (!g.ok) return { ok: false, error: g.error };
+  const supabase = g.supabase;
   const { data, error } = await supabase.rpc("metricas_lealtad_plataforma");
   if (error) return { ok: false, error: error.message };
   const m = data as Record<string, number>;
@@ -49,14 +51,18 @@ export interface EventoFraude {
 }
 
 export async function listarEventosFraude(): Promise<Resultado<EventoFraude[]>> {
-  const supabase = await createClient();
+  const g = await autorizarSuperSU();
+  if (!g.ok) return { ok: false, error: g.error };
+  const supabase = g.supabase;
   const { data, error } = await supabase.rpc("listar_eventos_fraude", { p_revisado: false });
   if (error) return { ok: false, error: error.message };
   return { ok: true, data: (data ?? []).map((e) => ({ id: e.id, tipo: e.tipo, clienteId: e.cliente_id, negocioId: e.negocio_id, severidad: e.severidad, payload: e.payload, createdAt: e.created_at })) };
 }
 
 export async function marcarFraudeRevisado(eventoId: string): Promise<Resultado> {
-  const supabase = await createClient();
+  const g = await autorizarSuperSU();
+  if (!g.ok) return { ok: false, error: g.error };
+  const supabase = g.supabase;
   const { error } = await supabase.rpc("marcar_fraude_revisado", { p_evento_id: eventoId });
   if (error) return { ok: false, error: error.message };
   revalidatePath("/admin/lealtad");

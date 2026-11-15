@@ -1,0 +1,220 @@
+
+ RUN  v3.2.7 C:/Users/karni/Documents/stylernow-cierre
+
+ ✓ tests/sena.test.ts (7 tests) 8ms
+ ✓ tests/cifrado.test.ts (4 tests) 591ms
+   ✓ cifrado de credenciales de pago (AES-256-GCM) > cifra y descifra sin perder el contenido  516ms
+ ✓ tests/sentry-limpieza.test.ts (5 tests) 17ms
+ ✓ tests/i18n.test.ts (3 tests) 101ms
+ ✓ tests/pagos-sandbox.test.ts (16 tests) 1164ms
+   ✓ firma del webhook de Mercado Pago > acepta una firma válida y reciente  940ms
+ ↓ tests/admin-actions-autorizacion.test.ts (1 test | 1 skipped)
+ ✓ tests/whatsapp.test.ts (27 tests) 219ms
+ ✓ tests/notificaciones.test.ts (15 tests) 320ms
+ ✓ tests/telefono-registro.test.ts (3 tests) 7ms
+ ↓ tests/integracion/webhook-mercadopago.test.ts (15 tests | 15 skipped)
+ ✓ tests/destino-seguro.test.ts (11 tests) 9ms
+ ✓ tests/libro.test.ts (7 tests) 121ms
+ ✓ tests/auditoria.test.ts (7 tests) 151ms
+stderr | tests/f0-01-request-id-proxy-webhook.test.ts > F0-01 · x-request-id entre el proxy y el webhook de Mercado Pago > el proxy cambia x-request-id: el que ve la ruta NO es el que firmó Mercado Pago
+[proxy] Faltan NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY en este entorno. Configuralas en Vercel → Project Settings → Environment Variables y vuelve a desplegar.
+
+stdout | tests/f0-01-request-id-proxy-webhook.test.ts > F0-01 · x-request-id entre el proxy y el webhook de Mercado Pago > el proxy cambia x-request-id: el que ve la ruta NO es el que firmó Mercado Pago
+[F0-01] id que envía Mercado Pago: mp-req-0001 | id que recibe la ruta: 1ebacfac-8951-443c-9d96-b05feb83275b | x-request-id-origen: mp-req-0001
+
+stderr | tests/f0-01-request-id-proxy-webhook.test.ts > F0-01 · x-request-id entre el proxy y el webhook de Mercado Pago > una firma VÁLIDA (hecha con el id original de Mercado Pago) se acepta
+[proxy] Faltan NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY en este entorno. Configuralas en Vercel → Project Settings → Environment Variables y vuelve a desplegar.
+
+stderr | tests/f0-01-request-id-proxy-webhook.test.ts > F0-01 · x-request-id entre el proxy y el webhook de Mercado Pago > una firma MANIPULADA (v1 alterado) se rechaza con 401 y no toca la base
+[proxy] Faltan NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY en este entorno. Configuralas en Vercel → Project Settings → Environment Variables y vuelve a desplegar.
+
+stderr | tests/f0-01-request-id-proxy-webhook.test.ts > F0-01 · x-request-id entre el proxy y el webhook de Mercado Pago > una firma MANIPULADA (v1 alterado) se rechaza con 401 y no toca la base
+[webhook mercadopago] firma inválida {
+  tipo: 'payment',
+  tipoCrudo: 'payment',
+  dataId: '123456789',
+  requestId: 'mp-req-0003',
+  diagnostico: {
+    secretoLongitud: 22,
+    secretoTeniaEspacios: false,
+    huellaSecreto: '93ee9c68',
+    firmaPresente: true,
+    tsPresente: true,
+    v1Longitud: 64,
+    tsRecibido: '1794765599385',
+    v1Recibido: 'a1dd10c59617cb6c2da38ab340f578e66a664440c915923f2f4420a3deeda71d',
+    tsEdadSegundos: 0,
+    tsDentroDeVentana: true,
+    requestIdPresente: true,
+    dataIdUrlPresente: true,
+    dataIdCuerpoPresente: true,
+    coincideConVariante: null
+  }
+}
+
+stderr | tests/f0-01-request-id-proxy-webhook.test.ts > F0-01 · x-request-id entre el proxy y el webhook de Mercado Pago > firma hecha con otra clave, o de otro data.id, o sin x-signature: 401
+[proxy] Faltan NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY en este entorno. Configuralas en Vercel → Project Settings → Environment Variables y vuelve a desplegar.
+
+stderr | tests/f0-01-request-id-proxy-webhook.test.ts > F0-01 · x-request-id entre el proxy y el webhook de Mercado Pago > firma hecha con otra clave, o de otro data.id, o sin x-signature: 401
+[webhook mercadopago] firma inválida {
+  tipo: 'payment',
+  tipoCrudo: 'payment',
+  dataId: '123456789',
+  requestId: 'mp-req-0004',
+  diagnostico: {
+    secretoLongitud: 22,
+    secretoTeniaEspacios: false,
+    huellaSecreto: '93ee9c68',
+    firmaPresente: true,
+    tsPresente: true,
+    v1Longitud: 64,
+    tsRecibido: '1794765599405',
+    v1Recibido: '3e4662e15125960d54bbde3f82dea2918937ebf6f3f2cd60f4e384380aae50e5',
+    tsEdadSegundos: 0,
+    tsDentroDeVentana: true,
+    requestIdPresente: true,
+    dataIdUrlPresente: true,
+    dataIdCuerpoPresente: true,
+    coincideConVariante: null
+  }
+}
+
+stderr | tests/f0-01-request-id-proxy-webhook.test.ts > F0-01 · x-request-id entre el proxy y el webhook de Mercado Pago > firma hecha con otra clave, o de otro data.id, o sin x-signature: 401
+[proxy] Faltan NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY en este entorno. Configuralas en Vercel → Project Settings → Environment Variables y vuelve a desplegar.
+
+stderr | tests/f0-01-request-id-proxy-webhook.test.ts > F0-01 · x-request-id entre el proxy y el webhook de Mercado Pago > firma hecha con otra clave, o de otro data.id, o sin x-signature: 401
+[webhook mercadopago] firma inválida {
+  tipo: 'payment',
+  tipoCrudo: 'payment',
+  dataId: '123456789',
+  requestId: 'mp-req-0004',
+  diagnostico: {
+    secretoLongitud: 22,
+    secretoTeniaEspacios: false,
+    huellaSecreto: '93ee9c68',
+    firmaPresente: true,
+    tsPresente: true,
+    v1Longitud: 64,
+    tsRecibido: '1794765599405',
+    v1Recibido: '7634182e8a64fdda1a502da3e2e42558302b6b0fcb377f8d7234b6ff159bed79',
+    tsEdadSegundos: 0,
+    tsDentroDeVentana: true,
+    requestIdPresente: true,
+    dataIdUrlPresente: true,
+    dataIdCuerpoPresente: true,
+    coincideConVariante: null
+  }
+}
+
+stderr | tests/f0-01-request-id-proxy-webhook.test.ts > F0-01 · x-request-id entre el proxy y el webhook de Mercado Pago > firma hecha con otra clave, o de otro data.id, o sin x-signature: 401
+[proxy] Faltan NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY en este entorno. Configuralas en Vercel → Project Settings → Environment Variables y vuelve a desplegar.
+
+stderr | tests/f0-01-request-id-proxy-webhook.test.ts > F0-01 · x-request-id entre el proxy y el webhook de Mercado Pago > firma hecha con otra clave, o de otro data.id, o sin x-signature: 401
+[webhook mercadopago] firma inválida {
+  tipo: 'payment',
+  tipoCrudo: 'payment',
+  dataId: '123456789',
+  requestId: 'mp-req-0004',
+  diagnostico: {
+    secretoLongitud: 22,
+    secretoTeniaEspacios: false,
+    huellaSecreto: '93ee9c68',
+    firmaPresente: false,
+    tsPresente: false,
+    v1Longitud: 0,
+    tsRecibido: null,
+    v1Recibido: null,
+    tsEdadSegundos: null,
+    tsDentroDeVentana: false,
+    requestIdPresente: true,
+    dataIdUrlPresente: true,
+    dataIdCuerpoPresente: true,
+    coincideConVariante: null
+  }
+}
+
+stderr | tests/f0-01-request-id-proxy-webhook.test.ts > F0-01 · x-request-id entre el proxy y el webhook de Mercado Pago > un cliente NO puede falsificar x-request-id-origen: el proxy lo descarta y escribe el suyo
+[proxy] Faltan NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY en este entorno. Configuralas en Vercel → Project Settings → Environment Variables y vuelve a desplegar.
+
+stderr | tests/f0-01-request-id-proxy-webhook.test.ts > F0-01 · x-request-id entre el proxy y el webhook de Mercado Pago > un cliente NO puede falsificar x-request-id-origen: el proxy lo descarta y escribe el suyo
+[webhook mercadopago] firma inválida {
+  tipo: 'payment',
+  tipoCrudo: 'payment',
+  dataId: '123456789',
+  requestId: 'id-real-B',
+  diagnostico: {
+    secretoLongitud: 22,
+    secretoTeniaEspacios: false,
+    huellaSecreto: '93ee9c68',
+    firmaPresente: true,
+    tsPresente: true,
+    v1Longitud: 64,
+    tsRecibido: '1794765599436',
+    v1Recibido: '4c3c83866b5782587278cd0bad9917061c82dbd104b3944db2360b6960b374e4',
+    tsEdadSegundos: 0,
+    tsDentroDeVentana: true,
+    requestIdPresente: true,
+    dataIdUrlPresente: true,
+    dataIdCuerpoPresente: true,
+    coincideConVariante: null
+  }
+}
+
+stderr | tests/f0-01-request-id-proxy-webhook.test.ts > F0-01 · x-request-id entre el proxy y el webhook de Mercado Pago > sin x-request-id de entrada tampoco se acepta un x-request-id-origen inventado por el cliente
+[proxy] Faltan NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY en este entorno. Configuralas en Vercel → Project Settings → Environment Variables y vuelve a desplegar.
+
+stderr | tests/f0-01-request-id-proxy-webhook.test.ts > F0-01 · x-request-id entre el proxy y el webhook de Mercado Pago > sin x-request-id de entrada tampoco se acepta un x-request-id-origen inventado por el cliente
+[webhook mercadopago] firma inválida {
+  tipo: 'payment',
+  tipoCrudo: 'payment',
+  dataId: '123456789',
+  requestId: 'e4fe8cf5-184b-4183-bb6a-9cd3a250290f',
+  diagnostico: {
+    secretoLongitud: 22,
+    secretoTeniaEspacios: false,
+    huellaSecreto: '93ee9c68',
+    firmaPresente: true,
+    tsPresente: true,
+    v1Longitud: 64,
+    tsRecibido: '1794765599450',
+    v1Recibido: 'e0c56b1a809dd7ef73b9ef6f4541225b64057a91c4a8b6362098d680f22a9cfe',
+    tsEdadSegundos: 0,
+    tsDentroDeVentana: true,
+    requestIdPresente: true,
+    dataIdUrlPresente: true,
+    dataIdCuerpoPresente: true,
+    coincideConVariante: null
+  }
+}
+
+stderr | tests/f0-01-request-id-proxy-webhook.test.ts > F0-01 · x-request-id entre el proxy y el webhook de Mercado Pago > llamada directa al handler (sin proxy) con origen falsificado y firma con clave ajena: 401
+[webhook mercadopago] firma inválida {
+  tipo: 'payment',
+  tipoCrudo: 'payment',
+  dataId: '123456789',
+  requestId: 'x',
+  diagnostico: {
+    secretoLongitud: 22,
+    secretoTeniaEspacios: false,
+    huellaSecreto: '93ee9c68',
+    firmaPresente: true,
+    tsPresente: true,
+    v1Longitud: 64,
+    tsRecibido: '1794765599464',
+    v1Recibido: 'c77e3512d9b3df87d18866a665160240948cdc1283824f561d255c53a5d2645e',
+    tsEdadSegundos: 0,
+    tsDentroDeVentana: true,
+    requestIdPresente: true,
+    dataIdUrlPresente: true,
+    dataIdCuerpoPresente: true,
+    coincideConVariante: null
+  }
+}
+
+ ✓ tests/f0-01-request-id-proxy-webhook.test.ts (7 tests) 2444ms
+
+ Test Files  12 passed | 2 skipped (14)
+      Tests  112 passed | 16 skipped (128)
+   Start at  12:59:49
+   Duration  7.70s (transform 21.05s, setup 0ms, collect 37.91s, tests 5.15s, environment 4ms, prepare 4.94s)
+

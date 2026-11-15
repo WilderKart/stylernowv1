@@ -1,0 +1,1327 @@
+diff --git a/src/app/admin/actions.ts b/src/app/admin/actions.ts
+index 5dd3f7f..f889f1e 100644
+--- a/src/app/admin/actions.ts
++++ b/src/app/admin/actions.ts
+@@ -1,6 +1,6 @@
+ "use server";
+ 
+-import { createClient } from "@/lib/supabase/server";
++import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
+ import { revalidatePath } from "next/cache";
+ 
+ type Resultado<T = undefined> =
+@@ -8,12 +8,10 @@ type Resultado<T = undefined> =
+   | { ok: false; error: string };
+ 
+ async function usuarioActual() {
+-  const supabase = await createClient();
+-  const {
+-    data: { user },
+-  } = await supabase.auth.getUser();
+-  if (!user) throw new Error("NO_AUTENTICADO");
+-  return { supabase, userId: user.id };
++  // Autorización en el servidor (Super Admin); la base la vuelve a exigir en cada RPC.
++  const g = await autorizarSuperSU();
++  if (!g.ok) throw new Error(g.error);
++  return { supabase: g.supabase, userId: g.userId };
+ }
+ 
+ const MENSAJES_ERROR: Record<string, string> = {
+diff --git a/src/app/admin/ai/actions.ts b/src/app/admin/ai/actions.ts
+index 4669d9f..a024984 100644
+--- a/src/app/admin/ai/actions.ts
++++ b/src/app/admin/ai/actions.ts
+@@ -1,6 +1,6 @@
+ "use server";
+ 
+-import { createClient } from "@/lib/supabase/server";
++import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
+ import { revalidatePath } from "next/cache";
+ 
+ type Resultado<T = undefined> =
+@@ -31,7 +31,9 @@ export interface AccionCostoIa {
+ }
+ 
+ export async function listarAccionesCostoIa(): Promise<Resultado<AccionCostoIa[]>> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { data, error } = await supabase.from("ai_accion_costo").select("*").order("categoria").order("accion");
+   if (error) return { ok: false, error: error.message };
+   return {
+@@ -53,7 +55,9 @@ export async function actualizarCostoAccionIa(
+   costoCreditos: number,
+   activo: boolean
+ ): Promise<Resultado> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { error } = await supabase.rpc("actualizar_accion_costo_ia", {
+     p_accion: accion,
+     p_costo_creditos: costoCreditos,
+@@ -75,7 +79,9 @@ export interface ModeloIa {
+ }
+ 
+ export async function listarModelosIa(): Promise<Resultado<ModeloIa[]>> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { data, error } = await supabase.from("ai_modelo_config").select("*").order("orden_preferencia");
+   if (error) return { ok: false, error: error.message };
+   return {
+@@ -92,7 +98,9 @@ export async function listarModelosIa(): Promise<Resultado<ModeloIa[]>> {
+ }
+ 
+ export async function actualizarModeloIa(nombre: string, ordenPreferencia: number, activo: boolean): Promise<Resultado> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { error } = await supabase.rpc("actualizar_modelo_config_ia", {
+     p_nombre: nombre,
+     p_orden_preferencia: ordenPreferencia,
+@@ -113,7 +121,9 @@ export interface PaqueteIa {
+ }
+ 
+ export async function listarPaquetesIa(): Promise<Resultado<PaqueteIa[]>> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { data, error } = await supabase.from("ai_paquete_creditos").select("*").order("creditos", { nullsFirst: false });
+   if (error) return { ok: false, error: error.message };
+   return {
+@@ -129,7 +139,9 @@ export async function listarPaquetesIa(): Promise<Resultado<PaqueteIa[]>> {
+ }
+ 
+ export async function actualizarPaqueteIa(id: string, precioCop: number | null, activo: boolean): Promise<Resultado> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { error } = await supabase.rpc("actualizar_paquete_creditos_ia", {
+     p_paquete_id: id,
+     // El parámetro SQL acepta NULL (paquete "Enterprise", sin autoservicio) —
+@@ -152,14 +164,18 @@ export interface FuncionPlanIa {
+ }
+ 
+ export async function listarFuncionesPlanIa(): Promise<Resultado<FuncionPlanIa[]>> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { data, error } = await supabase.from("plan_funcion_ia").select("*").order("funcion");
+   if (error) return { ok: false, error: error.message };
+   return { ok: true, data: data.map((f) => ({ planCodigo: f.plan_codigo, funcion: f.funcion, habilitado: f.habilitado })) };
+ }
+ 
+ export async function configurarFuncionPlanIa(planCodigo: string, funcion: string, habilitado: boolean): Promise<Resultado> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { error } = await supabase.rpc("configurar_funcion_plan_ia", {
+     p_plan_codigo: planCodigo as "ESSENTIAL" | "STUDIO" | "PRESTIGE" | "SIGNATURE",
+     p_funcion: funcion,
+@@ -182,7 +198,9 @@ export interface SimulacionIa {
+ }
+ 
+ export async function simularConsumoIa(planCodigo: string, numStaff: number, numClientes: number): Promise<Resultado<SimulacionIa>> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { data, error } = await supabase.rpc("simular_consumo_ia", {
+     p_plan_codigo: planCodigo as "ESSENTIAL" | "STUDIO" | "PRESTIGE" | "SIGNATURE",
+     p_num_staff: numStaff,
+@@ -213,7 +231,9 @@ export interface ResumenConsumoIa {
+ }
+ 
+ export async function obtenerResumenConsumoIa(): Promise<Resultado<ResumenConsumoIa>> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { data: consumos, error } = await supabase
+     .from("credito_ia_consumo")
+     .select("negocio_id, funcion, creditos_consumidos");
+diff --git a/src/app/admin/barra-actions.ts b/src/app/admin/barra-actions.ts
+index 088656d..20e0986 100644
+--- a/src/app/admin/barra-actions.ts
++++ b/src/app/admin/barra-actions.ts
+@@ -1,5 +1,6 @@
+ "use server";
+ 
++import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
+ import { rpcAdmin } from "./_componentes/rpc";
+ 
+ export type ResultadoBusqueda = {
+@@ -10,6 +11,9 @@ export type ResultadoBusqueda = {
+ 
+ /** Buscador global del Super Admin. La base exige is_supersu() (migración 137). */
+ export async function buscarGlobal(q: string): Promise<ResultadoBusqueda | null> {
++  // Autorización en el servidor (Super Admin); la base la vuelve a exigir en admin_buscar.
++  const g = await autorizarSuperSU();
++  if (!g.ok) return null;
+   const texto = String(q ?? "").trim().slice(0, 80);
+   if (texto.length < 2) return { negocios: [], usuarios: [], reservas: [] };
+   const r = await rpcAdmin<ResultadoBusqueda>("admin_buscar", { p_q: texto });
+diff --git a/src/app/admin/configuracion/actions.ts b/src/app/admin/configuracion/actions.ts
+index af90b3b..13670f5 100644
+--- a/src/app/admin/configuracion/actions.ts
++++ b/src/app/admin/configuracion/actions.ts
+@@ -1,6 +1,6 @@
+ "use server";
+ 
+-import { createClient } from "@/lib/supabase/server";
++import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
+ import { revalidatePath } from "next/cache";
+ 
+ type Resultado<T = undefined> =
+@@ -8,12 +8,10 @@ type Resultado<T = undefined> =
+   | { ok: false; error: string };
+ 
+ async function usuarioActual() {
+-  const supabase = await createClient();
+-  const {
+-    data: { user },
+-  } = await supabase.auth.getUser();
+-  if (!user) throw new Error("NO_AUTENTICADO");
+-  return { supabase, userId: user.id };
++  // Autorización en el servidor (Super Admin); la base la vuelve a exigir en cada RPC.
++  const g = await autorizarSuperSU();
++  if (!g.ok) throw new Error(g.error);
++  return { supabase: g.supabase, userId: g.userId };
+ }
+ 
+ const MENSAJES_ERROR: Record<string, string> = {
+diff --git a/src/app/admin/lealtad/actions.ts b/src/app/admin/lealtad/actions.ts
+index d26e81a..8095899 100644
+--- a/src/app/admin/lealtad/actions.ts
++++ b/src/app/admin/lealtad/actions.ts
+@@ -1,6 +1,6 @@
+ "use server";
+ 
+-import { createClient } from "@/lib/supabase/server";
++import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
+ import { revalidatePath } from "next/cache";
+ 
+ type Resultado<T = undefined> =
+@@ -22,7 +22,9 @@ export interface MetricasLealtad {
+ }
+ 
+ export async function obtenerMetricasLealtad(): Promise<Resultado<MetricasLealtad>> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { data, error } = await supabase.rpc("metricas_lealtad_plataforma");
+   if (error) return { ok: false, error: error.message };
+   const m = data as Record<string, number>;
+@@ -49,14 +51,18 @@ export interface EventoFraude {
+ }
+ 
+ export async function listarEventosFraude(): Promise<Resultado<EventoFraude[]>> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { data, error } = await supabase.rpc("listar_eventos_fraude", { p_revisado: false });
+   if (error) return { ok: false, error: error.message };
+   return { ok: true, data: (data ?? []).map((e) => ({ id: e.id, tipo: e.tipo, clienteId: e.cliente_id, negocioId: e.negocio_id, severidad: e.severidad, payload: e.payload, createdAt: e.created_at })) };
+ }
+ 
+ export async function marcarFraudeRevisado(eventoId: string): Promise<Resultado> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { error } = await supabase.rpc("marcar_fraude_revisado", { p_evento_id: eventoId });
+   if (error) return { ok: false, error: error.message };
+   revalidatePath("/admin/lealtad");
+diff --git a/src/app/admin/planes/actions.ts b/src/app/admin/planes/actions.ts
+index c89254e..de64486 100644
+--- a/src/app/admin/planes/actions.ts
++++ b/src/app/admin/planes/actions.ts
+@@ -1,6 +1,6 @@
+ "use server";
+ 
+-import { createClient } from "@/lib/supabase/server";
++import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
+ import type { Database } from "@/types/database";
+ import { revalidatePath } from "next/cache";
+ import { conMotivo, validarMotivo } from "@/lib/auditoria/motivo";
+@@ -15,12 +15,10 @@ const PASARELAS = ["MERCADOPAGO", "STRIPE", "PAYONEER", "MANUAL"] as const;
+ const PAISES_VALIDOS = ["CO", "US", "MX", "ES"];
+ 
+ async function usuarioActual() {
+-  const supabase = await createClient();
+-  const {
+-    data: { user },
+-  } = await supabase.auth.getUser();
+-  if (!user) throw new Error("NO_AUTENTICADO");
+-  return { supabase, userId: user.id };
++  // Autorización en el servidor (Super Admin); la base la vuelve a exigir en cada RPC.
++  const g = await autorizarSuperSU();
++  if (!g.ok) throw new Error(g.error);
++  return { supabase: g.supabase, userId: g.userId };
+ }
+ 
+ const MENSAJES_ERROR: Record<string, string> = {
+diff --git a/src/app/admin/soporte/actions.ts b/src/app/admin/soporte/actions.ts
+index f44424b..bbea72f 100644
+--- a/src/app/admin/soporte/actions.ts
++++ b/src/app/admin/soporte/actions.ts
+@@ -1,6 +1,6 @@
+ "use server";
+ 
+-import { createClient } from "@/lib/supabase/server";
++import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
+ import { revalidatePath } from "next/cache";
+ 
+ type Resultado<T = undefined> =
+@@ -8,12 +8,10 @@ type Resultado<T = undefined> =
+   | { ok: false; error: string };
+ 
+ async function usuarioActual() {
+-  const supabase = await createClient();
+-  const {
+-    data: { user },
+-  } = await supabase.auth.getUser();
+-  if (!user) throw new Error("NO_AUTENTICADO");
+-  return { supabase, userId: user.id };
++  // Autorización en el servidor (Super Admin); la base la vuelve a exigir en cada RPC.
++  const g = await autorizarSuperSU();
++  if (!g.ok) throw new Error(g.error);
++  return { supabase: g.supabase, userId: g.userId };
+ }
+ 
+ const MENSAJES_ERROR: Record<string, string> = {
+diff --git a/src/lib/pagos/webhook-mercadopago.ts b/src/lib/pagos/webhook-mercadopago.ts
+index 6448536..9a8ec55 100644
+--- a/src/lib/pagos/webhook-mercadopago.ts
++++ b/src/lib/pagos/webhook-mercadopago.ts
+@@ -65,7 +65,9 @@ export async function procesarWebhookMercadoPago(request: Request): Promise<Resp
+     (cuerpo?.data?.id != null ? String(cuerpo.data.id) : null) ??
+     url.searchParams.get("id");
+   const firma = request.headers.get("x-signature");
+-  const requestIdHeader = (request.headers.get("x-request-id") ?? "").slice(0, 200);
++  // El proxy reemplaza `x-request-id` por un id propio (auditoría) y deja el que envió Mercado Pago en
++  // `x-request-id-origen`: la firma se calcula con el id ORIGINAL del proveedor.
++  const requestIdHeader = (request.headers.get("x-request-id-origen") ?? request.headers.get("x-request-id") ?? "").slice(0, 200);
+ 
+   // ── 1 · Autenticidad ────────────────────────────────────────────────────
+   const firmaValida = verificarFirma({ firma, requestId: requestIdHeader || null, dataId });
+diff --git a/src/proxy.ts b/src/proxy.ts
+index cbf893c..618d6b6 100644
+--- a/src/proxy.ts
++++ b/src/proxy.ts
+@@ -40,6 +40,11 @@ export async function proxy(request: NextRequest) {
+   requestHeaders.set("x-nonce", nonce);
+   // Id de petición para la auditoría (migración 123): lo genera SIEMPRE el servidor, nunca se acepta
+   // el que mande el navegador. createClient() lo reenvía a PostgREST y la base lo guarda en evento_auditoria.
++  // El id que mande el cliente (p. ej. Mercado Pago, que lo firma) se conserva aparte; nunca se confía el valor
++  // entrante: se borra siempre antes y solo lo escribe el servidor.
++  requestHeaders.delete("x-request-id-origen");
++  const idEntrante = request.headers.get("x-request-id");
++  if (idEntrante) requestHeaders.set("x-request-id-origen", idEntrante.slice(0, 200));
+   requestHeaders.set("x-request-id", crypto.randomUUID());
+   requestHeaders.set(cabeceraCsp, csp);
+ 
+diff --git a/src/lib/auth/autorizar-supersu.ts b/src/lib/auth/autorizar-supersu.ts
+new file mode 100644
+index 0000000..c67bd85
+--- /dev/null
++++ b/src/lib/auth/autorizar-supersu.ts
+@@ -0,0 +1,31 @@
++import "server-only";
++import type { SupabaseClient } from "@supabase/supabase-js";
++import { createClient } from "@/lib/supabase/server";
++import type { Database } from "@/types/database";
++
++/**
++ * Guarda de las Server Actions del Super Admin (/admin). Una Server Action es un endpoint POST invocable sin pasar por la
++ * interfaz, así que la autorización se decide AQUÍ, en el servidor, con la sesión y la columna `perfil.es_supersu` (la misma
++ * fuente que usa `is_supersu()` en la base), nunca con nada que mande el navegador. La base vuelve a exigirlo en cada RPC/RLS
++ * (segunda capa); esta es la primera.
++ *
++ * A diferencia de `requireSuperSU()` (páginas), no redirige: devuelve un resultado para que cada acción responda con su
++ * propio `{ ok: false, error }`. Igual que en las páginas, una cuenta que autenticó con Google nunca actúa como Super Admin.
++ */
++export type AutorizacionSuperSU =
++  | { ok: true; supabase: SupabaseClient<Database>; userId: string }
++  | { ok: false; error: string };
++
++export async function autorizarSuperSU(): Promise<AutorizacionSuperSU> {
++  const supabase = (await createClient()) as SupabaseClient<Database>;
++  const {
++    data: { user },
++  } = await supabase.auth.getUser();
++  if (!user) return { ok: false, error: "Tu sesión expiró. Vuelve a iniciar sesión." };
++
++  const { data: perfil } = await supabase.from("perfil").select("es_supersu").eq("id", user.id).maybeSingle();
++  if (perfil?.es_supersu !== true || user.app_metadata?.provider === "google") {
++    return { ok: false, error: "No tienes permiso de SuperSU." };
++  }
++  return { ok: true, supabase, userId: user.id };
++}
+diff --git a/supabase/migrations/138_crear_grupo_familiar_autorizacion.sql b/supabase/migrations/138_crear_grupo_familiar_autorizacion.sql
+new file mode 100644
+index 0000000..6c9e79f
+--- /dev/null
++++ b/supabase/migrations/138_crear_grupo_familiar_autorizacion.sql
+@@ -0,0 +1,70 @@
++-- 138 · crear_grupo_familiar: autorización por negocio y límites del descuento (hallazgo F0-05, plan de cierre Fase 1A).
++-- Antes: cualquier usuario autenticado podía crear un grupo familiar amarrado a CUALQUIER negocio (incluso inexistente solo
++-- fallaba por la llave foránea) y fijar el descuento que quisiera (negativo, >100 %). Hoy el descuento no entra en ningún
++-- cálculo de precio, pero la fila queda visible en el panel de ese negocio y quedaría lista para usarse.
++-- Ahora (sin cambiar la firma, así que NO crea una sobrecarga nueva):
++--   · negocio_id ≠ NULL exige relación autorizada: dueño, personal del negocio, cliente con al menos una reserva en él, o Super Admin;
++--   · un descuento > 0 solo lo fija el dueño de ese negocio o el Super Admin (decisión de mínimo privilegio; la regla comercial
++--     de quién puede ofrecer descuentos queda pendiente de confirmación del dueño del producto);
++--   · el descuento es un porcentaje 0–100 y no admite NULL;
++--   · restricción CHECK en la tabla (NOT VALID: protege lo nuevo sin validar filas antiguas) para que tampoco se pueda por otra vía.
++-- Aditiva e idempotente.
++
++create or replace function public.crear_grupo_familiar(
++  p_nombre text default 'Mi familia',
++  p_negocio_id uuid default null,
++  p_limite_miembros int default 4,
++  p_descuento_familiar_pct numeric default 0
++) returns public.familia_grupo
++language plpgsql security definer set search_path = public as $$
++declare
++  v_uid uuid := auth.uid();
++  v_super boolean;
++  v_grupo public.familia_grupo;
++begin
++  if v_uid is null then raise exception 'NO_AUTENTICADO'; end if;
++  v_super := coalesce(public.is_supersu(), false);
++
++  if p_descuento_familiar_pct is null or p_descuento_familiar_pct < 0 or p_descuento_familiar_pct > 100 then
++    raise exception 'DESCUENTO_INVALIDO';
++  end if;
++
++  if p_negocio_id is not null then
++    if not v_super
++       and not coalesce(public.tiene_acceso_interno(p_negocio_id), false)
++       and not exists (select 1 from public.reserva r where r.cliente_id = v_uid and r.negocio_id = p_negocio_id) then
++      raise exception 'NO_AUTORIZADO';
++    end if;
++    if not exists (select 1 from public.negocio n where n.id = p_negocio_id) then
++      raise exception 'NEGOCIO_NO_ENCONTRADO';
++    end if;
++  end if;
++
++  if p_descuento_familiar_pct > 0
++     and not (v_super or (p_negocio_id is not null and coalesce(public.is_barberia_de(p_negocio_id), false))) then
++    raise exception 'NO_AUTORIZADO';
++  end if;
++
++  if exists (select 1 from public.familia_miembro where cliente_id = v_uid) then raise exception 'YA_PERTENECE_A_UNA_FAMILIA'; end if;
++
++  insert into public.familia_grupo (titular_cliente_id, negocio_id, nombre, limite_miembros, descuento_familiar_pct)
++  values (v_uid, p_negocio_id, p_nombre, greatest(p_limite_miembros, 1), p_descuento_familiar_pct)
++  returning * into v_grupo;
++
++  insert into public.familia_miembro (familia_id, cliente_id, parentesco) values (v_grupo.id, v_uid, 'Titular');
++
++  return v_grupo;
++end;
++$$;
++
++-- Permisos explícitos sobre los TRES roles (public/anon/authenticated son independientes).
++revoke all on function public.crear_grupo_familiar(text, uuid, int, numeric) from public, anon;
++grant execute on function public.crear_grupo_familiar(text, uuid, int, numeric) to authenticated;
++
++do $$
++begin
++  if not exists (select 1 from pg_constraint where conname = 'familia_grupo_descuento_rango_chk' and conrelid = 'public.familia_grupo'::regclass) then
++    alter table public.familia_grupo
++      add constraint familia_grupo_descuento_rango_chk check (descuento_familiar_pct between 0 and 100) not valid;
++  end if;
++end $$;
+diff --git a/tests/f0-01-request-id-proxy-webhook.test.ts b/tests/f0-01-request-id-proxy-webhook.test.ts
+new file mode 100644
+index 0000000..6c68e9f
+--- /dev/null
++++ b/tests/f0-01-request-id-proxy-webhook.test.ts
+@@ -0,0 +1,137 @@
++/**
++ * F0-01 — el proxy sobrescribe `x-request-id` y el webhook de Mercado Pago firma con el id ORIGINAL.
++ * Prueba sintética de extremo a extremo (sin red, sin base, sin Mercado Pago real):
++ *   petición firmada como la firma Mercado Pago → proxy real (src/proxy.ts) → encabezados que recibe la ruta
++ *   → procesarWebhookMercadoPago real. La base se simula: si la firma pasa, el registro idempotente
++ *   responde «duplicado» (200); si no pasa, el handler devuelve 401 antes de tocar la base.
++ * Clave y firmas son ficticias.
++ */
++import { createHmac } from "node:crypto";
++import { beforeAll, describe, expect, it, vi } from "vitest";
++import { NextRequest } from "next/server";
++
++vi.mock("server-only", () => ({}));
++const llamadasRpc: string[] = [];
++vi.mock("@/lib/supabase/admin", () => ({
++  createAdminClient: () => ({
++    rpc: async (nombre: string) => {
++      llamadasRpc.push(nombre);
++      return { data: false, error: null }; // webhook_registrar → «ya existía»: corta el flujo tras la firma
++    },
++  }),
++}));
++
++const SECRETO = "secreto-ficticio-f0-01";
++const URL_WEBHOOK = "http://localhost:3000/api/webhooks/mercadopago?data.id=123456789&type=payment";
++
++function firmar(dataId: string, requestId: string, ts: string, clave = SECRETO) {
++  const v1 = createHmac("sha256", clave).update(`id:${dataId};request-id:${requestId};ts:${ts};`).digest("hex");
++  return `ts=${ts},v1=${v1}`;
++}
++
++/** Encabezados que la ruta recibe de verdad tras pasar por el proxy (Next los publica como x-middleware-request-*). */
++function encabezadosAguasAbajo(respuesta: Response): Headers {
++  const salida = new Headers();
++  const prefijo = "x-middleware-request-";
++  respuesta.headers.forEach((valor, nombre) => {
++    if (nombre.startsWith(prefijo)) salida.set(nombre.slice(prefijo.length), valor);
++  });
++  return salida;
++}
++
++let proxy: (r: NextRequest) => Promise<Response>;
++let procesar: (r: Request) => Promise<Response>;
++
++beforeAll(async () => {
++  process.env.MERCADOPAGO_WEBHOOK_SECRET = SECRETO;
++  delete process.env.NEXT_PUBLIC_SUPABASE_URL; // el proxy degrada sin sesión: no se llama a Supabase
++  delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
++  ({ proxy } = (await import("@/proxy")) as unknown as { proxy: typeof proxy });
++  ({ procesarWebhookMercadoPago: procesar } = await import("@/lib/pagos/webhook-mercadopago"));
++});
++
++/** Envía la notificación por el camino real: proxy → handler. */
++async function enviar(cabecerasEntrantes: Record<string, string>) {
++  llamadasRpc.length = 0;
++  const peticion = new NextRequest(URL_WEBHOOK, {
++    method: "POST",
++    headers: { "content-type": "application/json", ...cabecerasEntrantes },
++    body: JSON.stringify({ type: "payment", data: { id: "123456789" } }),
++  });
++  const respuestaProxy = await proxy(peticion);
++  const abajo = encabezadosAguasAbajo(respuestaProxy);
++  const alRuta = new Request(URL_WEBHOOK, {
++    method: "POST",
++    headers: abajo,
++    body: JSON.stringify({ type: "payment", data: { id: "123456789" } }),
++  });
++  const res = await procesar(alRuta);
++  return { status: res.status, abajo, llegoALaBase: llamadasRpc.length > 0 };
++}
++
++describe("F0-01 · x-request-id entre el proxy y el webhook de Mercado Pago", () => {
++  it("el proxy cambia x-request-id: el que ve la ruta NO es el que firmó Mercado Pago", async () => {
++    const idMp = "mp-req-0001";
++    const { abajo } = await enviar({ "x-request-id": idMp, "x-signature": firmar("123456789", idMp, String(Date.now())) });
++    console.info("[F0-01] id que envía Mercado Pago:", idMp, "| id que recibe la ruta:", abajo.get("x-request-id"), "| x-request-id-origen:", abajo.get("x-request-id-origen") ?? "(ausente)");
++    expect(abajo.get("x-request-id")).not.toBe(idMp);
++  });
++
++  it("una firma VÁLIDA (hecha con el id original de Mercado Pago) se acepta", async () => {
++    const idMp = "mp-req-0002";
++    const r = await enviar({ "x-request-id": idMp, "x-signature": firmar("123456789", idMp, String(Date.now())) });
++    expect(r.status).toBe(200);
++    expect(r.llegoALaBase).toBe(true);
++  });
++
++  it("una firma MANIPULADA (v1 alterado) se rechaza con 401 y no toca la base", async () => {
++    const idMp = "mp-req-0003";
++    const firma = firmar("123456789", idMp, String(Date.now()));
++    const alterada = firma.replace(/v1=(.)/, (_, c) => `v1=${c === "a" ? "b" : "a"}`);
++    const r = await enviar({ "x-request-id": idMp, "x-signature": alterada });
++    expect(r.status).toBe(401);
++    expect(r.llegoALaBase).toBe(false);
++  });
++
++  it("firma hecha con otra clave, o de otro data.id, o sin x-signature: 401", async () => {
++    const idMp = "mp-req-0004";
++    const ts = String(Date.now());
++    expect((await enviar({ "x-request-id": idMp, "x-signature": firmar("123456789", idMp, ts, "otra-clave") })).status).toBe(401);
++    expect((await enviar({ "x-request-id": idMp, "x-signature": firmar("999", idMp, ts) })).status).toBe(401);
++    expect((await enviar({ "x-request-id": idMp })).llegoALaBase).toBe(false);
++  });
++
++  it("un cliente NO puede falsificar x-request-id-origen: el proxy lo descarta y escribe el suyo", async () => {
++    // Atacante: la firma es válida para el id «A», pero la petición real trae x-request-id «B» y finge origen «A».
++    const ts = String(Date.now());
++    const r = await enviar({
++      "x-request-id": "id-real-B",
++      "x-request-id-origen": "id-falso-A",
++      "x-signature": firmar("123456789", "id-falso-A", ts),
++    });
++    expect(r.abajo.get("x-request-id-origen")).not.toBe("id-falso-A");
++    expect(r.status).toBe(401);
++    expect(r.llegoALaBase).toBe(false);
++  });
++
++  it("sin x-request-id de entrada tampoco se acepta un x-request-id-origen inventado por el cliente", async () => {
++    const ts = String(Date.now());
++    const r = await enviar({ "x-request-id-origen": "inventado", "x-signature": firmar("123456789", "inventado", ts) });
++    expect(r.abajo.get("x-request-id-origen")).toBeNull();
++    expect(r.status).toBe(401);
++  });
++
++  it("llamada directa al handler (sin proxy) con origen falsificado y firma con clave ajena: 401", async () => {
++    llamadasRpc.length = 0;
++    const ts = String(Date.now());
++    const res = await procesar(
++      new Request(URL_WEBHOOK, {
++        method: "POST",
++        headers: { "x-request-id-origen": "x", "x-request-id": "y", "x-signature": firmar("123456789", "x", ts, "clave-del-atacante") },
++        body: JSON.stringify({ type: "payment", data: { id: "123456789" } }),
++      }),
++    );
++    expect(res.status).toBe(401);
++    expect(llamadasRpc.length).toBe(0);
++  });
++});
+diff --git a/tests/admin-actions-autorizacion.test.ts b/tests/admin-actions-autorizacion.test.ts
+new file mode 100644
+index 0000000..358cdd6
+--- /dev/null
++++ b/tests/admin-actions-autorizacion.test.ts
+@@ -0,0 +1,215 @@
++/**
++ * H-008 · Server Actions de /admin: ¿cada operación verifica la autorización en el SERVIDOR?
++ *
++ * Ejecuta el código REAL de cada Server Action exportada en src/app/admin/** con la sesión REAL (JWT de GoTrue local) de
++ * cada actor contra la base LOCAL de Docker, y mide:
++ *   · el resultado devuelto (ok / datos),
++ *   · si cambió el estado de la base (huella md5 de todas las tablas de `public` y de `auth.users` antes/después).
++ * Un actor que no es Super Admin NO debe: obtener ok:true en una escritura, leer datos de la plataforma, ni alterar la base.
++ * El Super Admin hace de CONTROL: sirve para demostrar que las llamadas son válidas (si el control falla, la prueba no vale).
++ *
++ * Solo corre con PRUEBAS_LOCALES_ADMIN=1 y exige que la API sea http://127.0.0.1:55321 (jamás un entorno remoto).
++ * Salida: docs/plan_cierre/evidencias_1a/admin_actions_<etiqueta>.json
++ */
++import { execSync } from "node:child_process";
++import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
++import { createClient, type SupabaseClient } from "@supabase/supabase-js";
++import { describe, expect, it, vi } from "vitest";
++
++const API = process.env.API_URL ?? "";
++const ANON = process.env.ANON_KEY ?? "";
++const SERVICE = process.env.SERVICE_ROLE_KEY ?? "";
++const PW = process.env.PW_PRUEBAS ?? "";
++const ETIQUETA = process.env.ETIQUETA ?? "ejecucion";
++const habilitado = process.env.PRUEBAS_LOCALES_ADMIN === "1" && API === "http://127.0.0.1:55321" && ANON && SERVICE && PW;
++
++// ── Sustitutos de Next (no hay servidor Next en esta prueba; el resto del código es el real) ───────────────────────────
++let actual: SupabaseClient;
++let admin: SupabaseClient;
++vi.mock("server-only", () => ({}));
++vi.mock("next/cache", () => ({ revalidatePath: () => {}, revalidateTag: () => {} }));
++vi.mock("next/navigation", () => ({
++  redirect: (url: string) => {
++    throw Object.assign(new Error("NEXT_REDIRECT"), { digest: `NEXT_REDIRECT;${url}` });
++  },
++  notFound: () => {
++    throw new Error("NEXT_NOT_FOUND");
++  },
++}));
++vi.mock("@/lib/supabase/server", () => ({ createClient: async () => actual }));
++vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => admin }));
++
++const sql = (q: string) =>
++  execSync("docker exec -i supabase_db_stylernow-cierre psql -U postgres -d postgres -At -v ON_ERROR_STOP=1", { input: q, encoding: "utf8" }).trim();
++const uno = (q: string, defecto: string) => {
++  try {
++    return sql(q).split("\n")[0] || defecto;
++  } catch {
++    return defecto;
++  }
++};
++
++/** Huella por tabla (md5 del contenido). Se compara antes/después de cada actor. */
++function huella(): Record<string, string> {
++  const filas = sql(`
++    select t.s || '.' || t.n || '=' || (xpath('/row/c/text()', query_to_xml(format('select md5(coalesce(string_agg(x::text, ''|'' order by x::text), '''')) as c from %I.%I x', t.s, t.n), false, true, '')))[1]::text
++    from (select schemaname s, tablename n from pg_tables where schemaname = 'public' union all select 'auth', 'users') t order by 1`);
++  return Object.fromEntries(filas.split("\n").map((l) => l.split("=") as [string, string]));
++}
++const diferencias = (a: Record<string, string>, b: Record<string, string>) => Object.keys(b).filter((k) => a[k] !== b[k]);
++
++const ACTORES = ["anonimo", "intruso", "cliente-a", "pro-a1", "guardian-a", "dueno-a", "dueno-b", "super"] as const;
++
++describe.skipIf(!habilitado)("H-008 · Server Actions de /admin con sesión real por actor", () => {
++  it("matriz acción × actor", async () => {
++    sql(readFileSync("supabase/seed_admin_acciones.sql", "utf8")); // repone el estado inicial de los objetos que consumen las acciones
++    const R = "11111111-1111-4111-8111-111111111111"; // UUID v4 válido que no existe
++    const NEG = (x: string) => `00000000-0000-0000-0006-0000000005${x}`; // negocios sembrados en el estado que exige cada acción
++    const N = "00000000-0000-0000-0006-0000000001b0";
++    const U = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"; // cuenta víctima (seed_admin_acciones.sql)
++    const id = (tabla: string, col = "id") => uno(`select ${col} from public.${tabla} limit 1`, R);
++    const ids = {
++      resena: R,
++      ticket: id("ticket_soporte"),
++      banner: id("banner_home"),
++      fraude: id("lealtad_fraude_evento"),
++      reembolso: R,
++      aiAccion: uno("select accion from public.ai_accion_costo limit 1", "x"),
++      aiModelo: uno("select nombre from public.ai_modelo_config limit 1", "x"),
++      aiPaquete: id("ai_paquete_creditos"),
++      waPaquete: uno("select id from public.whatsapp_paquete limit 1", R),
++    };
++
++    const ahora = new Date(Date.now() + 40 * 86400_000).toISOString();
++    const M = "motivo de prueba local";
++    type Caso = { modulo: string; fn: string; tipo: "lectura" | "escritura"; args: unknown[] };
++    const c = (modulo: string, fn: string, tipo: Caso["tipo"], ...args: unknown[]): Caso => ({ modulo, fn, tipo, args });
++
++    const casos: Caso[] = [
++      c("@/app/admin/actions", "obtenerResumenAdmin", "lectura"),
++      c("@/app/admin/actions", "listarNegocios", "lectura"),
++      c("@/app/admin/actions", "listarResenasReportadas", "lectura"),
++      c("@/app/admin/actions", "aprobarNegocio", "escritura", NEG("a1")),
++      c("@/app/admin/actions", "rechazarNegocio", "escritura", NEG("a2"), M),
++      c("@/app/admin/actions", "suspenderNegocio", "escritura", NEG("b1"), M, "INFRACCION"),
++      c("@/app/admin/actions", "marcarNegocioEnMora", "escritura", NEG("b2"), M),
++      c("@/app/admin/actions", "forzarReactivacionPagoExterno", "escritura", NEG("c1"), M),
++      c("@/app/admin/actions", "reactivarNegocio", "escritura", NEG("c2")),
++      c("@/app/admin/actions", "cancelarNegocio", "escritura", NEG("b3"), M),
++      c("@/app/admin/actions", "activarPlanManual", "escritura", { negocioId: NEG("b4"), estado: "ACTIVA", plan: "STUDIO", tipo: "CORTESIA", motivo: M, dias: 30, referencia: null }),
++      c("@/app/admin/actions", "moderarResena", "escritura", ids.resena, "MANTENER", M),
++      c("@/app/admin/ai/actions", "listarAccionesCostoIa", "lectura"),
++      c("@/app/admin/ai/actions", "listarModelosIa", "lectura"),
++      c("@/app/admin/ai/actions", "listarPaquetesIa", "lectura"),
++      c("@/app/admin/ai/actions", "listarFuncionesPlanIa", "lectura"),
++      c("@/app/admin/ai/actions", "obtenerResumenConsumoIa", "lectura"),
++      c("@/app/admin/ai/actions", "simularConsumoIa", "lectura", "ESSENTIAL", 2, 100),
++      c("@/app/admin/ai/actions", "actualizarCostoAccionIa", "escritura", ids.aiAccion, 7, true),
++      c("@/app/admin/ai/actions", "actualizarModeloIa", "escritura", ids.aiModelo, 7, true),
++      c("@/app/admin/ai/actions", "actualizarPaqueteIa", "escritura", ids.aiPaquete, 7777, true),
++      c("@/app/admin/ai/actions", "configurarFuncionPlanIa", "escritura", "ESSENTIAL", "funcion_prueba", true),
++      c("@/app/admin/auditoria/actions", "listarAuditoriaAdmin", "lectura", {}),
++      c("@/app/admin/auditoria/actions", "listarEntidadesAdmin", "lectura"),
++      c("@/app/admin/auditoria/actions", "buscarNegociosAuditoria", "lectura", "barber"),
++      c("@/app/admin/barra-actions", "buscarGlobal", "lectura", "barber"),
++      c("@/app/admin/configuracion/actions", "obtenerComisionGlobal", "lectura"),
++      c("@/app/admin/configuracion/actions", "obtenerTarifasAds", "lectura"),
++      c("@/app/admin/configuracion/actions", "obtenerMetricasAdsPlataforma", "lectura"),
++      c("@/app/admin/configuracion/actions", "listarCiudades", "lectura"),
++      c("@/app/admin/configuracion/actions", "listarBanners", "lectura"),
++      c("@/app/admin/configuracion/actions", "listarPlanes", "lectura"),
++      c("@/app/admin/configuracion/actions", "listarTextosLegales", "lectura"),
++      c("@/app/admin/configuracion/actions", "actualizarTarifasAds", "escritura", { cpcDestacado: 777, cpcPin: 777, cpmPin: 777 }),
++      c("@/app/admin/configuracion/actions", "actualizarComisionGlobal", "escritura", 9),
++      c("@/app/admin/configuracion/actions", "actualizarCiudad", "escritura", "Cali", false),
++      c("@/app/admin/configuracion/actions", "crearBanner", "escritura", { imagenUrl: "https://ejemplo.test/b.png", texto: "banner prueba", urlDestino: "", vigenciaDesde: "", vigenciaHasta: "", orden: 1 }),
++      c("@/app/admin/configuracion/actions", "actualizarBanner", "escritura", ids.banner, { activo: false }),
++      c("@/app/admin/configuracion/actions", "eliminarBanner", "escritura", ids.banner),
++      c("@/app/admin/configuracion/actions", "actualizarPlan", "escritura", { codigo: "ESSENTIAL", precioMensual: 777, limiteSedes: null, staffIncluido: null, staffAddonPrecio: null, sedeAddonPrecio: null, guardianDisponible: true, marketplaceAdsDisponible: true, creditosIaMes: null, conversacionesWhatsappMes: null }),
++      c("@/app/admin/configuracion/actions", "publicarTextoLegal", "escritura", "TERMINOS", "contenido de prueba local", false),
++      c("@/app/admin/lealtad/actions", "obtenerMetricasLealtad", "lectura"),
++      c("@/app/admin/lealtad/actions", "listarEventosFraude", "lectura"),
++      c("@/app/admin/lealtad/actions", "marcarFraudeRevisado", "escritura", ids.fraude),
++      c("@/app/admin/planes/actions", "obtenerDatosPlanes", "lectura"),
++      c("@/app/admin/planes/actions", "guardarAjustesPais", "escritura", { codigo: "CO", activo: true, pasarela: "MERCADOPAGO", cobroRecurrente: false, fundadorDescuentoPct: 31, fundadorCupos: 100, fundadorMeses: 12, impuestoPct: null, precioMasImpuesto: false }, M),
++      c("@/app/admin/planes/actions", "guardarPrecioPlan", "escritura", { plan: "STUDIO", pais: "CO", precioMensual: 777, esDesde: false, precioStaffExtra: null, precioSedeExtra: null, activo: true }, M),
++      c("@/app/admin/planes/actions", "guardarPrecioAddon", "escritura", "CO", 777, M),
++      c("@/app/admin/planes/actions", "guardarCaracteristica", "escritura", { plan: "STUDIO", clave: "clave_prueba", habilitado: true, valor: null }, M),
++      c("@/app/admin/reglas/actions", "obtenerReglas", "lectura"),
++      c("@/app/admin/reglas/actions", "guardarLimites", "escritura", { totalMin: 24, totalMax: 48, parcialMin: 2, pctMin: 25, pctMax: 55, maxIntentos: 3, motivo: M }),
++      c("@/app/admin/reglas/actions", "guardarConfigPrueba", "escritura", { dias: 14, modalidad: "SIN_TARJETA", graciaDias: 3, aviso1: 5, aviso2: 1, motivo: M }),
++      c("@/app/admin/reglas/actions", "programarComision", "escritura", { negocioId: null, pct: 5, efectivoDesde: ahora, motivo: M }),
++      c("@/app/admin/reglas/actions", "anularComisionProgramada", "escritura", R, M),
++      c("@/app/admin/reglas/actions", "guardarComisionDefault", "escritura", 9),
++      c("@/app/admin/reglas/actions", "reintentarReembolso", "escritura", ids.reembolso, M),
++      c("@/app/admin/soporte/actions", "listarTicketsAdmin", "lectura"),
++      c("@/app/admin/soporte/actions", "obtenerHiloTicketAdmin", "lectura", ids.ticket),
++      c("@/app/admin/soporte/actions", "responderTicketAdmin", "escritura", ids.ticket, "respuesta de prueba local"),
++      c("@/app/admin/soporte/actions", "actualizarEstadoTicket", "escritura", ids.ticket, "RESUELTO"),
++      c("@/app/admin/usuarios/actions", "suspenderUsuario", "escritura", U, M),
++      c("@/app/admin/usuarios/actions", "cerrarSesionesUsuario", "escritura", U, M),
++      c("@/app/admin/usuarios/actions", "reactivarUsuario", "escritura", U, M),
++      c("@/app/admin/whatsapp/actions", "obtenerResumenAdminWhatsApp", "lectura"),
++      c("@/app/admin/whatsapp/actions", "actualizarConfigWhatsApp", "escritura", { pctMarketingPlan: 12, pctMarketingRecarga: 12, mesesVencimientoRecarga: 12, umbralesAlerta: [80], proveedor: null, motivo: M }),
++      c("@/app/admin/whatsapp/actions", "cambiarEstadoConexion", "escritura", { estado: "SUSPENDIDO", motivo: M }),
++      c("@/app/admin/whatsapp/actions", "crearPaqueteWhatsApp", "escritura", { codigo: "PRUEBA_LOCAL_X1", nombre: "Paquete prueba", conversaciones: 100, precio: 1000, moneda: "COP", motivo: M }),
++      c("@/app/admin/whatsapp/actions", "versionarPaqueteWhatsApp", "escritura", { paqueteId: ids.waPaquete, nombre: "Paquete v2", conversaciones: 100, precio: 1000, motivo: M }),
++      c("@/app/admin/whatsapp/actions", "alternarPaqueteWhatsApp", "escritura", { paqueteId: ids.waPaquete, activo: false, motivo: M }),
++    ];
++
++    admin = createClient(API, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
++    const clientes: Record<string, SupabaseClient> = {};
++    for (const a of ACTORES) {
++      const cl = createClient(API, ANON, { auth: { persistSession: false, autoRefreshToken: false } });
++      if (a !== "anonimo") {
++        const { error } = await cl.auth.signInWithPassword({ email: `${a}@pruebas.test`, password: PW });
++        if (error) throw new Error(`no se pudo iniciar sesión como ${a}: ${error.message}`);
++      }
++      clientes[a] = cl;
++    }
++
++    const modulos: Record<string, Record<string, (...a: unknown[]) => Promise<unknown>>> = {};
++    for (const m of new Set(casos.map((k) => k.modulo))) modulos[m] = await import(/* @vite-ignore */ m);
++
++    const salida: unknown[] = [];
++    const resumen: Record<string, { llamadas: number; escrituras_ok: number; lecturas_con_datos: number; tablas_cambiadas: string[] }> = {};
++    for (const actor of ACTORES) {
++      actual = clientes[actor];
++      const antes = huella();
++      let escriturasOk = 0;
++      let lecturasConDatos = 0;
++      for (const caso of casos) {
++        let res: unknown;
++        let lanzo = "";
++        try {
++          res = await modulos[caso.modulo][caso.fn](...caso.args);
++        } catch (e) {
++          lanzo = e instanceof Error ? (e as Error & { digest?: string }).digest ?? e.message : String(e);
++        }
++        const r = res as { ok?: boolean; data?: unknown; error?: string } | null | undefined;
++        const ok = r === null || r === undefined ? false : typeof r.ok === "boolean" ? r.ok : true; // buscarGlobal devuelve el objeto
++        const datos = Array.isArray(r?.data) ? r.data.length : r?.data && typeof r.data === "object" ? Object.keys(r.data).length : r && r.ok === undefined ? Object.values(r as object).flat().length : r?.data ? 1 : 0;
++        if (caso.tipo === "escritura" && ok) escriturasOk++;
++        if (caso.tipo === "lectura" && ok && datos > 0) lecturasConDatos++;
++        salida.push({ actor, modulo: caso.modulo.replace("@/app/admin/", ""), fn: caso.fn, tipo: caso.tipo, ok, datos, lanzo: lanzo || undefined, error: r?.error?.slice(0, 120) });
++      }
++      const despues = huella();
++      resumen[actor] = { llamadas: casos.length, escrituras_ok: escriturasOk, lecturas_con_datos: lecturasConDatos, tablas_cambiadas: diferencias(antes, despues) };
++    }
++
++    mkdirSync("docs/plan_cierre/evidencias_1a", { recursive: true });
++    writeFileSync(`docs/plan_cierre/evidencias_1a/admin_actions_${ETIQUETA}.json`, JSON.stringify({ resumen, detalle: salida }, null, 1));
++    console.info("RESUMEN", JSON.stringify(resumen, null, 1));
++
++    // El CONTROL debe funcionar: el Super Admin tiene que poder leer y escribir (si no, las llamadas no son válidas).
++    expect(resumen.super.lecturas_con_datos).toBeGreaterThan(10);
++    expect(resumen.super.escrituras_ok).toBeGreaterThan(15);
++    // Ningún actor que no sea Super Admin: escrituras con ok, lecturas con datos ni cambios en la base.
++    for (const a of ACTORES.filter((x) => x !== "super")) {
++      expect(resumen[a].escrituras_ok, `${a}: escrituras con ok:true`).toBe(0);
++      expect(resumen[a].lecturas_con_datos, `${a}: lecturas con datos`).toBe(0);
++      expect(resumen[a].tablas_cambiadas, `${a}: tablas cambiadas`).toEqual([]);
++    }
++  }, 600_000);
++});
++
+diff --git a/tests/sql/f0_05_crear_grupo_familiar.sql b/tests/sql/f0_05_crear_grupo_familiar.sql
+new file mode 100644
+index 0000000..75b91e7
+--- /dev/null
++++ b/tests/sql/f0_05_crear_grupo_familiar.sql
+@@ -0,0 +1,153 @@
++-- F0-05 · crear_grupo_familiar: autorización por negocio y límites del descuento (RPC directa, sin pasar por la interfaz).
++-- Base LOCAL con datos ficticios; todo termina en ROLLBACK. Imprime una fila por caso (actor, llamada, esperado, obtenido) y
++-- falla (exit code ≠ 0) si alguno no coincide con lo esperado.
++--   Reglas que verifica (decisión de seguridad, no regla comercial nueva):
++--     · amarrar el grupo a un negocio exige relación autorizada: dueño, personal del negocio, cliente con reserva en él, o Super Admin;
++--     · un descuento ≠ 0 solo lo fija el dueño del negocio o el Super Admin; nunca un cliente ni un tercero;
++--     · el descuento es un porcentaje 0–100 y no puede ser NULL; los demás casos se rechazan en el servidor aunque la interfaz no lo permita.
++\set ON_ERROR_STOP 1
++begin;
++grant select, insert, update, delete on all tables in schema public to service_role;
++
++-- Actores ficticios (todos distintos; ids 00000000-…-f05-…)
++create temp table _a (alias text primary key, id uuid);
++insert into _a values
++  ('super',    '00000000-0000-0000-0f05-000000000001'),
++  ('dueno',    '00000000-0000-0000-0f05-000000000002'),
++  ('guardian', '00000000-0000-0000-0f05-000000000003'),
++  ('pro',      '00000000-0000-0000-0f05-000000000004'),
++  ('cliente',  '00000000-0000-0000-0f05-000000000005'),
++  ('intruso',  '00000000-0000-0000-0f05-000000000006'),
++  ('dueno_m',  '00000000-0000-0000-0f05-000000000007');
++grant select on _a to authenticated, anon;
++
++insert into auth.users (id, email, aud, role) select id, alias || '@f05.test', 'authenticated', 'authenticated' from _a;
++insert into public.perfil (id, nombre, es_supersu) select id, alias, alias = 'super' from _a on conflict (id) do update set es_supersu = excluded.es_supersu;
++
++insert into public.negocio (id, owner_user_id, nombre, slug, ciudad, pais_codigo) values
++  ('00000000-0000-0000-0f05-0000000000a0', '00000000-0000-0000-0f05-000000000002', 'Negocio N', 'f05-n', 'Cali', 'CO'),
++  ('00000000-0000-0000-0f05-0000000000b0', '00000000-0000-0000-0f05-000000000007', 'Negocio M', 'f05-m', 'Cali', 'CO');
++insert into public.sede (id, negocio_id, nombre, direccion, ciudad) values
++  ('00000000-0000-0000-0f05-0000000000a1', '00000000-0000-0000-0f05-0000000000a0', 'Sede N', 'x', 'Cali');
++update public.suscripcion set estado = 'ACTIVA' where negocio_id in ('00000000-0000-0000-0f05-0000000000a0', '00000000-0000-0000-0f05-0000000000b0');
++insert into public.staff (usuario_id, nombre) values ('00000000-0000-0000-0f05-000000000003', 'G'), ('00000000-0000-0000-0f05-000000000004', 'P');
++insert into public.vinculo_staff_negocio (staff_id, negocio_id, sede_activa_id, estado, es_guardian, comision_pct, fecha_ingreso) values
++  ('00000000-0000-0000-0f05-000000000003', '00000000-0000-0000-0f05-0000000000a0', '00000000-0000-0000-0f05-0000000000a1', 'ACTIVO', true,  40, now()),
++  ('00000000-0000-0000-0f05-000000000004', '00000000-0000-0000-0f05-0000000000a0', '00000000-0000-0000-0f05-0000000000a1', 'ACTIVO', false, 40, now());
++insert into public.reserva (cliente_id, negocio_id, sede_id, hora_inicio, hora_fin, estado, monto_total, monto_sena) values
++  ('00000000-0000-0000-0f05-000000000005', '00000000-0000-0000-0f05-0000000000a0', '00000000-0000-0000-0f05-0000000000a1', now() + interval '3 days', now() + interval '3 days 1 hour', 'CONFIRMADA', 30000, 0);
++
++create temp table _res (n int, actor text, llamada text, esperado text, obtenido text, detalle text);
++grant all on _res to authenticated, anon;
++
++-- Ejecuta la RPC como `p_actor` dentro de una subtransacción que SIEMPRE se revierte (no deja grupos creados).
++create or replace function pg_temp.intentar(p_n int, p_actor text, p_llamada text, p_esperado text, p_neg uuid, p_pct numeric, p_rol text default 'authenticated')
++returns void language plpgsql as $$
++declare v_id uuid; v_obt text := 'PERMITIDO'; v_det text := '';
++begin
++  select id into v_id from _a where alias = p_actor;
++  begin
++    execute format('set local role %I', p_rol);
++    perform set_config('request.jwt.claims', case when v_id is null then '{"role":"anon"}' else json_build_object('sub', v_id, 'role', p_rol)::text end, true);
++    perform public.crear_grupo_familiar('Grupo prueba', p_neg, 4, p_pct);
++    raise exception 'REVERTIR_PRUEBA';
++  exception when others then
++    if sqlerrm <> 'REVERTIR_PRUEBA' then v_obt := 'DENEGADO'; v_det := left(sqlerrm, 80); end if;
++  end;
++  insert into _res values (p_n, p_actor, p_llamada, p_esperado, v_obt, v_det);
++end $$;
++
++\set N '00000000-0000-0000-0f05-0000000000a0'
++\set M '00000000-0000-0000-0f05-0000000000b0'
++\set NADA '00000000-0000-0000-0f05-0000000000ff'
++
++\o /dev/null
++-- ── Sin negocio y sin descuento (el uso real de la interfaz): lo puede hacer cualquier autenticado ─────────────────────────
++select pg_temp.intentar(1,  'intruso',  'sin negocio, 0%',                      'PERMITIDO', null, 0);
++select pg_temp.intentar(2,  'cliente',  'sin negocio, 0%',                      'PERMITIDO', null, 0);
++-- ── Negocio ajeno: solo con relación autorizada ──────────────────────────────────────────────────────────────────────────
++select pg_temp.intentar(3,  'intruso',  'negocio N, 0%',                        'DENEGADO',  :'N', 0);
++select pg_temp.intentar(4,  'cliente',  'negocio N (con reserva en N), 0%',     'PERMITIDO', :'N', 0);
++select pg_temp.intentar(5,  'cliente',  'negocio M (sin relación con M), 0%',   'DENEGADO',  :'M', 0);
++select pg_temp.intentar(6,  'pro',      'negocio N (su negocio), 0%',           'PERMITIDO', :'N', 0);
++select pg_temp.intentar(7,  'pro',      'negocio M (otro negocio), 0%',         'DENEGADO',  :'M', 0);
++select pg_temp.intentar(8,  'guardian', 'negocio N (su negocio), 0%',           'PERMITIDO', :'N', 0);
++select pg_temp.intentar(9,  'guardian', 'negocio M (otro negocio), 0%',         'DENEGADO',  :'M', 0);
++select pg_temp.intentar(10, 'dueno',    'negocio N (propio), 0%',               'PERMITIDO', :'N', 0);
++select pg_temp.intentar(11, 'dueno',    'negocio M (de otro dueño), 0%',        'DENEGADO',  :'M', 0);
++select pg_temp.intentar(12, 'super',    'negocio N, 0%',                        'PERMITIDO', :'N', 0);
++select pg_temp.intentar(13, 'super',    'negocio M, 0%',                        'PERMITIDO', :'M', 0);
++select pg_temp.intentar(14, 'dueno',    'negocio inexistente, 0%',              'DENEGADO',  :'NADA', 0);
++select pg_temp.intentar(15, 'super',    'negocio inexistente, 0%',              'DENEGADO',  :'NADA', 0);
++-- ── Descuento: solo dueño del negocio o Super Admin; siempre entre 0 y 100 ───────────────────────────────────────────────
++select pg_temp.intentar(16, 'cliente',  'negocio N, 15%',                       'DENEGADO',  :'N', 15);
++select pg_temp.intentar(17, 'cliente',  'sin negocio, 15%',                     'DENEGADO',  null, 15);
++select pg_temp.intentar(18, 'intruso',  'negocio N, 15%',                       'DENEGADO',  :'N', 15);
++select pg_temp.intentar(19, 'pro',      'negocio N, 15%',                       'DENEGADO',  :'N', 15);
++select pg_temp.intentar(20, 'guardian', 'negocio N, 15%',                       'DENEGADO',  :'N', 15);
++select pg_temp.intentar(21, 'dueno',    'negocio N, 15%',                       'PERMITIDO', :'N', 15);
++select pg_temp.intentar(22, 'dueno',    'negocio M (ajeno), 15%',               'DENEGADO',  :'M', 15);
++select pg_temp.intentar(23, 'super',    'negocio N, 15%',                       'PERMITIDO', :'N', 15);
++select pg_temp.intentar(24, 'dueno',    'negocio N, 100%',                      'PERMITIDO', :'N', 100);
++select pg_temp.intentar(25, 'dueno',    'negocio N, 100.01%',                   'DENEGADO',  :'N', 100.01);
++select pg_temp.intentar(26, 'dueno',    'negocio N, 999.99%',                    'DENEGADO',  :'N', 999.99);
++select pg_temp.intentar(27, 'dueno',    'negocio N, -5%',                       'DENEGADO',  :'N', -5);
++select pg_temp.intentar(28, 'super',    'negocio N, -5%',                       'DENEGADO',  :'N', -5);
++select pg_temp.intentar(29, 'dueno',    'negocio N, NULL%',                     'DENEGADO',  :'N', null);
++select pg_temp.intentar(30, 'cliente',  'sin negocio, -50% (descuento negativo)', 'DENEGADO', null, -50);
++-- ── Anónimo (sin sesión) ─────────────────────────────────────────────────────────────────────────────────────────────────
++select pg_temp.intentar(31, 'anonimo',  'sin negocio, 0%',                      'DENEGADO',  null, 0, 'anon');
++select pg_temp.intentar(32, 'anonimo',  'negocio N, 15%',                       'DENEGADO',  :'N', 15, 'anon');
++
++reset role;
++\o
++\echo ''
++\echo '== F0-05 · resultados por caso =='
++select n, actor, llamada, esperado, obtenido, case when esperado = obtenido then 'ok' else '*** DIFIERE ***' end as veredicto, detalle from _res order by n;
++
++-- ── Escrituras directas a la tabla (saltándose la RPC): deben seguir bloqueadas por RLS ──────────────────────────────────
++create temp table _dir (n int, llamada text, esperado text, obtenido text);
++grant all on _dir to authenticated;
++do $$
++declare v_obt text;
++begin
++  -- como intruso: INSERT directo con negocio ajeno y descuento
++  perform set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0f05-000000000006","role":"authenticated"}', true);
++  set local role authenticated;
++  begin
++    insert into public.familia_grupo (titular_cliente_id, negocio_id, nombre, descuento_familiar_pct)
++    values ('00000000-0000-0000-0f05-000000000006', '00000000-0000-0000-0f05-0000000000a0', 'directo', 99);
++    v_obt := 'PERMITIDO';
++  exception when others then v_obt := 'DENEGADO'; end;
++  reset role;
++  insert into _dir values (101, 'INSERT directo en familia_grupo (negocio ajeno, 99%) como intruso', 'DENEGADO', v_obt);
++end $$;
++do $$
++declare v_obt text; v_g uuid;
++begin
++  -- titular legítimo crea un grupo sin descuento y luego intenta subirse el descuento con UPDATE directo
++  perform set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0f05-000000000005","role":"authenticated"}', true);
++  set local role authenticated;
++  v_g := (public.crear_grupo_familiar('Mi grupo', null, 4, 0)).id;
++  begin
++    update public.familia_grupo set descuento_familiar_pct = 50 where id = v_g;
++    -- un UPDATE sin política de UPDATE no falla: afecta 0 filas; se mide por efecto
++    reset role;
++    select case when descuento_familiar_pct = 50 then 'PERMITIDO' else 'DENEGADO' end into v_obt from public.familia_grupo where id = v_g;
++  exception when others then v_obt := 'DENEGADO'; reset role; end;
++  insert into _dir values (102, 'UPDATE directo del descuento a 50% por el propio titular', 'DENEGADO', v_obt);
++end $$;
++reset role;
++select n, llamada, esperado, obtenido, case when esperado = obtenido then 'ok' else '*** DIFIERE ***' end as veredicto from _dir order by n;
++
++do $$
++declare v_mal int; v_mal2 int;
++begin
++  select count(*) into v_mal from _res where esperado <> obtenido;
++  select count(*) into v_mal2 from _dir where esperado <> obtenido;
++  if v_mal + v_mal2 > 0 then
++    raise exception 'FALLA F0-05: % casos de RPC y % de escritura directa no coinciden con lo esperado', v_mal, v_mal2;
++  end if;
++  raise notice 'OK F0-05: % casos de RPC + % de escritura directa coinciden con lo esperado', (select count(*) from _res), (select count(*) from _dir);
++end $$;
++rollback;
+diff --git a/tests/aislamiento/insercion_reserva_resena.sql b/tests/aislamiento/insercion_reserva_resena.sql
+new file mode 100644
+index 0000000..41937e8
+--- /dev/null
++++ b/tests/aislamiento/insercion_reserva_resena.sql
+@@ -0,0 +1,80 @@
++-- Inserción DIRECTA (sin RPC) en reserva y resena con filas COMPLETAS y válidas, como cada actor.
++-- Motivo: la matriz HTTP envía una fila incompleta y en estas dos tablas un trigger BEFORE INSERT falla (P0001) antes de que se evalúe
++-- la política RLS; ahí el aislamiento de inserción no quedaba demostrado. Aquí el cuerpo es válido, así que cualquier rechazo es de
++-- autorización/regla y no de datos faltantes. Base LOCAL con seed_pruebas/seed_datos_ricos; cada intento se revierte (subtransacción).
++-- Esperado: nadie inserta sobre el negocio B suplantando a su cliente ni siendo interno de otro negocio.
++\set ON_ERROR_STOP 1
++begin;
++grant select, insert, update, delete on all tables in schema public to service_role;
++create temp table _r (n int, actor text, intento text, esperado text, obtenido text, detalle text);
++grant all on _r to authenticated, anon;
++
++create or replace function pg_temp.intentar(p_n int, p_actor text, p_intento text, p_esperado text, p_sql text, p_rol text default 'authenticated') returns void language plpgsql as $$
++declare v_id uuid; v_obt text := 'PERMITIDO'; v_det text := '';
++begin
++  select u.id into v_id from auth.users u where u.email = p_actor || '@pruebas.test';
++  p_sql := replace(p_sql, '@@ACTOR@@', coalesce(v_id::text, '00000000-0000-0000-0000-000000000000'));
++  begin
++    execute format('set local role %I', p_rol);
++    perform set_config('request.jwt.claims', case when v_id is null then '{"role":"anon"}' else json_build_object('sub', v_id, 'role', p_rol)::text end, true);
++    execute p_sql;
++    raise exception 'REVERTIR_PRUEBA';
++  exception when others then
++    if sqlerrm <> 'REVERTIR_PRUEBA' then v_obt := 'DENEGADO'; v_det := left(sqlerrm, 90); end if;
++  end;
++  insert into _r values (p_n, p_actor, p_intento, p_esperado, v_obt, v_det);
++end $$;
++
++-- Valores de B: negocio, sede, cliente, reserva COMPLETADA (para la reseña)
++\set NEG '00000000-0000-0000-0006-0000000001b0'
++\set SEDE '00000000-0000-0000-0006-0000000002b0'
++\set CLIB '00000000-0000-0000-0006-0000000000b3'
++\set RESB '00000000-0000-0000-0006-0000000004b2'
++\set CLIA '00000000-0000-0000-0006-0000000000a3'
++
++\o /dev/null
++-- RESERVA sobre el negocio B, suplantando al cliente de B
++select pg_temp.intentar(1, a, 'reserva en B con cliente_id = cliente de B (suplantación)', 'DENEGADO',
++  format($q$insert into public.reserva (cliente_id, negocio_id, sede_id, hora_inicio, hora_fin, estado, monto_total, monto_sena)
++            values (%L, %L, %L, now() + interval '5 days', now() + interval '5 days 1 hour', 'CONFIRMADA', 30000, 0)$q$, :'CLIB', :'NEG', :'SEDE'))
++from unnest(array['intruso','cliente-a','dueno-a','guardian-a','pro-a1','pro-a2']) a;
++-- RESERVA sobre B siendo personal interno de OTRO negocio (política reserva_insert_interno exige ser de B)
++select pg_temp.intentar(2, a, 'reserva en B con cliente_id propio, actor interno de A', 'DENEGADO',
++  format($q$insert into public.reserva (cliente_id, negocio_id, sede_id, hora_inicio, hora_fin, estado, monto_total, monto_sena)
++            values ('@@ACTOR@@', %L, %L, now() + interval '6 days', now() + interval '6 days 1 hour', 'CONFIRMADA', 30000, 0)$q$, :'NEG', :'SEDE'))
++from unnest(array['dueno-a','guardian-a','pro-a1','pro-a2']) a;
++-- RESERVA en B con cliente propio (camino de la política «cliente»): informativo, lo decide trg_reserva_proteger_directo
++select pg_temp.intentar(3, a, 'reserva DIRECTA en B con cliente_id propio (cliente de otro negocio)', 'DENEGADO',
++  format($q$insert into public.reserva (cliente_id, negocio_id, sede_id, hora_inicio, hora_fin, estado, monto_total, monto_sena)
++            values ('@@ACTOR@@', %L, %L, now() + interval '7 days', now() + interval '7 days 1 hour', 'CONFIRMADA', 30000, 0)$q$, :'NEG', :'SEDE'))
++from unnest(array['intruso','cliente-a']) a;
++-- RESEÑA sobre una reserva COMPLETADA de B
++select pg_temp.intentar(4, a, 'reseña en B con cliente_id = cliente de B (suplantación)', 'DENEGADO',
++  format($q$insert into public.resena (reserva_id, cliente_id, negocio_id, calificacion, comentario) values (%L, %L, %L, 1, 'ataque')$q$, :'RESB', :'CLIB', :'NEG'))
++from unnest(array['intruso','cliente-a','dueno-a','guardian-a','pro-a1']) a;
++select pg_temp.intentar(5, a, 'reseña en B sobre reserva ajena con cliente_id propio', 'DENEGADO',
++  format($q$insert into public.resena (reserva_id, cliente_id, negocio_id, calificacion, comentario) values (%L, '@@ACTOR@@', %L, 1, 'ataque')$q$, :'RESB', :'NEG'))
++from unnest(array['intruso','cliente-a','dueno-a','guardian-a','pro-a1']) a;
++-- Anónimo
++select pg_temp.intentar(6, 'anonimo', 'reserva en B sin sesión', 'DENEGADO',
++  format($q$insert into public.reserva (cliente_id, negocio_id, sede_id, hora_inicio, hora_fin, estado, monto_total, monto_sena) values (%L, %L, %L, now() + interval '8 days', now() + interval '8 days 1 hour', 'CONFIRMADA', 1, 0)$q$, :'CLIB', :'NEG', :'SEDE'), 'anon');
++select pg_temp.intentar(7, 'anonimo', 'reseña en B sin sesión', 'DENEGADO',
++  format($q$insert into public.resena (reserva_id, cliente_id, negocio_id, calificacion) values (%L, %L, %L, 1)$q$, :'RESB', :'CLIB', :'NEG'), 'anon');
++-- CONTROL POSITIVO: el cliente de B reseña su propia reserva COMPLETADA, y el dueño de B inserta una reserva en su negocio
++select pg_temp.intentar(8, 'cliente-b', 'CONTROL: cliente de B reseña su reserva COMPLETADA', 'PERMITIDO',
++  format($q$insert into public.resena (reserva_id, cliente_id, negocio_id, calificacion, comentario) values (%L, %L, %L, 5, 'control')$q$, :'RESB', :'CLIB', :'NEG'));
++select pg_temp.intentar(9, 'dueno-b', 'CONTROL: ni el dueño de B inserta reserva DIRECTA (solo por función)', 'DENEGADO',
++  format($q$insert into public.reserva (cliente_id, negocio_id, sede_id, hora_inicio, hora_fin, estado, monto_total, monto_sena)
++            values (%L, %L, %L, now() + interval '9 days', now() + interval '9 days 1 hour', 'CONFIRMADA', 30000, 0)$q$, :'CLIB', :'NEG', :'SEDE'));
++\o
++reset role;
++\echo '== inserción directa en reserva / resena =='
++select n, actor, intento, esperado, obtenido, case when detalle ~* 'permission denied for table|does not exist|syntax|invalid input|null value|violates (not-null|foreign)' then '*** RAZÓN INVÁLIDA (error de la prueba) ***' when esperado = obtenido then 'ok' else '*** DIFIERE ***' end veredicto, detalle from _r order by n, actor;
++do $$
++declare v_mal int;
++begin
++  select count(*) into v_mal from _r where esperado <> obtenido or detalle ~* 'permission denied for table|does not exist|syntax|invalid input|null value|violates (not-null|foreign)';
++  if v_mal > 0 then raise exception 'FALLA: % intentos no coinciden con lo esperado', v_mal; end if;
++  raise notice 'OK: % intentos coinciden con lo esperado', (select count(*) from _r);
++end $$;
++rollback;
+diff --git a/tests/aislamiento/visibilidad_negocio_inactivo.sql b/tests/aislamiento/visibilidad_negocio_inactivo.sql
+new file mode 100644
+index 0000000..ff386d7
+--- /dev/null
++++ b/tests/aislamiento/visibilidad_negocio_inactivo.sql
+@@ -0,0 +1,55 @@
++-- Los catálogos que son públicos «por diseño» (sede, servicio, combos, recursos, excepciones de horario, ofertas) solo deben serlo
++-- mientras el negocio está ACTIVO. Con el negocio B en PENDIENTE_APROBACION / SUSPENDIDO / CANCELADO, un tercero no debe ver NADA de B;
++-- su dueño sí (control). Base LOCAL con seed_pruebas + seed_tablas_sin_datos; cada estado se prueba dentro de una transacción con ROLLBACK.
++\set ON_ERROR_STOP 1
++\set NEG '00000000-0000-0000-0006-0000000001b0'
++begin;
++grant select on all tables in schema public to service_role;
++create temp table _v (estado text, actor text, tabla text, filas int);
++grant all on _v to authenticated, anon;
++create or replace function pg_temp.medir(p_estado text, p_actor text, p_email text, p_rol text) returns void language plpgsql as $$
++declare t text; n int; v_id uuid;
++begin
++  select id into v_id from auth.users where email = p_email;
++  execute format('set local role %I', p_rol);
++  perform set_config('request.jwt.claims', case when v_id is null then '{"role":"anon"}' else json_build_object('sub', v_id, 'role', p_rol)::text end, true);
++  foreach t in array array['sede','servicio','servicio_combo','recurso_tipo','oferta_negocio'] loop
++    begin
++      execute format('select count(*) from public.%I where negocio_id = %L', t, current_setting('seed.neg')) into n;
++    exception when insufficient_privilege then n := 0; -- sin permiso de tabla para ese rol (p. ej. anon en oferta_negocio): no ve nada
++    end;
++    insert into _v values (p_estado, p_actor, t, n);
++  end loop;
++  -- tablas cuyo vínculo es la sede
++  execute format('select count(*) from public.recurso r join public.sede s on s.id = r.sede_id where s.negocio_id = %L', current_setting('seed.neg')) into n;
++  insert into _v values (p_estado, p_actor, 'recurso', n);
++  execute format('select count(*) from public.sede_horario_excepcion e join public.sede s on s.id = e.sede_id where s.negocio_id = %L', current_setting('seed.neg')) into n;
++  insert into _v values (p_estado, p_actor, 'sede_horario_excepcion', n);
++  reset role;
++end $$;
++select set_config('seed.neg', :'NEG', false) \gset
++\o /dev/null
++do $$
++declare e text;
++begin
++  foreach e in array array['ACTIVO','PENDIENTE_APROBACION','SUSPENDIDO','CANCELADO'] loop
++    execute format('update public.negocio set estado = %L where id = current_setting(''seed.neg'')::uuid', e);
++    perform pg_temp.medir(e, 'anonimo',  'no-existe@pruebas.test', 'anon');
++    perform pg_temp.medir(e, 'intruso',  'intruso@pruebas.test', 'authenticated');
++    perform pg_temp.medir(e, 'dueno-a',  'dueno-a@pruebas.test', 'authenticated');
++    perform pg_temp.medir(e, 'dueno-b',  'dueno-b@pruebas.test', 'authenticated');
++  end loop;
++end $$;
++\o
++\echo '== filas de B visibles según el estado del negocio (anon/intruso/dueño de A deben ver 0 salvo con B ACTIVO) =='
++select estado, actor, sum(filas) as filas_visibles, string_agg(tabla || '=' || filas, ' ' order by tabla) filter (where filas > 0) as detalle from _v group by estado, actor order by estado, actor;
++do $$
++declare v_mal int; v_ctrl int;
++begin
++  select count(*) into v_mal from _v where estado <> 'ACTIVO' and actor in ('anonimo','intruso','dueno-a') and filas > 0;
++  select count(*) into v_ctrl from _v where estado <> 'ACTIVO' and actor = 'dueno-b' and filas > 0;
++  if v_mal > 0 then raise exception 'FALLA: % lecturas de B por terceros con el negocio NO activo', v_mal; end if;
++  if v_ctrl < 5 then raise exception 'FALLA del control: el dueño de B no ve sus propios datos con el negocio inactivo (%)', v_ctrl; end if;
++  raise notice 'OK: con B inactivo los terceros no ven nada y el dueño sí (% tablas con datos para el dueño)', v_ctrl;
++end $$;
++rollback;
+diff --git a/supabase/seed_tablas_sin_datos.sql b/supabase/seed_tablas_sin_datos.sql
+new file mode 100644
+index 0000000..ff2a027
+--- /dev/null
++++ b/supabase/seed_tablas_sin_datos.sql
+@@ -0,0 +1,142 @@
++-- SEMILLA para las tablas multi-tenant que no tenían NINGUNA fila del negocio B (solo base LOCAL de Docker, datos ficticios; NO es migración).
++-- Genérica: para cada tabla arma UNA fila ligada al negocio B leyendo el catálogo (columnas obligatorias, llaves foráneas, enums, tipos).
++-- Las llaves foráneas se resuelven a filas del negocio B (o se siembra el padre). Lo que no se pueda sembrar queda registrado en
++-- _sembrado con el motivo: una tabla sin fila representativa NO se considera probada.
++-- Idempotente a medias: si ya hay una fila de B en la tabla, no agrega otra. Aplicar después de seed_datos_ricos + seed_pruebas.
++\set ON_ERROR_STOP 0
++\set B_NEG '00000000-0000-0000-0006-0000000001b0'
++\set B_SEDE '00000000-0000-0000-0006-0000000002b0'
++\set B_CLI '00000000-0000-0000-0006-0000000000b3'
++\set B_STAFF '00000000-0000-0000-0006-0000000000b2'
++\set B_DUENO '00000000-0000-0000-0006-0000000000b1'
++\set B_RES '00000000-0000-0000-0006-0000000004b0'
++
++select set_config('seed.b_neg', :'B_NEG', false);
++select set_config('seed.b_sede', :'B_SEDE', false);
++select set_config('seed.b_cli', :'B_CLI', false);
++select set_config('seed.b_staff', :'B_STAFF', false);
++select set_config('seed.b_dueno', :'B_DUENO', false);
++select set_config('seed.b_res', :'B_RES', false);
++
++drop table if exists public._sembrado;
++create unlogged table public._sembrado (tabla text primary key, resultado text, detalle text);
++
++create or replace function pg_temp.pk_de(p_tabla text) returns text language sql as $$
++  select a.attname from pg_index i join pg_attribute a on a.attrelid = i.indrelid and a.attnum = any(i.indkey)
++   where i.indrelid = ('public.' || quote_ident(p_tabla))::regclass and i.indisprimary limit 1 $$;
++
++create or replace function pg_temp.tiene_col(p_tabla text, p_col text) returns boolean language sql as $$
++  select exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = p_tabla and column_name = p_col) $$;
++
++-- Valor (texto SQL) de la columna de referencia `p_col` de la tabla `p_tabla`, perteneciente al negocio B si es posible.
++create or replace function pg_temp.ref_valor(p_tabla text, p_col text, p_prof int) returns text language plpgsql as $$
++declare v text; v_fil text := '';
++begin
++  if p_tabla = 'negocio' and p_col = 'id' then return quote_literal(current_setting('seed.b_neg')); end if;
++  if p_tabla = 'sede' and p_col = 'id' then return quote_literal(current_setting('seed.b_sede')); end if;
++  if p_tabla = 'perfil' then return quote_literal(current_setting('seed.b_cli')); end if;
++  if p_tabla = 'staff' then return quote_literal(current_setting('seed.b_staff')); end if;
++  if p_tabla = 'reserva' and p_col = 'id' then return quote_literal(current_setting('seed.b_res')); end if;
++  if pg_temp.tiene_col(p_tabla, 'negocio_id') then v_fil := format(' where negocio_id = %L', current_setting('seed.b_neg'));
++  elsif pg_temp.tiene_col(p_tabla, 'cliente_id') then v_fil := format(' where cliente_id = %L', current_setting('seed.b_cli')); end if;
++  execute format('select %I::text from public.%I %s limit 1', p_col, p_tabla, v_fil) into v;
++  if v is null and p_prof < 3 then
++    perform pg_temp.sembrar(p_tabla, p_prof + 1, '{}'::jsonb);
++    execute format('select %I::text from public.%I %s limit 1', p_col, p_tabla, v_fil) into v;
++  end if;
++  if v is null then execute format('select %I::text from public.%I limit 1', p_col, p_tabla) into v; end if;
++  return case when v is null then null else quote_literal(v) end;
++end $$;
++
++create or replace function pg_temp.sembrar(p_tabla text, p_prof int default 0, p_ov jsonb default '{}'::jsonb) returns void language plpgsql as $$
++declare
++  r record; v_cols text[] := '{}'; v_vals text[] := '{}'; v_val text; v_fk record;
++  v_tenant text[] := array['negocio_id','sede_id','reserva_id','cliente_id','usuario_id','user_id','staff_id','titular_cliente_id','creado_por','autor_id'];
++begin
++  -- ya hay una fila ligada a B: no duplicar
++  for r in select c as col, case c when 'negocio_id' then current_setting('seed.b_neg') when 'sede_id' then current_setting('seed.b_sede')
++                  when 'reserva_id' then current_setting('seed.b_res') else current_setting('seed.b_cli') end as val
++             from unnest(array['negocio_id','sede_id','reserva_id','cliente_id']) c where pg_temp.tiene_col(p_tabla, c)
++  loop
++    execute format('select 1 from public.%I where %I = %L limit 1', p_tabla, r.col, r.val) into v_val;
++    if v_val is not null then return; end if;
++  end loop;
++  for r in
++    select c.column_name n, c.data_type t, c.udt_name u, c.is_nullable = 'YES' as nul, c.column_default d, c.is_generated g, c.is_identity idn
++      from information_schema.columns c where c.table_schema = 'public' and c.table_name = p_tabla order by c.ordinal_position
++  loop
++    continue when r.g <> 'NEVER' or r.idn = 'YES';
++    -- ¿obligatoria sin valor por defecto, o columna que ata la fila a un tenant/usuario?
++    continue when not ((not r.nul and r.d is null) or r.n = any (v_tenant) or p_ov ? r.n);
++    v_val := null;
++    if p_ov ? r.n then
++      v_val := case when jsonb_typeof(p_ov -> r.n) = 'null' then 'null' else quote_literal(p_ov ->> r.n) end;
++    else
++      select a.attname, fk.confrelid::regclass::text as ref, fa.attname as refcol into v_fk
++        from pg_constraint fk join pg_attribute a on a.attrelid = fk.conrelid and a.attnum = fk.conkey[1]
++        join pg_attribute fa on fa.attrelid = fk.confrelid and fa.attnum = fk.confkey[1]
++       where fk.contype = 'f' and fk.conrelid = ('public.' || quote_ident(p_tabla))::regclass and array_length(fk.conkey, 1) = 1 and a.attname = r.n limit 1;
++      if v_fk.ref is not null then
++        if v_fk.ref in ('perfil','auth.users') and r.n ~ '(owner|dueno)' then v_val := quote_literal(current_setting('seed.b_dueno'));
++        elsif v_fk.ref = 'auth.users' then v_val := quote_literal(current_setting('seed.b_cli'));
++        else v_val := pg_temp.ref_valor(regexp_replace(v_fk.ref, '^public\.', ''), v_fk.refcol, p_prof); end if;
++      end if;
++      if v_val is null and r.n in ('negocio_id') then v_val := quote_literal(current_setting('seed.b_neg')); end if;
++      if v_val is null and r.n in ('sede_id') then v_val := quote_literal(current_setting('seed.b_sede')); end if;
++      if v_val is null and r.n in ('cliente_id','usuario_id','user_id','titular_cliente_id') then v_val := quote_literal(current_setting('seed.b_cli')); end if;
++      if v_val is null and r.n in ('staff_id') then v_val := quote_literal(current_setting('seed.b_staff')); end if;
++      if v_val is null and r.n in ('reserva_id') then v_val := quote_literal(current_setting('seed.b_res')); end if;
++      if v_val is null then
++        select (regexp_match(pg_get_constraintdef(k.oid), '''([^'']+)''::'))[1] into v_val
++          from pg_constraint k where k.contype = 'c' and k.conrelid = ('public.' || quote_ident(p_tabla))::regclass
++           and pg_get_constraintdef(k.oid) ~ ('[(]*' || r.n || '[)]*(::text)? = ANY') limit 1;
++        if v_val is not null then v_val := quote_literal(v_val); end if;
++      end if;
++      if v_val is null and r.t = 'USER-DEFINED' then
++        select quote_literal(e.enumlabel) into v_val from pg_enum e join pg_type ty on ty.oid = e.enumtypid where ty.typname = r.u order by e.enumsortorder limit 1;
++      end if;
++      if v_val is null then
++        v_val := case
++          when r.nul and r.n = any (v_tenant) then null
++          when r.t = 'uuid' then quote_literal(gen_random_uuid())
++          when r.t in ('text','character varying','character') then quote_literal('sem-' || r.n)
++          when r.t in ('integer','bigint','smallint','numeric','double precision','real') then '1'
++          when r.t = 'boolean' then 'true'
++          when r.t like 'timestamp%' then 'now()'
++          when r.t = 'date' then 'current_date'
++          when r.t like 'time without%' then quote_literal('09:00')
++          when r.t = 'interval' then quote_literal('1 hour')
++          when r.t in ('jsonb','json') then quote_literal('{}')
++          when r.t = 'ARRAY' then quote_literal('{}')
++          else null end;
++      end if;
++    end if;
++    if v_val is null and not r.nul then raise exception 'sin valor para % (% / %)', r.n, r.t, r.u; end if;
++    v_cols := v_cols || quote_ident(r.n);
++    v_vals := v_vals || coalesce(v_val, 'null');
++  end loop;
++  execute format('insert into public.%I (%s) values (%s)', p_tabla, array_to_string(v_cols, ','), array_to_string(v_vals, ','));
++end $$;
++
++create or replace function pg_temp.intentar_sembrar(p_tabla text, p_ov jsonb default '{}'::jsonb) returns void language plpgsql as $$
++begin
++  perform pg_temp.sembrar(p_tabla, 0, p_ov);
++  insert into public._sembrado values (p_tabla, 'OK', null) on conflict (tabla) do update set resultado = 'OK', detalle = null;
++exception when others then
++  insert into public._sembrado values (p_tabla, 'ERROR', left(sqlerrm, 200)) on conflict (tabla) do update set resultado = 'ERROR', detalle = left(sqlerrm, 200);
++end $$;
++
++-- Overrides por tabla (se completan con lo que falle en la primera pasada)
++-- Las 61 tablas que no tenían filas de B (lista tomada de docs/plan_cierre/evidencias/matriz_aislamiento.json › cobertura)
++select pg_temp.intentar_sembrar(t) from unnest(string_to_array(
++ 'ai_conversion ai_memoria_negocio ai_prompt ai_roi_snapshot campana_publicitaria cashback_movimiento cashback_regla chat_conversacion comision_cambio_programado conexion_pago_evento corporativo_consumo corporativo_miembro credito_ia_consumo credito_ia_lote disponibilidad familia_grupo familia_miembro favorito_negocio gift_card_redencion lealtad_fraude_evento lealtad_movimiento lealtad_wallet lista_espera membresia_uso negocio_addon negocio_marca negocio_visita_perfil notificacion_envio notificacion_plantilla oauth_estado oferta_negocio prueba_uso punto_fidelizacion recompensa_regla recompensa_sugerencia recurso_tipo recurso referido_codigo referido_config referido resena sede_horario_excepcion sello_campana sello_cliente sello_evento servicio_combo solicitud_devolucion_saldo solicitud_reposicion staff_referido suscripcion_fundador suscripcion ticket_soporte venta_producto vip_miembro vip_nivel webhook_evento whatsapp_alerta whatsapp_campana whatsapp_compra_recarga whatsapp_consumo whatsapp_conversacion_lote', ' ')) t;
++-- Reglas CHECK que el generador no deduce solo (se fijan a mano)
++select pg_temp.intentar_sembrar('disponibilidad', '{"hora_fin":"18:00"}');
++select pg_temp.intentar_sembrar('oferta_negocio', '{"valor":"10"}');
++-- ai_prompt: un negocio solo puede crear PROPIO/COMPARTIDO (OFICIAL es de la plataforma y es público por diseño)
++delete from public.ai_prompt where negocio_id = current_setting('seed.b_neg')::uuid and tipo = 'OFICIAL';
++select pg_temp.intentar_sembrar('ai_prompt', '{"tipo":"PROPIO"}');
++\echo
++\echo '== resultado de la siembra =='
++select resultado, count(*) from public._sembrado group by 1;
++select tabla, detalle from public._sembrado where resultado <> 'OK' order by 1;
+diff --git a/supabase/seed_admin_acciones.sql b/supabase/seed_admin_acciones.sql
+new file mode 100644
+index 0000000..b00547b
+--- /dev/null
++++ b/supabase/seed_admin_acciones.sql
+@@ -0,0 +1,42 @@
++-- DATOS FICTICIOS para la prueba de las Server Actions de /admin (solo base LOCAL de Docker; no es una migración).
++-- Crea objetos en el estado correcto para que cada acción administrativa PUEDA ejecutarse: así, si un actor sin privilegio lograra
++-- ejecutarla, el cambio se vería en la base. Idempotente. Se aplica después de seed_datos_ricos + seed_pruebas.
++\set ON_ERROR_STOP 1
++begin;
++
++-- Cuenta "víctima" con UUID v4 válido (zod exige versión/variante RFC; los ids de las cuentas de prueba no la cumplen).
++insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
++  confirmation_token, recovery_token, email_change_token_new, email_change, email_change_token_current, phone_change, phone_change_token, reauthentication_token)
++values ('00000000-0000-0000-0000-000000000000', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'authenticated', 'authenticated', 'victima@pruebas.test', crypt(gen_random_uuid()::text, gen_salt('bf')), now(),
++  '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', '', '', '', '', '', '', '')
++on conflict (id) do nothing;
++insert into public.perfil (id, nombre, email, registro_pendiente, password_establecida) values ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'Víctima Prueba', 'victima@pruebas.test', false, true)
++on conflict (id) do nothing;
++
++-- Negocios en el estado que exige cada acción (owner: dueno-b).
++insert into public.negocio (id, owner_user_id, nombre, slug, ciudad, pais_codigo, estado) values
++  ('00000000-0000-0000-0006-0000000005a1', '00000000-0000-0000-0006-0000000000b1', 'Adm Pendiente 1',  'adm-pend-1',  'Cali', 'CO', 'PENDIENTE_APROBACION'),
++  ('00000000-0000-0000-0006-0000000005a2', '00000000-0000-0000-0006-0000000000b1', 'Adm Pendiente 2',  'adm-pend-2',  'Cali', 'CO', 'PENDIENTE_APROBACION'),
++  ('00000000-0000-0000-0006-0000000005b1', '00000000-0000-0000-0006-0000000000b1', 'Adm Activo 1',     'adm-act-1',   'Cali', 'CO', 'ACTIVO'),
++  ('00000000-0000-0000-0006-0000000005b2', '00000000-0000-0000-0006-0000000000b1', 'Adm Activo 2',     'adm-act-2',   'Cali', 'CO', 'ACTIVO'),
++  ('00000000-0000-0000-0006-0000000005b3', '00000000-0000-0000-0006-0000000000b1', 'Adm Activo 3',     'adm-act-3',   'Cali', 'CO', 'ACTIVO'),
++  ('00000000-0000-0000-0006-0000000005b4', '00000000-0000-0000-0006-0000000000b1', 'Adm Activo 4',     'adm-act-4',   'Cali', 'CO', 'ACTIVO'),
++  ('00000000-0000-0000-0006-0000000005c1', '00000000-0000-0000-0006-0000000000b1', 'Adm Suspendido 1', 'adm-susp-1',  'Cali', 'CO', 'SUSPENDIDO'),
++  ('00000000-0000-0000-0006-0000000005c2', '00000000-0000-0000-0006-0000000000b1', 'Adm Suspendido 2', 'adm-susp-2',  'Cali', 'CO', 'SUSPENDIDO')
++on conflict (id) do update set estado = excluded.estado, owner_user_id = excluded.owner_user_id;
++-- Suscripciones en el estado que exige cada acción (se REPONEN siempre: la prueba consume objetos: aprobar, cancelar, borrar banner…).
++insert into public.suscripcion (negocio_id, plan_codigo, estado, fecha_proximo_cobro, suspendido_causa) values
++  ('00000000-0000-0000-0006-0000000005b1', 'STUDIO', 'ACTIVA',     now() + interval '30 days', null),
++  ('00000000-0000-0000-0006-0000000005b2', 'STUDIO', 'ACTIVA',     now() + interval '30 days', null),
++  ('00000000-0000-0000-0006-0000000005b3', 'STUDIO', 'ACTIVA',     now() + interval '30 days', null),
++  ('00000000-0000-0000-0006-0000000005b4', 'STUDIO', 'ACTIVA',     now() + interval '30 days', null),
++  ('00000000-0000-0000-0006-0000000005c1', 'STUDIO', 'EN_MORA',    now() + interval '30 days', null),
++  ('00000000-0000-0000-0006-0000000005c2', 'STUDIO', 'SUSPENDIDA', now() + interval '30 days', 'IMPAGO')
++on conflict (negocio_id) do update set estado = excluded.estado, suspendido_causa = excluded.suspendido_causa, activacion_manual = false;
++
++insert into public.banner_home (id, imagen_url, texto, activo, orden) values ('00000000-0000-0000-0006-0000000006a1', 'https://ejemplo.test/banner.png', 'Banner prueba', true, 1) on conflict (id) do nothing;
++insert into public.ticket_soporte (id, creado_por, negocio_id, asunto) values ('00000000-0000-0000-0006-0000000006b1', '00000000-0000-0000-0006-0000000000a3', '00000000-0000-0000-0006-0000000001a0', 'Ticket de prueba') on conflict (id) do nothing;
++insert into public.ticket_mensaje (ticket_id, autor_id, actor_tipo, mensaje) select '00000000-0000-0000-0006-0000000006b1', '00000000-0000-0000-0006-0000000000a3', 'CLIENTE', 'Hola, necesito ayuda'
++ where not exists (select 1 from public.ticket_mensaje where ticket_id = '00000000-0000-0000-0006-0000000006b1');
++insert into public.lealtad_fraude_evento (id, tipo, cliente_id, negocio_id, severidad) values ('00000000-0000-0000-0006-0000000006c1', 'ABUSO_REFERIDO', '00000000-0000-0000-0006-0000000000a3', '00000000-0000-0000-0006-0000000001a0', 'MEDIA') on conflict (id) do nothing;
++commit;
+diff --git a/scripts/resumen-admin-actions.mjs b/scripts/resumen-admin-actions.mjs
+new file mode 100644
+index 0000000..7bf72dd
+--- /dev/null
++++ b/scripts/resumen-admin-actions.mjs
+@@ -0,0 +1,9 @@
++import fs from "node:fs";
++const d = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
++for (const [a, r] of Object.entries(d.resumen)) console.log(a.padEnd(11), "esc_ok", r.escrituras_ok, "lec_datos", r.lecturas_con_datos, "tablas", r.tablas_cambiadas.join(",") || "-");
++console.log("\nVIOLACIONES (no-super con ok:true en escritura o datos en lectura):");
++const m = new Map();
++for (const r of d.detalle) if (r.actor !== "super" && r.ok && (r.tipo === "escritura" || r.datos > 0)) { const k = `${r.modulo} ${r.fn} [${r.tipo}]`; m.set(k, [...(m.get(k) ?? []), `${r.actor}:${r.datos}`]); }
++for (const [k, v] of m) console.log(" ", k, "->", v.join(" "));
++console.log("\nCONTROL super que NO dio ok:");
++for (const r of d.detalle) if (r.actor === "super" && !r.ok) console.log(" ", r.modulo, r.fn, r.lanzo ?? "", (r.error ?? "").slice(0, 100));

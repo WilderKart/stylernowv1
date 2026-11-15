@@ -257,7 +257,6 @@ export async function crearPromptIa(
 // inventar un número.
 export interface RoiIa {
   creditosConsumidosTotal: number;
-  costoProveedorEstimadoUsdTotal: number;
   consumoPorCategoria: { categoria: string; creditos: number }[];
   consumoPorMes: { mes: string; creditos: number }[];
   campanasEjecutadasIa: number;
@@ -277,19 +276,16 @@ export async function obtenerRoiIa(negocioId: string): Promise<Resultado<RoiIa>>
     .eq("negocio_id", negocioId);
   if (error) return { ok: false, error: error.message };
 
-  const { data: acciones } = await supabase.from("ai_accion_costo").select("accion, categoria, costo_proveedor_estimado");
+  const { data: acciones } = await supabase.from("ai_accion_costo").select("accion, categoria");
   const categoriaPorAccion = new Map((acciones ?? []).map((a) => [a.accion, a.categoria]));
-  const costoUsdPorAccion = new Map((acciones ?? []).map((a) => [a.accion, Number(a.costo_proveedor_estimado)]));
 
   let creditosTotal = 0;
-  let costoUsdTotal = 0;
   let campanasEjecutadas = 0;
   const porCategoria = new Map<string, number>();
   const porMes = new Map<string, number>();
 
   for (const c of consumos ?? []) {
     creditosTotal += c.creditos_consumidos;
-    costoUsdTotal += costoUsdPorAccion.get(c.funcion) ?? 0;
     const categoria = categoriaPorAccion.get(c.funcion) ?? "OTRO";
     porCategoria.set(categoria, (porCategoria.get(categoria) ?? 0) + c.creditos_consumidos);
     if (categoria === "CAMPANAS") campanasEjecutadas += 1;
@@ -304,7 +300,6 @@ export async function obtenerRoiIa(negocioId: string): Promise<Resultado<RoiIa>>
     ok: true,
     data: {
       creditosConsumidosTotal: creditosTotal,
-      costoProveedorEstimadoUsdTotal: Number(costoUsdTotal.toFixed(4)),
       consumoPorCategoria: Array.from(porCategoria.entries()).map(([categoria, creditos]) => ({ categoria, creditos })).sort((a, b) => b.creditos - a.creditos),
       consumoPorMes: Array.from(porMes.entries()).map(([mes, creditos]) => ({ mes, creditos })).sort((a, b) => a.mes.localeCompare(b.mes)),
       campanasEjecutadasIa: campanasEjecutadas,

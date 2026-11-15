@@ -1,0 +1,19 @@
+-- REVERSIÓN de 139 (NO es migración: extensión .txt para que `supabase db push` la ignore). Aplicar a mano solo si hiciera falta.
+-- Devuelve el estado previo a 139 (OJO: reabre F1A-04, F1A-05 y F1A-06; no hay pérdida de datos porque 139 no borra ni modifica filas).
+
+-- F1A-04
+drop policy if exists referido_config_select on public.referido_config;
+create policy referido_config_select on public.referido_config for select using (true);
+drop policy if exists vip_nivel_select on public.vip_nivel;
+create policy vip_nivel_select on public.vip_nivel for select using (true);
+
+-- F1A-05
+grant all on public.ai_accion_costo to anon, authenticated;   -- estado de producción previo: rawdD para ambos roles
+drop function if exists public.ai_acciones_costo_admin();
+-- (revertir también el código: src/app/admin/ai/actions.ts y src/app/panel/ia/actions.ts)
+
+-- F1A-06
+grant execute on function public.agregar_miembro_familiar(uuid, uuid, text) to authenticated;   -- antes de 139 era ejecutable por authenticated (verificar en producción los grants exactos de public/anon antes de revertir)
+
+-- F1A-07 / descuentos: volver a la definición de 138 (supabase/migrations/138_crear_grupo_familiar_autorizacion.sql).
+alter table public.familia_grupo drop constraint if exists familia_grupo_limite_miembros_chk;

@@ -1,0 +1,6737 @@
+[
+ {
+  "archivo": "src/app/ajustes/actions.ts",
+  "accion": "guardarIdiomaRegionAction",
+  "params": [
+   {
+    "nombre": "pais",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "locale",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 6
+ },
+ {
+  "archivo": "src/app/ajustes/actions.ts",
+  "accion": "guardarPermisosAction",
+  "params": [
+   {
+    "nombre": "ubicacion",
+    "tipo": "string | null",
+    "opcional": false
+   },
+   {
+    "nombre": "notificaciones",
+    "tipo": "string | null",
+    "opcional": false
+   },
+   {
+    "nombre": "completar",
+    "tipo": "boolean",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/ayuda/actions.ts",
+  "accion": "crearTicketAccion",
+  "params": [
+   {
+    "nombre": "categoria",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "mensaje",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 10
+ },
+ {
+  "archivo": "src/app/ayuda/actions.ts",
+  "accion": "responderTicketAccion",
+  "params": [
+   {
+    "nombre": "ticketId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "mensaje",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/checkout/membresia/[planId]/actions.ts",
+  "accion": "iniciarCompraMembresia",
+  "params": [
+   {
+    "nombre": "planId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "suscribirse_membresia"
+  ],
+  "leidas": [
+   "membresia_plan"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 30
+ },
+ {
+  "archivo": "src/app/checkout/membresia/[planId]/actions.ts",
+  "accion": "consultarEstadoCompraMembresia",
+  "params": [
+   {
+    "nombre": "pagoId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "cliente_membresia"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 37
+ },
+ {
+  "archivo": "src/app/cuenta/actions.ts",
+  "accion": "exportarDatosAccion",
+  "params": [],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 5
+ },
+ {
+  "archivo": "src/app/cuenta/actions.ts",
+  "accion": "solicitarEliminacionAccion",
+  "params": [
+   {
+    "nombre": "confirmacion",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/cuenta/actions.ts",
+  "accion": "cancelarEliminacionAccion",
+  "params": [],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 6
+ },
+ {
+  "archivo": "src/app/favoritos/actions.ts",
+  "accion": "listarMisFavoritos",
+  "params": [],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "favorito_negocio",
+   "resena",
+   "servicio"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 44
+ },
+ {
+  "archivo": "src/app/gift-cards/canjear/actions.ts",
+  "accion": "consultarMiGiftCard",
+  "params": [
+   {
+    "nombre": "codigo",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "pin",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "consultar_gift_card"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 24
+ },
+ {
+  "archivo": "src/app/gift-cards/comprar/actions.ts",
+  "accion": "buscarNegociosParaGiftCard",
+  "params": [
+   {
+    "nombre": "texto",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "marketplace_buscar"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 6
+ },
+ {
+  "archivo": "src/app/gift-cards/comprar/actions.ts",
+  "accion": "iniciarCompraGiftCard",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "DatosCompraGiftCard",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "crear_gift_card"
+  ],
+  "leidas": [
+   "negocio"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 36
+ },
+ {
+  "archivo": "src/app/gift-cards/comprar/actions.ts",
+  "accion": "consultarEstadoCompraGiftCard",
+  "params": [
+   {
+    "nombre": "pagoId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 26
+ },
+ {
+  "archivo": "src/app/invitacion/[id]/actions.ts",
+  "accion": "responderInvitacion",
+  "params": [
+   {
+    "nombre": "invitacionId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "aceptar",
+    "tipo": "boolean",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "responder_invitacion"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 22
+ },
+ {
+  "archivo": "src/app/lealtad/actions.ts",
+  "accion": "obtenerResumenLealtad",
+  "params": [],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "obtener_mi_codigo_referido",
+   "mis_referidos",
+   "mis_sellos",
+   "mi_cashback",
+   "mi_familia"
+  ],
+  "leidas": [
+   "lealtad_wallet",
+   "cliente_membresia",
+   "lealtad_movimiento"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 55
+ },
+ {
+  "archivo": "src/app/lealtad/actions.ts",
+  "accion": "registrarEventoFraude",
+  "params": [
+   {
+    "nombre": "tipo",
+    "tipo": "\"CANJE_DUPLICADO\" | \"ABUSO_REFERIDO\"",
+    "opcional": false
+   },
+   {
+    "nombre": "negocioId",
+    "tipo": "string | null",
+    "opcional": false
+   },
+   {
+    "nombre": "payload",
+    "tipo": "Record<string, unknown>",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "registrar_evento_fraude"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 8
+ },
+ {
+  "archivo": "src/app/lealtad/actions.ts",
+  "accion": "registrarReferido",
+  "params": [
+   {
+    "nombre": "codigo",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "registrar_referido",
+   "registrar_evento_fraude"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 16
+ },
+ {
+  "archivo": "src/app/lealtad/actions.ts",
+  "accion": "crearGrupoFamiliar",
+  "params": [
+   {
+    "nombre": "nombre",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "crear_grupo_familiar"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/lealtad/actions.ts",
+  "accion": "canjearWallet",
+  "params": [
+   {
+    "nombre": "monto",
+    "tipo": "number",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "canjear_lealtad_wallet"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/legal/aceptar/actions.ts",
+  "accion": "aceptarPendientes",
+  "params": [],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 15
+ },
+ {
+  "archivo": "src/app/login/actions.ts",
+  "accion": "enviarCodigo",
+  "params": [
+   {
+    "nombre": "email",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "siguiente",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "aceptaTerminos",
+    "tipo": "boolean",
+    "opcional": false
+   },
+   {
+    "nombre": "modo",
+    "tipo": "\"ingresar\" | \"registro\"",
+    "opcional": true
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 47
+ },
+ {
+  "archivo": "src/app/login/actions.ts",
+  "accion": "verificarCodigo",
+  "params": [
+   {
+    "nombre": "email",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "token",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [],
+  "leidas": [
+   "perfil"
+  ],
+  "escritas": [
+   "perfil:update"
+  ],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 47
+ },
+ {
+  "archivo": "src/app/login/actions.ts",
+  "accion": "crearContrasena",
+  "params": [
+   {
+    "nombre": "password",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [],
+  "leidas": [
+   "perfil"
+  ],
+  "escritas": [
+   "perfil:update"
+  ],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 23
+ },
+ {
+  "archivo": "src/app/login/actions.ts",
+  "accion": "iniciarSesionConGoogle",
+  "params": [
+   {
+    "nombre": "siguiente",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 4
+ },
+ {
+  "archivo": "src/app/login/actions.ts",
+  "accion": "iniciarSesionConContrasena",
+  "params": [
+   {
+    "nombre": "email",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "password",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [],
+  "leidas": [
+   "perfil"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 14
+ },
+ {
+  "archivo": "src/app/login/actions.ts",
+  "accion": "solicitarRecuperacion",
+  "params": [
+   {
+    "nombre": "email",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 14
+ },
+ {
+  "archivo": "src/app/login/actions.ts",
+  "accion": "restablecerContrasena",
+  "params": [
+   {
+    "nombre": "password",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": true,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "incrementar_session_version"
+  ],
+  "leidas": [],
+  "escritas": [
+   "perfil:update"
+  ],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 21
+ },
+ {
+  "archivo": "src/app/login/actions.ts",
+  "accion": "cambiarContrasena",
+  "params": [
+   {
+    "nombre": "passwordActual",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "passwordNueva",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": true,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "incrementar_session_version"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 23
+ },
+ {
+  "archivo": "src/app/login/registro-actions.ts",
+  "accion": "necesitaRegistro",
+  "params": [],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "perfil"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 13
+ },
+ {
+  "archivo": "src/app/login/registro-actions.ts",
+  "accion": "cancelarRegistro",
+  "params": [],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 10
+ },
+ {
+  "archivo": "src/app/login/registro-actions.ts",
+  "accion": "crearCuentaRegistro",
+  "params": [
+   {
+    "nombre": "nombre",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "pais",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "telefono",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "marketing",
+    "tipo": "boolean",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "completar_registro_con_telefono"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 29
+ },
+ {
+  "archivo": "src/app/membresias/[id]/actions.ts",
+  "accion": "cancelarMiMembresia",
+  "params": [
+   {
+    "nombre": "id",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "cancelar_membresia"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/membresias/[id]/actions.ts",
+  "accion": "congelarMiMembresia",
+  "params": [
+   {
+    "nombre": "id",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "dias",
+    "tipo": "7 | 15 | 30",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "congelar_membresia"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/membresias/[id]/actions.ts",
+  "accion": "reactivarMiMembresia",
+  "params": [
+   {
+    "nombre": "id",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "reactivar_membresia_congelada"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/mi-look/actions.ts",
+  "accion": "compartirFotos",
+  "params": [
+   {
+    "nombre": "fotoIds",
+    "tipo": "string[]",
+    "opcional": false
+   },
+   {
+    "nombre": "compartir",
+    "tipo": "boolean",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/negocio/[slug]/actions.ts",
+  "accion": "esFavorito",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "favorito_negocio"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 14
+ },
+ {
+  "archivo": "src/app/negocio/[slug]/actions.ts",
+  "accion": "alternarFavorito",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "slug",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "favorito_negocio"
+  ],
+  "escritas": [
+   "favorito_negocio:delete",
+   "favorito_negocio:insert"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 32
+ },
+ {
+  "archivo": "src/app/negocio/[slug]/profesional/[staffId]/actions.ts",
+  "accion": "masResenasAction",
+  "params": [
+   {
+    "nombre": "slug",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "staffId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "offset",
+    "tipo": "number",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "negocio"
+  ],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 14
+ },
+ {
+  "archivo": "src/app/negocio/[slug]/reservar/actions.ts",
+  "accion": "obtenerSlots",
+  "params": [
+   {
+    "nombre": "args",
+    "tipo": "{\r\n  sedeId: string;\r\n  servicioIds: string[];\r\n  fecha: string;\r\n  staffId: string | null;\r\n}",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "slots_disponibles"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 19
+ },
+ {
+  "archivo": "src/app/negocio/[slug]/reservar/actions.ts",
+  "accion": "crearReservaAction",
+  "params": [
+   {
+    "nombre": "args",
+    "tipo": "{\r\n  sedeId: string;\r\n  servicioIds: string[];\r\n  horaInicio: string;\r\n  staffId: string | null;\r\n  idempotencyKey: stri",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "crear_reserva"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 34
+ },
+ {
+  "archivo": "src/app/negocio/[slug]/reservar/actions.ts",
+  "accion": "unirseListaEspera",
+  "params": [
+   {
+    "nombre": "args",
+    "tipo": "{\r\n  negocioId: string;\r\n  sedeId: string;\r\n  servicioIds: string[];\r\n  staffId: string | null;\r\n  fecha: string;\r\n}",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "lista_espera:insert"
+  ],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 27
+ },
+ {
+  "archivo": "src/app/notificaciones/actions.ts",
+  "accion": "marcarLeidaAction",
+  "params": [
+   {
+    "nombre": "id",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 5
+ },
+ {
+  "archivo": "src/app/notificaciones/actions.ts",
+  "accion": "marcarTodasLeidasAction",
+  "params": [],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 4
+ },
+ {
+  "archivo": "src/app/notificaciones/actions.ts",
+  "accion": "contarNoLeidasAction",
+  "params": [],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 4
+ },
+ {
+  "archivo": "src/app/notificaciones/preferencias-actions.ts",
+  "accion": "guardarPreferenciaAction",
+  "params": [
+   {
+    "nombre": "evento",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "canal",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "activo",
+    "tipo": "boolean",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "notif_preferencia_guardar"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 9
+ },
+ {
+  "archivo": "src/app/notificaciones/preferencias-actions.ts",
+  "accion": "suscribirPushAction",
+  "params": [
+   {
+    "nombre": "sub",
+    "tipo": "{ endpoint?: unknown; keys?: { p256dh?: unknown; auth?: unknown } }",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "notif_push_suscribir"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 13
+ },
+ {
+  "archivo": "src/app/notificaciones/preferencias-actions.ts",
+  "accion": "desuscribirPushAction",
+  "params": [
+   {
+    "nombre": "endpoint",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "notif_push_desuscribir"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/ofertas/actions.ts",
+  "accion": "cambiarConsentimientoMarcas",
+  "params": [
+   {
+    "nombre": "otorgado",
+    "tipo": "boolean",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 6
+ },
+ {
+  "archivo": "src/app/pagos/actions.ts",
+  "accion": "pedirDevolucion",
+  "params": [],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 6
+ },
+ {
+  "archivo": "src/app/panel/ads/actions.ts",
+  "accion": "listarMisCampanas",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "campana_publicitaria"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 29
+ },
+ {
+  "archivo": "src/app/panel/ads/actions.ts",
+  "accion": "crearCampana",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{\r\n  negocioId: string;\r\n  formato: \"DESTACADO\" | \"PIN\";\r\n  unidadCobro: \"CPC\" | \"CPM\";\r\n  presupuestoDiario: number;\r\n ",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "crear_campana_publicitaria"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 25
+ },
+ {
+  "archivo": "src/app/panel/ads/actions.ts",
+  "accion": "activarCampana",
+  "params": [
+   {
+    "nombre": "campanaId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "activar_campana"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/panel/ads/actions.ts",
+  "accion": "pausarCampana",
+  "params": [
+   {
+    "nombre": "campanaId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "pausar_campana"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/panel/ads/actions.ts",
+  "accion": "finalizarCampana",
+  "params": [
+   {
+    "nombre": "campanaId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "finalizar_campana"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/panel/ads/actions.ts",
+  "accion": "obtenerMetricasCampana",
+  "params": [
+   {
+    "nombre": "campanaId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "metricas_campana"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 25
+ },
+ {
+  "archivo": "src/app/panel/agenda/actions.ts",
+  "accion": "listarCitas",
+  "params": [
+   {
+    "nombre": "sedeId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "desdeISO",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "hastaISO",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "reserva"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 45
+ },
+ {
+  "archivo": "src/app/panel/agenda/actions.ts",
+  "accion": "listarBloqueos",
+  "params": [
+   {
+    "nombre": "vinculoIds",
+    "tipo": "string[]",
+    "opcional": false
+   },
+   {
+    "nombre": "desdeISO",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "hastaISO",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "bloqueo_ausencia"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 29
+ },
+ {
+  "archivo": "src/app/panel/agenda/actions.ts",
+  "accion": "crearBloqueo",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{\r\n  vinculoId: string;\r\n  fechaInicio: string;\r\n  fechaFin: string;\r\n  motivo?: string;\r\n}",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "bloqueo_ausencia:insert"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 26
+ },
+ {
+  "archivo": "src/app/panel/agenda/actions.ts",
+  "accion": "eliminarBloqueo",
+  "params": [
+   {
+    "nombre": "id",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "bloqueo_ausencia:delete"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/panel/agenda/actions.ts",
+  "accion": "buscarClienteExistente",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "busqueda",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "reserva",
+   "perfil"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 26
+ },
+ {
+  "archivo": "src/app/panel/agenda/actions.ts",
+  "accion": "listarServiciosActivos",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "servicio"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 20
+ },
+ {
+  "archivo": "src/app/panel/agenda/actions.ts",
+  "accion": "obtenerSlotsAgenda",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{\r\n  sedeId: string;\r\n  servicioIds: string[];\r\n  fechaISO: string;\r\n  staffId?: string | null;\r\n}",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "slots_disponibles"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 25
+ },
+ {
+  "archivo": "src/app/panel/agenda/actions.ts",
+  "accion": "crearCitaManual",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{\r\n  sedeId: string;\r\n  servicioIds: string[];\r\n  horaInicio: string;\r\n  clienteId: string;\r\n  staffId?: string | null;\r",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "crear_reserva_manual"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 23
+ },
+ {
+  "archivo": "src/app/panel/agenda/actions.ts",
+  "accion": "reprogramarCita",
+  "params": [
+   {
+    "nombre": "reservaId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "nuevaHoraInicio",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "motivo",
+    "tipo": "string",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "reprogramar_reserva"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 15
+ },
+ {
+  "archivo": "src/app/panel/agenda/actions.ts",
+  "accion": "reasignarStaff",
+  "params": [
+   {
+    "nombre": "reservaId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "nuevoStaffId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "motivo",
+    "tipo": "string",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "reasignar_staff_reserva"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 15
+ },
+ {
+  "archivo": "src/app/panel/agenda/actions.ts",
+  "accion": "cancelarCita",
+  "params": [
+   {
+    "nombre": "reservaId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "motivo",
+    "tipo": "string",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "cancelar_reserva"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 16
+ },
+ {
+  "archivo": "src/app/panel/agenda/actions.ts",
+  "accion": "marcarNoShow",
+  "params": [
+   {
+    "nombre": "reservaId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "motivo",
+    "tipo": "string",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "marcar_no_show"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 22
+ },
+ {
+  "archivo": "src/app/panel/auditoria/actions.ts",
+  "accion": "listarAuditoriaNegocio",
+  "params": [
+   {
+    "nombre": "entrada",
+    "tipo": "z.input<typeof esquemaFiltros>",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "auditoria_listar"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 23
+ },
+ {
+  "archivo": "src/app/panel/auditoria/actions.ts",
+  "accion": "listarEntidadesNegocio",
+  "params": [],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "auditoria_entidades"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 10
+ },
+ {
+  "archivo": "src/app/panel/cobros/actions.ts",
+  "accion": "obtenerConexionCobros",
+  "params": [],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "conexion_pago_estado"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 22
+ },
+ {
+  "archivo": "src/app/panel/cobros/actions.ts",
+  "accion": "desconectarCuentaCobro",
+  "params": [
+   {
+    "nombre": "motivo",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "conexion_desconectar"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 14
+ },
+ {
+  "archivo": "src/app/panel/crm/actions.ts",
+  "accion": "listarClientesCRM",
+  "params": [
+   {
+    "nombre": "filtro",
+    "tipo": "FiltroCRM",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "reserva",
+   "cliente_etiqueta",
+   "perfil",
+   "vista_crm_cliente"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 103
+ },
+ {
+  "archivo": "src/app/panel/crm/actions.ts",
+  "accion": "listarCumpleanerosDelMes",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "sedeId",
+    "tipo": "string | null",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "reserva",
+   "perfil",
+   "vista_crm_cliente"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 46
+ },
+ {
+  "archivo": "src/app/panel/crm/actions.ts",
+  "accion": "obtenerResumenCliente",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "clienteId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "vista_crm_cliente",
+   "perfil",
+   "punto_fidelizacion",
+   "reserva"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 62
+ },
+ {
+  "archivo": "src/app/panel/crm/actions.ts",
+  "accion": "listarHistorialCliente",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "clienteId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "reserva"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 34
+ },
+ {
+  "archivo": "src/app/panel/crm/actions.ts",
+  "accion": "listarNotas",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "clienteId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "cliente_nota",
+   "staff"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 30
+ },
+ {
+  "archivo": "src/app/panel/crm/actions.ts",
+  "accion": "crearNota",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "clienteId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "texto",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "cliente_nota:insert"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 17
+ },
+ {
+  "archivo": "src/app/panel/crm/actions.ts",
+  "accion": "eliminarNota",
+  "params": [
+   {
+    "nombre": "id",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "clienteId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "cliente_nota:delete"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/panel/crm/actions.ts",
+  "accion": "listarEtiquetasNegocio",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "cliente_etiqueta"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 10
+ },
+ {
+  "archivo": "src/app/panel/crm/actions.ts",
+  "accion": "agregarEtiqueta",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "clienteId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "etiqueta",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "cliente_etiqueta:insert"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 22
+ },
+ {
+  "archivo": "src/app/panel/crm/actions.ts",
+  "accion": "quitarEtiqueta",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "clienteId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "etiqueta",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "cliente_etiqueta:delete"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 17
+ },
+ {
+  "archivo": "src/app/panel/crm/actions.ts",
+  "accion": "listarFotos",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "clienteId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "reserva_foto"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 15
+ },
+ {
+  "archivo": "src/app/panel/crm/actions.ts",
+  "accion": "subirFoto",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{\r\n  negocioId: string;\r\n  clienteId: string;\r\n  reservaId: string;\r\n  dataUrl: string;\r\n  consentimiento: boolean;\r\n}",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "reserva_foto:insert"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 42
+ },
+ {
+  "archivo": "src/app/panel/crm/actions.ts",
+  "accion": "eliminarFoto",
+  "params": [
+   {
+    "nombre": "id",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "clienteId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "reserva_foto:delete"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/panel/crm/actions.ts",
+  "accion": "listarReservasCompletadas",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "clienteId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "reserva"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 17
+ },
+ {
+  "archivo": "src/app/panel/crm/actions.ts",
+  "accion": "obtenerBeneficiosLealtadCliente",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "clienteId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "cliente_membresia",
+   "vip_miembro",
+   "sello_cliente",
+   "cashback_movimiento"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 48
+ },
+ {
+  "archivo": "src/app/panel/dashboard-actions.ts",
+  "accion": "obtenerResumenDia",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "sedeId",
+    "tipo": "string | null",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "dashboard_resumen_dia"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 36
+ },
+ {
+  "archivo": "src/app/panel/dashboard-actions.ts",
+  "accion": "obtenerRankingSemana",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "sedeId",
+    "tipo": "string | null",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "dashboard_ranking_staff_semana"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 23
+ },
+ {
+  "archivo": "src/app/panel/dashboard-actions.ts",
+  "accion": "obtenerLineaTiempoDia",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "sedeId",
+    "tipo": "string | null",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "reserva"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 43
+ },
+ {
+  "archivo": "src/app/panel/dashboard-actions.ts",
+  "accion": "obtenerMetricasLealtadNegocio",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "metricas_lealtad_negocio"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 21
+ },
+ {
+  "archivo": "src/app/panel/ia/actions.ts",
+  "accion": "obtenerSaldoCreditosIa",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "saldo_creditos_ia"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 6
+ },
+ {
+  "archivo": "src/app/panel/ia/actions.ts",
+  "accion": "listarConsumoIa",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "credito_ia_consumo"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 21
+ },
+ {
+  "archivo": "src/app/panel/ia/actions.ts",
+  "accion": "listarPaquetesDisponiblesIa",
+  "params": [],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "ai_paquete_creditos"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 14
+ },
+ {
+  "archivo": "src/app/panel/ia/actions.ts",
+  "accion": "comprarPaqueteIa",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "paqueteId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "comprar_paquete_creditos_ia"
+  ],
+  "leidas": [
+   "negocio",
+   "ai_paquete_creditos"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 33
+ },
+ {
+  "archivo": "src/app/panel/ia/actions.ts",
+  "accion": "consultarEstadoCompraIa",
+  "params": [
+   {
+    "nombre": "pagoId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "pago"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 16
+ },
+ {
+  "archivo": "src/app/panel/ia/actions.ts",
+  "accion": "listarFuncionesHabilitadasNegocio",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "negocio",
+   "plan_funcion_ia"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 8
+ },
+ {
+  "archivo": "src/app/panel/ia/actions.ts",
+  "accion": "listarMemoriaIa",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "listar_memoria_ia"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 9
+ },
+ {
+  "archivo": "src/app/panel/ia/actions.ts",
+  "accion": "guardarMemoriaIa",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "categoria",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "contenido",
+    "tipo": "Record<string, unknown>",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "guardar_memoria_ia"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/panel/ia/actions.ts",
+  "accion": "aprobarMemoriaIa",
+  "params": [
+   {
+    "nombre": "memoriaId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "aprobar_memoria_ia"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/panel/ia/actions.ts",
+  "accion": "olvidarMemoriaIa",
+  "params": [
+   {
+    "nombre": "memoriaId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "olvidar_memoria_ia"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/panel/ia/actions.ts",
+  "accion": "historialMemoriaIa",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "categoria",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "historial_memoria_ia"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 9
+ },
+ {
+  "archivo": "src/app/panel/ia/actions.ts",
+  "accion": "restaurarVersionMemoriaIa",
+  "params": [
+   {
+    "nombre": "memoriaIdHistorica",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "restaurar_version_memoria_ia"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/panel/ia/actions.ts",
+  "accion": "listarPromptsIa",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "listar_prompts_ia"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 9
+ },
+ {
+  "archivo": "src/app/panel/ia/actions.ts",
+  "accion": "crearPromptIa",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "tipo",
+    "tipo": "\"PROPIO\" | \"COMPARTIDO\"",
+    "opcional": false
+   },
+   {
+    "nombre": "categoria",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "nombre",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "contenido",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "crear_prompt_ia"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 13
+ },
+ {
+  "archivo": "src/app/panel/ia/actions.ts",
+  "accion": "obtenerRoiIa",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "credito_ia_consumo",
+   "ai_accion_costo",
+   "ai_conversion"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 40
+ },
+ {
+  "archivo": "src/app/panel/inventario/actions.ts",
+  "accion": "listarStock",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "sedeId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "producto",
+   "producto_stock"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 31
+ },
+ {
+  "archivo": "src/app/panel/inventario/actions.ts",
+  "accion": "registrarMovimiento",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{\r\n  productoId: string;\r\n  sedeId: string;\r\n  tipo: \"ENTRADA\" | \"SALIDA\";\r\n  cantidad: number;\r\n  motivo?: string;\r\n}",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "registrar_movimiento_inventario"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 23
+ },
+ {
+  "archivo": "src/app/panel/inventario/actions.ts",
+  "accion": "ajustarStock",
+  "params": [
+   {
+    "nombre": "productoId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "sedeId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "nuevoStockActual",
+    "tipo": "number",
+    "opcional": false
+   },
+   {
+    "nombre": "motivo",
+    "tipo": "string",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "ajustar_stock"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 16
+ },
+ {
+  "archivo": "src/app/panel/inventario/actions.ts",
+  "accion": "configurarStockMinimo",
+  "params": [
+   {
+    "nombre": "productoId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "sedeId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "stockMinimo",
+    "tipo": "number",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "configurar_stock_minimo"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 15
+ },
+ {
+  "archivo": "src/app/panel/inventario/actions.ts",
+  "accion": "listarSolicitudesPendientes",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "sedeId",
+    "tipo": "string | null",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "solicitud_reposicion"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 27
+ },
+ {
+  "archivo": "src/app/panel/inventario/actions.ts",
+  "accion": "crearSolicitudReposicion",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{\r\n  negocioId: string;\r\n  sedeId: string;\r\n  productoId: string;\r\n  cantidadSolicitada: number;\r\n  motivo?: string;\r\n}",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "solicitud_reposicion:insert"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 25
+ },
+ {
+  "archivo": "src/app/panel/inventario/actions.ts",
+  "accion": "atenderSolicitud",
+  "params": [
+   {
+    "nombre": "solicitudId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "cantidadRecibida",
+    "tipo": "number",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "atender_solicitud_reposicion"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 14
+ },
+ {
+  "archivo": "src/app/panel/inventario/actions.ts",
+  "accion": "cancelarSolicitud",
+  "params": [
+   {
+    "nombre": "solicitudId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "solicitud_reposicion:update"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/panel/inventario/actions.ts",
+  "accion": "listarMovimientos",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "sedeId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "movimiento_inventario"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 26
+ },
+ {
+  "archivo": "src/app/panel/inventario/actions.ts",
+  "accion": "listarConsumoPorServicio",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "servicio",
+   "servicio_producto_consumo"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 27
+ },
+ {
+  "archivo": "src/app/panel/inventario/actions.ts",
+  "accion": "configurarConsumo",
+  "params": [
+   {
+    "nombre": "servicioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "productoId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "cantidad",
+    "tipo": "number",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "servicio_producto_consumo:upsert"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 14
+ },
+ {
+  "archivo": "src/app/panel/inventario/actions.ts",
+  "accion": "quitarConsumo",
+  "params": [
+   {
+    "nombre": "servicioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "productoId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "servicio_producto_consumo:delete"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 15
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "listarPlanesMembresia",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [],
+  "leidas": [
+   "membresia_plan"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 6
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "crearPlanMembresia",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{ negocioId: string; nombre: string; precio: number; duracionMeses: 1 | 3 | 6 | 12; congelacionMaxDias: 0 | 7 | 15 | 30 ",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "crear_plan_membresia"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "alternarPlanMembresia",
+  "params": [
+   {
+    "nombre": "planId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "activo",
+    "tipo": "boolean",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "alternar_plan_membresia"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "listarGiftCards",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [],
+  "leidas": [
+   "gift_card"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 6
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "bloquearGiftCardAdmin",
+  "params": [
+   {
+    "nombre": "giftCardId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "motivo",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "bloquear_gift_card"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "obtenerConfigReferidos",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [],
+  "leidas": [
+   "referido_config"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 6
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "configurarReferidosAction",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{ negocioId: string; monto: number | null; porcentaje: number | null; limiteMensual: number | null; vigenciaDias: number",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "configurar_referidos"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "listarCampanasSellos",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [],
+  "leidas": [
+   "sello_campana"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 6
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "crearCampanaSellosAction",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{ negocioId: string; nombre: string; sellosRequeridos: number; recompensaDescripcion: string }",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "crear_campana_sellos"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "alternarCampanaSellosAction",
+  "params": [
+   {
+    "nombre": "campanaId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "estado",
+    "tipo": "\"ACTIVA\" | \"PAUSADA\" | \"FINALIZADA\"",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "alternar_campana_sellos"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "listarReglasCashback",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [],
+  "leidas": [
+   "cashback_regla"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 6
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "crearReglaCashbackAction",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{ negocioId: string; porcentaje: number; limiteMensual: number | null }",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "crear_regla_cashback"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "alternarReglaCashbackAction",
+  "params": [
+   {
+    "nombre": "reglaId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "activo",
+    "tipo": "boolean",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "alternar_regla_cashback"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "listarNivelesVip",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [],
+  "leidas": [
+   "vip_nivel"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 6
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "sembrarNivelesVipAction",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "sembrar_niveles_vip_default"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "listarMiembrosVip",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [],
+  "leidas": [
+   "vip_miembro"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 14
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "listarFamiliasNegocio",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [],
+  "leidas": [
+   "familia_grupo"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 13
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "listarCuentasCorporativas",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [],
+  "leidas": [
+   "corporativo_cuenta"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 6
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "crearCuentaCorporativaAction",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{ negocioId: string; nombreEmpresa: string; contactoEmail: string; cuposTotales: number; vigenciaFin: string }",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "crear_cuenta_corporativa"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "listarReglasRecompensa",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [],
+  "leidas": [
+   "recompensa_regla"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 6
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "crearReglaRecompensaAction",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{ negocioId: string; disparador: string; nivelIa: 0 | 1 | 2; montoCredito: number | null }",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "crear_regla_recompensa"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 8
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "listarSugerenciasAction",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "listar_sugerencias_recompensa"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 6
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "generarSugerenciasAction",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": true,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "evaluar_candidatos_recompensa",
+   "crear_sugerencia_recompensa",
+   "consumir_creditos_ia"
+  ],
+  "leidas": [
+   "recompensa_regla",
+   "ai_memoria_negocio"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 43
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "confirmarSugerenciaAction",
+  "params": [
+   {
+    "nombre": "sugerenciaId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "confirmar_sugerencia_recompensa"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/panel/lealtad/actions.ts",
+  "accion": "descartarSugerenciaAction",
+  "params": [
+   {
+    "nombre": "sugerenciaId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "descartar_sugerencia_recompensa"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 7
+ },
+ {
+  "archivo": "src/app/panel/marca/actions.ts",
+  "accion": "guardarMarca",
+  "params": [
+   {
+    "nombre": "f",
+    "tipo": "FormularioMarca",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "guardar_marca_negocio"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 26
+ },
+ {
+  "archivo": "src/app/panel/marca/actions.ts",
+  "accion": "subirLogoMarca",
+  "params": [
+   {
+    "nombre": "dataUrl",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 27
+ },
+ {
+  "archivo": "src/app/panel/marca/actions.ts",
+  "accion": "solicitarActivacionMarca",
+  "params": [],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "crear_ticket_soporte"
+  ],
+  "leidas": [
+   "ticket_soporte"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 25
+ },
+ {
+  "archivo": "src/app/panel/onboarding/actions.ts",
+  "accion": "crearOActualizarNegocio",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{\r\n  negocioId: string | null;\r\n  nombre: string;\r\n  categoria: string[];\r\n  ciudad: string;\r\n  descripcion: string;\r\n  ",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "negocio"
+  ],
+  "escritas": [
+   "negocio:update",
+   "negocio:insert"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 89
+ },
+ {
+  "archivo": "src/app/panel/onboarding/actions.ts",
+  "accion": "subirLogo",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "dataUrl",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "negocio"
+  ],
+  "escritas": [
+   "negocio:update"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 37
+ },
+ {
+  "archivo": "src/app/panel/onboarding/actions.ts",
+  "accion": "elegirPlan",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "planCodigo",
+    "tipo": "\"ESSENTIAL\" | \"STUDIO\" | \"PRESTIGE\"",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "crear_suscripcion_inicial"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 17
+ },
+ {
+  "archivo": "src/app/panel/onboarding/actions.ts",
+  "accion": "guardarSede",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{\r\n  sedeId: string | null;\r\n  negocioId: string;\r\n  nombre: string;\r\n  direccion: string;\r\n  ciudad: string;\r\n  horario",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "sede:update",
+   "sede:insert"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 44
+ },
+ {
+  "archivo": "src/app/panel/onboarding/actions.ts",
+  "accion": "invitarStaff",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "email",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "sedeId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "crear_invitacion_staff"
+  ],
+  "leidas": [
+   "negocio"
+  ],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": true,
+  "fetchExterno": true,
+  "lineas": 32
+ },
+ {
+  "archivo": "src/app/panel/onboarding/actions.ts",
+  "accion": "cancelarInvitacion",
+  "params": [
+   {
+    "nombre": "invitacionId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "cancelar_invitacion"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/panel/onboarding/actions.ts",
+  "accion": "enviarAAprobacion",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "enviar_negocio_a_aprobacion"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 23
+ },
+ {
+  "archivo": "src/app/panel/politica/actions.ts",
+  "accion": "obtenerPolitica",
+  "params": [],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "limites_politica_cancelacion"
+  ],
+  "leidas": [
+   "negocio"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 34
+ },
+ {
+  "archivo": "src/app/panel/politica/actions.ts",
+  "accion": "guardarPolitica",
+  "params": [
+   {
+    "nombre": "entrada",
+    "tipo": "PoliticaNegocio",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "configurar_politica_cancelacion"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 18
+ },
+ {
+  "archivo": "src/app/panel/politica/actions.ts",
+  "accion": "obtenerAnticipo",
+  "params": [],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "negocio_cobra_en_linea"
+  ],
+  "leidas": [
+   "negocio"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 31
+ },
+ {
+  "archivo": "src/app/panel/politica/actions.ts",
+  "accion": "guardarAnticipo",
+  "params": [
+   {
+    "nombre": "entrada",
+    "tipo": "z.input<typeof esquemaAnticipo>",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "configurar_anticipo"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 24
+ },
+ {
+  "archivo": "src/app/panel/pos/actions.ts",
+  "accion": "listarProductos",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "producto"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 15
+ },
+ {
+  "archivo": "src/app/panel/pos/actions.ts",
+  "accion": "crearProducto",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "nombre",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "precio",
+    "tipo": "number",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "producto:insert"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 13
+ },
+ {
+  "archivo": "src/app/panel/pos/actions.ts",
+  "accion": "actualizarProducto",
+  "params": [
+   {
+    "nombre": "id",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "nombre",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "precio",
+    "tipo": "number",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "producto:update"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 13
+ },
+ {
+  "archivo": "src/app/panel/pos/actions.ts",
+  "accion": "cambiarEstadoProducto",
+  "params": [
+   {
+    "nombre": "id",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "activar",
+    "tipo": "boolean",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "producto:update"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/panel/pos/actions.ts",
+  "accion": "listarReservasParaCobrar",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "sedeId",
+    "tipo": "string | null",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "reserva"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 43
+ },
+ {
+  "archivo": "src/app/panel/pos/actions.ts",
+  "accion": "obtenerPuntosDisponibles",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "clienteId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "punto_fidelizacion"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 15
+ },
+ {
+  "archivo": "src/app/panel/pos/actions.ts",
+  "accion": "canjearGiftCardEnPos",
+  "params": [
+   {
+    "nombre": "codigo",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "pin",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "clienteId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "redimir_gift_card_pos"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/panel/pos/actions.ts",
+  "accion": "completarVenta",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{\r\n  reservaId: string;\r\n  productos: { productoId: string; cantidad: number }[];\r\n  metodoPagoSaldo: \"EFECTIVO\" | \"DATA",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "completar_venta_pos"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 47
+ },
+ {
+  "archivo": "src/app/panel/pos/actions.ts",
+  "accion": "obtenerCierreCaja",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "sedeId",
+    "tipo": "string | null",
+    "opcional": true
+   },
+   {
+    "nombre": "fecha",
+    "tipo": "string",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "cierre_caja_dia"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 30
+ },
+ {
+  "archivo": "src/app/panel/pos/actions.ts",
+  "accion": "registrarEgresoCaja",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{ negocioId: string; sedeId: string; monto: number; concepto: string; categoria: string }",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "registrar_egreso_caja"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 13
+ },
+ {
+  "archivo": "src/app/panel/pos/actions.ts",
+  "accion": "anularEgresoCaja",
+  "params": [
+   {
+    "nombre": "egresoId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "motivo",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "anular_egreso_caja"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/panel/reportes/actions.ts",
+  "accion": "obtenerIngresosPeriodo",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{\r\n  negocioId: string;\r\n  sedeId?: string | null;\r\n  desde?: string;\r\n  hasta?: string;\r\n  agrupacion: \"semana\" | \"mes\"",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "reportes_ingresos_periodo"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 25
+ },
+ {
+  "archivo": "src/app/panel/reportes/actions.ts",
+  "accion": "obtenerServiciosTop",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "sedeId",
+    "tipo": "string | null",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "reportes_servicios_top"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 21
+ },
+ {
+  "archivo": "src/app/panel/reportes/actions.ts",
+  "accion": "obtenerRankingStaffPeriodo",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{\r\n  negocioId: string;\r\n  sedeId?: string | null;\r\n  desde?: string;\r\n  hasta?: string;\r\n}",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "reportes_ranking_staff"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 29
+ },
+ {
+  "archivo": "src/app/panel/reportes/actions.ts",
+  "accion": "obtenerMiPosicionMarketplace",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "marketplace_mi_posicion"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 10
+ },
+ {
+  "archivo": "src/app/panel/reportes/actions.ts",
+  "accion": "listarResenas",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "resena"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 26
+ },
+ {
+  "archivo": "src/app/panel/reportes/actions.ts",
+  "accion": "reportarResena",
+  "params": [
+   {
+    "nombre": "resenaId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "motivo",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "reportar_resena"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 12
+ },
+ {
+  "archivo": "src/app/panel/reportes/actions.ts",
+  "accion": "responderResena",
+  "params": [
+   {
+    "nombre": "resenaId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "respuesta",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "resena:update"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 12
+ },
+ {
+  "archivo": "src/app/panel/reportes/actions.ts",
+  "accion": "obtenerHorariosMuertos",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "detectar_horarios_muertos"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 24
+ },
+ {
+  "archivo": "src/app/panel/sedes/actions.ts",
+  "accion": "crearSede",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{\r\n  negocioId: string;\r\n  nombre: string;\r\n  direccion: string;\r\n  ciudad: string;\r\n  horario: HorarioSemana;\r\n  latitu",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "crear_sede"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 29
+ },
+ {
+  "archivo": "src/app/panel/sedes/actions.ts",
+  "accion": "actualizarSede",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{\r\n  sedeId: string;\r\n  nombre: string;\r\n  direccion: string;\r\n  ciudad: string;\r\n  horario: HorarioSemana;\r\n  latitud: ",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "sede:update"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 35
+ },
+ {
+  "archivo": "src/app/panel/sedes/actions.ts",
+  "accion": "cerrarSedeTemporal",
+  "params": [
+   {
+    "nombre": "sedeId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "motivo",
+    "tipo": "string",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "cerrar_sede"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 16
+ },
+ {
+  "archivo": "src/app/panel/sedes/actions.ts",
+  "accion": "eliminarSede",
+  "params": [
+   {
+    "nombre": "sedeId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "motivo",
+    "tipo": "string",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "cerrar_sede"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 15
+ },
+ {
+  "archivo": "src/app/panel/sedes/actions.ts",
+  "accion": "reabrirSede",
+  "params": [
+   {
+    "nombre": "sedeId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "reabrir_sede"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 12
+ },
+ {
+  "archivo": "src/app/panel/sedes/actions.ts",
+  "accion": "marcarSedePrincipal",
+  "params": [
+   {
+    "nombre": "sedeId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "establecer_sede_principal"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/panel/sedes/actions.ts",
+  "accion": "trasladarStaff",
+  "params": [
+   {
+    "nombre": "vinculoId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "nuevaSedeId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "trasladar_staff"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 14
+ },
+ {
+  "archivo": "src/app/panel/sedes/actions.ts",
+  "accion": "guardarExcepcion",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{\r\n  sedeId: string;\r\n  fecha: string;\r\n  cerrado: boolean;\r\n  horaInicio: string | null;\r\n  horaFin: string | null;\r\n  ",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "sede_horario_excepcion:upsert"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 30
+ },
+ {
+  "archivo": "src/app/panel/sedes/actions.ts",
+  "accion": "eliminarExcepcion",
+  "params": [
+   {
+    "nombre": "id",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "sedeId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "sede_horario_excepcion:delete"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/panel/servicios/actions.ts",
+  "accion": "crearServicio",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "DatosServicio",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "servicio"
+  ],
+  "escritas": [
+   "servicio:insert"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 35
+ },
+ {
+  "archivo": "src/app/panel/servicios/actions.ts",
+  "accion": "actualizarServicio",
+  "params": [
+   {
+    "nombre": "servicioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "datos",
+    "tipo": "Omit<DatosServicio, \"negocioId\">",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "servicio"
+  ],
+  "escritas": [
+   "servicio:update"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 38
+ },
+ {
+  "archivo": "src/app/panel/servicios/actions.ts",
+  "accion": "cambiarEstadoServicio",
+  "params": [
+   {
+    "nombre": "servicioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "activar",
+    "tipo": "boolean",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "servicio:update"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 18
+ },
+ {
+  "archivo": "src/app/panel/servicios/actions.ts",
+  "accion": "subirImagenServicio",
+  "params": [
+   {
+    "nombre": "servicioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "dataUrl",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "servicio",
+   "negocio"
+  ],
+  "escritas": [
+   "servicio:update"
+  ],
+  "validaEntrada": true,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 42
+ },
+ {
+  "archivo": "src/app/panel/servicios/actions.ts",
+  "accion": "eliminarServicio",
+  "params": [
+   {
+    "nombre": "servicioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "servicio:update"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 3
+ },
+ {
+  "archivo": "src/app/panel/servicios/actions.ts",
+  "accion": "listarStaffAsignable",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "servicioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "vinculo_staff_negocio",
+   "staff_servicio"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 23
+ },
+ {
+  "archivo": "src/app/panel/servicios/actions.ts",
+  "accion": "alternarStaffServicio",
+  "params": [
+   {
+    "nombre": "servicioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "staffId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "asignar",
+    "tipo": "boolean",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "staff_servicio:insert",
+   "staff_servicio:delete"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 17
+ },
+ {
+  "archivo": "src/app/panel/servicios/actions.ts",
+  "accion": "crearCombo",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "DatosCombo",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "servicio_combo:insert",
+   "servicio_combo_item:insert",
+   "servicio_combo:delete"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 44
+ },
+ {
+  "archivo": "src/app/panel/servicios/actions.ts",
+  "accion": "actualizarCombo",
+  "params": [
+   {
+    "nombre": "comboId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "datos",
+    "tipo": "Omit<DatosCombo, \"negocioId\">",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "servicio_combo:update",
+   "servicio_combo_item:delete",
+   "servicio_combo_item:insert"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 41
+ },
+ {
+  "archivo": "src/app/panel/servicios/actions.ts",
+  "accion": "cambiarEstadoCombo",
+  "params": [
+   {
+    "nombre": "comboId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "activar",
+    "tipo": "boolean",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "servicio_combo:update"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 14
+ },
+ {
+  "archivo": "src/app/panel/soporte/actions.ts",
+  "accion": "listarMisTickets",
+  "params": [],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "ticket_soporte"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 16
+ },
+ {
+  "archivo": "src/app/panel/soporte/actions.ts",
+  "accion": "obtenerHiloTicket",
+  "params": [
+   {
+    "nombre": "ticketId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "ticket_soporte",
+   "ticket_mensaje"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 20
+ },
+ {
+  "archivo": "src/app/panel/soporte/actions.ts",
+  "accion": "crearTicket",
+  "params": [
+   {
+    "nombre": "asunto",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "mensaje",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "negocioId",
+    "tipo": "string | null",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "crear_ticket_soporte"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 15
+ },
+ {
+  "archivo": "src/app/panel/soporte/actions.ts",
+  "accion": "responderTicket",
+  "params": [
+   {
+    "nombre": "ticketId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "mensaje",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "responder_ticket_soporte"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 12
+ },
+ {
+  "archivo": "src/app/panel/staff/actions.ts",
+  "accion": "listarStaff",
+  "params": [
+   {
+    "nombre": "filtro",
+    "tipo": "FiltroStaff",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "vista_staff_negocio"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 72
+ },
+ {
+  "archivo": "src/app/panel/staff/actions.ts",
+  "accion": "crearInvitacionStaff",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{\r\n  negocioId: string;\r\n  email: string;\r\n  sedeId: string;\r\n  comisionPct?: number;\r\n}",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "crear_invitacion_staff"
+  ],
+  "leidas": [
+   "negocio"
+  ],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": true,
+  "fetchExterno": true,
+  "lineas": 33
+ },
+ {
+  "archivo": "src/app/panel/staff/actions.ts",
+  "accion": "reenviarInvitacion",
+  "params": [
+   {
+    "nombre": "invitacionId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "reenviar_invitacion"
+  ],
+  "leidas": [
+   "negocio"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": true,
+  "lineas": 21
+ },
+ {
+  "archivo": "src/app/panel/staff/actions.ts",
+  "accion": "cancelarInvitacion",
+  "params": [
+   {
+    "nombre": "invitacionId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "cancelar_invitacion"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/panel/staff/actions.ts",
+  "accion": "listarInvitacionesPendientes",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "invitacion_staff"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 26
+ },
+ {
+  "archivo": "src/app/panel/staff/actions.ts",
+  "accion": "promoverGuardian",
+  "params": [
+   {
+    "nombre": "vinculoId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "promover_guardian"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 12
+ },
+ {
+  "archivo": "src/app/panel/staff/actions.ts",
+  "accion": "revocarGuardian",
+  "params": [
+   {
+    "nombre": "vinculoId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "revocar_guardian"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 12
+ },
+ {
+  "archivo": "src/app/panel/staff/actions.ts",
+  "accion": "suspenderStaff",
+  "params": [
+   {
+    "nombre": "vinculoId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "motivo",
+    "tipo": "string",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "suspender_staff"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 15
+ },
+ {
+  "archivo": "src/app/panel/staff/actions.ts",
+  "accion": "reactivarStaff",
+  "params": [
+   {
+    "nombre": "vinculoId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "reactivar_staff"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 12
+ },
+ {
+  "archivo": "src/app/panel/staff/actions.ts",
+  "accion": "retirarStaff",
+  "params": [
+   {
+    "nombre": "vinculoId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "motivo",
+    "tipo": "string",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "retirar_staff"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 15
+ },
+ {
+  "archivo": "src/app/panel/staff/actions.ts",
+  "accion": "obtenerHistorialStaff",
+  "params": [
+   {
+    "nombre": "vinculoId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "evento_auditoria",
+   "nivel_staff_consolidado"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 46
+ },
+ {
+  "archivo": "src/app/panel/suscripcion/actions.ts",
+  "accion": "obtenerCatalogoPlanes",
+  "params": [],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "plan"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 24
+ },
+ {
+  "archivo": "src/app/panel/suscripcion/actions.ts",
+  "accion": "obtenerMiSuscripcion",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "suscripcion",
+   "negocio"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 62
+ },
+ {
+  "archivo": "src/app/panel/suscripcion/actions.ts",
+  "accion": "iniciarUpgrade",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "planCodigoNuevo",
+    "tipo": "PlanCodigo",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "solicitar_upgrade_plan"
+  ],
+  "leidas": [
+   "negocio"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 32
+ },
+ {
+  "archivo": "src/app/panel/suscripcion/actions.ts",
+  "accion": "iniciarPagoPlan",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "planCodigo",
+    "tipo": "PlanCodigo",
+    "opcional": true
+   },
+   {
+    "nombre": "ciclo",
+    "tipo": "\"MENSUAL\" | \"ANUAL\"",
+    "opcional": true
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "solicitar_pago_plan"
+  ],
+  "leidas": [
+   "negocio"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 34
+ },
+ {
+  "archivo": "src/app/panel/suscripcion/actions.ts",
+  "accion": "listarPagosSuscripcion",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "pago"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 30
+ },
+ {
+  "archivo": "src/app/panel/suscripcion/actions.ts",
+  "accion": "consultarEstadoUpgrade",
+  "params": [
+   {
+    "nombre": "pagoId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "pago"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 16
+ },
+ {
+  "archivo": "src/app/panel/suscripcion/actions.ts",
+  "accion": "solicitarDowngrade",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "planCodigoDestino",
+    "tipo": "PlanCodigo",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "solicitar_downgrade_plan"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 14
+ },
+ {
+  "archivo": "src/app/panel/suscripcion/actions.ts",
+  "accion": "cancelarDowngradeProgramado",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "cancelar_downgrade_programado"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/panel/suscripcion/actions.ts",
+  "accion": "cancelarMiNegocio",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "motivo",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "cancelar_negocio_propio"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/panel/suscripcion/prueba.ts",
+  "accion": "elegirPais",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "pais",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "elegir_pais_negocio"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 12
+ },
+ {
+  "archivo": "src/app/panel/suscripcion/prueba.ts",
+  "accion": "iniciarPrueba",
+  "params": [
+   {
+    "nombre": "entrada",
+    "tipo": "DatosPrueba",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": true,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "iniciar_prueba_negocio_srv2"
+  ],
+  "leidas": [
+   "negocio",
+   "pais"
+  ],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 75
+ },
+ {
+  "archivo": "src/app/panel/wallet/actions.ts",
+  "accion": "obtenerMiWallet",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "wallet"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 10
+ },
+ {
+  "archivo": "src/app/panel/wallet/actions.ts",
+  "accion": "listarMovimientosWallet",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "wallet",
+   "wallet_movimiento"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 17
+ },
+ {
+  "archivo": "src/app/panel/whatsapp/actions.ts",
+  "accion": "obtenerResumenWhatsApp",
+  "params": [],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 10
+ },
+ {
+  "archivo": "src/app/panel/whatsapp/actions.ts",
+  "accion": "guardarPlantilla",
+  "params": [
+   {
+    "nombre": "entrada",
+    "tipo": "z.input<typeof esquemaPlantilla>",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 21
+ },
+ {
+  "archivo": "src/app/panel/whatsapp/actions.ts",
+  "accion": "eliminarPlantilla",
+  "params": [
+   {
+    "nombre": "plantillaId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 13
+ },
+ {
+  "archivo": "src/app/panel/whatsapp/actions.ts",
+  "accion": "contarSegmento",
+  "params": [
+   {
+    "nombre": "segmento",
+    "tipo": "z.input<typeof esquemaSegmento>",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 15
+ },
+ {
+  "archivo": "src/app/panel/whatsapp/actions.ts",
+  "accion": "crearCampana",
+  "params": [
+   {
+    "nombre": "entrada",
+    "tipo": "z.input<typeof esquemaCampana>",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 19
+ },
+ {
+  "archivo": "src/app/panel/whatsapp/actions.ts",
+  "accion": "programarCampana",
+  "params": [
+   {
+    "nombre": "campanaId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 13
+ },
+ {
+  "archivo": "src/app/panel/whatsapp/actions.ts",
+  "accion": "cancelarCampana",
+  "params": [
+   {
+    "nombre": "campanaId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 13
+ },
+ {
+  "archivo": "src/app/panel/whatsapp/actions.ts",
+  "accion": "solicitarRecarga",
+  "params": [
+   {
+    "nombre": "paqueteId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 16
+ },
+ {
+  "archivo": "src/app/panel/whatsapp/actions.ts",
+  "accion": "cancelarRecarga",
+  "params": [
+   {
+    "nombre": "compraId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 13
+ },
+ {
+  "archivo": "src/app/perfil/actions.ts",
+  "accion": "actualizarPerfil",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{\r\n  nombre: string;\r\n  codigoPais: string;\r\n  telefonoLocal: string;\r\n  fechaNacimiento: string;\r\n  categoriasInteres: ",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "perfil:update"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 41
+ },
+ {
+  "archivo": "src/app/perfil/actions.ts",
+  "accion": "cerrarSesion",
+  "params": [],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 5
+ },
+ {
+  "archivo": "src/app/perfil/foto-actions.ts",
+  "accion": "subirFotoPerfil",
+  "params": [
+   {
+    "nombre": "formData",
+    "tipo": "FormData",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "perfil:update"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 35
+ },
+ {
+  "archivo": "src/app/perfil/foto-actions.ts",
+  "accion": "quitarFotoPerfil",
+  "params": [],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "perfil:update"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 16
+ },
+ {
+  "archivo": "src/app/privacidad/actions.ts",
+  "accion": "guardarPreferenciasPrivacidad",
+  "params": [
+   {
+    "nombre": "prefs",
+    "tipo": "Partial<Record<PropositoConsentimiento, boolean>>",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 12
+ },
+ {
+  "archivo": "src/app/reserva/[id]/actions-cita.ts",
+  "accion": "llegueAction",
+  "params": [
+   {
+    "nombre": "reservaId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "coords",
+    "tipo": "{ lat: number; lng: number }",
+    "opcional": true
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 9
+ },
+ {
+  "archivo": "src/app/reserva/[id]/actions-cita.ts",
+  "accion": "slotsReprogramarAction",
+  "params": [
+   {
+    "nombre": "reservaId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "fecha",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 27
+ },
+ {
+  "archivo": "src/app/reserva/[id]/actions-cita.ts",
+  "accion": "reprogramarAction",
+  "params": [
+   {
+    "nombre": "reservaId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "horaISO",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "motivo",
+    "tipo": "string",
+    "opcional": true
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 8
+ },
+ {
+  "archivo": "src/app/reserva/[id]/actions-cita.ts",
+  "accion": "calificarAction",
+  "params": [
+   {
+    "nombre": "reservaId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "calificacion",
+    "tipo": "number",
+    "opcional": false
+   },
+   {
+    "nombre": "comentario",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 10
+ },
+ {
+  "archivo": "src/app/reserva/[id]/actions-cita.ts",
+  "accion": "enviarMensajeAction",
+  "params": [
+   {
+    "nombre": "reservaId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "cuerpo",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 3
+ },
+ {
+  "archivo": "src/app/reserva/[id]/actions-cita.ts",
+  "accion": "listarMensajesAction",
+  "params": [
+   {
+    "nombre": "reservaId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 3
+ },
+ {
+  "archivo": "src/app/reserva/[id]/actions-cita.ts",
+  "accion": "marcarLeidoAction",
+  "params": [
+   {
+    "nombre": "reservaId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 3
+ },
+ {
+  "archivo": "src/app/reserva/[id]/actions.ts",
+  "accion": "cancelarReservaAction",
+  "params": [
+   {
+    "nombre": "reservaId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "motivo",
+    "tipo": "string",
+    "opcional": true
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": true,
+  "archivoUsaAdmin": true,
+  "rpcs": [
+   "cancelar_reserva"
+  ],
+  "leidas": [
+   "reembolso"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 49
+ },
+ {
+  "archivo": "src/app/reserva/[id]/pago/actions.ts",
+  "accion": "iniciarPagoSena",
+  "params": [
+   {
+    "nombre": "reservaId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "aceptaPolitica",
+    "tipo": "boolean",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "aceptar_politica_reserva",
+   "crear_pago_sena"
+  ],
+  "leidas": [
+   "reserva"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 88
+ },
+ {
+  "archivo": "src/app/reserva/[id]/pago/actions.ts",
+  "accion": "consultarEstadoPago",
+  "params": [
+   {
+    "nombre": "reservaId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "reserva",
+   "pago"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 44
+ },
+ {
+  "archivo": "src/app/reserva/[id]/pago/actions.ts",
+  "accion": "confirmarSinAnticipo",
+  "params": [
+   {
+    "nombre": "reservaId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "confirmar_reserva_sin_anticipo"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 17
+ },
+ {
+  "archivo": "src/app/staff/agenda/actions.ts",
+  "accion": "listarMisCitas",
+  "params": [
+   {
+    "nombre": "desdeISO",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "hastaISO",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "reserva"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 42
+ },
+ {
+  "archivo": "src/app/staff/agenda/actions.ts",
+  "accion": "hacerCheckIn",
+  "params": [
+   {
+    "nombre": "reservaId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "iniciar_atencion_reserva"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/staff/agenda/actions.ts",
+  "accion": "hacerCheckOut",
+  "params": [
+   {
+    "nombre": "reservaId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "finalizar_atencion_reserva"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/app/staff/clientes/actions.ts",
+  "accion": "listarMisClientes",
+  "params": [],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "reserva"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 46
+ },
+ {
+  "archivo": "src/app/staff/lealtad/actions.ts",
+  "accion": "obtenerMisReferidosStaff",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "mis_referidos_staff"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 6
+ },
+ {
+  "archivo": "src/app/staff/lealtad/actions.ts",
+  "accion": "obtenerSellosOtorgadosPorMi",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "sello_evento"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 25
+ },
+ {
+  "archivo": "src/app/staff/nivel/actions.ts",
+  "accion": "obtenerMiNivel",
+  "params": [],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "staff_mi_nivel_actual"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 20
+ },
+ {
+  "archivo": "src/app/staff/perfil/actions.ts",
+  "accion": "obtenerMiPerfilStaff",
+  "params": [],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "staff"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 10
+ },
+ {
+  "archivo": "src/app/staff/perfil/actions.ts",
+  "accion": "actualizarMiPerfilStaff",
+  "params": [
+   {
+    "nombre": "datos",
+    "tipo": "{ nombre: string; especialidad: string; bio: string }",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "staff:update"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 15
+ },
+ {
+  "archivo": "src/app/staff/perfil/actions.ts",
+  "accion": "subirFotoPerfilStaff",
+  "params": [
+   {
+    "nombre": "dataUrl",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "staff:update"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 25
+ },
+ {
+  "archivo": "src/app/staff/perfil/actions.ts",
+  "accion": "obtenerMisGanancias",
+  "params": [
+   {
+    "nombre": "negocioId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "vinculoId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "desdeISO",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "hastaISO",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [
+   "reportes_ranking_staff",
+   "staff_mis_propinas"
+  ],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 22
+ },
+ {
+  "archivo": "src/app/staff/perfil/actions.ts",
+  "accion": "listarMiDisponibilidad",
+  "params": [
+   {
+    "nombre": "vinculoId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "disponibilidad"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 18
+ },
+ {
+  "archivo": "src/app/staff/perfil/actions.ts",
+  "accion": "guardarDiaDisponibilidad",
+  "params": [
+   {
+    "nombre": "vinculoId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "sedeId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "diaSemana",
+    "tipo": "number",
+    "opcional": false
+   },
+   {
+    "nombre": "horaInicio",
+    "tipo": "string | null",
+    "opcional": false
+   },
+   {
+    "nombre": "horaFin",
+    "tipo": "string | null",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "disponibilidad:delete",
+   "disponibilidad:insert"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 22
+ },
+ {
+  "archivo": "src/app/staff/perfil/actions.ts",
+  "accion": "listarMisBloqueos",
+  "params": [
+   {
+    "nombre": "vinculoId",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [
+   "bloqueo_ausencia"
+  ],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 15
+ },
+ {
+  "archivo": "src/app/staff/perfil/actions.ts",
+  "accion": "crearMiBloqueo",
+  "params": [
+   {
+    "nombre": "vinculoId",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "fechaInicio",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "fechaFin",
+    "tipo": "string",
+    "opcional": false
+   },
+   {
+    "nombre": "motivo",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "bloqueo_ausencia:insert"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 14
+ },
+ {
+  "archivo": "src/app/staff/perfil/actions.ts",
+  "accion": "eliminarMiBloqueo",
+  "params": [
+   {
+    "nombre": "id",
+    "tipo": "string",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [
+   "bloqueo_ausencia:delete"
+  ],
+  "validaEntrada": false,
+  "revalida": true,
+  "fetchExterno": false,
+  "lineas": 11
+ },
+ {
+  "archivo": "src/components/marketplace/actions.ts",
+  "accion": "contarResultadosAction",
+  "params": [
+   {
+    "nombre": "f",
+    "tipo": "{\r\n  categoria?: string;\r\n  lat?: number;\r\n  lng?: number;\r\n  radioKm?: number;\r\n  califMin?: number;\r\n  abiertoHoy?: bo",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": true,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 26
+ },
+ {
+  "archivo": "src/components/privacidad/acciones-cookies.ts",
+  "accion": "guardarEleccionCookies",
+  "params": [
+   {
+    "nombre": "analitica",
+    "tipo": "boolean",
+    "opcional": false
+   }
+  ],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 4
+ },
+ {
+  "archivo": "src/components/sistema/actions.ts",
+  "accion": "consultarEstadoSistemaAction",
+  "params": [],
+  "sesion": false,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": false,
+  "lineas": 9
+ },
+ {
+  "archivo": "src/lib/geo/direccion-desde-coordenadas.ts",
+  "accion": "direccionDesdeCoordenadas",
+  "params": [
+   {
+    "nombre": "lat",
+    "tipo": "number",
+    "opcional": false
+   },
+   {
+    "nombre": "lng",
+    "tipo": "number",
+    "opcional": false
+   }
+  ],
+  "sesion": true,
+  "clienteAdmin": false,
+  "archivoUsaAdmin": false,
+  "rpcs": [],
+  "leidas": [],
+  "escritas": [],
+  "validaEntrada": false,
+  "revalida": false,
+  "fetchExterno": true,
+  "lineas": 38
+ }
+]

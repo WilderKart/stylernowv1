@@ -1,0 +1,90 @@
+tabla	filas_de_B	lectura_por_terceros	escritura_terceros	insercion_terceros	borrado_terceros	veredicto
+aceptacion_politica_reserva	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+ai_conversion	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+ai_memoria_negocio	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+ai_prompt	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+ai_roi_snapshot	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+campana_publicitaria	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+cashback_movimiento	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+cashback_regla	1	anon,intruso,cliente-a,dueno-a,guardian-a,pro-a1,pro-a2	bloqueada	RLS deniega	bloqueado	APROBADA — lectura pública: regla activa pública; NO depende de que el negocio esté ACTIVO (observación F1A-04)
+chat_conversacion	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+cliente_etiqueta	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+cliente_membresia	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+cliente_nota	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+comision_cambio_programado	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+conexion_pago_evento	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+conexion_pago_negocio	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+corporativo_consumo	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+corporativo_cuenta	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+corporativo_miembro	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+credito_ia_consumo	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+credito_ia_lote	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+disponibilidad	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+egreso_caja	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+evento_auditoria	3	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+familia_grupo	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+familia_miembro	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+favorito_negocio	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+gift_card	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+gift_card_redencion	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+invitacion_staff	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+lealtad_fraude_evento	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+lealtad_movimiento	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+lealtad_wallet	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+libro_movimiento	3	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+lista_espera	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+membresia_plan	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+membresia_uso	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+movimiento_inventario	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+negocio_addon	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+negocio_marca	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+negocio_visita_perfil	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+notificacion_envio	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+notificacion_outbox	3	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+notificacion_plantilla	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+notificacion_usuario	3	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+oauth_estado	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+oferta_negocio	1	intruso,cliente-a,dueno-a,guardian-a,pro-a1,pro-a2	bloqueada	RLS deniega	bloqueado	APROBADA — lectura pública: authenticated; vigente y negocio ACTIVO (verificado)
+pago	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+producto	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+producto_stock	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+prueba_uso	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+punto_fidelizacion	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+recompensa_regla	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+recompensa_sugerencia	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+recurso	1	anon,intruso,cliente-a,dueno-a,guardian-a,pro-a1,pro-a2	bloqueada	RLS deniega	bloqueado	APROBADA — lectura pública: catálogo público solo con negocio ACTIVO (verificado)
+recurso_tipo	1	anon,intruso,cliente-a,dueno-a,guardian-a,pro-a1,pro-a2	bloqueada	RLS deniega	bloqueado	APROBADA — lectura pública: catálogo público solo con negocio ACTIVO (verificado)
+reembolso	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+referido	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+referido_codigo	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+referido_config	1	anon,intruso,cliente-a,dueno-a,guardian-a,pro-a1,pro-a2	bloqueada	RLS deniega	bloqueado	APROBADA — lectura pública: USING (true): legible por cualquiera, incluso de negocios no activos (hallazgo F1A-04)
+resena	1	anon,intruso,cliente-a,dueno-a,guardian-a,pro-a1,pro-a2	bloqueada	trigger/regla previa (ver prueba dirigida)	bloqueado	APROBADA — lectura pública: reseñas VISIBLE son públicas por diseño (resena_select_publico)
+reserva	3	ninguno	bloqueada	trigger/regla previa (ver prueba dirigida)	bloqueado	APROBADA — aislada
+reserva_foto	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+reserva_servicio	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+sede	1	anon,intruso,cliente-a,dueno-a,guardian-a,pro-a1,pro-a2	bloqueada	RLS deniega	bloqueado	APROBADA — lectura pública: catálogo público solo con negocio ACTIVO (verificado con B en 4 estados)
+sede_horario_excepcion	1	anon,intruso,cliente-a,dueno-a,guardian-a,pro-a1,pro-a2	bloqueada	RLS deniega	bloqueado	APROBADA — lectura pública: catálogo público solo con negocio ACTIVO (verificado)
+sello_campana	1	anon,intruso,cliente-a,dueno-a,guardian-a,pro-a1,pro-a2	bloqueada	RLS deniega	bloqueado	APROBADA — lectura pública: campaña ACTIVA pública; NO depende de que el negocio esté ACTIVO (observación F1A-04)
+sello_cliente	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+sello_evento	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+servicio	2	anon,intruso,cliente-a,dueno-a,guardian-a,pro-a1,pro-a2	bloqueada	RLS deniega	bloqueado	APROBADA — lectura pública: catálogo público solo con negocio ACTIVO (verificado)
+servicio_combo	1	anon,intruso,cliente-a,dueno-a,guardian-a,pro-a1,pro-a2	bloqueada	RLS deniega	bloqueado	APROBADA — lectura pública: catálogo público solo con negocio ACTIVO (verificado)
+solicitud_devolucion_saldo	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+solicitud_reposicion	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+staff_referido	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+suscripcion	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+suscripcion_fundador	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+ticket_soporte	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+venta_producto	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+vinculo_staff_negocio	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+vip_miembro	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+vip_nivel	1	anon,intruso,cliente-a,dueno-a,guardian-a,pro-a1,pro-a2	bloqueada	RLS deniega	bloqueado	APROBADA — lectura pública: USING (true): legible por cualquiera, incluso de negocios no activos (hallazgo F1A-04)
+wallet	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+webhook_evento	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+whatsapp_alerta	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+whatsapp_campana	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+whatsapp_compra_recarga	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+whatsapp_consumo	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+whatsapp_conversacion_lote	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+whatsapp_mensaje	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada
+whatsapp_plantilla	1	ninguno	bloqueada	RLS deniega	bloqueado	APROBADA — aislada

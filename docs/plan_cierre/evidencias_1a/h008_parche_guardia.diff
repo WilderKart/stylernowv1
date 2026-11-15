@@ -1,0 +1,302 @@
+diff --git a/src/app/admin/actions.ts b/src/app/admin/actions.ts
+index 5dd3f7f..f889f1e 100644
+--- a/src/app/admin/actions.ts
++++ b/src/app/admin/actions.ts
+@@ -1,6 +1,6 @@
+ "use server";
+ 
+-import { createClient } from "@/lib/supabase/server";
++import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
+ import { revalidatePath } from "next/cache";
+ 
+ type Resultado<T = undefined> =
+@@ -8,12 +8,10 @@ type Resultado<T = undefined> =
+   | { ok: false; error: string };
+ 
+ async function usuarioActual() {
+-  const supabase = await createClient();
+-  const {
+-    data: { user },
+-  } = await supabase.auth.getUser();
+-  if (!user) throw new Error("NO_AUTENTICADO");
+-  return { supabase, userId: user.id };
++  // Autorización en el servidor (Super Admin); la base la vuelve a exigir en cada RPC.
++  const g = await autorizarSuperSU();
++  if (!g.ok) throw new Error(g.error);
++  return { supabase: g.supabase, userId: g.userId };
+ }
+ 
+ const MENSAJES_ERROR: Record<string, string> = {
+diff --git a/src/app/admin/ai/actions.ts b/src/app/admin/ai/actions.ts
+index 4669d9f..a024984 100644
+--- a/src/app/admin/ai/actions.ts
++++ b/src/app/admin/ai/actions.ts
+@@ -1,6 +1,6 @@
+ "use server";
+ 
+-import { createClient } from "@/lib/supabase/server";
++import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
+ import { revalidatePath } from "next/cache";
+ 
+ type Resultado<T = undefined> =
+@@ -31,7 +31,9 @@ export interface AccionCostoIa {
+ }
+ 
+ export async function listarAccionesCostoIa(): Promise<Resultado<AccionCostoIa[]>> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { data, error } = await supabase.from("ai_accion_costo").select("*").order("categoria").order("accion");
+   if (error) return { ok: false, error: error.message };
+   return {
+@@ -53,7 +55,9 @@ export async function actualizarCostoAccionIa(
+   costoCreditos: number,
+   activo: boolean
+ ): Promise<Resultado> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { error } = await supabase.rpc("actualizar_accion_costo_ia", {
+     p_accion: accion,
+     p_costo_creditos: costoCreditos,
+@@ -75,7 +79,9 @@ export interface ModeloIa {
+ }
+ 
+ export async function listarModelosIa(): Promise<Resultado<ModeloIa[]>> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { data, error } = await supabase.from("ai_modelo_config").select("*").order("orden_preferencia");
+   if (error) return { ok: false, error: error.message };
+   return {
+@@ -92,7 +98,9 @@ export async function listarModelosIa(): Promise<Resultado<ModeloIa[]>> {
+ }
+ 
+ export async function actualizarModeloIa(nombre: string, ordenPreferencia: number, activo: boolean): Promise<Resultado> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { error } = await supabase.rpc("actualizar_modelo_config_ia", {
+     p_nombre: nombre,
+     p_orden_preferencia: ordenPreferencia,
+@@ -113,7 +121,9 @@ export interface PaqueteIa {
+ }
+ 
+ export async function listarPaquetesIa(): Promise<Resultado<PaqueteIa[]>> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { data, error } = await supabase.from("ai_paquete_creditos").select("*").order("creditos", { nullsFirst: false });
+   if (error) return { ok: false, error: error.message };
+   return {
+@@ -129,7 +139,9 @@ export async function listarPaquetesIa(): Promise<Resultado<PaqueteIa[]>> {
+ }
+ 
+ export async function actualizarPaqueteIa(id: string, precioCop: number | null, activo: boolean): Promise<Resultado> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { error } = await supabase.rpc("actualizar_paquete_creditos_ia", {
+     p_paquete_id: id,
+     // El parámetro SQL acepta NULL (paquete "Enterprise", sin autoservicio) —
+@@ -152,14 +164,18 @@ export interface FuncionPlanIa {
+ }
+ 
+ export async function listarFuncionesPlanIa(): Promise<Resultado<FuncionPlanIa[]>> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { data, error } = await supabase.from("plan_funcion_ia").select("*").order("funcion");
+   if (error) return { ok: false, error: error.message };
+   return { ok: true, data: data.map((f) => ({ planCodigo: f.plan_codigo, funcion: f.funcion, habilitado: f.habilitado })) };
+ }
+ 
+ export async function configurarFuncionPlanIa(planCodigo: string, funcion: string, habilitado: boolean): Promise<Resultado> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { error } = await supabase.rpc("configurar_funcion_plan_ia", {
+     p_plan_codigo: planCodigo as "ESSENTIAL" | "STUDIO" | "PRESTIGE" | "SIGNATURE",
+     p_funcion: funcion,
+@@ -182,7 +198,9 @@ export interface SimulacionIa {
+ }
+ 
+ export async function simularConsumoIa(planCodigo: string, numStaff: number, numClientes: number): Promise<Resultado<SimulacionIa>> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { data, error } = await supabase.rpc("simular_consumo_ia", {
+     p_plan_codigo: planCodigo as "ESSENTIAL" | "STUDIO" | "PRESTIGE" | "SIGNATURE",
+     p_num_staff: numStaff,
+@@ -213,7 +231,9 @@ export interface ResumenConsumoIa {
+ }
+ 
+ export async function obtenerResumenConsumoIa(): Promise<Resultado<ResumenConsumoIa>> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { data: consumos, error } = await supabase
+     .from("credito_ia_consumo")
+     .select("negocio_id, funcion, creditos_consumidos");
+diff --git a/src/app/admin/barra-actions.ts b/src/app/admin/barra-actions.ts
+index 088656d..20e0986 100644
+--- a/src/app/admin/barra-actions.ts
++++ b/src/app/admin/barra-actions.ts
+@@ -1,5 +1,6 @@
+ "use server";
+ 
++import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
+ import { rpcAdmin } from "./_componentes/rpc";
+ 
+ export type ResultadoBusqueda = {
+@@ -10,6 +11,9 @@ export type ResultadoBusqueda = {
+ 
+ /** Buscador global del Super Admin. La base exige is_supersu() (migración 137). */
+ export async function buscarGlobal(q: string): Promise<ResultadoBusqueda | null> {
++  // Autorización en el servidor (Super Admin); la base la vuelve a exigir en admin_buscar.
++  const g = await autorizarSuperSU();
++  if (!g.ok) return null;
+   const texto = String(q ?? "").trim().slice(0, 80);
+   if (texto.length < 2) return { negocios: [], usuarios: [], reservas: [] };
+   const r = await rpcAdmin<ResultadoBusqueda>("admin_buscar", { p_q: texto });
+diff --git a/src/app/admin/configuracion/actions.ts b/src/app/admin/configuracion/actions.ts
+index af90b3b..13670f5 100644
+--- a/src/app/admin/configuracion/actions.ts
++++ b/src/app/admin/configuracion/actions.ts
+@@ -1,6 +1,6 @@
+ "use server";
+ 
+-import { createClient } from "@/lib/supabase/server";
++import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
+ import { revalidatePath } from "next/cache";
+ 
+ type Resultado<T = undefined> =
+@@ -8,12 +8,10 @@ type Resultado<T = undefined> =
+   | { ok: false; error: string };
+ 
+ async function usuarioActual() {
+-  const supabase = await createClient();
+-  const {
+-    data: { user },
+-  } = await supabase.auth.getUser();
+-  if (!user) throw new Error("NO_AUTENTICADO");
+-  return { supabase, userId: user.id };
++  // Autorización en el servidor (Super Admin); la base la vuelve a exigir en cada RPC.
++  const g = await autorizarSuperSU();
++  if (!g.ok) throw new Error(g.error);
++  return { supabase: g.supabase, userId: g.userId };
+ }
+ 
+ const MENSAJES_ERROR: Record<string, string> = {
+diff --git a/src/app/admin/lealtad/actions.ts b/src/app/admin/lealtad/actions.ts
+index d26e81a..8095899 100644
+--- a/src/app/admin/lealtad/actions.ts
++++ b/src/app/admin/lealtad/actions.ts
+@@ -1,6 +1,6 @@
+ "use server";
+ 
+-import { createClient } from "@/lib/supabase/server";
++import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
+ import { revalidatePath } from "next/cache";
+ 
+ type Resultado<T = undefined> =
+@@ -22,7 +22,9 @@ export interface MetricasLealtad {
+ }
+ 
+ export async function obtenerMetricasLealtad(): Promise<Resultado<MetricasLealtad>> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { data, error } = await supabase.rpc("metricas_lealtad_plataforma");
+   if (error) return { ok: false, error: error.message };
+   const m = data as Record<string, number>;
+@@ -49,14 +51,18 @@ export interface EventoFraude {
+ }
+ 
+ export async function listarEventosFraude(): Promise<Resultado<EventoFraude[]>> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { data, error } = await supabase.rpc("listar_eventos_fraude", { p_revisado: false });
+   if (error) return { ok: false, error: error.message };
+   return { ok: true, data: (data ?? []).map((e) => ({ id: e.id, tipo: e.tipo, clienteId: e.cliente_id, negocioId: e.negocio_id, severidad: e.severidad, payload: e.payload, createdAt: e.created_at })) };
+ }
+ 
+ export async function marcarFraudeRevisado(eventoId: string): Promise<Resultado> {
+-  const supabase = await createClient();
++  const g = await autorizarSuperSU();
++  if (!g.ok) return { ok: false, error: g.error };
++  const supabase = g.supabase;
+   const { error } = await supabase.rpc("marcar_fraude_revisado", { p_evento_id: eventoId });
+   if (error) return { ok: false, error: error.message };
+   revalidatePath("/admin/lealtad");
+diff --git a/src/app/admin/planes/actions.ts b/src/app/admin/planes/actions.ts
+index c89254e..de64486 100644
+--- a/src/app/admin/planes/actions.ts
++++ b/src/app/admin/planes/actions.ts
+@@ -1,6 +1,6 @@
+ "use server";
+ 
+-import { createClient } from "@/lib/supabase/server";
++import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
+ import type { Database } from "@/types/database";
+ import { revalidatePath } from "next/cache";
+ import { conMotivo, validarMotivo } from "@/lib/auditoria/motivo";
+@@ -15,12 +15,10 @@ const PASARELAS = ["MERCADOPAGO", "STRIPE", "PAYONEER", "MANUAL"] as const;
+ const PAISES_VALIDOS = ["CO", "US", "MX", "ES"];
+ 
+ async function usuarioActual() {
+-  const supabase = await createClient();
+-  const {
+-    data: { user },
+-  } = await supabase.auth.getUser();
+-  if (!user) throw new Error("NO_AUTENTICADO");
+-  return { supabase, userId: user.id };
++  // Autorización en el servidor (Super Admin); la base la vuelve a exigir en cada RPC.
++  const g = await autorizarSuperSU();
++  if (!g.ok) throw new Error(g.error);
++  return { supabase: g.supabase, userId: g.userId };
+ }
+ 
+ const MENSAJES_ERROR: Record<string, string> = {
+diff --git a/src/app/admin/soporte/actions.ts b/src/app/admin/soporte/actions.ts
+index f44424b..bbea72f 100644
+--- a/src/app/admin/soporte/actions.ts
++++ b/src/app/admin/soporte/actions.ts
+@@ -1,6 +1,6 @@
+ "use server";
+ 
+-import { createClient } from "@/lib/supabase/server";
++import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
+ import { revalidatePath } from "next/cache";
+ 
+ type Resultado<T = undefined> =
+@@ -8,12 +8,10 @@ type Resultado<T = undefined> =
+   | { ok: false; error: string };
+ 
+ async function usuarioActual() {
+-  const supabase = await createClient();
+-  const {
+-    data: { user },
+-  } = await supabase.auth.getUser();
+-  if (!user) throw new Error("NO_AUTENTICADO");
+-  return { supabase, userId: user.id };
++  // Autorización en el servidor (Super Admin); la base la vuelve a exigir en cada RPC.
++  const g = await autorizarSuperSU();
++  if (!g.ok) throw new Error(g.error);
++  return { supabase: g.supabase, userId: g.userId };
+ }
+ 
+ const MENSAJES_ERROR: Record<string, string> = {

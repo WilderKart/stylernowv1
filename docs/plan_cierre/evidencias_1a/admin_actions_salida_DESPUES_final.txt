@@ -1,0 +1,89 @@
+
+ RUN  v3.2.7 C:/Users/karni/Documents/stylernow-cierre
+
+stdout | tests/admin-actions-autorizacion.test.ts > H-008 · Server Actions de /admin con sesión real por actor > matriz acción × actor
+RESUMEN {
+ "anonimo": {
+  "llamadas": 69,
+  "escrituras_ok": 0,
+  "lecturas_con_datos": 0,
+  "tablas_cambiadas": []
+ },
+ "intruso": {
+  "llamadas": 69,
+  "escrituras_ok": 0,
+  "lecturas_con_datos": 0,
+  "tablas_cambiadas": []
+ },
+ "cliente-a": {
+  "llamadas": 69,
+  "escrituras_ok": 0,
+  "lecturas_con_datos": 0,
+  "tablas_cambiadas": []
+ },
+ "pro-a1": {
+  "llamadas": 69,
+  "escrituras_ok": 0,
+  "lecturas_con_datos": 0,
+  "tablas_cambiadas": []
+ },
+ "guardian-a": {
+  "llamadas": 69,
+  "escrituras_ok": 0,
+  "lecturas_con_datos": 0,
+  "tablas_cambiadas": []
+ },
+ "dueno-a": {
+  "llamadas": 69,
+  "escrituras_ok": 0,
+  "lecturas_con_datos": 0,
+  "tablas_cambiadas": []
+ },
+ "dueno-b": {
+  "llamadas": 69,
+  "escrituras_ok": 0,
+  "lecturas_con_datos": 0,
+  "tablas_cambiadas": []
+ },
+ "super": {
+  "llamadas": 69,
+  "escrituras_ok": 37,
+  "lecturas_con_datos": 24,
+  "tablas_cambiadas": [
+   "auth.users",
+   "public.addon_precio",
+   "public.ai_accion_costo",
+   "public.ai_modelo_config",
+   "public.ai_paquete_creditos",
+   "public.banner_home",
+   "public.ciudad_habilitada",
+   "public.comision_cambio_programado",
+   "public.configuracion_plataforma",
+   "public.evento_auditoria",
+   "public.lealtad_fraude_evento",
+   "public.negocio",
+   "public.notificacion_outbox",
+   "public.notificacion_outbox_evento",
+   "public.pais",
+   "public.perfil",
+   "public.plan",
+   "public.plan_caracteristica",
+   "public.plan_precio",
+   "public.suscripcion",
+   "public.texto_legal",
+   "public.ticket_mensaje",
+   "public.ticket_soporte",
+   "public.whatsapp_config",
+   "public.whatsapp_paquete"
+  ]
+ }
+}
+
+ ✓ tests/admin-actions-autorizacion.test.ts (1 test) 100836ms
+   ✓ H-008 · Server Actions de /admin con sesión real por actor > matriz acción × actor  100830ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  13:10:33
+   Duration  102.07s (transform 1.20s, setup 0ms, collect 246ms, tests 100.84s, environment 0ms, prepare 292ms)
+

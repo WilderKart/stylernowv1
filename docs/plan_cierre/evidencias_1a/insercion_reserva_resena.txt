@@ -1,0 +1,32 @@
+== inserción directa en reserva / resena ==
+ n |   actor    |                               intento                                | esperado  | obtenido  | veredicto |                            detalle                            
+---+------------+----------------------------------------------------------------------+-----------+-----------+-----------+---------------------------------------------------------------
+ 1 | cliente-a  | reserva en B con cliente_id = cliente de B (suplantación)            | DENEGADO  | DENEGADO  | ok        | RESERVA_SOLO_POR_FUNCION
+ 1 | dueno-a    | reserva en B con cliente_id = cliente de B (suplantación)            | DENEGADO  | DENEGADO  | ok        | RESERVA_SOLO_POR_FUNCION
+ 1 | guardian-a | reserva en B con cliente_id = cliente de B (suplantación)            | DENEGADO  | DENEGADO  | ok        | RESERVA_SOLO_POR_FUNCION
+ 1 | intruso    | reserva en B con cliente_id = cliente de B (suplantación)            | DENEGADO  | DENEGADO  | ok        | RESERVA_SOLO_POR_FUNCION
+ 1 | pro-a1     | reserva en B con cliente_id = cliente de B (suplantación)            | DENEGADO  | DENEGADO  | ok        | RESERVA_SOLO_POR_FUNCION
+ 1 | pro-a2     | reserva en B con cliente_id = cliente de B (suplantación)            | DENEGADO  | DENEGADO  | ok        | RESERVA_SOLO_POR_FUNCION
+ 2 | dueno-a    | reserva en B con cliente_id propio, actor interno de A               | DENEGADO  | DENEGADO  | ok        | RESERVA_SOLO_POR_FUNCION
+ 2 | guardian-a | reserva en B con cliente_id propio, actor interno de A               | DENEGADO  | DENEGADO  | ok        | RESERVA_SOLO_POR_FUNCION
+ 2 | pro-a1     | reserva en B con cliente_id propio, actor interno de A               | DENEGADO  | DENEGADO  | ok        | RESERVA_SOLO_POR_FUNCION
+ 2 | pro-a2     | reserva en B con cliente_id propio, actor interno de A               | DENEGADO  | DENEGADO  | ok        | RESERVA_SOLO_POR_FUNCION
+ 3 | cliente-a  | reserva DIRECTA en B con cliente_id propio (cliente de otro negocio) | DENEGADO  | DENEGADO  | ok        | RESERVA_SOLO_POR_FUNCION
+ 3 | intruso    | reserva DIRECTA en B con cliente_id propio (cliente de otro negocio) | DENEGADO  | DENEGADO  | ok        | RESERVA_SOLO_POR_FUNCION
+ 4 | cliente-a  | reseña en B con cliente_id = cliente de B (suplantación)             | DENEGADO  | DENEGADO  | ok        | new row violates row-level security policy for table "resena"
+ 4 | dueno-a    | reseña en B con cliente_id = cliente de B (suplantación)             | DENEGADO  | DENEGADO  | ok        | new row violates row-level security policy for table "resena"
+ 4 | guardian-a | reseña en B con cliente_id = cliente de B (suplantación)             | DENEGADO  | DENEGADO  | ok        | new row violates row-level security policy for table "resena"
+ 4 | intruso    | reseña en B con cliente_id = cliente de B (suplantación)             | DENEGADO  | DENEGADO  | ok        | new row violates row-level security policy for table "resena"
+ 4 | pro-a1     | reseña en B con cliente_id = cliente de B (suplantación)             | DENEGADO  | DENEGADO  | ok        | new row violates row-level security policy for table "resena"
+ 5 | cliente-a  | reseña en B sobre reserva ajena con cliente_id propio                | DENEGADO  | DENEGADO  | ok        | new row violates row-level security policy for table "resena"
+ 5 | dueno-a    | reseña en B sobre reserva ajena con cliente_id propio                | DENEGADO  | DENEGADO  | ok        | new row violates row-level security policy for table "resena"
+ 5 | guardian-a | reseña en B sobre reserva ajena con cliente_id propio                | DENEGADO  | DENEGADO  | ok        | new row violates row-level security policy for table "resena"
+ 5 | intruso    | reseña en B sobre reserva ajena con cliente_id propio                | DENEGADO  | DENEGADO  | ok        | new row violates row-level security policy for table "resena"
+ 5 | pro-a1     | reseña en B sobre reserva ajena con cliente_id propio                | DENEGADO  | DENEGADO  | ok        | new row violates row-level security policy for table "resena"
+ 6 | anonimo    | reserva en B sin sesión                                              | DENEGADO  | DENEGADO  | ok        | RESERVA_SOLO_POR_FUNCION
+ 7 | anonimo    | reseña en B sin sesión                                               | DENEGADO  | DENEGADO  | ok        | new row violates row-level security policy for table "resena"
+ 8 | cliente-b  | CONTROL: cliente de B reseña su reserva COMPLETADA                   | PERMITIDO | PERMITIDO | ok        | 
+ 9 | dueno-b    | CONTROL: ni el dueño de B inserta reserva DIRECTA (solo por función) | DENEGADO  | DENEGADO  | ok        | RESERVA_SOLO_POR_FUNCION
+(26 rows)
+
+NOTICE:  OK: 26 intentos coinciden con lo esperado

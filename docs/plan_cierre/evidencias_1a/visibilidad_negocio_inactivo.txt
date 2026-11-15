@@ -1,0 +1,22 @@
+== filas de B visibles según el estado del negocio (anon/intruso/dueño de A deben ver 0 salvo con B ACTIVO) ==
+        estado        |  actor  | filas_visibles |                                                detalle                                                
+----------------------+---------+----------------+-------------------------------------------------------------------------------------------------------
+ ACTIVO               | anonimo |              6 | recurso=1 recurso_tipo=1 sede=1 sede_horario_excepcion=1 servicio=1 servicio_combo=1
+ ACTIVO               | dueno-a |              7 | oferta_negocio=1 recurso=1 recurso_tipo=1 sede=1 sede_horario_excepcion=1 servicio=1 servicio_combo=1
+ ACTIVO               | dueno-b |              8 | oferta_negocio=1 recurso=1 recurso_tipo=1 sede=1 sede_horario_excepcion=1 servicio=2 servicio_combo=1
+ ACTIVO               | intruso |              7 | oferta_negocio=1 recurso=1 recurso_tipo=1 sede=1 sede_horario_excepcion=1 servicio=1 servicio_combo=1
+ CANCELADO            | anonimo |              0 | 
+ CANCELADO            | dueno-a |              0 | 
+ CANCELADO            | dueno-b |              8 | oferta_negocio=1 recurso=1 recurso_tipo=1 sede=1 sede_horario_excepcion=1 servicio=2 servicio_combo=1
+ CANCELADO            | intruso |              0 | 
+ PENDIENTE_APROBACION | anonimo |              0 | 
+ PENDIENTE_APROBACION | dueno-a |              0 | 
+ PENDIENTE_APROBACION | dueno-b |              8 | oferta_negocio=1 recurso=1 recurso_tipo=1 sede=1 sede_horario_excepcion=1 servicio=2 servicio_combo=1
+ PENDIENTE_APROBACION | intruso |              0 | 
+ SUSPENDIDO           | anonimo |              0 | 
+ SUSPENDIDO           | dueno-a |              0 | 
+ SUSPENDIDO           | dueno-b |              8 | oferta_negocio=1 recurso=1 recurso_tipo=1 sede=1 sede_horario_excepcion=1 servicio=2 servicio_combo=1
+ SUSPENDIDO           | intruso |              0 | 
+(16 rows)
+
+NOTICE:  OK: con B inactivo los terceros no ven nada y el dueño sí (21 tablas con datos para el dueño)

@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
 import { revalidatePath } from "next/cache";
 
 type Resultado<T = undefined> =
@@ -8,12 +8,10 @@ type Resultado<T = undefined> =
   | { ok: false; error: string };
 
 async function usuarioActual() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("NO_AUTENTICADO");
-  return { supabase, userId: user.id };
+  // Autorización en el servidor (Super Admin); la base la vuelve a exigir en cada RPC.
+  const g = await autorizarSuperSU();
+  if (!g.ok) throw new Error(g.error);
+  return { supabase: g.supabase, userId: g.userId };
 }
 
 const MENSAJES_ERROR: Record<string, string> = {
