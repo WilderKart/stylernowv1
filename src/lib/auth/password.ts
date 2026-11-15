@@ -7,7 +7,7 @@ import { z } from "zod";
  */
 export const PASSWORD_SCHEMA = z
   .string()
-  .min(12, "Mínimo 12 caracteres")
+  .min(8, "Mínimo 8 caracteres")
   .regex(/[A-Z]/, "Necesita al menos una mayúscula")
   .regex(/[a-z]/, "Necesita al menos una minúscula")
   .regex(/[0-9]/, "Necesita al menos un número")

@@ -4,7 +4,7 @@ import { validarFormatoPassword } from "@/lib/auth/password";
 
 /** Valores mostrados en la UI (requisitos visibles al usuario) — una sola fuente. */
 export const POLITICA_PASSWORD = {
-  minimo: 12,
+  minimo: 8,
   requiereMayuscula: true,
   requiereMinuscula: true,
   requiereNumero: true,
