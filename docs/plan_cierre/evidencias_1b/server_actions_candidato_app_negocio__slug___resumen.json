@@ -1,0 +1,52 @@
+{
+ "VIOLACION": [
+  {
+   "k": "app/negocio/[slug]/actions.ts::alternarFavorito",
+   "actores": [
+    "intruso[escribe favorito_negocio]",
+    "cliente-a[escribe favorito_negocio]",
+    "pro-a1[escribe favorito_negocio]",
+    "guardian-a[escribe favorito_negocio]",
+    "dueno-a[escribe favorito_negocio]"
+   ],
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  }
+ ],
+ "LIMPIA_CON_CONTROL": [
+  {
+   "k": "app/negocio/[slug]/actions.ts::esFavorito",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  }
+ ],
+ "INCONCLUSA": [
+  {
+   "k": "app/negocio/[slug]/profesional/[staffId]/actions.ts::masResenasAction",
+   "error": "Negocio no disponible."
+  },
+  {
+   "k": "app/negocio/[slug]/reservar/actions.ts::obtenerSlots",
+   "error": "Cannot read properties of undefined (reading 'length')"
+  },
+  {
+   "k": "app/negocio/[slug]/reservar/actions.ts::crearReservaAction",
+   "error": "Could not find the function public.crear_reserva without parameters in the schema cache"
+  },
+  {
+   "k": "app/negocio/[slug]/reservar/actions.ts::unirseListaEspera",
+   "error": "Inicia sesión para unirte a la lista de espera."
+  }
+ ],
+ "NO_EJECUTADA": []
+}

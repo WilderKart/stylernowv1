@@ -1,0 +1,146 @@
+{
+ "VIOLACION": [],
+ "LIMPIA_CON_CONTROL": [
+  {
+   "k": "app/panel/crm/actions.ts::listarClientesCRM",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarCumpleanerosDelMes",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::obtenerResumenCliente",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarHistorialCliente",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarNotas",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::crearNota",
+   "control": [
+    "guardian-b",
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::eliminarNota",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarEtiquetasNegocio",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::agregarEtiqueta",
+   "control": [
+    "guardian-b",
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::quitarEtiqueta",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarFotos",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::eliminarFoto",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarReservasCompletadas",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/crm/actions.ts::obtenerBeneficiosLealtadCliente",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  }
+ ],
+ "INCONCLUSA": [
+  {
+   "k": "app/panel/crm/actions.ts::subirFoto",
+   "error": "NO_AUTENTICADO"
+  }
+ ],
+ "NO_EJECUTADA": []
+}

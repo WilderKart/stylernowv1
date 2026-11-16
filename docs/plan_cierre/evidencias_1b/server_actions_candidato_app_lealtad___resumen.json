@@ -1,0 +1,38 @@
+{
+ "VIOLACION": [],
+ "LIMPIA_CON_CONTROL": [
+  {
+   "k": "app/lealtad/actions.ts::obtenerResumenLealtad",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/lealtad/actions.ts::crearGrupoFamiliar",
+   "control": [
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  }
+ ],
+ "INCONCLUSA": [
+  {
+   "k": "app/lealtad/actions.ts::registrarEventoFraude"
+  },
+  {
+   "k": "app/lealtad/actions.ts::registrarReferido",
+   "error": "NO_AUTENTICADO"
+  },
+  {
+   "k": "app/lealtad/actions.ts::canjearWallet",
+   "error": "NO_AUTENTICADO"
+  }
+ ],
+ "NO_EJECUTADA": []
+}

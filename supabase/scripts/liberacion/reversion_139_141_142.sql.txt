@@ -1,0 +1,14 @@
+-- REVERSIÓN COMPLETA de 139 + 141 + 142 (+ paso 1). NO es migración (.txt): se pega a mano en el SQL Editor SOLO si hay que deshacer.
+-- Ninguna de las tres migraciones borra ni modifica filas, así que revertir no requiere restaurar datos: solo devolver privilegios, políticas y funciones.
+-- ORDEN: (1) primero ESTE bloque; (2) después las sentencias de las secciones A–E que guardaste con captura_estado_previo.sql
+--        (devuelven los privilegios, políticas, definiciones y permisos de ejecución EXACTOS que había antes, no una aproximación).
+-- OJO: revertir REABRE las vulnerabilidades que cada migración cerraba (márgenes de IA legibles, referido_config/vip_nivel públicos, TRUNCATE a anon/authenticated, etc.).
+-- Si revierte 139, el código NUEVO deja de funcionar donde use la función ai_acciones_costo_admin (aquí NO se elimina esa función a propósito: es inocua y mantiene compatible al código nuevo).
+
+-- 139: quitar el permiso por columnas de ai_accion_costo (el grant de tabla de la sección B lo reemplaza)
+revoke select (id, accion, categoria, nivel_ia, costo_creditos, activo, created_at, updated_at) on public.ai_accion_costo from authenticated;
+-- 139: quitar el CHECK del límite de miembros
+alter table public.familia_grupo drop constraint if exists familia_grupo_limite_miembros_chk;
+-- 141: privilegios por defecto de tablas futuras (si la captura mostró que existían)
+alter default privileges in schema public grant truncate, references, trigger on tables to anon, authenticated;
+alter default privileges for role postgres in schema public grant truncate, references, trigger on tables to anon, authenticated;

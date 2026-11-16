@@ -1,0 +1,184 @@
+{
+ "VIOLACION": [],
+ "LIMPIA_CON_CONTROL": [
+  {
+   "k": "app/panel/lealtad/actions.ts::listarPlanesMembresia",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::alternarPlanMembresia",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarGiftCards",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::obtenerConfigReferidos",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarCampanasSellos",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarReglasCashback",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarNivelesVip",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarMiembrosVip",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarFamiliasNegocio",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarCuentasCorporativas",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarReglasRecompensa",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarSugerenciasAction",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::generarSugerenciasAction",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::confirmarSugerenciaAction",
+   "control": [
+    "dueno-b"
+   ]
+  }
+ ],
+ "INCONCLUSA": [
+  {
+   "k": "app/panel/lealtad/actions.ts::crearPlanMembresia",
+   "error": "Could not find the function public.crear_plan_membresia without parameters in the schema cache"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::bloquearGiftCardAdmin",
+   "error": "permission denied for function bloquear_gift_card"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::configurarReferidosAction",
+   "error": "Could not find the function public.configurar_referidos without parameters in the schema cache"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::crearCampanaSellosAction",
+   "error": "Could not find the function public.crear_campana_sellos without parameters in the schema cache"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::alternarCampanaSellosAction",
+   "error": "permission denied for function alternar_campana_sellos"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::crearReglaCashbackAction",
+   "error": "Could not find the function public.crear_regla_cashback without parameters in the schema cache"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::alternarReglaCashbackAction",
+   "error": "permission denied for function alternar_regla_cashback"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::sembrarNivelesVipAction",
+   "error": "permission denied for function sembrar_niveles_vip_default"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::crearCuentaCorporativaAction",
+   "error": "Could not find the function public.crear_cuenta_corporativa without parameters in the schema cache"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::crearReglaRecompensaAction",
+   "error": "Could not find the function public.crear_regla_recompensa(p_accion, p_condicion) in the schema cache"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::descartarSugerenciaAction",
+   "error": "permission denied for function descartar_sugerencia_recompensa"
+  }
+ ],
+ "NO_EJECUTADA": []
+}

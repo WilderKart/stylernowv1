@@ -1,0 +1,127 @@
+{
+ "VIOLACION": [],
+ "LIMPIA_CON_CONTROL": [
+  {
+   "k": "app/panel/ia/actions.ts::obtenerSaldoCreditosIa",
+   "control": [
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::listarConsumoIa",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::listarPaquetesDisponiblesIa",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::consultarEstadoCompraIa",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::listarFuncionesHabilitadasNegocio",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::listarMemoriaIa",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::aprobarMemoriaIa",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::olvidarMemoriaIa",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::historialMemoriaIa",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::listarPromptsIa",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::crearPromptIa",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/ia/actions.ts::obtenerRoiIa",
+   "control": [
+    "cliente-b",
+    "pro-b1",
+    "guardian-b",
+    "dueno-b",
+    "super"
+   ]
+  }
+ ],
+ "INCONCLUSA": [
+  {
+   "k": "app/panel/ia/actions.ts::comprarPaqueteIa",
+   "error": "Inicia sesión de nuevo."
+  },
+  {
+   "k": "app/panel/ia/actions.ts::guardarMemoriaIa",
+   "error": "permission denied for function guardar_memoria_ia"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::restaurarVersionMemoriaIa",
+   "error": "permission denied for function restaurar_version_memoria_ia"
+  }
+ ],
+ "NO_EJECUTADA": []
+}

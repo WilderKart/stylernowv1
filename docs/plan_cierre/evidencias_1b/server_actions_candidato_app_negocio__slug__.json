@@ -1,0 +1,731 @@
+{
+ "bloqueados": [],
+ "fallosImport": {},
+ "detalle": [
+  {
+   "actor": "anonimo",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "esFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 5,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "alternarFavorito",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Inicia sesión para guardar favoritos.",
+   "fugaB": false,
+   "bytes": 60,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/negocio/[slug]/profesional/[staffId]/actions.ts",
+   "accion": "masResenasAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Negocio no disponible.",
+   "fugaB": false,
+   "bytes": 45,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "obtenerSlots",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "lanzo": "Cannot read properties of undefined (reading 'length')",
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "crearReservaAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Could not find the function public.crear_reserva without parameters in the schema cache",
+   "fugaB": false,
+   "bytes": 129,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "unirseListaEspera",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Inicia sesión para unirte a la lista de espera.",
+   "fugaB": false,
+   "bytes": 72,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "esFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "alternarFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": [
+    "favorito_negocio"
+   ]
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/negocio/[slug]/profesional/[staffId]/actions.ts",
+   "accion": "masResenasAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Negocio no disponible.",
+   "fugaB": false,
+   "bytes": 45,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "obtenerSlots",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "lanzo": "Cannot read properties of undefined (reading 'length')",
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "crearReservaAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Could not find the function public.crear_reserva without parameters in the schema cache",
+   "fugaB": false,
+   "bytes": 129,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "unirseListaEspera",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "null value in column \"negocio_id\" of relation \"lista_espera\" violates not-null constraint",
+   "fugaB": false,
+   "bytes": 118,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "esFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "alternarFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": [
+    "favorito_negocio"
+   ]
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/negocio/[slug]/profesional/[staffId]/actions.ts",
+   "accion": "masResenasAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Negocio no disponible.",
+   "fugaB": false,
+   "bytes": 45,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "obtenerSlots",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "lanzo": "Cannot read properties of undefined (reading 'length')",
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "crearReservaAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Could not find the function public.crear_reserva without parameters in the schema cache",
+   "fugaB": false,
+   "bytes": 129,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "unirseListaEspera",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "null value in column \"negocio_id\" of relation \"lista_espera\" violates not-null constraint",
+   "fugaB": false,
+   "bytes": 118,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "esFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "alternarFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": [
+    "favorito_negocio"
+   ]
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/negocio/[slug]/profesional/[staffId]/actions.ts",
+   "accion": "masResenasAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Negocio no disponible.",
+   "fugaB": false,
+   "bytes": 45,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "obtenerSlots",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "lanzo": "Cannot read properties of undefined (reading 'length')",
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "crearReservaAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Could not find the function public.crear_reserva without parameters in the schema cache",
+   "fugaB": false,
+   "bytes": 129,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "unirseListaEspera",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "null value in column \"negocio_id\" of relation \"lista_espera\" violates not-null constraint",
+   "fugaB": false,
+   "bytes": 118,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "esFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "alternarFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": [
+    "favorito_negocio"
+   ]
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/negocio/[slug]/profesional/[staffId]/actions.ts",
+   "accion": "masResenasAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Negocio no disponible.",
+   "fugaB": false,
+   "bytes": 45,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "obtenerSlots",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "lanzo": "Cannot read properties of undefined (reading 'length')",
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "crearReservaAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Could not find the function public.crear_reserva without parameters in the schema cache",
+   "fugaB": false,
+   "bytes": 129,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "unirseListaEspera",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "null value in column \"negocio_id\" of relation \"lista_espera\" violates not-null constraint",
+   "fugaB": false,
+   "bytes": 118,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "esFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "alternarFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": [
+    "favorito_negocio"
+   ]
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/negocio/[slug]/profesional/[staffId]/actions.ts",
+   "accion": "masResenasAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Negocio no disponible.",
+   "fugaB": false,
+   "bytes": 45,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "obtenerSlots",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "lanzo": "Cannot read properties of undefined (reading 'length')",
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "crearReservaAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Could not find the function public.crear_reserva without parameters in the schema cache",
+   "fugaB": false,
+   "bytes": 129,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "unirseListaEspera",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "null value in column \"negocio_id\" of relation \"lista_espera\" violates not-null constraint",
+   "fugaB": false,
+   "bytes": 118,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "esFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "alternarFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": [
+    "favorito_negocio"
+   ]
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/negocio/[slug]/profesional/[staffId]/actions.ts",
+   "accion": "masResenasAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Negocio no disponible.",
+   "fugaB": false,
+   "bytes": 45,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "obtenerSlots",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "lanzo": "Cannot read properties of undefined (reading 'length')",
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "crearReservaAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Could not find the function public.crear_reserva without parameters in the schema cache",
+   "fugaB": false,
+   "bytes": 129,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "unirseListaEspera",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "null value in column \"negocio_id\" of relation \"lista_espera\" violates not-null constraint",
+   "fugaB": false,
+   "bytes": 118,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "esFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 5,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "alternarFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 36,
+   "escrituraB": [
+    "favorito_negocio"
+   ]
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/negocio/[slug]/profesional/[staffId]/actions.ts",
+   "accion": "masResenasAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Negocio no disponible.",
+   "fugaB": false,
+   "bytes": 45,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "obtenerSlots",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "lanzo": "Cannot read properties of undefined (reading 'length')",
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "crearReservaAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Could not find the function public.crear_reserva without parameters in the schema cache",
+   "fugaB": false,
+   "bytes": 129,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "unirseListaEspera",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "null value in column \"negocio_id\" of relation \"lista_espera\" violates not-null constraint",
+   "fugaB": false,
+   "bytes": 118,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "esFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 5,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "alternarFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 36,
+   "escrituraB": [
+    "favorito_negocio"
+   ]
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/negocio/[slug]/profesional/[staffId]/actions.ts",
+   "accion": "masResenasAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Negocio no disponible.",
+   "fugaB": false,
+   "bytes": 45,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "obtenerSlots",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "lanzo": "Cannot read properties of undefined (reading 'length')",
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "crearReservaAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Could not find the function public.crear_reserva without parameters in the schema cache",
+   "fugaB": false,
+   "bytes": 129,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "unirseListaEspera",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "null value in column \"negocio_id\" of relation \"lista_espera\" violates not-null constraint",
+   "fugaB": false,
+   "bytes": 118,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "esFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 5,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "alternarFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 36,
+   "escrituraB": [
+    "favorito_negocio"
+   ]
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/negocio/[slug]/profesional/[staffId]/actions.ts",
+   "accion": "masResenasAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Negocio no disponible.",
+   "fugaB": false,
+   "bytes": 45,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "obtenerSlots",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "lanzo": "Cannot read properties of undefined (reading 'length')",
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "crearReservaAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Could not find the function public.crear_reserva without parameters in the schema cache",
+   "fugaB": false,
+   "bytes": 129,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "unirseListaEspera",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "null value in column \"negocio_id\" of relation \"lista_espera\" violates not-null constraint",
+   "fugaB": false,
+   "bytes": 118,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "esFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 5,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/negocio/[slug]/actions.ts",
+   "accion": "alternarFavorito",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 36,
+   "escrituraB": [
+    "favorito_negocio"
+   ]
+  },
+  {
+   "actor": "super",
+   "archivo": "app/negocio/[slug]/profesional/[staffId]/actions.ts",
+   "accion": "masResenasAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Negocio no disponible.",
+   "fugaB": false,
+   "bytes": 45,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "obtenerSlots",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "lanzo": "Cannot read properties of undefined (reading 'length')",
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "crearReservaAction",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Could not find the function public.crear_reserva without parameters in the schema cache",
+   "fugaB": false,
+   "bytes": 129,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/negocio/[slug]/reservar/actions.ts",
+   "accion": "unirseListaEspera",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "null value in column \"negocio_id\" of relation \"lista_espera\" violates not-null constraint",
+   "fugaB": false,
+   "bytes": 118,
+   "escrituraB": []
+  }
+ ]
+}

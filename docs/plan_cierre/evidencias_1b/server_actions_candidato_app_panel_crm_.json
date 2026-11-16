@@ -1,0 +1,1720 @@
+{
+ "bloqueados": [],
+ "fallosImport": {},
+ "detalle": [
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarClientesCRM",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarCumpleanerosDelMes",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerResumenCliente",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarHistorialCliente",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarNotas",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "crearNota",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarNota",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarEtiquetasNegocio",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "agregarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "quitarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarFotos",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "subirFoto",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarFoto",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarReservasCompletadas",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerBeneficiosLealtadCliente",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarClientesCRM",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 41,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarCumpleanerosDelMes",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerResumenCliente",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No encontramos ese cliente.",
+   "fugaB": false,
+   "bytes": 50,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarHistorialCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarNotas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "crearNota",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "new row violates row-level security policy for table \"cliente_nota\"",
+   "fugaB": false,
+   "bytes": 92,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarNota",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarEtiquetasNegocio",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "agregarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "new row violates row-level security policy for table \"cliente_etiqueta\"",
+   "fugaB": false,
+   "bytes": 96,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "quitarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarFotos",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "subirFoto",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Necesitas el consentimiento explícito del Cliente para subir esta foto.",
+   "fugaB": false,
+   "bytes": 94,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarFoto",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarReservasCompletadas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerBeneficiosLealtadCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 101,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarClientesCRM",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 41,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarCumpleanerosDelMes",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerResumenCliente",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No encontramos ese cliente.",
+   "fugaB": false,
+   "bytes": 50,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarHistorialCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarNotas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "crearNota",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "new row violates row-level security policy for table \"cliente_nota\"",
+   "fugaB": false,
+   "bytes": 92,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarNota",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarEtiquetasNegocio",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "agregarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "new row violates row-level security policy for table \"cliente_etiqueta\"",
+   "fugaB": false,
+   "bytes": 96,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "quitarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarFotos",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "subirFoto",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Necesitas el consentimiento explícito del Cliente para subir esta foto.",
+   "fugaB": false,
+   "bytes": 94,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarFoto",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarReservasCompletadas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerBeneficiosLealtadCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 101,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarClientesCRM",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 41,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarCumpleanerosDelMes",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerResumenCliente",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No encontramos ese cliente.",
+   "fugaB": false,
+   "bytes": 50,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarHistorialCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarNotas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "crearNota",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "new row violates row-level security policy for table \"cliente_nota\"",
+   "fugaB": false,
+   "bytes": 92,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarNota",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarEtiquetasNegocio",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "agregarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "new row violates row-level security policy for table \"cliente_etiqueta\"",
+   "fugaB": false,
+   "bytes": 96,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "quitarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarFotos",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "subirFoto",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Necesitas el consentimiento explícito del Cliente para subir esta foto.",
+   "fugaB": false,
+   "bytes": 94,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarFoto",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarReservasCompletadas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerBeneficiosLealtadCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 101,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarClientesCRM",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 41,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarCumpleanerosDelMes",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerResumenCliente",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No encontramos ese cliente.",
+   "fugaB": false,
+   "bytes": 50,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarHistorialCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarNotas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "crearNota",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "new row violates row-level security policy for table \"cliente_nota\"",
+   "fugaB": false,
+   "bytes": 92,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarNota",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarEtiquetasNegocio",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "agregarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "new row violates row-level security policy for table \"cliente_etiqueta\"",
+   "fugaB": false,
+   "bytes": 96,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "quitarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarFotos",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "subirFoto",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Necesitas el consentimiento explícito del Cliente para subir esta foto.",
+   "fugaB": false,
+   "bytes": 94,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarFoto",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarReservasCompletadas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerBeneficiosLealtadCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 101,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarClientesCRM",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 41,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarCumpleanerosDelMes",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerResumenCliente",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No encontramos ese cliente.",
+   "fugaB": false,
+   "bytes": 50,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarHistorialCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarNotas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "crearNota",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "new row violates row-level security policy for table \"cliente_nota\"",
+   "fugaB": false,
+   "bytes": 92,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarNota",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarEtiquetasNegocio",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "agregarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "new row violates row-level security policy for table \"cliente_etiqueta\"",
+   "fugaB": false,
+   "bytes": 96,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "quitarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarFotos",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "subirFoto",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Necesitas el consentimiento explícito del Cliente para subir esta foto.",
+   "fugaB": false,
+   "bytes": 94,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarFoto",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarReservasCompletadas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerBeneficiosLealtadCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 101,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarClientesCRM",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 248,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarCumpleanerosDelMes",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerResumenCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 337,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarHistorialCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 812,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarNotas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "crearNota",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "new row violates row-level security policy for table \"cliente_nota\"",
+   "fugaB": false,
+   "bytes": 92,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarNota",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarEtiquetasNegocio",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "agregarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "new row violates row-level security policy for table \"cliente_etiqueta\"",
+   "fugaB": false,
+   "bytes": 96,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "quitarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarFotos",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 207,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "subirFoto",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Necesitas el consentimiento explícito del Cliente para subir esta foto.",
+   "fugaB": false,
+   "bytes": 94,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarFoto",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarReservasCompletadas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 114,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerBeneficiosLealtadCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 245,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarClientesCRM",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 248,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarCumpleanerosDelMes",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerResumenCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 342,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarHistorialCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 442,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarNotas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "crearNota",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "new row violates row-level security policy for table \"cliente_nota\"",
+   "fugaB": false,
+   "bytes": 92,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarNota",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarEtiquetasNegocio",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "agregarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "new row violates row-level security policy for table \"cliente_etiqueta\"",
+   "fugaB": false,
+   "bytes": 96,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "quitarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarFotos",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "subirFoto",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Necesitas el consentimiento explícito del Cliente para subir esta foto.",
+   "fugaB": false,
+   "bytes": 94,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarFoto",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarReservasCompletadas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 114,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerBeneficiosLealtadCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 245,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarClientesCRM",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 253,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarCumpleanerosDelMes",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerResumenCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 342,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarHistorialCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 822,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarNotas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 157,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "crearNota",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": [
+    "cliente_nota",
+    "evento_auditoria"
+   ]
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarNota",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarEtiquetasNegocio",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 26,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "agregarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": [
+    "cliente_etiqueta",
+    "evento_auditoria"
+   ]
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "quitarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": [
+    "cliente_etiqueta",
+    "evento_auditoria"
+   ]
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarFotos",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 207,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "subirFoto",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Necesitas el consentimiento explícito del Cliente para subir esta foto.",
+   "fugaB": false,
+   "bytes": 94,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarFoto",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarReservasCompletadas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 114,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerBeneficiosLealtadCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 245,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarClientesCRM",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 253,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarCumpleanerosDelMes",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerResumenCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 342,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarHistorialCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 822,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarNotas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 311,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "crearNota",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": [
+    "cliente_nota",
+    "evento_auditoria"
+   ]
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarNota",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarEtiquetasNegocio",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 26,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "agregarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": [
+    "cliente_etiqueta",
+    "evento_auditoria"
+   ]
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "quitarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": [
+    "cliente_etiqueta",
+    "evento_auditoria"
+   ]
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarFotos",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 207,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "subirFoto",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Necesitas el consentimiento explícito del Cliente para subir esta foto.",
+   "fugaB": false,
+   "bytes": 94,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarFoto",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarReservasCompletadas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 114,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerBeneficiosLealtadCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 245,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarClientesCRM",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 253,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarCumpleanerosDelMes",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 21,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerResumenCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 342,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarHistorialCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 822,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarNotas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 457,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "crearNota",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "new row violates row-level security policy for table \"cliente_nota\"",
+   "fugaB": false,
+   "bytes": 92,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarNota",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarEtiquetasNegocio",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 26,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "agregarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "new row violates row-level security policy for table \"cliente_etiqueta\"",
+   "fugaB": false,
+   "bytes": 96,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "quitarEtiqueta",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarFotos",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 207,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "subirFoto",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Necesitas el consentimiento explícito del Cliente para subir esta foto.",
+   "fugaB": false,
+   "bytes": 94,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "eliminarFoto",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "listarReservasCompletadas",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 114,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/crm/actions.ts",
+   "accion": "obtenerBeneficiosLealtadCliente",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 245,
+   "escrituraB": []
+  }
+ ]
+}

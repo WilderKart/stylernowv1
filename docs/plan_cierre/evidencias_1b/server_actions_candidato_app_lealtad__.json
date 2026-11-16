@@ -1,0 +1,596 @@
+{
+ "bloqueados": [],
+ "fallosImport": {},
+ "detalle": [
+  {
+   "actor": "anonimo",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "obtenerResumenLealtad",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarEventoFraude",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarReferido",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "crearGrupoFamiliar",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "canjearWallet",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "obtenerResumenLealtad",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 248,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarEventoFraude",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarReferido",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Ese código de referido no existe.",
+   "fugaB": false,
+   "bytes": 56,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "crearGrupoFamiliar",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Ya perteneces a un grupo familiar.",
+   "fugaB": false,
+   "bytes": 57,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "canjearWallet",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes saldo suficiente en tu StylerWallet.",
+   "fugaB": false,
+   "bytes": 69,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "obtenerResumenLealtad",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 250,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarEventoFraude",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarReferido",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Ese código de referido no existe.",
+   "fugaB": false,
+   "bytes": 56,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "crearGrupoFamiliar",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Ya perteneces a un grupo familiar.",
+   "fugaB": false,
+   "bytes": 57,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "canjearWallet",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes saldo suficiente en tu StylerWallet.",
+   "fugaB": false,
+   "bytes": 69,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "obtenerResumenLealtad",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 272,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarEventoFraude",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarReferido",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Ese código de referido no existe.",
+   "fugaB": false,
+   "bytes": 56,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "crearGrupoFamiliar",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Ya perteneces a un grupo familiar.",
+   "fugaB": false,
+   "bytes": 57,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "canjearWallet",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes saldo suficiente en tu StylerWallet.",
+   "fugaB": false,
+   "bytes": 69,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "obtenerResumenLealtad",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 256,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarEventoFraude",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarReferido",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Ese código de referido no existe.",
+   "fugaB": false,
+   "bytes": 56,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "crearGrupoFamiliar",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Ya perteneces a un grupo familiar.",
+   "fugaB": false,
+   "bytes": 57,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "canjearWallet",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes saldo suficiente en tu StylerWallet.",
+   "fugaB": false,
+   "bytes": 69,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "obtenerResumenLealtad",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 252,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarEventoFraude",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarReferido",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Ese código de referido no existe.",
+   "fugaB": false,
+   "bytes": 56,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "crearGrupoFamiliar",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Ya perteneces a un grupo familiar.",
+   "fugaB": false,
+   "bytes": 57,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "canjearWallet",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes saldo suficiente en tu StylerWallet.",
+   "fugaB": false,
+   "bytes": 69,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "obtenerResumenLealtad",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": true,
+   "bytes": 977,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarEventoFraude",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": [
+    "lealtad_fraude_evento"
+   ]
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarReferido",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Ese código de referido no existe.",
+   "fugaB": false,
+   "bytes": 56,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "crearGrupoFamiliar",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Ya perteneces a un grupo familiar.",
+   "fugaB": false,
+   "bytes": 57,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "canjearWallet",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes saldo suficiente en tu StylerWallet.",
+   "fugaB": false,
+   "bytes": 69,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "obtenerResumenLealtad",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 220,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarEventoFraude",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": [
+    "lealtad_fraude_evento"
+   ]
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarReferido",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Ese código de referido no existe.",
+   "fugaB": false,
+   "bytes": 56,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "crearGrupoFamiliar",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "canjearWallet",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes saldo suficiente en tu StylerWallet.",
+   "fugaB": false,
+   "bytes": 69,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "obtenerResumenLealtad",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 220,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarEventoFraude",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": [
+    "lealtad_fraude_evento"
+   ]
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarReferido",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Ese código de referido no existe.",
+   "fugaB": false,
+   "bytes": 56,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "crearGrupoFamiliar",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "canjearWallet",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes saldo suficiente en tu StylerWallet.",
+   "fugaB": false,
+   "bytes": 69,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "obtenerResumenLealtad",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 220,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarEventoFraude",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": [
+    "lealtad_fraude_evento"
+   ]
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarReferido",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Ese código de referido no existe.",
+   "fugaB": false,
+   "bytes": 56,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "crearGrupoFamiliar",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "canjearWallet",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes saldo suficiente en tu StylerWallet.",
+   "fugaB": false,
+   "bytes": 69,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "obtenerResumenLealtad",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 220,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarEventoFraude",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "fugaB": false,
+   "bytes": 4,
+   "escrituraB": [
+    "lealtad_fraude_evento"
+   ]
+  },
+  {
+   "actor": "super",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "registrarReferido",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "Ese código de referido no existe.",
+   "fugaB": false,
+   "bytes": 56,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "crearGrupoFamiliar",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/lealtad/actions.ts",
+   "accion": "canjearWallet",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes saldo suficiente en tu StylerWallet.",
+   "fugaB": false,
+   "bytes": 69,
+   "escrituraB": []
+  }
+ ]
+}
