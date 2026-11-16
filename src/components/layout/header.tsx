@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { obtenerT } from "@/lib/i18n/servidor";
 import type { Traductor } from "@/lib/i18n/diccionario";
+import h from "./header.module.css";
 
 export function Logo() {
   return (
@@ -42,36 +43,39 @@ async function CampanaConContador({ t }: { t: Traductor }) {
 }
 
 /**
- * Barra superior de las pantallas de "recorrido" (patrón .p-top): logo a la izquierda y
- * el acceso del Cliente a la derecha. La API pública no cambia.
+ * Barra superior de las pantallas de "recorrido" (maqueta 2026-11-15): logo grande a la izquierda,
+ * separador vertical y el acceso del Cliente a la derecha. La API pública no cambia.
  */
 export async function Header({ autenticado, etiqueta }: { autenticado: boolean; etiqueta?: string }) {
   const t = await obtenerT();
   return (
-    <header className="p-top">
-      <Link href="/" aria-label={t("header.inicio")} className="flex min-h-12 items-center pl-3 no-underline text-text">
-        <Logo />
+    <header className={h.barra}>
+      <Link href="/" aria-label={t("header.inicio")} className={h.logo}>
+        <span className={h.marca} aria-hidden>
+          Styler<span className={h.now}>Now</span>
+        </span>
       </Link>
-      {etiqueta ? <span className="sn-num hidden flex-1 text-center sm:block">{etiqueta}</span> : <span className="flex-1" />}
+      {etiqueta ? <span className={`sn-num hidden sm:block ${h.etiqueta}`}>{etiqueta}</span> : null}
+      <span className={h.separador} aria-hidden />
       {autenticado ? (
         <>
           <Suspense fallback={<Campana cantidad={0} t={t} />}>
             <CampanaConContador t={t} />
           </Suspense>
-          <Link href="/mis-reservas" className="sn-label flex min-h-12 items-center px-3 text-text no-underline">
+          <Link href="/mis-reservas" className={h.accion}>
             {t("header.mis_reservas")}
           </Link>
         </>
       ) : (
         <>
           {/* Acceso visible al registro de negocios (antes solo existía la URL /para-negocios). */}
-          <Link href="/para-negocios" className="sn-label hidden min-h-12 items-center px-3 text-text no-underline sm:flex">
+          <Link href="/para-negocios" className={`${h.accion} ${h.ancho}`}>
             {t("header.para_negocios")}
           </Link>
-          <Link href="/login" className="sn-label flex min-h-12 items-center px-3 text-text no-underline">
+          <Link href="/login" className={h.accion}>
             {t("header.iniciar_sesion")}
           </Link>
-          <Link href="/registro" className="sn-label flex min-h-12 items-center border-2 border-border px-4 text-text no-underline">
+          <Link href="/registro" className={`${h.accion} ${h.caja}`}>
             {t("header.crear_cuenta")}
           </Link>
         </>

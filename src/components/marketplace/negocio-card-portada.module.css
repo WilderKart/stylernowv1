@@ -1,0 +1,131 @@
+/* Tarjeta de negocio del Home (maqueta 2026-11-15): foto en grises, ciudad inclinada y panel con borde superior en diagonal. */
+.tarjeta {
+  position: relative;
+  display: block;
+  height: 133px;
+  /* La regla global deja todo en esquina recta: el redondeo se hace con clip-path y el borde con ::after. */
+  clip-path: inset(0 round 10px);
+  background: var(--bg);
+  color: var(--text);
+  text-decoration: none;
+  isolation: isolate;
+}
+.tarjeta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: 2px solid var(--text);
+  border-radius: 10px;
+  pointer-events: none;
+}
+.tarjeta:focus-visible {
+  outline: none;
+}
+/* El clip-path recortaría el contorno exterior: el foco se marca en el propio borde. */
+.tarjeta:focus-visible::after {
+  border: 4px solid var(--focus);
+}
+.foto {
+  position: absolute;
+  inset: 0 0 auto 0;
+  width: 100%;
+  height: 96px;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.08);
+}
+.ciudad {
+  position: absolute;
+  top: 7px;
+  right: 6px;
+  z-index: 1;
+  padding: 3px 9px 2px;
+  font: 700 12px/16px var(--sn-font-mono);
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: #0a0a0a;
+  transform: rotate(-2deg);
+}
+.ciudad::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 2px solid #0a0a0a;
+  background: #fff;
+  transform: skewX(-12deg);
+}
+.patrocinado {
+  position: absolute;
+  top: 7px;
+  left: 8px;
+  z-index: 1;
+  padding: 2px 7px;
+  background: #fe5400;
+  color: #0a0a0a;
+  font: 700 11px/14px var(--sn-font-mono);
+  text-transform: uppercase;
+}
+.panel {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 59px;
+}
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 6px -1px -12px 0;
+  border: 2px solid var(--text);
+  border-radius: 9px;
+  background: var(--bg);
+  transform: rotate(-1.6deg);
+  transform-origin: 0 0;
+}
+.nombre {
+  position: absolute;
+  left: 14px;
+  right: 120px;
+  top: 17px;
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--sn-font-display);
+  font-stretch: 78%;
+  font-weight: 900;
+  font-size: 19px;
+  line-height: 20px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.disponible {
+  position: absolute;
+  right: 17px;
+  top: 15px;
+  padding: 0 4px;
+  background: #01ef6d;
+  color: #0a0a0a;
+  font: 700 11px/17px var(--sn-font-mono);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.pie {
+  position: absolute;
+  left: 14px;
+  right: 17px;
+  bottom: 7px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font: 400 12.5px/16px var(--sn-font-mono);
+  white-space: nowrap;
+}
+.estrella {
+  color: #fe5400;
+  font-size: 15px;
+  margin-right: 4px;
+}
+.precio {
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+}
