@@ -9142,6 +9142,48 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      crear_reserva_autorizada: {
+        Args: {
+          p_hora_inicio: string
+          p_autoriza_datos?: boolean
+          p_idempotency_key?: string
+          p_sede_id: string
+          p_servicio_ids: string[]
+          p_staff_id?: string
+        }
+        Returns: {
+          bloqueo_fin: string | null
+          bloqueo_inicio: string | null
+          buffer_posterior_minutos: number
+          buffer_previo_minutos: number
+          cancelado_motivo: string | null
+          cancelado_por: string | null
+          checkin_at: string | null
+          checkout_at: string | null
+          cliente_id: string
+          created_at: string
+          estado: Database["public"]["Enums"]["reserva_estado"]
+          expira_at: string | null
+          hora_fin: string
+          hora_inicio: string
+          id: string
+          idempotency_key: string | null
+          monto_sena: number
+          monto_total: number
+          negocio_id: string
+          rango: unknown
+          recurso_id: string | null
+          sede_id: string
+          staff_id: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reserva"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       crear_reserva_manual: {
         Args: {
           p_cliente_id: string

@@ -7,16 +7,19 @@ import { createClient } from "@/lib/supabase/server";
  *
  * Ninguna recibe precios ni duraciones: la RPC `crear_reserva` los recalcula desde la
  * base con la identidad de `auth.uid()`. Lo único que viaja es qué se quiere reservar.
+ * Desde la migración 143 se reserva con `crear_reserva_autorizada`, que exige la autorización de
+ * datos y guarda su evidencia en la MISMA transacción (y `crear_reserva` ya no es invocable directo).
  */
 
 export type ResultadoReserva =
   | { ok: true; reservaId: string }
-  | { ok: false; codigo: "SLOT_NO_DISPONIBLE" | "NO_AUTENTICADO" | "ERROR"; mensaje: string };
+  | { ok: false; codigo: "SLOT_NO_DISPONIBLE" | "NO_AUTENTICADO" | "AUTORIZACION_DATOS" | "ERROR"; mensaje: string };
 
 /** Traduce el mensaje de la excepción de plpgsql al código de dominio de la API. */
 function codigoDeError(mensaje: string) {
   if (mensaje.includes("SLOT_NO_DISPONIBLE")) return "SLOT_NO_DISPONIBLE" as const;
   if (mensaje.includes("NO_AUTENTICADO")) return "NO_AUTENTICADO" as const;
+  if (mensaje.includes("AUTORIZACION_DATOS_REQUERIDA")) return "AUTORIZACION_DATOS" as const;
   return "ERROR" as const;
 }
 
@@ -54,15 +57,21 @@ export async function crearReservaAction(args: {
   horaInicio: string;
   staffId: string | null;
   idempotencyKey: string;
+  autorizaDatos: boolean;
 }): Promise<ResultadoReserva> {
+  // Aviso temprano; la base vuelve a exigirlo (AUTORIZACION_DATOS_REQUERIDA) aunque se salte esta acción.
+  if (args.autorizaDatos !== true) {
+    return { ok: false, codigo: "AUTORIZACION_DATOS", mensaje: "Para reservar debes autorizar el uso de tus datos para esta cita." };
+  }
   const supabase = await createClient();
 
-  const { data, error } = await supabase.rpc("crear_reserva", {
+  const { data, error } = await supabase.rpc("crear_reserva_autorizada", {
     p_sede_id: args.sedeId,
     p_servicio_ids: args.servicioIds,
     p_hora_inicio: args.horaInicio,
     p_staff_id: args.staffId ?? undefined,
     p_idempotency_key: args.idempotencyKey,
+    p_autoriza_datos: true,
   });
 
   if (error) {
@@ -75,7 +84,9 @@ export async function crearReservaAction(args: {
           ? "Ese horario acaba de ocuparse. Elige otro, ya actualizamos la lista."
           : codigo === "NO_AUTENTICADO"
             ? "Tu sesión expiró. Vuelve a iniciar sesión para reservar."
-            : error.message,
+            : codigo === "AUTORIZACION_DATOS"
+              ? "Para reservar debes autorizar el uso de tus datos para esta cita."
+              : error.message,
     };
   }
 

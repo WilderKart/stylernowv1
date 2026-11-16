@@ -6,6 +6,7 @@ import { SlotsPorFranja } from "@/components/negocio/horas-agrupadas";
 import { FOTOS_RESPALDO, nivelATier } from "@/components/negocio/nivel";
 import { duracion, fechaCorta, fechaHoraLarga, fechaISO, hora, hoyISO, sumarDias } from "@/lib/formato";
 import { AvisoDistancia } from "./aviso-distancia";
+import { Casilla } from "@/components/privacidad/casilla";
 import { useT } from "@/lib/i18n/proveedor";
 import { calcularSenaServiciosEstimada, resumenPoliticaCancelacion, type ConfigSena } from "@/lib/pagos/sena";
 import { cn, formatCOP } from "@/lib/utils";
@@ -97,6 +98,7 @@ export function FlujoReserva({
   const [slots, setSlots] = useState<Slot[]>([]);
   const [cargandoSlots, iniciarCarga] = useTransition();
   const [confirmando, setConfirmando] = useState(false);
+  const [autorizaDatos, setAutorizaDatos] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [avisoEspera, setAvisoEspera] = useState<string | null>(null);
 
@@ -167,6 +169,10 @@ export function FlujoReserva({
 
   async function confirmar() {
     if (!slot || !sede) return;
+    if (!autorizaDatos) {
+      setError(t("res.err_autoriza"));
+      return;
+    }
     setConfirmando(true);
     setError(null);
 
@@ -177,6 +183,7 @@ export function FlujoReserva({
       staffId,
       // 05-API/01_Standards.md: un reintento por timeout de red no crea dos Reservas.
       idempotencyKey: crypto.randomUUID(),
+      autorizaDatos,
     });
 
     if (resultado.ok) {
@@ -624,6 +631,28 @@ export function FlujoReserva({
                 <li key={linea}>{linea}</li>
               ))}
             </ul>
+
+            {/* Autorización de datos de ESTA reserva (texto aprobado 2026-11-16; la base guarda la evidencia). */}
+            <div className="px-4 pt-4">
+              <Casilla
+                caja
+                checked={autorizaDatos}
+                onChange={(v) => {
+                  setAutorizaDatos(v);
+                  if (v) setError(null);
+                }}
+                etiqueta={t("login.obligatoria")}
+                descripcion={
+                  <>
+                    {t("res.autoriza_1", { negocio: negocio.nombre })}{" "}
+                    <Link href="/legal/politica-de-datos" target="_blank" className="font-bold underline underline-offset-2">
+                      {t("res.autoriza_politica")}
+                    </Link>
+                    .
+                  </>
+                }
+              />
+            </div>
           </section>
         ) : null}
 
