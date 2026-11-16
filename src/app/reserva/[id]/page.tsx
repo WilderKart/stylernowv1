@@ -24,6 +24,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { BotonLlegue, FilaCompartir, Reprogramar } from "./acciones-cita";
 import { BotonCancelar } from "./boton-cancelar";
+import { QrCita } from "./qr-cita";
 import { obtenerT } from "@/lib/i18n/servidor";
 
 export async function generateMetadata() {
@@ -257,6 +258,12 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
           </p>
         ) : null}
       </div>
+
+      {activa ? (
+        <div className="mb-4 -mt-2">
+          <QrCita reservaId={reserva.id} />
+        </div>
+      ) : null}
 
       {cuentaRegresiva ? (
         <div role="status" className="mx-4 mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 border-2 border-border p-3">
