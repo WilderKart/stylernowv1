@@ -1,0 +1,299 @@
+/*
+ * Portada del Home (maqueta 2026-11-15). Todo se mide en "u": 1u = 1 px de la maqueta de 392 px
+ * de ancho; en pantallas más anchas la escala se detiene en 1.5 px para no inflar la composición.
+ * Las rayas naranjas y los recuadros inclinados se dibujan con código (SVG / transform), sin imágenes.
+ */
+.portada {
+  container-type: inline-size;
+  --naranja: #fe5400;
+  --linea: var(--text);
+  overflow-x: clip;
+}
+.portada > * {
+  --u: min(calc(100cqw / 392), 1.5px);
+}
+
+/* ───────── Héroe: titular a la izquierda, barbero y rayas a la derecha ───────── */
+.heroe {
+  position: relative;
+  height: calc(var(--u) * 252);
+}
+.arte {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: calc(var(--u) * 232);
+  height: calc(var(--u) * 252);
+  pointer-events: none;
+}
+.rayas {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: calc(var(--u) * 300);
+  height: calc(var(--u) * 252);
+  overflow: visible;
+  fill: var(--naranja);
+}
+.foto {
+  position: absolute;
+  left: calc(var(--u) * 19);
+  top: calc(var(--u) * -5);
+  width: calc(var(--u) * 237);
+  height: auto;
+  max-width: none;
+  user-select: none;
+}
+
+.titulo {
+  position: absolute;
+  left: calc(var(--u) * 15);
+  top: calc(var(--u) * 23);
+  margin: 0;
+  font-family: var(--sn-font-display);
+  font-stretch: 62.5%;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--text);
+  white-space: nowrap;
+}
+/* La maqueta usa el mismo grotesco condensado, un poco más estrecho: se ajusta el ancho por línea. */
+.titulo span {
+  display: block;
+  font-size: calc(var(--u) * 60);
+  line-height: calc(var(--u) * 49);
+  letter-spacing: calc(var(--u) * -0.6);
+  transform: rotate(-2.8deg) scaleX(var(--sx, 0.8));
+  transform-origin: 0 50%;
+}
+.titulo span:nth-child(2) {
+  --sx: 0.84;
+}
+.titulo span:nth-child(3) {
+  --sx: 0.89;
+  font-size: calc(var(--u) * 68);
+  line-height: calc(var(--u) * 51);
+}
+.caliente {
+  color: var(--naranja);
+}
+
+.bajada {
+  position: absolute;
+  left: calc(var(--u) * 15);
+  top: calc(var(--u) * 172);
+  width: calc(var(--u) * 200);
+  margin: 0;
+  font-family: var(--sn-font-sans);
+  font-stretch: 70%;
+  font-weight: 500;
+  font-size: calc(var(--u) * 14);
+  line-height: calc(var(--u) * 15.2);
+  letter-spacing: 0;
+  color: var(--text);
+}
+.bajada span {
+  display: block;
+  white-space: nowrap;
+}
+.bajada span + span {
+  width: calc(var(--u) * 145);
+  white-space: normal;
+}
+.trazo {
+  position: absolute;
+  left: calc(var(--u) * 16);
+  top: calc(var(--u) * 218);
+  width: calc(var(--u) * 114);
+  height: calc(var(--u) * 13);
+  fill: var(--naranja);
+}
+
+/* ───────── Buscador inclinado ───────── */
+.buscador {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  height: calc(var(--u) * 45);
+  margin: calc(var(--u) * 1) calc(var(--u) * 10) 0 calc(var(--u) * 18);
+  transform: rotate(-1.1deg);
+}
+.buscador::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--linea);
+  border-radius: calc(var(--u) * 8);
+  background: linear-gradient(
+    90deg,
+    var(--bg) 0 calc(100% - var(--u) * 58),
+    var(--linea) 0 calc(100% - var(--u) * 56),
+    var(--naranja) 0
+  );
+  box-shadow: calc(var(--u) * 3) calc(var(--u) * 8) 0 var(--linea);
+  transform: skewX(-12deg);
+}
+.lupa {
+  position: relative;
+  flex: none;
+  width: calc(var(--u) * 21) !important;
+  height: calc(var(--u) * 21) !important;
+  margin-left: calc(var(--u) * 15);
+  stroke-width: 2.4 !important;
+  stroke-linecap: round !important;
+  color: var(--text);
+}
+.campo {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  margin-left: calc(var(--u) * 12);
+  border: 0;
+  background: transparent;
+  font-family: var(--sn-font-sans);
+  font-stretch: 88%;
+  font-size: max(16px, calc(var(--u) * 15.5));
+  letter-spacing: -0.2px;
+  color: var(--text);
+  outline: none;
+}
+.campo::placeholder {
+  color: #6e6e6e;
+  opacity: 1;
+}
+.ir {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: calc(var(--u) * 56);
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: #0a0a0a;
+  cursor: pointer;
+}
+.ir svg {
+  width: calc(var(--u) * 24) !important;
+  height: calc(var(--u) * 24) !important;
+  stroke-width: 2.4 !important;
+}
+.buscador:focus-within::before {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* ───────── Mosaicos de categoría ───────── */
+.categorias {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(var(--u) * 6);
+  margin: calc(var(--u) * 25) calc(var(--u) * 9) 0 calc(var(--u) * 14);
+}
+.mosaico {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: calc(var(--u) * 80);
+  color: #0a0a0a;
+  text-decoration: none;
+  transform: rotate(-5.2deg);
+}
+.mosaico::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--linea);
+  border-radius: calc(var(--u) * 7);
+  background: var(--bg);
+  box-shadow: calc(var(--u) * 3) calc(var(--u) * 6) 0 var(--linea);
+  transform: skewX(-11deg);
+  transition: transform 120ms ease;
+}
+.mosaico:active::before {
+  transform: skewX(-11deg) translate(2px, 3px);
+  box-shadow: none;
+}
+.mosaico:focus-visible {
+  outline: none;
+}
+.mosaico:focus-visible::before {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+.destacado::before {
+  background: var(--naranja);
+}
+.mosaico > * {
+  position: relative;
+}
+.mosaico:nth-child(3) .etiqueta {
+  font-size: calc(var(--u) * 22);
+}
+.mosaico:not(.destacado) {
+  color: var(--text);
+}
+.icono {
+  width: calc(var(--u) * 36) !important;
+  height: calc(var(--u) * 36) !important;
+  margin: calc(var(--u) * -4) 0 calc(var(--u) * 3);
+}
+.etiqueta {
+  font-family: var(--sn-font-display);
+  font-stretch: 62.5%;
+  font-weight: 900;
+  font-size: calc(var(--u) * 19.5);
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  transform: skewX(-12deg);
+}
+.subetiqueta {
+  margin-top: calc(var(--u) * 2);
+  font-family: var(--sn-font-display);
+  font-stretch: 75%;
+  font-weight: 800;
+  font-size: calc(var(--u) * 9);
+  line-height: 1;
+  letter-spacing: calc(var(--u) * 0.1);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transform: skewX(-12deg);
+  white-space: nowrap;
+}
+
+/* ───────── Franja negra ───────── */
+.franja {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--u) * 16);
+  width: calc(100% + var(--u) * 24);
+  height: calc(var(--u) * 35);
+  margin: calc(var(--u) * 22) 0 0 calc(var(--u) * -12);
+  background: #0a0a0a;
+  color: #fff;
+  transform: rotate(-1deg);
+}
+:global([data-theme="dark"]) .franja {
+  outline: 2px solid var(--line);
+}
+.franja svg {
+  flex: none;
+  width: calc(var(--u) * 24) !important;
+  height: calc(var(--u) * 24) !important;
+}
+.franja span {
+  font-family: var(--sn-font-display);
+  font-stretch: 66%;
+  font-weight: 900;
+  font-size: calc(var(--u) * 22.5);
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: skewX(-12deg);
+}

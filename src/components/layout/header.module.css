@@ -1,0 +1,85 @@
+/* Barra superior del recorrido del Cliente (maqueta 2026-11-15). Medidas de la maqueta de 392 px;
+   en móviles más angostos todo se reduce en proporción (1u = 100vw/392, máximo 1 px). */
+.barra {
+  --u: min(1px, calc(100vw / 392));
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 15);
+  height: 56px;
+  padding: 0 calc(var(--u) * 10) 0 calc(var(--u) * 16);
+  border-bottom: 2px solid var(--text);
+  background: var(--bg);
+}
+.logo {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--text);
+  text-decoration: none;
+}
+.marca {
+  font-family: var(--sn-font-display);
+  font-stretch: 62.5%;
+  font-weight: 900;
+  font-size: calc(var(--u) * 37);
+  line-height: 1;
+  letter-spacing: calc(var(--u) * -1.6);
+  text-transform: uppercase;
+}
+.now {
+  color: #fe5400;
+}
+.etiqueta {
+  flex: 1;
+  text-align: center;
+}
+.separador {
+  flex: none;
+  width: 2px;
+  height: 33px;
+  margin-left: auto;
+  margin-right: calc(var(--u) * 4);
+  background: var(--text);
+}
+.etiqueta + .separador {
+  margin-left: 0;
+}
+.accion {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  font-family: var(--sn-font-display);
+  font-stretch: 62.5%;
+  font-weight: 800;
+  font-size: calc(var(--u) * 15.5);
+  line-height: 1;
+  letter-spacing: calc(var(--u) * -0.6);
+  word-spacing: calc(var(--u) * 3);
+  text-transform: uppercase;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.caja {
+  position: relative;
+  padding: 0 calc(var(--u) * 13);
+}
+.caja::before {
+  content: "";
+  position: absolute;
+  inset: 9px 0;
+  border: 2px solid var(--text);
+}
+
+/* «Para negocios» solo en pantallas anchas (en móvil no cabe junto al resto). */
+.ancho {
+  display: none;
+}
+@media (min-width: 640px) {
+  .ancho {
+    display: flex;
+  }
+}

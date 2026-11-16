@@ -63,7 +63,7 @@ export function CampoContrasena({
 
 /** Mismas reglas que `PASSWORD_SCHEMA` (src/lib/auth/password.ts); el servidor es quien decide. */
 export const REGLAS_PASSWORD = [
-  { clave: "auth.req_largo", ok: (p: string) => p.length >= 12 },
+  { clave: "auth.req_largo", ok: (p: string) => p.length >= 8 },
   { clave: "auth.req_mayus", ok: (p: string) => /[A-Z]/.test(p) },
   { clave: "auth.req_minus", ok: (p: string) => /[a-z]/.test(p) },
   { clave: "auth.req_numero", ok: (p: string) => /[0-9]/.test(p) },
