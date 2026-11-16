@@ -107,7 +107,7 @@ Conclusiones demostradas:
 | Desplegar | Merge de la rama a `main` | No | El código nuevo funciona con S1 (filas 3 y 5) |
 | Contraer | 139 | Solo al código viejo, que ya no existe | El código nuevo funciona en S2 |
 
-No dividí ni modifiqué 139: el paso 1 es un archivo **nuevo y aparte** (`supabase/scripts/liberacion/paso1_expandir_ai_acciones_costo_admin.sql`) con la misma función. 139 usa `create or replace`, así que reaplicarla después es idempotente. Justificación de que exista: es la única forma de lograr ventana 0 sin tocar 139.
+No dividí ni modifiqué 139: el paso 1 es un archivo **nuevo y aparte** (`supabase/scripts/liberacion/01_paso1_expandir_funcion.sql`) con la misma función. 139 usa `create or replace`, así que reaplicarla después es idempotente. Justificación de que exista: es la única forma de lograr ventana 0 sin tocar 139.
 
 Tiempo de incompatibilidad con el orden recomendado: **0 s**. Con el orden «naive»: desde que se aplica 139 hasta que Vercel publica el código (minutos).
 
@@ -180,23 +180,23 @@ Período de observación entre 4 y 6: al menos unas horas con tráfico normal y 
 
 ### 6.2 Alternativa B — tú aplicas el SQL (recomendada)
 
-Reglas para todos los pasos: pega **el contenido exacto del archivo**, sin cambiar nada; envuélvelo en `begin;` … `commit;` (así si algo falla no queda a medias); ejecuta un paso, verifica y solo entonces el siguiente.
+Reglas para todos los pasos: cada archivo `01_`, `02_`, `03_` ya trae tres bloques (A verificación previa, B aplicar dentro de `begin;`…`commit;`, C verificación posterior); ejecútalos por separado, seleccionando cada bloque. Los tres archivos se probaron en local sobre una base en el estado previo: los resultados de los bloques A y C coincidieron con lo esperado. Ejecuta un paso, verifica y solo entonces el siguiente.
 
 **Paso 0 — Captura previa** · Archivo `supabase/scripts/liberacion/captura_estado_previo.sql` (solo SELECT).
 - Resultado esperado: filas de las secciones A–I. Sección H (tablas con dueño distinto de `postgres`) **debe salir vacía**; si trae filas, detente y avísame. Sección F debe mostrar los dos CHECK (`familia_grupo_limite_miembros_chk` **no** debe aparecer aún; `oferta_negocio_porcentaje_max_chk` sí). Sección G: anota los conteos.
 - Si hay error: no es una escritura; avísame con el texto.
 
-**Paso 1 — Expandir** · Archivo `supabase/scripts/liberacion/paso1_expandir_ai_acciones_costo_admin.sql`.
-- Antes: `select to_regprocedure('public.ai_acciones_costo_admin()');` → `NULL`.
+**Paso 1 — Expandir** · Archivo `supabase/scripts/liberacion/01_paso1_expandir_funcion.sql`.
+- Verificaciones: están dentro del archivo (bloques A y C).
 - Después: `select to_regprocedure('public.ai_acciones_costo_admin()')::text, (select proacl::text from pg_proc where oid = 'public.ai_acciones_costo_admin()'::regprocedure);` → la función existe y el ACL incluye `authenticated=X` y **no** incluye `anon` ni un ACL público (`=X`).
 - Si hay error: nada quedó aplicado (transacción); avísame. Reversión: `drop function if exists public.ai_acciones_costo_admin();`
 
-**Paso 2 — 141** · Archivo `supabase/migrations/141_quitar_truncate_y_trigger_a_roles_publicos.sql`.
+**Paso 2 — 141** · Archivo `supabase/scripts/liberacion/02_migracion_141.sql` (contiene la migración 141 sin cambios, verificado byte a byte, más sus bloques de verificación).
 - Antes: `select count(*) from information_schema.role_table_grants where table_schema='public' and grantee in ('anon','authenticated') and privilege_type in ('TRUNCATE','TRIGGER','REFERENCES');` → número > 0 (en local fueron 586).
 - Después: la misma consulta → **0**. Navega la app (inicio, un negocio, reservar) para confirmar que todo carga.
 - Si hay error o aviso «no privileges could be revoked»: avísame antes de seguir. Reversión: sentencias de la sección A de la captura.
 
-**Paso 3 — 142** · Archivo `supabase/migrations/142_registrar_evento_fraude_acotado.sql`.
+**Paso 3 — 142** · Archivo `supabase/scripts/liberacion/03_migracion_142.sql` (contiene la migración 142 sin cambios, más sus bloques de verificación).
 - Antes: `select pg_get_functiondef('public.registrar_evento_fraude(text,uuid,text,jsonb)'::regprocedure) like '%NO_AUTENTICADO%';` → `false`.
 - Después: misma consulta → `true`; `select proacl::text from pg_proc where oid='public.registrar_evento_fraude(text,uuid,text,jsonb)'::regprocedure;` → sin `anon`.
 - Reversión: la definición de la sección D de la captura + sección E.
@@ -286,3 +286,13 @@ Marca lo que apruebas expresamente, en orden:
 - [ ] **E.** Después de la observación, paso 6 (139).
 
 Detengo aquí. No haré nada remoto hasta tu aprobación expresa.
+
+
+---
+
+## 11. Estado tras la integración autorizada (2026-11-15)
+
+- `main` (3 commits: `7321a19`, `bb5ea72`, `fd8eb4f`) integrado en `cierre/fase-0` con un merge limpio (`eaad166`); un único push realizado. Sin merge a `main`, sin despliegue, sin SQL remoto.
+- Pruebas sobre la rama integrada: tsc 0 errores; ESLint sin hallazgos; Vitest 112 pasan / 17 omitidas; 21 suites SQL: 20 OK y 1 FALLA (`directiva_116_118`, obsoleta, anterior a esta liberación); `check-auth-coverage` sin problemas; `next build --webpack` compiló. **Limitación:** `next build` con Turbopack (el de Vercel) no corre en este worktree por el enlace de `node_modules`; la confirmación con Turbopack es la vista previa de Vercel de la rama.
+- **La captura de privilegios y políticas NO sustituye un respaldo completo de producción, y la reversión descrita no es un sustituto de un backup.**
+- 139 sigue pendiente hasta que el código nuevo esté desplegado y comprobado.
