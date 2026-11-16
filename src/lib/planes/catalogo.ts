@@ -12,6 +12,8 @@ export interface PaisPlanes {
   precioMasImpuesto: boolean;
   fundadorDescuentoPct: number;
   fundadorMeses: number;
+  /** Total de cupos fundador del país (los restantes se calculan en la base en cada consulta). */
+  fundadorCupos: number;
   mesesPagadosAnual: number;
   cuposFundadorRestantes: number;
   cobroRecurrenteHabilitado: boolean;
@@ -95,6 +97,7 @@ export async function obtenerCatalogoPais(paisCodigo: string): Promise<CatalogoP
       precioMasImpuesto: pais.precio_mas_impuesto,
       fundadorDescuentoPct: Number(pais.fundador_descuento_pct),
       fundadorMeses: pais.fundador_meses,
+      fundadorCupos: Number(pais.fundador_cupos ?? 0),
       mesesPagadosAnual: pais.anual_meses_pagados,
       cuposFundadorRestantes: typeof cupos === "number" ? cupos : 0,
       cobroRecurrenteHabilitado: pais.cobro_recurrente_habilitado,

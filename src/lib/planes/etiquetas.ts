@@ -62,6 +62,26 @@ export function lineasIncluye(plan: PlanPais): string[] {
   return lineas;
 }
 
+/**
+ * Orden comercial de la página «Para negocios»: primero lo que muestra que StylerNow es gestión
+ * completa (agenda, equipo, caja y CRM, inventario, reportes) y después visibilidad y reservas.
+ * Mismos datos que `lineasIncluye` (solo características HABILITADAS del plan); cambia el orden
+ * y no incluye los límites de profesionales y sedes, que la tarjeta muestra aparte.
+ */
+const ORDEN_COMERCIAL = ["reservas_agenda", "comisiones_turnos", "crm_caja", "inventario", "reportes", "perfil_mapa", "recordatorios", "anticipo"];
+
+export function caracteristicasComerciales(plan: PlanPais): string[] {
+  const orden = [...ORDEN_COMERCIAL, ...ORDEN_CARACTERISTICAS.filter((c) => !ORDEN_COMERCIAL.includes(c))];
+  const lineas: string[] = [];
+  for (const clave of orden) {
+    const c = plan.caracteristicas[clave];
+    if (!c?.habilitado || !ETIQUETAS[clave]) continue;
+    const valor = c.valor ? VALORES[c.valor] : null;
+    lineas.push(valor ? `${ETIQUETAS[clave]}: ${valor}` : ETIQUETAS[clave]);
+  }
+  return lineas;
+}
+
 export function llamadoAccion(plan: PlanPais): "prueba" | "ventas" {
   return plan.caracteristicas.llamado_accion?.valor === "ventas" ? "ventas" : "prueba";
 }
