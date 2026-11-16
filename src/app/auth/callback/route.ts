@@ -1,5 +1,6 @@
 import { registrarAceptacionDeRegistro, registrarAceptacionLegal } from "@/lib/auth/aceptacion-legal";
 import { destinoSeguro } from "@/lib/auth/destino-seguro";
+import { destinoInicial, fijarIntencionRegistro, intencionDe, RUTA_ONBOARDING } from "@/lib/auth/destino-inicial";
 import { registrarEventoIdentidad } from "@/lib/auth/identity-events";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse, type NextRequest } from "next/server";
@@ -57,6 +58,12 @@ export async function GET(request: NextRequest) {
       if (vinoDelRegistro && registroPendiente) {
         await supabase.from("perfil").update({ password_establecida: true }).eq("id", data.user.id);
       }
+      // Cuenta nueva por Google desde «Crear cuenta»: la intención llega en el `next` que armó el
+      // servidor (onboarding = negocio). Solo enruta — no da permisos — y solo se fija una vez, en una
+      // cuenta todavía pendiente; una cuenta existente nunca cambia de intención por un `next`.
+      if (registroPendiente && !esRecuperacion && intencionDe(data.user) === null) {
+        await fijarIntencionRegistro(data.user.id, next.startsWith(RUTA_ONBOARDING) ? "negocio" : "cliente");
+      }
       if (registroPendiente && !esRecuperacion) {
         return NextResponse.redirect(`${origin}/login?next=${encodeURIComponent(next)}`);
       }
@@ -69,7 +76,11 @@ export async function GET(request: NextRequest) {
         .eq("id", data.user.id)
         .single();
 
-      const destino = esRecuperacion || perfil?.telefono ? next : "/perfil?bienvenida=1";
+      const destino = esRecuperacion
+        ? next
+        : perfil?.telefono
+          ? await destinoInicial(supabase, data.user, next)
+          : "/perfil?bienvenida=1";
       // Mismo bloqueo que el flujo de código tipeado (login/formulario.tsx): un
       // cambio legal material pendiente se resuelve antes que cualquier otro
       // destino (02-UX/10_Super_Admin.md) — salvo recuperación de contraseña,

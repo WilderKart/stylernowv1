@@ -9,6 +9,7 @@ import { guardarEnHistorial } from "@/lib/auth/password-history";
 import { registrarIntentoAuth, verificarRateLimitAuth } from "@/lib/auth/rate-limit-auth";
 import { googleProvider } from "@/lib/auth/providers/google-provider";
 import { destinoSeguro } from "@/lib/auth/destino-seguro";
+import { destinoInicial, destinoPorIntencion, fijarIntencionRegistro } from "@/lib/auth/destino-inicial";
 import { limitar, ipDelLlamador } from "@/lib/rate-limit";
 import { headers } from "next/headers";
 import { z } from "zod";
@@ -28,6 +29,8 @@ async function origenActual() {
 }
 
 const CORREO = z.string().trim().toLowerCase().max(254).email();
+/** Tipo de cuenta del registro: solo enruta (ver destino-inicial.ts), nunca otorga permisos. */
+const TIPO_CUENTA = z.enum(["cliente", "negocio"]);
 
 /** Límite por IP y por correo para todo lo que envía un correo de Auth (registro y reenvío). */
 async function limitarEnvioCorreo(email: string) {
@@ -52,12 +55,18 @@ async function limitarEnvioCorreo(email: string) {
  * ve la pantalla de verificación en ambos casos y nunca se le dice "ese correo ya existe".
  */
 export async function registrarCuenta(datos: {
+  tipo: unknown;
   email: string;
   password: string;
   confirmar: string;
   aceptaTerminos: boolean;
   siguiente: string;
-}): Promise<{ ok: true; email: string } | { ok: false; campo?: "email" | "password" | "confirmar" | "terminos"; error: string }> {
+}): Promise<
+  | { ok: true; email: string; siguiente: string }
+  | { ok: false; campo?: "tipo" | "email" | "password" | "confirmar" | "terminos"; error: string }
+> {
+  const tipo = TIPO_CUENTA.safeParse(datos.tipo);
+  if (!tipo.success) return { ok: false, campo: "tipo", error: "Elige qué tipo de cuenta quieres crear." };
   const correo = CORREO.safeParse(datos.email);
   if (!correo.success) return { ok: false, campo: "email", error: "Escribe un correo válido." };
   const email = correo.data;
@@ -76,7 +85,8 @@ export async function registrarCuenta(datos: {
   const supabase = await createClient();
   // Evidencia de la aceptación: hora y versiones exactas mostradas al momento de registrarse.
   const versiones = await idsTextosVigentes(supabase);
-  const siguiente = destinoSeguro(datos.siguiente);
+  // El destino lo decide el servidor a partir del tipo validado (no se confía en el `next` del navegador).
+  const siguiente = destinoPorIntencion(tipo.data, destinoSeguro(datos.siguiente));
   const { data, error } = await supabase.auth.signUp({
     email,
     password: datos.password,
@@ -89,7 +99,7 @@ export async function registrarCuenta(datos: {
   // Correo ya registrado: misma respuesta que una cuenta nueva (anti-enumeración). No se envía
   // código ni se toca la cuenta existente; en la verificación, «Reenviar» tampoco revela nada.
   if (error && (error.code === "user_already_exists" || /already (registered|exists)/i.test(error.message))) {
-    return { ok: true, email };
+    return { ok: true, email, siguiente };
   }
   if (error) {
     if (/password/i.test(error.message)) return { ok: false, campo: "password", error: "Esa contraseña no cumple los requisitos. Elige otra." };
@@ -99,10 +109,12 @@ export async function registrarCuenta(datos: {
   }
   // Solo una cuenta realmente nueva trae identidades; con un correo existente Supabase devuelve
   // un usuario ficticio sin identidades — no se toca nada y se responde igual.
+  // La intención se guarda SOLO en una cuenta realmente nueva: un correo existente no cambia nada.
   if (data.user && (data.user.identities?.length ?? 0) > 0) {
     await guardarEnHistorial(data.user.id, datos.password);
+    await fijarIntencionRegistro(data.user.id, tipo.data);
   }
-  return { ok: true, email };
+  return { ok: true, email, siguiente };
 }
 
 /**
@@ -221,7 +233,12 @@ export async function crearContrasena(password: string) {
  * OTP o password. `siguiente` viaja como `next` en el `redirectTo` para que
  * el callback vuelva exactamente donde el usuario intentaba entrar.
  */
-export async function iniciarSesionConGoogle(siguiente: string) {
+export async function iniciarSesionConGoogle(siguienteCrudo: string, tipoCrudo?: unknown) {
+  // Desde «Crear cuenta» llega el tipo elegido: el servidor arma el `next` (onboarding o destino de
+  // cliente). El callback solo lo usa para enrutar y, en una cuenta nueva, para guardar la intención.
+  const tipo = tipoCrudo === undefined ? null : TIPO_CUENTA.safeParse(tipoCrudo);
+  if (tipo && !tipo.success) return { ok: false as const, error: "Elige qué tipo de cuenta quieres crear." };
+  const siguiente = tipo ? destinoPorIntencion(tipo.data, destinoSeguro(siguienteCrudo)) : destinoSeguro(siguienteCrudo);
   const redirectTo = `${await origenActual()}/auth/callback?next=${encodeURIComponent(siguiente)}`;
   return googleProvider.login(redirectTo);
 }
@@ -234,7 +251,7 @@ export async function iniciarSesionConGoogle(siguiente: string) {
  * verificar" solo se distingue cuando la contraseña es correcta (Supabase valida la contraseña
  * antes que la confirmación), así que no revela nada a quien no conoce la contraseña.
  */
-export async function iniciarSesionConContrasena(emailCrudo: string, password: string) {
+export async function iniciarSesionConContrasena(emailCrudo: string, password: string, siguienteCrudo = "/") {
   const correo = CORREO.safeParse(emailCrudo);
   if (!correo.success || !password) return { ok: false as const, error: "Correo o contraseña incorrectos." };
   const email = correo.data;
@@ -253,7 +270,12 @@ export async function iniciarSesionConContrasena(emailCrudo: string, password: s
     }
     return { ok: false as const, error: "Correo o contraseña incorrectos." };
   }
-  return { ok: true as const, esSupersu: data.user ? await esSupersuCuenta(supabase, data.user.id) : false };
+  const esSupersu = data.user ? await esSupersuCuenta(supabase, data.user.id) : false;
+  const siguiente = destinoSeguro(siguienteCrudo);
+  // Destino resuelto en el servidor: quien se registró como negocio y dejó el onboarding a medias lo
+  // retoma aquí; el Super Admin va a /admin (su rol solo viene de la base de datos).
+  const destino = esSupersu ? (siguiente !== "/" ? siguiente : "/admin") : await destinoInicial(supabase, data.user, siguiente);
+  return { ok: true as const, esSupersu, destino };
 }
 
 export async function solicitarRecuperacion(emailCrudo: string) {

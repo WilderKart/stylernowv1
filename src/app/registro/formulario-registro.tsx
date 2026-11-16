@@ -18,18 +18,21 @@ import {
 } from "../login/_componentes/campos";
 import { ErrorForm, Hot, PantallaAuth, Separador } from "../login/_componentes/pantalla-auth";
 import { iniciarSesionConGoogle, registrarCuenta } from "../login/actions";
+import { SelectorTipoCuenta, type TipoCuenta } from "./tipo-cuenta";
 
-type Campo = "email" | "password" | "confirmar" | "terminos";
+type Campo = "tipo" | "email" | "password" | "confirmar" | "terminos";
 
 /**
- * CREAR CUENTA (rediseño 2026-11-15): correo + contraseña + confirmación + aceptación legal.
- * Al crearla se envía el código de verificación y se pasa a /registro/verificar.
+ * CREAR CUENTA (rediseño 2026-11-16): tipo de cuenta (cliente o negocio) + correo + contraseña +
+ * confirmación + aceptación legal. Al crearla se envía el código de verificación y se pasa a
+ * /registro/verificar. El tipo solo decide el recorrido (negocio → onboarding); el servidor lo
+ * valida y arma el destino, y nunca lo trata como permiso.
  * El profesional (staff) no se registra aquí: entra por invitación de su barbería.
  */
-export function FormularioRegistro({ siguiente }: { siguiente: string }) {
+export function FormularioRegistro({ siguiente, tipoInicial }: { siguiente: string; tipoInicial: TipoCuenta | null }) {
   const t = useT();
   const router = useRouter();
-  const paraNegocio = siguiente.startsWith("/panel/onboarding");
+  const [tipo, setTipo] = useState<TipoCuenta | null>(tipoInicial);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
@@ -43,6 +46,10 @@ export function FormularioRegistro({ siguiente }: { siguiente: string }) {
   async function onCrear(e: React.FormEvent) {
     e.preventDefault();
     // Aviso inmediato (el servidor vuelve a validar todo).
+    if (!tipo) {
+      document.getElementById("tipo-cuenta")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return setError({ campo: "tipo", texto: t("auth.err_tipo") });
+    }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return setError({ campo: "email", texto: t("auth.err_correo") });
     if (!cumpleReglas(password)) return setError({ campo: "password", texto: t("auth.err_pw") });
     if (password !== confirmar) return setError({ campo: "confirmar", texto: t("auth.no_coinciden") });
@@ -50,20 +57,26 @@ export function FormularioRegistro({ siguiente }: { siguiente: string }) {
 
     setLoading(true);
     setError(null);
-    const res = await registrarCuenta({ email, password, confirmar, aceptaTerminos: acepta, siguiente });
+    const res = await registrarCuenta({ tipo, email, password, confirmar, aceptaTerminos: acepta, siguiente });
     if (!res.ok) {
       setLoading(false);
       setError({ campo: res.campo, texto: res.error });
       return;
     }
-    guardarVerificacion(res.email, siguiente);
-    router.push(`/registro/verificar${qs}`);
+    // El destino lo devuelve el servidor (negocio → onboarding); viaja por sessionStorage, no por la URL.
+    guardarVerificacion(res.email, res.siguiente);
+    router.push(`/registro/verificar${res.siguiente !== "/" ? `?next=${encodeURIComponent(res.siguiente)}` : ""}`);
   }
 
   async function onGoogle() {
+    // Con Google también hay que elegir antes el tipo: el servidor arma el destino a partir de él.
+    if (!tipo) {
+      document.getElementById("tipo-cuenta")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return setError({ campo: "tipo", texto: t("auth.err_tipo") });
+    }
     setGoogleCargando(true);
     setError(null);
-    const res = await iniciarSesionConGoogle(siguiente);
+    const res = await iniciarSesionConGoogle(siguiente, tipo);
     if (!res.ok) {
       setGoogleCargando(false);
       setError({ texto: res.error });
@@ -77,17 +90,30 @@ export function FormularioRegistro({ siguiente }: { siguiente: string }) {
   return (
     <PantallaAuth
       indice={t("auth.i_registro")}
-      volver={paraNegocio ? "/para-negocios" : "/"}
+      volver={tipoInicial === "negocio" ? "/para-negocios" : "/"}
       titulo={
         <>
-          {paraNegocio ? t("auth.reg_neg_t1") : t("auth.reg_t1")}
+          {t("auth.reg_t1")}
           <br />
-          <Hot>{paraNegocio ? t("auth.reg_neg_t2") : t("auth.reg_t2")}</Hot>
+          <Hot>{t("auth.reg_t2")}</Hot>
         </>
       }
-      intro={paraNegocio ? t("auth.reg_intro_neg") : t("auth.reg_intro")}
+      intro={t("auth.reg_intro")}
     >
       <form onSubmit={onCrear} className="flex flex-col gap-4" noValidate>
+        <div id="tipo-cuenta" className="mb-1 flex scroll-mt-20 flex-col gap-2">
+          <SelectorTipoCuenta
+            valor={tipo}
+            onChange={(v) => {
+              setTipo(v);
+              if (error?.campo === "tipo") setError(null);
+            }}
+            error={error?.campo === "tipo"}
+            idError="error-tipo"
+          />
+          {error?.campo === "tipo" ? <ErrorForm className="mt-1" >{error.texto}</ErrorForm> : null}
+        </div>
+
         <div className="flex flex-col gap-2">
           <Input
             label={t("login.correo")}

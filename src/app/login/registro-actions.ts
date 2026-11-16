@@ -3,6 +3,8 @@
 import type { Pais } from "@/lib/cliente/preferencias";
 import { telefonoE164, type PaisRegistro } from "@/lib/telefono-registro";
 import { createClient } from "@/lib/supabase/server";
+import { destinoInicial } from "@/lib/auth/destino-inicial";
+import { destinoSeguro } from "@/lib/auth/destino-seguro";
 import { aceptarTextosLegales, faltaAceptarVigentes, idsTextosVigentes, obtenerPendientesLegales } from "@/lib/auth/aceptacion-legal";
 
 const PAISES: Pais[] = ["CO", "US", "MX", "ES"];
@@ -36,7 +38,8 @@ export async function crearCuentaRegistro(
   telefono: string,
   marketing: boolean,
   aceptaTerminos = false,
-): Promise<{ ok: true; pendientesLegales: boolean } | { ok: false; error: string }> {
+  siguienteCrudo = "/",
+): Promise<{ ok: true; pendientesLegales: boolean; destino: string } | { ok: false; error: string }> {
   const nombreLimpio = (nombre ?? "").trim().replace(/\s+/g, " ");
   if (nombreLimpio.length < 2 || nombreLimpio.length > 80) return { ok: false, error: "El nombre debe tener entre 2 y 80 caracteres." };
   if (!PAISES.includes(pais as Pais)) return { ok: false, error: "País no disponible." };
@@ -69,7 +72,9 @@ export async function crearCuentaRegistro(
     return { ok: false, error: "No pudimos guardar tu perfil. Intenta de nuevo." };
   }
   const pendientes = await obtenerPendientesLegales(supabase, user.id);
-  return { ok: true, pendientesLegales: pendientes.length > 0 };
+  // Destino resuelto en el servidor: negocio → onboarding (o panel si ya lo terminó); cliente → inicio.
+  const destino = await destinoInicial(supabase, user, destinoSeguro(siguienteCrudo));
+  return { ok: true, pendientesLegales: pendientes.length > 0, destino };
 }
 
 /** ¿El paso de perfil debe pedir la casilla legal? (cuenta nueva por Google que aún no la marcó). */

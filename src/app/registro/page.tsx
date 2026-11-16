@@ -11,7 +11,7 @@ export async function generateMetadata() {
 
 /**
  * CREAR CUENTA (rediseño 2026-11-15): pantalla propia, distinta de /login.
- * Con ?next=/panel/onboarding el texto habla del registro del negocio.
+ * Con ?tipo=negocio o ?next=/panel/onboarding llega con «Soy barbería o negocio» ya elegido.
  * El profesional (staff) no se registra aquí: entra por invitación de su barbería (/invitacion/[id]).
  */
 export default async function RegistroPage(props: PageProps<"/registro">) {
@@ -25,5 +25,11 @@ export default async function RegistroPage(props: PageProps<"/registro">) {
   // Con sesión no se crea otra cuenta: /login decide (perfil pendiente, Super Admin o destino).
   if (user) redirect(`/login${siguiente !== "/" ? `?next=${encodeURIComponent(siguiente)}` : ""}`);
 
-  return <FormularioRegistro siguiente={siguiente} />;
+  // Preselección del tipo (solo comodidad visual; el servidor vuelve a validar): «Para negocios»
+  // enlaza con ?tipo=negocio o con next=/panel/onboarding.
+  const tipoParam = Array.isArray(params.tipo) ? params.tipo[0] : params.tipo;
+  const tipoInicial =
+    tipoParam === "negocio" || siguiente.startsWith("/panel/onboarding") ? "negocio" : tipoParam === "cliente" ? "cliente" : null;
+
+  return <FormularioRegistro siguiente={siguiente} tipoInicial={tipoInicial} />;
 }

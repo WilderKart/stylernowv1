@@ -1,3 +1,4 @@
+import { destinoInicial } from "@/lib/auth/destino-inicial";
 import { destinoSeguro } from "@/lib/auth/destino-seguro";
 import { obtenerPreferencias } from "@/lib/cliente/preferencias";
 import { createClient } from "@/lib/supabase/server";
@@ -34,7 +35,8 @@ export default async function LoginPage(props: PageProps<"/login">) {
     if (user.app_metadata?.registro_pendiente === true || (prefs.ok && prefs.data.pais === null)) {
       return <CompletarPerfil email={user.email ?? ""} siguiente={siguiente} pedirAceptacion={await requiereAceptacionEnPerfil()} />;
     }
-    redirect(siguiente);
+    // Sesión completa: destino resuelto en el servidor (retoma el onboarding de negocio si quedó a medias).
+    redirect(await destinoInicial(supabase, user, siguiente));
   }
 
   const aviso = params.recuperada === "1" ? "recuperada" : params.error ? "enlace" : undefined;
