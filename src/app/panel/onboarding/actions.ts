@@ -1,5 +1,6 @@
 "use server";
 
+import { enviarInvitacionStaff } from "@/lib/correo/invitacion-staff";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -239,7 +240,7 @@ export async function guardarSede(datos: {
 
 // ── Paso 4 — Invitar Staff (opcional) ───────────────────────────────────────
 
-export async function invitarStaff(negocioId: string, email: string, sedeId: string): Promise<Resultado> {
+export async function invitarStaff(negocioId: string, email: string, sedeId: string): Promise<Resultado<{ correoEnviado: boolean; enlace: string }>> {
   try {
     const { supabase } = await usuarioActual();
     const correo = email.trim().toLowerCase();
@@ -263,35 +264,15 @@ export async function invitarStaff(negocioId: string, email: string, sedeId: str
     }
 
     const { data: negocio } = await supabase.from("negocio").select("nombre").eq("id", negocioId).single();
-    await notificarInvitacion(correo, negocio?.nombre ?? "un negocio en StylerNow", invitacion.id);
+    const envio = await enviarInvitacionStaff(correo, negocio?.nombre ?? "un negocio en StylerNow", invitacion.id);
 
     revalidatePath("/panel/onboarding");
-    return { ok: true };
+    return { ok: true, data: { correoEnviado: envio.enviado, enlace: envio.enlace } };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
   }
 }
 
-async function notificarInvitacion(email: string, nombreNegocio: string, invitacionId: string) {
-  const token = process.env.RESEND_API_KEY;
-  if (!token) return; // No bloquea el onboarding si falta la key en este entorno.
-  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://stylernow.com"}/invitacion/${invitacionId}`;
-
-  try {
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: "StylerNow <notificaciones@mail.stylernow.com>",
-        to: email,
-        subject: `Te invitaron a unirte a ${nombreNegocio} en StylerNow`,
-        html: `<h2>Te invitaron a StylerNow</h2><p>${nombreNegocio} te invitó a unirte como Staff. Ingresa con este mismo correo (${email}) y <a href="${url}">acepta o rechaza la invitación aquí</a>.</p>`,
-      }),
-    });
-  } catch {
-    // El registro de la invitación ya quedó guardado; el correo es un mejor-esfuerzo.
-  }
-}
 
 export async function cancelarInvitacion(invitacionId: string): Promise<Resultado> {
   try {

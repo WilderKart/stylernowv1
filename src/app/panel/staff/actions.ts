@@ -1,5 +1,6 @@
 "use server";
 
+import { enviarInvitacionStaff } from "@/lib/correo/invitacion-staff";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -148,7 +149,7 @@ export async function crearInvitacionStaff(datos: {
   email: string;
   sedeId: string;
   comisionPct?: number;
-}): Promise<Resultado> {
+}): Promise<Resultado<{ correoEnviado: boolean; enlace: string }>> {
   try {
     const { supabase } = await usuarioActual();
     const correo = datos.email.trim().toLowerCase();
@@ -168,16 +169,16 @@ export async function crearInvitacionStaff(datos: {
       .select("nombre")
       .eq("id", datos.negocioId)
       .single();
-    await notificarInvitacion(correo, negocio?.nombre ?? "un negocio en StylerNow", invitacion.id);
+    const envio = await enviarInvitacionStaff(correo, negocio?.nombre ?? "un negocio en StylerNow", invitacion.id);
 
     revalidatePath("/panel/staff");
-    return { ok: true };
+    return { ok: true, data: { correoEnviado: envio.enviado, enlace: envio.enlace } };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
   }
 }
 
-export async function reenviarInvitacion(invitacionId: string): Promise<Resultado> {
+export async function reenviarInvitacion(invitacionId: string): Promise<Resultado<{ correoEnviado: boolean; enlace: string }>> {
   try {
     const { supabase } = await usuarioActual();
     const { data: invitacion, error } = await supabase.rpc("reenviar_invitacion", {
@@ -190,10 +191,10 @@ export async function reenviarInvitacion(invitacionId: string): Promise<Resultad
       .select("nombre")
       .eq("id", invitacion.negocio_id)
       .single();
-    await notificarInvitacion(invitacion.email, negocio?.nombre ?? "un negocio en StylerNow", invitacion.id);
+    const envio = await enviarInvitacionStaff(invitacion.email, negocio?.nombre ?? "un negocio en StylerNow", invitacion.id);
 
     revalidatePath("/panel/staff");
-    return { ok: true };
+    return { ok: true, data: { correoEnviado: envio.enviado, enlace: envio.enlace } };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
   }
@@ -238,26 +239,6 @@ export async function listarInvitacionesPendientes(
   }
 }
 
-async function notificarInvitacion(email: string, nombreNegocio: string, invitacionId: string) {
-  const token = process.env.RESEND_API_KEY;
-  if (!token) return; // No bloquea la acción si falta la key en este entorno.
-  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://stylernow.com"}/invitacion/${invitacionId}`;
-
-  try {
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: "StylerNow <notificaciones@mail.stylernow.com>",
-        to: email,
-        subject: `Te invitaron a unirte a ${nombreNegocio} en StylerNow`,
-        html: `<h2>Te invitaron a StylerNow</h2><p>${nombreNegocio} te invitó a unirte como Staff. Ingresa con este mismo correo (${email}) y <a href="${url}">acepta o rechaza la invitación aquí</a>.</p>`,
-      }),
-    });
-  } catch {
-    // El registro ya quedó guardado; el correo es un mejor-esfuerzo.
-  }
-}
 
 // ── Ciclo de vida del vínculo ────────────────────────────────────────────
 

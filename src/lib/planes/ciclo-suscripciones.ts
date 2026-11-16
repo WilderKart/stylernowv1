@@ -1,6 +1,7 @@
 import "server-only";
 import { proveedorDe } from "@/lib/pagos/proveedores/adaptadores";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { REMITENTE_CORREO } from "@/lib/correo/remitente";
 import { formatearMoneda } from "./moneda";
 import { calcularPrecio, type CicloFacturacion } from "./precios";
 
@@ -20,8 +21,9 @@ async function enviarCorreo(para: string, asunto: string, html: string) {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: "StylerNow <notificaciones@mail.stylernow.com>", to: para, subject: asunto, html }),
+      body: JSON.stringify({ from: REMITENTE_CORREO, to: para, subject: asunto, html }),
     });
+    if (!res.ok) console.error("[ciclo-suscripciones] Resend rechazó el envío", res.status, (await res.text().catch(() => "")).slice(0, 300));
     return res.ok;
   } catch {
     return false;

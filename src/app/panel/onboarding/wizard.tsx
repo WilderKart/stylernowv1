@@ -716,6 +716,9 @@ function PasoStaff({
       return;
     }
     onCambio([...invitaciones, { id: crypto.randomUUID(), email: email.trim().toLowerCase(), estado: "PENDIENTE" }]);
+    if (!res.data.correoEnviado) {
+      setError(`La invitación quedó creada, pero el correo no salió. Comparte este enlace (debe ingresar con ese correo): ${res.data.enlace}`);
+    }
     setEmail("");
   }
 

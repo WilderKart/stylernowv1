@@ -20,6 +20,9 @@ export function FormularioInvitacion({
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [enviado, setEnviado] = useState(false);
+  // Si Resend no entregó el correo, la invitación igual quedó creada: se muestra el enlace para compartirlo.
+  const [sinCorreo, setSinCorreo] = useState<string | null>(null);
+  const [copiado, setCopiado] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -36,16 +39,41 @@ export function FormularioInvitacion({
     const res = await crearInvitacionStaff({ negocioId, email, sedeId, comisionPct: comision });
     setEnviando(false);
     if (!res.ok) return setError(res.error);
+    setSinCorreo(res.data.correoEnviado ? null : res.data.enlace);
+    setCopiado(false);
     setEnviado(true);
   }
 
   if (enviado) {
     return (
       <div className="rounded-2xl border border-border-subtle bg-surface p-6 text-center">
-        <p className="text-[14px] font-bold text-text">Invitación enviada</p>
-        <p className="mt-1.5 text-[12.5px] text-text-muted">
-          Le enviamos un correo a {email} para que acepte unirse al equipo.
-        </p>
+        {sinCorreo ? (
+          <>
+            <p className="text-[14px] font-bold text-text">Invitación creada, pero el correo no salió</p>
+            <p className="mt-1.5 text-[12.5px] text-text-muted">
+              No pudimos enviar el correo a {email}. Compártele este enlace (por WhatsApp, por ejemplo): para aceptarla debe
+              ingresar con ese mismo correo.
+            </p>
+            <p className="mt-3 break-all rounded-lg border border-border bg-bg px-3 py-2 text-left font-mono text-[12px] text-text">{sinCorreo}</p>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="mt-2"
+              onClick={() => {
+                navigator.clipboard?.writeText(sinCorreo).then(() => setCopiado(true)).catch(() => {});
+              }}
+            >
+              {copiado ? "Enlace copiado" : "Copiar enlace"}
+            </Button>
+          </>
+        ) : (
+          <>
+            <p className="text-[14px] font-bold text-text">Invitación enviada</p>
+            <p className="mt-1.5 text-[12.5px] text-text-muted">
+              Le enviamos un correo a {email} para que acepte unirse al equipo.
+            </p>
+          </>
+        )}
         <div className="mt-4 flex justify-center gap-2">
           <Button variant="secondary" size="sm" onClick={() => { setEnviado(false); setEmail(""); setComisionPct(""); }}>
             Invitar a otra persona

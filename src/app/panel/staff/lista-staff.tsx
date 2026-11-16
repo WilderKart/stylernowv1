@@ -116,6 +116,9 @@ export function ListaStaff({
     setInvitaciones((prev) =>
       prev.map((i) => (i.id === id ? { ...i, reenviosCount: i.reenviosCount + 1 } : i))
     );
+    if (!res.data.correoEnviado) {
+      setError(`El correo no salió. Comparte este enlace (debe ingresar con el correo invitado): ${res.data.enlace}`);
+    }
   }
 
   async function onCancelar(id: string) {

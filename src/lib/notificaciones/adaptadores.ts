@@ -45,7 +45,8 @@ export function adaptadorNoHabilitado(canal: Canal): AdaptadorCanal {
   };
 }
 
-const REMITENTE_POR_DEFECTO = "StylerNow <notificaciones@mail.stylernow.com>";
+// Dominio verificado en Resend (mail.stylernow.com nunca se verificó: Resend respondía 403).
+const REMITENTE_POR_DEFECTO = "StylerNow <notificaciones@stylernow.com>";
 
 export function adaptadorResend(env: Entorno, fetchImpl: FetchLike = fetch): AdaptadorCanal {
   const token = env.RESEND_API_KEY?.trim();
