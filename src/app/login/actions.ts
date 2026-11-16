@@ -11,6 +11,7 @@ import { googleProvider } from "@/lib/auth/providers/google-provider";
 import { destinoSeguro } from "@/lib/auth/destino-seguro";
 import { destinoInicial, destinoPorIntencion, fijarIntencionRegistro } from "@/lib/auth/destino-inicial";
 import { limitar, ipDelLlamador } from "@/lib/rate-limit";
+import { MENSAJE_TURNSTILE, verificarTurnstile } from "@/lib/seguridad/turnstile";
 import { headers } from "next/headers";
 import { z } from "zod";
 
@@ -61,6 +62,7 @@ export async function registrarCuenta(datos: {
   confirmar: string;
   aceptaTerminos: boolean;
   siguiente: string;
+  turnstile?: unknown;
 }): Promise<
   | { ok: true; email: string; siguiente: string }
   | { ok: false; campo?: "tipo" | "email" | "password" | "confirmar" | "terminos"; error: string }
@@ -78,6 +80,9 @@ export async function registrarCuenta(datos: {
   }
   const politica = await validarPolitica(datos.password);
   if (!politica.ok) return { ok: false, campo: "password", error: politica.error };
+
+  // Anti-bots (Cloudflare Turnstile), verificado aquí con la clave secreta; antes de enviar ningún correo.
+  if (!(await verificarTurnstile(datos.turnstile, "registro"))) return { ok: false, error: MENSAJE_TURNSTILE };
 
   const limite = await limitarEnvioCorreo(email);
   if (!limite.ok) return { ok: false, error: limite.error };
@@ -251,10 +256,11 @@ export async function iniciarSesionConGoogle(siguienteCrudo: string, tipoCrudo?:
  * verificar" solo se distingue cuando la contraseña es correcta (Supabase valida la contraseña
  * antes que la confirmación), así que no revela nada a quien no conoce la contraseña.
  */
-export async function iniciarSesionConContrasena(emailCrudo: string, password: string, siguienteCrudo = "/") {
+export async function iniciarSesionConContrasena(emailCrudo: string, password: string, siguienteCrudo = "/", turnstile?: unknown) {
   const correo = CORREO.safeParse(emailCrudo);
   if (!correo.success || !password) return { ok: false as const, error: "Correo o contraseña incorrectos." };
   const email = correo.data;
+  if (!(await verificarTurnstile(turnstile, "ingreso"))) return { ok: false as const, error: MENSAJE_TURNSTILE };
 
   const limite = await verificarRateLimitAuth(email, "password_login");
   if (!limite.ok) return { ok: false as const, error: limite.error };
@@ -278,10 +284,11 @@ export async function iniciarSesionConContrasena(emailCrudo: string, password: s
   return { ok: true as const, esSupersu, destino };
 }
 
-export async function solicitarRecuperacion(emailCrudo: string) {
+export async function solicitarRecuperacion(emailCrudo: string, turnstile?: unknown) {
   const correo = CORREO.safeParse(emailCrudo);
   if (!correo.success) return { ok: false as const, error: "Escribe un correo válido." };
   const email = correo.data;
+  if (!(await verificarTurnstile(turnstile, "recuperar"))) return { ok: false as const, error: MENSAJE_TURNSTILE };
   const porIp = await limitar("recuperar-ip", await ipDelLlamador(), 8, 600);
   if (!porIp.ok) return { ok: false as const, error: "Demasiados intentos. Espera unos minutos antes de volver a intentar." };
   const limite = await verificarRateLimitAuth(email, "password_recovery");

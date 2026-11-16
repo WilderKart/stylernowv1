@@ -1,12 +1,14 @@
 "use client";
 
+import { Turnstile, type ControlTurnstile } from "@/components/seguridad/turnstile";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/i18n/proveedor";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Aviso, BotonGoogle, CambioPantalla, CampoContrasena, guardarVerificacion } from "./_componentes/campos";
 import { ErrorForm, Hot, PantallaAuth, Separador, claseEnlace } from "./_componentes/pantalla-auth";
 import { iniciarSesionConContrasena, iniciarSesionConGoogle, reenviarCodigoVerificacion } from "./actions";
@@ -28,6 +30,9 @@ export function FormularioIngreso({ siguiente, aviso }: { siguiente: string; avi
 
   const qs = siguiente && siguiente !== "/" ? `?next=${encodeURIComponent(siguiente)}` : "";
 
+  const [tokenTs, setTokenTs] = useState<string | null>(null);
+  const controlTs = useRef<ControlTurnstile>(null);
+
   async function onIngresar(e: React.FormEvent) {
     e.preventDefault();
     setSinVerificar(false);
@@ -35,9 +40,15 @@ export function FormularioIngreso({ siguiente, aviso }: { siguiente: string; avi
       setError(t("auth.err_campos"));
       return;
     }
+    if (!tokenTs) {
+      setError(t("auth.err_verificando"));
+      return;
+    }
     setLoading(true);
     setError(null);
-    const res = await iniciarSesionConContrasena(email, password, siguiente);
+    const res = await iniciarSesionConContrasena(email, password, siguiente, tokenTs);
+    // Cada token sirve una sola vez: se pide uno nuevo para el siguiente intento.
+    controlTs.current?.reiniciar();
     if (!res.ok) {
       setLoading(false);
       if ("sinVerificar" in res && res.sinVerificar) setSinVerificar(true);
@@ -111,6 +122,7 @@ export function FormularioIngreso({ siguiente, aviso }: { siguiente: string; avi
           </Link>
         </div>
 
+        <Turnstile ref={controlTs} accion="ingreso" onToken={setTokenTs} />
         {error ? <ErrorForm>{error}</ErrorForm> : null}
         {sinVerificar ? (
           <div className="flex flex-col gap-2 border-2 border-danger p-3">

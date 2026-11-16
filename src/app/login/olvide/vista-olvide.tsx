@@ -1,11 +1,13 @@
 "use client";
 
+import { Turnstile, type ControlTurnstile } from "@/components/seguridad/turnstile";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/i18n/proveedor";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { enmascararCorreo } from "../_componentes/campos";
 import { ErrorForm, Hot, PantallaAuth, claseEnlace } from "../_componentes/pantalla-auth";
 import { solicitarRecuperacion } from "../actions";
@@ -21,13 +23,20 @@ export function VistaOlvide({ siguiente }: { siguiente: string }) {
   const [enviado, setEnviado] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tokenTs, setTokenTs] = useState<string | null>(null);
+  const controlTs = useRef<ControlTurnstile>(null);
   const qs = siguiente && siguiente !== "/" ? `?next=${encodeURIComponent(siguiente)}` : "";
 
   async function onEnviar(e: React.FormEvent) {
     e.preventDefault();
+    if (!tokenTs) {
+      setError(t("auth.err_verificando"));
+      return;
+    }
     setLoading(true);
     setError(null);
-    const res = await solicitarRecuperacion(email);
+    const res = await solicitarRecuperacion(email, tokenTs);
+    controlTs.current?.reiniciar();
     setLoading(false);
     if (!res.ok) {
       setError(res.error);
@@ -93,6 +102,7 @@ export function VistaOlvide({ siguiente }: { siguiente: string }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
+        <Turnstile ref={controlTs} accion="recuperar" onToken={setTokenTs} />
         {error ? <ErrorForm>{error}</ErrorForm> : null}
         <Button type="submit" size="lg" loading={loading} className="w-full justify-between">
           <span>{t("auth.enviar_enlace")}</span>

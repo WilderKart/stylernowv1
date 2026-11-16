@@ -1,11 +1,13 @@
 "use client";
 
+import { Turnstile, type ControlTurnstile } from "@/components/seguridad/turnstile";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/i18n/proveedor";
 import { ArrowUpRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   BotonGoogle,
   CambioPantalla,
@@ -40,6 +42,8 @@ export function FormularioRegistro({ siguiente, tipoInicial }: { siguiente: stri
   const [loading, setLoading] = useState(false);
   const [googleCargando, setGoogleCargando] = useState(false);
   const [error, setError] = useState<{ campo?: Campo; texto: string } | null>(null);
+  const [tokenTs, setTokenTs] = useState<string | null>(null);
+  const controlTs = useRef<ControlTurnstile>(null);
 
   const qs = siguiente && siguiente !== "/" ? `?next=${encodeURIComponent(siguiente)}` : "";
 
@@ -54,10 +58,13 @@ export function FormularioRegistro({ siguiente, tipoInicial }: { siguiente: stri
     if (!cumpleReglas(password)) return setError({ campo: "password", texto: t("auth.err_pw") });
     if (password !== confirmar) return setError({ campo: "confirmar", texto: t("auth.no_coinciden") });
     if (!acepta) return setError({ campo: "terminos", texto: t("auth.err_terminos") });
+    if (!tokenTs) return setError({ texto: t("auth.err_verificando") });
 
     setLoading(true);
     setError(null);
-    const res = await registrarCuenta({ tipo, email, password, confirmar, aceptaTerminos: acepta, siguiente });
+    const res = await registrarCuenta({ tipo, email, password, confirmar, aceptaTerminos: acepta, siguiente, turnstile: tokenTs });
+    // Cada token sirve una sola vez: se pide uno nuevo por si hay que reintentar.
+    controlTs.current?.reiniciar();
     if (!res.ok) {
       setLoading(false);
       setError({ campo: res.campo, texto: res.error });
@@ -162,6 +169,7 @@ export function FormularioRegistro({ siguiente, tipoInicial }: { siguiente: stri
           {errorDe("terminos")}
         </div>
 
+        <Turnstile ref={controlTs} accion="registro" onToken={setTokenTs} />
         {error && !error.campo ? <ErrorForm>{error.texto}</ErrorForm> : null}
 
         <Button type="submit" size="lg" loading={loading} className="w-full justify-between">

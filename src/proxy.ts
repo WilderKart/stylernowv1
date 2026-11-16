@@ -18,7 +18,9 @@ function construirCsp(nonce: string) {
   const dev = process.env.NODE_ENV === "development";
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${dev ? " 'unsafe-eval'" : ""}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com${dev ? " 'unsafe-eval'" : ""}`,
+    // Cloudflare Turnstile (anti-bots de registro, ingreso y recuperación) se dibuja en un iframe propio.
+    "frame-src 'self' https://challenges.cloudflare.com",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' blob: data: https://*.supabase.co https://tile.openstreetmap.org https://*.tile.openstreetmap.org",
     "font-src 'self' data:",
