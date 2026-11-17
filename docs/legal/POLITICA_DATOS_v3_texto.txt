@@ -1,0 +1,139 @@
+Política de Tratamiento de Datos Personales — StylerNow
+
+1. Responsable del tratamiento
+
+TAWILSTACK S.A.S., con NIT en trámite de asignación, domicilio en Calle 15B # 20-79, Candelaria, Valle del Cauca, Colombia, correo electrónico equipo@stylernow.com y teléfono +57 3183943465, opera StylerNow, su producto de software como servicio y plataforma digital. En esta política, TAWILSTACK S.A.S. se denomina “TAWILSTACK” y StylerNow se refiere al producto.
+
+TAWILSTACK es responsable del tratamiento para los fines y medios que determina al operar StylerNow. Cuando un Negocio utiliza StylerNow para cargar y gestionar información de sus clientes bajo sus instrucciones, el Negocio determina esos fines y actúa como responsable, y TAWILSTACK trata esos datos por cuenta del Negocio como encargado. Para la información de reservas que se comparte entre la Plataforma y un Negocio, cada parte tratará los datos para las finalidades que determine y cumplirá las obligaciones que le correspondan según su rol efectivo.
+
+El tratamiento se rige por los principios de legalidad, finalidad, libertad, veracidad o calidad, transparencia, acceso y circulación restringida, seguridad y confidencialidad. Esta política explica qué información se trata, para qué, con quién se comparte, durante cuánto tiempo según cada finalidad y cómo puedes ejercer tus derechos.
+
+Atención de datos personales: el equipo de TAWILSTACK encargado de la protección de datos personales atiende las consultas, reclamos y solicitudes de los titulares a través de equipo@stylernow.com y del teléfono +57 3183943465, según el procedimiento de la sección 9.
+
+2. Datos que tratamos
+
+Datos que nos das:
+(a) Cuenta: nombre, correo electrónico, celular, país e idioma. Opcionalmente, foto de perfil, fecha de nacimiento y categorías de interés.
+(b) Reservas: Negocio, sede, profesional, servicios, fecha, hora, valores y estado de la cita, reprogramaciones, cancelaciones e inasistencias.
+(c) Política de cancelación: cuando pagas un anticipo, guardamos la política que aceptaste (texto, números y versión), con fecha, hora y zona horaria, como constancia.
+(d) Pagos: monto, estado, medio y referencias de la transacción. Los datos de tu tarjeta los recibe y guarda Mercado Pago. TAWILSTACK no los recibe ni los almacena.
+(e) Contenido: reseñas, mensajes del chat de una cita, fotos de antes y después de un servicio (solo con tu consentimiento) y la información de tu programa de lealtad (puntos, sellos, beneficios, referidos y grupo familiar).
+(f) Negocios: datos de contacto y de identificación fiscal del Negocio, su equipo, servicios, horarios y precios. Si el Negocio conecta su cuenta de Mercado Pago, guardamos cifradas las credenciales que Mercado Pago entrega para cobrar a su nombre.
+(g) Prueba gratuita del Negocio: para que cada Negocio use una sola prueba, convertimos en huellas criptográficas irreversibles (con una clave secreta que solo conoce TAWILSTACK) el teléfono y el documento que nos indicas, tu correo, un identificador de dispositivo (que guardamos en una cookie técnica llamada sn_disp, de hasta 730 días), tu dirección IP y rasgos generales de tu equipo (tipo de navegador, tamaño de pantalla, zona horaria e idioma). No guardamos esos datos en texto claro para este control ni los usamos para identificarte en la interfaz.
+
+Datos que se generan al usar la Plataforma:
+(h) Seguridad y prevención de abuso: (i) registramos los intentos de ingreso, de envío de código y de recuperación de contraseña con tu correo, el tipo de intento, si tuvo éxito y la hora, para bloquear intentos repetidos; (ii) para limitar los intentos por conexión convertimos tu dirección IP en una huella irreversible que eliminamos en un plazo máximo de dos días y no guardamos la dirección IP en texto claro con ese fin; (iii) para contar clics e impresiones de anuncios de forma honesta generamos una huella irreversible a partir de tu cuenta o, si no has iniciado sesión, de tu conexión y tu navegador; (iv) nuestro proveedor de autenticación (Supabase) guarda, por cada sesión activa, la dirección IP y el navegador con que se inició, para proteger tu cuenta mientras la sesión exista; (v) cuando ocurre un error en la aplicación, nuestro proveedor de monitoreo (Sentry) recibe el tipo de error, la pantalla en que ocurrió, el nombre y la versión de tu navegador y sistema operativo y, si has iniciado sesión, el identificador interno de tu cuenta; no le enviamos tu correo, tu nombre, tus cookies ni las cabeceras de tu conexión; (vi) para comprobar que eres una persona y no un programa automático en el registro, el ingreso y la recuperación de contraseña usamos Cloudflare Turnstile, que recibe señales técnicas de tu navegador y tu dirección IP; (vii) mantenemos registros de auditoría de las acciones relevantes en los paneles, con el identificador de la cuenta y de la petición, sin dirección IP ni datos de tu navegador. Las constancias de aceptación y de autorización de la sección 4 no incluyen tu dirección IP ni datos de tu navegador.
+(i) Ubicación: solo cuando pulsas «Cerca de mí» o «Usar mi ubicación» y tu navegador lo permite, usamos tus coordenadas aproximadas para ordenar los resultados por cercanía o calcular la distancia a una sede. No las guardamos en nuestra base de datos ni deducimos tu ciudad a partir de tu dirección IP. Como viajan en la dirección de la página, pueden quedar en el historial de tu navegador y, por un tiempo corto, en los registros de ejecución de nuestro proveedor de alojamiento. Puedes revocar el permiso desde tu navegador.
+(j) Analítica de uso y rendimiento: solo si la autorizas en el Centro de privacidad.
+(k) Visitas a perfiles de Negocios y clics en anuncios, para medir campañas de forma agregada.
+(l) Cookies y almacenamiento local: cookies de sesión de autenticación, cookie de idioma, cookie técnica de dispositivo para la prueba gratuita del Negocio (sn_disp) y tu elección sobre cookies de analítica, que se guarda en el almacenamiento local de tu navegador. Ninguna es publicitaria.
+
+No solicitamos diagnósticos ni usamos datos sensibles como requisito general para crear una cuenta o reservar. Si decides comunicar al Negocio una alergia, condición de salud u otra información sensible para que pueda prestarte el servicio con seguridad, el Negocio determina ese tratamiento como responsable independiente. TAWILSTACK tratará esa información por cuenta del Negocio solo si queda almacenada o procesada en StylerNow, conforme a las instrucciones y finalidades del Negocio. Evita incluir información sensible que no sea necesaria. Es facultativo responder cualquier pregunta sobre datos sensibles o sobre menores de edad, y ninguna actividad de la Plataforma está condicionada a que lo hagas.
+
+La Plataforma está dirigida a personas mayores de 18 años. Un padre, madre o representante puede realizar una reserva para un menor bajo su responsabilidad. No se debe crear una cuenta independiente para un menor. El Negocio debe tratar la información del menor y cualquier dato sensible conforme a la ley y a las autorizaciones que correspondan.
+
+3. Para qué usamos tus datos
+
+(a) Crear y proteger tu cuenta y verificar tu identidad al iniciar sesión.
+(b) Gestionar tus reservas: disponibilidad, confirmación, recordatorios, cambios, cancelaciones y, cuando corresponde, reembolsos.
+(c) Procesar pagos a través de Mercado Pago y dejar constancia de cada operación.
+(d) Compartir con el Negocio que eliges los datos necesarios para atenderte (nombre, contacto y detalle de la cita).
+(e) Operar los programas de lealtad, gift cards, membresías y referidos.
+(f) Prevenir fraude y abuso, por ejemplo pruebas gratuitas repetidas, accesos no autorizados o reseñas falsas.
+(g) Cumplir obligaciones legales, contables y tributarias, y atender requerimientos de autoridades.
+(h) Con tu autorización previa, y solo para cada fin que autorices: analítica de uso, recomendaciones personalizadas, ofertas de negocios cercanos, compartir tu nombre y ciudad con marcas aliadas, novedades de StylerNow por correo y promociones por WhatsApp de los negocios donde te atendiste.
+(i) Funciones de inteligencia artificial para los Negocios (por ejemplo, textos sugeridos y análisis de su operación). Estas funciones procesan información del Negocio y pueden usar datos de sus citas y clientes de forma limitada a la tarea solicitada, sin tomar decisiones automatizadas con efectos jurídicos sobre las personas y conforme a las instrucciones de la Superintendencia de Industria y Comercio sobre el tratamiento de datos personales en sistemas de inteligencia artificial (Circular Externa 002 de 2024).
+(j) Utilizar cookies o almacenamiento local necesario para mantener la sesión, recordar el idioma, guardar tu elección de cookies y proteger la Plataforma; la cookie de identificador de dispositivo también se usa para prevenir pruebas gratuitas repetidas.
+(k) Si lo autorizas, activar analítica de visitas y rendimiento de Vercel mediante sus herramientas Analytics y Speed Insights. Si no eliges analítica, esas herramientas no se cargan.
+
+TAWILSTACK no vende tus datos personales.
+
+4. Autorizaciones independientes
+
+Al registrarte marcas la casilla de aceptación de los Términos y de esta política. Con ella aceptas los Términos y Condiciones y nos das tu autorización previa, expresa e informada para tratar tus datos personales para las finalidades necesarias descritas en la sección 3, letras (a) a (g) y (j); sin ese tratamiento no podemos crear tu cuenta ni prestarte el servicio. La casilla no viene marcada y el silencio no se entiende como autorización. Además, antes de confirmar cada reserva autorizas de forma específica que StylerNow y el Negocio elegido usen tu nombre, celular y correo solo para gestionar esa reserva y avisarte sobre ella. Esa aceptación no incluye las finalidades opcionales: la autorización para finalidades opcionales no se presume por aceptar los Términos ni esta política. Las preferencias de analítica, personalización, ofertas cercanas, beneficios de marcas aliadas y comunicaciones de marketing se solicitan por separado, no están activadas por defecto y puedes retirarlas desde el Centro de privacidad o mediante los canales de contacto. Guardamos un historial de cada decisión y su fecha. Los avisos operativos de cuenta y reserva no son publicidad y no dependen de que aceptes marketing.
+
+La elección de cookies se conserva en el navegador. Si has iniciado sesión, la preferencia de analítica también puede registrarse en tu cuenta. Puedes cambiarla en cualquier momento desde el banner o el Centro de privacidad. Las cookies y el almacenamiento estrictamente necesarios para el funcionamiento y la seguridad no se desactivan con la opción de rechazar analítica.
+
+5. Con quién compartimos datos
+
+(a) El Negocio con el que reservas, para prestarte el servicio.
+(b) Proveedores que nos ayudan a operar, solo con los datos necesarios y bajo deber de confidencialidad:
+- Supabase: base de datos, autenticación y almacenamiento de archivos.
+- Vercel: alojamiento de la Plataforma y analítica (esta última, solo con tu autorización).
+- Mercado Pago: procesamiento de pagos y reembolsos.
+- Resend: envío de correos.
+- Google: inicio de sesión con Google, si lo eliges.
+- Cloudflare (Turnstile): verificación contra programas automáticos en el registro, el ingreso y la recuperación de contraseña.
+- Sentry: monitoreo de errores de la aplicación (recibe el error, la pantalla, el navegador y sistema operativo y el identificador interno de tu cuenta; no recibe tu correo, tu nombre ni tus cookies).
+- OpenStreetMap (Nominatim): conversión de las coordenadas de la sede de un Negocio en una dirección; recibe solo esas coordenadas.
+- OpenStreetMap: imágenes del mapa. Tu navegador las descarga directamente, lo que expone tu dirección IP a ese servicio.
+- Proveedores de inteligencia artificial (por ejemplo, OpenRouter y Google Gemini): solo para las funciones de IA de los Negocios.
+- Meta (WhatsApp Business): solo cuando el envío de mensajes por WhatsApp esté habilitado.
+(c) Marcas aliadas: solo tu nombre y ciudad, y solo si lo autorizas.
+(d) Autoridades, cuando la ley lo exija.
+
+Los proveedores tratan la información necesaria para prestar el servicio contratado bajo las condiciones de seguridad y confidencialidad aplicables. Cuando TAWILSTACK encarga a un proveedor el tratamiento de datos por su cuenta, limita el uso a las instrucciones y finalidades acordadas. No vendemos datos personales.
+
+6. Transferencias y transmisiones internacionales
+
+Algunos proveedores pueden tratar información desde otros países, incluido Estados Unidos. Cuando TAWILSTACK comunica datos a otro responsable se realiza una transferencia; cuando un proveedor los procesa por cuenta e instrucciones de TAWILSTACK se realiza una transmisión. Entre esos proveedores hay empresas ubicadas en Estados Unidos y en otros países (por ejemplo, Supabase, Vercel, Sentry, Cloudflare, Resend, Google, Meta y OpenRouter). Aplicamos las condiciones y salvaguardas exigidas por la normativa colombiana para cada operación (Ley 1581 de 2012, artículo 26, y Decreto 1074 de 2015), y la aceptación de esta política incluye tu autorización para las transferencias y transmisiones internacionales necesarias para prestarte el servicio. El uso de mapas de OpenStreetMap puede hacer que tu navegador se conecte directamente a ese servicio y le comunique tu dirección IP.
+
+7. Cuánto tiempo conservamos los datos
+
+Conservamos los datos solo durante el tiempo razonable y necesario para la finalidad informada, la relación con la cuenta y el cumplimiento de obligaciones legales o contractuales; después los suprimimos o anonimizamos, salvo que la ley exija conservarlos. No aplicamos un único plazo a todas las categorías. Por ejemplo: las huellas de límite de intentos por conexión se eliminan en un máximo de dos días; la cookie de identificador de dispositivo de la prueba gratuita dura hasta 730 días; los registros de pagos, reembolsos y movimientos contables se conservan hasta diez (10) años, plazo de conservación de los libros y soportes contables; y las constancias de aceptación y de autorización se conservan mientras exista la relación y por el tiempo necesario para atender reclamaciones o cumplir deberes legales. Para los demás datos técnicos (intentos de ingreso, huellas de anuncios y de la prueba gratuita, errores de monitoreo y auditoría) aplicamos plazos que revisamos periódicamente y que no superan lo necesario para su finalidad. Puedes preguntarnos el plazo que corresponde a un dato concreto escribiendo a equipo@stylernow.com.
+
+Si solicitas eliminar tu cuenta, la solicitud queda sujeta al período de retractación que se informa al iniciarla (actualmente, catorce (14) días). Durante ese plazo puedes cancelarla. Al ejecutarse, se anonimiza la información básica del perfil y se eliminan o desvinculan datos de la cuenta como fotos, favoritos y preferencias, según el flujo aplicable; las reservas futuras se cancelan y se tramita el reembolso del anticipo cuando corresponda. Algunos registros de operaciones, aceptaciones, consentimientos y auditoría pueden conservarse cuando sea necesario para cumplir obligaciones legales, proteger derechos o acreditar actuaciones, con acceso restringido.
+
+Conservamos, sin datos que te identifiquen cuando es posible, los registros que la ley obliga a guardar: pagos, reembolsos, movimientos contables, constancias de aceptación y auditoría. Los registros financieros no se borran ni se modifican: se corrigen con movimientos de ajuste.
+
+8. Tus derechos
+
+Como titular puedes:
+- Conocer, actualizar y rectificar tus datos.
+- Pedir prueba de la autorización que diste.
+- Saber cómo se han usado tus datos.
+- Revocar la autorización o pedir que se eliminen tus datos, cuando no exista un deber legal o contractual de conservarlos.
+- Acceder gratis a tus datos.
+- Presentar quejas ante la Superintendencia de Industria y Comercio por infracciones a la ley de protección de datos, una vez agotado el trámite de consulta o reclamo ante TAWILSTACK.
+
+Puedes ejercer estos derechos tú, tus causahabientes, tu representante o apoderado debidamente acreditado. La revocatoria de la autorización y la supresión no proceden cuando exista un deber legal o contractual de conservar los datos. El ejercicio de tus derechos es gratuito.
+
+Desde la Plataforma puedes:
+- Actualizar tu perfil.
+- Gestionar tus autorizaciones en el Centro de privacidad.
+- Descargar una copia de tus datos.
+- Solicitar la eliminación de tu cuenta.
+
+9. Cómo presentar consultas y reclamos
+
+Escríbenos a equipo@stylernow.com o usa el canal de soporte de la Plataforma. Para ayudarnos a tramitar la solicitud, indica tu nombre, un medio de respuesta, el derecho que deseas ejercer y la información necesaria para localizar los datos. Podemos pedir información razonable para verificar tu identidad; no envíes contraseñas ni datos de tarjetas.
+
+Las consultas se atienden dentro de diez (10) días hábiles desde su recepción. Si no es posible responder en ese plazo, se te informará el motivo y la nueva fecha, que no podrá exceder cinco (5) días hábiles adicionales. Los reclamos se atienden dentro de quince (15) días hábiles; si no es posible, se te informará el motivo y la nueva fecha, que no podrá exceder ocho (8) días hábiles adicionales. Si el reclamo está incompleto, podremos pedir que lo subsanes dentro del término legal. Si no somos competentes para responder, trasladaremos la solicitud a quien corresponda e informaremos el trámite, conforme a la ley.
+
+Si tu solicitud se refiere a datos que registró un Negocio (por ejemplo, sus notas sobre ti), la trasladamos al Negocio y te acompañamos en el trámite.
+
+10. Seguridad
+
+Aplicamos medidas técnicas y organizativas razonables:
+- Conexiones cifradas.
+- Control de acceso por rol y por Negocio, de modo que un Negocio no puede ver datos de otro.
+- Credenciales de pago cifradas.
+- Registros de auditoría.
+- Límites de intentos.
+- Registros financieros que no se pueden alterar.
+
+Ningún sistema es infalible. Si ocurre un incidente que afecte tus datos, actuaremos y te avisaremos según la ley.
+
+TAWILSTACK mantiene un procedimiento de gestión de incidentes de seguridad para evaluarlos, limitar sus efectos, registrarlos y conservar evidencia. Cuando un incidente afecte datos personales, lo reportará a la Superintendencia de Industria y Comercio dentro de los quince (15) días hábiles siguientes a su detección, cuando la normativa lo exija, y te avisará si afecta tus datos. Los Negocios deben reportarnos, dentro de las 24 horas siguientes a conocerlo, cualquier incidente que involucre datos de Clientes obtenidos a través de la Plataforma, escribiendo a equipo@stylernow.com.
+
+11. Menores de edad
+
+La Plataforma está dirigida a mayores de 18 años. Un padre, madre o representante legal puede reservar un servicio para un menor y debe entregar únicamente la información necesaria para esa atención. Si un Negocio recopila datos del menor o información sensible, debe informar la finalidad, obtener las autorizaciones que correspondan y proteger el interés superior del menor. TAWILSTACK no busca crear perfiles ni cuentas de menores.
+
+12. Cambios a esta política
+
+Si cambiamos esta política, publicaremos la versión vigente y su fecha de entrada en vigor. Los cambios de redacción que no alteren las finalidades, los datos tratados, los plazos ni tus derechos se aplican desde su publicación y te los informamos en tu siguiente ingreso. Cuando el cambio sea material, te lo notificaremos y solicitaremos una nueva aceptación antes de que continúes usando las funciones afectadas. Conservamos las versiones anteriores y la constancia de las versiones aceptadas.
+
+13. Vigencia
+
+Versión 3, elaborada el 17 de noviembre de 2026. Rige desde su publicación en la Plataforma, cuya fecha se muestra junto a la versión vigente. Las bases de datos de StylerNow se conservan mientras TAWILSTACK opere StylerNow y por los plazos de la sección 7.
