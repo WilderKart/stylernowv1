@@ -1,6 +1,6 @@
 # Estado de los documentos legales
 
-Actualización: 2026-11-17. TAWILSTACK S.A.S. opera StylerNow, su producto SaaS. El propietario confirmó la razón social, el domicilio (Calle 15B # 20-79, Candelaria, Valle del Cauca), el correo (equipo@stylernow.com) y el teléfono (+57 3183943465). **El NIT sigue en trámite de asignación y así se indica en los textos.** Los textos son un trabajo de ingeniería y redacción apoyado en la investigación de `INVESTIGACION_NORMATIVA.md`; **no sustituyen la revisión de un abogado colombiano.**
+Actualización: 2026-11-17. TAWILSTACK S.A.S. opera StylerNow, su producto SaaS. El propietario confirmó la razón social, el domicilio (Calle 15B # 20-79, Candelaria, Valle del Cauca), el correo (equipo@stylernow.com) y el teléfono (+57 3183943465). **StylerNow es un producto operado por TAWILSTACK S.A.S., y los textos lo dicen expresamente (Política §1; Términos §1).** **El NIT sigue en trámite de asignación y así se indica en los textos.** Los textos son un trabajo de ingeniería y redacción apoyado en la investigación de `INVESTIGACION_NORMATIVA.md`; **no sustituyen la revisión de un abogado colombiano.**
 
 ## 1. Qué hay publicado en producción hoy (medido el 2026-11-17, solo lectura)
 | Tipo | Versiones en `texto_legal` | Observación |
@@ -29,7 +29,7 @@ Nota sobre numeración: los nombres de archivo conservan «v4» (términos) y «
 
 ## 4. Pendientes (no los inventé)
 1. **NIT** de TAWILSTACK S.A.S. (en trámite). Cuando exista, se actualizan ambas fuentes y se regenera la migración; mientras tanto el texto dice «NIT en trámite de asignación».
-2. **Revisión de un abogado colombiano** (ver `AUDITORIA_NORMATIVA_COLOMBIA.md` §3: puntos que no se verificaron literalmente).
+2. **Revisión de un abogado colombiano** (ver `AUDITORIA_NORMATIVA_COLOMBIA.md` §3). Los arts. 8, 12, 14, 15, 16, 17 y 26 de la Ley 1581 se verificaron literalmente el 2026-11-17; faltan los de la Ley 1480 y la lista de países con nivel adecuado.
 3. **Confirmar con el propietario**: el área de atención de datos es «el equipo de TAWILSTACK» con el correo y teléfono informados; el plazo de 15 días hábiles para peticiones, quejas y reclamos generales; los plazos de retención de la sección 7 de la política.
 4. **Interfaz** (próximo cambio de código): rótulo de la casilla, valorar dos casillas, aviso de privacidad para visitantes y control de franjas Ley 2300 en el servidor (`TEXTOS_UI_CONSENTIMIENTO.md`).
 5. **Política de retención** (`POLITICA_RETENCION_BORRADOR.md`) y procesos de borrado: hoy varias tablas técnicas no tienen borrado automático; la política pública promete solo lo que existe.

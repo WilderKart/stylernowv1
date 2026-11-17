@@ -18,10 +18,10 @@ Leyenda: ✅ cubierto en el texto y coherente con el código · ◑ cubierto en 
 | 6 | Datos sensibles: carácter facultativo; no se condiciona ninguna actividad | Ley 1581 arts. 5, 6; D. 1074 art. 2.2.2.25.2.3 | Política §2 (párrafo de datos sensibles) | ✅ El negocio decide ese tratamiento como responsable independiente |
 | 7 | Menores de edad: tratamiento prohibido salvo interés superior; representante | Ley 1581 art. 7; D. 1074 art. 2.2.2.25.2.9 | Política §2 y §11; Términos §4 | ✅ Plataforma para mayores de 18; reserva para un menor por su representante |
 | 8 | Derechos del titular (conocer, actualizar, rectificar, prueba de la autorización, uso, revocar/suprimir, acceso gratuito, queja ante la SIC) | Ley 1581 art. 8 | Política §8 | ✅ Incluye quién puede ejercerlos, gratuidad, límite de la supresión (deber legal o contractual) y el requisito previo de reclamo ante el responsable antes de la SIC* |
-| 9 | Procedimiento de consultas y reclamos con plazos | Ley 1581 arts. 14 (consultas) y 15 (reclamos) | Política §9: consultas 10 días hábiles (+5); reclamos 15 días hábiles (+8) | ◑ El art. 15 se leyó; **el art. 14 no se verificó literalmente** (la investigación §1) |
+| 9 | Procedimiento de consultas y reclamos con plazos | Ley 1581 arts. 14 (consultas) y 15 (reclamos) | Política §9: consultas 10 días hábiles (+5); reclamos 15 días hábiles (+8) | ✅ **Verificados literalmente el 2026-11-17** en el Gestor Normativo de Función Pública: art. 14 (10 días hábiles + 5) y art. 15 (reclamo 15 días hábiles + 8; subsanación a los 5 días; desistimiento a los 2 meses; leyenda «reclamo en trámite» en 2 días hábiles; traslado en 2 días hábiles), recogidos en la política §9 |
 | 10 | Medidas de seguridad | Ley 1581 art. 4 lit. g, art. 17 lit. d | Política §10 | ✅ |
 | 11 | Aviso de incidentes a la SIC | Ley 1581 art. 17 lit. n; Circ. Externa SIC 002 de 2015 | Política §10: 15 días hábiles desde la detección, cuando la normativa lo exija; los negocios reportan en 24 horas | ✅ Plazo de 15 días hábiles tomado de la circular citada; no verificada su vigencia frente a un proyecto de actualización (investigación §6.2) |
-| 12 | Transferencias y transmisiones internacionales | Ley 1581 art. 26; D. 1074 arts. 2.2.2.25.5.1–5.2 | Política §5 y §6 (lista de proveedores y países; autorización incluida en la aceptación) | ◑ **El art. 26 no se leyó literalmente.** Hay que confirmar con abogado el fundamento (nivel adecuado de Estados Unidos o autorización expresa) y que existan contratos de transmisión con cada proveedor |
+| 12 | Transferencias y transmisiones internacionales | Ley 1581 art. 26; D. 1074 arts. 2.2.2.25.5.1–5.2 | Política §5 y §6 (lista de proveedores y países; autorización incluida en la aceptación) | ◑ **Art. 26 leído el 2026-11-17:** prohíbe transferir a países sin nivel adecuado, salvo, entre otras, autorización expresa e inequívoca del titular y transferencias necesarias para ejecutar un contrato con el titular; el texto invoca ambas. Falta que un abogado confirme si Estados Unidos figura como país adecuado y que existan contratos de transmisión con cada proveedor |
 | 13 | Limitación temporal y procedimientos de retención documentados | D. 1074 art. 2.2.2.25.2.8 | Política §7 (plazos que ya se aplican; resto, «revisados periódicamente») | ◑ Varias tablas técnicas no tienen borrado automático (dictamen §2). La política **no promete** lo que no existe; falta cerrar `POLITICA_RETENCION_BORRADOR.md` y su automatización |
 | 14 | Fecha de entrada en vigencia y período de vigencia | D. 1074 art. 2.2.2.25.3.1 | Política §13 («Versión 3, elaborada el 17 de noviembre de 2026… rige desde su publicación…») | ✅ |
 | 15 | Aviso de privacidad cuando no sea posible entregar la política | D. 1074 arts. 2.2.2.25.3.2–3.4 | No hay aviso para visitantes sin cuenta | ❌ Mejora de interfaz (`TEXTOS_UI_CONSENTIMIENTO.md` §2, punto 3) |
@@ -32,7 +32,7 @@ Leyenda: ✅ cubierto en el texto y coherente con el código · ◑ cubierto en 
 | 20 | Prohibido «interés legítimo» como base | Ley 1581 art. 10 (no existe esa base) | Ninguno de los textos canónicos lo usa; el borrador paralelo que sí lo usaba quedó marcado como no vigente | ✅ |
 | 21 | Roles responsable / encargado | Ley 1581 arts. 3, 17, 18 | Política §1; Términos cláusula 9A | ✅ El negocio es responsable independiente de los datos que recibe; TAWILSTACK es encargado de lo que el negocio carga |
 
-\* El requisito previo de agotar el reclamo ante el responsable antes de la queja ante la SIC es el art. 16 de la Ley 1581; no se leyó literalmente en la investigación.
+\* Art. 16 de la Ley 1581, verificado el 2026-11-17: la queja ante la SIC solo procede «una vez haya agotado el trámite de consulta o reclamo» ante el responsable o encargado. Art. 8: el sitio muestra los literales a) a f) (conocer/actualizar/rectificar; prueba de la autorización; ser informado del uso; quejas ante la SIC; revocar y suprimir; acceso gratuito). Art. 17: literales a) a o), entre ellos b) copia de la autorización, k) **manual interno de políticas y procedimientos** (pendiente, fila 17) y n) informar a la autoridad las violaciones de seguridad.
 
 ## 2. Consumo, comercio electrónico y comunicaciones
 
@@ -47,7 +47,7 @@ Leyenda: ✅ cubierto en el texto y coherente con el código · ◑ cubierto en 
 | 28 | Mensajes de datos: validez y prueba | Ley 527 de 1999, arts. 5–13 | Términos §21 | ✅ |
 
 ## 3. Qué no pude verificar y por qué importa
-1. Texto literal de los artículos 14 y 26 de la Ley 1581; el art. 16 (queja ante la SIC) y los arts. 42, 43 y 47 de la Ley 1480.
+1. Los arts. 42, 43 y 47 de la Ley 1480 (los arts. 8, 12, 14, 15, 16, 17 y 26 de la Ley 1581 se verificaron el 2026-11-17; la página de la SIC `manejo-de-informacion-personal` trata solo el hábeas data financiero de la Ley 1266 de 2008, que no aplica a StylerNow, y no cubre RNBD, aviso de privacidad ni transferencias).
 2. Si Estados Unidos figura como país de nivel adecuado en la lista vigente de la SIC y si hay contratos de transmisión firmados con Supabase, Vercel, Sentry, Cloudflare, Resend, Google, Meta y OpenRouter.
 3. Si el borrador de actualización del Título V de la Circular Única cambia el plazo de reporte de incidentes.
 4. La retención real en días de los registros de Supabase por plan y la configuración de la organización en Sentry (el repositorio afirma que no guarda IP, no verificable desde el código).
@@ -74,3 +74,10 @@ Leyenda: ✅ cubierto en el texto y coherente con el código · ◑ cubierto en 
 4. Política de retención aprobada y automatizada; manual interno de protección de datos.
 5. Confirmar RNBD y contratos de transmisión con proveedores.
 6. Aplicar la migración 149 solo cuando se decida publicar (reacepción de todos los usuarios).
+
+## 6. Identidad operadora (cambio del 2026-11-17)
+Ambos textos dejan claro que **StylerNow es un producto operado por TAWILSTACK S.A.S.** y no una persona jurídica distinta: la Política §1 y los Términos §1 establecen que toda referencia a StylerNow como parte (derechos, obligaciones, cobros, responsabilidad, tratamiento de datos) se entiende hecha a TAWILSTACK S.A.S., que responde ante los usuarios y ante las autoridades.
+
+## 7. Fuentes consultadas el 2026-11-17
+- Ley 1581 de 2012, Gestor Normativo de Función Pública: <https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=49981>
+- SIC, «Manejo de información personal» (Ley 1266 de 2008): <https://www.sic.gov.co/manejo-de-informacion-personal>. Canal de PQRSF de la SIC: <https://servicioslinea.sic.gov.co/servilinea/pqrsf/>
