@@ -43,7 +43,7 @@ function cargarApi(): Promise<ApiTurnstile> {
 export type ControlTurnstile = { reiniciar: () => void };
 
 /** Devuelve el token vigente (o null) y un control para pedir uno nuevo tras cada envío. */
-export const Turnstile = React.forwardRef<ControlTurnstile, { accion: "registro" | "ingreso" | "recuperar"; onToken: (t: string | null) => void }>(
+export const Turnstile = React.forwardRef<ControlTurnstile, { accion: "registro" | "ingreso" | "recuperar" | "solicitud" | "seguimiento"; onToken: (t: string | null) => void }>(
   function Turnstile({ accion, onToken }, ref) {
     const caja = React.useRef<HTMLDivElement>(null);
     const id = React.useRef<string | null>(null);

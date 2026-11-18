@@ -26,6 +26,8 @@ export const RUTAS: RutaRegistro[] = [
   { path: "/mantenimiento", publica: true },
   // Landing B2B (W01): precios por país, cupos fundador y alta del negocio. Pública.
   { path: "/para-negocios", publica: true },
+  // Centro de Cumplimiento y PQRS: radicación y seguimiento SIN cuenta (la persona que reclama no tiene por qué tenerla).
+  { path: "/solicitudes", publica: true },
   // El usuario llega aquí SIN sesión todavía (magic link, recuperación de
   // contraseña, callback de Google) — esta ruta es justamente quien la crea.
   // Encontrado como regresión real durante ADR-015 Fase D: sin esta entrada,

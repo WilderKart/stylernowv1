@@ -46,6 +46,7 @@ const GRUPOS: { titulo?: string; items: Item[] }[] = [
       { href: "/admin/negocios", etiqueta: "Negocios", icono: Store, contador: "negociosPendientes" },
       { href: "/admin/usuarios", etiqueta: "Usuarios", icono: Users },
       { href: "/admin/soporte", etiqueta: "Soporte", icono: LifeBuoy, contador: "ticketsAbiertos" },
+      { href: "/admin/centro-cumplimiento", etiqueta: "Cumplimiento y PQRS", icono: Scale },
       { href: "/admin/moderacion", etiqueta: "Moderación", icono: ShieldAlert, contador: "resenasReportadas" },
     ],
   },
