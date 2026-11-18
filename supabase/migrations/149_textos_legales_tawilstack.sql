@@ -4,7 +4,7 @@
 -- cambio_material = true activa el flujo existente de reaceptación.
 -- Estado de producción medido el 2026-11-17: TERMINOS hasta la versión 2 (texto corto) y POLITICA_DATOS hasta la versión 2 (con «NIT xxxxx» y dirección antigua).
 -- La migración 115 (Términos de 18 000 caracteres) NO llegó a insertar su versión 3 en producción; por eso aquí las versiones nuevas son max+1 (TERMINOS 3, POLITICA_DATOS 3).
--- Se aborta (sin cambios) si el estado de las versiones no es el esperado o si los textos conservan marcadores. El NIT permanece «en trámite de asignación» a propósito.
+-- Se aborta (sin cambios) si el estado de las versiones no es el esperado o si los textos conservan marcadores. El NIT 902127652-0 fue confirmado por el propietario el 2026-11-18.
 
 begin;
 
@@ -14,7 +14,7 @@ declare
 
 1. Quiénes somos y aceptación
 
-TAWILSTACK S.A.S., con NIT en trámite de asignación, domicilio en Calle 15B # 20-79, Candelaria, Valle del Cauca, Colombia, correo electrónico equipo@stylernow.com y teléfono +57 3183943465, es la sociedad que opera StylerNow, su producto de software como servicio y plataforma digital ("StylerNow" o la "Plataforma"). En estos términos, "TAWILSTACK" o "nosotros" es TAWILSTACK S.A.S. StylerNow no es una persona jurídica distinta: cuando estos términos hablan de StylerNow como parte (sus derechos, obligaciones, cobros, responsabilidad o tratamiento de datos), se refieren a TAWILSTACK S.A.S., que es la contraparte de los Usuarios. Estos términos regulan el uso del sitio web, la aplicación y los servicios relacionados.
+TAWILSTACK S.A.S., con NIT 902127652-0, domicilio en Calle 15B # 20-79, Candelaria, Valle del Cauca, Colombia, correo electrónico equipo@stylernow.com y teléfono +57 3183943465, es la sociedad que opera StylerNow, su producto de software como servicio y plataforma digital ("StylerNow" o la "Plataforma"). En estos términos, "TAWILSTACK" o "nosotros" es TAWILSTACK S.A.S. StylerNow no es una persona jurídica distinta: cuando estos términos hablan de StylerNow como parte (sus derechos, obligaciones, cobros, responsabilidad o tratamiento de datos), se refieren a TAWILSTACK S.A.S., que es la contraparte de los Usuarios. Estos términos regulan el uso del sitio web, la aplicación y los servicios relacionados.
 
 Al crear una cuenta y marcar la casilla de aceptación, aceptas estos términos sin modificaciones y la Política de Tratamiento de Datos Personales; con esa casilla nos autorizas a tratar tus datos personales para las finalidades necesarias que la política describe (sección 3, letras a a g y j). Esa aceptación no incluye las autorizaciones opcionales, como las de marketing, que se piden por separado. Si no estás de acuerdo, no debes usar la Plataforma. Te recomendamos guardar una copia.
 
@@ -214,7 +214,7 @@ $terminos$;
 
 1. Responsable del tratamiento
 
-TAWILSTACK S.A.S., con NIT en trámite de asignación, domicilio en Calle 15B # 20-79, Candelaria, Valle del Cauca, Colombia, correo electrónico equipo@stylernow.com y teléfono +57 3183943465, opera StylerNow, su producto de software como servicio y plataforma digital. En esta política, TAWILSTACK S.A.S. se denomina “TAWILSTACK” y StylerNow se refiere al producto. StylerNow no es una persona jurídica distinta: es un producto de TAWILSTACK, y todo tratamiento de datos que esta política atribuya a StylerNow lo realiza TAWILSTACK, que responde ante los titulares y ante las autoridades.
+TAWILSTACK S.A.S., con NIT 902127652-0, domicilio en Calle 15B # 20-79, Candelaria, Valle del Cauca, Colombia, correo electrónico equipo@stylernow.com y teléfono +57 3183943465, opera StylerNow, su producto de software como servicio y plataforma digital. En esta política, TAWILSTACK S.A.S. se denomina “TAWILSTACK” y StylerNow se refiere al producto. StylerNow no es una persona jurídica distinta: es un producto de TAWILSTACK, y todo tratamiento de datos que esta política atribuya a StylerNow lo realiza TAWILSTACK, que responde ante los titulares y ante las autoridades.
 
 TAWILSTACK es responsable del tratamiento para los fines y medios que determina al operar StylerNow. Cuando un Negocio utiliza StylerNow para cargar y gestionar información de sus clientes bajo sus instrucciones, el Negocio determina esos fines y actúa como responsable, y TAWILSTACK trata esos datos por cuenta del Negocio como encargado. Para la información de reservas que se comparte entre la Plataforma y un Negocio, cada parte tratará los datos para las finalidades que determine y cumplirá las obligaciones que le correspondan según su rol efectivo.
 
@@ -368,8 +368,8 @@ begin
   end if;
   if position('TAWILSTACK S.A.S.' in v_terminos) = 0
     or position('TAWILSTACK S.A.S.' in v_politica) = 0
-    or position('NIT en trámite de asignación' in v_terminos) = 0
-    or position('NIT en trámite de asignación' in v_politica) = 0
+    or position('NIT 902127652-0' in v_terminos) = 0
+    or position('NIT 902127652-0' in v_politica) = 0
     or position('Calle 15B # 20-79' in v_terminos) = 0
     or position('Calle 15B # 20-79' in v_politica) = 0 then
     raise exception 'IDENTIFICACION_TAWILSTACK_INCOMPLETA';

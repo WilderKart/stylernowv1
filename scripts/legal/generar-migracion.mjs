@@ -16,7 +16,7 @@ const sql = `-- 149 · Publica nuevas versiones de los Términos y Condiciones y
 -- cambio_material = true activa el flujo existente de reaceptación.
 -- Estado de producción medido el 2026-11-17: TERMINOS hasta la versión 2 (texto corto) y POLITICA_DATOS hasta la versión 2 (con «NIT xxxxx» y dirección antigua).
 -- La migración 115 (Términos de 18 000 caracteres) NO llegó a insertar su versión 3 en producción; por eso aquí las versiones nuevas son max+1 (TERMINOS 3, POLITICA_DATOS 3).
--- Se aborta (sin cambios) si el estado de las versiones no es el esperado o si los textos conservan marcadores. El NIT permanece «en trámite de asignación» a propósito.
+-- Se aborta (sin cambios) si el estado de las versiones no es el esperado o si los textos conservan marcadores. El NIT 902127652-0 fue confirmado por el propietario el 2026-11-18.
 
 begin;
 
@@ -44,8 +44,8 @@ begin
   end if;
   if position('TAWILSTACK S.A.S.' in v_terminos) = 0
     or position('TAWILSTACK S.A.S.' in v_politica) = 0
-    or position('NIT en trámite de asignación' in v_terminos) = 0
-    or position('NIT en trámite de asignación' in v_politica) = 0
+    or position('NIT 902127652-0' in v_terminos) = 0
+    or position('NIT 902127652-0' in v_politica) = 0
     or position('Calle 15B # 20-79' in v_terminos) = 0
     or position('Calle 15B # 20-79' in v_politica) = 0 then
     raise exception 'IDENTIFICACION_TAWILSTACK_INCOMPLETA';

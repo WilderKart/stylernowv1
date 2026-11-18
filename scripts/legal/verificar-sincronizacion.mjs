@@ -35,8 +35,8 @@ for (const [tag, fuente, nombre] of pares) {
     for (let i = 0; i < Math.max(A.length, B.length); i++) if (A[i] !== B[i]) { console.log("  primera diferencia en la línea", i + 1); break; }
   }
 }
-const requeridos = ["TAWILSTACK S.A.S.", "NIT en trámite de asignación", "Calle 15B # 20-79", "Candelaria, Valle del Cauca", "equipo@stylernow.com", "+57 3183943465"];
-const prohibidos = [/xxxxx/i, /Carrera 1A/i, /\[(PENDIENTE|COMPLETAR|DECISI[ÓO]N)/i, /soporte@stylernow/i, /NIT\s*\d/i];
+const requeridos = ["TAWILSTACK S.A.S.", "NIT 902127652-0", "Calle 15B # 20-79", "Candelaria, Valle del Cauca", "equipo@stylernow.com", "+57 3183943465"];
+const prohibidos = [/xxxxx/i, /Carrera 1A/i, /\[(PENDIENTE|COMPLETAR|DECISI[ÓO]N)/i, /soporte@stylernow/i, /en trámite de asignación/i];
 for (const tag of ["terminos", "politica"]) {
   for (const r of requeridos) if (!textos[tag].includes(r)) falla(`${tag}: falta «${r}»`);
   for (const re of prohibidos) if (re.test(textos[tag])) falla(`${tag}: contiene un dato prohibido (${re})`);
