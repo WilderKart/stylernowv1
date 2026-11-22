@@ -1,3 +1,4 @@
+import { paisesHabilitados } from "./paises-habilitados";
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { MonedaCodigo } from "./moneda";
@@ -39,13 +40,15 @@ export interface CatalogoPais {
   precioMiMarca: number | null;
 }
 
+/* ¿Se ofrece este país? Solo los habilitados para el lanzamiento (ver paises-habilitados.ts). */
 export const PAISES_ACTIVOS_DEFECTO = "CO";
 
 /** Países activos (para selectores de país en registro y Super Admin). */
 export async function listarPaisesActivos() {
   const supabase = await createClient();
   const { data } = await supabase.from("pais").select("codigo, nombre, moneda, locale").eq("activo", true).order("nombre");
-  return data ?? [];
+  const habilitados = paisesHabilitados();
+  return (data ?? []).filter((p) => habilitados.includes(p.codigo));
 }
 
 /** Planes y precios de un país, leídos de la BD (plan × plan_precio × plan_caracteristica). */

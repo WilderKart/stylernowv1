@@ -10,13 +10,16 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { guardarIdiomaRegionAction } from "../actions";
 import { useT } from "@/lib/i18n/proveedor";
+import { paisEstaHabilitado } from "@/lib/planes/paises-habilitados";
 
-const PAISES = [
+const TODOS_LOS_PAISES = [
   { codigo: "CO", nombre: "aj.pais_co", formato: "COP · $ 45.000 · 15:30" },
   { codigo: "US", nombre: "aj.pais_us", formato: "USD · $45.00 · 3:30 PM" },
   { codigo: "MX", nombre: "aj.pais_mx", formato: "MXN · $450.00 · 15:30" },
   { codigo: "ES", nombre: "aj.pais_es", formato: "EUR · 45,00 € · 15:30" },
 ] as const satisfies readonly { codigo: Pais; nombre: string; formato: string }[];
+// Solo se ofrecen los países habilitados para el lanzamiento (Colombia); el resto sigue en la arquitectura.
+const PAISES = TODOS_LOS_PAISES.filter((p) => paisEstaHabilitado(p.codigo));
 
 const IDIOMAS: { codigo: Idioma; nombre: string }[] = [
   { codigo: "es", nombre: "Español" },

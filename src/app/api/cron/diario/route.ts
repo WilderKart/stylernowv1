@@ -1,3 +1,4 @@
+import { procesarNotificacionesCumplimiento } from "@/lib/cumplimiento/notificaciones";
 import { procesarOutbox } from "@/lib/notificaciones/worker";
 import { procesarReembolsosPendientes } from "@/lib/pagos/reembolsos";
 import { reconciliarPagosPendientes } from "@/lib/pagos/sincronizar";
@@ -49,6 +50,17 @@ export async function GET(request: NextRequest) {
 
   const { data: roiSnapshot, error: e4 } = await admin.rpc("generar_roi_snapshot_mensual");
   resultado.roi_ia_snapshot = e4 ? { error: e4.message } : roiSnapshot;
+
+  // Centro de Cumplimiento y PQRS: motor de SLA (prioridades, alertas, escalamiento, desistimiento) y despacho de alertas.
+  // Idempotente: cada alerta tiene clave única. Con un cron diario las alertas de horas dependen además de que el SuperAdmin
+  // abra el Centro (que también evalúa) o de pasar a un cron más frecuente (plan Pro de Vercel).
+  try {
+    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("cumplimiento_evaluar_sla");
+    resultado.cumplimiento_sla = error ? { error: error.message } : data;
+    resultado.cumplimiento_envios = await procesarNotificacionesCumplimiento(50);
+  } catch (e) {
+    resultado.cumplimiento = { error: e instanceof Error ? e.message : "error inesperado" };
+  }
 
   try {
     resultado.suscripciones = await ejecutarCicloSuscripciones();

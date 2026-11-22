@@ -14,7 +14,7 @@ import { ipDelLlamador } from "@/lib/rate-limit";
  *  · en local / vista previa se omite, para no bloquear el desarrollo.
  * Cualquier error de red con Cloudflare también falla cerrado.
  */
-export type AccionTurnstile = "registro" | "ingreso" | "recuperar";
+export type AccionTurnstile = "registro" | "ingreso" | "recuperar" | "solicitud" | "seguimiento";
 
 const URL_VERIFICAR = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 

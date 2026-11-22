@@ -7,11 +7,13 @@ Fuente de verdad ejecutable: el archivo `.ts`, nunca este documento.
 |---|---|---|---|
 | `/` | Sí | — | proxy.ts |
 | `/login` | Sí | — | proxy.ts |
+| `/registro` | Sí | — | proxy.ts |
 | `/legal` | Sí | — | proxy.ts |
 | `/negocio` | Sí | — | proxy.ts |
 | `/onboarding` | Sí | — | proxy.ts |
 | `/mantenimiento` | Sí | — | proxy.ts |
 | `/para-negocios` | Sí | — | proxy.ts |
+| `/solicitudes` | Sí | — | proxy.ts |
 | `/auth/callback` | Sí | — | proxy.ts |
 | `/perfil` | No | cliente, staff, guardian, barberia | proxy.ts |
 | `/favoritos` | No | cliente | proxy.ts |
@@ -37,6 +39,7 @@ Fuente de verdad ejecutable: el archivo `.ts`, nunca este documento.
 | `/panel/sedes` | No | barberia, guardian | proxy.ts |
 | `/panel/staff` | No | barberia, guardian | proxy.ts |
 | `/panel/servicios` | No | barberia, guardian | proxy.ts |
+| `/panel/promociones` | No | barberia | proxy.ts |
 | `/panel/agenda` | No | barberia, guardian | proxy.ts |
 | `/panel/crm` | No | barberia, guardian | proxy.ts |
 | `/panel/pos` | No | barberia, guardian | proxy.ts |
@@ -51,5 +54,8 @@ Fuente de verdad ejecutable: el archivo `.ts`, nunca este documento.
 | `/panel/lealtad` | No | barberia, guardian | proxy.ts |
 | `/panel/ia` | No | barberia, guardian | proxy.ts |
 | `/panel/whatsapp` | No | barberia | proxy.ts |
+| `/panel/politica` | No | barberia | proxy.ts |
+| `/panel/cobros` | No | barberia | proxy.ts |
+| `/panel/libro` | No | barberia | proxy.ts |
 | `/staff` | No | staff, guardian | proxy.ts |
 | `/admin` | No | supersu | proxy.ts |
