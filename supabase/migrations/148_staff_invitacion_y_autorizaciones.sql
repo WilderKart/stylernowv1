@@ -1,4 +1,4 @@
--- 147 — Fase 3: invitación de Staff, autorizaciones del profesional y visibilidad pública.
+-- 148 — Fase 3: invitación de Staff, autorizaciones del profesional y visibilidad pública.
 --
 -- Decisiones del propietario (2026-11-16): A un solo vínculo activo; C invitación con un botón sin
 -- revelar públicamente si un correo existe; D transición de 30 días para el Staff existente, sin

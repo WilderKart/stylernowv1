@@ -95,7 +95,7 @@ export async function registrarCuenta(datos: {
   if (!limite.ok) return { ok: false, error: limite.error };
 
   const supabase = await createClient();
-  // Versiones exactas mostradas al registrarse. La aceptación se guarda en el servidor (migración 145)
+  // Versiones exactas mostradas al registrarse. La aceptación se guarda en el servidor (migración 146)
   // con la hora del servidor; en los metadatos solo quedan los ids, para enrutar tras verificar.
   const versiones = await idsTextosVigentes(supabase);
   // El destino lo decide el servidor a partir del tipo validado (no se confía en el `next` del navegador).

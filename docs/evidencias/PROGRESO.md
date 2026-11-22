@@ -13,11 +13,11 @@ Base de datos: Supabase local (docker `supabase_db_stylernow`). Nada en producci
 - F: sin IP ni navegador. G: sin borrado en cascada de evidencias; política de conservación = borrador pendiente.
 
 ## Fases
-- [x] Fase 1: migración 145 (aceptaciones solo por función, hora del servidor, textos inmutables con huella).
-- [x] Fase 2: migración 146 (repositorio `evidencia_legal` de solo anexión con cadena SHA-256; 103 evidencias previas importadas; manipulación detectable).
-- [x] Fase 3: migración 147 + UI (invitación pública enmascarada, registro/ingreso con invitación, aceptación transaccional con autorización de tratamiento, perfil Staff con autorizaciones, lista de Staff del panel con estado, adaptador Cloudinary).
-- [x] Fase 4: migración 148 + `/admin/evidencias` (búsqueda, detalle con texto exacto y huella, expediente descargable con motivo, verificación de cadena; cada consulta auditada).
-- [x] Fase 5: `tests/sql/evidencias_145_148.sql` (≈110 comprobaciones, 10 actores) + suites previas + vitest/tsc/eslint. Resultados en `INFORME_FINAL.md`.
+- [x] Fase 1: migración 146 (aceptaciones solo por función, hora del servidor, textos inmutables con huella).
+- [x] Fase 2: migración 147 (repositorio `evidencia_legal` de solo anexión con cadena SHA-256; 103 evidencias previas importadas; manipulación detectable).
+- [x] Fase 3: migración 148 + UI (invitación pública enmascarada, registro/ingreso con invitación, aceptación transaccional con autorización de tratamiento, perfil Staff con autorizaciones, lista de Staff del panel con estado, adaptador Cloudinary).
+- [x] Fase 4: migración 149 + `/admin/evidencias` (búsqueda, detalle con texto exacto y huella, expediente descargable con motivo, verificación de cadena; cada consulta auditada).
+- [x] Fase 5: `tests/sql/evidencias_145_149.sql` (≈110 comprobaciones, 10 actores) + suites previas + vitest/tsc/eslint. Resultados en `INFORME_FINAL.md`.
 
 ## Notas / contradicciones encontradas (requieren decisión del propietario)
 1. Aceptación TÁCITA: al ingresar, los cambios NO materiales de Términos/Política se registran sin acción del usuario

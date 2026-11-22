@@ -8,7 +8,7 @@ import { ACCIONES, CATEGORIAS, POR_PAGINA } from "./constantes";
 
 /**
  * CENTRO DE EVIDENCIAS LEGALES (SuperSU, Fase 4). Cero confianza: aquí se exige SuperSU y las
- * funciones de la migración 148 lo vuelven a exigir en la base, recalculan las huellas y dejan cada
+ * funciones de la migración 149 lo vuelven a exigir en la base, recalculan las huellas y dejan cada
  * consulta y exportación en `evento_auditoria`. Los filtros del navegador se validan con zod.
  */
 

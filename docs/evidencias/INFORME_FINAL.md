@@ -17,10 +17,10 @@ Esperando tu aprobación antes de cualquier intervención en producción.
 ## 2. Archivos
 
 **Migraciones nuevas (aplicadas solo en la base local):**
-- `145_aceptacion_legal_solo_servidor.sql`
-- `146_repositorio_evidencias_legales.sql`
-- `147_staff_invitacion_y_autorizaciones.sql`
-- `148_centro_evidencias_supersu.sql`
+- `146_aceptacion_legal_solo_servidor.sql`
+- `147_repositorio_evidencias_legales.sql`
+- `148_staff_invitacion_y_autorizaciones.sql`
+- `149_centro_evidencias_supersu.sql`
 
 Orden obligatorio: 145 → 146 → 147 → 148 (147 usa el repositorio de 146; 148 lo consulta). No hay `down`: la reversión es restaurar un respaldo (producción hoy no tiene respaldo propio documentado; hacerlo antes de aplicar).
 
@@ -29,7 +29,7 @@ Orden obligatorio: 145 → 146 → 147 → 148 (147 usa el repositorio de 146; 1
 - Staff: `src/app/staff/perfil/{page,actions,vista-perfil-staff}.tsx|ts`, `src/app/panel/staff/{page,lista-staff}.tsx`.
 - CRM: `src/app/admin/evidencias/{page,actions,constantes,vista-evidencias}.ts(x)`, `src/app/admin/barra-lateral.tsx`.
 - Cloudinary: `src/lib/almacenamiento/cloudinary.ts`, `next.config.ts` y `src/proxy.ts` (solo `img-src` de la CSP; con nota).
-- Pruebas: `tests/sql/evidencias_145_148.sql`, `tests/cloudinary.test.ts`.
+- Pruebas: `tests/sql/evidencias_145_149.sql`, `tests/cloudinary.test.ts`.
 - Documentos: `docs/evidencias/{PROGRESO,CLOUDINARY,INFORME_FINAL}.md`.
 - `webhook-mercadopago.ts` no se tocó.
 
@@ -65,7 +65,7 @@ Nadie escribe directo en estas tres tablas por la API. La excepción vigente es 
 ## 4. Resultados reproducibles (todos contra la base local)
 
 ```
-docker exec -i supabase_db_stylernow psql -U postgres -d postgres -v ON_ERROR_STOP=1 -q < tests/sql/evidencias_145_148.sql
+docker exec -i supabase_db_stylernow psql -U postgres -d postgres -v ON_ERROR_STOP=1 -q < tests/sql/evidencias_145_149.sql
 ```
 Resultado: `OK: evidencias_145_148 — todas las pruebas pasaron` (113 comprobaciones; 10 actores: anon, cliente, dueño A/B, staff A/B, invitados con correo verificado/sin verificar/expirado, intruso, SuperSU). Cubre: forja y borrado de aceptaciones, textos inmutables, RLS por titular y por negocio, tácita solo en cambios no materiales, borradores fuera del registro normal, invitación (correo ajeno, sin verificar, expirada, inexistente, repetida, tope del plan, un solo vínculo), publicación sin tratamiento / sin foto / revocada / re-autorizada, fin de la transición, manipulación detectada, SuperSU y auditoría de cada consulta, y borrado de cuenta sin perder evidencias.
 
@@ -90,7 +90,7 @@ Detalle en `PROGRESO.md` §Notas. Las que bloquean o cambian el despliegue:
 ## 6. Para pasar a producción (solo con tu aprobación)
 
 1. Respaldo de la base antes de nada (no hay uno propio documentado).
-2. Aplicar 145 → 146 → 147 → 148 en ese orden (primero la base, luego el código) y correr la suite `evidencias_145_148.sql` y `seguridad_regresion.sql` contra una copia o rama de base, no contra producción en frío.
+2. Aplicar 145 → 146 → 147 → 148 en ese orden (primero la base, luego el código) y correr la suite `evidencias_145_149.sql` y `seguridad_regresion.sql` contra una copia o rama de base, no contra producción en frío.
 3. En producción la transición de 30 días empieza al aplicar 147 (se fija con `now()`) y se notifica al Staff existente; conviene aplicarla justo antes de desplegar el código.
 4. Cloudinary: no hacer nada hasta que decidas (variables de entorno, prueba real, procedimiento de `CLOUDINARY.md`).
 5. Nota de seguridad: `src/proxy.ts` cambió solo en `img-src` (Cloudinary). Revisar antes de mezclar con otras ramas que lo toquen.

@@ -1,11 +1,11 @@
 import type { createClient } from "@/lib/supabase/server";
 
 type Supa = Awaited<ReturnType<typeof createClient>>;
-/** Origen de la aceptación (columna `aceptacion_legal.origen`, migración 145). */
+/** Origen de la aceptación (columna `aceptacion_legal.origen`, migración 146). */
 export type OrigenAceptacion = "registro" | "perfil" | "legal_aceptar" | "ingreso";
 
 /**
- * Única vía de escritura (migración 145): la función `registrar_aceptacion_legal` toma la identidad
+ * Única vía de escritura (migración 146): la función `registrar_aceptacion_legal` toma la identidad
  * de la sesión y la hora del servidor, y solo admite versiones VIGENTES. El navegador ya no puede
  * insertar, cambiar ni borrar filas de `aceptacion_legal`.
  */
@@ -150,7 +150,7 @@ export async function faltaAceptarVigentes(
 }
 
 /**
- * Registro con contraseña: desde la migración 145 la aceptación se guarda EN EL SERVIDOR en el mismo
+ * Registro con contraseña: desde la migración 146 la aceptación se guarda EN EL SERVIDOR en el mismo
  * instante del registro (`registrar_aceptacion_legal_registro`, con la hora del servidor), no al
  * verificar el correo ni con la hora de los metadatos de Auth (que el usuario puede editar).
  * Esta función solo dice si la cuenta vino del registro con casilla (para enrutar) y, para cuentas

@@ -1,4 +1,4 @@
--- 145 — Fase 1 del Centro de Evidencias: cerrar las tres debilidades de la aceptación legal.
+-- 146 — Fase 1 del Centro de Evidencias: cerrar las tres debilidades de la aceptación legal.
 --
 --  1. El usuario ya NO puede crear, editar ni borrar sus filas de `aceptacion_legal` (antes la
 --     política `aceptacion_legal_propia` era FOR ALL: podía borrar su prueba o cambiar la fecha).

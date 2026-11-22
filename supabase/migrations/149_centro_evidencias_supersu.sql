@@ -1,4 +1,4 @@
--- 148 · CENTRO DE EVIDENCIAS LEGALES (Super Admin) — Fase 4 (2026-11-16)
+-- 149 · CENTRO DE EVIDENCIAS LEGALES (Super Admin) — Fase 4 (2026-11-16)
 --
 -- La tabla `evidencia_legal` (146) NO tiene política para SuperSU: todo acceso del CRM pasa por
 -- estas funciones, que (1) exigen SuperSU con el rol REAL de la sesión, (2) dejan rastro en

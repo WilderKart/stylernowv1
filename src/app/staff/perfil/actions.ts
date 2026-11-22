@@ -233,7 +233,7 @@ export async function eliminarMiBloqueo(id: string): Promise<Resultado> {
 
 // ── Autorizaciones del profesional (tratamiento y publicación) ────────────────
 // Toda la regla vive en la base (`autorizar_staff`, `revocar_publicacion_staff`,
-// `estado_autorizaciones_staff`, migración 147): el negocio sale del vínculo propio y la
+// `estado_autorizaciones_staff`, migración 148): el negocio sale del vínculo propio y la
 // evidencia queda en el repositorio legal; aquí solo se traducen errores.
 
 export interface MisAutorizaciones {
