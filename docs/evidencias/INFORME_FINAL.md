@@ -67,7 +67,7 @@ Nadie escribe directo en estas tres tablas por la API. La excepción vigente es 
 ```
 docker exec -i supabase_db_stylernow psql -U postgres -d postgres -v ON_ERROR_STOP=1 -q < tests/sql/evidencias_145_149.sql
 ```
-Resultado: `OK: evidencias_145_148 — todas las pruebas pasaron` (113 comprobaciones; 10 actores: anon, cliente, dueño A/B, staff A/B, invitados con correo verificado/sin verificar/expirado, intruso, SuperSU). Cubre: forja y borrado de aceptaciones, textos inmutables, RLS por titular y por negocio, tácita solo en cambios no materiales, borradores fuera del registro normal, invitación (correo ajeno, sin verificar, expirada, inexistente, repetida, tope del plan, un solo vínculo), publicación sin tratamiento / sin foto / revocada / re-autorizada, fin de la transición, manipulación detectada, SuperSU y auditoría de cada consulta, y borrado de cuenta sin perder evidencias.
+Resultado: `OK: evidencias_146_149 — todas las pruebas pasaron` (113 comprobaciones; 10 actores: anon, cliente, dueño A/B, staff A/B, invitados con correo verificado/sin verificar/expirado, intruso, SuperSU). Cubre: forja y borrado de aceptaciones, textos inmutables, RLS por titular y por negocio, tácita solo en cambios no materiales, borradores fuera del registro normal, invitación (correo ajeno, sin verificar, expirada, inexistente, repetida, tope del plan, un solo vínculo), publicación sin tratamiento / sin foto / revocada / re-autorizada, fin de la transición, manipulación detectada, SuperSU y auditoría de cada consulta, y borrado de cuenta sin perder evidencias.
 
 Suites previas, repetidas tras los cambios, sin regresiones: `aislamiento_multiempresa.sql`, `seguridad_regresion.sql`, `registro_pendiente_127.sql`, `auditoria_123.sql` → todas pasan.
 
