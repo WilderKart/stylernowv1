@@ -50,7 +50,7 @@ export default async function PerfilStaffPage(props: PageProps<"/staff/perfil">)
   const nombreNegocio = negocio?.nombre ?? "el negocio";
   // Versión más reciente de cada texto (borradores de trabajo, pendientes de validación jurídica).
   const textoDe = (tipo: string) =>
-    ((textos ?? []).find((t) => t.tipo === tipo)?.contenido ?? "").replaceAll("{negocio}", nombreNegocio);
+    (((textos ?? []) as Array<{ tipo: string; contenido: string }>).find((t) => t.tipo === tipo)?.contenido ?? "").replaceAll("{negocio}", nombreNegocio);
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-8 sm:px-10">
