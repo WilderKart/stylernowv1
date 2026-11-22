@@ -1,0 +1,8 @@
+-- Reversión de 178: quita EXECUTE a service_role (vuelve al estado previo: solo el propietario de la función).
+-- Nota: con esto el cron diario vuelve a fallar con permiso denegado en esas cuatro funciones.
+begin;
+revoke execute on function public.ejecutar_downgrades_programados() from service_role;
+revoke execute on function public.expirar_reservas_vencidas() from service_role;
+revoke execute on function public.generar_roi_snapshot_mensual() from service_role;
+revoke execute on function public.otorgar_creditos_plan_mensual() from service_role;
+commit;
