@@ -1,0 +1,10 @@
+-- Reversión de 174 (después de revertir 175-179).
+drop function if exists public.adicional_marcar_pago_pendiente_srv(uuid, text);
+drop function if exists public.adicional_mis_lotes(uuid);
+drop function if exists public.adicional_cancelar_renovacion(uuid, text);
+drop function if exists public.adicional_renovar(uuid);
+drop function if exists public.adicional_checkout_fallido_srv(uuid, uuid, text);
+drop function if exists public._adicional_cerrar_checkout(uuid, text, uuid, text);
+drop function if exists public.adicional_iniciar(uuid, int, numeric);
+drop function if exists public.adicional_cotizar(uuid, int);
+drop function if exists public._adicional_cotizacion(uuid, int, uuid);

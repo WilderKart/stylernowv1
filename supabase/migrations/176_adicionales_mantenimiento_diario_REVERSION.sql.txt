@@ -1,0 +1,2 @@
+-- Reversión de 176.
+drop function if exists public.adicional_mantenimiento_srv(timestamptz, boolean);

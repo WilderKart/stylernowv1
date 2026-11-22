@@ -14,6 +14,7 @@ import { esFavorito } from "./actions";
 import { BotonCompartir } from "./boton-compartir";
 import { BotonFavorito } from "./boton-favorito";
 import { obtenerT } from "@/lib/i18n/servidor";
+import { negocioAceptaReservas } from "@/lib/suscripcion/estado-operativo";
 
 async function cargarNegocio(slug: string) {
   const supabase = await createClient();
@@ -23,7 +24,7 @@ async function cargarNegocio(slug: string) {
   const { data: negocio } = await supabase
     .from("negocio")
     .select(
-      "id, nombre, slug, descripcion, ciudad, categoria, logo_url, ventana_reembolso_total_horas, ventana_reembolso_parcial_horas, reembolso_parcial_pct"
+      "id, nombre, slug, descripcion, ciudad, categoria, logo_url, foto_principal_url, ventana_reembolso_total_horas, ventana_reembolso_parcial_horas, reembolso_parcial_pct"
     )
     .eq("slug", slug)
     .eq("estado", "ACTIVO")
@@ -31,7 +32,7 @@ async function cargarNegocio(slug: string) {
 
   if (!negocio) return null;
 
-  const [{ data: sedes }, { data: servicios }, { data: staff }, { data: resenas }] =
+  const [{ data: sedes }, { data: servicios }, { data: staff }, { data: resenas }, { data: verificado }] =
     await Promise.all([
       supabase
         .from("sede")
@@ -47,6 +48,8 @@ async function cargarNegocio(slug: string) {
         .order("precio_base"),
       supabase.rpc("negocio_staff_publico", { p_negocio_id: negocio.id }),
       supabase.rpc("negocio_resenas_publicas", { p_negocio_id: negocio.id, p_limite: 8 }),
+      // Insignia: solo un booleano (migración 150); nunca documentos ni datos de la verificación.
+      (supabase as unknown as { rpc: (n: string, a: object) => Promise<{ data: boolean | null }> }).rpc("negocio_verificado", { p_negocio_id: negocio.id }),
     ]);
 
   const calificaciones = (resenas ?? []).map((r) => r.calificacion);
@@ -62,6 +65,7 @@ async function cargarNegocio(slug: string) {
     staff: staff ?? [],
     resenas: resenas ?? [],
     promedio,
+    verificado: verificado === true,
   };
 }
 
@@ -100,7 +104,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
   const datos = await cargarNegocio(slug);
   if (!datos) notFound();
 
-  const { negocio, sedes, servicios, staff, resenas, promedio } = datos;
+  const { negocio, sedes, servicios, staff, resenas, promedio, verificado } = datos;
   const sede = sedes[0];
   const horarioHoy = sede ? horarioDeHoy(sede.horario_base, sede.zona_horaria ?? TZ_POR_DEFECTO) : null;
   const favoritoInicial = await esFavorito(negocio.id);
@@ -181,6 +185,8 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
   };
 
   const sinDisponibilidad = servicios.length === 0 || sedes.length === 0;
+  // FASE 2B: suscripción restringida (decide la base, migración 160). La página sigue visible; solo se pausan las reservas nuevas.
+  const aceptaReservas = await negocioAceptaReservas(negocio.id);
   const marca = await obtenerMarcaPublica(negocio.id);
   // Mi Marca publicada: el nombre y el logo de marca sustituyen a los del negocio en la portada.
   const nombreVisible = marca?.nombreMarca ?? negocio.nombre;
@@ -204,10 +210,15 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
       />
 
       <main className="flex-1">
+        {!aceptaReservas ? (
+          <div role="status" className="body-sm m-4 border-2 border-current p-3 font-semibold">
+            {t("res.pausado")}
+          </div>
+        ) : null}
         {/* ── Portada ───────────────────────────────────────────────── */}
         <div className="relative">
           <Photo
-            src={marca?.logoUrl ?? negocio.logo_url ?? FOTO_NEGOCIO_RESPALDO}
+            src={marca?.logoUrl ?? negocio.foto_principal_url ?? negocio.logo_url ?? FOTO_NEGOCIO_RESPALDO}
             alt={nombreVisible}
             className="h-[250px] w-full"
           />
@@ -235,6 +246,11 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
           {partesNombre.slice(mitad).join(" ")}
           {"."}
         </h1>
+        {verificado ? (
+          <div className="px-4 pb-3">
+            <Status tone="ok">Negocio verificado por StylerNow</Status>
+          </div>
+        ) : null}
         {miNivelVip ? (
           <div className="px-4 pb-3">
             <Status tone="ok">{t("neg.eres_vip", { nivel: miNivelVip })}</Status>
@@ -403,9 +419,9 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
 
       {/* CTA principal fijo (02-UX/04_Marketplace.md). */}
       <div className="p-foot">
-        {sinDisponibilidad ? (
+        {sinDisponibilidad || !aceptaReservas ? (
           <span className="sn-btn sn-btn--secondary w-full justify-center" aria-disabled="true">
-            {t("neg.sin_disponibilidad")}
+            {aceptaReservas ? t("neg.sin_disponibilidad") : t("res.pausado")}
           </span>
         ) : (
           <Link href={`/negocio/${negocio.slug}/reservar`} className="sn-btn sn-btn--primary w-full">

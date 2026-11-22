@@ -1,0 +1,39 @@
+-- REVERSIÓN de 160 (solo base LOCAL). Restaura las dos funciones tocadas, elimina lo nuevo y devuelve la gracia a 3.
+-- Antes de revertir 160 hay que revertir 164, 163, 162 y 161 (dependen de estas funciones).
+begin;
+create or replace function public.negocio_puede_recibir_reservas(p_negocio_id uuid)
+ returns boolean language sql stable security definer set search_path to 'public'
+as $function$
+  select coalesce((
+    select s.estado in ('ACTIVA','TRIAL') or (s.estado = 'EN_MORA' and (s.gracia_fin is null or s.gracia_fin > now()))
+    from public.suscripcion s where s.negocio_id = p_negocio_id
+  ), true);
+$function$;
+
+do $$
+declare v_def text; v_nuevo text;
+begin
+  v_def := pg_get_functiondef('public.trg_reserva_exige_plan()'::regprocedure);
+  v_nuevo := regexp_replace(v_def, 'raise exception ''SUSCRIPCION_RESTRINGIDA''[^;]*;', 'raise exception ''NEGOCIO_REQUIERE_PLAN'';');
+  if v_nuevo = v_def then raise exception 'ANCLA_NO_ENCONTRADA trg_reserva_exige_plan (reversión)'; end if;
+  execute v_nuevo;
+end $$;
+
+drop function if exists public._exigir_operativo_reserva(uuid);
+drop function if exists public._exigir_operativo_sede(uuid);
+drop function if exists public._exigir_operativo(uuid);
+drop function if exists public.negocio_estado_operativo(uuid);
+drop function if exists public.negocio_acepta_reservas(uuid);
+drop function if exists public.negocio_operativo(uuid);
+drop function if exists public._estado_operativo_en(uuid, timestamptz);
+drop function if exists public.suscripcion_numero_dia(timestamptz, timestamptz);
+drop function if exists public.suscripcion_fecha_limite(timestamptz, integer);
+drop function if exists public.suscripcion_inicio_dia(date);
+drop function if exists public.suscripcion_dia(timestamptz);
+
+alter table public.configuracion_plataforma drop constraint if exists suscripcion_config_valida;
+alter table public.configuracion_plataforma
+  drop column if exists gracia_permite_operar, drop column if exists prueba_gracia_dias, drop column if exists suscripcion_periodo_dias;
+alter table public.configuracion_plataforma alter column suscripcion_gracia_dias set default 3;
+update public.configuracion_plataforma set suscripcion_gracia_dias = 3, updated_at = now() where id and suscripcion_gracia_dias = 1;
+commit;

@@ -1,5 +1,6 @@
 "use server";
 
+import { MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
 import { procesarReembolsosSinFallar } from "@/lib/pagos/reembolsos";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
@@ -18,6 +19,7 @@ async function usuarioActual() {
 }
 
 const MENSAJES_ERROR: Record<string, string> = {
+  SUSCRIPCION_RESTRINGIDA: MENSAJE_RESTRINGIDA,
   NO_AUTORIZADO: "No tienes permiso sobre esa reserva.",
   NEGOCIO_NO_DISPONIBLE: "Este negocio no está activo en este momento.",
   CLIENTE_NO_ENCONTRADO: "No encontramos ningún cliente con ese dato.",

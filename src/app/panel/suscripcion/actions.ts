@@ -253,7 +253,7 @@ export interface PagoSuscripcion {
   fecha: string;
   monto: number;
   estado: string;
-  concepto: "PLAN" | "UPGRADE";
+  concepto: "PLAN" | "UPGRADE" | "ADICIONAL";
   plan: string | null;
   ciclo: string | null;
 }
@@ -279,7 +279,7 @@ export async function listarPagosSuscripcion(negocioId: string): Promise<Resulta
           fecha: p.created_at,
           monto: Number(p.monto),
           estado: p.estado,
-          concepto: m.concepto === "PLAN" ? "PLAN" : "UPGRADE",
+          concepto: m.concepto === "PLAN" ? "PLAN" : m.concepto === "STAFF_EXTRA" ? "ADICIONAL" : "UPGRADE",
           plan: m.plan_codigo_nuevo ?? null,
           ciclo: m.ciclo ?? null,
         };

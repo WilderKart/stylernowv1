@@ -1,5 +1,6 @@
 "use server";
 
+import { MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -35,6 +36,7 @@ async function usuarioActual() {
 }
 
 const MENSAJES_ERROR: Record<string, string> = {
+  SUSCRIPCION_RESTRINGIDA: MENSAJE_RESTRINGIDA,
   NO_AUTORIZADO: "No tienes permiso sobre esta sede.",
   PLAN_LIMIT_EXCEEDED:
     "Tu plan no permite más sedes. Haz un upgrade para agregar otra (01-PRD/03_Monetization.md).",

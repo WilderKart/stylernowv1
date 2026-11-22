@@ -33,15 +33,15 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
-    remotePatterns: hostSupabase
-      ? [
-          {
-            protocol: "https",
-            hostname: hostSupabase,
-            pathname: "/storage/v1/object/public/**",
-          },
-        ]
-      : [],
+    remotePatterns: [
+      ...(hostSupabase
+        ? [{ protocol: "https" as const, hostname: hostSupabase, pathname: "/storage/v1/object/public/**" }]
+        : []),
+      // Cloudinary (decisión B): solo la nube propia y solo si está configurada.
+      ...(process.env.CLOUDINARY_CLOUD_NAME
+        ? [{ protocol: "https" as const, hostname: "res.cloudinary.com", pathname: `/${process.env.CLOUDINARY_CLOUD_NAME.trim()}/**` }]
+        : []),
+    ],
   },
 };
 

@@ -1,5 +1,6 @@
 "use server";
 
+import { exigirOperativo, MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
 import { chatJSON } from "@/lib/ia/ai-provider";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -18,6 +19,7 @@ type Resultado<T = undefined> =
   | { ok: false; error: string };
 
 const MENSAJES_ERROR: Record<string, string> = {
+  SUSCRIPCION_RESTRINGIDA: MENSAJE_RESTRINGIDA,
   NO_AUTORIZADO: "No tienes permiso sobre este negocio.",
   FUNCION_NO_INCLUIDA: "Esta función no está incluida en tu plan. Mejora tu plan desde Mi Plan para usarla.",
   PRECIO_INVALIDO: "El precio debe ser mayor a 0.",
@@ -345,6 +347,10 @@ async function redactarSugerenciaConIA(negocioId: string, disparador: string, co
 
 export async function generarSugerenciasAction(negocioId: string): Promise<Resultado<{ generadas: number; conIaReal: number }>> {
   const supabase = await cliente();
+  // FASE 2B: esta acción usa la clave de servicio (consume créditos de IA y crea sugerencias), así que NO la frena el JWT del usuario:
+  // se exige el estado operativo del negocio aquí, además de la autorización de las lecturas con el JWT del usuario.
+  const operativo = await exigirOperativo(negocioId);
+  if (!operativo.ok) return { ok: false, error: operativo.error };
   const admin = createAdminClient();
   const { data: reglas, error: eReglas } = await supabase.from("recompensa_regla").select("id, disparador, nivel_ia").eq("negocio_id", negocioId).eq("activo", true);
   if (eReglas) return { ok: false, error: eReglas.message };

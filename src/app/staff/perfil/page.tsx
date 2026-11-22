@@ -7,6 +7,8 @@ import {
   obtenerMisGanancias,
 } from "./actions";
 import { VistaPerfilStaff } from "./vista-perfil-staff";
+import { TarjetaVisibilidadPublica } from "@/components/panel/tarjeta-visibilidad-publica";
+import { obtenerEstadoPublicacion } from "@/app/panel/staff/publicacion-actions";
 
 export const metadata = { title: "Mi Perfil" };
 
@@ -26,6 +28,7 @@ export default async function PerfilStaffPage() {
   const desde = inicioSemanaISO();
   const hasta = new Date().toISOString();
 
+  const publicacionRes = await obtenerEstadoPublicacion(contexto.negocioId);
   const [perfilRes, gananciasRes, disponibilidadRes, bloqueosRes] = await Promise.all([
     obtenerMiPerfilStaff(),
     obtenerMisGanancias(contexto.negocioId, contexto.vinculoId, desde, hasta),
@@ -36,6 +39,7 @@ export default async function PerfilStaffPage() {
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-8 sm:px-10">
       <h1 className="font-display mb-6 text-[22px] font-bold uppercase text-text">Mi Perfil</h1>
+      {publicacionRes.ok ? <TarjetaVisibilidadPublica estado={publicacionRes.data} /> : null}
       <VistaPerfilStaff
         vinculoId={contexto.vinculoId}
         sedeId={contexto.sedeId}

@@ -14,9 +14,13 @@ import { resolverContexto, type ContextoUsuario, type RolPanel } from "@/lib/aut
  * `RolPanel`, `PanelNav` tipado por Permission Registry) queda documentada
  * como trabajo futuro en `ADR_016_Authorization_Refactor.md` — no se ejecuta
  * aquí para no arriesgar código de autorización ya verificado.
+ *
+ * "ADMIN" (administrador delegado, migración 151/154) es OPT-IN: una página solo lo admite si lo pide expresamente en
+ * `rolesPermitidos`. Las ~27 páginas existentes piden ["BARBERIA","GUARDIAN"], así que un administrador recibe 403 en todas ellas
+ * salvo en las que se revisaron para él (hoy solo /panel/staff). Denegado por defecto.
  */
 export async function verificarAccesoPanel(
-  rolesPermitidos: Array<Extract<RolPanel, "BARBERIA" | "GUARDIAN">>,
+  rolesPermitidos: Array<Extract<RolPanel, "BARBERIA" | "ADMIN" | "GUARDIAN">>,
   rutaActual: string
 ): Promise<ContextoUsuario> {
   const contexto = await resolverContexto();

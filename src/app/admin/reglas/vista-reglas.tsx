@@ -9,6 +9,7 @@ import { useState, useTransition } from "react";
 import {
   anularComisionProgramada,
   guardarComisionDefault,
+  guardarConfigCiclo,
   guardarConfigPrueba,
   guardarLimites,
   programarComision,
@@ -117,8 +118,9 @@ function SeccionPrueba({ p }: { p: DatosReglas["prueba"] }) {
     <Card className="flex flex-col gap-3 p-5">
       <h2 className="section">Prueba gratuita y suscripciones</h2>
       <p className="sn-meta">
-        La prueba nunca se cobra automáticamente. Al vencer, el negocio entra en gracia (sigue recibiendo reservas) y paga su
-        plan por Checkout Pro desde «Plan y facturación»; si la gracia termina sin pago, pasa a «requiere plan». Las modalidades
+        La prueba nunca se cobra automáticamente. Al vencer sin pago confirmado, el negocio queda con la suscripción restringida (la gracia de
+        la prueba se configura abajo en «Ciclo de la suscripción») y paga su plan por Checkout Pro desde «Plan y facturación». La «gracia por
+        impago» de este formulario es la del periodo pagado (hoy 1 día; antes 3 y compartida con la prueba). Las modalidades
         con tarjeta están deshabilitadas en esta etapa (sin cobro recurrente). Aplica a pruebas que se inicien desde ahora.
       </p>
       <div className="grid gap-3 sm:grid-cols-3">
@@ -159,6 +161,46 @@ function SeccionPrueba({ p }: { p: DatosReglas["prueba"] }) {
         }
       >
         Guardar prueba
+      </Button>
+    </Card>
+  );
+}
+
+function SeccionCiclo({ c }: { c: DatosReglas["ciclo"] }) {
+  const [v, setV] = useState({ periodoDias: String(c.periodoDias), pruebaGraciaDias: String(c.pruebaGraciaDias), graciaOpera: c.graciaOpera, motivo: "" });
+  const { aviso, pendiente, ejecutar } = useAccion();
+  return (
+    <Card className="flex flex-col gap-3 p-5">
+      <h2 className="section">Ciclo de la suscripción</h2>
+      <p className="sn-meta">
+        Un pago confirmado cubre el periodo indicado, contado por día de calendario en hora de Colombia: día 1 = día del pago, último día pagado = día
+        {" "}{c.periodoDias}, el día siguiente es de gracia (según la «gracia por impago») y después la suscripción queda restringida. El negocio
+        restringido conserva sus datos, consulta su histórico, paga y cumple las citas ya confirmadas, pero no recibe reservas nuevas ni modifica
+        servicios, disponibilidad, equipo ni precios. Aplica a los pagos y vencimientos que ocurran desde ahora.
+      </p>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Input label="Periodo pagado (días)" type="number" value={v.periodoDias} onChange={(e) => setV({ ...v, periodoDias: e.target.value })} />
+        <Input label="Gracia tras la prueba (días, 0 = sin gracia)" type="number" value={v.pruebaGraciaDias} onChange={(e) => setV({ ...v, pruebaGraciaDias: e.target.value })} />
+        <label className="flex flex-col gap-1 text-[13px] font-semibold">
+          ¿La gracia deja operar?
+          <select className="h-11 border-2 border-border bg-bg px-3" value={v.graciaOpera ? "SI" : "NO"} onChange={(e) => setV({ ...v, graciaOpera: e.target.value === "SI" })}>
+            <option value="SI">Sí: sigue operando con aviso de renovación</option>
+            <option value="NO">No: la gracia ya restringe (solo permite pagar)</option>
+          </select>
+        </label>
+      </div>
+      <Input label="Motivo del cambio" required value={v.motivo} onChange={(e) => setV({ ...v, motivo: e.target.value })} />
+      <Mensaje aviso={aviso} />
+      <Button
+        loading={pendiente}
+        onClick={() =>
+          ejecutar(
+            () => guardarConfigCiclo({ periodoDias: n(v.periodoDias), pruebaGraciaDias: n(v.pruebaGraciaDias), graciaOpera: v.graciaOpera, motivo: v.motivo }),
+            "Ciclo de la suscripción guardado."
+          )
+        }
+      >
+        Guardar ciclo
       </Button>
     </Card>
   );
@@ -277,6 +319,7 @@ export function VistaReglas({ datos }: { datos: DatosReglas }) {
       <SeccionReembolsos r={datos.reembolsosRevision} />
       <SeccionLimites l={datos.limites} />
       <SeccionPrueba p={datos.prueba} />
+      <SeccionCiclo c={datos.ciclo} />
       <SeccionComision d={datos} />
     </div>
   );

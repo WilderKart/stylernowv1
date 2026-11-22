@@ -1,5 +1,6 @@
 "use server";
 
+import { MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -17,6 +18,7 @@ async function usuarioActual() {
 }
 
 const MENSAJES_ERROR: Record<string, string> = {
+  SUSCRIPCION_RESTRINGIDA: MENSAJE_RESTRINGIDA,
   NO_AUTORIZADO: "No tienes permiso para cobrar esta reserva.",
   RESERVA_NO_ENCONTRADA: "No encontramos esa reserva.",
   RESERVA_NO_COMPLETABLE: "Esta reserva ya fue cobrada o no está confirmada.",

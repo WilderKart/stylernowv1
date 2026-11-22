@@ -101,6 +101,16 @@ export async function GET(request: NextRequest) {
     resultado.conciliacion_pagos = { error: e instanceof Error ? e.message : "error inesperado" };
   }
 
+  // Barberos adicionales (migración 176). Va DESPUÉS de la conciliación de pagos (un pago aprobado hoy se aplica antes de evaluar
+  // vencimientos) y ANTES del outbox (los avisos que genera salen en esta misma corrida). Idempotente: una corrida por día de Bogotá,
+  // avisos 7/3/1, gracia de 3 días y suspensión; no toca renovaciones de planes principales.
+  try {
+    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("adicional_mantenimiento_srv", {});
+    resultado.adicionales = error ? { error: error.message } : data;
+  } catch (e) {
+    resultado.adicionales = { error: e instanceof Error ? e.message : "error inesperado" };
+  }
+
   // Va al final: la eliminación de cuentas y las cascadas del día también encolan reembolsos.
   try {
     resultado.reembolsos = await procesarReembolsosPendientes(50);

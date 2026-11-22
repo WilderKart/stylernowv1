@@ -1,5 +1,6 @@
 "use server";
 
+import { MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -17,6 +18,7 @@ async function usuarioActual() {
 }
 
 const MENSAJES_ERROR: Record<string, string> = {
+  SUSCRIPCION_RESTRINGIDA: MENSAJE_RESTRINGIDA,
   NO_AUTORIZADO: "No tienes permiso sobre esta sede.",
   CANTIDAD_INVALIDA: "La cantidad debe ser mayor a 0.",
   PRODUCTO_NO_ENCONTRADO: "No encontramos ese producto.",

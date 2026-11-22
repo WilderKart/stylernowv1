@@ -1,0 +1,514 @@
+-- REVERSION de 151 (probada en Docker local: aplicar -> revertir -> volver a aplicar). Solo contra la base local salvo orden expresa.
+-- Pierde es_admin / presta_servicios / rol_invitado (administradores delegados vuelven a ser BARBER al reaplicar).
+-- La vista se recrea sin las columnas nuevas (DROP + CREATE): sus privilegios se guardan antes y se reponen EXACTAMENTE (hallazgo de la prueba: sin esto el rol authenticated perdía el SELECT).
+begin;
+create temp table _acl_vista_151 on commit drop as
+  select a.grantee, a.privilege_type from pg_class c, aclexplode(c.relacl) a where c.oid = 'public.vista_staff_negocio'::regclass and a.grantee <> c.relowner;
+drop view if exists public.vista_staff_negocio;
+create or replace view public.vista_staff_negocio with (security_invoker=true) as  SELECT v.id AS vinculo_id,
+    v.negocio_id,
+    v.staff_id,
+    s.nombre,
+    s.foto_url,
+    s.especialidad,
+    p.telefono,
+    p.email,
+    v.es_guardian,
+    v.estado,
+    v.sede_activa_id AS sede_id,
+    sd.nombre AS sede_nombre,
+    v.comision_pct,
+    v.fecha_ingreso,
+    v.created_at,
+    ( SELECT nc.nivel
+           FROM (nivel_staff_consolidado nc
+             JOIN temporada t ON ((t.id = nc.temporada_id)))
+          WHERE (nc.vinculo_id = v.id)
+          ORDER BY t.fecha_fin DESC
+         LIMIT 1) AS nivel
+   FROM (((vinculo_staff_negocio v
+     JOIN staff s ON ((s.usuario_id = v.staff_id)))
+     LEFT JOIN perfil p ON ((p.id = v.staff_id)))
+     LEFT JOIN sede sd ON ((sd.id = v.sede_activa_id)));
+do $$ declare r record; begin  for r in select grantee, privilege_type from _acl_vista_151 loop    execute format('grant %s on public.vista_staff_negocio to %s', r.privilege_type, case when r.grantee = 0 then 'public' else quote_ident(pg_get_userbyid(r.grantee)) end);  end loop;end $$;
+CREATE OR REPLACE FUNCTION public.negocio_staff_publico(p_negocio_id uuid)
+ RETURNS TABLE(staff_id uuid, nombre text, foto_url text, especialidad text, nivel nivel_staff, servicio_ids uuid[])
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+  select
+    s.usuario_id,
+    s.nombre,
+    s.foto_url,
+    s.especialidad,
+    (
+      select nc.nivel from public.nivel_staff_consolidado nc
+      join public.temporada t on t.id = nc.temporada_id
+      where nc.vinculo_id = v.id
+      order by t.fecha_fin desc
+      limit 1
+    ),
+    coalesce(
+      (select array_agg(ss.servicio_id) from public.staff_servicio ss where ss.staff_id = s.usuario_id),
+      '{}'::uuid[]
+    )
+  from public.vinculo_staff_negocio v
+  join public.staff s on s.usuario_id = v.staff_id
+  join public.negocio n on n.id = v.negocio_id
+  where v.negocio_id = p_negocio_id
+    and v.estado = 'ACTIVO'
+    and n.estado = 'ACTIVO'
+    and public.staff_es_publicable(v.staff_id, v.negocio_id)
+  order by s.nombre;
+$function$
+;
+CREATE OR REPLACE FUNCTION public.slots_disponibles(p_sede_id uuid, p_servicio_ids uuid[], p_fecha date, p_staff_id uuid DEFAULT NULL::uuid, p_granularidad_minutos integer DEFAULT 15)
+ RETURNS TABLE(hora_inicio timestamp with time zone, hora_fin timestamp with time zone, staff_id uuid, recurso_id uuid, disponible boolean)
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_sede public.sede;
+  v_negocio public.negocio;
+  v_tz text;
+  v_dur int;
+  v_buf_prev int;
+  v_buf_post int;
+  v_tipo_recurso uuid;
+  v_n_servicios int;
+  v_dia int;
+  v_clave text;
+  v_min_inicio timestamptz;
+  v_max_inicio timestamptz;
+  v_excepcion public.sede_horario_excepcion;
+  v_hay_excepcion boolean;
+begin
+  select * into v_sede from public.sede where id = p_sede_id;
+  if not found or v_sede.cerrada_permanente or v_sede.cerrada_temporalmente then
+    return;
+  end if;
+
+  select * into v_negocio from public.negocio where id = v_sede.negocio_id;
+  if not found or v_negocio.estado <> 'ACTIVO' then
+    return;
+  end if;
+
+  v_tz := coalesce(v_sede.zona_horaria, 'America/Bogota');
+
+  -- Excepción del día (festivo, cierre puntual, horario especial). Un
+  -- `cerrado = true` corta toda la sede ese día sin evaluar nada más.
+  select * into v_excepcion
+  from public.sede_horario_excepcion
+  where sede_id = p_sede_id and fecha = p_fecha;
+  -- Se captura ahora: los SELECT siguientes (conteo de servicios, etc.)
+  -- pisan `found` con su propio resultado antes de llegar al CTE de abajo.
+  v_hay_excepcion := found;
+
+  if v_hay_excepcion and v_excepcion.cerrado then
+    return;
+  end if;
+
+  select count(*),
+         coalesce(sum(s.duracion_minutos), 0),
+         coalesce(sum(s.buffer_previo_minutos), 0),
+         coalesce(sum(s.buffer_posterior_minutos), 0),
+         -- max(uuid) no existe en Postgres (bug ya corregido una vez en la
+         -- migración 009 — reintroducido acá al copiar una versión vieja de
+         -- esta función; encontrado ahora por la prueba real, no a ojo).
+         (array_agg(s.requiere_recurso_tipo_id) filter (where s.requiere_recurso_tipo_id is not null))[1]
+    into v_n_servicios, v_dur, v_buf_prev, v_buf_post, v_tipo_recurso
+  from public.servicio s
+  where s.id = any(p_servicio_ids)
+    and s.negocio_id = v_negocio.id
+    and s.estado = 'ACTIVO';
+
+  if v_n_servicios = 0 or v_n_servicios <> coalesce(array_length(p_servicio_ids, 1), 0) then
+    return;
+  end if;
+
+  v_min_inicio := now() + make_interval(mins => v_negocio.min_anticipacion_minutos);
+  v_max_inicio := now() + make_interval(days => v_negocio.max_anticipacion_dias);
+
+  v_dia := extract(dow from p_fecha)::int;
+  v_clave := (array['dom','lun','mar','mie','jue','vie','sab'])[v_dia + 1];
+
+  return query
+  with sede_ventanas as (
+    -- Horario especial de la excepción tiene prioridad sobre el semanal.
+    select v_excepcion.hora_inicio_especial as h_ini, v_excepcion.hora_fin_especial as h_fin
+    where v_hay_excepcion and not v_excepcion.cerrado
+    union all
+    select (elem ->> 0)::time, (elem ->> 1)::time
+    from jsonb_array_elements(coalesce(v_sede.horario_base -> v_clave, '[]'::jsonb)) as elem
+    where not v_hay_excepcion and v_sede.horario_base <> '{}'::jsonb
+    union all
+    select '00:00'::time, '23:59:59'::time
+    where not v_hay_excepcion and v_sede.horario_base = '{}'::jsonb
+  ),
+  staff_cand as (
+    select v.id as vinculo_id, v.staff_id
+    from public.vinculo_staff_negocio v
+    where v.negocio_id = v_negocio.id
+      and v.estado = 'ACTIVO'
+      and (v.sede_activa_id = p_sede_id or v.sede_activa_id is null)
+      and (p_staff_id is null or v.staff_id = p_staff_id)
+      and (public.staff_es_publicable(v.staff_id, v_negocio.id) or coalesce(public.tiene_acceso_interno(v_negocio.id), false))
+      and not exists (
+        select 1 from unnest(p_servicio_ids) as sid
+        where not exists (
+          select 1 from public.staff_servicio ss
+          where ss.staff_id = v.staff_id and ss.servicio_id = sid
+        )
+      )
+  ),
+  ventanas as (
+    select sc.vinculo_id, sc.staff_id,
+           greatest(d.hora_inicio, sv.h_ini) as h_ini,
+           least(d.hora_fin, sv.h_fin) as h_fin
+    from staff_cand sc
+    join public.disponibilidad d
+      on d.vinculo_id = sc.vinculo_id and d.sede_id = p_sede_id and d.dia_semana = v_dia
+    cross join sede_ventanas sv
+    where greatest(d.hora_inicio, sv.h_ini) < least(d.hora_fin, sv.h_fin)
+  ),
+  slots as (
+    select v.vinculo_id, v.staff_id, gs.inicio
+    from ventanas v
+    cross join lateral generate_series(
+      timezone(v_tz, (p_fecha + v.h_ini)::timestamp) + make_interval(mins => v_buf_prev),
+      timezone(v_tz, (p_fecha + v.h_fin)::timestamp) - make_interval(mins => v_dur + v_buf_post),
+      make_interval(mins => greatest(p_granularidad_minutos, 5))
+    ) as gs(inicio)
+  ),
+  evaluados as (
+    select s.vinculo_id, s.staff_id, s.inicio,
+           tstzrange(
+             s.inicio - make_interval(mins => v_buf_prev),
+             s.inicio + make_interval(mins => v_dur + v_buf_post),
+             '[)'
+           ) as bloque
+    from slots s
+  ),
+  con_estado as (
+    select
+      e.inicio, e.staff_id, e.vinculo_id,
+      (
+        select r.id from public.recurso r
+        where v_tipo_recurso is not null
+          and r.sede_id = p_sede_id
+          and r.recurso_tipo_id = v_tipo_recurso
+          and r.estado = 'DISPONIBLE'
+          and not exists (
+            select 1 from public.reserva rr
+            where rr.recurso_id = r.id
+              and rr.estado in ('PENDIENTE_PAGO','CONFIRMADA','EN_CURSO')
+              and rr.rango && e.bloque
+          )
+        limit 1
+      ) as recurso_id,
+      (
+        e.inicio >= v_min_inicio and e.inicio <= v_max_inicio
+        and not exists (
+          select 1 from public.reserva rr
+          where rr.staff_id = e.staff_id
+            and rr.estado in ('PENDIENTE_PAGO','CONFIRMADA','EN_CURSO')
+            and rr.rango && e.bloque
+        )
+        and not exists (
+          select 1 from public.bloqueo_ausencia ba
+          where ba.vinculo_id = e.vinculo_id
+            and tstzrange(ba.fecha_inicio, ba.fecha_fin, '[)') && e.bloque
+        )
+      ) as libre_staff
+    from evaluados e
+  ),
+  nivel as (
+    select nc.vinculo_id,
+           max(case nc.nivel when 'MASTER' then 3 when 'EXPERT' then 2 else 1 end) as rango_nivel
+    from public.nivel_staff_consolidado nc
+    group by nc.vinculo_id
+  ),
+  carga as (
+    select r.staff_id, count(*) as reservas_dia
+    from public.reserva r
+    where r.estado in ('PENDIENTE_PAGO','CONFIRMADA','EN_CURSO','COMPLETADA')
+      and (r.hora_inicio at time zone v_tz)::date = p_fecha
+    group by r.staff_id
+  ),
+  elegido as (
+    select
+      c.inicio, c.staff_id, c.recurso_id,
+      (c.libre_staff and (v_tipo_recurso is null or c.recurso_id is not null)) as ok,
+      row_number() over (
+        partition by c.inicio
+        order by
+          (c.libre_staff and (v_tipo_recurso is null or c.recurso_id is not null)) desc,
+          coalesce(n.rango_nivel, 0) desc,
+          coalesce(cg.reservas_dia, 0) asc,
+          random()
+      ) as rn
+    from con_estado c
+    left join nivel n on n.vinculo_id = c.vinculo_id
+    left join carga cg on cg.staff_id = c.staff_id
+  )
+  select el.inicio, el.inicio + make_interval(mins => v_dur), el.staff_id, el.recurso_id, el.ok
+  from elegido el
+  where el.rn = 1
+  order by el.inicio;
+end;
+$function$
+;
+CREATE OR REPLACE FUNCTION public.staff_perfil_publico(p_negocio_id uuid, p_staff_id uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare v jsonb; vin public.vinculo_staff_negocio; ng public.negocio; st public.staff;
+  v_nivel text; v_nota numeric; v_total bigint; v_dist jsonb; v_cortes bigint; v_precio numeric; v_port jsonb;
+begin
+  select n.* into ng from public.negocio n where n.id = p_negocio_id and n.estado = 'ACTIVO';
+  if not found then return null; end if;
+  select vv.* into vin from public.vinculo_staff_negocio vv
+   where vv.negocio_id = p_negocio_id and vv.staff_id = p_staff_id and vv.estado = 'ACTIVO';
+  if not found then return null; end if;
+  if not public.staff_es_publicable(p_staff_id, p_negocio_id) then return null; end if;
+  select s.* into st from public.staff s where s.usuario_id = p_staff_id;
+  if not found then return null; end if;
+  select nc.nivel::text into v_nivel from public.nivel_staff_consolidado nc
+    join public.temporada t on t.id = nc.temporada_id where nc.vinculo_id = vin.id order by t.fecha_fin desc limit 1;
+  select round(avg(x.calificacion)::numeric, 2), count(*) into v_nota, v_total
+    from public.resena x where x.negocio_id = p_negocio_id and x.staff_id = p_staff_id and x.estado = 'VISIBLE';
+  select jsonb_object_agg(g.n::text, coalesce(c.k, 0)) into v_dist
+    from generate_series(1, 5) g(n)
+    left join (select x.calificacion, count(*) k from public.resena x
+               where x.negocio_id = p_negocio_id and x.staff_id = p_staff_id and x.estado = 'VISIBLE'
+               group by x.calificacion) c on c.calificacion = g.n;
+  select count(*) into v_cortes from public.reserva re
+    where re.negocio_id = p_negocio_id and re.staff_id = p_staff_id and re.estado = 'COMPLETADA';
+  select min(sv.precio_base) into v_precio from public.servicio sv
+    where sv.negocio_id = p_negocio_id and sv.estado = 'ACTIVO'
+      and (not exists (select 1 from public.staff_servicio ss0 where ss0.staff_id = p_staff_id)
+           or sv.id in (select ss.servicio_id from public.staff_servicio ss where ss.staff_id = p_staff_id));
+  select coalesce(jsonb_agg(jsonb_build_object('foto_id', f.id, 'url', f.url, 'momento', f.momento)
+                            order by f.compartida_at desc), '[]'::jsonb) into v_port
+    from (select rf.* from public.reserva_foto rf join public.reserva re on re.id = rf.reserva_id
+          where re.staff_id = p_staff_id and rf.negocio_id = p_negocio_id and rf.compartida
+          order by rf.compartida_at desc limit 24) f;
+  return jsonb_build_object(
+    'staff_id', st.usuario_id, 'nombre', st.nombre, 'foto_url', st.foto_url,
+    'especialidad', st.especialidad, 'bio', st.bio, 'nivel', v_nivel,
+    'negocio', jsonb_build_object('negocio_id', ng.id, 'nombre', ng.nombre, 'slug', ng.slug, 'ciudad', ng.ciudad),
+    'cortes', v_cortes,
+    'anios', greatest(0, extract(year from age(now(), coalesce(vin.fecha_ingreso, vin.created_at)))::int),
+    'nota', v_nota, 'total_resenas', v_total, 'distribucion', v_dist,
+    'precio_desde', v_precio, 'portafolio', v_port);
+end $function$
+;
+CREATE OR REPLACE FUNCTION public.marketplace_buscar(p_texto text DEFAULT NULL::text, p_ciudad text DEFAULT NULL::text, p_categoria text DEFAULT NULL::text, p_orden text DEFAULT 'RELEVANCIA'::text, p_limite integer DEFAULT 20, p_offset integer DEFAULT 0, p_lat double precision DEFAULT NULL::double precision, p_lng double precision DEFAULT NULL::double precision)
+ RETURNS TABLE(id uuid, nombre text, slug text, ciudad text, categoria text[], descripcion text, logo_url text, calificacion numeric, total_resenas bigint, precio_desde numeric, sede_id uuid, proxima_disponibilidad timestamp with time zone, patrocinado boolean, campana_id uuid, sede_latitud double precision, sede_longitud double precision)
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_radio_km numeric := 10;
+  v_conteo int := 0;
+  v_promedio_plataforma numeric;
+  v_confianza numeric := 5;
+begin
+  select coalesce(avg(resena.calificacion), 4) into v_promedio_plataforma
+  from public.resena where resena.estado = 'VISIBLE';
+
+  if p_lat is not null and p_lng is not null then
+    loop
+      select count(*) into v_conteo
+      from public.negocio n
+      join public.sede sd on sd.negocio_id = n.id and not sd.cerrada_permanente
+      where n.estado = 'ACTIVO'
+        and n.elegibilidad_marketplace and public.negocio_visible_en_mapa(n.id)
+        and coalesce((select ch.habilitada from public.ciudad_habilitada ch where ch.ciudad = n.ciudad), true)
+        and (p_categoria is null or p_categoria = any(n.categoria))
+        and (p_texto is null or p_texto = '' or n.nombre ilike '%' || p_texto || '%' or translate(lower(n.ciudad), 'áéíóúñ', 'aeioun') ilike '%' || translate(lower(p_texto), 'áéíóúñ', 'aeioun') || '%' or exists (select 1 from unnest(n.categoria) cat where cat ilike '%' || p_texto || '%') or coalesce(n.descripcion, '') ilike '%' || p_texto || '%')
+        and 6371 * acos(greatest(-1, least(1,
+              cos(radians(p_lat)) * cos(radians(sd.latitud)) * cos(radians(sd.longitud) - radians(p_lng))
+              + sin(radians(p_lat)) * sin(radians(sd.latitud))
+            ))) <= v_radio_km;
+      exit when v_conteo >= 3 or v_radio_km >= 50;
+      v_radio_km := v_radio_km + 5;
+    end loop;
+  end if;
+
+  return query
+  with base as (
+    select
+      n.id, n.nombre, n.slug, n.ciudad, n.categoria, n.descripcion, n.logo_url, n.created_at,
+      (select round(avg(re.calificacion)::numeric, 2) from public.resena re
+        where re.negocio_id = n.id and re.estado = 'VISIBLE') as calificacion,
+      (select count(*) from public.resena re
+        where re.negocio_id = n.id and re.estado = 'VISIBLE') as total_resenas,
+      (select count(*) from public.resena re
+        where re.negocio_id = n.id and re.estado = 'VISIBLE' and re.created_at >= now() - interval '12 months') as votos_12m,
+      (select coalesce(avg(re.calificacion), 0) from public.resena re
+        where re.negocio_id = n.id and re.estado = 'VISIBLE' and re.created_at >= now() - interval '12 months') as promedio_12m,
+      (select min(sv.precio_base) from public.servicio sv
+        where sv.negocio_id = n.id and sv.estado = 'ACTIVO') as precio_desde,
+      (select count(*) from public.negocio_visita_perfil v where v.negocio_id = n.id and v.created_at >= now() - interval '90 days') as visitas_90d,
+      (select count(*) from public.reserva r where r.negocio_id = n.id and r.estado = 'COMPLETADA' and r.hora_inicio >= now() - interval '90 days') as completadas_90d,
+      (
+        select c.id from public.campana_publicitaria c
+        where c.negocio_id = n.id and c.estado = 'ACTIVA'
+          and (c.presupuesto_total is null or c.gasto_total < c.presupuesto_total)
+          and (c.fecha_inicio is null or c.fecha_inicio <= now())
+          and (c.fecha_fin is null or c.fecha_fin >= now())
+        order by c.created_at limit 1
+      ) as campana_id
+    from public.negocio n
+    where n.estado = 'ACTIVO'
+      and n.elegibilidad_marketplace and public.negocio_visible_en_mapa(n.id)
+      and coalesce((select ch.habilitada from public.ciudad_habilitada ch where ch.ciudad = n.ciudad), true)
+      and (p_ciudad is null or p_lat is not null or n.ciudad ilike p_ciudad)
+      and (p_categoria is null or p_categoria = any(n.categoria))
+      and (
+        p_texto is null or p_texto = ''
+        or n.nombre ilike '%' || p_texto || '%' or translate(lower(n.ciudad), 'áéíóúñ', 'aeioun') ilike '%' || translate(lower(p_texto), 'áéíóúñ', 'aeioun') || '%' or exists (select 1 from unnest(n.categoria) cat where cat ilike '%' || p_texto || '%')
+        or coalesce(n.descripcion, '') ilike '%' || p_texto || '%'
+      )
+  ),
+  con_sede as (
+    select
+      b.*,
+      sede.id as sede_id, sede.zona_horaria,
+      sede.distancia_km,
+      sede.latitud as sede_latitud,
+      sede.longitud as sede_longitud,
+      coalesce(sede.staff_total, 0) as staff_total,
+      coalesce(sede.staff_experto, 0) as staff_experto
+    from base b
+    left join lateral (
+      select
+        s.id, s.zona_horaria, s.latitud, s.longitud,
+        case when p_lat is not null and p_lng is not null then
+          6371 * acos(greatest(-1, least(1,
+            cos(radians(p_lat)) * cos(radians(s.latitud)) * cos(radians(s.longitud) - radians(p_lng))
+            + sin(radians(p_lat)) * sin(radians(s.latitud))
+          )))
+        else null end as distancia_km,
+        (select count(*) from public.vinculo_staff_negocio v where v.sede_activa_id = s.id and v.estado = 'ACTIVO') as staff_total,
+        (select count(*) from public.vinculo_staff_negocio v
+          join public.nivel_staff_consolidado nc on nc.vinculo_id = v.id
+          where v.sede_activa_id = s.id and v.estado = 'ACTIVO' and nc.nivel in ('EXPERT', 'MASTER')
+          and nc.temporada_id = (select temporada.id from public.temporada order by temporada.fecha_inicio desc limit 1)
+        ) as staff_experto
+      from public.sede s
+      where s.negocio_id = b.id and not s.cerrada_permanente and not s.cerrada_temporalmente
+      order by
+        case when p_lat is not null and p_lng is not null then
+          6371 * acos(greatest(-1, least(1,
+            cos(radians(p_lat)) * cos(radians(s.latitud)) * cos(radians(s.longitud) - radians(p_lng))
+            + sin(radians(p_lat)) * sin(radians(s.latitud))
+          )))
+        else null end asc nulls last,
+        s.es_principal desc, s.created_at
+      limit 1
+    ) sede on true
+    where p_lat is null or p_lng is null or sede.distancia_km is null or sede.distancia_km <= v_radio_km
+  ),
+  con_disponibilidad as (
+    select
+      cs.*,
+      prox.inicio as proxima_disponibilidad
+    from con_sede cs
+    left join lateral (
+      select dia.minimo as inicio
+      from generate_series(0, 6) as dia_offset
+      cross join lateral (
+        select min(sd.hora_inicio) as minimo
+        from public.slots_disponibles(
+          cs.sede_id,
+          array[(select sv.id from public.servicio sv where sv.negocio_id = cs.id and sv.estado = 'ACTIVO' order by sv.precio_base limit 1)],
+          (now() at time zone coalesce(cs.zona_horaria, 'America/Bogota'))::date + dia_offset,
+          null, 30
+        ) sd
+        where sd.disponible
+      ) dia
+      where dia.minimo is not null
+      limit 1
+    ) prox on true
+  ),
+  puntuado as (
+    select
+      cd.*,
+      (((cd.votos_12m::numeric / (cd.votos_12m + v_confianza)) * cd.promedio_12m
+        + (v_confianza / (cd.votos_12m + v_confianza)) * v_promedio_plataforma) - 1) / 4 as rating_normalizado,
+      case
+        when cd.proxima_disponibilidad is null then 0
+        else greatest(0, least(1, 1 - (extract(epoch from (cd.proxima_disponibilidad - now())) / 3600 - 48) / (168 - 48)))
+      end as disponibilidad_normalizada,
+      case when cd.visitas_90d > 0 then cd.completadas_90d::numeric / cd.visitas_90d else 0 end as conversion_cruda,
+      case when cd.staff_total > 0 then cd.staff_experto::numeric / cd.staff_total else 0 end as calidad_de_staff,
+      case when cd.campana_id is not null then 1 else 0 end as patrocinio_normalizado
+    from con_disponibilidad cd
+  ),
+  normalizado as (
+    select
+      p.*,
+      case
+        when p.distancia_km is null then 1
+        when max(p.distancia_km) over () = min(p.distancia_km) over () then 1
+        else 1 - (p.distancia_km - min(p.distancia_km) over ()) / (max(p.distancia_km) over () - min(p.distancia_km) over ())
+      end as proximidad_normalizada,
+      case
+        when max(p.conversion_cruda) over () = min(p.conversion_cruda) over () then p.conversion_cruda
+        else (p.conversion_cruda - min(p.conversion_cruda) over ()) / (max(p.conversion_cruda) over () - min(p.conversion_cruda) over ())
+      end as conversion_normalizada
+    from puntuado p
+  ),
+  final as (
+    select
+      nz.*,
+      0.25 * nz.rating_normalizado
+      + 0.20 * nz.proximidad_normalizada
+      + 0.20 * nz.disponibilidad_normalizada
+      + 0.15 * nz.conversion_normalizada
+      + 0.10 * nz.calidad_de_staff
+      + 0.10 * nz.patrocinio_normalizado as score
+    from normalizado nz
+  )
+  select
+    f.id, f.nombre, f.slug, f.ciudad, f.categoria, f.descripcion, f.logo_url,
+    coalesce(f.calificacion, 0), f.total_resenas, f.precio_desde,
+    f.sede_id, f.proxima_disponibilidad, f.campana_id is not null, f.campana_id,
+    f.sede_latitud, f.sede_longitud
+  from final f
+  order by
+    case when p_orden = 'CALIFICACION' then f.calificacion end desc nulls last,
+    case when p_orden = 'PRECIO' then f.precio_desde end asc nulls last,
+    case when p_orden = 'RECIENTE' then f.created_at end desc,
+    round(f.score::numeric, 3) desc,
+    f.rating_normalizado desc,
+    f.created_at asc,
+    md5(f.id::text || coalesce(p_texto, '') || coalesce(p_ciudad, '') || coalesce(p_categoria, '')) asc
+  limit least(greatest(coalesce(p_limite, 20), 1), 100)
+  offset greatest(coalesce(p_offset, 0), 0);
+end;
+$function$
+;
+drop policy if exists staff_select_publico on public.staff;
+create policy staff_select_publico on public.staff for select using (exists (select 1 from public.vinculo_staff_negocio v join public.negocio n on n.id = v.negocio_id where v.staff_id = staff.usuario_id and v.estado = 'ACTIVO' and n.estado = 'ACTIVO'));
+drop trigger if exists trg_reserva_solo_profesionales on public.reserva;
+drop trigger if exists trg_staff_servicio_solo_profesionales on public.staff_servicio;
+drop function if exists public.trg_reserva_solo_profesionales();
+drop function if exists public.trg_staff_servicio_solo_profesionales();
+drop function if exists public.rol_equipo(uuid, uuid);
+drop function if exists public._rol_equipo(uuid, uuid);
+drop function if exists public.is_admin_de(uuid);
+drop trigger if exists trg_auditar_vinculo_staff_negocio on public.vinculo_staff_negocio;
+create trigger trg_auditar_vinculo_staff_negocio after insert or delete or update on public.vinculo_staff_negocio for each row execute function public._trg_auditar_cambio('vinculo_staff_negocio', 'negocio_id', 'staff_id,sede_activa_id,es_guardian,estado,comision_pct', '-');
+alter table public.plan drop column if exists propietario_profesional_por_defecto, drop column if exists propietario_perfil_auto_alta,
+  drop column if exists propietario_puede_activar_perfil, drop column if exists propietario_puede_desactivar_perfil;
+alter table public.invitacion_staff drop constraint if exists invitacion_staff_rol_invitado_check, drop column if exists rol_invitado;
+alter table public.vinculo_staff_negocio drop constraint if exists vinculo_capacidad_minima, drop column if exists es_admin, drop column if exists presta_servicios;
+commit;

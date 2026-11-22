@@ -1,0 +1,15 @@
+-- REVERSIÓN de 162 (solo base LOCAL).
+begin;
+do $$
+declare r record;
+begin
+  for r in select c.relname from pg_trigger t join pg_class c on c.oid = t.tgrelid
+            where t.tgname = 'trg_guardia_operativa' and not t.tgisinternal and c.relnamespace = 'public'::regnamespace
+  loop execute format('drop trigger if exists trg_guardia_operativa on public.%I', r.relname); end loop;
+end $$;
+drop trigger if exists trg_guardia_reprogramacion on public.reserva;
+drop function if exists public.trg_guardia_reprogramacion();
+drop function if exists public.trg_guardia_operativa_negocio();
+drop function if exists public.trg_guardia_operativa_equipo();
+drop function if exists public.trg_guardia_operativa();
+commit;

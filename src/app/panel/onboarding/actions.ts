@@ -1,6 +1,7 @@
 "use server";
 
-import { enviarInvitacionStaff } from "@/lib/correo/invitacion-staff";
+import { iniciarPrueba, type DatosPrueba } from "@/app/panel/suscripcion/prueba";
+import { configCloudinary, subirImagenCloudinary } from "@/lib/almacenamiento/cloudinary";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -141,14 +142,21 @@ export async function subirLogo(negocioId: string, dataUrl: string): Promise<Res
       return { ok: false, error: "La imagen no puede superar 5 MB." };
     }
 
-    const ruta = `${negocioId}/logo.${ext}`;
-    const { error: eUpload } = await supabase.storage
-      .from("negocio-media")
-      .upload(ruta, bytes, { contentType: mime, upsert: true });
-    if (eUpload) return { ok: false, error: eUpload.message };
-
-    const { data: pub } = supabase.storage.from("negocio-media").getPublicUrl(ruta);
-    const url = `${pub.publicUrl}?v=${Date.now()}`;
+    let url: string;
+    if (configCloudinary()) {
+      // Decisión B: archivos nuevos a Cloudinary. El logo es público (se muestra en el perfil del negocio).
+      const sub = await subirImagenCloudinary({ bytes, mime, carpeta: `negocios/${negocioId}`, publicId: "logo" });
+      url = sub.url;
+    } else {
+      // Cloudinary aún no está configurado en este entorno: se conserva el camino anterior para no bloquear el alta.
+      const ruta = `${negocioId}/logo.${ext}`;
+      const { error: eUpload } = await supabase.storage
+        .from("negocio-media")
+        .upload(ruta, bytes, { contentType: mime, upsert: true });
+      if (eUpload) return { ok: false, error: eUpload.message };
+      const { data: pub } = supabase.storage.from("negocio-media").getPublicUrl(ruta);
+      url = `${pub.publicUrl}?v=${Date.now()}`;
+    }
 
     await supabase.from("negocio").update({ logo_url: url }).eq("id", negocioId);
     revalidatePath("/panel/onboarding");
@@ -176,137 +184,117 @@ export async function elegirPlan(
   }
 }
 
-// ── Paso 2 — Sede ───────────────────────────────────────────────────────────
+// ── Paso 1 — Fotografía principal (fachada) ────────────────────────────────
 
-export interface HorarioDia {
-  abierto: boolean;
-  inicio: string;
-  fin: string;
+/** ¿Hay almacenamiento de imágenes de Cloudinary en este entorno? (la fachada no usa Supabase Storage nunca). */
+export async function almacenamientoDeImagenesDisponible(): Promise<boolean> {
+  return configCloudinary() !== null;
 }
-export type HorarioSemana = Record<
-  "dom" | "lun" | "mar" | "mie" | "jue" | "vie" | "sab",
-  HorarioDia
->;
 
-export async function guardarSede(datos: {
-  sedeId: string | null;
-  negocioId: string;
+export async function subirFotoPrincipal(negocioId: string, dataUrl: string): Promise<Resultado<{ url: string }>> {
+  try {
+    const { supabase, userId } = await usuarioActual();
+    const { data: negocio } = await supabase
+      .from("negocio")
+      .select("id")
+      .eq("id", negocioId)
+      .eq("owner_user_id", userId)
+      .maybeSingle();
+    if (!negocio) return { ok: false, error: "No autorizado." };
+    if (!configCloudinary()) {
+      return { ok: false, error: "El almacenamiento de imágenes no está disponible por ahora. Podrás subir la fotografía desde tu panel." };
+    }
+
+    const match = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(dataUrl);
+    if (!match) return { ok: false, error: "Sube una imagen JPG, PNG o WebP." };
+    const bytes = Buffer.from(match[2], "base64");
+    if (bytes.byteLength > 8 * 1024 * 1024) return { ok: false, error: "La imagen no puede superar 8 MB." };
+
+    const sub = await subirImagenCloudinary({
+      bytes,
+      mime: match[1],
+      carpeta: `negocios/${negocioId}`,
+      publicId: "fachada",
+      maxBytes: 8 * 1024 * 1024,
+    });
+    // RPC de la migración 150: valida dueño, host de Cloudinary y la carpeta del propio negocio.
+    const { error } = await (supabase as unknown as {
+      rpc: (n: string, a: object) => Promise<{ error: { message: string } | null }>;
+    }).rpc("fijar_foto_principal_negocio", {
+      p_negocio_id: negocioId,
+      p_url: sub.url,
+      p_public_id: sub.publicId,
+    });
+    if (error) return { ok: false, error: "No pudimos guardar la fotografía. Intenta de nuevo." };
+    revalidatePath("/panel/onboarding");
+    return { ok: true, data: { url: sub.url } };
+  } catch (e) {
+    const m = e instanceof Error ? e.message : "";
+    if (m === "ARCHIVO_DEMASIADO_GRANDE") return { ok: false, error: "La imagen no puede superar 8 MB." };
+    if (m === "TIPO_NO_PERMITIDO") return { ok: false, error: "Sube una imagen JPG, PNG o WebP." };
+    return { ok: false, error: "No pudimos subir la fotografía. Intenta de nuevo." };
+  }
+}
+
+// ── Paso 4 — Activar la prueba y cerrar el alta ─────────────────────────────
+
+export interface ResumenAlta {
   nombre: string;
-  direccion: string;
-  ciudad: string;
-  horario: HorarioSemana;
-  latitud: number | null;
-  longitud: number | null;
-}): Promise<Resultado<{ id: string }>> {
-  try {
-    const { supabase } = await usuarioActual();
-
-    const horarioBase = Object.fromEntries(
-      Object.entries(datos.horario)
-        .filter(([, d]) => d.abierto)
-        .map(([dia, d]) => [dia, [[d.inicio, d.fin]]])
-    );
-
-    const payload = {
-      negocio_id: datos.negocioId,
-      nombre: datos.nombre,
-      direccion: datos.direccion,
-      ciudad: datos.ciudad,
-      horario_base: horarioBase,
-      latitud: datos.latitud,
-      longitud: datos.longitud,
-    };
-
-    if (datos.sedeId) {
-      const { error } = await supabase.from("sede").update(payload).eq("id", datos.sedeId);
-      if (error) return { ok: false, error: error.message };
-      revalidatePath("/panel/onboarding");
-      return { ok: true, data: { id: datos.sedeId } };
-    }
-
-    const { data, error } = await supabase.from("sede").insert(payload).select("id").single();
-    if (error) return { ok: false, error: error.message };
-    revalidatePath("/panel/onboarding");
-    return { ok: true, data: { id: data.id } };
-  } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
-  }
+  fotoUrl: string | null;
+  planCodigo: string;
+  pruebaInicio: string;
+  pruebaFin: string;
+  conMetodoPago: boolean;
 }
 
-// Paso 3 — Servicios: `crearServicio`/`eliminarServicio` viven en
-// `@/app/panel/servicios/actions` desde el Módulo 2.5 — un solo lugar para
-// esa lógica (validaciones de duración/precio/duplicados), reutilizado aquí
-// y en el Panel de Servicios completo. El wizard las importa directo.
-
-// ── Paso 4 — Invitar Staff (opcional) ───────────────────────────────────────
-
-export async function invitarStaff(negocioId: string, email: string, sedeId: string): Promise<Resultado<{ correoEnviado: boolean; enlace: string }>> {
+/**
+ * Activa la prueba (sin tarjeta; el servidor fija fechas y reglas antiabuso) y cierra el onboarding. Idempotente:
+ * si la prueba ya está activa por un reintento o una doble pulsación, no crea otra; solo confirma el cierre.
+ */
+export async function activarPruebaYCompletar(entrada: DatosPrueba): Promise<Resultado<ResumenAlta>> {
   try {
-    const { supabase } = await usuarioActual();
-    const correo = email.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
-      return { ok: false, error: "Ese correo no parece válido." };
+    const { supabase, userId } = await usuarioActual();
+    const { data: previa } = await supabase
+      .from("suscripcion")
+      .select("estado")
+      .eq("negocio_id", entrada.negocioId)
+      .maybeSingle();
+
+    if (previa?.estado !== "TRIAL") {
+      const r = await iniciarPrueba(entrada);
+      if (!r.ok) return r;
     }
 
-    // Mismo RPC que usa el Módulo 2.4 (panel/staff/actions.ts) — un solo
-    // camino para crear invitaciones, sin duplicar la lógica de tope de plan
-    // ni el upsert por (negocio_id, email).
-    const { data: invitacion, error } = await supabase.rpc("crear_invitacion_staff", {
-      p_negocio_id: negocioId,
-      p_email: correo,
-      p_sede_id: sedeId,
-    });
-    if (error) {
-      if (error.message.includes("PLAN_LIMIT_EXCEEDED")) {
-        return { ok: false, error: "Tu plan no permite más Staff — puedes seguir sin invitar y sumarlo después." };
-      }
-      return { ok: false, error: error.message };
-    }
-
-    const { data: negocio } = await supabase.from("negocio").select("nombre").eq("id", negocioId).single();
-    const envio = await enviarInvitacionStaff(correo, negocio?.nombre ?? "un negocio en StylerNow", invitacion.id);
-
-    revalidatePath("/panel/onboarding");
-    return { ok: true, data: { correoEnviado: envio.enviado, enlace: envio.enlace } };
-  } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
-  }
-}
-
-
-export async function cancelarInvitacion(invitacionId: string): Promise<Resultado> {
-  try {
-    const { supabase } = await usuarioActual();
-    const { error } = await supabase.rpc("cancelar_invitacion", { p_invitacion_id: invitacionId });
-    if (error) return { ok: false, error: error.message };
-    revalidatePath("/panel/onboarding");
-    return { ok: true };
-  } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
-  }
-}
-
-// ── Envío a aprobación ───────────────────────────────────────────────────────
-
-export async function enviarAAprobacion(negocioId: string): Promise<Resultado> {
-  try {
-    const { supabase } = await usuarioActual();
-    const { error } = await supabase.rpc("enviar_negocio_a_aprobacion", {
-      p_negocio_id: negocioId,
-    });
+    const { error } = await (supabase as unknown as {
+      rpc: (n: string, a: object) => Promise<{ error: { message: string } | null }>;
+    }).rpc("completar_onboarding_negocio", { p_negocio_id: entrada.negocioId });
     if (error) {
       const mensajes: Record<string, string> = {
-        FALTA_SEDE: "Agrega al menos una Sede antes de enviar a aprobación.",
-        FALTA_SERVICIO: "Agrega al menos un Servicio antes de enviar a aprobación.",
-        FALTA_PLAN: "Elige un Plan antes de enviar a aprobación.",
+        FALTA_SEDE: "Falta la ubicación de tu negocio. Vuelve al paso 2.",
+        FALTA_PRUEBA_ACTIVA: "No pudimos activar tu prueba. Intenta de nuevo.",
         NO_AUTORIZADO: "No tienes permiso sobre este negocio.",
       };
       const clave = Object.keys(mensajes).find((k) => error.message.includes(k));
-      return { ok: false, error: clave ? mensajes[clave] : error.message };
+      return { ok: false, error: clave ? mensajes[clave] : "No pudimos completar el registro. Intenta de nuevo." };
     }
+
+    const [{ data: negocio }, { data: susc }] = await Promise.all([
+      supabase.from("negocio").select("nombre, foto_principal_url").eq("id", entrada.negocioId).eq("owner_user_id", userId).single(),
+      supabase.from("suscripcion").select("plan_codigo, prueba_inicio, prueba_fin, metodo_pago_ref").eq("negocio_id", entrada.negocioId).single(),
+    ]);
     revalidatePath("/panel");
     revalidatePath("/panel/onboarding");
-    return { ok: true };
+    return {
+      ok: true,
+      data: {
+        nombre: negocio?.nombre ?? "",
+        fotoUrl: negocio?.foto_principal_url ?? null,
+        planCodigo: susc?.plan_codigo ?? entrada.plan,
+        pruebaInicio: susc?.prueba_inicio ?? new Date().toISOString(),
+        pruebaFin: susc?.prueba_fin ?? new Date().toISOString(),
+        conMetodoPago: Boolean(susc?.metodo_pago_ref),
+      },
+    };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
   }

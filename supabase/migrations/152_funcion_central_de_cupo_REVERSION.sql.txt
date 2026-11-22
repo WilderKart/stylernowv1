@@ -1,0 +1,348 @@
+-- REVERSION de 152 (probada en Docker local). Restaura los 4 criterios anteriores de cupo. Solo contra la base local salvo orden expresa.
+-- Las invitaciones creadas con rol BUSINESS_ADMIN/ADMIN_BARBER conservan su columna rol_invitado (la quita la reversion de 151) pero la funcion antigua las trata como BARBER.
+begin;
+drop trigger if exists trg_vinculo_cupo on public.vinculo_staff_negocio;
+drop trigger if exists trg_invitacion_cupo on public.invitacion_staff;
+drop function if exists public.cambiar_rol_equipo(uuid, text);
+drop function if exists public.crear_invitacion_staff(uuid, text, uuid, numeric, text);
+CREATE OR REPLACE FUNCTION public.crear_invitacion_staff(p_negocio_id uuid, p_email text, p_sede_id uuid, p_comision_pct numeric DEFAULT NULL::numeric)
+ RETURNS invitacion_staff
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_plan public.plan;
+  v_conteo int;
+  v_email text := lower(trim(p_email));
+  v_invitacion public.invitacion_staff;
+begin
+  if not public.is_barberia_de(p_negocio_id) then
+    raise exception 'NO_AUTORIZADO';
+  end if;
+
+  if not exists (select 1 from public.sede where id = p_sede_id and negocio_id = p_negocio_id) then
+    raise exception 'SEDE_NO_PERTENECE_AL_NEGOCIO';
+  end if;
+
+  -- Tope duro del plan (staff_tope_absoluto — solo Raven lo define hoy):
+  -- cuenta vínculos que ya ocupan un cupo + invitaciones pendientes de OTROS
+  -- correos, para no permitir sobre-reservar el cupo invitando de más.
+  select p.* into v_plan from public.plan p
+  join public.negocio n on n.plan_codigo = p.codigo
+  where n.id = p_negocio_id;
+
+  select
+    (select count(*) from public.vinculo_staff_negocio
+      where negocio_id = p_negocio_id and estado in ('ACTIVO', 'SUSPENDIDO', 'INVITADO'))
+    + (select count(*) from public.invitacion_staff
+        where negocio_id = p_negocio_id and estado = 'PENDIENTE' and email <> v_email)
+  into v_conteo;
+
+  if v_plan.staff_tope_absoluto is not null and v_conteo >= v_plan.staff_tope_absoluto then
+    raise exception 'PLAN_LIMIT_EXCEEDED';
+  end if;
+
+  if p_comision_pct is not null and not public.negocio_tiene_funcion(p_negocio_id, 'comisiones_turnos') then
+    raise exception 'PLAN_NO_INCLUYE_COMISIONES';
+  end if;
+
+  insert into public.invitacion_staff (negocio_id, email, sede_id, comision_pct, invitado_por)
+  values (p_negocio_id, v_email, p_sede_id, p_comision_pct, auth.uid())
+  on conflict (negocio_id, email) do update
+    set estado = 'PENDIENTE',
+        sede_id = excluded.sede_id,
+        comision_pct = excluded.comision_pct,
+        expira_at = now() + interval '7 days',
+        respondida_at = null
+  returning * into v_invitacion;
+
+  insert into public.evento_auditoria (entidad_tipo, entidad_id, accion, actor_tipo, actor_id, negocio_id, payload_despues)
+  values ('invitacion_staff', v_invitacion.id, 'STAFF_INVITADO', 'BARBERIA', auth.uid(), p_negocio_id,
+    jsonb_build_object('email', v_invitacion.email, 'sede_id', p_sede_id));
+
+  return v_invitacion;
+end;
+$function$
+;
+revoke all on function public.crear_invitacion_staff(uuid, text, uuid, numeric) from public, anon, authenticated;
+grant execute on function public.crear_invitacion_staff(uuid, text, uuid, numeric) to authenticated;
+CREATE OR REPLACE FUNCTION public.responder_invitacion(p_invitacion_id uuid, p_aceptar boolean)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_invitacion public.invitacion_staff;
+  v_mi_email text;
+  v_plan public.plan;
+  v_conteo int;
+  v_sede_id uuid;
+  v_vinculo_existente public.vinculo_staff_negocio;
+  v_vinculo public.vinculo_staff_negocio;
+  v_perfil_nombre text;
+begin
+  select * into v_invitacion from public.invitacion_staff where id = p_invitacion_id;
+  if not found then
+    raise exception 'INVITACION_NO_ENCONTRADA';
+  end if;
+
+  select email into v_mi_email from public.perfil where id = auth.uid();
+  if v_mi_email is null or lower(v_mi_email) <> v_invitacion.email then
+    raise exception 'NO_AUTORIZADO';
+  end if;
+
+  if v_invitacion.estado <> 'PENDIENTE' then
+    raise exception 'INVITACION_NO_PENDIENTE';
+  end if;
+
+  if v_invitacion.expira_at < now() then
+    update public.invitacion_staff set estado = 'EXPIRADA' where id = p_invitacion_id;
+    raise exception 'INVITACION_EXPIRADA';
+  end if;
+
+  if p_aceptar and coalesce(current_setting('stylernow.aceptacion_staff', true), '') <> 'on' then
+    raise exception 'USA_ACEPTAR_INVITACION_STAFF';
+  end if;
+
+  if not p_aceptar then
+    update public.invitacion_staff set estado = 'RECHAZADA', respondida_at = now() where id = p_invitacion_id;
+    insert into public.evento_auditoria (entidad_tipo, entidad_id, accion, actor_tipo, actor_id, negocio_id)
+    values ('invitacion_staff', p_invitacion_id, 'STAFF_INVITACION_RECHAZADA', 'STAFF', auth.uid(), v_invitacion.negocio_id);
+    return jsonb_build_object('aceptada', false);
+  end if;
+
+  -- ADL-009: un Staff nunca tiene dos vínculos no-RETIRADO al mismo tiempo
+  -- (índice único parcial en vinculo_staff_negocio). Se valida acá para un
+  -- error legible en vez de que la caiga en la violación del índice.
+  if exists (
+    select 1 from public.vinculo_staff_negocio where staff_id = auth.uid() and estado <> 'RETIRADO'
+  ) then
+    raise exception 'YA_TIENE_VINCULO_ACTIVO';
+  end if;
+
+  select p.* into v_plan from public.plan p
+  join public.negocio n on n.plan_codigo = p.codigo where n.id = v_invitacion.negocio_id;
+  select count(*) into v_conteo from public.vinculo_staff_negocio
+    where negocio_id = v_invitacion.negocio_id and estado in ('ACTIVO', 'SUSPENDIDO');
+  if v_plan.staff_tope_absoluto is not null and v_conteo >= v_plan.staff_tope_absoluto then
+    raise exception 'PLAN_LIMIT_EXCEEDED';
+  end if;
+
+  select coalesce(
+    v_invitacion.sede_id,
+    (select id from public.sede where negocio_id = v_invitacion.negocio_id and es_principal limit 1)
+  ) into v_sede_id;
+
+  select nombre into v_perfil_nombre from public.perfil where id = auth.uid();
+
+  insert into public.staff (usuario_id, nombre)
+  values (auth.uid(), coalesce(v_perfil_nombre, 'Staff'))
+  on conflict (usuario_id) do nothing;
+
+  -- Reingreso al mismo negocio tras haber sido retirado antes: se reactiva
+  -- la MISMA fila de vínculo (no una nueva) para no perder el historial de
+  -- nivel PRO/EXPERT/MASTER, que está indexado por vinculo_id.
+  select * into v_vinculo_existente from public.vinculo_staff_negocio
+    where staff_id = auth.uid() and negocio_id = v_invitacion.negocio_id
+    order by created_at desc limit 1;
+
+  if found then
+    update public.vinculo_staff_negocio
+    set estado = 'ACTIVO',
+        sede_activa_id = v_sede_id,
+        comision_pct = coalesce(v_invitacion.comision_pct, comision_pct),
+        fecha_ingreso = coalesce(fecha_ingreso, now()),
+        es_guardian = false
+    where id = v_vinculo_existente.id
+    returning * into v_vinculo;
+  else
+    insert into public.vinculo_staff_negocio (staff_id, negocio_id, sede_activa_id, comision_pct, estado, fecha_ingreso)
+    values (auth.uid(), v_invitacion.negocio_id, v_sede_id, v_invitacion.comision_pct, 'ACTIVO', now())
+    returning * into v_vinculo;
+  end if;
+
+  update public.invitacion_staff set estado = 'ACEPTADA', respondida_at = now() where id = p_invitacion_id;
+
+  insert into public.evento_auditoria (entidad_tipo, entidad_id, accion, actor_tipo, actor_id, negocio_id, payload_despues)
+  values ('vinculo_staff_negocio', v_vinculo.id, 'STAFF_VINCULADO', 'STAFF', auth.uid(), v_invitacion.negocio_id,
+    jsonb_build_object('sede_id', v_sede_id, 'invitacion_id', p_invitacion_id));
+
+  return jsonb_build_object('aceptada', true, 'vinculo_id', v_vinculo.id, 'negocio_id', v_invitacion.negocio_id);
+end;
+$function$
+;
+CREATE OR REPLACE FUNCTION public.cupo_plan_negocio(p_negocio_id uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_plan public.plan;
+  v_siguiente public.plan;
+  v_staff int;
+  v_sedes int;
+begin
+  if not (public.is_barberia_de(p_negocio_id) or public.is_staff_de(p_negocio_id) or public.is_supersu()) then
+    raise exception 'NO_AUTORIZADO';
+  end if;
+
+  select p.* into v_plan from public.plan p
+  join public.negocio n on n.plan_codigo = p.codigo where n.id = p_negocio_id;
+  if not found then
+    return null;
+  end if;
+
+  select
+    (select count(*) from public.vinculo_staff_negocio
+      where negocio_id = p_negocio_id and estado in ('ACTIVO', 'SUSPENDIDO', 'INVITADO'))
+    + (select count(*) from public.invitacion_staff where negocio_id = p_negocio_id and estado = 'PENDIENTE')
+  into v_staff;
+  select count(*) into v_sedes from public.sede where negocio_id = p_negocio_id and not cerrada_permanente;
+
+  -- Siguiente plan de la escalera (por capacidad de Staff); Signature es el último.
+  select s.* into v_siguiente from public.plan s
+  where s.codigo <> v_plan.codigo and coalesce(s.staff_incluido, 0) > coalesce(v_plan.staff_incluido, 0)
+  order by s.staff_incluido asc limit 1;
+
+  return jsonb_build_object(
+    'plan_codigo', v_plan.codigo, 'plan_nombre', v_plan.nombre,
+    'staff_tope', v_plan.staff_tope_absoluto, 'staff_incluido', v_plan.staff_incluido, 'staff_usado', v_staff,
+    'sedes_tope', v_plan.limite_sedes, 'sedes_usadas', v_sedes,
+    'guardian_disponible', v_plan.guardian_disponible,
+    'comisiones', public.negocio_tiene_funcion(p_negocio_id, 'comisiones_turnos'),
+    'siguiente_codigo', v_siguiente.codigo, 'siguiente_nombre', v_siguiente.nombre,
+    'siguiente_staff', v_siguiente.staff_incluido
+  );
+end;
+$function$
+;
+CREATE OR REPLACE FUNCTION public.solicitar_downgrade_plan(p_negocio_id uuid, p_plan_codigo_destino plan_codigo)
+ RETURNS suscripcion
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_suscripcion public.suscripcion;
+  v_plan_actual public.plan;
+  v_plan_destino public.plan;
+  v_sedes_activas int;
+  v_staff_activo int;
+begin
+  if not public.is_barberia_de(p_negocio_id) then
+    raise exception 'NO_AUTORIZADO';
+  end if;
+
+  select * into v_suscripcion from public.suscripcion where negocio_id = p_negocio_id for update;
+  if not found or v_suscripcion.estado <> 'ACTIVA' then
+    raise exception 'SUSCRIPCION_NO_ACTIVA';
+  end if;
+
+  if p_plan_codigo_destino = 'SIGNATURE' then
+    raise exception 'SIGNATURE_REQUIERE_COTIZACION';
+  end if;
+
+  select * into v_plan_actual from public.plan where codigo = v_suscripcion.plan_codigo;
+  select * into v_plan_destino from public.plan where codigo = p_plan_codigo_destino;
+
+  if v_plan_destino.precio_mensual is null or v_plan_actual.precio_mensual is null
+     or v_plan_destino.precio_mensual >= v_plan_actual.precio_mensual then
+    raise exception 'NO_ES_DOWNGRADE';
+  end if;
+
+  select count(*) into v_sedes_activas from public.sede
+  where negocio_id = p_negocio_id and not cerrada_permanente and not cerrada_temporalmente;
+  if v_plan_destino.limite_sedes is not null and v_sedes_activas > v_plan_destino.limite_sedes then
+    raise exception 'EXCEDE_LIMITE_SEDES';
+  end if;
+
+  select count(*) into v_staff_activo from public.vinculo_staff_negocio
+  where negocio_id = p_negocio_id and estado = 'ACTIVO';
+  if v_plan_destino.staff_tope_absoluto is not null and v_staff_activo > v_plan_destino.staff_tope_absoluto then
+    raise exception 'EXCEDE_LIMITE_STAFF';
+  end if;
+
+  update public.suscripcion
+  set plan_codigo_destino = p_plan_codigo_destino, updated_at = now()
+  where negocio_id = p_negocio_id
+  returning * into v_suscripcion;
+
+  insert into public.evento_auditoria (entidad_tipo, entidad_id, accion, actor_tipo, actor_id, negocio_id, payload_despues)
+  values ('suscripcion', v_suscripcion.id, 'DOWNGRADE_PROGRAMADO', 'BARBERIA', auth.uid(), p_negocio_id,
+    jsonb_build_object('plan_codigo_destino', p_plan_codigo_destino, 'efectivo_desde', v_suscripcion.fecha_proximo_cobro));
+
+  return v_suscripcion;
+end;
+$function$
+;
+CREATE OR REPLACE FUNCTION public.ejecutar_downgrades_programados()
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_row record;
+  v_plan_destino public.plan;
+  v_sedes_activas int;
+  v_staff_activo int;
+  v_ejecutados int := 0;
+  v_cancelados int := 0;
+begin
+  for v_row in
+    select * from public.suscripcion
+    where plan_codigo_destino is not null and fecha_proximo_cobro <= now() and estado = 'ACTIVA'
+    for update
+  loop
+    select * into v_plan_destino from public.plan where codigo = v_row.plan_codigo_destino;
+
+    select count(*) into v_sedes_activas from public.sede
+    where negocio_id = v_row.negocio_id and not cerrada_permanente and not cerrada_temporalmente;
+    select count(*) into v_staff_activo from public.vinculo_staff_negocio
+    where negocio_id = v_row.negocio_id and estado = 'ACTIVO';
+
+    if (v_plan_destino.limite_sedes is not null and v_sedes_activas > v_plan_destino.limite_sedes)
+       or (v_plan_destino.staff_tope_absoluto is not null and v_staff_activo > v_plan_destino.staff_tope_absoluto) then
+      update public.suscripcion set plan_codigo_destino = null, updated_at = now() where id = v_row.id;
+
+      insert into public.evento_auditoria (entidad_tipo, entidad_id, accion, actor_tipo, negocio_id, payload_despues)
+      values ('suscripcion', v_row.id, 'DOWNGRADE_CANCELADO_POR_LIMITE', 'SISTEMA', v_row.negocio_id,
+        jsonb_build_object('plan_codigo_destino_cancelado', v_row.plan_codigo_destino));
+
+      insert into public.notificacion_envio (destinatario_id, evento, categoria, canal, negocio_id)
+      select n.owner_user_id, 'DOWNGRADE_CANCELADO_POR_LIMITE', 'SUSCRIPCION', 'PANEL_INTERNO', v_row.negocio_id
+      from public.negocio n where n.id = v_row.negocio_id;
+
+      v_cancelados := v_cancelados + 1;
+    else
+      update public.suscripcion
+      set plan_codigo = v_row.plan_codigo_destino,
+          plan_codigo_destino = null,
+          fecha_inicio_ciclo = now(),
+          fecha_proximo_cobro = now() + interval '30 days',
+          updated_at = now()
+      where id = v_row.id;
+
+      update public.negocio set plan_codigo = v_row.plan_codigo_destino, updated_at = now() where id = v_row.negocio_id;
+
+      insert into public.evento_auditoria (entidad_tipo, entidad_id, accion, actor_tipo, negocio_id, payload_despues)
+      values ('suscripcion', v_row.id, 'DOWNGRADE_EJECUTADO', 'SISTEMA', v_row.negocio_id,
+        jsonb_build_object('plan_codigo', v_row.plan_codigo_destino));
+
+      v_ejecutados := v_ejecutados + 1;
+    end if;
+  end loop;
+
+  return jsonb_build_object('ejecutados', v_ejecutados, 'cancelados_por_limite', v_cancelados);
+end;
+$function$
+;
+drop function if exists public.capacidad_profesional_negocio(uuid);
+drop function if exists public.trg_vinculo_cupo();
+drop function if exists public.trg_invitacion_cupo();
+drop function if exists public._capacidad_profesional(uuid, text, int, text);
+drop function if exists public._cupo_bloquear(uuid);
+commit;

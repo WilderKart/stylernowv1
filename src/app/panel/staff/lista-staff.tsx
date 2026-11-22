@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import type { PermisosPanel } from "@/lib/auth/resolver-contexto";
+import { ETIQUETA_ROL, type RolAsignable } from "@/lib/auth/roles-equipo";
 import { useEnLinea } from "@/lib/hooks/use-en-linea";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -21,6 +22,8 @@ interface InvitacionPendiente {
   sedeId: string | null;
   expiraAt: string;
   reenviosCount: number;
+  rol: RolAsignable;
+  vigente: boolean;
 }
 
 const LIMITE_PAGINA = 20;
@@ -37,6 +40,9 @@ export function ListaStaff({
   sedeIdFijo,
   sedes,
   permisos,
+  avisoCupo = null,
+  resumenCupo = null,
+  puedeContratarAdicionales = false,
   itemsIniciales,
   totalInicial,
   invitacionesIniciales,
@@ -47,6 +53,12 @@ export function ListaStaff({
   sedeIdFijo: string | null;
   sedes: { id: string; nombre: string }[];
   permisos: PermisosPanel;
+  /** Texto de «equipo completo» si el plan ya no admite más profesionales; null si hay cupo. */
+  avisoCupo?: string | null;
+  /** «X de Y cupos de profesional ocupados» (función central de capacidad). */
+  resumenCupo?: string | null;
+  /** Solo el propietario contrata barberos adicionales (el administrador delegado ve el aviso pero no el botón). */
+  puedeContratarAdicionales?: boolean;
   itemsIniciales: StaffItem[];
   totalInicial: number;
   invitacionesIniciales: InvitacionPendiente[];
@@ -138,18 +150,37 @@ export function ListaStaff({
         <div>
           <h1 className="font-display text-[22px] font-bold uppercase text-text">Staff</h1>
           <p className="mt-1 text-[12.5px] text-text-muted">
-            {total} persona{total === 1 ? "" : "s"} en el equipo
+            {total} persona{total === 1 ? "" : "s"} en el equipo{resumenCupo ? ` · ${resumenCupo}` : ""}
           </p>
         </div>
-        {permisos.invitarStaff ? (
-          <Link
-            href="/panel/staff/nuevo"
-            className="shrink-0 rounded-none bg-accent px-4 py-2.5 text-[12.5px] font-bold text-ink hover:bg-accent-hover"
-          >
-            + INVITAR STAFF
-          </Link>
-        ) : null}
+        <div className="flex flex-wrap gap-2">
+          {puedeContratarAdicionales ? (
+            <Link
+              href="/panel/staff/adicionales"
+              className="shrink-0 border-2 border-border px-4 py-2.5 text-[12.5px] font-bold uppercase text-text hover:bg-text hover:text-bg"
+            >
+              Agregar barberos adicionales
+            </Link>
+          ) : null}
+          {permisos.invitarStaff ? (
+            <Link
+              href="/panel/staff/nuevo"
+              className="shrink-0 rounded-none bg-accent px-4 py-2.5 text-[12.5px] font-bold text-ink hover:bg-accent-hover"
+            >
+              + INVITAR AL EQUIPO
+            </Link>
+          ) : null}
+        </div>
       </div>
+
+      {avisoCupo ? (
+        <Card className="mb-4 border-accent bg-bg">
+          <p className="text-[12.5px] leading-relaxed text-text-muted">{avisoCupo}</p>
+          <Link href={puedeContratarAdicionales ? "/panel/staff/adicionales" : "/panel/suscripcion"} className="mt-2 inline-block text-[12px] font-bold uppercase text-accent">
+            {puedeContratarAdicionales ? "Agregar barberos adicionales" : "Ver mi plan"}
+          </Link>
+        </Card>
+      ) : null}
 
       {!enLinea ? (
         <Card className="mb-4 border-danger/30 bg-danger-soft">
@@ -180,6 +211,8 @@ export function ListaStaff({
                       month: "short",
                     })}
                     {inv.reenviosCount > 0 ? ` · reenviada ${inv.reenviosCount}x` : ""}
+                    {` · ${ETIQUETA_ROL[inv.rol]}`}
+                    {inv.vigente ? "" : " · vencida (no ocupa cupo)"}
                   </p>
                 </div>
                 <div className="flex shrink-0 gap-1.5">
@@ -280,6 +313,7 @@ export function ListaStaff({
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="truncate text-[14px] font-bold text-text">{s.nombre}</p>
+                        <Badge tone={s.rol === "BARBER" ? "neutral" : "accent"}>{ETIQUETA_ROL[s.rol].toUpperCase()}</Badge>
                         {s.esGuardian ? <Badge tone="accent">GUARDIAN</Badge> : null}
                         {s.nivel ? <Badge tone="neutral">{s.nivel}</Badge> : null}
                       </div>

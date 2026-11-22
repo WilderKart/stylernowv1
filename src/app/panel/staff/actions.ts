@@ -1,8 +1,10 @@
 "use server";
 
+import { MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
 import { enviarInvitacionStaff } from "@/lib/correo/invitacion-staff";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { derivarRolEquipo, type RolAsignable, type RolEquipo, ROLES_ASIGNABLES } from "@/lib/auth/roles-equipo";
 
 type Resultado<T = undefined> =
   | ({ ok: true } & (T extends undefined ? object : { data: T }))
@@ -18,9 +20,14 @@ async function usuarioActual() {
 }
 
 const MENSAJES_ERROR: Record<string, string> = {
+  SUSCRIPCION_RESTRINGIDA: MENSAJE_RESTRINGIDA,
   NO_AUTORIZADO: "No tienes permiso sobre este Staff.",
   PLAN_LIMIT_EXCEEDED:
-    "Tu plan no permite más Staff. Haz un upgrade para sumar otro cupo (01-PRD/03_Monetization.md).",
+    "Tu plan ya tiene completo el cupo de profesionales. Actualiza tu plan desde Suscripción para invitar más.",
+  PLAN_NO_INCLUYE_COMISIONES:
+    "Las comisiones por profesional no están incluidas en tu plan. Actualiza tu plan para usarlas.",
+  PLAN_NO_INCLUYE_GUARDIAN:
+    "El perfil Guardián no está incluido en tu plan. Actualiza tu plan desde Suscripción para usarlo.",
   SEDE_NO_PERTENECE_AL_NEGOCIO: "Esa sede no pertenece a este negocio.",
   YA_TIENE_VINCULO_ACTIVO: "Ese correo ya pertenece a un Staff activo en otro negocio.",
   INVITACION_NO_PENDIENTE: "Esa invitación ya no está pendiente.",
@@ -29,6 +36,15 @@ const MENSAJES_ERROR: Record<string, string> = {
   STAFF_NO_ACTIVO: "Ese Staff no está activo.",
   STAFF_NO_SUSPENDIDO: "Ese Staff no está suspendido.",
   STAFF_YA_RETIRADO: "Ese Staff ya no pertenece al negocio.",
+  ROL_INVALIDO: "Ese rol no existe.",
+  FALTA_SEDE: "Necesitas una sede operativa antes de activar tu perfil profesional.",
+  PERFIL_NO_PERMITIDO_POR_PLAN: "Tu plan no permite activar el perfil profesional del propietario.",
+  DESACTIVAR_NO_PERMITIDO_POR_PLAN: "Tu plan no permite desactivar el perfil profesional del propietario.",
+  COMISION_NO_APLICA_A_ADMINISTRADOR: "Un administrador que no atiende clientes no tiene comisión.",
+  TIENE_RESERVAS_FUTURAS:
+    "Tiene reservas futuras asignadas. Reasígnalas o cancélalas antes de quitarle el perfil profesional.",
+  ROL_PROPIETARIO_NO_CAMBIA: "El rol del propietario no se cambia aquí. Activa o desactiva tu perfil profesional desde el Resumen.",
+  STAFF_NO_PRESTA_SERVICIOS: "Esa persona es administradora y no atiende clientes, así que no se le asignan servicios ni citas.",
   FALTA_SEDE_ACTIVA: "Este Staff todavía no tiene una sede asignada — trasládalo a una sede antes de promoverlo.",
   YA_ES_GUARDIAN: "Ese Staff ya tiene el perfil Guardian.",
   NO_ES_GUARDIAN: "Ese Staff no tiene el perfil Guardian.",
@@ -56,6 +72,10 @@ export interface StaffItem {
   comisionPct: number | null;
   fechaIngreso: string | null;
   nivel: "PRO" | "EXPERT" | "MASTER" | null;
+  esAdmin: boolean;
+  prestaServicios: boolean;
+  /** Rol derivado de capacidades (el propietario se reconoce por ser el dueño del negocio). */
+  rol: RolEquipo;
 }
 
 export interface FiltroStaff {
@@ -112,8 +132,13 @@ export async function listarStaff(
     const limite = filtro.limite ?? 20;
     q = q.range(offset, offset + limite - 1);
 
-    const { data, error, count } = await q;
+    const [{ data, error, count }, { data: negocioDueno }] = await Promise.all([
+      q,
+      // El propietario no se guarda en el vínculo: se reconoce por ser el dueño del negocio (migración 151).
+      supabase.from("negocio").select("owner_user_id").eq("id", filtro.negocioId).maybeSingle(),
+    ]);
     if (error) return { ok: false, error: error.message };
+    const propietarioId = negocioDueno?.owner_user_id ?? null;
 
     // La vista hace join/left join sobre columnas que en la práctica nunca
     // son null (vinculo_id, staff_id, nombre, es_guardian, estado vienen de
@@ -134,6 +159,13 @@ export async function listarStaff(
       comisionPct: r.comision_pct,
       fechaIngreso: r.fecha_ingreso,
       nivel: r.nivel,
+      esAdmin: r.es_admin ?? false,
+      prestaServicios: r.presta_servicios ?? true,
+      rol: derivarRolEquipo({
+        esPropietario: propietarioId !== null && r.staff_id === propietarioId,
+        esAdmin: r.es_admin ?? false,
+        prestaServicios: r.presta_servicios ?? true,
+      }),
     }));
 
     return { ok: true, data: { items, total: count ?? 0 } };
@@ -149,6 +181,8 @@ export async function crearInvitacionStaff(datos: {
   email: string;
   sedeId: string;
   comisionPct?: number;
+  /** Rol con el que se invita. El servidor decide quién puede invitar cada rol (un administrador delegado solo invita BARBER). */
+  rol?: RolAsignable;
 }): Promise<Resultado<{ correoEnviado: boolean; enlace: string }>> {
   try {
     const { supabase } = await usuarioActual();
@@ -161,6 +195,7 @@ export async function crearInvitacionStaff(datos: {
       p_email: correo,
       p_sede_id: datos.sedeId,
       p_comision_pct: datos.comisionPct ?? undefined,
+      p_rol: datos.rol ?? "BARBER",
     });
     if (error) return { ok: false, error: traducirError(error.message) };
 
@@ -169,7 +204,7 @@ export async function crearInvitacionStaff(datos: {
       .select("nombre")
       .eq("id", datos.negocioId)
       .single();
-    const envio = await enviarInvitacionStaff(correo, negocio?.nombre ?? "un negocio en StylerNow", invitacion.id);
+    const envio = await enviarInvitacionStaff(correo, negocio?.nombre ?? "un negocio en StylerNow", invitacion.id, datos.rol ?? "BARBER");
 
     revalidatePath("/panel/staff");
     return { ok: true, data: { correoEnviado: envio.enviado, enlace: envio.enlace } };
@@ -191,7 +226,7 @@ export async function reenviarInvitacion(invitacionId: string): Promise<Resultad
       .select("nombre")
       .eq("id", invitacion.negocio_id)
       .single();
-    const envio = await enviarInvitacionStaff(invitacion.email, negocio?.nombre ?? "un negocio en StylerNow", invitacion.id);
+    const envio = await enviarInvitacionStaff(invitacion.email, negocio?.nombre ?? "un negocio en StylerNow", invitacion.id, (invitacion.rol_invitado as RolAsignable) ?? "BARBER");
 
     revalidatePath("/panel/staff");
     return { ok: true, data: { correoEnviado: envio.enviado, enlace: envio.enlace } };
@@ -214,12 +249,12 @@ export async function cancelarInvitacion(invitacionId: string): Promise<Resultad
 
 export async function listarInvitacionesPendientes(
   negocioId: string
-): Promise<Resultado<{ id: string; email: string; sedeId: string | null; expiraAt: string; reenviosCount: number }[]>> {
+): Promise<Resultado<{ id: string; email: string; sedeId: string | null; expiraAt: string; reenviosCount: number; rol: RolAsignable; vigente: boolean }[]>> {
   try {
     const { supabase } = await usuarioActual();
     const { data, error } = await supabase
       .from("invitacion_staff")
-      .select("id, email, sede_id, expira_at, reenvios_count")
+      .select("id, email, sede_id, expira_at, reenvios_count, rol_invitado")
       .eq("negocio_id", negocioId)
       .eq("estado", "PENDIENTE")
       .order("created_at", { ascending: false });
@@ -232,6 +267,8 @@ export async function listarInvitacionesPendientes(
         sedeId: i.sede_id,
         expiraAt: i.expira_at,
         reenviosCount: i.reenvios_count,
+        rol: (ROLES_ASIGNABLES as readonly string[]).includes(i.rol_invitado) ? (i.rol_invitado as RolAsignable) : "BARBER",
+        vigente: new Date(i.expira_at).getTime() > Date.now(),
       })),
     };
   } catch (e) {
@@ -241,6 +278,51 @@ export async function listarInvitacionesPendientes(
 
 
 // ── Ciclo de vida del vínculo ────────────────────────────────────────────
+
+// ── Roles del equipo y perfil profesional del propietario (migraciones 152 y 153) ─────────
+
+/** Cambia el rol de un integrante. Solo el propietario; el servidor valida el cupo (un rol que presta servicios lo consume). */
+export async function cambiarRolEquipo(vinculoId: string, rol: RolAsignable): Promise<Resultado> {
+  try {
+    if (!(ROLES_ASIGNABLES as readonly string[]).includes(rol)) return { ok: false, error: MENSAJES_ERROR.ROL_INVALIDO };
+    const { supabase } = await usuarioActual();
+    const { error } = await supabase.rpc("cambiar_rol_equipo", { p_vinculo_id: vinculoId, p_rol: rol });
+    if (error) return { ok: false, error: traducirError(error.message) };
+    revalidatePath("/panel/staff");
+    revalidatePath(`/panel/staff/${vinculoId}`);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
+/** El propietario activa su propio perfil profesional (consume un cupo). Idempotente. */
+export async function activarPerfilProfesional(negocioId: string): Promise<Resultado> {
+  try {
+    const { supabase } = await usuarioActual();
+    const { error } = await supabase.rpc("activar_perfil_profesional_propietario", { p_negocio_id: negocioId });
+    if (error) return { ok: false, error: traducirError(error.message) };
+    revalidatePath("/panel");
+    revalidatePath("/panel/staff");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
+/** El propietario deja de atender (libera su cupo). El servidor lo bloquea si tiene reservas futuras asignadas. */
+export async function desactivarPerfilProfesional(negocioId: string): Promise<Resultado> {
+  try {
+    const { supabase } = await usuarioActual();
+    const { error } = await supabase.rpc("desactivar_perfil_profesional_propietario", { p_negocio_id: negocioId });
+    if (error) return { ok: false, error: traducirError(error.message) };
+    revalidatePath("/panel");
+    revalidatePath("/panel/staff");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
 
 export async function promoverGuardian(vinculoId: string): Promise<Resultado> {
   try {

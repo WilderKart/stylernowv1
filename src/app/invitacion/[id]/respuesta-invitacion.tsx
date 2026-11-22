@@ -25,6 +25,7 @@ export function RespuestaInvitacion({
   const [enviando, setEnviando] = useState<"aceptar" | "rechazar" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [rechazada, setRechazada] = useState(false);
+  const [autoriza, setAutoriza] = useState(false);
 
   if (estado !== "PENDIENTE" || rechazada) {
     return (
@@ -45,7 +46,7 @@ export function RespuestaInvitacion({
   async function onResponder(aceptar: boolean) {
     setEnviando(aceptar ? "aceptar" : "rechazar");
     setError(null);
-    const res = await responderInvitacion(invitacionId, aceptar);
+    const res = await responderInvitacion(invitacionId, aceptar, autoriza);
     setEnviando(null);
     if (!res.ok) return setError(res.error);
     if (aceptar) router.push("/panel");
@@ -55,6 +56,10 @@ export function RespuestaInvitacion({
   return (
     <div className="mt-6">
       {error ? <p className="mb-3 text-[12.5px] font-semibold text-danger">{error}</p> : null}
+      <label className="mb-3 flex items-start gap-2 text-[12.5px] text-text-muted">
+        <input type="checkbox" checked={autoriza} onChange={(e) => setAutoriza(e.target.checked)} className="mt-0.5" />
+        <span>Autorizo el tratamiento de mis datos para gestionar mi vínculo, mi agenda y mis turnos en este negocio (necesario para aceptar).</span>
+      </label>
       <div className="flex gap-2">
         <Button
           variant="secondary"
@@ -68,7 +73,7 @@ export function RespuestaInvitacion({
         <Button
           className="flex-1"
           loading={enviando === "aceptar"}
-          disabled={enviando !== null}
+          disabled={enviando !== null || !autoriza}
           onClick={() => onResponder(true)}
         >
           Aceptar

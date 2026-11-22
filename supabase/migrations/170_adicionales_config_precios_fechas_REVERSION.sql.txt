@@ -1,0 +1,6 @@
+-- Reversión de 170 (ejecutar DESPUÉS de revertir 171-179, que dependen de estas tablas).
+drop function if exists public.adicional_dias_para(timestamptz, timestamptz);
+drop function if exists public.adicional_fecha_bogota(timestamptz);
+drop function if exists public.adicional_fin_periodo(timestamptz, int);
+drop table if exists public.adicional_precio_plan;
+drop table if exists public.adicional_config;

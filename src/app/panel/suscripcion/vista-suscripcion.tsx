@@ -23,6 +23,7 @@ import {
   type PlanCodigo,
 } from "./actions";
 import type { FundadorActivo } from "./datos";
+import { obtenerDispositivoId, rasgosDelEquipo } from "@/lib/prueba/huella-dispositivo";
 import { iniciarPrueba } from "./prueba";
 import type { ConfigPrueba } from "./config-prueba";
 
@@ -93,6 +94,7 @@ const T = {
   historialVacio: "Todavía no has hecho pagos de plan.",
   conceptoPlan: "Plan",
   conceptoUpgrade: "Upgrade",
+  conceptoAdicional: "Barberos adicionales",
   estadosPago: { PENDIENTE: "Pendiente", APROBADO: "Aprobado", RECHAZADO: "Rechazado", REEMBOLSADO: "Reembolsado" } as Record<string, string>,
 };
 
@@ -103,44 +105,6 @@ function puedePagarPlan(s: MiSuscripcion): boolean {
   if (s.estado === "SUSPENDIDA") return (s.suspendidoCausa ?? "IMPAGO") === "IMPAGO";
   if (s.estado === "ACTIVA") return new Date(s.fechaProximoCobro).getTime() - Date.now() <= 7 * 86_400_000;
   return false;
-}
-
-const CLAVE_DISPOSITIVO = "sn_dispositivo_id";
-
-/**
- * Rasgos estables del equipo para el antiabuso de la prueba (migración 135). No identifican a la persona:
- * el servidor solo guarda su HMAC y lo combina con la red.
- */
-function rasgosDelEquipo(): string {
-  try {
-    const n = navigator as Navigator & { deviceMemory?: number };
-    return [
-      n.userAgent,
-      n.language,
-      Intl.DateTimeFormat().resolvedOptions().timeZone,
-      `${screen.width}x${screen.height}x${screen.colorDepth}`,
-      String(window.devicePixelRatio),
-      String(n.hardwareConcurrency ?? ""),
-      String(n.deviceMemory ?? ""),
-    ]
-      .join("|")
-      .slice(0, 600);
-  } catch {
-    return "equipo-desconocido";
-  }
-}
-
-/** Identificador estable del dispositivo: se genera una vez y se persiste (try/catch por si el almacenamiento falla). */
-function obtenerDispositivoId(): string {
-  try {
-    const existente = window.localStorage.getItem(CLAVE_DISPOSITIVO);
-    if (existente) return existente;
-    const nuevo = crypto.randomUUID();
-    window.localStorage.setItem(CLAVE_DISPOSITIVO, nuevo);
-    return nuevo;
-  } catch {
-    return crypto.randomUUID();
-  }
 }
 
 function fechaCorta(iso: string, locale: string) {
@@ -567,7 +531,7 @@ export function VistaSuscripcion({
               <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 border-2 border-border p-3">
                 <div className="min-w-0">
                   <span className="block text-[14px] font-bold break-words">
-                    {p.concepto === "PLAN" ? T.conceptoPlan : T.conceptoUpgrade}
+                    {p.concepto === "PLAN" ? T.conceptoPlan : p.concepto === "ADICIONAL" ? T.conceptoAdicional : T.conceptoUpgrade}
                     {p.plan ? ` · ${p.plan}` : ""}
                     {p.ciclo ? ` · ${p.ciclo === "ANUAL" ? "anual" : "mensual"}` : ""}
                   </span>

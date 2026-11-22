@@ -2,6 +2,7 @@
 
 import { trasladarStaff } from "@/app/panel/sedes/actions";
 import {
+  cambiarRolEquipo,
   promoverGuardian,
   reactivarStaff,
   retirarStaff,
@@ -12,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/card";
 import type { PermisosPanel } from "@/lib/auth/resolver-contexto";
+import { DESCRIPCION_ROL, ETIQUETA_ROL, ROLES_ASIGNABLES, rolConsumeCupo, type RolAsignable, type RolEquipo } from "@/lib/auth/roles-equipo";
 import type { Database } from "@/types/database";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -30,6 +32,7 @@ const ETIQUETA_ACCION: Record<string, string> = {
   STAFF_SUSPENDIDO: "Suspendido",
   STAFF_REACTIVADO: "Reactivado",
   STAFF_RETIRADO: "Se le retiró el acceso",
+  STAFF_ROL_CAMBIADO: "Cambió su rol en el equipo",
   STAFF_NIVEL_CONSOLIDADO: "Nivel de la temporada",
 };
 
@@ -45,17 +48,28 @@ export function DetalleStaff({
   permisos,
   otrasSedes,
   historialInicial,
+  rolEquipo,
+  puedeCambiarRol,
+  sinCupoDisponible,
 }: {
   staff: StaffVista;
   permisos: PermisosPanel;
   otrasSedes: { id: string; nombre: string }[];
   historialInicial: EventoHistorial[];
+  /** Rol derivado (la base de datos lo calcula: rol_equipo). */
+  rolEquipo: RolEquipo;
+  /** Solo el propietario cambia roles, y nunca el suyo. */
+  puedeCambiarRol: boolean;
+  /** El plan no tiene cupo libre: se deshabilitan los roles que ocupan cupo para quien hoy no lo ocupa. */
+  sinCupoDisponible: boolean;
 }) {
   const router = useRouter();
   const [historial] = useState(historialInicial);
   const [error, setError] = useState<string | null>(null);
   const [accionando, setAccionando] = useState(false);
   const [destino, setDestino] = useState("");
+  const rolActual: RolAsignable = rolEquipo === "BUSINESS_OWNER" ? "BARBER" : rolEquipo;
+  const [rolNuevo, setRolNuevo] = useState<RolAsignable>(rolActual);
 
   const activo = staff.estado === "ACTIVO";
   const suspendido = staff.estado === "SUSPENDIDO";
@@ -161,6 +175,54 @@ export function DetalleStaff({
           <p className="mt-3 text-[11px] text-text-faint">
             Configurar comisiones vive en el módulo de Finanzas (2.10) — aquí solo se muestra.
           </p>
+        ) : null}
+      </Card>
+
+      {/* ── Rol en el equipo (migración 151/152) ───────────────────────── */}
+      <Card className="mb-6">
+        <div className="mb-1 flex items-center justify-between gap-2">
+          <p className="text-[13px] font-bold text-text">Rol en el equipo</p>
+          <Badge tone={rolEquipo === "BARBER" ? "neutral" : "accent"}>{ETIQUETA_ROL[rolEquipo].toUpperCase()}</Badge>
+        </div>
+        <p className="text-[12px] text-text-faint">
+          {rolEquipo === "BUSINESS_OWNER"
+            ? "Es el propietario del negocio. Su perfil profesional (si atiende) se activa o desactiva desde el Resumen."
+            : rolEquipo === "BUSINESS_ADMIN"
+              ? DESCRIPCION_ROL.BUSINESS_ADMIN
+              : rolEquipo === "ADMIN_BARBER"
+                ? DESCRIPCION_ROL.ADMIN_BARBER
+                : DESCRIPCION_ROL.BARBER}
+        </p>
+        {puedeCambiarRol ? (
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border-subtle pt-3">
+            <select
+              value={rolNuevo}
+              onChange={(e) => setRolNuevo(e.target.value as RolAsignable)}
+              aria-label="Nuevo rol"
+              className="h-9 flex-1 rounded-lg border border-border bg-bg px-2 text-[12px] text-text outline-none focus:border-accent/60"
+            >
+              {ROLES_ASIGNABLES.map((r) => {
+                // Pasar a un rol que atiende ocupa un cupo: no se ofrece si no hay (la base de datos igual lo rechaza).
+                const sinCupo = rolConsumeCupo(r) && !rolConsumeCupo(rolActual) && sinCupoDisponible;
+                return (
+                  <option key={r} value={r} disabled={sinCupo}>
+                    {ETIQUETA_ROL[r]}
+                    {sinCupo ? " — sin cupo en tu plan" : ""}
+                  </option>
+                );
+              })}
+            </select>
+            <Button
+              size="sm"
+              variant="secondary"
+              loading={accionando}
+              disabled={rolNuevo === rolActual}
+              onClick={() => ejecutar(() => cambiarRolEquipo(staff.vinculo_id!, rolNuevo))}
+            >
+              Cambiar rol
+            </Button>
+            <p className="w-full text-[11.5px] text-text-faint">{DESCRIPCION_ROL[rolNuevo]}</p>
+          </div>
         ) : null}
       </Card>
 

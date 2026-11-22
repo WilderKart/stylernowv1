@@ -1,0 +1,30 @@
+-- REVERSION de 153 (probada en Docker local). No elimina vinculos ya creados del propietario (son datos validos del modelo 151).
+begin;
+CREATE OR REPLACE FUNCTION public.completar_onboarding_negocio(p_negocio_id uuid)
+ RETURNS negocio
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare v_neg public.negocio; v_estado text;
+begin
+  if auth.uid() is null then raise exception 'NO_AUTENTICADO'; end if;
+  select * into v_neg from public.negocio where id = p_negocio_id and owner_user_id = auth.uid() for update;
+  if not found then raise exception 'NO_AUTORIZADO'; end if;
+  if v_neg.onboarding_completo then return v_neg; end if;  -- reintento: no repite nada
+  if not exists (select 1 from public.sede where negocio_id = p_negocio_id and not cerrada_permanente) then
+    raise exception 'FALTA_SEDE';
+  end if;
+  select s.estado::text into v_estado from public.suscripcion s where s.negocio_id = p_negocio_id;
+  if v_estado is null or v_estado not in ('TRIAL', 'ACTIVA') then raise exception 'FALTA_PRUEBA_ACTIVA'; end if;
+  update public.negocio set onboarding_completo = true, updated_at = now() where id = p_negocio_id returning * into v_neg;
+  insert into public.evento_auditoria (entidad_tipo, entidad_id, accion, actor_tipo, actor_id, negocio_id)
+  values ('negocio', p_negocio_id, 'ONBOARDING_COMPLETADO', 'BARBERIA', auth.uid(), p_negocio_id);
+  return v_neg;
+end $function$
+;
+drop function if exists public.admin_configurar_perfil_propietario_plan(public.plan_codigo, boolean, boolean, boolean, boolean, text);
+drop function if exists public.desactivar_perfil_profesional_propietario(uuid);
+drop function if exists public.activar_perfil_profesional_propietario(uuid);
+drop function if exists public._activar_perfil_propietario(uuid, uuid, boolean);
+commit;

@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import {
   guardarAjustesPais,
   guardarCaracteristica,
+  guardarPerfilPropietarioPlan,
   guardarPrecioAddon,
   guardarPrecioPlan,
   type AjustesPais,
@@ -95,6 +96,8 @@ export function EditorPlanes({ datos }: { datos: DatosPlanes }) {
             })}
           </div>
         </section>
+
+        <PerfilPropietarioPlanes planes={datos.planes} />
 
         <AddonForm
           key={`ad-${pais.codigo}-${datos.addons.find((a) => a.pais === pais.codigo)?.precioMensual ?? "n"}`}
@@ -368,5 +371,65 @@ function FilaCaracteristica({ plan, clave, c }: { plan: PlanBase; clave: string;
         Guardar
       </Button>
     </div>
+  );
+}
+
+// ── Perfil profesional del propietario por plan ─────────────────────────
+
+function PerfilPropietarioPlanes({ planes }: { planes: PlanBase[] }) {
+  return (
+    <section className="flex flex-col gap-3">
+      <SectionTitle>Perfil profesional del propietario</SectionTitle>
+      <Meta>
+        Un solo lugar para decidir si el propietario atiende además de administrar. Lo leen el alta del negocio, el botón «Activar mi perfil
+        profesional», la normalización de datos y el panel. El perfil profesional ocupa un cupo del plan. El motivo (mínimo 10 caracteres) queda en la auditoría.
+      </Meta>
+      <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2">
+        {planes.map((plan) => (
+          <PerfilPropietarioForm key={`${plan.codigo}-${JSON.stringify(plan.perfilPropietario)}`} plan={plan} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function PerfilPropietarioForm({ plan }: { plan: PlanBase }) {
+  const { guardar, pendiente } = useGuardar();
+  const [porDefecto, setPorDefecto] = useState(plan.perfilPropietario.porDefecto);
+  const [autoAlta, setAutoAlta] = useState(plan.perfilPropietario.autoAlta);
+  const [puedeActivar, setPuedeActivar] = useState(plan.perfilPropietario.puedeActivar);
+  const [puedeDesactivar, setPuedeDesactivar] = useState(plan.perfilPropietario.puedeDesactivar);
+  const incoherente = (porDefecto || autoAlta) && !puedeActivar;
+  return (
+    <Panel className="min-w-0">
+      <div className="p-card__h flex flex-wrap items-center justify-between gap-2">
+        <SectionTitle className="break-words">{plan.nombre}</SectionTitle>
+        <Status>{autoAlta ? "AUTOMÁTICO" : porDefecto ? "POR DEFECTO" : "VOLUNTARIO"}</Status>
+      </div>
+      <div className="p-card__b flex min-w-0 flex-col gap-3">
+        <Fila etiqueta="Activo por defecto" ayuda="La normalización de negocios existentes lo aplica a las altas completas.">
+          <Switch checked={porDefecto} onCheckedChange={setPorDefecto} aria-label="Activo por defecto" />
+        </Fila>
+        <Fila etiqueta="Se activa al completar el alta" ayuda="Al cerrar el alta, el propietario queda habilitado como profesional.">
+          <Switch checked={autoAlta} onCheckedChange={setAutoAlta} aria-label="Automático al completar el alta" />
+        </Fila>
+        <Fila etiqueta="El propietario puede activarlo">
+          <Switch checked={puedeActivar} onCheckedChange={setPuedeActivar} aria-label="El propietario puede activarlo" />
+        </Fila>
+        <Fila etiqueta="El propietario puede desactivarlo">
+          <Switch checked={puedeDesactivar} onCheckedChange={setPuedeDesactivar} aria-label="El propietario puede desactivarlo" />
+        </Fila>
+        {incoherente ? <Meta>Incoherente: no puede ser por defecto ni automático si el propietario no puede activarlo.</Meta> : null}
+        <Button
+          loading={pendiente}
+          disabled={incoherente}
+          onClick={() =>
+            guardar((m) => guardarPerfilPropietarioPlan(plan.codigo, { porDefecto, autoAlta, puedeActivar, puedeDesactivar }, m), `${plan.nombre}: perfil del propietario guardado.`)
+          }
+        >
+          Guardar {plan.nombre}
+        </Button>
+      </div>
+    </Panel>
   );
 }

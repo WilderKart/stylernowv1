@@ -5,6 +5,11 @@
 begin;
 
 -- Paridad con producción (el CLI local no da privilegios por defecto).
+-- Precios del catálogo que esta prueba necesita, fijados DENTRO de la transacción (rollback): Signature se cotiza (precio «desde» + es_desde), como dejó la migración 109.
+-- Antes dependía de lo que hubiera en plan_precio y fallaba con PLAN_SIN_PRECIO si alguien dejaba SIGNATURE/CO sin precio en la base local.
+update public.plan_precio set precio_mensual = 599000, es_desde = true where plan_codigo = 'SIGNATURE' and pais_codigo = 'CO';
+update public.plan_precio set precio_mensual = 139900, es_desde = false where plan_codigo = 'STUDIO' and pais_codigo = 'CO';
+
 grant select, insert, update, delete on all tables in schema public to authenticated, service_role;
 
 create temp table _f (k text primary key, v uuid);
@@ -28,24 +33,18 @@ begin
   update public.negocio set estado = 'ACTIVO', plan_codigo = 'ESSENTIAL' where id = n;
 end $$;
 
--- 1 · Prueba vencida → EN_MORA con la gracia configurada; sigue recibiendo reservas.
+-- 1 · Prueba vencida → (FASE 2B, decisión 2026-11-18) SIN gracia de prueba: REQUIERE_PLAN de inmediato y sin reservas.
+--     Antes (133) pasaba a EN_MORA con la gracia general y seguía recibiendo reservas; esa expectativa cambió por la regla aprobada.
 do $$
-declare n uuid := (select v from _f where k='neg'); s public.suscripcion; g int;
+declare n uuid := (select v from _f where k='neg'); s public.suscripcion;
 begin
   perform public.mantenimiento_suscripciones();
   select * into s from public.suscripcion where negocio_id = n;
-  select suscripcion_gracia_dias into g from public.configuracion_plataforma where id;
-  if s.estado <> 'EN_MORA' or s.gracia_fin < now() + make_interval(days => g) - interval '1 minute' then
-    raise exception 'FALLA 133: la prueba vencida debe entrar en gracia %', row_to_json(s);
+  if s.estado <> 'REQUIERE_PLAN' or s.gracia_fin is not null then
+    raise exception 'FALLA 133: la prueba vencida debe pasar a REQUIERE_PLAN sin gracia %', row_to_json(s);
   end if;
-  if not public.negocio_puede_recibir_reservas(n) then raise exception 'FALLA 133: en gracia debe seguir recibiendo reservas'; end if;
-  -- Gracia vencida sin plan pagado → REQUIERE_PLAN y sin reservas.
-  update public.suscripcion set gracia_fin = now() - interval '1 minute' where negocio_id = n;
-  perform public.mantenimiento_suscripciones();
-  select * into s from public.suscripcion where negocio_id = n;
-  if s.estado <> 'REQUIERE_PLAN' then raise exception 'FALLA 133: tras la gracia debe requerir plan, quedó %', s.estado; end if;
   if public.negocio_puede_recibir_reservas(n) then raise exception 'FALLA 133: sin plan no debe recibir reservas'; end if;
-  raise notice 'OK 133: prueba → gracia → requiere plan';
+  raise notice 'OK 133: prueba vencida → requiere plan (sin gracia de prueba)';
 end $$;
 
 -- 2 · Solo el dueño solicita el pago; monto calculado en la base; cuenta de StylerNow; idempotente.
@@ -114,7 +113,7 @@ begin
   perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
   perform public.aplicar_evento_pago(p.id, '9133002', 'APROBADO', '{}'::jsonb);
   select * into s from public.suscripcion where negocio_id = n;
-  if s.fecha_inicio_ciclo <> fin or s.fecha_proximo_cobro <> fin + interval '1 month' then
+  if s.fecha_inicio_ciclo <> fin or s.fecha_proximo_cobro <> public.suscripcion_fecha_limite(fin, 30) then
     raise exception 'FALLA 133: la renovación anticipada debe sumarse al periodo vigente %', row_to_json(s);
   end if;
 

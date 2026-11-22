@@ -1,0 +1,11 @@
+-- REVERSION de 157 (probada en Docker local dentro de una transaccion). Usa los eventos NORMALIZACION_FASE1_PERFIL_PROPIETARIO
+-- como registro de lo que hizo la normalizacion. Los eventos de auditoria son inmutables y permanecen; las filas staff creadas
+-- se conservan (inofensivas). No borra nada.
+begin;
+update public.vinculo_staff_negocio set estado = 'RETIRADO', es_guardian = false
+ where id in (select (e.payload_despues ->> 'vinculo_id')::uuid from public.evento_auditoria e
+               where e.accion = 'NORMALIZACION_FASE1_PERFIL_PROPIETARIO' and e.payload_despues ->> 'resultado' = 'ACTIVADO');
+update public.vinculo_staff_negocio set estado = 'ACTIVO'
+ where id in (select (e.payload_despues ->> 'vinculo_id')::uuid from public.evento_auditoria e
+               where e.accion = 'NORMALIZACION_FASE1_PERFIL_PROPIETARIO' and e.payload_despues ->> 'resultado' = 'RETIRADO_DEL_MODELO_ANTIGUO');
+commit;

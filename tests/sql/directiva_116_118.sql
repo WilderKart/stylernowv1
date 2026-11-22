@@ -374,7 +374,7 @@ begin
   s := public.iniciar_prueba_negocio_srv('00000000-0000-0000-0000-0000000000a1', '00000000-0000-0000-0000-0000000000b1',
       'STUDIO', 'MENSUAL', null, null, repeat('a', 64), repeat('b', 64), repeat('c', 64), repeat('d', 64));
   if s.estado <> 'TRIAL' or s.metodo_pago_ref is not null
-     or abs(extract(epoch from (s.prueba_fin - now() - interval '14 days'))) > 60 then
+     or s.prueba_fin is distinct from public.suscripcion_fecha_limite(now(), 14) then  -- FASE 2B: el fin de prueba es la medianoche (Bogotá) del día 15, no now()+14 días exactos
     raise exception 'FALLA 118: prueba sin tarjeta mal creada: %', row_to_json(s);
   end if;
   raise notice 'OK 118: prueba sin tarjeta iniciada (14 días configurables)';

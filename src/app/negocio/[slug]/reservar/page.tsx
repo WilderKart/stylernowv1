@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { FlujoReserva } from "./flujo-reserva";
 import { obtenerT } from "@/lib/i18n/servidor";
+import { negocioAceptaReservas } from "@/lib/suscripcion/estado-operativo";
 
 export async function generateMetadata() {
   const t = await obtenerT();
@@ -77,7 +78,10 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
     }))
     .filter((c) => c.servicio_ids.length >= 2 && c.servicio_ids.every((id) => idsServiciosActivos.has(id)));
 
-  if (!sedes?.length || !servicios?.length) {
+  // FASE 2B: negocio con la suscripción restringida (la base lo decide, ver migración 160): no ofrece el flujo de reserva.
+  const aceptaReservas = await negocioAceptaReservas(negocio.id);
+
+  if (!aceptaReservas || !sedes?.length || !servicios?.length) {
     return (
       <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-bg">
         <div className="p-top">
@@ -90,8 +94,8 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
         </div>
         <EmptyState
           big={t("res.sin_turnos")}
-          title={t("res.no_acepta")}
-          hint={t("res.no_acepta_hint")}
+          title={aceptaReservas ? t("res.no_acepta") : t("res.pausado")}
+          hint={aceptaReservas ? t("res.no_acepta_hint") : t("res.pausado_hint")}
         />
       </div>
     );

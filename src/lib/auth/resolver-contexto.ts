@@ -2,6 +2,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { derivarPermisosPanel } from "@/lib/auth/permission-registry";
 import type { Permisos } from "@/lib/auth/tipos";
+import { derivarRolEquipo, type RolEquipo } from "@/lib/auth/roles-equipo";
 
 /**
  * Resolutor central de autorización del Panel Negocio — ADR-006 (Guardian
@@ -19,7 +20,12 @@ import type { Permisos } from "@/lib/auth/tipos";
  * el alcance de Guardian en el siguiente request, sin logout.
  */
 
-export type RolPanel = "BARBERIA" | "GUARDIAN" | "STAFF" | "NINGUNO";
+/**
+ * BARBERIA = propietario (BUSINESS_OWNER). ADMIN = administrador delegado (BUSINESS_ADMIN o ADMIN_BARBER, migración 151/154) con el
+ * conjunto MÍNIMO de permisos delegados; las páginas que no lo admitan expresamente lo rechazan (forbidden). El rol detallado del equipo
+ * está en `rolEquipo`; el rol del Panel solo decide a qué superficie entra.
+ */
+export type RolPanel = "BARBERIA" | "ADMIN" | "GUARDIAN" | "STAFF" | "NINGUNO";
 
 /** Estado crudo del vínculo Staff–Negocio, cuando existe uno. */
 export type EstadoVinculoPanel = "ACTIVO" | "SUSPENDIDO" | "INVITADO" | "RETIRADO" | null;
@@ -36,8 +42,12 @@ export interface ContextoUsuario {
   userId: string | null;
   rol: RolPanel;
   negocioId: string | null;
-  /** La propia sede si es Guardian/Staff; `null` en Barbería significa "todas". */
+  /** La propia sede si es Guardian/Staff; `null` en Barbería/Administrador significa "todas". */
   sedeId: string | null;
+  /**
+   * Vínculo profesional del usuario en su negocio, si lo tiene (ACTIVO, SUSPENDIDO o INVITADO). Un propietario o un administrador SIN
+   * perfil profesional tienen `null`; un propietario que atiende conserva rol BARBERIA Y recibe aquí su vínculo, así conserva su agenda.
+   */
   staffVinculoId: string | null;
   esGuardian: boolean;
   /** Estado del vínculo tal cual está en la base — permite distinguir un
@@ -45,6 +55,12 @@ export interface ContextoUsuario {
    * vínculo todavía (NINGUNO real). */
   estadoVinculo: EstadoVinculoPanel;
   permisos: PermisosPanel;
+  /** Rol del equipo derivado de capacidades (migración 151). `null` solo si no hay negocio. */
+  rolEquipo: RolEquipo | null;
+  /** Administra el negocio (propietario o administrador delegado ACTIVO). */
+  esAdmin: boolean;
+  /** Tiene perfil profesional ACTIVO: debe poder usar /staff (agenda) además de /panel. Un administrador puro no. */
+  prestaServicios: boolean;
 }
 
 const PERMISOS_NINGUNO: PermisosPanel = {
@@ -83,6 +99,9 @@ const CONTEXTO_NINGUNO: ContextoUsuario = {
   esGuardian: false,
   estadoVinculo: null,
   permisos: PERMISOS_NINGUNO,
+  rolEquipo: null,
+  esAdmin: false,
+  prestaServicios: false,
 };
 
 export async function resolverContexto(): Promise<ContextoUsuario> {
@@ -107,15 +126,27 @@ export async function resolverContexto(): Promise<ContextoUsuario> {
   const negocio = negocios?.[0] ?? null;
 
   if (negocio) {
+    // El propietario puede además tener perfil profesional (migración 153): una misma cuenta administra y atiende. Antes este
+    // resolver devolvía staffVinculoId=null y no miraba el vínculo, así que quien atendía perdía su agenda.
+    const { data: propio } = await supabase
+      .from("vinculo_staff_negocio")
+      .select("id, sede_activa_id, es_guardian, estado, presta_servicios")
+      .eq("staff_id", user.id)
+      .eq("negocio_id", negocio.id)
+      .neq("estado", "RETIRADO")
+      .maybeSingle();
     return {
       userId: user.id,
       rol: "BARBERIA",
       negocioId: negocio.id,
       sedeId: null,
-      staffVinculoId: null,
+      staffVinculoId: propio?.id ?? null,
       esGuardian: false,
-      estadoVinculo: null,
+      estadoVinculo: (propio?.estado as EstadoVinculoPanel) ?? null,
       permisos: derivarPermisosPanel("barberia"),
+      rolEquipo: "BUSINESS_OWNER",
+      esAdmin: true,
+      prestaServicios: Boolean(propio && propio.estado === "ACTIVO" && propio.presta_servicios),
     };
   }
 
@@ -127,12 +158,33 @@ export async function resolverContexto(): Promise<ContextoUsuario> {
   // necesita un destino real (nunca el wizard de "crear negocio").
   const { data: vinculo } = await supabase
     .from("vinculo_staff_negocio")
-    .select("id, negocio_id, sede_activa_id, es_guardian, estado")
+    .select("id, negocio_id, sede_activa_id, es_guardian, estado, es_admin, presta_servicios")
     .eq("staff_id", user.id)
     .neq("estado", "RETIRADO")
     .maybeSingle();
 
   if (vinculo) {
+    const rolEquipo = derivarRolEquipo({ esPropietario: false, esAdmin: vinculo.es_admin, prestaServicios: vinculo.presta_servicios });
+    const presta = vinculo.estado === "ACTIVO" && vinculo.presta_servicios;
+
+    // Administrador delegado ACTIVO (BUSINESS_ADMIN / ADMIN_BARBER): permisos mínimos delegados a nivel de negocio. Si además es
+    // Guardian conserva esGuardian, pero el alcance administrativo (negocio) prima sobre el de sede.
+    if (vinculo.estado === "ACTIVO" && vinculo.es_admin) {
+      return {
+        userId: user.id,
+        rol: "ADMIN",
+        negocioId: vinculo.negocio_id,
+        sedeId: null,
+        staffVinculoId: vinculo.id,
+        esGuardian: vinculo.es_guardian,
+        estadoVinculo: "ACTIVO",
+        permisos: derivarPermisosPanel("admin"),
+        rolEquipo,
+        esAdmin: true,
+        prestaServicios: presta,
+      };
+    }
+
     if (vinculo.estado === "ACTIVO" && vinculo.es_guardian && vinculo.sede_activa_id) {
       return {
         userId: user.id,
@@ -143,6 +195,9 @@ export async function resolverContexto(): Promise<ContextoUsuario> {
         esGuardian: true,
         estadoVinculo: "ACTIVO",
         permisos: derivarPermisosPanel("guardian"),
+        rolEquipo,
+        esAdmin: false,
+        prestaServicios: presta,
       };
     }
 
@@ -155,6 +210,9 @@ export async function resolverContexto(): Promise<ContextoUsuario> {
       esGuardian: vinculo.es_guardian,
       estadoVinculo: vinculo.estado as EstadoVinculoPanel,
       permisos: PERMISOS_NINGUNO,
+      rolEquipo,
+      esAdmin: false,
+      prestaServicios: presta,
     };
   }
 

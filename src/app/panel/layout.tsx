@@ -2,6 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import CargandoPanel from "./loading";
+import { BannerSuscripcion } from "@/components/panel/banner-suscripcion";
+import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { obtenerEstadoOperativo } from "@/lib/suscripcion/estado-operativo";
 
 export const metadata = {
   title: { template: "%s · Panel Negocio · StylerNow", default: "Panel Negocio" },
@@ -29,7 +32,16 @@ async function PanelGuardado({ children }: { children: React.ReactNode }) {
 
   if (!user) redirect("/login?next=/panel");
 
-  return <div className="min-h-dvh bg-bg">{children}</div>;
+  // FASE 2B: aviso de suscripción restringida/gracia en TODO el panel. El estado lo decide la base (migración 160); aquí solo se muestra.
+  const contexto = await resolverContexto();
+  const estado = contexto.negocioId ? await obtenerEstadoOperativo(contexto.negocioId) : null;
+
+  return (
+    <div className="min-h-dvh bg-bg">
+      {estado ? <BannerSuscripcion estado={estado} puedePagar={contexto.rol === "BARBERIA"} /> : null}
+      {children}
+    </div>
+  );
 }
 
 export default function PanelLayout({ children }: { children: React.ReactNode }) {
