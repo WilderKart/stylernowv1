@@ -440,5 +440,5 @@ rollback to savepoint borrado;
 select public._t_rechaza('G borrado con aceptacion_legal bloqueado por la FK (documentado)',
   $q$delete from auth.users where id = '00000000-0000-0000-0007-0000000000a3'$q$, 'aceptacion_legal');
 
-select 'OK: evidencias_145_148 — todas las pruebas pasaron' as resultado;
+select 'OK: evidencias_146_149 — todas las pruebas pasaron' as resultado;
 rollback;
