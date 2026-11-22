@@ -5,7 +5,7 @@
 --    interbloqueos) y deja historial + auditoría.
 -- 2) _adicionales_activos / _adicionales_resumen: cupo vigente de un negocio. Aportan cupo: ACTIVO, PROXIMO_A_RENOVAR, EN_GRACIA (con
 --    gracia vigente) y CANCELADO mientras quede periodo pagado. SUSPENDIDO, EXPIRADO_SIN_PAGO y REEMBOLSADO aportan 0.
--- 3) _capacidad_profesional (152) SIN cambiar su firma: limite = tope del plan + adicionales activos. `p_adicionales` queda como
+-- 3) _capacidad_profesional (159) SIN cambiar su firma: limite = tope del plan + adicionales activos. `p_adicionales` queda como
 --    mínimo/simulación (greatest), de modo que los cuatro llamadores que pasan 0 reciben los adicionales reales sin tocarlos.
 --    Nunca se retira a nadie por exceso: solo se bloquean nuevas altas/invitaciones (disponibles = 0). Los suspendidos siguen ocupando.
 -- Rollback: 172_adicionales_motor_estados_y_capacidad_REVERSION.sql.txt.

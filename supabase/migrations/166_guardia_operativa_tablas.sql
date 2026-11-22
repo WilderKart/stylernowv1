@@ -2,7 +2,7 @@
 --
 -- Cubren las escrituras directas (RLS del propietario, Server Actions con el JWT del usuario) Y las RPC SECURITY DEFINER que escriban
 -- en esas tablas, porque auth.uid() sigue siendo quien llama. NO se aplican al sistema (service_role, cron, webhooks: auth.uid() nulo)
--- ni al SuperSU. Un negocio en alta (PENDIENTE_APROBACION) se considera operativo (160), así que el alta guiada no se ve afectada.
+-- ni al SuperSU. Un negocio en alta (PENDIENTE_APROBACION) se considera operativo (164), así que el alta guiada no se ve afectada.
 --
 -- Tablas guardadas (cada una con su forma de llegar al negocio):
 --   negocio_id directo: servicio, servicio_combo, oferta_negocio, membresia_plan, cashback_regla, recompensa_regla, sello_campana,
@@ -14,7 +14,7 @@
 --   negocio: bloqueado cambiar datos del negocio (nombre, marca, anticipos, políticas…); NO se bloquean estado, plan, país ni propietario.
 --   reserva: NO se bloquea el cambio de estado (completar/cancelar/no-show); SÍ se bloquea mover una cita (hora, sede, recurso).
 --
--- NO se guardan por disparador (se hace por RPC en 163) las tablas que el cumplimiento de una cita sí toca: movimiento_inventario,
+-- NO se guardan por disparador (se hace por RPC en 167) las tablas que el cumplimiento de una cita sí toca: movimiento_inventario,
 -- producto_stock, venta_producto, wallet, puntos, etc.
 -- Reversión: 162_..._REVERSION.sql.txt.
 

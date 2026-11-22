@@ -5,7 +5,7 @@
 --     Se conserva «no se pierden días»: si aún queda periodo pagado o de prueba, el nuevo empieza al terminar.
 --   · mantenimiento_suscripciones (133): prueba vencida → REQUIERE_PLAN de inmediato (gracia de prueba 0; si SuperAdmin la sube, pasa por
 --     EN_MORA hasta prueba_fin + gracia); periodo pagado vencido → EN_MORA con gracia_fin = fecha_proximo_cobro + gracia (determinista,
---     no depende de la hora en que corra el cron). El estado operativo se deriva de las fechas (160), el cron solo sincroniza el estado visible.
+--     no depende de la hora en que corra el cron). El estado operativo se deriva de las fechas (164), el cron solo sincroniza el estado visible.
 --   · iniciar_prueba_negocio_srv/srv2 (118) y admin_activar_negocio_manual (090): el fin de prueba/vigencia usa la función central de fechas.
 -- Reversión: 161_..._REVERSION.sql.txt.
 

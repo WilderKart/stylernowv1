@@ -1,4 +1,4 @@
--- Reversión de 171 (después de revertir 172-179).
+-- Reversión de 170 (después de revertir 172-179).
 drop table if exists public.adicional_mantenimiento_corrida;
 drop table if exists public.adicional_reembolso;
 drop table if exists public.adicional_pago_revision;

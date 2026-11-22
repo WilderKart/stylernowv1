@@ -1,4 +1,4 @@
--- REVERSIÓN de 162 (solo base LOCAL).
+-- REVERSIÓN de 166 (solo base LOCAL).
 begin;
 do $$
 declare r record;

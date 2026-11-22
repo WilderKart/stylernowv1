@@ -1,4 +1,4 @@
--- REVERSION de 154 (probada en Docker local). Devuelve la gestion del equipo solo al propietario.
+-- REVERSION de 161 (probada en Docker local). Devuelve la gestion del equipo solo al propietario.
 begin;
 CREATE OR REPLACE FUNCTION public.suspender_staff(p_vinculo_id uuid, p_motivo text DEFAULT NULL::text)
  RETURNS vinculo_staff_negocio

@@ -1,4 +1,4 @@
--- Reversión de 172 (después de revertir 173-179).
+-- Reversión de 171 (después de revertir 173-179).
 drop function if exists public._adicional_notificar(uuid, text, text, jsonb);
 delete from public.notificacion_outbox where evento like 'ADICIONAL\_%';
 delete from public.notificacion_plantilla where codigo like 'ADICIONAL\_%';

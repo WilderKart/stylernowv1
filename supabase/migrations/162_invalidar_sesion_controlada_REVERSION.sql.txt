@@ -1,4 +1,4 @@
--- REVERSION de 155 (probada en Docker local). Devuelve las 5 acciones y el trigger a su estado previo (con el defecto: suspender/trasladar fallan para el propietario).
+-- REVERSION de 162 (probada en Docker local). Devuelve las 5 acciones y el trigger a su estado previo (con el defecto: suspender/trasladar fallan para el propietario).
 begin;
 CREATE OR REPLACE FUNCTION public.suspender_staff(p_vinculo_id uuid, p_motivo text DEFAULT NULL::text)
  RETURNS vinculo_staff_negocio

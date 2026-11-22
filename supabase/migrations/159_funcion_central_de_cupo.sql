@@ -1,7 +1,7 @@
 -- 159: UNA sola función central de capacidad profesional + unificación de los criterios de cupo (FASE 1, 2026-11-18).
 --
 -- Hoy había 4 criterios distintos de "cuántos profesionales tiene un negocio":
---   · crear_invitacion_staff (015+149):     vínculos ACTIVO/SUSPENDIDO/INVITADO + invitaciones PENDIENTE de OTROS correos
+--   · crear_invitacion_staff (015+156):     vínculos ACTIVO/SUSPENDIDO/INVITADO + invitaciones PENDIENTE de OTROS correos
 --   · responder_invitacion (015):           solo vínculos ACTIVO/SUSPENDIDO (ignoraba invitaciones y vencimiento)
 --   · solicitar_downgrade_plan / ejecutar_downgrades_programados (049): solo ACTIVO
 --   · src/app/panel/suscripcion/datos.ts:   solo ACTIVO (conteo en la interfaz)
@@ -126,7 +126,7 @@ drop trigger if exists trg_invitacion_cupo on public.invitacion_staff;
 create trigger trg_invitacion_cupo before insert or update of estado, expira_at, rol_invitado on public.invitacion_staff
   for each row execute function public.trg_invitacion_cupo();
 
--- ── 3. cupo_plan_negocio (149) ahora lee de la función central; mismas claves + las nuevas ──
+-- ── 3. cupo_plan_negocio (156) ahora lee de la función central; mismas claves + las nuevas ──
 create or replace function public.cupo_plan_negocio(p_negocio_id uuid)
 returns jsonb language plpgsql stable security definer set search_path = public as $$
 declare

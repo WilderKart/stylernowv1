@@ -1,5 +1,5 @@
 -- 154 · Centro de Cumplimiento y PQRS — Grupo F: los eventos de un caso se copian al repositorio de evidencias legales
---       (146: append-only, hash SHA-256 encadenado). No se crea otra infraestructura de evidencias.
+--       (147: append-only, hash SHA-256 encadenado). No se crea otra infraestructura de evidencias.
 --
 -- Ajustes MÍNIMOS y aditivos al repositorio:
 --   · `usuario_id` admite NULL (un solicitante sin cuenta no tiene usuario; el rol se registra como EXTERNO).
@@ -7,7 +7,7 @@
 --   Los hashes ya calculados no cambian (el hash se calcula sobre el contenido; NULL se serializa igual que antes).
 -- Privacidad: la evidencia NO guarda el contenido de la solicitud ni los datos del solicitante; guarda qué ocurrió, cuándo, quién actuó
 -- y el número de radicación. Solo el texto de una RESPUESTA SUSTANTIVA (lo que StylerNow contestó) se guarda para poder demostrarlo.
--- Reversión (solo local): drop trigger trg_caso_evidencia on caso_historial; restaurar los CHECK originales de 146.
+-- Reversión (solo local): drop trigger trg_caso_evidencia on caso_historial; restaurar los CHECK originales de 147.
 
 alter table public.evidencia_legal alter column usuario_id drop not null;
 alter table public.evidencia_legal drop constraint if exists evidencia_legal_rol_check;
@@ -59,7 +59,7 @@ revoke all on function public.trg_caso_evidencia() from public, anon, authentica
 drop trigger if exists trg_caso_evidencia on public.caso_historial;
 create trigger trg_caso_evidencia after insert on public.caso_historial for each row execute function public.trg_caso_evidencia();
 
--- Evidencias de un caso (SuperSU): usa la misma tabla; la lectura queda auditada por las funciones de 148 si se desea expediente.
+-- Evidencias de un caso (SuperSU): usa la misma tabla; la lectura queda auditada por las funciones de 149 si se desea expediente.
 create or replace function public.caso_evidencias(p_ticket uuid)
 returns table (secuencia bigint, ocurrido_at timestamptz, finalidad text, accion text, rol text, hash text, hash_anterior text, tiene_texto boolean)
 language plpgsql stable security definer set search_path = public as $$

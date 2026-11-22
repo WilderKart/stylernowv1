@@ -3,7 +3,7 @@
 -- Un LOTE es una contratación: N cupos adicionales a un precio unitario CONGELADO (total = N × precio) con su propio periodo de 30 días.
 -- Un cambio de precio posterior (adicional_precio_plan) nunca toca lotes existentes. Sin descuento Founder.
 -- Máquina de estados ÚNICA en la base (adicional_estado_def + adicional_transicion): el mismo vocabulario en backend, interfaz, CRM y
--- webhooks. Nadie escribe `estado` directo: solo _adicional_transicionar (173), que valida la tabla de transiciones.
+-- webhooks. Nadie escribe `estado` directo: solo _adicional_transicionar (172), que valida la tabla de transiciones.
 -- Cupos: son fungibles (un lote aporta `cantidad` al tope de capacidad); no se atan a profesionales concretos.
 -- Rollback: 170_adicionales_modelo_lotes_REVERSION.sql.txt.
 
@@ -12,7 +12,7 @@ create table if not exists public.adicional_estado_def (
   codigo text primary key,
   etiqueta_es text not null,
   etiqueta_en text not null,
-  aporta_cupo boolean not null default false,      -- referencia; el cálculo real vive en _adicionales_activos (173)
+  aporta_cupo boolean not null default false,      -- referencia; el cálculo real vive en _adicionales_activos (172)
   terminal boolean not null default false,
   orden int not null
 );

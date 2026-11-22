@@ -4,7 +4,7 @@
 --  * Radicación pública sin cuenta (`caso_radicar`, solo service_role: la llama el servidor tras Turnstile + rate limit).
 --  * Seguimiento seguro: token aleatorio de alta entropía (solo se guarda su SHA-256); número de radicación + token.
 --  * Máquina de estados que separa RESPONDER (comunicación sustantiva) de RESOLVER (decisión) y CERRAR (trámite completo).
---  * Plazos desde el catálogo (150): legal verificado / legal provisional / interno. Nunca se hardcodean.
+--  * Plazos desde el catálogo (151): legal verificado / legal provisional / interno. Nunca se hardcodean.
 --  * Historial append-only (`caso_historial`) de toda acción.
 --  * Datos del solicitante en tabla aparte (solo SuperSU), con minimización.
 --

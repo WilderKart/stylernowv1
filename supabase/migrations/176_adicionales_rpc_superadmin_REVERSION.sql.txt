@@ -1,4 +1,4 @@
--- Reversión de 177 (después de revertir 178).
+-- Reversión de 176 (después de revertir 177).
 drop function if exists public.admin_adicional_activar_manual(uuid, int, int, text, text, text);
 drop function if exists public.admin_adicional_accion(uuid, text, text, jsonb);
 drop function if exists public.admin_adicional_detalle(uuid);

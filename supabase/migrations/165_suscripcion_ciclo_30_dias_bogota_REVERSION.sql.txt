@@ -1,4 +1,4 @@
--- REVERSIÓN de 161 (solo base LOCAL): deshace cada parche por ancla exacta (falla si la función cambió después).
+-- REVERSIÓN de 165 (solo base LOCAL): deshace cada parche por ancla exacta (falla si la función cambió después).
 begin;
 create or replace function public._parchar_funcion(p_firma regprocedure, p_ancla text, p_nuevo text, p_todas boolean default false)
  returns void language plpgsql set search_path to 'public'

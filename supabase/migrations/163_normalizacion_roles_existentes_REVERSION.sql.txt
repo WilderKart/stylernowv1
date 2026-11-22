@@ -1,4 +1,4 @@
--- REVERSION de 157 (probada en Docker local dentro de una transaccion). Usa los eventos NORMALIZACION_FASE1_PERFIL_PROPIETARIO
+-- REVERSION de 163 (probada en Docker local dentro de una transaccion). Usa los eventos NORMALIZACION_FASE1_PERFIL_PROPIETARIO
 -- como registro de lo que hizo la normalizacion. Los eventos de auditoria son inmutables y permanecen; las filas staff creadas
 -- se conservan (inofensivas). No borra nada.
 begin;

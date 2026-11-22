@@ -3,7 +3,7 @@
 -- Decisiones comerciales (vinculantes): adicionales en TODOS los planes; precio inicial 51.900 COP/mes por adicional, igual para los
 -- cuatro planes pero editable POR PLAN desde SuperAdmin; límite por establecimiento 50 (configurable); máximo por lote configurable
 -- (50 = PROPUESTA, pendiente de confirmar); periodo de 30 días desde el pago confirmado; gracia de 3 días; avisos 7/3/1 días.
--- Nada de esto vive en el código: todo está en estas tablas y se edita con auditoría (RPC de la 176).
+-- Nada de esto vive en el código: todo está en estas tablas y se edita con auditoría (RPC de la 175).
 --
 -- Fechas: UNA sola función (adicional_fin_periodo / adicional_dias_para) en zona America/Bogota. Ni la interfaz ni el servidor
 -- calculan vencimientos: los leen de la base.

@@ -1,4 +1,4 @@
--- REVERSION de 151 (probada en Docker local: aplicar -> revertir -> volver a aplicar). Solo contra la base local salvo orden expresa.
+-- REVERSION de 158 (probada en Docker local: aplicar -> revertir -> volver a aplicar). Solo contra la base local salvo orden expresa.
 -- Pierde es_admin / presta_servicios / rol_invitado (administradores delegados vuelven a ser BARBER al reaplicar).
 -- La vista se recrea sin las columnas nuevas (DROP + CREATE): sus privilegios se guardan antes y se reponen EXACTAMENTE (hallazgo de la prueba: sin esto el rol authenticated perdía el SELECT).
 begin;

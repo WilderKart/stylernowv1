@@ -1,4 +1,4 @@
--- REVERSIÓN de 163 (solo base LOCAL): quita la línea de guardia de cada función por ancla exacta.
+-- REVERSIÓN de 167 (solo base LOCAL): quita la línea de guardia de cada función por ancla exacta.
 begin;
 
 do $$

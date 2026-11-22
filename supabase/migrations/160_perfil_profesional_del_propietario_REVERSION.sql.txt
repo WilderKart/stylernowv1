@@ -1,4 +1,4 @@
--- REVERSION de 153 (probada en Docker local). No elimina vinculos ya creados del propietario (son datos validos del modelo 151).
+-- REVERSION de 160 (probada en Docker local). No elimina vinculos ya creados del propietario (son datos validos del modelo 158).
 begin;
 CREATE OR REPLACE FUNCTION public.completar_onboarding_negocio(p_negocio_id uuid)
  RETURNS negocio

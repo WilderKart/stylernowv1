@@ -1,4 +1,4 @@
--- REVERSIÓN de 164 (solo base LOCAL).
+-- REVERSIÓN de 168 (solo base LOCAL).
 begin;
 drop function if exists public.admin_estado_operativo_negocios(uuid[]);
 drop function if exists public.admin_set_config_suscripcion(integer, integer, boolean, text);

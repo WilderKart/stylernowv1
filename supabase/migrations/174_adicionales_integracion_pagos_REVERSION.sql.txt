@@ -1,4 +1,4 @@
--- Reversión de 175: quita las ramas STAFF_EXTRA de aplicar_evento_pago y el filtro de los RPC de plan (vuelven a su texto de 049/133).
+-- Reversión de 174: quita las ramas STAFF_EXTRA de aplicar_evento_pago y el filtro de los RPC de plan (vuelven a su texto de 049/133).
 do $$
 declare v_def text; v_nuevo text; v_i int; v_j int;
   v_a constant text := E'  if v_pago.estado in (''APROBADO'',''RECHAZADO'',''REEMBOLSADO'',''REEMBOLSADO_PARCIAL'') then';

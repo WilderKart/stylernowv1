@@ -4,7 +4,7 @@
 -- DENTRO de cada función con coalesce(...,false) (NULL no lanza). El precio sale SIEMPRE de la base (adicional_precio_plan); el
 -- navegador solo envía cantidad y el total que vio, y si no coincide con el de la base se rechaza (PRECIO_CAMBIO).
 -- Flujo manual por Checkout Pro: iniciar → pago SUSCRIPCION (concepto STAFF_EXTRA, beneficiario PLATAFORMA) → el servidor crea la
--- preferencia → el webhook/conciliación confirma con Mercado Pago (175). Nada se activa por lo que diga el frontend.
+-- preferencia → el webhook/conciliación confirma con Mercado Pago (174). Nada se activa por lo que diga el frontend.
 -- Rollback: 173_adicionales_rpc_propietario_REVERSION.sql.txt.
 
 -- ── Validación y cotización comunes (interna) ───────────────────────────────────────────────────

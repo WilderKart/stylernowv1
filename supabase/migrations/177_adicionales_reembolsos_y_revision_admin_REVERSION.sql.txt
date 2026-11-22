@@ -1,4 +1,4 @@
--- Reversión de 178.
+-- Reversión de 177.
 drop function if exists public.admin_adicional_revision_resolver(uuid, text, text);
 drop function if exists public.admin_adicional_revision_listar(text);
 drop function if exists public.admin_adicional_reembolso_listar(text);

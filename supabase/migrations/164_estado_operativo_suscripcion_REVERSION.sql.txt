@@ -1,5 +1,5 @@
--- REVERSIÓN de 160 (solo base LOCAL). Restaura las dos funciones tocadas, elimina lo nuevo y devuelve la gracia a 3.
--- Antes de revertir 160 hay que revertir 164, 163, 162 y 161 (dependen de estas funciones).
+-- REVERSIÓN de 164 (solo base LOCAL). Restaura las dos funciones tocadas, elimina lo nuevo y devuelve la gracia a 3.
+-- Antes de revertir 164 hay que revertir 168, 167, 166 y 165 (dependen de estas funciones).
 begin;
 create or replace function public.negocio_puede_recibir_reservas(p_negocio_id uuid)
  returns boolean language sql stable security definer set search_path to 'public'

@@ -1,4 +1,4 @@
--- Reversión de 174 (después de revertir 175-179).
+-- Reversión de 173 (después de revertir 175-179).
 drop function if exists public.adicional_marcar_pago_pendiente_srv(uuid, text);
 drop function if exists public.adicional_mis_lotes(uuid);
 drop function if exists public.adicional_cancelar_renovacion(uuid, text);

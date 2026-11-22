@@ -1,5 +1,5 @@
--- REVERSION de 152 (probada en Docker local). Restaura los 4 criterios anteriores de cupo. Solo contra la base local salvo orden expresa.
--- Las invitaciones creadas con rol BUSINESS_ADMIN/ADMIN_BARBER conservan su columna rol_invitado (la quita la reversion de 151) pero la funcion antigua las trata como BARBER.
+-- REVERSION de 159 (probada en Docker local). Restaura los 4 criterios anteriores de cupo. Solo contra la base local salvo orden expresa.
+-- Las invitaciones creadas con rol BUSINESS_ADMIN/ADMIN_BARBER conservan su columna rol_invitado (la quita la reversion de 158) pero la funcion antigua las trata como BARBER.
 begin;
 drop trigger if exists trg_vinculo_cupo on public.vinculo_staff_negocio;
 drop trigger if exists trg_invitacion_cupo on public.invitacion_staff;

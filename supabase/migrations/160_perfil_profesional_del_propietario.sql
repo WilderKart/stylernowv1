@@ -3,11 +3,11 @@
 -- El propietario NO es profesional por el solo hecho de ser propietario: administra. Si además atiende, activa su propio perfil
 -- profesional: una fila staff + un vínculo ACTIVO con presta_servicios=true (consume cupo, como cualquier profesional). Así una misma
 -- cuenta administra y atiende, sin duplicar correo, celular ni identidad.
--- TODO lo comercial sale de la configuración por plan (columnas de 151, editables por SuperSU en /admin/planes con motivo y auditoría):
+-- TODO lo comercial sale de la configuración por plan (columnas de 158, editables por SuperSU en /admin/planes con motivo y auditoría):
 --   · propietario_perfil_auto_alta        -> completar_onboarding_negocio lo activa al cerrar el alta (hoy solo Essential)
 --   · propietario_puede_activar_perfil    -> activar_perfil_profesional_propietario lo permite
 --   · propietario_puede_desactivar_perfil -> desactivar_perfil_profesional_propietario lo permite
---   · propietario_profesional_por_defecto -> lo usa la normalización de datos existentes (157)
+--   · propietario_profesional_por_defecto -> lo usa la normalización de datos existentes (163)
 -- Reglas: sin sede operativa NO se crea vínculo (estado SIN_SEDE); consume cupo; se bloquea si no hay; desactivar retira el vínculo
 -- (conserva fila e historial, como retirar_staff) y se BLOQUEA si hay reservas futuras asignadas. Publicarse en la agenda pública es
 -- OTRA cosa: exige foto profesional + consentimiento expreso (staff_es_publicable), ver el informe de la Fase 1.
@@ -15,7 +15,7 @@
 
 -- Interno: devuelve un estado en vez de lanzar, para que completar_onboarding_negocio no se caiga por un caso no crítico.
 -- Estados: ACTIVADO | YA_ACTIVO | SIN_CUPO | SIN_SEDE | OMITIDO_VINCULO_EN_OTRO_NEGOCIO.  Lanza NO_AUTORIZADO si p_usuario no es el propietario.
--- p_ignorar_cupo: solo para la normalización de datos (157), que debe marcar el exceso en vez de rechazarlo; nunca se expone a clientes.
+-- p_ignorar_cupo: solo para la normalización de datos (163), que debe marcar el exceso en vez de rechazarlo; nunca se expone a clientes.
 create or replace function public._activar_perfil_propietario(p_negocio_id uuid, p_usuario_id uuid, p_ignorar_cupo boolean default false)
 returns text language plpgsql security definer set search_path = public as $$
 declare
@@ -140,7 +140,7 @@ end $$;
 revoke all on function public.admin_configurar_perfil_propietario_plan(public.plan_codigo, boolean, boolean, boolean, boolean, text) from public, anon, authenticated;
 grant execute on function public.admin_configurar_perfil_propietario_plan(public.plan_codigo, boolean, boolean, boolean, boolean, text) to authenticated;  -- el cuerpo exige is_supersu()
 
--- completar_onboarding_negocio (150): si la configuración del plan lo indica, el propietario queda habilitado como profesional.
+-- completar_onboarding_negocio (157): si la configuración del plan lo indica, el propietario queda habilitado como profesional.
 do $$
 declare v_def text;
   v_ancla constant text := E'''ONBOARDING_COMPLETADO'', ''BARBERIA'', auth.uid(), p_negocio_id);';

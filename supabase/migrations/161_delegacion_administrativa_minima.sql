@@ -6,7 +6,7 @@
 --
 -- Un administrador delegado (es_admin=true, vínculo ACTIVO) puede, en SU negocio:
 --   · ver el equipo y las invitaciones (políticas de lectura),
---   · invitar BARBER (no administradores: crear_invitacion_staff en 152), reenviar y cancelar invitaciones a BARBER,
+--   · invitar BARBER (no administradores: crear_invitacion_staff en 159), reenviar y cancelar invitaciones a BARBER,
 --   · suspender, reactivar, retirar y trasladar de sede a profesionales que NO son administradores.
 -- NO puede: tocar a otro administrador ni al propietario, cambiar roles, promover/revocar Guardian, ni nada de facturación.
 -- Todo lo demás del panel para un administrador (servicios, sedes, horarios, reservas del negocio, clientes, reportes) queda

@@ -1,5 +1,5 @@
 -- 167 · FASE 2B · Guardia de bloqueo en las RPC que crean o modifican la operación sin pasar por las tablas guardadas en 162
--- (depende de 160 y 162). Se inserta UNA línea al inicio de cada función por ancla exacta (primer «begin» del cuerpo); si la ancla falta,
+-- (depende de 164 y 166). Se inserta UNA línea al inicio de cada función por ancla exacta (primer «begin» del cuerpo); si la ancla falta,
 -- la migración aborta. Cada llamada usa la guardia central: SUSCRIPCION_RESTRINGIDA.
 --
 -- Parchean 35 RPC (reservas nuevas y manuales, mover cita, confirmar/pagar seña, equipo, precios y políticas, comercial,

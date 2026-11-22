@@ -356,8 +356,9 @@ begin
   select coalesce(max(version), 0) into v_max_terminos from public.texto_legal where tipo = 'TERMINOS';
   select coalesce(max(version), 0) into v_max_politica from public.texto_legal where tipo = 'POLITICA_DATOS';
 
-  -- Términos: 2 (producción hoy) o 3 (si algún día se aplicó la 115). Política: 2.
-  if v_max_terminos not in (2, 3) or v_max_politica <> 2 then
+  -- Términos: 2 en producción hoy (1–3 admitido: 1 en una base nueva construida desde cero, 3 si algún día se aplicó la 115). Política: 1–2.
+  -- Lo que se evita es publicar sobre un estado inesperado (p. ej. una versión posterior ya publicada).
+  if v_max_terminos not between 1 and 3 or v_max_politica not between 1 and 2 then
     raise exception 'VERSION_LEGAL_INESPERADA: términos %, política %; revisar antes de publicar', v_max_terminos, v_max_politica;
   end if;
   if v_terminos like '%[PENDIENTE%' or v_politica like '%[PENDIENTE%'

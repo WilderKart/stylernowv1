@@ -81,7 +81,7 @@ begin
   end loop;
 end $$;
 
--- cambiar_rol_equipo (152): reemplaza el comentario provisional por la llamada.
+-- cambiar_rol_equipo (159): reemplaza el comentario provisional por la llamada.
 do $$
 declare v_def text;
   v_a constant text := E'  -- No se llama a incrementar_session_version: el trigger perfil_proteger_columnas_sensibles lo rechaza dentro de funciones definer\n  -- invocadas por un usuario (defecto preexistente, ver informe). El rol se resuelve en cada solicitud, sin caché de sesión.';
