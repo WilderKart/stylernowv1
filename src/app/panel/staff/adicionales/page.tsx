@@ -17,7 +17,7 @@ export default async function AdicionalesPage() {
   const res = await obtenerPanelAdicionales(negocioId);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <BarraSuperior titulo="Barberos adicionales" volverA="/panel/staff" />
       <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-6 sm:px-10">
         {res.ok ? (

@@ -12,7 +12,7 @@ export default async function PromocionesPage() {
   const r = await listarPromociones();
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-8">
         {r.ok ? (

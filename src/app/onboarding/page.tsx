@@ -50,7 +50,7 @@ export default function OnboardingPage() {
   const slide = SLIDES[step];
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <main className="mx-auto flex w-full max-w-lg flex-1 flex-col">
         <Photo className="h-[clamp(220px,40dvh,360px)] w-full flex-none border-b-2 border-border" />
         <div className="px-4 pt-4">

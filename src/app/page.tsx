@@ -140,7 +140,7 @@ export default async function HomePage(props: PageProps<"/">) {
   const grilla = "grid grid-cols-1 gap-4 px-[14px] sm:grid-cols-2 sm:px-6 lg:grid-cols-3";
 
   return (
-    <div className={`flex min-h-dvh flex-col bg-bg ${user || !portada ? "pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom))]" : "pb-8"}`}>
+    <div className={`flex min-h-dvh flex-col bg-app ${user || !portada ? "pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom))]" : "pb-8"}`}>
       <Header autenticado={Boolean(user)} etiqueta={t("home.etiqueta")} />
 
       <SeleccionMapaProvider>

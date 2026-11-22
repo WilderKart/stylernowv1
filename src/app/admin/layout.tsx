@@ -24,7 +24,7 @@ async function AdminGuardado({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const [{ data: { user } }, contadores] = await Promise.all([supabase.auth.getUser(), contadoresAdmin()]);
   return (
-    <div className="flex min-h-dvh flex-col bg-bg lg:flex-row">
+    <div className="flex min-h-dvh flex-col bg-app lg:flex-row">
       <BarraLateralAdmin email={user?.email ?? ""} nombre={nombre ?? ""} contadores={contadores} />
       <div className="flex min-w-0 flex-1 flex-col">
         <BarraSuperiorAdmin contadores={contadores} />

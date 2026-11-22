@@ -27,7 +27,7 @@ export default async function ServicioDetallePage(props: PageProps<"/panel/servi
     : null;
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg pb-16">
+    <div className="flex min-h-dvh flex-col bg-app pb-16">
       <BarraSuperior titulo={servicio.nombre} volverA="/panel/servicios" />
       <DetalleServicio
         servicio={servicio}

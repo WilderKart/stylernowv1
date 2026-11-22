@@ -31,7 +31,7 @@ export default async function PanelIaPage() {
   ]);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <VistaAiWorkspace
         negocioId={negocioId}

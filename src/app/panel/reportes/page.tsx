@@ -35,7 +35,7 @@ export default async function ReportesPage() {
   ]);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <VistaReportes
         negocioId={negocioId}

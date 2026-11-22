@@ -32,7 +32,7 @@ export default async function MarcaPage() {
     precio?.precio_mensual != null && pais ? formatearMoneda(Number(precio.precio_mensual), pais.moneda, pais.locale) : null;
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <VistaMarca
         activo={(addon ?? []).length > 0}

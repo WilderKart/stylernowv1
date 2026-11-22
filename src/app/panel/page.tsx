@@ -102,7 +102,7 @@ export default async function PanelPage() {
     const dashboard = await cargarDashboard(contexto.negocioId!, sede.id);
 
     return (
-      <div className="flex min-h-dvh flex-col bg-bg">
+      <div className="flex min-h-dvh flex-col bg-app">
         <PanelNav rol={contexto.rol} />
         <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 py-8 sm:px-10">
           <h1 className="font-display mb-1 text-[24px] font-bold uppercase text-text">
@@ -201,7 +201,7 @@ export default async function PanelPage() {
   const metricasLealtad = metricasLealtadRes?.ok ? metricasLealtadRes.data : null;
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} prestaServicios={contexto.prestaServicios} />
       <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 py-8 sm:px-10">
         <h1 className="font-display mb-6 text-[24px] font-bold uppercase text-text">

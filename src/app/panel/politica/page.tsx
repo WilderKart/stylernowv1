@@ -13,7 +13,7 @@ export default async function PoliticaPage() {
   const [r, a] = await Promise.all([obtenerPolitica(), obtenerAnticipo()]);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:px-8">
         {a.ok ? (

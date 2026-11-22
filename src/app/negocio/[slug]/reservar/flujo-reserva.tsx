@@ -255,7 +255,7 @@ export function FlujoReserva({
   );
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       {/* ── Barra superior + progreso ───────────────────────────────── */}
       <div className="p-top">
         {paso > 1 ? (

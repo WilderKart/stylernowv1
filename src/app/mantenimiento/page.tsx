@@ -33,7 +33,7 @@ export default async function MantenimientoPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-xl flex-col bg-bg">
+    <main className="mx-auto flex min-h-dvh w-full max-w-xl flex-col bg-app">
       <div className="p-top">
         <span className="sn-header__title pl-3">
           Styler<span className="sn-hot">Now</span>.

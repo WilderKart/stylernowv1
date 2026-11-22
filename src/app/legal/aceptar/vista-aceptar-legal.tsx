@@ -44,7 +44,7 @@ export function VistaAceptarLegal({
   return (
     <div className="flex flex-col gap-4">
       {textos.map((t, i) => (
-        <section key={t.id} className="border-2 border-border bg-bg">
+        <section key={t.id} className="border-2 border-border bg-app">
           <div className="border-b-2 border-border p-4">
             <Num>{String(i + 1).padStart(2, "0")} / Documento</Num>
             <h2 className="section mt-1 text-[15px] leading-5 break-words">{t.titulo}</h2>

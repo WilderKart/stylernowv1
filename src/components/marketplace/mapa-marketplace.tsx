@@ -163,7 +163,7 @@ export function MapaMarketplace({
       <div className="sn-map relative !h-[60dvh] !min-h-[320px] w-full">
         <div ref={contenedorRef} className="size-full" />
         {sinUbicacion ? (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-bg/90 px-6 text-center">
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-app/90 px-6 text-center">
             <p className="sn-label">{t("mapa.sin_ubicacion")}</p>
           </div>
         ) : null}

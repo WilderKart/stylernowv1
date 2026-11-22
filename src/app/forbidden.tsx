@@ -11,7 +11,7 @@ import { obtenerT } from "@/lib/i18n/servidor";
 export default async function Forbidden() {
   const t = await obtenerT();
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-bg px-6 text-center">
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-app px-6 text-center">
       <p className="font-display mb-2 text-[56px] font-bold leading-none text-danger">403</p>
       <h1 className="font-display mb-2 text-[18px] font-bold uppercase text-text">
         {t("forb.titulo")}

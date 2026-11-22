@@ -11,7 +11,7 @@
   height: 56px;
   padding: 0 calc(var(--u) * 10) 0 calc(var(--u) * 16);
   border-bottom: 2px solid var(--text);
-  background: var(--bg);
+  background: var(--app-bg);
 }
 .logo {
   display: flex;

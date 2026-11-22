@@ -12,7 +12,7 @@ import * as React from "react";
 
 /** Contenedor de pantalla: columna fluida, centrada en pantallas anchas. */
 export function Pantalla({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("mx-auto flex min-h-dvh w-full max-w-xl flex-1 flex-col bg-bg", className)} {...props} />;
+  return <div className={cn("mx-auto flex min-h-dvh w-full max-w-xl flex-1 flex-col bg-app", className)} {...props} />;
 }
 
 /** Barra superior del prototipo (.p-top): volver + título mono en numeración editorial. */

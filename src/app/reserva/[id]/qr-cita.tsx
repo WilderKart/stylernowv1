@@ -21,7 +21,7 @@ export async function QrCita({ reservaId }: { reservaId: string }) {
   const src = `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 
   return (
-    <div className="mx-4 mt-4 hidden items-center gap-5 border-2 border-border bg-bg p-4 shadow-hard md:flex">
+    <div className="mx-4 mt-4 hidden items-center gap-5 border-2 border-border bg-app p-4 shadow-hard md:flex">
       {/* eslint-disable-next-line @next/next/no-img-element -- imagen generada en el servidor (data:), no optimizable */}
       <img src={src} alt={t("rv.qr_alt")} width={132} height={132} className="size-[132px] shrink-0 border-2 border-ink bg-paper" />
       <div className="flex min-w-0 flex-col gap-1.5">

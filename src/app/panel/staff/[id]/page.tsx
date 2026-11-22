@@ -67,7 +67,7 @@ export default async function StaffDetallePage(props: PageProps<"/panel/staff/[i
   ]);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg pb-16">
+    <div className="flex min-h-dvh flex-col bg-app pb-16">
       <BarraSuperior titulo={staff.nombre!} volverA="/panel/staff" />
       <DetalleStaff
         staff={staff}

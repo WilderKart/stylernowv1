@@ -50,7 +50,7 @@ function TarjetaSeleccion({ negocio: n, onCerrar }: { negocio: NegocioTarjeta; o
   const t = useT();
   const href = n.patrocinado && n.campana_id ? `/negocio/${n.slug}?campana_id=${n.campana_id}` : `/negocio/${n.slug}`;
   return (
-    <section aria-label={t("mapa.seleccionado")} className="mb-6 flex flex-col border-2 border-border bg-bg shadow-hard">
+    <section aria-label={t("mapa.seleccionado")} className="mb-6 flex flex-col border-2 border-border bg-app shadow-hard">
       {/* Pestaña: tipo de negocio + cerrar */}
       <div className="flex items-center justify-between gap-2 border-b-2 border-border bg-ink pl-3 text-paper">
         <span className="sn-label flex min-w-0 items-center gap-2">

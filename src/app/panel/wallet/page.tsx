@@ -14,7 +14,7 @@ export default async function WalletPage() {
   const [walletRes, movimientosRes] = await Promise.all([obtenerMiWallet(negocioId), listarMovimientosWallet(negocioId)]);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <VistaWallet
         walletInicial={walletRes.ok ? walletRes.data : { saldoDisponible: 0, saldoRetenido: 0 }}

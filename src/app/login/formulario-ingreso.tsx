@@ -105,7 +105,7 @@ export function FormularioIngreso({
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg lg:grid lg:grid-cols-2">
+    <div className="flex min-h-dvh flex-col bg-app lg:grid lg:grid-cols-2">
       {/* Panel visual / marca — solo escritorio */}
       <aside className="relative hidden overflow-hidden bg-ink lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col">
         <Image src="/images/login-barber-bg.jpg" alt="" fill priority sizes="50vw" className="object-cover" />
@@ -136,8 +136,8 @@ export function FormularioIngreso({
       </aside>
 
       {/* Panel de formulario */}
-      <div className="flex min-h-dvh flex-col bg-bg">
-        <div className="sticky top-0 z-[3] flex min-h-[52px] items-center gap-2 border-b border-[var(--grid)] bg-bg py-1 pr-2 pl-1">
+      <div className="flex min-h-dvh flex-col bg-app">
+        <div className="sticky top-0 z-[3] flex min-h-[52px] items-center gap-2 border-b border-[var(--grid)] bg-app py-1 pr-2 pl-1">
           <Link href="/" className="sn-iconbtn" aria-label={t("comun.volver")}>
             <ChevronLeft />
           </Link>

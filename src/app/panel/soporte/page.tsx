@@ -11,7 +11,7 @@ export default async function SoportePage() {
   const res = await listarMisTickets();
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <VistaSoporte negocioId={contexto.negocioId!} ticketsIniciales={res.ok ? res.data : []} errorInicial={res.ok ? null : res.error} />
     </div>

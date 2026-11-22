@@ -39,7 +39,7 @@
   z-index: -1;
   border: 2.5px solid var(--text);
   border-radius: 5px;
-  background: var(--bg);
+  background: var(--app-bg);
   box-shadow: 5px 6px 0 var(--text);
   transform: skewX(-3deg);
   transition: transform 120ms ease, box-shadow 120ms ease;
@@ -88,7 +88,7 @@
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: #fff;
+  background: var(--app-bg);
 }
 .icono {
   width: 36px !important;

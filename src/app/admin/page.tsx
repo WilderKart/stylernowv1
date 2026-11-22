@@ -152,7 +152,7 @@ export default async function AdminDashboardPage(props: PageProps<"/admin">) {
           <TituloCaja href="/admin/negocios">Estado de negocios</TituloCaja>
           <div className="flex flex-col items-center gap-5 px-4 pb-5 pt-4 sm:flex-row sm:px-5 lg:flex-col xl:flex-row">
             <div className="relative grid size-36 shrink-0 place-items-center rounded-full" style={{ background: dona }}>
-              <div className="grid size-[104px] place-items-center rounded-full bg-bg text-center">
+              <div className="grid size-[104px] place-items-center rounded-full bg-app text-center">
                 <div>
                   <p className="font-display text-[30px] font-black leading-none text-text">{total}</p>
                   <p className="text-[11.5px] text-text-muted">Negocios</p>

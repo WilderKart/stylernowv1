@@ -91,7 +91,7 @@ export function FormularioCombo({
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4 border-2 border-line bg-bg p-4">
+    <form onSubmit={onSubmit} className="flex flex-col gap-4 border-2 border-line bg-app p-4">
       <Input label="Nombre del combo" required value={nombre} onChange={(e) => setNombre(e.target.value)} />
       <Input
         label="Descripción (opcional)"

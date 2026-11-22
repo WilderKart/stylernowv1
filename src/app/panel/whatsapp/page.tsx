@@ -11,7 +11,7 @@ export default async function WhatsAppPage() {
   const resumen = await obtenerResumenWhatsApp();
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <VistaWhatsApp resumen={resumen.ok ? resumen.data : null} errorInicial={resumen.ok ? null : resumen.error} />
     </div>

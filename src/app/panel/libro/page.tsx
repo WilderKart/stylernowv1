@@ -20,7 +20,7 @@ export default async function LibroPanelPage(props: { searchParams: Promise<Reco
   );
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <main className="mx-auto w-full max-w-5xl min-w-0 flex-1 px-4 py-8 sm:px-8">
         <h1 className="poster-3 mb-4 break-words">Libro financiero</h1>

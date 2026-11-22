@@ -17,7 +17,7 @@ export default async function AuditoriaPage() {
   const [res, entidades] = await Promise.all([listarAuditoriaNegocio({ pagina: 1 }), listarEntidadesNegocio()]);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <VistaAuditoria
         inicial={res.ok ? res.data : null}

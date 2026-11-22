@@ -204,7 +204,7 @@ export function VistaCuenta({ resumen, error }: { resumen: ResumenEliminacion | 
             role="alertdialog"
             aria-modal="true"
             aria-label={t("cta.aria_confirmar", { paso })}
-            className={`fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[92dvh] w-full max-w-xl flex-col gap-3 overflow-y-auto border-t-4 bg-bg px-4 pt-2.5 pb-8 outline-none ${paso === 2 ? "border-danger" : "border-border"}`}
+            className={`fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[92dvh] w-full max-w-xl flex-col gap-3 overflow-y-auto border-t-4 bg-app px-4 pt-2.5 pb-8 outline-none ${paso === 2 ? "border-danger" : "border-border"}`}
           >
             <span aria-hidden className="h-1.5 w-12 self-center bg-text" />
             <span className="sn-meta font-bold">{t("cta.confirmacion_n", { paso })}</span>

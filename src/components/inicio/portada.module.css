@@ -126,7 +126,7 @@
   border-radius: calc(var(--u) * 8);
   background: linear-gradient(
     90deg,
-    var(--bg) 0 calc(100% - var(--u) * 58),
+    var(--app-bg) 0 calc(100% - var(--u) * 58),
     var(--linea) 0 calc(100% - var(--u) * 56),
     var(--naranja) 0
   );
@@ -208,7 +208,7 @@
   inset: 0;
   border: 2px solid var(--linea);
   border-radius: calc(var(--u) * 7);
-  background: var(--bg);
+  background: var(--app-bg);
   box-shadow: calc(var(--u) * 3) calc(var(--u) * 6) 0 var(--linea);
   transform: skewX(-11deg);
   transition: transform 120ms ease;

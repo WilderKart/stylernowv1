@@ -193,7 +193,7 @@ export function ListaStaff({
       </div>
 
       {avisoCupo ? (
-        <Card className="mb-4 border-accent bg-bg">
+        <Card className="mb-4 border-accent bg-app">
           <p className="text-[12.5px] leading-relaxed text-text-muted">{avisoCupo}</p>
           <Link href={puedeContratarAdicionales ? "/panel/staff/adicionales" : "/panel/suscripcion"} className="mt-2 inline-block text-[12px] font-bold uppercase text-accent">
             {puedeContratarAdicionales ? "Agregar barberos adicionales" : "Ver mi plan"}

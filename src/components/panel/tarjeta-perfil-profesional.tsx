@@ -50,7 +50,7 @@ export function TarjetaPerfilProfesional({
   }
 
   return (
-    <Card className="mb-6 border-accent bg-bg shadow-[4px_4px_0_0_var(--color-ink,#111)]">
+    <Card className="mb-6 border-accent bg-app shadow-[4px_4px_0_0_var(--color-ink,#111)]">
       <p className="font-display text-[15px] font-bold uppercase text-text">
         {prestaServicios ? "Atiendes clientes" : "Activar mi perfil profesional"}
       </p>

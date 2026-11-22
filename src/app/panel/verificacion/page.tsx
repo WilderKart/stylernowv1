@@ -25,7 +25,7 @@ export default async function VerificacionPage() {
   };
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-8 sm:px-10">
         <VistaVerificacion negocioId={negocioId} inicial={inicial} almacenamiento={await almacenamientoDeImagenesDisponible()} />

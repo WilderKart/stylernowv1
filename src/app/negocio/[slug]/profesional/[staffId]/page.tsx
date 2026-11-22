@@ -130,7 +130,7 @@ export default async function ProfesionalPage(props: PageProps<"/negocio/[slug]/
   const notaTxt = nota !== null ? nota.toFixed(1).replace(".", ",") : "—";
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col overflow-x-hidden bg-bg">
+    <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col overflow-x-hidden bg-app">
       <main className="flex-1">
         <div className="relative">
           <Photo

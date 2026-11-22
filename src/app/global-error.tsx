@@ -39,7 +39,7 @@ export default function GlobalError({
         style={{
           margin: 0,
           minHeight: "100dvh",
-          background: "#FFFFFF",
+          background: "#F8F6F2",
           color: "#0A0A0A",
           fontFamily: "system-ui, -apple-system, sans-serif",
         }}

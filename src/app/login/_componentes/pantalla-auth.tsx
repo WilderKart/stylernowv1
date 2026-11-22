@@ -36,9 +36,9 @@ export function PantallaAuth({
 }) {
   const t = useT();
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <main className={cn("mx-auto flex w-full flex-1 flex-col", ancho)}>
-        <div className="sticky top-0 z-[3] flex min-h-[52px] items-center justify-between gap-2 border-b border-[var(--grid)] bg-bg py-1 pr-2 pl-1">
+        <div className="sticky top-0 z-[3] flex min-h-[52px] items-center justify-between gap-2 border-b border-[var(--grid)] bg-app py-1 pr-2 pl-1">
           {onVolver ? (
             <button type="button" onClick={onVolver} className="sn-iconbtn" aria-label={t("comun.volver")}>
               <ChevronLeft />

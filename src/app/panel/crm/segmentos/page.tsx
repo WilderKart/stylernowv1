@@ -12,7 +12,7 @@ export default async function SegmentosPage() {
   const resEtiquetas = await listarEtiquetasNegocio(negocioId);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <BarraSuperior titulo="Segmentos de Clientes" volverA="/panel/crm" />
       <ConstructorSegmentos
         negocioId={negocioId}

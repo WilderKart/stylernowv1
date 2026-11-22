@@ -49,7 +49,7 @@ export default async function DetalleMembresiaNegocioPage(props: PageProps<"/neg
     : { data: null };
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg pb-28">
+    <div className="flex min-h-dvh flex-col bg-app pb-28">
       <BarraSuperior titulo={plan.nombre} volverA={`/negocio/${negocio.slug}/membresias`} />
       <main className="mx-auto w-full max-w-md flex-1 px-5 py-6 sm:px-0">
         <Card>
@@ -101,7 +101,7 @@ export default async function DetalleMembresiaNegocioPage(props: PageProps<"/neg
       </main>
 
       {!membresiaPropia ? (
-        <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border-subtle bg-bg/95 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur">
+        <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border-subtle bg-app/95 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur">
           <div className="mx-auto w-full max-w-md">
             <Link href={`/checkout/membresia/${plan.id}`}>
               <Button size="lg" className="w-full">{t("mem.comprar_por", { monto: formatCOP(Number(plan.precio)) })}</Button>

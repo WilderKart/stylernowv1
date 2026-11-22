@@ -189,7 +189,7 @@ export function ChatCliente({
               e.preventDefault();
               void enviar(borrador);
             }}
-            className="flex items-stretch gap-2 border-t-2 border-border bg-bg p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+            className="flex items-stretch gap-2 border-t-2 border-border bg-app p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
           >
             <label htmlFor="msg" className="sr-only">
               {t("chat.mensaje")}

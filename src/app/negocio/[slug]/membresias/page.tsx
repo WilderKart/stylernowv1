@@ -49,7 +49,7 @@ export default async function MembresiasNegocioPage(props: PageProps<"/negocio/[
   ]);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <BarraSuperior titulo={t("mem.meta")} volverA={`/negocio/${negocio.slug}`} />
       <main className="mx-auto w-full max-w-md flex-1 px-5 py-6 sm:px-0">
         <p className="mb-5 text-[12.5px] text-text-muted">{negocio.nombre}</p>

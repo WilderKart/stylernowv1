@@ -17,7 +17,7 @@ export function AvisoPlan({
   href?: string;
 }) {
   return (
-    <Card role="status" className="border-accent bg-bg shadow-[4px_4px_0_0_var(--color-ink,#111)]">
+    <Card role="status" className="border-accent bg-app shadow-[4px_4px_0_0_var(--color-ink,#111)]">
       <p className="font-display text-[15px] font-bold uppercase text-text">{titulo}</p>
       <p className="mt-1.5 text-[13px] leading-relaxed text-text-muted">{detalle}</p>
       <Link

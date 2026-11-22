@@ -21,7 +21,7 @@ export default async function ConsumoPage() {
   ]);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <BarraSuperior titulo="Consumo por Servicio" volverA="/panel/inventario" />
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-6 sm:px-10">
         <p className="mb-4 text-[12.5px] text-text-muted">

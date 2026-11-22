@@ -52,7 +52,7 @@ export default async function SedeDetallePage(props: PageProps<"/panel/sedes/[id
   ]);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg pb-16">
+    <div className="flex min-h-dvh flex-col bg-app pb-16">
       <BarraSuperior
         titulo={sede.nombre}
         volverA={contexto.rol === "GUARDIAN" ? "/panel" : "/panel/sedes"}

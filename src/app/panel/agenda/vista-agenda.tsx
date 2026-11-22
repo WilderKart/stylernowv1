@@ -597,7 +597,7 @@ function PanelCita({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center" onClick={onCerrar}>
       <div
-        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-bg p-5 sm:rounded-3xl"
+        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-app p-5 sm:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
@@ -803,7 +803,7 @@ function FormularioNuevaCita({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center" onClick={onCerrar}>
       <div
-        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-bg p-5 sm:rounded-3xl"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-app p-5 sm:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         <p className="mb-4 text-[15px] font-bold text-text">Nueva cita manual</p>
@@ -959,7 +959,7 @@ function FormularioBloqueo({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center" onClick={onCerrar}>
-      <div className="w-full max-w-md rounded-t-3xl bg-bg p-5 sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-md rounded-t-3xl bg-app p-5 sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
         <p className="mb-4 text-[15px] font-bold text-text">Bloquear horario</p>
         <div className="flex flex-col gap-3">
           <select

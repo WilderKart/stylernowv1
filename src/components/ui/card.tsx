@@ -5,7 +5,7 @@ export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElemen
   return (
     <div
       className={cn(
-        "border-2 border-border bg-bg p-4",
+        "border-2 border-border bg-app p-4",
         className
       )}
       {...props}
@@ -19,7 +19,7 @@ export function Badge({
   ...props
 }: React.HTMLAttributes<HTMLSpanElement> & { tone?: "neutral" | "success" | "danger" | "accent" }) {
   const tones = {
-    neutral: "border-2 border-border bg-bg text-text",
+    neutral: "border-2 border-border bg-app text-text",
     success: "bg-success text-ink",
     danger: "bg-danger text-ink",
     accent: "bg-signal text-ink",

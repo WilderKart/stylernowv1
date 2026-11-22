@@ -195,7 +195,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
 
   return (
     <div
-      className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-bg"
+      className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-app"
       // Mi Marca (add-on): el negocio redefine su acento y su tinta; los colores ya vienen validados #RRGGBB.
       style={marca ? ({ "--signal": marca.colorPrimario, "--ink": marca.colorSecundario } as React.CSSProperties) : undefined}
     >

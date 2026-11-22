@@ -48,7 +48,7 @@
   inset: 0;
   z-index: -1;
   border: 2px solid var(--text);
-  background: var(--bg);
+  background: var(--app-bg);
   transform: skewX(-14deg);
 }
 /* Área táctil de 48 px sin cambiar el dibujo. */

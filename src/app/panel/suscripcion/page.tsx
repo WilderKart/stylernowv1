@@ -25,7 +25,7 @@ export default async function SuscripcionPage() {
 
   if (!suscripcionRes.ok) {
     return (
-      <div className="flex min-h-dvh flex-col bg-bg">
+      <div className="flex min-h-dvh flex-col bg-app">
         <PanelNav rol={contexto.rol} />
         <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:px-8">
           <EmptyState
@@ -42,7 +42,7 @@ export default async function SuscripcionPage() {
   const catalogo = await obtenerCatalogoPais(suscripcionRes.data.paisCodigo || uso.paisNegocio || "CO");
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <VistaSuscripcion
         negocioId={negocioId}

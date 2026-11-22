@@ -225,7 +225,7 @@ function CampoColor({ etiqueta, valor, onChange, ok }: { etiqueta: string; valor
 /** Perfil de marca estilo C25: banda de color primario, logo, nombre, slogan y CTA en secundario. */
 function VistaPrevia({ nombre, slogan, logoUrl, primario, secundario }: { nombre: string; slogan: string; logoUrl: string | null; primario: string; secundario: string }) {
   return (
-    <div className="min-w-0 overflow-hidden border-2 border-border shadow-hard" style={{ background: "var(--bg)" }}>
+    <div className="min-w-0 overflow-hidden border-2 border-border shadow-hard" style={{ background: "var(--app-bg)" }}>
       <div className="flex min-w-0 items-center gap-4 p-5" style={{ background: primario }}>
         {logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element

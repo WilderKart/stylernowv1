@@ -22,7 +22,7 @@ export default async function ClienteDetallePage(props: PageProps<"/panel/crm/[c
   ]);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg pb-16">
+    <div className="flex min-h-dvh flex-col bg-app pb-16">
       <BarraSuperior titulo={resResumen.data.nombre} volverA="/panel/crm" />
       <DetalleCliente
         negocioId={negocioId}

@@ -30,7 +30,7 @@ export default async function ComboDetallePage(props: PageProps<"/panel/servicio
   ]);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg pb-16">
+    <div className="flex min-h-dvh flex-col bg-app pb-16">
       <BarraSuperior titulo={combo.nombre} volverA="/panel/servicios" />
       <DetalleCombo
         combo={combo}

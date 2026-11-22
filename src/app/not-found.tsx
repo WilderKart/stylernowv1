@@ -7,7 +7,7 @@ import { obtenerT } from "@/lib/i18n/servidor";
 export default async function NotFound() {
   const t = await obtenerT();
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <main className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center gap-3 p-4">
         <Num>{t("nf.codigo")}</Num>
         <Poster as="h1" size={2} className="break-words">

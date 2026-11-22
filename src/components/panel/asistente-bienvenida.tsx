@@ -100,7 +100,7 @@ export function AsistenteBienvenida({ datos }: { datos: DatosAsistente }) {
   if (oculto || hechas === tareas.length) return null;
 
   return (
-    <section aria-labelledby="asistente-titulo" className="mb-8 border-2 border-ink bg-bg shadow-hard dark:border-border">
+    <section aria-labelledby="asistente-titulo" className="mb-8 border-2 border-ink bg-app shadow-hard dark:border-border">
       <div className="border-b-2 border-ink bg-signal px-4 py-3 text-ink dark:border-border">
         <h2 id="asistente-titulo" className="font-display text-[clamp(22px,7vw,30px)] font-bold uppercase leading-none">
           ¡Bienvenido a StylerNow!
@@ -115,7 +115,7 @@ export function AsistenteBienvenida({ datos }: { datos: DatosAsistente }) {
           <span>Tu configuración</span>
           <span>{hechas} de {tareas.length} completadas</span>
         </div>
-        <div className="mt-1.5 h-2 w-full border-2 border-border bg-bg" role="progressbar" aria-valuemin={0} aria-valuemax={tareas.length} aria-valuenow={hechas}>
+        <div className="mt-1.5 h-2 w-full border-2 border-border bg-app" role="progressbar" aria-valuemin={0} aria-valuemax={tareas.length} aria-valuenow={hechas}>
           <div className="h-full bg-signal" style={{ width: (hechas / tareas.length) * 100 + "%" }} />
         </div>
       </div>

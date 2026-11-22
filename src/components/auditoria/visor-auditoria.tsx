@@ -153,7 +153,7 @@ export function VisorAuditoria({
                   onChange={(e) => onBuscarNegocio(e.target.value)}
                 />
                 {opciones.length > 0 ? (
-                  <ul className="absolute z-10 mt-1 w-full border-2 border-border bg-bg">
+                  <ul className="absolute z-10 mt-1 w-full border-2 border-border bg-app">
                     {opciones.map((o) => (
                       <li key={o.id}>
                         <button

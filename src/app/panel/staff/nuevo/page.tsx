@@ -34,7 +34,7 @@ export default async function InvitarStaffPage() {
   const rolesDisponibles = llenoDeCupo ? permitidos.filter((r) => r === "BUSINESS_ADMIN") : permitidos;
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <BarraSuperior titulo="Invitar al equipo" volverA="/panel/staff" />
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-6 sm:px-10">
         {cupo && llenoDeCupo ? (

@@ -13,7 +13,7 @@ export function Caja({
   destacada?: boolean;
 }) {
   return (
-    <section className={`min-w-0 border-2 border-border bg-bg ${destacada ? "border-l-[6px] border-l-accent" : ""} ${className}`}>
+    <section className={`min-w-0 border-2 border-border bg-app ${destacada ? "border-l-[6px] border-l-accent" : ""} ${className}`}>
       {children}
     </section>
   );
@@ -50,7 +50,7 @@ export function Kpi({
   href?: string;
   destacada?: boolean;
 }) {
-  const clase = `group flex min-w-0 flex-col justify-between gap-3 border-2 border-border bg-bg p-4 sm:p-5 ${
+  const clase = `group flex min-w-0 flex-col justify-between gap-3 border-2 border-border bg-app p-4 sm:p-5 ${
     destacada ? "border-l-[6px] border-l-accent" : ""
   } ${href ? "transition-shadow hover:shadow-[4px_4px_0_0_var(--shadow-ink)]" : ""}`;
   const contenido = (

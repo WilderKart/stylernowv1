@@ -57,7 +57,7 @@ export function Wizard({
 
   if (resumen) {
     return (
-      <div className="min-h-dvh bg-bg">
+      <div className="min-h-dvh bg-app">
         <Marca />
         <main className="mx-auto w-full max-w-lg px-5 py-8 pb-16">
           <PantallaListo resumen={resumen} planNombre={nombreDePlan(resumen.planCodigo)} diasPrueba={diasPrueba} />
@@ -67,7 +67,7 @@ export function Wizard({
   }
 
   return (
-    <div className="min-h-dvh bg-bg">
+    <div className="min-h-dvh bg-app">
       <Marca />
       <main className="mx-auto flex w-full max-w-lg flex-col gap-7 px-5 py-6 pb-20">
         <IndicadorPasos actual={paso} maximo={maximo} onIr={ir} />

@@ -14,7 +14,7 @@ export default async function TicketPage(props: PageProps<"/panel/soporte/[id]">
   if (!res.ok) notFound();
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <VistaHiloTicket ticketInicial={res.data.ticket} mensajesIniciales={res.data.mensajes} soySupersu={false} />
     </div>

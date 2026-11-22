@@ -24,7 +24,7 @@ export default async function CierreCajaPage() {
   const sedes = (sedesData ?? []).filter((s) => sedeId === null || s.id === sedeId);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <BarraSuperior titulo="Cierre de caja" volverA="/panel/pos" />
       <main className="mx-auto w-full max-w-md flex-1 px-5 py-6 sm:px-10">
         <VistaCierreCaja

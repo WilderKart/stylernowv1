@@ -12,7 +12,7 @@ export default async function ProductosPage() {
   const res = await listarProductos(negocioId);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <BarraSuperior titulo="Productos" volverA="/panel/pos" />
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-6 sm:px-10">
         <ListaProductos negocioId={negocioId} productosIniciales={res.ok ? res.data : []} />

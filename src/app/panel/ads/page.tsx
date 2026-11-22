@@ -19,7 +19,7 @@ export default async function AdsPage() {
   ]);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <VistaAds
         negocioId={negocioId}

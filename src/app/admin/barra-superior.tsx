@@ -103,7 +103,7 @@ function Buscador() {
       </label>
 
       {abierto && (
-        <div id={idLista} role="listbox" className="absolute inset-x-0 top-full z-40 mt-1 max-h-[70vh] overflow-y-auto border-2 border-border bg-bg shadow-[4px_4px_0_0_var(--shadow-ink)]">
+        <div id={idLista} role="listbox" className="absolute inset-x-0 top-full z-40 mt-1 max-h-[70vh] overflow-y-auto border-2 border-border bg-app shadow-[4px_4px_0_0_var(--shadow-ink)]">
           {cargando && lista.length === 0 ? (
             <p className="px-4 py-3 text-[13px] text-text-faint">Buscando…</p>
           ) : items && lista.length === 0 ? (
@@ -176,7 +176,7 @@ function Campana({ contadores }: { contadores: ContadoresAdmin }) {
         )}
       </button>
       {abierto && (
-        <div className="absolute right-0 top-full z-40 mt-1 w-[min(320px,calc(100vw-2rem))] border-2 border-border bg-bg shadow-[4px_4px_0_0_var(--shadow-ink)]">
+        <div className="absolute right-0 top-full z-40 mt-1 w-[min(320px,calc(100vw-2rem))] border-2 border-border bg-app shadow-[4px_4px_0_0_var(--shadow-ink)]">
           <p className="border-b border-border-subtle px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-wide text-text">Pendientes</p>
           {avisos.length === 0 ? (
             <p className="px-4 py-4 text-[13px] text-text-muted">Todo al día: no hay pendientes.</p>
@@ -197,7 +197,7 @@ function Campana({ contadores }: { contadores: ContadoresAdmin }) {
 /** Barra superior del contenido: buscador global + pendientes. Se ve en todas las secciones. */
 export function BarraSuperiorAdmin({ contadores }: { contadores: ContadoresAdmin }) {
   return (
-    <div className="sticky top-14 z-20 border-b-2 border-border bg-bg/95 backdrop-blur lg:top-0">
+    <div className="sticky top-14 z-20 border-b-2 border-border bg-app/95 backdrop-blur lg:top-0">
       <div className="flex items-center gap-2 px-4 py-2.5 sm:px-8 lg:px-10">
         <Buscador />
         <Campana contadores={contadores} />

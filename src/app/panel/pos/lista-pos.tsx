@@ -158,7 +158,7 @@ function ModalCobro({
   if (resultado) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-5">
-        <div className="w-full max-w-sm rounded-3xl bg-bg p-6 text-center">
+        <div className="w-full max-w-sm rounded-3xl bg-app p-6 text-center">
           <p className="text-[16px] font-bold text-text">Venta registrada</p>
           <div className="mt-4 flex flex-col gap-2 text-left text-[12.5px]">
             <div className="flex justify-between"><span className="text-text-faint">Cobrado</span><span className="font-bold text-text">{formatCOP(resultado.saldoCobrado)}</span></div>
@@ -180,7 +180,7 @@ function ModalCobro({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center" onClick={onCerrar}>
-      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-bg p-5 sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
+      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-app p-5 sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
         <p className="mb-1 text-[15px] font-bold text-text">{reserva.clienteNombre}</p>
         <p className="mb-4 text-[12px] text-text-faint">{reserva.servicios} · Saldo del servicio {formatCOP(saldoServicio)}</p>
 
@@ -293,7 +293,7 @@ function ModalCanjeGiftCard({ reservas, onCerrar }: { reservas: ReservaParaCobra
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center" onClick={onCerrar}>
-      <div className="max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-t-3xl bg-bg p-5 sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
+      <div className="max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-t-3xl bg-app p-5 sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
         <p className="mb-4 text-[15px] font-bold text-text">Canjear Gift Card</p>
 
         {resultado !== null ? (

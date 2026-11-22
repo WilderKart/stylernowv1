@@ -47,7 +47,7 @@ export function TarjetaVisibilidadPublica({ estado }: { estado: EstadoPublicacio
   }
 
   return (
-    <Card className="mb-6 border-accent bg-bg shadow-[4px_4px_0_0_var(--color-ink,#111)]">
+    <Card className="mb-6 border-accent bg-app shadow-[4px_4px_0_0_var(--color-ink,#111)]">
       <div className="flex items-start justify-between gap-3">
         <p className="font-display text-[15px] font-bold uppercase text-text">Tu imagen pública</p>
         <span

@@ -19,7 +19,7 @@ export default async function NuevoComboPage() {
     .order("nombre");
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <BarraSuperior titulo="Nuevo combo" volverA="/panel/servicios" />
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-6 sm:px-10">
         <FormularioNuevoCombo negocioId={contexto.negocioId!} servicios={servicios ?? []} />

@@ -52,7 +52,7 @@ export function VerDetalle() {
 export function PantallaCargandoCliente({ filas = 4 }: { filas?: number }) {
   const t = useT();
   return (
-    <div aria-busy="true" aria-label={t("comun.cargando_aria")} className="mx-auto flex min-h-dvh w-full max-w-xl flex-1 flex-col bg-bg">
+    <div aria-busy="true" aria-label={t("comun.cargando_aria")} className="mx-auto flex min-h-dvh w-full max-w-xl flex-1 flex-col bg-app">
       <div className="p-top">
         <span className="w-2" />
         <span className="sn-skel h-4 w-32" />

@@ -23,7 +23,7 @@ export default async function AgendaPage(props: PageProps<"/panel/agenda">) {
 
   if (!sedesNegocio || sedesNegocio.length === 0) {
     return (
-      <div className="flex min-h-dvh flex-col bg-bg">
+      <div className="flex min-h-dvh flex-col bg-app">
         <PanelNav rol={contexto.rol} />
         <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-10 text-center sm:px-10">
           <p className="text-[12.5px] text-text-faint">Necesitas al menos una sede operativa para usar la Agenda.</p>
@@ -56,7 +56,7 @@ export default async function AgendaPage(props: PageProps<"/panel/agenda">) {
   }));
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <VistaAgenda
         negocioId={negocioId}

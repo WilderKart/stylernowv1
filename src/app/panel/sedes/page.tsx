@@ -37,7 +37,7 @@ export default async function SedesPage() {
   const limiteAlcanzado = plan?.limite_sedes != null && sedesOperativas.length >= plan.limite_sedes;
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-8 sm:px-10">
         <div className="mb-6 flex items-center justify-between gap-3">

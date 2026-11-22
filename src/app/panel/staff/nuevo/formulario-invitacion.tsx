@@ -62,7 +62,7 @@ export function FormularioInvitacion({
               No pudimos enviar el correo a {email}. Compártele este enlace (por WhatsApp, por ejemplo): para aceptarla debe
               ingresar con ese mismo correo.
             </p>
-            <p className="mt-3 break-all rounded-lg border border-border bg-bg px-3 py-2 text-left font-mono text-[12px] text-text">{sinCorreo}</p>
+            <p className="mt-3 break-all rounded-lg border border-border bg-app px-3 py-2 text-left font-mono text-[12px] text-text">{sinCorreo}</p>
             <Button
               variant="secondary"
               size="sm"

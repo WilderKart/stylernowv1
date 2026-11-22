@@ -24,7 +24,7 @@ export default async function FavoritosPage() {
   const negocios = await listarMisFavoritos();
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom))]">
+    <div className="flex min-h-dvh flex-col bg-app pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom))]">
       <Header autenticado etiqueta={t("fav.etiqueta")} />
       <main className="mx-auto w-full max-w-5xl flex-1">
         <h1 className="poster-1 px-4 pb-4 pt-3 sm:px-6">

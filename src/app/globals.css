@@ -9,6 +9,7 @@
 :root,
 [data-theme="light"] {
   --bg: #ffffff;
+  --app-bg: #f8f6f2;
   --surface: #f2f2f2;
   --surface-2: #e6e6e6;
   --ink: #0a0a0a;
@@ -37,6 +38,7 @@
 
 [data-theme="dark"] {
   --bg: #0a0a0a;
+  --app-bg: #0a0a0a;
   --surface: #141414;
   --surface-2: #1e1e1e;
   --ink: #0a0a0a;
@@ -102,6 +104,7 @@
   --font-mono: var(--sn-font-mono);
 
   --color-bg: var(--bg);
+  --color-app: var(--app-bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-border: var(--line);
@@ -155,7 +158,7 @@
 }
 
 html {
-  background: var(--bg);
+  background: var(--app-bg);
   /* Nada se sale por los lados: `clip` recorta sin crear contenedor de scroll (no rompe position: sticky). */
   overflow-x: clip;
   max-width: 100%;
@@ -168,7 +171,7 @@ body {
   /* Sin pellizco ni doble toque para hacer zoom; sí se permite desplazar. */
   touch-action: pan-x pan-y;
   overscroll-behavior-x: none;
-  background: var(--bg);
+  background: var(--app-bg);
   color: var(--text);
   font: 400 15px/22px var(--sn-font-sans);
   -webkit-font-smoothing: antialiased;

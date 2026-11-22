@@ -55,7 +55,7 @@ export default async function CumplimientoPage() {
   const historico = ((historicoRes.data ?? []) as unknown as FilaReserva[]).map(aCita);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-8">
         <h1 className="font-display mb-1 text-[24px] font-bold uppercase text-text">Cumplimiento de citas</h1>
