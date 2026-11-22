@@ -4,9 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { formatCOP } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   actualizarMiPerfilStaff,
+  autorizarDesdePerfil,
+  revocarPublicacion,
+  type MisAutorizaciones,
   crearMiBloqueo,
   eliminarMiBloqueo,
   guardarDiaDisponibilidad,
@@ -26,6 +30,10 @@ export function VistaPerfilStaff({
   gananciasIniciales,
   disponibilidadInicial,
   bloqueosIniciales,
+  autorizaciones,
+  textoTratamiento,
+  textoPublicacion,
+  bienvenida,
 }: {
   vinculoId: string;
   sedeId: string | null;
@@ -33,10 +41,26 @@ export function VistaPerfilStaff({
   gananciasIniciales: MisGanancias;
   disponibilidadInicial: DiaDisponibilidad[];
   bloqueosIniciales: BloqueoStaff[];
+  autorizaciones: MisAutorizaciones | null;
+  textoTratamiento: string;
+  textoPublicacion: string;
+  bienvenida: boolean;
 }) {
   return (
     <div className="flex flex-col gap-8">
+      {bienvenida ? (
+        <Card className="p-5">
+          <p className="m-0 text-[14px] font-bold text-text">¡Bienvenido al equipo!</p>
+          <p className="m-0 mt-1 text-[13px] text-text-muted">
+            Completa tu perfil profesional. Si quieres que los clientes te vean y reserven contigo, sube tu foto y activa la
+            publicación de tu perfil más abajo. Es opcional: sin ella sigues usando tu agenda y el panel normalmente.
+          </p>
+        </Card>
+      ) : null}
       <SeccionDatos perfilInicial={perfilInicial} />
+      {autorizaciones ? (
+        <SeccionAutorizaciones estado={autorizaciones} textoTratamiento={textoTratamiento} textoPublicacion={textoPublicacion} />
+      ) : null}
       <SeccionGanancias ganancias={gananciasIniciales} />
       {sedeId ? (
         <SeccionDisponibilidad vinculoId={vinculoId} sedeId={sedeId} disponibilidadInicial={disponibilidadInicial} />
@@ -303,5 +327,103 @@ function SeccionBloqueos({ vinculoId, bloqueosIniciales }: { vinculoId: string; 
         </ul>
       )}
     </section>
+  );
+}
+
+const FECHA = new Intl.DateTimeFormat("es-CO", { dateStyle: "long", timeStyle: "short", timeZone: "America/Bogota" });
+const fecha = (iso: string | null) => (iso ? FECHA.format(new Date(iso)) : "");
+
+/**
+ * Autorizaciones del profesional. La de tratamiento se otorga al aceptar la invitación (aquí se
+ * consulta, o se otorga si falta). La de PUBLICACIÓN es independiente, voluntaria y revocable aquí
+ * mismo; nunca se marca sola. Los textos son BORRADORES de trabajo (pendientes de validación jurídica).
+ */
+function SeccionAutorizaciones({
+  estado,
+  textoTratamiento,
+  textoPublicacion,
+}: {
+  estado: MisAutorizaciones;
+  textoTratamiento: string;
+  textoPublicacion: string;
+}) {
+  const router = useRouter();
+  const [cargando, setCargando] = useState<null | "tratamiento" | "publicacion" | "revocar">(null);
+  const [error, setError] = useState<string | null>(null);
+  const tratamientoOk = estado.tratamiento === "ACEPTA";
+  const publicacionOk = estado.publicacion === "ACEPTA";
+
+  async function ejecutar(accion: "tratamiento" | "publicacion" | "revocar") {
+    setCargando(accion);
+    setError(null);
+    const res = accion === "revocar" ? await revocarPublicacion() : await autorizarDesdePerfil(accion);
+    setCargando(null);
+    if (!res.ok) return setError(res.error);
+    router.refresh();
+  }
+
+  return (
+    <Card className="flex flex-col gap-5 p-5">
+      <div>
+        <h2 className="font-display m-0 text-[15px] font-bold uppercase text-text">Mis autorizaciones</h2>
+        <p className="m-0 mt-1 text-[12px] text-text-faint">
+          Textos en revisión jurídica: pueden ajustarse. Cada decisión queda registrada con su fecha y el texto exacto.
+        </p>
+      </div>
+
+      <section className="flex flex-col items-start gap-2">
+        <p className="m-0 text-[13px] font-bold text-text">Tratamiento de datos para tu vínculo profesional</p>
+        <p className="m-0 text-[13px] text-text-muted">{textoTratamiento}</p>
+        {tratamientoOk ? (
+          <p className="m-0 text-[12px] text-text-faint">Autorizada el {fecha(estado.tratamientoAt)}.</p>
+        ) : (
+          <Button size="sm" loading={cargando === "tratamiento"} disabled={cargando !== null} onClick={() => ejecutar("tratamiento")}>
+            Autorizar tratamiento
+          </Button>
+        )}
+      </section>
+
+      <section className="flex flex-col items-start gap-2 border-t border-border pt-4">
+        <p className="m-0 text-[13px] font-bold text-text">Publicar mi perfil a los clientes (opcional)</p>
+        <p className="m-0 text-[13px] text-text-muted">{textoPublicacion}</p>
+        {publicacionOk ? (
+          <>
+            <p className="m-0 text-[12px] text-text-faint">
+              Autorizada el {fecha(estado.publicacionAt)}.{" "}
+              {estado.tieneFoto ? "Tu perfil se muestra a los clientes." : "Sube una foto para que tu perfil se muestre."}
+            </p>
+            <Button variant="secondary" size="sm" loading={cargando === "revocar"} disabled={cargando !== null} onClick={() => ejecutar("revocar")}>
+              Dejar de publicar mi perfil
+            </Button>
+          </>
+        ) : (
+          <>
+            {estado.publicacion === "REVOCA" ? (
+              <p className="m-0 text-[12px] text-text-faint">Retiraste esta autorización el {fecha(estado.publicacionAt)}.</p>
+            ) : null}
+            {estado.enTransicion && estado.transicionFin ? (
+              <p className="m-0 text-[12px] text-text-faint">
+                Por ahora tu perfil sigue visible. Si no lo autorizas antes del {fecha(estado.transicionFin)}, dejará de
+                mostrarse (tu cuenta y tu agenda siguen igual).
+              </p>
+            ) : null}
+            {!estado.tieneFoto ? <p className="m-0 text-[12px] text-text-faint">Para mostrarse, tu perfil también necesita una foto.</p> : null}
+            <Button
+              size="sm"
+              loading={cargando === "publicacion"}
+              disabled={cargando !== null || !tratamientoOk}
+              onClick={() => ejecutar("publicacion")}
+            >
+              Autorizar publicación
+            </Button>
+          </>
+        )}
+      </section>
+      {error ? (
+        <p role="alert" className="m-0 text-[12px] text-danger">
+          {error}
+        </p>
+      ) : null}
+    </Card>
   );
 }

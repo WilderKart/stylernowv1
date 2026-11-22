@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { obtenerT } from "@/lib/i18n/servidor";
 import { CompletarPerfil } from "./completar-perfil";
+import { obtenerInvitacionPendiente } from "@/lib/invitaciones/invitacion-pendiente";
 import { FormularioIngreso } from "./formulario-ingreso";
 import { requiereAceptacionEnPerfil } from "./registro-actions";
 
@@ -40,5 +41,7 @@ export default async function LoginPage(props: PageProps<"/login">) {
   }
 
   const aviso = params.recuperada === "1" ? "recuperada" : params.error ? "enlace" : undefined;
-  return <FormularioIngreso siguiente={siguiente} aviso={aviso} />;
+  // Staff invitado con cuenta: correo precargado (sale de la invitación, en el servidor).
+  const invitacion = await obtenerInvitacionPendiente(Array.isArray(params.invitacion) ? params.invitacion[0] : params.invitacion);
+  return <FormularioIngreso siguiente={siguiente} aviso={aviso} invitacion={invitacion ? { email: invitacion.email, negocio: invitacion.negocio } : null} />;
 }

@@ -16,7 +16,8 @@ import type { User } from "@supabase/supabase-js";
  * Se guarda en `app_metadata` (solo escribible con la clave de servicio), nunca en
  * `user_metadata`, que la persona puede editar desde el navegador.
  */
-export type IntencionRegistro = "cliente" | "negocio";
+/** «staff» solo existe para quien se registra desde una invitación válida (lo valida el servidor). */
+export type IntencionRegistro = "cliente" | "negocio" | "staff";
 
 export const RUTA_ONBOARDING = "/panel/onboarding";
 
@@ -24,7 +25,7 @@ type ClienteSupabase = Awaited<ReturnType<typeof createClient>>;
 
 export function intencionDe(user: Pick<User, "app_metadata"> | null | undefined): IntencionRegistro | null {
   const v = user?.app_metadata?.intencion_registro;
-  return v === "cliente" || v === "negocio" ? v : null;
+  return v === "cliente" || v === "negocio" || v === "staff" ? v : null;
 }
 
 /** Destino que corresponde a la intención elegida (sin `next` explícito). */

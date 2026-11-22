@@ -22,7 +22,8 @@ function construirCsp(nonce: string) {
     // Cloudflare Turnstile (anti-bots de registro, ingreso y recuperación) se dibuja en un iframe propio.
     "frame-src 'self' https://challenges.cloudflare.com",
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' blob: data: https://*.supabase.co https://tile.openstreetmap.org https://*.tile.openstreetmap.org",
+    // res.cloudinary.com: fotos de Staff cuando el adaptador Cloudinary está configurado (decisión B).
+    "img-src 'self' blob: data: https://*.supabase.co https://res.cloudinary.com https://tile.openstreetmap.org https://*.tile.openstreetmap.org",
     "font-src 'self' data:",
     "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://tile.openstreetmap.org https://*.tile.openstreetmap.org",
     "worker-src 'self' blob:",

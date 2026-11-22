@@ -15,6 +15,23 @@ import {
   type StaffItem,
 } from "./actions";
 
+/** Estado legal del profesional para el dueño (función `estado_autorizaciones_staff`). */
+export interface AutorizacionStaff {
+  tieneFoto: boolean;
+  tratamiento: string | null;
+  publicacion: string | null;
+  publicable: boolean;
+  enTransicion: boolean;
+}
+
+/** Texto corto de visibilidad: por qué un profesional se muestra o no a los clientes. */
+function visibilidad(a: AutorizacionStaff) {
+  if (a.publicable && a.publicacion === "ACEPTA") return { texto: "Visible a clientes", tono: "success" as const };
+  if (a.publicable && a.enTransicion) return { texto: "Visible (en transición)", tono: "neutral" as const };
+  if (a.publicacion !== "ACEPTA") return { texto: a.publicacion === "REVOCA" ? "Publicación retirada" : "Sin autorización de publicación", tono: "neutral" as const };
+  return { texto: "Falta foto", tono: "neutral" as const };
+}
+
 interface InvitacionPendiente {
   id: string;
   email: string;
@@ -41,6 +58,7 @@ export function ListaStaff({
   totalInicial,
   invitacionesIniciales,
   errorInicial,
+  autorizaciones = {},
 }: {
   negocioId: string;
   /** Guardian: su única sede — el filtro de sede no aplica, siempre queda fijo. */
@@ -51,6 +69,7 @@ export function ListaStaff({
   totalInicial: number;
   invitacionesIniciales: InvitacionPendiente[];
   errorInicial: string | null;
+  autorizaciones?: Record<string, AutorizacionStaff>;
 }) {
   const enLinea = useEnLinea();
   const [items, setItems] = useState(itemsIniciales);
@@ -287,6 +306,12 @@ export function ListaStaff({
                         {s.especialidad ?? "Sin profesión definida"}
                         {s.sedeNombre ? ` · ${s.sedeNombre}` : ""}
                       </p>
+                      {autorizaciones[s.staffId] ? (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          <Badge tone={visibilidad(autorizaciones[s.staffId]).tono}>{visibilidad(autorizaciones[s.staffId]).texto}</Badge>
+                          {autorizaciones[s.staffId].tratamiento !== "ACEPTA" ? <Badge tone="danger">Tratamiento de datos pendiente</Badge> : null}
+                        </div>
+                      ) : null}
                     </div>
                     <Badge tone={ESTADO_TONO[s.estado]}>{s.estado}</Badge>
                   </div>

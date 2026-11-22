@@ -53,7 +53,7 @@ export async function crearCuentaRegistro(
   if (!user) return { ok: false, error: "Tu sesión venció. Vuelve a ingresar." };
   if (await faltaAceptarVigentes(supabase, user.id)) {
     if (aceptaTerminos !== true) return { ok: false, error: "Debes aceptar los Términos y la Política de Tratamiento de Datos." };
-    await aceptarTextosLegales(supabase, user.id, await idsTextosVigentes(supabase));
+    await aceptarTextosLegales(supabase, user.id, await idsTextosVigentes(supabase), "perfil");
     await supabase.from("perfil").update({ consentimiento_datos_at: new Date().toISOString() }).eq("id", user.id).is("consentimiento_datos_at", null);
   }
 

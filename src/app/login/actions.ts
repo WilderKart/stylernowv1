@@ -10,6 +10,7 @@ import { registrarIntentoAuth, verificarRateLimitAuth } from "@/lib/auth/rate-li
 import { googleProvider } from "@/lib/auth/providers/google-provider";
 import { destinoSeguro } from "@/lib/auth/destino-seguro";
 import { destinoInicial, destinoPorIntencion, fijarIntencionRegistro } from "@/lib/auth/destino-inicial";
+import { obtenerInvitacionPendiente } from "@/lib/invitaciones/invitacion-pendiente";
 import { limitar, ipDelLlamador } from "@/lib/rate-limit";
 import { MENSAJE_TURNSTILE, verificarTurnstile } from "@/lib/seguridad/turnstile";
 import { headers } from "next/headers";
@@ -63,13 +64,19 @@ export async function registrarCuenta(datos: {
   aceptaTerminos: boolean;
   siguiente: string;
   turnstile?: unknown;
+  invitacion?: unknown;
 }): Promise<
   | { ok: true; email: string; siguiente: string }
   | { ok: false; campo?: "tipo" | "email" | "password" | "confirmar" | "terminos"; error: string }
 > {
-  const tipo = TIPO_CUENTA.safeParse(datos.tipo);
+  // Staff invitado: el correo y el destino salen de la invitación PENDIENTE (servidor), no del formulario.
+  const invitacion = datos.invitacion === undefined ? null : await obtenerInvitacionPendiente(datos.invitacion);
+  if (datos.invitacion !== undefined && !invitacion) {
+    return { ok: false, error: "Esta invitación ya no está disponible. Pídele a quien te invitó que te envíe una nueva." };
+  }
+  const tipo = invitacion ? ({ success: true, data: "staff" } as const) : TIPO_CUENTA.safeParse(datos.tipo);
   if (!tipo.success) return { ok: false, campo: "tipo", error: "Elige qué tipo de cuenta quieres crear." };
-  const correo = CORREO.safeParse(datos.email);
+  const correo = CORREO.safeParse(invitacion ? invitacion.email : datos.email);
   if (!correo.success) return { ok: false, campo: "email", error: "Escribe un correo válido." };
   const email = correo.data;
   if (datos.aceptaTerminos !== true) {
@@ -88,16 +95,17 @@ export async function registrarCuenta(datos: {
   if (!limite.ok) return { ok: false, error: limite.error };
 
   const supabase = await createClient();
-  // Evidencia de la aceptación: hora y versiones exactas mostradas al momento de registrarse.
+  // Versiones exactas mostradas al registrarse. La aceptación se guarda en el servidor (migración 145)
+  // con la hora del servidor; en los metadatos solo quedan los ids, para enrutar tras verificar.
   const versiones = await idsTextosVigentes(supabase);
   // El destino lo decide el servidor a partir del tipo validado (no se confía en el `next` del navegador).
-  const siguiente = destinoPorIntencion(tipo.data, destinoSeguro(datos.siguiente));
+  const siguiente = invitacion ? `/invitacion/${invitacion.id}` : destinoPorIntencion(tipo.data, destinoSeguro(datos.siguiente));
   const { data, error } = await supabase.auth.signUp({
     email,
     password: datos.password,
     options: {
       emailRedirectTo: `${await origenActual()}/auth/callback?next=${encodeURIComponent(siguiente)}`,
-      data: { acepta_legal_at: new Date().toISOString(), acepta_legal_ids: versiones },
+      data: { acepta_legal_ids: versiones },
     },
   });
   await registrarIntentoAuth(email, "otp_envio", !error);
@@ -118,6 +126,12 @@ export async function registrarCuenta(datos: {
   if (data.user && (data.user.identities?.length ?? 0) > 0) {
     await guardarEnHistorial(data.user.id, datos.password);
     await fijarIntencionRegistro(data.user.id, tipo.data);
+    // Evidencia de la casilla marcada: en el mismo instante y con la hora del servidor.
+    const { error: eAcepta } = await (createAdminClient() as unknown as { rpc: (n: string, a: object) => Promise<{ error: { message: string } | null }> }).rpc(
+      "registrar_aceptacion_legal_registro",
+      { p_usuario: data.user.id, p_texto_ids: versiones }
+    );
+    if (eAcepta) console.error("[registrarCuenta] aceptación legal no registrada", eAcepta.message);
   }
   return { ok: true, email, siguiente };
 }

@@ -2,6 +2,7 @@ import { destinoSeguro } from "@/lib/auth/destino-seguro";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { obtenerT } from "@/lib/i18n/servidor";
+import { obtenerInvitacionPendiente } from "@/lib/invitaciones/invitacion-pendiente";
 import { FormularioRegistro } from "./formulario-registro";
 
 export async function generateMetadata() {
@@ -30,6 +31,12 @@ export default async function RegistroPage(props: PageProps<"/registro">) {
   const tipoParam = Array.isArray(params.tipo) ? params.tipo[0] : params.tipo;
   const tipoInicial =
     tipoParam === "negocio" || siguiente.startsWith("/panel/onboarding") ? "negocio" : tipoParam === "cliente" ? "cliente" : null;
+
+  // Staff invitado: el correo sale de la invitación (servidor) y queda bloqueado.
+  const invitacion = await obtenerInvitacionPendiente(Array.isArray(params.invitacion) ? params.invitacion[0] : params.invitacion);
+  if (invitacion) {
+    return <FormularioRegistro siguiente={`/invitacion/${invitacion.id}`} tipoInicial={null} invitacion={invitacion} />;
+  }
 
   return <FormularioRegistro siguiente={siguiente} tipoInicial={tipoInicial} />;
 }
