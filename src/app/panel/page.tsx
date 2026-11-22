@@ -1,9 +1,15 @@
 import { DashboardResumen } from "@/components/panel/dashboard-resumen";
 import { EnlaceReserva } from "@/components/panel/enlace-reserva";
+import { AsistenteBienvenida } from "@/components/panel/asistente-bienvenida";
 import { PanelNav } from "@/components/panel/panel-nav";
+import { TarjetaPerfilProfesional } from "@/components/panel/tarjeta-perfil-profesional";
+import { TarjetaVisibilidadPublica } from "@/components/panel/tarjeta-visibilidad-publica";
+import { obtenerEstadoPublicacion } from "./staff/publicacion-actions";
 import { Badge, Card } from "@/components/ui/card";
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { obtenerCupoPlan } from "@/lib/planes/cupo";
 import { createClient } from "@/lib/supabase/server";
+import { obtenerEstadoOperativo } from "@/lib/suscripcion/estado-operativo";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
@@ -72,6 +78,17 @@ export default async function PanelPage() {
   // lógica aquí.
   if (contexto.rol === "STAFF") {
     redirect("/staff");
+  }
+
+  // Administrador delegado (BUSINESS_ADMIN / ADMIN_BARBER): hoy su superficie es el equipo (migración 161, denegado por defecto).
+  if (contexto.rol === "ADMIN") {
+    redirect("/panel/staff");
+  }
+
+  // FASE 2B: con la suscripción restringida el resumen operativo no aplica; el panel abre en el cumplimiento de citas pendientes.
+  if ((contexto.rol === "BARBERIA" || contexto.rol === "GUARDIAN") && contexto.negocioId) {
+    const estadoOperativo = await obtenerEstadoOperativo(contexto.negocioId);
+    if (!estadoOperativo.operativo) redirect("/panel/cumplimiento");
   }
 
   if (contexto.rol === "GUARDIAN") {
@@ -154,11 +171,29 @@ export default async function PanelPage() {
   // rol === "BARBERIA"
   const { data: negocio } = await supabase
     .from("negocio")
-    .select("id, nombre, slug, estado, onboarding_completo, logo_url")
+    .select("id, nombre, slug, estado, onboarding_completo, logo_url, descripcion, foto_principal_url")
     .eq("id", contexto.negocioId!)
     .single();
 
   if (!negocio || !negocio.onboarding_completo) redirect("/panel/onboarding");
+
+  // Tareas del asistente de bienvenida (se calculan aqui, en el servidor; el navegador solo las muestra).
+  const [{ count: nServicios }, cupo, { data: verif }] = await Promise.all([
+    supabase.from("servicio").select("id", { count: "exact", head: true }).eq("negocio_id", negocio.id).eq("estado", "ACTIVO"),
+    obtenerCupoPlan(negocio.id),
+    (supabase as unknown as { rpc: (n: string, a: object) => Promise<{ data: { estado: string } | null }> }).rpc("mi_verificacion_negocio", { p_negocio_id: negocio.id }),
+  ]);
+  const datosAsistente = {
+    servicios: nServicios ?? 0,
+    // El propio perfil profesional del propietario ocupa cupo, pero no es «invitar al equipo».
+    equipo: Math.max((cupo?.staffUsado ?? 0) - (contexto.prestaServicios ? 1 : 0), 0),
+    equipoTope: cupo?.staffTope ?? null,
+    planNombre: cupo?.planNombre ?? "actual",
+    perfilCompleto: Boolean(negocio.descripcion && negocio.foto_principal_url),
+    verificacion: verif?.estado ?? "NO_INICIADA",
+  };
+
+  const estadoPublicacion = contexto.prestaServicios ? await obtenerEstadoPublicacion(negocio.id) : null;
 
   const dashboardBarberia =
     negocio.estado === "ACTIVO" ? await cargarDashboard(negocio.id, null) : null;
@@ -167,11 +202,26 @@ export default async function PanelPage() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
-      <PanelNav rol={contexto.rol} />
+      <PanelNav rol={contexto.rol} prestaServicios={contexto.prestaServicios} />
       <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 py-8 sm:px-10">
         <h1 className="font-display mb-6 text-[24px] font-bold uppercase text-text">
           {negocio.nombre}
         </h1>
+
+        <AsistenteBienvenida datos={datosAsistente} />
+
+        <TarjetaPerfilProfesional
+          negocioId={negocio.id}
+          prestaServicios={contexto.prestaServicios}
+          disponibles={cupo?.capacidad?.disponibles ?? null}
+          limite={cupo?.staffTope ?? null}
+          ocupados={cupo?.staffUsado ?? 0}
+          planNombre={cupo?.planNombre ?? "actual"}
+          puedeActivar={cupo?.perfilPropietario.puedeActivar ?? false}
+          puedeDesactivar={cupo?.perfilPropietario.puedeDesactivar ?? false}
+        />
+
+        {estadoPublicacion?.ok ? <TarjetaVisibilidadPublica estado={estadoPublicacion.data} /> : null}
 
         <Card className="mb-6 flex items-center justify-between">
           <div>

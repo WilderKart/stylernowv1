@@ -60,6 +60,8 @@ export interface PaisPlanes {
 export interface PlanBase {
   codigo: PlanCodigo;
   nombre: string;
+  /** Perfil profesional del propietario (migración 160): configuración única que leen la base y la interfaz. */
+  perfilPropietario: { porDefecto: boolean; autoAlta: boolean; puedeActivar: boolean; puedeDesactivar: boolean };
 }
 export interface PrecioPlan {
   plan: PlanCodigo;
@@ -93,7 +95,7 @@ export async function obtenerDatosPlanes(): Promise<Resultado<DatosPlanes>> {
     const { supabase } = await usuarioActual();
     const [paisRes, planRes, precioRes, addonRes, carRes] = await Promise.all([
       supabase.from("pais").select("*").order("codigo"),
-      supabase.from("plan").select("codigo, nombre"),
+      supabase.from("plan").select("codigo, nombre, propietario_profesional_por_defecto, propietario_perfil_auto_alta, propietario_puede_activar_perfil, propietario_puede_desactivar_perfil"),
       supabase.from("plan_precio").select("*"),
       supabase.from("addon_precio").select("pais_codigo, precio_mensual").eq("addon_codigo", "MI_MARCA"),
       supabase.from("plan_caracteristica").select("plan_codigo, clave, habilitado, valor").order("clave"),
@@ -128,7 +130,19 @@ export async function obtenerDatosPlanes(): Promise<Resultado<DatosPlanes>> {
           anualMesesPagados: p.anual_meses_pagados,
           cuposRestantes: cupos[i],
         })),
-        planes: PLANES.map((c) => ({ codigo: c, nombre: (planRes.data ?? []).find((x) => x.codigo === c)?.nombre ?? c })),
+        planes: PLANES.map((c) => {
+          const x = (planRes.data ?? []).find((y) => y.codigo === c);
+          return {
+            codigo: c,
+            nombre: x?.nombre ?? c,
+            perfilPropietario: {
+              porDefecto: x?.propietario_profesional_por_defecto ?? false,
+              autoAlta: x?.propietario_perfil_auto_alta ?? false,
+              puedeActivar: x?.propietario_puede_activar_perfil ?? true,
+              puedeDesactivar: x?.propietario_puede_desactivar_perfil ?? true,
+            },
+          };
+        }),
         precios: (precioRes.data ?? []).map((r) => ({
           plan: r.plan_codigo,
           pais: r.pais_codigo,
@@ -265,6 +279,39 @@ export async function guardarCaracteristica(c: Caracteristica, motivo: string): 
       m
     );
     if (error) return { ok: false, error: traducirError(error.message) };
+    revalidatePath("/admin/planes");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: mensajeDe(e) };
+  }
+}
+
+// ── Perfil profesional del propietario por plan (migración 160) ───────────────
+
+export async function guardarPerfilPropietarioPlan(
+  plan: PlanCodigo,
+  cfg: { porDefecto: boolean; autoAlta: boolean; puedeActivar: boolean; puedeDesactivar: boolean },
+  motivo: string
+): Promise<Resultado> {
+  try {
+    const { supabase } = await usuarioActual();
+    if (!PLANES.includes(plan)) return { ok: false, error: "Plan desconocido." };
+    const m = validarMotivo(motivo);
+    if (!m || m.length < 10) return { ok: false, error: "Escribe el motivo del cambio (mínimo 10 caracteres). Queda en la auditoría." };
+    const { error } = await supabase.rpc("admin_configurar_perfil_propietario_plan", {
+      p_plan: plan,
+      p_por_defecto: cfg.porDefecto,
+      p_auto_alta: cfg.autoAlta,
+      p_puede_activar: cfg.puedeActivar,
+      p_puede_desactivar: cfg.puedeDesactivar,
+      p_motivo: m,
+    });
+    if (error) {
+      if (error.message.includes("CONFIGURACION_INCOHERENTE")) {
+        return { ok: false, error: "Incoherente: no puedes hacerlo obligatorio si el propietario no puede activarlo." };
+      }
+      return { ok: false, error: traducirError(error.message) };
+    }
     revalidatePath("/admin/planes");
     return { ok: true };
   } catch (e) {

@@ -4,6 +4,7 @@ import { cerrarSesion } from "@/app/perfil/actions";
 import { cn } from "@/lib/utils";
 import {
   Activity,
+  BadgeCheck,
   BookOpen,
   FileCheck,
   ChartColumn,
@@ -24,6 +25,7 @@ import {
   ShieldAlert,
   Sparkles,
   Store,
+  UserPlus,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -45,6 +47,7 @@ const GRUPOS: { titulo?: string; items: Item[] }[] = [
     titulo: "Operación",
     items: [
       { href: "/admin/negocios", etiqueta: "Negocios", icono: Store, contador: "negociosPendientes" },
+      { href: "/admin/verificaciones", etiqueta: "Verificaciones", icono: BadgeCheck },
       { href: "/admin/usuarios", etiqueta: "Usuarios", icono: Users },
       { href: "/admin/soporte", etiqueta: "Soporte", icono: LifeBuoy, contador: "ticketsAbiertos" },
       { href: "/admin/centro-cumplimiento", etiqueta: "Cumplimiento y PQRS", icono: Scale },
@@ -55,6 +58,7 @@ const GRUPOS: { titulo?: string; items: Item[] }[] = [
     titulo: "Ingresos y producto",
     items: [
       { href: "/admin/planes", etiqueta: "Planes y suscripciones", icono: Layers },
+      { href: "/admin/adicionales", etiqueta: "Barberos adicionales", icono: UserPlus },
       { href: "/admin/comisiones", etiqueta: "Comisiones", icono: Percent },
       { href: "/admin/lealtad", etiqueta: "Lealtad", icono: Gift },
       { href: "/admin/marketing", etiqueta: "Marketing", icono: Megaphone },

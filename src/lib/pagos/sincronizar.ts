@@ -105,7 +105,12 @@ async function aplicar(pagoId: string, pagoPasarela: PagoPasarela): Promise<Resu
   const admin = createAdminClient();
 
   const posterior = ESTADOS_DISPUTA.has(pagoPasarela.estadoCrudo) || ESTADOS_REEMBOLSO.has(pagoPasarela.estadoCrudo);
-  if (pagoPasarela.estado === "PENDIENTE" && !posterior) return { estado: "PENDIENTE" };
+  if (pagoPasarela.estado === "PENDIENTE" && !posterior) {
+    // Barberos adicionales (migración 173): Mercado Pago informa «pendiente» → el lote pasa a PAGO_PENDIENTE.
+    // La función solo actúa sobre pagos de concepto STAFF_EXTRA; para cualquier otro pago no hace nada. Nunca activa cupos.
+    await marcarAdicionalPendiente(pagoId, pagoPasarela.id);
+    return { estado: "PENDIENTE" };
+  }
 
   // Directiva Sandbox, etapas 2 y 5: el pago debe venir del entorno correcto y, si es de un negocio,
   // haber sido recibido por la cuenta de ESE negocio. Si no, no se aplica nada y queda en auditoría.
@@ -168,6 +173,11 @@ async function aplicar(pagoId: string, pagoPasarela: PagoPasarela): Promise<Resu
     reserva_id?: string | null;
   };
 
+  // Barberos adicionales (175): un pago que no cuadra con su lote NO activa nada ni se reembolsa solo; la base lo deja en la cola
+  // de revisión (`adicional_pago_revision`) y aquí se devuelve REQUIERE_REVISION para que el webhook quede registrado como tal.
+  if (!r.procesado && r.motivo === "ADICIONAL_EN_REVISION") {
+    return { estado: "REQUIERE_REVISION", motivo: `ADICIONAL_EN_REVISION:${(r as { detalle?: string }).detalle ?? ""}` };
+  }
   if (!r.procesado) return { estado: "SIN_CAMBIOS", motivo: r.motivo ?? "SIN_EFECTO" };
 
   // 03-Business-Rules/03_Payment_Rules.md: pago que confirma después de la expiración
@@ -403,9 +413,30 @@ async function sincronizarConPago(
     // Si la cuenta se identificó solo por el user_id del aviso (URL del panel), NO se reembolsa
     // automáticamente: ese vendedor puede tener ventas ajenas a StylerNow en su cuenta.
     if (!opciones.reembolsarHuerfano) return { estado: "REQUIERE_REVISION", motivo: "HUERFANO_CUENTA_VENDEDOR" };
+    // Barberos adicionales (FASE 2A): una referencia que no tiene forma de `pago.id` (p. ej. «ADIC-<lote>», de otro concepto o de
+    // un flujo futuro) NO es un huérfano de reserva: no se reembolsa a ciegas. Queda registrada arriba (WEBHOOK_HUERFANO) y se
+    // devuelve a revisión para que SuperAdmin decida con la cola auditable. Los huérfanos con forma de UUID conservan la regla
+    // histórica (05-API/06_Webhooks.md).
+    if (!pagoId || !/^[0-9a-f-]{36}$/i.test(pagoId)) return { estado: "REQUIERE_REVISION", motivo: "REFERENCIA_NO_RECONOCIDA" };
     if (pasarela.estado === "APROBADO") await reembolsar(pasarela.id, undefined, `huerfano-${pasarela.id}`, token);
     return { estado: "REEMBOLSADO", motivo: "HUERFANO" };
   }
 
   return aplicar(pago.id, pasarela);
+}
+
+/**
+ * Avisa a la base que Mercado Pago dejó el pago de un adicional «pendiente». Es un efecto lateral de solo-lectura de estado:
+ * si falla, no se interrumpe la conciliación (el estado real se vuelve a leer en la siguiente notificación o en el cron).
+ */
+async function marcarAdicionalPendiente(pagoId: string, idTransaccion: string): Promise<void> {
+  try {
+    // La función es de la migración 173 (aún no está en los tipos generados).
+    const admin = createAdminClient() as unknown as {
+      rpc: (n: string, a: object) => Promise<{ data: unknown; error: { message: string } | null }>;
+    };
+    await admin.rpc("adicional_marcar_pago_pendiente_srv", { p_pago_id: pagoId, p_id_transaccion: idTransaccion });
+  } catch (e) {
+    console.error("[adicionales] no se pudo marcar el pago como pendiente", pagoId, e instanceof Error ? e.message : e);
+  }
 }

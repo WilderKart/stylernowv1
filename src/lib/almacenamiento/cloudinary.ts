@@ -136,3 +136,75 @@ export function urlFirmada(
   const ruta = `${opciones.transformacion ? `${opciones.transformacion}/` : ""}v${opciones.version}/${publicId}.${opciones.formato}`;
   return `https://res.cloudinary.com/${cfg.cloudName}/image/authenticated/${firmaDeEntrega(ruta, cfg.apiSecret)}/${ruta}`;
 }
+
+// ── Documentos privados (verificación del negocio) ───────────────────────────────────────
+
+const MIME_DOCUMENTO = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"]);
+
+/**
+ * Tipo real del archivo según sus primeros bytes. No se confía en el tipo que declara el navegador:
+ * un ejecutable renombrado a .pdf no pasa. Devuelve null si no es PDF, JPEG, PNG ni WebP.
+ */
+export function tipoRealDeArchivo(bytes: Uint8Array): "application/pdf" | "image/jpeg" | "image/png" | "image/webp" | null {
+  const arranca = (...b: number[]) => b.every((v, i) => bytes[i] === v);
+  if (bytes.length >= 5 && arranca(0x25, 0x50, 0x44, 0x46, 0x2d)) return "application/pdf";
+  if (bytes.length >= 3 && arranca(0xff, 0xd8, 0xff)) return "image/jpeg";
+  if (bytes.length >= 8 && arranca(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a)) return "image/png";
+  if (bytes.length >= 12 && arranca(0x52, 0x49, 0x46, 0x46) && bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) {
+    return "image/webp";
+  }
+  return null;
+}
+
+/**
+ * Sube un documento PRIVADO (`authenticated`): sin URL pública. Solo el servidor puede generar una URL firmada y
+ * nunca se entrega al navegador; se lee a través de una ruta que autoriza cada lectura (ver /api/verificacion).
+ */
+export async function subirDocumentoPrivado(opciones: {
+  bytes: Buffer;
+  mime: string;
+  carpeta: string;
+  publicId: string;
+  maxBytes?: number;
+  config?: ConfigCloudinary;
+}): Promise<{ publicId: string; version: number; formato: string; bytes: number }> {
+  const cfg = opciones.config ?? configCloudinary();
+  if (!cfg) throw new Error("CLOUDINARY_NO_CONFIGURADO");
+  if (!MIME_DOCUMENTO.has(opciones.mime)) throw new Error("TIPO_NO_PERMITIDO");
+  if (opciones.bytes.byteLength > (opciones.maxBytes ?? 8 * 1024 * 1024)) throw new Error("ARCHIVO_DEMASIADO_GRANDE");
+
+  const params: Record<string, string | number> = {
+    folder: opciones.carpeta,
+    public_id: opciones.publicId,
+    overwrite: "false",
+    type: "authenticated",
+    timestamp: Math.floor(Date.now() / 1000),
+  };
+  const cuerpo = new FormData();
+  for (const [k, v] of Object.entries(params)) cuerpo.append(k, String(v));
+  cuerpo.append("api_key", cfg.apiKey);
+  cuerpo.append("signature", firmarParametros(params, cfg.apiSecret));
+  cuerpo.append("file", `data:${opciones.mime};base64,${opciones.bytes.toString("base64")}`);
+
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(cfg.cloudName)}/image/upload`, {
+    method: "POST",
+    body: cuerpo,
+    cache: "no-store",
+  });
+  const json = (await res.json().catch(() => null)) as { public_id?: string; version?: number; format?: string; bytes?: number } | null;
+  if (!res.ok || !json?.public_id || !json.version || !json.format) throw new Error("CLOUDINARY_SUBIDA_FALLIDA");
+  return { publicId: json.public_id, version: json.version, formato: json.format, bytes: json.bytes ?? opciones.bytes.byteLength };
+}
+
+/** Descarga un documento privado desde el servidor con URL firmada (esa URL nunca sale del servidor). */
+export async function leerDocumentoPrivado(
+  publicId: string,
+  version: number,
+  formato: string,
+  config?: ConfigCloudinary,
+): Promise<{ cuerpo: ReadableStream<Uint8Array>; tipo: string; longitud: string | null }> {
+  const url = urlFirmada(publicId, { version, formato, config });
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok || !res.body) throw new Error("DOCUMENTO_NO_DISPONIBLE");
+  return { cuerpo: res.body, tipo: res.headers.get("content-type") ?? "application/octet-stream", longitud: res.headers.get("content-length") };
+}

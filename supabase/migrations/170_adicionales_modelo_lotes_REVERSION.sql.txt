@@ -1,0 +1,10 @@
+-- Reversión de 171 (después de revertir 172-179).
+drop table if exists public.adicional_mantenimiento_corrida;
+drop table if exists public.adicional_reembolso;
+drop table if exists public.adicional_pago_revision;
+drop table if exists public.adicional_historial;
+drop table if exists public.adicional_cobro;
+drop table if exists public.adicional_lote;
+drop function if exists public.trg_adicional_lote_guardia();
+drop table if exists public.adicional_transicion;
+drop table if exists public.adicional_estado_def;

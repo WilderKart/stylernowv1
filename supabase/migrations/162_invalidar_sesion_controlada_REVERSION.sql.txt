@@ -1,0 +1,249 @@
+-- REVERSION de 155 (probada en Docker local). Devuelve las 5 acciones y el trigger a su estado previo (con el defecto: suspender/trasladar fallan para el propietario).
+begin;
+CREATE OR REPLACE FUNCTION public.suspender_staff(p_vinculo_id uuid, p_motivo text DEFAULT NULL::text)
+ RETURNS vinculo_staff_negocio
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_vinculo public.vinculo_staff_negocio;
+begin
+  select * into v_vinculo from public.vinculo_staff_negocio where id = p_vinculo_id;
+  if not found or not public._puede_gestionar_vinculo(p_vinculo_id) then
+    raise exception 'NO_AUTORIZADO';
+  end if;
+  if v_vinculo.estado <> 'ACTIVO' then
+    raise exception 'STAFF_NO_ACTIVO';
+  end if;
+
+  update public.vinculo_staff_negocio set estado = 'SUSPENDIDO' where id = p_vinculo_id
+  returning * into v_vinculo;
+
+  perform public.incrementar_session_version(v_vinculo.staff_id);
+
+  insert into public.evento_auditoria (entidad_tipo, entidad_id, accion, actor_tipo, actor_id, negocio_id, motivo)
+  values ('vinculo_staff_negocio', p_vinculo_id, 'STAFF_SUSPENDIDO', 'BARBERIA', auth.uid(), v_vinculo.negocio_id, p_motivo);
+
+  return v_vinculo;
+end;
+$function$
+;
+CREATE OR REPLACE FUNCTION public.trasladar_staff(p_vinculo_id uuid, p_nueva_sede_id uuid)
+ RETURNS vinculo_staff_negocio
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_vinculo public.vinculo_staff_negocio;
+  v_sede_nueva public.sede;
+  v_sede_anterior_id uuid;
+begin
+  select * into v_vinculo from public.vinculo_staff_negocio where id = p_vinculo_id;
+  if not found or not public._puede_gestionar_vinculo(p_vinculo_id) then
+    raise exception 'NO_AUTORIZADO';
+  end if;
+
+  select * into v_sede_nueva from public.sede where id = p_nueva_sede_id;
+  if not found or v_sede_nueva.negocio_id <> v_vinculo.negocio_id then
+    raise exception 'SEDE_NO_PERTENECE_AL_NEGOCIO';
+  end if;
+  if v_sede_nueva.cerrada_permanente or v_sede_nueva.cerrada_temporalmente then
+    raise exception 'SEDE_DESTINO_NO_OPERATIVA';
+  end if;
+
+  v_sede_anterior_id := v_vinculo.sede_activa_id;
+
+  update public.vinculo_staff_negocio
+  set sede_activa_id = p_nueva_sede_id
+  where id = p_vinculo_id
+  returning * into v_vinculo;
+
+  perform public.incrementar_session_version(v_vinculo.staff_id);
+
+  insert into public.evento_auditoria (entidad_tipo, entidad_id, accion, actor_tipo, actor_id, negocio_id, payload_antes, payload_despues)
+  values (
+    'vinculo_staff_negocio', p_vinculo_id, 'STAFF_TRASLADADO', 'BARBERIA', auth.uid(), v_vinculo.negocio_id,
+    jsonb_build_object('sede_id', v_sede_anterior_id),
+    jsonb_build_object('sede_id', p_nueva_sede_id)
+  );
+
+  return v_vinculo;
+end;
+$function$
+;
+CREATE OR REPLACE FUNCTION public.retirar_staff(p_vinculo_id uuid, p_motivo text DEFAULT NULL::text)
+ RETURNS vinculo_staff_negocio
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_vinculo public.vinculo_staff_negocio;
+begin
+  select * into v_vinculo from public.vinculo_staff_negocio where id = p_vinculo_id;
+  if not found or not public._puede_gestionar_vinculo(p_vinculo_id) then
+    raise exception 'NO_AUTORIZADO';
+  end if;
+  if v_vinculo.estado = 'RETIRADO' then
+    raise exception 'STAFF_YA_RETIRADO';
+  end if;
+
+  -- "Eliminar acceso" (matriz de Roles) — pierde el perfil Guardian si lo
+  -- tenía (Degradación implícita: no hay Guardian sin vínculo activo) y
+  -- todo permiso administrativo, sin período de gracia, conservando la fila
+  -- y su historial completo (Reservas, Nivel, evento_auditoria).
+  update public.vinculo_staff_negocio
+  set estado = 'RETIRADO', es_guardian = false
+  where id = p_vinculo_id
+  returning * into v_vinculo;
+
+  insert into public.evento_auditoria (entidad_tipo, entidad_id, accion, actor_tipo, actor_id, negocio_id, motivo)
+  values ('vinculo_staff_negocio', p_vinculo_id, 'STAFF_RETIRADO', 'BARBERIA', auth.uid(), v_vinculo.negocio_id, p_motivo);
+
+  return v_vinculo;
+end;
+$function$
+;
+CREATE OR REPLACE FUNCTION public.promover_guardian(p_vinculo_id uuid)
+ RETURNS vinculo_staff_negocio
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_vinculo public.vinculo_staff_negocio;
+begin
+  select * into v_vinculo from public.vinculo_staff_negocio where id = p_vinculo_id;
+  if not found or not public.is_barberia_de(v_vinculo.negocio_id) then
+    raise exception 'NO_AUTORIZADO';
+  end if;
+  if v_vinculo.estado <> 'ACTIVO' then
+    raise exception 'STAFF_NO_ACTIVO';
+  end if;
+  if v_vinculo.sede_activa_id is null then
+    raise exception 'FALTA_SEDE_ACTIVA';
+  end if;
+  if not coalesce((select p.guardian_disponible from public.plan p
+                   join public.negocio n on n.plan_codigo = p.codigo where n.id = v_vinculo.negocio_id), false) then
+    raise exception 'PLAN_NO_INCLUYE_GUARDIAN';
+  end if;
+  if v_vinculo.es_guardian then
+    raise exception 'YA_ES_GUARDIAN';
+  end if;
+
+  update public.vinculo_staff_negocio set es_guardian = true where id = p_vinculo_id
+  returning * into v_vinculo;
+
+  insert into public.evento_auditoria (entidad_tipo, entidad_id, accion, actor_tipo, actor_id, negocio_id, payload_antes, payload_despues)
+  values ('vinculo_staff_negocio', p_vinculo_id, 'STAFF_PROMOVIDO_GUARDIAN', 'BARBERIA', auth.uid(), v_vinculo.negocio_id,
+    jsonb_build_object('es_guardian', false), jsonb_build_object('es_guardian', true, 'sede_id', v_vinculo.sede_activa_id));
+
+  return v_vinculo;
+end;
+$function$
+;
+CREATE OR REPLACE FUNCTION public.revocar_guardian(p_vinculo_id uuid)
+ RETURNS vinculo_staff_negocio
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_vinculo public.vinculo_staff_negocio;
+begin
+  select * into v_vinculo from public.vinculo_staff_negocio where id = p_vinculo_id;
+  if not found or not public.is_barberia_de(v_vinculo.negocio_id) then
+    raise exception 'NO_AUTORIZADO';
+  end if;
+  if not v_vinculo.es_guardian then
+    raise exception 'NO_ES_GUARDIAN';
+  end if;
+
+  update public.vinculo_staff_negocio set es_guardian = false where id = p_vinculo_id
+  returning * into v_vinculo;
+
+  perform public.incrementar_session_version(v_vinculo.staff_id);
+
+  insert into public.evento_auditoria (entidad_tipo, entidad_id, accion, actor_tipo, actor_id, negocio_id, payload_antes, payload_despues)
+  values ('vinculo_staff_negocio', p_vinculo_id, 'STAFF_GUARDIAN_REVOCADO', 'BARBERIA', auth.uid(), v_vinculo.negocio_id,
+    jsonb_build_object('es_guardian', true), jsonb_build_object('es_guardian', false));
+
+  return v_vinculo;
+end;
+$function$
+;
+CREATE OR REPLACE FUNCTION public.cambiar_rol_equipo(p_vinculo_id uuid, p_rol text)
+ RETURNS vinculo_staff_negocio
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v public.vinculo_staff_negocio; v_cap jsonb;
+  v_admin boolean; v_presta boolean; v_futuras int;
+begin
+  if auth.uid() is null then raise exception 'NO_AUTENTICADO'; end if;
+  if p_rol is null or p_rol not in ('BARBER', 'BUSINESS_ADMIN', 'ADMIN_BARBER') then raise exception 'ROL_INVALIDO'; end if;
+  select * into v from public.vinculo_staff_negocio where id = p_vinculo_id;
+  if not found or not public.is_barberia_de(v.negocio_id) then raise exception 'NO_AUTORIZADO'; end if;
+  perform public._cupo_bloquear(v.negocio_id);
+  select * into v from public.vinculo_staff_negocio where id = p_vinculo_id for update;
+  if v.estado = 'RETIRADO' then raise exception 'STAFF_YA_RETIRADO'; end if;
+  if exists (select 1 from public.negocio n where n.id = v.negocio_id and n.owner_user_id = v.staff_id) then
+    raise exception 'ROL_PROPIETARIO_NO_CAMBIA';  -- el perfil del propietario se activa/desactiva con sus propias funciones
+  end if;
+  v_admin := p_rol in ('BUSINESS_ADMIN', 'ADMIN_BARBER');
+  v_presta := p_rol in ('BARBER', 'ADMIN_BARBER');
+  if v_admin = v.es_admin and v_presta = v.presta_servicios then return v; end if;  -- idempotente
+
+  if v_presta and not v.presta_servicios then
+    v_cap := public._capacidad_profesional(v.negocio_id);  -- este vínculo hoy no ocupa cupo: no se excluye nada
+    if (v_cap ->> 'disponibles') is not null and (v_cap ->> 'disponibles')::int < 1 then raise exception 'PLAN_LIMIT_EXCEEDED'; end if;
+  end if;
+  if v.presta_servicios and not v_presta then
+    select count(*) into v_futuras from public.reserva r
+     where r.staff_id = v.staff_id and r.negocio_id = v.negocio_id
+       and r.estado in ('PENDIENTE_PAGO', 'CONFIRMADA', 'EN_CURSO') and r.hora_inicio > now();
+    if v_futuras > 0 then raise exception 'TIENE_RESERVAS_FUTURAS'; end if;
+  end if;
+
+  update public.vinculo_staff_negocio set es_admin = v_admin, presta_servicios = v_presta where id = p_vinculo_id returning * into v;
+  -- No se llama a incrementar_session_version: el trigger perfil_proteger_columnas_sensibles lo rechaza dentro de funciones definer
+  -- invocadas por un usuario (defecto preexistente, ver informe). El rol se resuelve en cada solicitud, sin caché de sesión.
+  insert into public.evento_auditoria (entidad_tipo, entidad_id, accion, actor_tipo, actor_id, negocio_id, payload_despues)
+  values ('vinculo_staff_negocio', p_vinculo_id, 'STAFF_ROL_CAMBIADO', 'BARBERIA', auth.uid(), v.negocio_id, jsonb_build_object('rol', p_rol));
+  return v;
+end $function$
+;
+CREATE OR REPLACE FUNCTION public.perfil_proteger_columnas_sensibles()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SET search_path TO 'public'
+AS $function$
+begin
+  if current_user in ('authenticated', 'anon') then
+    if tg_op = 'INSERT' then
+      if coalesce(new.es_supersu, false) then
+        raise exception 'NO_AUTORIZADO: es_supersu solo se asigna desde la base de datos';
+      end if;
+      return new;
+    end if;
+    if new.es_supersu is distinct from old.es_supersu then
+      raise exception 'NO_AUTORIZADO: es_supersu solo se asigna desde la base de datos';
+    end if;
+    if new.email is distinct from old.email then
+      raise exception 'NO_AUTORIZADO: el correo del perfil se toma de la cuenta y no se edita directamente';
+    end if;
+  end if;
+  if tg_op = 'UPDATE' and auth.uid() is not null and not public.is_supersu()
+     and new.session_version is distinct from old.session_version then
+    raise exception 'NO_AUTORIZADO: session_version no se puede modificar directamente';
+  end if;
+  return new;
+end;
+$function$
+;
+drop function if exists public.invalidar_sesion_usuario(uuid, uuid, text);
+commit;

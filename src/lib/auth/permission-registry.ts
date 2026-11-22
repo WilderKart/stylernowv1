@@ -1,4 +1,4 @@
-import type { Permisos, Rol } from "./tipos";
+import { PERMISOS_NINGUNO_CONTEXTO, type Permisos, type Rol } from "./tipos";
 
 /**
  * Fuente única de permisos — ADR-015, Fase A/P. Transcribe completa la matriz
@@ -171,13 +171,47 @@ export function tienePermiso(rol: Rol, modulo: string, accion: string): boolean 
 }
 
 /**
+ * Administrador delegado (BUSINESS_ADMIN / ADMIN_BARBER, migraciones 158 y 161): conjunto MÍNIMO de permisos del Panel que el
+ * propietario delega, a nivel de NEGOCIO. Es una lista cerrada (denegado por defecto) y solo incluye lo que la base de datos ya
+ * hace cumplir con `is_admin_de` en las RPC de equipo (migración 161). Lo que NO está aquí no se delega en esta fase:
+ *   · facturación/suscripción/plan, pagos y cobros, verificación del negocio, propiedad, auditoría y configuración del negocio;
+ *   · cambiar roles, dar permisos administrativos, promover/revocar Guardian y activar el perfil profesional del propietario;
+ *   · servicios, sedes, agenda completa, clientes y reportes: sus políticas RLS siguen siendo del propietario (~110 políticas sin
+ *     revisar). Ampliar la delegación exige revisar política por política — decisión pendiente, ver docs/FASE1_ROLES_CUPOS_INFORME.md.
+ * El registro de 5 roles de arriba NO cambia: Guardian y Barbería se derivan exactamente igual que antes.
+ */
+export const PERMISOS_ADMIN_DELEGADO: ReadonlySet<string> = new Set([
+  "sede:ver", // lectura de sedes para elegir la sede al invitar/trasladar (alcance negocio)
+  "staff:ver_companeros",
+  "staff:invitar", // solo rol BARBER: la RPC rechaza invitar administradores
+  "staff:cancelar_invitacion", // solo invitaciones a BARBER
+  "staff:suspender", // solo profesionales que no son administradores
+  "staff:reactivar",
+  "staff:eliminar_acceso",
+  "staff:trasladar_sede",
+]);
+
+/**
  * Deriva los 24 booleanos ya existentes de `Permisos` (`resolver-contexto.ts`)
  * a partir del registro — mismo comportamiento de hoy, ahora con una sola
  * fuente. `rol` debe ser "guardian" o "barberia" (los únicos que usan este
- * shape hoy); para "staff"/"cliente"/"supersu" cada resolver arma el suyo
- * directamente (ver Fase A del plan).
+ * shape hoy) o "admin" (administrador delegado, lista cerrada de arriba); para
+ * "staff"/"cliente"/"supersu" cada resolver arma el suyo directamente (ver Fase A del plan).
  */
-export function derivarPermisosPanel(rol: Extract<Rol, "guardian" | "barberia">): Permisos {
+export function derivarPermisosPanel(rol: Extract<Rol, "guardian" | "barberia"> | "admin"): Permisos {
+  if (rol === "admin") {
+    const d = (modulo: string, accion: string) => PERMISOS_ADMIN_DELEGADO.has(`${modulo}:${accion}`);
+    return {
+      ...PERMISOS_NINGUNO_CONTEXTO, // todo denegado; solo se activa lo delegado
+      verTodasLasSedes: d("sede", "ver"),
+      invitarStaff: d("staff", "invitar"),
+      cancelarInvitacionStaff: d("staff", "cancelar_invitacion"),
+      suspenderStaff: d("staff", "suspender"),
+      reactivarStaff: d("staff", "reactivar"),
+      retirarStaff: d("staff", "eliminar_acceso"),
+      trasladarStaff: d("staff", "trasladar_sede"),
+    };
+  }
   const p = (modulo: string, accion: string) => tienePermiso(rol, modulo, accion);
   return {
     verTodasLasSedes: alcanceDe(rol, "sede", "ver") === "negocio",

@@ -64,6 +64,9 @@ export const RUTAS: RutaRegistro[] = [
   { path: "/panel", publica: false, roles: ["barberia", "guardian"] },
   { path: "/panel/onboarding", publica: false, roles: ["barberia"] },
   { path: "/panel/sedes", publica: false, roles: ["barberia", "guardian"] },
+  // Perfil público y verificación del negocio (diseño de onboarding 2026-11-17): solo el propietario.
+  { path: "/panel/perfil-publico", publica: false, roles: ["barberia"] },
+  { path: "/panel/verificacion", publica: false, roles: ["barberia"] },
   { path: "/panel/staff", publica: false, roles: ["barberia", "guardian"] },
   { path: "/panel/servicios", publica: false, roles: ["barberia", "guardian"] },
   { path: "/panel/promociones", publica: false, roles: ["barberia"] },
@@ -77,6 +80,8 @@ export const RUTAS: RutaRegistro[] = [
   { path: "/panel/ads", publica: false, roles: ["barberia", "guardian"] },
   { path: "/panel/marca", publica: false, roles: ["barberia"] },
   { path: "/panel/suscripcion", publica: false, roles: ["barberia", "guardian"] },
+  // Cumplimiento de citas pendientes con la suscripción restringida (migración 164): agenda histórica y citas confirmadas completables.
+  { path: "/panel/cumplimiento", publica: false, roles: ["barberia", "guardian"] },
   { path: "/panel/reportes", publica: false, roles: ["barberia", "guardian"] },
   { path: "/panel/lealtad", publica: false, roles: ["barberia", "guardian"] },
   { path: "/panel/ia", publica: false, roles: ["barberia", "guardian"] },

@@ -16,12 +16,18 @@ import { usePathname } from "next/navigation";
  * 2.5-2.9), cada uno agrega su propia entrada aquí, ya filtrada por
  * `permisos` — nunca una lista separada "para Guardian".
  */
-export function PanelNav({ rol }: { rol: RolPanel }) {
+export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** Perfil profesional activo: añade el acceso a la agenda propia (/staff). */ prestaServicios?: boolean }) {
   const pathname = usePathname();
 
-  const items = [
+  // Administrador delegado (migración 161): su superficie son los módulos revisados para él. Hoy solo el equipo; el resto del panel
+  // sigue siendo del propietario hasta revisar sus políticas (denegado por defecto).
+  const items = rol === "ADMIN"
+    ? [{ href: "/panel/staff", etiqueta: "Equipo" }, ...(prestaServicios ? [{ href: "/staff", etiqueta: "Mi agenda" }] : [])]
+    : [
     { href: "/panel", etiqueta: "Resumen" },
     ...(rol === "BARBERIA" ? [{ href: "/panel/sedes", etiqueta: "Sedes" }] : []),
+    ...(rol === "BARBERIA" ? [{ href: "/panel/perfil-publico", etiqueta: "Perfil público" }] : []),
+    ...(rol === "BARBERIA" ? [{ href: "/panel/verificacion", etiqueta: "Verificación" }] : []),
     // Agenda, Staff y Servicios son compartidos entre Barbería y Guardian
     // (ADR-006) — el alcance lo resuelve la propia pantalla vía `permisos`,
     // nunca un ítem de nav distinto por rol.
@@ -44,6 +50,7 @@ export function PanelNav({ rol }: { rol: RolPanel }) {
     ...(rol === "BARBERIA" ? [{ href: "/panel/marca", etiqueta: "Mi Marca" }] : []),
     ...(rol === "BARBERIA" ? [{ href: "/panel/suscripcion", etiqueta: "Mi Plan" }] : []),
     { href: "/panel/soporte", etiqueta: "Soporte" },
+    ...(prestaServicios && rol === "BARBERIA" ? [{ href: "/staff", etiqueta: "Mi agenda" }] : []),
     ...(rol === "BARBERIA" ? [{ href: "/panel/auditoria", etiqueta: "Auditoría" }] : []),
   ];
 

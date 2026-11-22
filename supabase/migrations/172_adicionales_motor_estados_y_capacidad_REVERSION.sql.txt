@@ -1,0 +1,44 @@
+-- Reversión de 173 (después de revertir 174-179): restaura _capacidad_profesional tal como la dejó la 152.
+create or replace function public._capacidad_profesional(
+  p_negocio_id uuid, p_plan_codigo text default null, p_adicionales int default 0, p_excluir_email text default null)
+returns jsonb language plpgsql stable security definer set search_path = public as $$
+declare
+  v_plan public.plan;
+  v_act int; v_susp int; v_pend int; v_inv int; v_ocup int; v_limite int;
+begin
+  select p.* into v_plan from public.plan p
+   where p.codigo = coalesce(p_plan_codigo::public.plan_codigo, (select n.plan_codigo from public.negocio n where n.id = p_negocio_id));
+  if not found then return null; end if;
+
+  select count(*) filter (where estado = 'ACTIVO'),
+         count(*) filter (where estado = 'SUSPENDIDO'),
+         count(*) filter (where estado = 'INVITADO')
+    into v_act, v_susp, v_pend
+    from public.vinculo_staff_negocio where negocio_id = p_negocio_id and presta_servicios;
+
+  select count(*) into v_inv from public.invitacion_staff i
+   where i.negocio_id = p_negocio_id and i.estado = 'PENDIENTE' and i.expira_at > now()
+     and i.rol_invitado in ('BARBER', 'ADMIN_BARBER')
+     and (p_excluir_email is null or i.email <> lower(p_excluir_email));
+
+  v_ocup := v_act + v_susp + v_pend + v_inv;
+  v_limite := case when v_plan.staff_tope_absoluto is null then null
+                   else v_plan.staff_tope_absoluto + greatest(coalesce(p_adicionales, 0), 0) end;
+  return jsonb_build_object(
+    'plan_codigo', v_plan.codigo, 'plan_nombre', v_plan.nombre,
+    'incluidos', v_plan.staff_incluido,
+    'adicionales_contratados', greatest(coalesce(p_adicionales, 0), 0),
+    'limite', v_limite,
+    'activos', v_act, 'suspendidos', v_susp, 'pendientes_activacion', v_pend,
+    'invitaciones_pendientes', v_inv,
+    'operativos', v_act + v_susp + v_pend,
+    'ocupados', v_ocup,
+    'disponibles', case when v_limite is null then null else greatest(v_limite - v_ocup, 0) end,
+    'exceso', case when v_limite is null then 0 else greatest(v_ocup - v_limite, 0) end);
+end $$;
+revoke all on function public._capacidad_profesional(uuid, text, int, text) from public, anon, authenticated;
+
+drop function if exists public._adicionales_resumen(uuid);
+drop function if exists public._adicionales_activos(uuid);
+drop function if exists public._adicional_transicionar(uuid, text, text, text, uuid, text, uuid, jsonb);
+drop function if exists public._adicional_historial(uuid, text, text, uuid, text, uuid, text, jsonb, text, text, int, int);

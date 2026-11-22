@@ -1,0 +1,9 @@
+-- Reversión de 177 (después de revertir 178).
+drop function if exists public.admin_adicional_activar_manual(uuid, int, int, text, text, text);
+drop function if exists public.admin_adicional_accion(uuid, text, text, jsonb);
+drop function if exists public.admin_adicional_detalle(uuid);
+drop function if exists public.admin_adicional_listar(jsonb);
+drop function if exists public.admin_adicional_precio_guardar(char, public.plan_codigo, numeric, text, boolean);
+drop function if exists public.admin_adicional_config_guardar(jsonb, text);
+drop function if exists public.admin_adicional_config_obtener();
+drop function if exists public._adicional_exige_supersu(text, boolean);

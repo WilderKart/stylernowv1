@@ -3,20 +3,28 @@
 import { crearInvitacionStaff } from "@/app/panel/staff/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DESCRIPCION_ROL, ETIQUETA_ROL, type RolAsignable } from "@/lib/auth/roles-equipo";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function FormularioInvitacion({
   negocioId,
   sedes,
+  permiteComision = true,
+  rolesDisponibles = ["BARBER"],
 }: {
   negocioId: string;
   sedes: { id: string; nombre: string }[];
+  /** false cuando el plan no incluye comisiones por profesional (la regla real la aplica el servidor). */
+  permiteComision?: boolean;
+  /** Roles que el actor puede asignar. El propietario elige entre varios; un administrador delegado solo puede invitar BARBER. */
+  rolesDisponibles?: RolAsignable[];
 }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [sedeId, setSedeId] = useState(sedes[0]?.id ?? "");
   const [comisionPct, setComisionPct] = useState("");
+  const [rol, setRol] = useState<RolAsignable>(rolesDisponibles[0] ?? "BARBER");
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [enviado, setEnviado] = useState(false);
@@ -29,14 +37,14 @@ export function FormularioInvitacion({
     setEnviando(true);
     setError(null);
 
-    const comision = comisionPct.trim() ? Number(comisionPct) : undefined;
+    const comision = permiteComision && rol !== "BUSINESS_ADMIN" && comisionPct.trim() ? Number(comisionPct) : undefined;
     if (comision !== undefined && (Number.isNaN(comision) || comision < 20 || comision > 80)) {
       setEnviando(false);
       setError("La comisión debe estar entre 20% y 80%.");
       return;
     }
 
-    const res = await crearInvitacionStaff({ negocioId, email, sedeId, comisionPct: comision });
+    const res = await crearInvitacionStaff({ negocioId, email, sedeId, comisionPct: comision, rol });
     setEnviando(false);
     if (!res.ok) return setError(res.error);
     setSinCorreo(res.data.correoEnviado ? null : res.data.enlace);
@@ -113,15 +121,39 @@ export function FormularioInvitacion({
         </select>
       </div>
 
-      <Input
-        label="Comisión % (opcional)"
-        type="number"
-        min={20}
-        max={80}
-        placeholder="Entre 20 y 80"
-        value={comisionPct}
-        onChange={(e) => setComisionPct(e.target.value)}
-      />
+      {rolesDisponibles.length > 1 ? (
+        <div>
+          <label className="mb-1.5 block text-[12px] font-semibold text-text-muted">Rol</label>
+          <select
+            value={rol}
+            onChange={(e) => setRol(e.target.value as RolAsignable)}
+            className="h-12 w-full rounded-xl border border-border bg-bg px-3 text-[13.5px] text-text outline-none focus:border-accent/60"
+          >
+            {rolesDisponibles.map((r) => (
+              <option key={r} value={r}>
+                {ETIQUETA_ROL[r]}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1.5 text-[12px] text-text-faint">{DESCRIPCION_ROL[rol]}</p>
+        </div>
+      ) : null}
+
+      {permiteComision && rol !== "BUSINESS_ADMIN" ? (
+        <Input
+          label="Comisión % (opcional)"
+          type="number"
+          min={20}
+          max={80}
+          placeholder="Entre 20 y 80"
+          value={comisionPct}
+          onChange={(e) => setComisionPct(e.target.value)}
+        />
+      ) : rol === "BUSINESS_ADMIN" ? null : (
+        <p className="text-[12px] text-text-faint">
+          Las comisiones por profesional no están incluidas en tu plan. Puedes activarlas actualizando tu plan.
+        </p>
+      )}
 
       {error ? <p className="text-[12.5px] text-danger">{error}</p> : null}
 

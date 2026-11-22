@@ -2,6 +2,8 @@ import "server-only";
 
 import { headers } from "next/headers";
 import { REMITENTE_CORREO } from "./remitente";
+import { textoInvitacion } from "./texto-invitacion";
+import type { RolAsignable } from "@/lib/auth/roles-equipo";
 
 /**
  * Correo de invitación a Staff (único punto de envío: panel de Staff y paso 4 del onboarding).
@@ -14,10 +16,6 @@ import { REMITENTE_CORREO } from "./remitente";
  *    no salió (aceptarla exige ingresar con ESE correo: la invitación la protege la base);
  *  · el nombre del negocio y el correo se escapan antes de ponerlos en el HTML.
  */
-function escaparHtml(v: string) {
-  return v.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
-}
-
 async function origen() {
   const definido = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
   if (definido) return definido;
@@ -29,9 +27,12 @@ async function origen() {
 export async function enviarInvitacionStaff(
   email: string,
   nombreNegocio: string,
-  invitacionId: string
+  invitacionId: string,
+  /** Rol con el que se invita: el correo lo dice con claridad (profesional, administrador o ambos). */
+  rol: RolAsignable = "BARBER"
 ): Promise<{ enviado: boolean; enlace: string }> {
   const enlace = `${await origen()}/invitacion/${invitacionId}`;
+  const contenido = textoInvitacion(rol, nombreNegocio, email, enlace);
   const token = process.env.RESEND_API_KEY?.trim();
   if (!token) {
     console.error("[invitacion-staff] RESEND_API_KEY no configurada: el correo no se envió", invitacionId);
@@ -45,8 +46,8 @@ export async function enviarInvitacionStaff(
       body: JSON.stringify({
         from: REMITENTE_CORREO,
         to: email,
-        subject: `Te invitaron a unirte a ${nombreNegocio.replace(/[\r\n]+/g, " ").slice(0, 120)} en StylerNow`,
-        html: `<h2>Te invitaron a StylerNow</h2><p>${escaparHtml(nombreNegocio)} te invitó a unirte como Staff. Ingresa con este mismo correo (${escaparHtml(email)}) y <a href="${enlace}">acepta o rechaza la invitación aquí</a>.</p>`,
+        subject: contenido.asunto,
+        html: contenido.html,
       }),
     });
     if (!r.ok) {

@@ -26,6 +26,8 @@ const MENSAJES: Record<string, string> = {
   REEMBOLSO_NO_REINTENTABLE: "Ese reembolso no está en revisión ni fallido.",
   politica_limites_coherentes: "Los límites no son coherentes (mínimo ≤ máximo, 0–100 %).",
   prueba_config_valida: "Configuración de prueba inválida (1–90 días, gracia 0–30, avisos coherentes).",
+  PERIODO_INVALIDO: "El periodo pagado debe estar entre 1 y 366 días.",
+  GRACIA_PRUEBA_INVALIDA: "La gracia de la prueba debe estar entre 0 y 30 días.",
 };
 
 function traducir(m: string) {
@@ -51,6 +53,8 @@ function fallo(e: unknown): { ok: false; error: string } {
 export interface DatosReglas {
   limites: { totalMin: number; totalMax: number; parcialMin: number; pctMin: number; pctMax: number; maxIntentos: number };
   prueba: { dias: number; modalidad: "SIN_TARJETA" | "CON_TARJETA" | "AMBAS"; graciaDias: number; aviso1: number; aviso2: number };
+  /** Ciclo de la suscripción restringida (migraciones 164/168): periodo pagado, gracia de la prueba y si la gracia deja operar. */
+  ciclo: { periodoDias: number; pruebaGraciaDias: number; graciaOpera: boolean };
   comisionDefault: number;
   cambiosComision: {
     id: string;
@@ -113,9 +117,14 @@ export async function obtenerReglas(): Promise<Resultado<DatosReglas>> {
         prueba: {
           dias: Number(cfg.prueba_dias ?? 14),
           modalidad: (cfg.prueba_modalidad as DatosReglas["prueba"]["modalidad"]) ?? "SIN_TARJETA",
-          graciaDias: Number(cfg.suscripcion_gracia_dias ?? 3),
+          graciaDias: Number(cfg.suscripcion_gracia_dias ?? 1),
           aviso1: Number(cfg.prueba_aviso_dias_1 ?? 3),
           aviso2: Number(cfg.prueba_aviso_dias_2 ?? 1),
+        },
+        ciclo: {
+          periodoDias: Number(cfg.suscripcion_periodo_dias ?? 30),
+          pruebaGraciaDias: Number(cfg.prueba_gracia_dias ?? 0),
+          graciaOpera: (cfg as unknown as Record<string, unknown>).gracia_permite_operar !== false,
         },
         comisionDefault: Number(cfg.comision_plataforma_pct_default ?? 0),
         cambiosComision: ((cambios ?? []) as unknown as Record<string, string | number | null>[]).map((x) => ({
@@ -168,6 +177,34 @@ export async function guardarLimites(entrada: z.input<typeof esquemaLimites>): P
       p_pct_min: d.pctMin,
       p_pct_max: d.pctMax,
       p_max_intentos: d.maxIntentos,
+      p_motivo: d.motivo,
+    });
+    if (error) return fallo(error.message);
+    revalidatePath("/admin/reglas");
+    return { ok: true };
+  } catch (e) {
+    return fallo(e instanceof z.ZodError ? "MOTIVO_REQUERIDO" : e);
+  }
+}
+
+const esquemaCiclo = z
+  .object({
+    periodoDias: z.number().int().min(1).max(366),
+    pruebaGraciaDias: z.number().int().min(0).max(30),
+    graciaOpera: z.boolean(),
+    motivo,
+  })
+  .strict();
+
+/** Ciclo de la suscripción principal (migración 168): periodo pagado, gracia de la prueba y si la gracia deja operar. Aplica a los pagos y vencimientos desde ahora. */
+export async function guardarConfigCiclo(entrada: z.input<typeof esquemaCiclo>): Promise<Resultado> {
+  try {
+    const d = esquemaCiclo.parse(entrada);
+    const supabase = await sesionSuperSU();
+    const { error } = await (supabase as unknown as RpcSinTipos).rpc("admin_set_config_suscripcion", {
+      p_periodo_dias: d.periodoDias,
+      p_prueba_gracia_dias: d.pruebaGraciaDias,
+      p_gracia_permite_operar: d.graciaOpera,
       p_motivo: d.motivo,
     });
     if (error) return fallo(error.message);

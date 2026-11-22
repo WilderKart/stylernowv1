@@ -134,6 +134,14 @@ export function ListaNegocios({
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1">
                   <Badge tone={ESTADO_TONO[n.estado] ?? "neutral"}>{n.estado}</Badge>
+                  {n.operativo ? (
+                    <Badge tone={n.operativo.operativo ? (n.operativo.fase === "GRACIA" ? "accent" : "success") : "danger"}>
+                      {n.operativo.operativo ? "OPERATIVO" : "RESTRINGIDO"} · {n.operativo.fase}
+                      {n.operativo.motivo ? ` · ${n.operativo.motivo}` : ""}
+                      {n.operativo.diaCiclo ? ` · día ${n.operativo.diaCiclo}` : ""}
+                      {n.operativo.activacionManual ? " · manual" : ""}
+                    </Badge>
+                  ) : null}
                   {n.suscripcionEstado && n.suscripcionEstado !== "ACTIVA" ? (
                     <Badge tone={SUSCRIPCION_TONO[n.suscripcionEstado] ?? "neutral"}>
                       {n.suscripcionEstado}{n.suscripcionCausa ? ` · ${n.suscripcionCausa}` : ""}

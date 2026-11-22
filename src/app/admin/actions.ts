@@ -84,6 +84,18 @@ export interface NegocioAdmin {
   createdAt: string;
   suscripcionEstado: string | null;
   suscripcionCausa: string | null;
+  /** Estado operativo derivado por la base (migración 164/168); `null` si no se pudo leer. */
+  operativo: EstadoOperativoAdmin | null;
+}
+
+export interface EstadoOperativoAdmin {
+  operativo: boolean;
+  fase: string;
+  motivo: string | null;
+  diaCiclo: number | null;
+  limiteServicio: string | null;
+  bloqueoDesde: string | null;
+  activacionManual: boolean;
 }
 
 type NegocioEstado = "PENDIENTE_APROBACION" | "ACTIVO" | "SUSPENDIDO" | "RECHAZADO" | "CANCELADO";
@@ -99,6 +111,24 @@ export async function listarNegocios(estado?: NegocioEstado | string): Promise<R
     if (estado) q = q.eq("estado", estado as NegocioEstado);
     const { data, error } = await q;
     if (error) return { ok: false, error: error.message };
+    // Estado operativo de cada negocio, calculado por la base (una sola función); aquí solo se lee.
+    const operativos = new Map<string, EstadoOperativoAdmin>();
+    const ids = (data ?? []).map((n) => n.id);
+    if (ids.length > 0) {
+      const { data: ops } = await supabase.rpc("admin_estado_operativo_negocios", { p_negocio_ids: ids });
+      for (const o of ops ?? []) {
+        const e = (o.estado_operativo ?? {}) as Record<string, unknown>;
+        operativos.set(o.negocio_id, {
+          operativo: e.operativo === true,
+          fase: typeof e.estado === "string" ? e.estado : "RESTRINGIDO",
+          motivo: typeof e.motivo === "string" ? e.motivo : null,
+          diaCiclo: typeof e.dia_ciclo === "number" ? e.dia_ciclo : null,
+          limiteServicio: typeof e.limite_servicio === "string" ? e.limite_servicio : null,
+          bloqueoDesde: typeof e.bloqueo_desde === "string" ? e.bloqueo_desde : null,
+          activacionManual: e.activacion_manual === true,
+        });
+      }
+    }
     return {
       ok: true,
       data: (data ?? []).map((n) => {
@@ -114,6 +144,7 @@ export async function listarNegocios(estado?: NegocioEstado | string): Promise<R
           createdAt: n.created_at,
           suscripcionEstado: s?.estado ?? null,
           suscripcionCausa: s?.suspendido_causa ?? null,
+          operativo: operativos.get(n.id) ?? null,
         };
       }),
     };

@@ -1,0 +1,27 @@
+-- Reversión de 175: quita las ramas STAFF_EXTRA de aplicar_evento_pago y el filtro de los RPC de plan (vuelven a su texto de 049/133).
+do $$
+declare v_def text; v_nuevo text; v_i int; v_j int;
+  v_a constant text := E'  if v_pago.estado in (''APROBADO'',''RECHAZADO'',''REEMBOLSADO'',''REEMBOLSADO_PARCIAL'') then';
+  v_ini constant text := E'  -- Barberos adicionales (migración 174)';
+begin
+  v_def := pg_get_functiondef('public.aplicar_evento_pago(uuid,text,pago_estado,jsonb)'::regprocedure);
+  v_i := position(v_ini in v_def);
+  if v_i > 0 then
+    v_j := position(v_a in v_def);
+    v_nuevo := substr(v_def, 1, v_i - 1) || substr(v_def, v_j);
+    execute v_nuevo;
+  end if;
+end $$;
+
+do $$
+declare v_def text; v_f text;
+  v_x constant text := ' and coalesce(metadata->>''concepto'', '''') <> ''STAFF_EXTRA''';
+begin
+  foreach v_f in array array['public.solicitar_pago_plan(uuid,plan_codigo,text)', 'public.solicitar_upgrade_plan(uuid,plan_codigo)'] loop
+    v_def := pg_get_functiondef(v_f::regprocedure);
+    if position(v_x in v_def) > 0 then execute replace(v_def, v_x, ''); end if;
+  end loop;
+end $$;
+
+drop function if exists public._adicional_aplicar_pago(public.pago, text, public.pago_estado, jsonb);
+drop function if exists public._adicional_revisar_pago(public.pago, uuid, text, text, jsonb);

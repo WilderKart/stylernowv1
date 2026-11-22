@@ -1,5 +1,6 @@
 "use server";
 
+import { MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -17,6 +18,7 @@ async function usuarioActual() {
 }
 
 const MENSAJES_ERROR: Record<string, string> = {
+  SUSCRIPCION_RESTRINGIDA: MENSAJE_RESTRINGIDA,
   "servicio_duracion_rango": "La duración debe estar entre 5 y 480 minutos.",
   "servicio_precio_base_check": "El precio no puede ser negativo.",
   "Solo la Barbería puede cambiar el precio": "Solo la Barbería puede cambiar el precio de un servicio.",

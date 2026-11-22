@@ -12,6 +12,9 @@ export interface ContextoStaff {
   sedeId: string | null;
   esGuardian: boolean;
   estadoVinculo: EstadoVinculoStaff;
+  /** false = administrador sin perfil profesional (BUSINESS_ADMIN): no tiene agenda ni clientes que atender. */
+  prestaServicios: boolean;
+  esAdmin: boolean;
 }
 
 /**
@@ -37,7 +40,7 @@ export async function obtenerContextoStaff(): Promise<ContextoStaff | null> {
 
   const { data: vinculo } = await supabase
     .from("vinculo_staff_negocio")
-    .select("id, negocio_id, sede_activa_id, es_guardian, estado, negocio:negocio_id (nombre)")
+    .select("id, negocio_id, sede_activa_id, es_guardian, estado, es_admin, presta_servicios, negocio:negocio_id (nombre)")
     .eq("staff_id", user.id)
     .neq("estado", "RETIRADO")
     .order("created_at", { ascending: false })
@@ -54,5 +57,7 @@ export async function obtenerContextoStaff(): Promise<ContextoStaff | null> {
     sedeId: vinculo.sede_activa_id,
     esGuardian: vinculo.es_guardian,
     estadoVinculo: vinculo.estado as EstadoVinculoStaff,
+    prestaServicios: vinculo.presta_servicios,
+    esAdmin: vinculo.es_admin,
   };
 }
