@@ -2,21 +2,27 @@
 
 import { Turnstile, type ControlTurnstile } from "@/components/seguridad/turnstile";
 
+import { Num, Poster } from "@/components/brutal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/i18n/proveedor";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, Scissors, User } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
-import { Aviso, BotonGoogle, CambioPantalla, CampoContrasena, guardarVerificacion } from "./_componentes/campos";
-import { ErrorForm, Hot, PantallaAuth, Separador, claseEnlace } from "./_componentes/pantalla-auth";
+import { useRef, useState, useSyncExternalStore } from "react";
+import { Aviso, BotonGoogle, CampoContrasena, guardarVerificacion } from "./_componentes/campos";
+import { ErrorForm, Hot, Separador, claseEnlace } from "./_componentes/pantalla-auth";
 import { iniciarSesionConContrasena, iniciarSesionConGoogle, reenviarCodigoVerificacion } from "./actions";
 
 /**
- * INGRESAR (rediseño 2026-11-15): solo para cuentas existentes, con correo + contraseña.
+ * INGRESAR (rediseño 2026-11-22): solo para cuentas existentes, con correo + contraseña.
  * El código por correo ya no es un método de ingreso. Crear cuenta vive en /registro y
  * recuperar la contraseña en /login/olvide: cada pantalla tiene una sola acción principal.
+ *
+ * Solo cambia la presentación: en escritorio es una pantalla dividida (panel de marca a la
+ * izquierda + formulario centrado a la derecha) y en móvil una sola columna con jerarquía
+ * clara. Turnstile, invitaciones, handlers, estados, Supabase, OAuth y `?next=` quedan intactos.
  */
 export function FormularioIngreso({
   siguiente,
@@ -36,6 +42,10 @@ export function FormularioIngreso({
   const [googleCargando, setGoogleCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sinVerificar, setSinVerificar] = useState(false);
+  // El banner de cookies es un overlay fijo (no se toca): mientras está visible se reserva
+  // espacio inferior para que ningún botón quede inalcanzable. Al elegir, desaparece y el
+  // formulario vuelve a su centrado natural. Misma clave/evento que usa el banner.
+  const bannerCookies = useBannerCookiesVisible();
 
   const qs = siguiente && siguiente !== "/" ? `?next=${encodeURIComponent(siguiente)}` : "";
 
@@ -95,67 +105,149 @@ export function FormularioIngreso({
   }
 
   return (
-    <PantallaAuth
-      indice={t("auth.i_ingresar")}
-      volver="/"
-      titulo={
-        <>
-          {t("auth.ing_t1")}
-          <br />
-          {t("auth.ing_t2")}
-          <br />
-          <Hot>{t("auth.ing_t3")}</Hot>
-        </>
-      }
-      intro={t("auth.ing_intro")}
-    >
-      <form onSubmit={onIngresar} className="flex flex-col gap-4" noValidate>
-        {invitacion ? <Aviso>Ingresa con tu cuenta para continuar con la invitación de {invitacion.negocio}.</Aviso> : null}
-        {aviso === "recuperada" ? <Aviso>{t("auth.aviso_recuperada")}</Aviso> : null}
-        {aviso === "enlace" ? <Aviso>{t("auth.aviso_enlace")}</Aviso> : null}
+    <div className="flex min-h-dvh flex-col bg-bg lg:grid lg:grid-cols-2">
+      {/* Panel visual / marca — solo escritorio */}
+      <aside className="relative hidden overflow-hidden bg-ink lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col">
+        <Image src="/images/login-barber-bg.jpg" alt="" fill priority sizes="50vw" className="object-cover" />
+        <div className="absolute inset-0 bg-[rgba(10,10,10,0.55)]" aria-hidden />
+        <div className="relative z-10 flex flex-1 flex-col justify-between gap-10 px-8 pt-8 pb-[21rem] xl:px-12 xl:pt-12 xl:pb-[21rem]">
+          <span className="font-display text-2xl leading-none font-black tracking-tight text-white uppercase">
+            Styler<span className="text-signal">Now</span>
+          </span>
 
-        <Input
-          label={t("login.correo")}
-          type="email"
-          name="email"
-          required
-          autoComplete="email"
-          inputMode="email"
-          placeholder={t("login.correo_ph")}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <div className="flex flex-col gap-1">
-          <CampoContrasena label={t("login.contrasena")} name="password" value={password} onChange={setPassword} autoComplete="current-password" />
-          <Link href={`/login/olvide${qs}`} className={`${claseEnlace} self-end`}>
-            {t("auth.olvide")}
+          <Poster as="h1" size={1} className="text-white xl:text-[88px]">
+            {t("auth.ing_t1")}
+            <br />
+            {t("auth.ing_t2")}
+            <br />
+            <Hot>{t("auth.ing_t3")}</Hot>
+          </Poster>
+
+          <Link
+            href="/para-negocios"
+            className="inline-flex w-fit max-w-sm flex-col gap-1 border-2 border-ink bg-signal px-5 py-4 text-ink shadow-hard transition-transform duration-100 ease-[cubic-bezier(0.2,0,0,1)] hover:-translate-y-0.5"
+          >
+            <span className="font-display text-lg leading-tight font-black uppercase">{t("login.negocio_q")}</span>
+            <span className="flex items-center gap-2 font-mono text-sm leading-4 font-bold tracking-[0.72px] text-white uppercase">
+              {t("login.negocio_cta")}
+            </span>
           </Link>
         </div>
+      </aside>
 
-        <Turnstile ref={controlTs} accion="ingreso" onToken={setTokenTs} />
-        {error ? <ErrorForm>{error}</ErrorForm> : null}
-        {sinVerificar ? (
-          <div className="flex flex-col gap-2 border-2 border-danger p-3">
-            <p className="text-[14px] text-text">{t("auth.sin_verificar")}</p>
-            <button type="button" onClick={onVerificarAhora} disabled={loading} className={`${claseEnlace} self-start`}>
-              {t("auth.verificar_ahora")}
-            </button>
+      {/* Panel de formulario */}
+      <div className="flex min-h-dvh flex-col bg-bg">
+        <div className="sticky top-0 z-[3] flex min-h-[52px] items-center gap-2 border-b border-[var(--grid)] bg-bg py-1 pr-2 pl-1">
+          <Link href="/" className="sn-iconbtn" aria-label={t("comun.volver")}>
+            <ChevronLeft />
+          </Link>
+          <Num className="flex-1">{t("auth.i_ingresar")}</Num>
+        </div>
+
+        <div className={`flex flex-1 flex-col px-4 pt-3 lg:pt-0 ${bannerCookies ? "pb-80 lg:pb-60" : "pb-16 lg:pb-0"}`}>
+          <div className="mx-auto flex w-full max-w-lg flex-col lg:my-auto lg:max-w-md">
+            <Poster as="h1" size={3} className="pt-1 pb-4 break-words lg:hidden">
+              {t("auth.ing_t1")}
+              <br />
+              {t("auth.ing_t2")}
+              <br />
+              <Hot>{t("auth.ing_t3")}</Hot>
+            </Poster>
+            <p className="body mb-4 text-text-muted break-words lg:mb-2">{t("auth.ing_intro")}</p>
+
+            <form onSubmit={onIngresar} className="flex flex-col gap-4" noValidate>
+              {invitacion ? <Aviso>Ingresa con tu cuenta para continuar con la invitación de {invitacion.negocio}.</Aviso> : null}
+              {aviso === "recuperada" ? <Aviso>{t("auth.aviso_recuperada")}</Aviso> : null}
+              {aviso === "enlace" ? <Aviso>{t("auth.aviso_enlace")}</Aviso> : null}
+
+              <Input
+                label={t("login.correo")}
+                type="email"
+                name="email"
+                required
+                autoComplete="email"
+                inputMode="email"
+                placeholder={t("login.correo_ph")}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <div className="flex flex-col gap-1">
+                <CampoContrasena label={t("login.contrasena")} name="password" value={password} onChange={setPassword} autoComplete="current-password" />
+                <Link href={`/login/olvide${qs}`} className={`${claseEnlace} self-end`}>
+                  {t("auth.olvide")}
+                </Link>
+              </div>
+
+              <Turnstile ref={controlTs} accion="ingreso" onToken={setTokenTs} />
+              {error ? <ErrorForm>{error}</ErrorForm> : null}
+              {sinVerificar ? (
+                <div className="flex flex-col gap-2 border-2 border-danger p-3">
+                  <p className="text-[14px] text-text">{t("auth.sin_verificar")}</p>
+                  <button type="button" onClick={onVerificarAhora} disabled={loading} className={`${claseEnlace} self-start`}>
+                    {t("auth.verificar_ahora")}
+                  </button>
+                </div>
+              ) : null}
+
+              <Button type="submit" size="lg" loading={loading} className="w-full justify-between">
+                <span>{t("auth.ingresar")}</span>
+                <ArrowUpRight className="size-[18px]" aria-hidden />
+              </Button>
+
+              <Separador>{t("login.o")}</Separador>
+              <BotonGoogle texto={t("login.google")} onClick={onGoogle} cargando={googleCargando} />
+
+              {/* ¿Todavía no tienes cuenta? — tarjeta secundaria destacada */}
+              <Link
+                href={`/registro${qs}`}
+                className="flex items-center justify-between gap-3 border-2 border-[var(--grid-soft)] bg-[var(--surface)] px-4 py-3.5 transition-colors hover:bg-[var(--surface-2)]"
+              >
+                <span className="flex min-w-0 flex-col gap-0.5">
+                  <span className="body-sm text-text-muted">{t("auth.sin_cuenta")}</span>
+                  <span className="sn-label text-text">{t("auth.crea_una")}</span>
+                </span>
+                <User className="size-5 shrink-0 text-text" aria-hidden />
+              </Link>
+
+              {/* Registro de negocios — solo móvil (en escritorio vive en el panel izquierdo) */}
+              <Link
+                href="/para-negocios"
+                className="flex items-center justify-between gap-3 border-2 border-ink bg-signal px-4 py-3.5 text-ink shadow-hard transition-transform duration-100 ease-[cubic-bezier(0.2,0,0,1)] hover:-translate-y-0.5 lg:hidden"
+              >
+                <span className="flex min-w-0 flex-col gap-0.5">
+                  <span className="font-mono text-xs leading-4 font-bold tracking-[0.72px] uppercase">{t("login.negocio_q")}</span>
+                  <span className="flex items-center gap-2 font-mono text-sm leading-4 font-bold tracking-[0.72px] text-white uppercase">
+                    {t("login.negocio_cta")}
+                  </span>
+                </span>
+                <Scissors className="size-6 shrink-0 text-ink" aria-hidden />
+              </Link>
+            </form>
           </div>
-        ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
 
-        <Button type="submit" size="lg" loading={loading} className="w-full justify-between">
-          <span>{t("auth.ingresar")}</span>
-          <ArrowUpRight className="size-[18px]" aria-hidden />
-        </Button>
-
-        <Separador>{t("login.o")}</Separador>
-        <BotonGoogle texto={t("login.google")} onClick={onGoogle} cargando={googleCargando} />
-
-        <CambioPantalla pregunta={t("auth.sin_cuenta")} accion={t("auth.crea_una")} href={`/registro${qs}`} />
-        <Link href="/para-negocios" className={claseEnlace}>
-          {t("login.registrar_negocio")}
-        </Link>
-      </form>
-    </PantallaAuth>
+/**
+ * ¿Sigue visible el banner de cookies? Lee la misma clave de `localStorage` y escucha el
+ * evento que emite el banner al elegir. `useSyncExternalStore` evita el setState dentro de
+ * un efecto (servidor: sin reserva; cliente: se ajusta tras hidratar).
+ */
+function useBannerCookiesVisible(): boolean {
+  return useSyncExternalStore(
+    (alCambiar) => {
+      window.addEventListener("stylernow:cookies", alCambiar);
+      return () => window.removeEventListener("stylernow:cookies", alCambiar);
+    },
+    () => {
+      try {
+        return !localStorage.getItem("stylernow_cookies_v1");
+      } catch {
+        return true;
+      }
+    },
+    () => false
   );
 }
