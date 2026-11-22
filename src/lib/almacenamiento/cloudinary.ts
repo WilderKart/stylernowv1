@@ -5,7 +5,8 @@ import { createHash } from "node:crypto";
 /**
  * ADAPTADOR CLOUDINARY (2026-11-16, decisión B). Solo servidor: la clave secreta nunca sale de aquí.
  *
- * - Se activa únicamente si existen CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY y CLOUDINARY_API_SECRET.
+ * - Se activa únicamente si existen el nombre de la nube (CLOUDINARY_CLOUD_NAME o, si falta, NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME),
+ *   CLOUDINARY_API_KEY y CLOUDINARY_API_SECRET.
  *   Sin ellas, quien lo use debe seguir con Supabase Storage (comportamiento actual, sin cambios).
  * - Subida FIRMADA desde el servidor (nunca un preset sin firma en el navegador).
  * - `tipo: "authenticated"` para archivos privados: solo se ven con URL firmada (`urlFirmada`).
@@ -20,8 +21,13 @@ export interface ConfigCloudinary {
   apiSecret: string;
 }
 
+/** Nombre de la nube: acepta CLOUDINARY_CLOUD_NAME o NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME (la que exista y no esté vacía). */
+export function nombreDeLaNube(): string | undefined {
+  return (process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME)?.trim() || undefined;
+}
+
 export function configCloudinary(): ConfigCloudinary | null {
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim();
+  const cloudName = nombreDeLaNube();
   const apiKey = process.env.CLOUDINARY_API_KEY?.trim();
   const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim();
   if (!cloudName || !apiKey || !apiSecret) return null;

@@ -7,6 +7,9 @@ const hostSupabase = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
   : null;
 
+// Nombre de la nube de Cloudinary: misma resolución que src/lib/almacenamiento/cloudinary.ts (nombreDeLaNube).
+const nubeCloudinary = (process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME)?.trim() || undefined;
+
 const nextConfig: NextConfig = {
   // ADR-015: habilita forbidden()/unauthorized() de next/navigation — un
   // 403/401 real (no un notFound() disfrazado) cuando requireRole() detecta
@@ -37,9 +40,9 @@ const nextConfig: NextConfig = {
       ...(hostSupabase
         ? [{ protocol: "https" as const, hostname: hostSupabase, pathname: "/storage/v1/object/public/**" }]
         : []),
-      // Cloudinary (decisión B): solo la nube propia y solo si está configurada.
-      ...(process.env.CLOUDINARY_CLOUD_NAME
-        ? [{ protocol: "https" as const, hostname: "res.cloudinary.com", pathname: `/${process.env.CLOUDINARY_CLOUD_NAME.trim()}/**` }]
+      // Cloudinary (decisión B): solo la nube propia y solo si está configurada (misma resolución que src/lib/almacenamiento/cloudinary.ts).
+      ...(nubeCloudinary
+        ? [{ protocol: "https" as const, hostname: "res.cloudinary.com", pathname: `/${nubeCloudinary}/**` }]
         : []),
     ],
   },

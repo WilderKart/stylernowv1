@@ -36,7 +36,24 @@ describe("adaptador Cloudinary (sin red)", () => {
 
   it("sin variables de entorno no se activa", () => {
     vi.stubEnv("CLOUDINARY_CLOUD_NAME", "");
+    vi.stubEnv("NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME", "");
     expect(configCloudinary()).toBeNull();
+  });
+
+  it("acepta el nombre de la nube desde NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME cuando falta CLOUDINARY_CLOUD_NAME", () => {
+    vi.stubEnv("CLOUDINARY_CLOUD_NAME", "");
+    vi.stubEnv("NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME", "  nube-publica ");
+    vi.stubEnv("CLOUDINARY_API_KEY", "k");
+    vi.stubEnv("CLOUDINARY_API_SECRET", "s");
+    expect(configCloudinary()).toEqual({ cloudName: "nube-publica", apiKey: "k", apiSecret: "s" });
+  });
+
+  it("CLOUDINARY_CLOUD_NAME tiene prioridad sobre el nombre público", () => {
+    vi.stubEnv("CLOUDINARY_CLOUD_NAME", "privada");
+    vi.stubEnv("NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME", "publica");
+    vi.stubEnv("CLOUDINARY_API_KEY", "k");
+    vi.stubEnv("CLOUDINARY_API_SECRET", "s");
+    expect(configCloudinary()?.cloudName).toBe("privada");
   });
 
   it("rechaza tipos y tamaños no permitidos antes de llamar a la red", async () => {
