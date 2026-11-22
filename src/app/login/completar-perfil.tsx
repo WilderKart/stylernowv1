@@ -36,7 +36,7 @@ export function CompletarPerfil({ email, siguiente, pedirAceptacion }: { email: 
     }
     setLoading(true);
     setError(null);
-    const res = await crearCuentaRegistro(nombre, pais, telefono, marketing, acepta);
+    const res = await crearCuentaRegistro(nombre, pais, telefono, marketing, acepta, siguiente);
     if (!res.ok) {
       setLoading(false);
       setError(res.error);
@@ -44,7 +44,7 @@ export function CompletarPerfil({ email, siguiente, pedirAceptacion }: { email: 
     }
     // Navegación completa: la caché del router guardaba «destino → /login» de cuando el perfil estaba
     // pendiente y, con router.replace, volvía a /login en bucle (encontrado en la prueba local).
-    window.location.assign(res.pendientesLegales ? `/legal/aceptar?next=${encodeURIComponent(siguiente)}` : siguiente);
+    window.location.assign(res.pendientesLegales ? `/legal/aceptar?next=${encodeURIComponent(res.destino)}` : res.destino);
   }
 
   async function onSalir() {

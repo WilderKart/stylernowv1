@@ -46,7 +46,7 @@ export async function crearOActualizarNegocio(datos: {
     }
 
     if (datos.negocioId) {
-      const { error } = await supabase
+      const { data: filas, error } = await supabase
         .from("negocio")
         .update({
           nombre: datos.nombre,
@@ -57,8 +57,11 @@ export async function crearOActualizarNegocio(datos: {
           email_contacto: datos.emailContacto || null,
         })
         .eq("id", datos.negocioId)
-        .eq("owner_user_id", userId);
+        .eq("owner_user_id", userId)
+        .select("id");
       if (error) return { ok: false, error: error.message };
+      // Sin filas actualizadas = el negocio no es de esta persona (o no existe): no se informa éxito (antes devolvía ok y el id recibido).
+      if (!filas || filas.length === 0) return { ok: false, error: "No tienes permiso sobre este negocio." };
       revalidatePath("/panel/onboarding");
       return { ok: true, data: { id: datos.negocioId } };
     }
@@ -217,8 +220,10 @@ export async function guardarSede(datos: {
     };
 
     if (datos.sedeId) {
-      const { error } = await supabase.from("sede").update(payload).eq("id", datos.sedeId);
+      const { data: filas, error } = await supabase.from("sede").update(payload).eq("id", datos.sedeId).select("id");
       if (error) return { ok: false, error: error.message };
+      // Sin filas actualizadas = la sede no es de esta persona (RLS): no se informa éxito.
+      if (!filas || filas.length === 0) return { ok: false, error: "No tienes permiso sobre esta sede." };
       revalidatePath("/panel/onboarding");
       return { ok: true, data: { id: datos.sedeId } };
     }

@@ -1,0 +1,1085 @@
+{
+ "SEGURA_DEMOSTRADA": [
+  {
+   "k": "app/ajustes/actions.ts::guardarIdiomaRegionAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/ajustes/actions.ts::guardarPermisosAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/ayuda/actions.ts::crearTicketAccion",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/ayuda/actions.ts::responderTicketAccion",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/checkout/membresia/[planId]/actions.ts::consultarEstadoCompraMembresia",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/cuenta/actions.ts::cancelarEliminacionAccion",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/favoritos/actions.ts::listarMisFavoritos",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/gift-cards/comprar/actions.ts::buscarNegociosParaGiftCard",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/gift-cards/comprar/actions.ts::consultarEstadoCompraGiftCard",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/lealtad/actions.ts::canjearWallet",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/lealtad/actions.ts::crearGrupoFamiliar",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/lealtad/actions.ts::obtenerResumenLealtad",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/legal/aceptar/actions.ts::aceptarPendientes",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/login/registro-actions.ts::cancelarRegistro",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/login/registro-actions.ts::necesitaRegistro",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/membresias/[id]/actions.ts::cancelarMiMembresia",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/negocio/[slug]/actions.ts::esFavorito",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/negocio/[slug]/reservar/actions.ts::obtenerSlots",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/notificaciones/actions.ts::contarNoLeidasAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/notificaciones/actions.ts::marcarLeidaAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/notificaciones/actions.ts::marcarTodasLeidasAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/notificaciones/preferencias-actions.ts::desuscribirPushAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/notificaciones/preferencias-actions.ts::guardarPreferenciaAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/ofertas/actions.ts::cambiarConsentimientoMarcas",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/ads/actions.ts::finalizarCampana",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/ads/actions.ts::listarMisCampanas",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/ads/actions.ts::obtenerMetricasCampana",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::buscarClienteExistente",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::cancelarCita",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::crearBloqueo",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::eliminarBloqueo",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::listarBloqueos",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::listarCitas",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::obtenerSlotsAgenda",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/auditoria/actions.ts::listarEntidadesNegocio",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/cobros/actions.ts::desconectarCuentaCobro",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/cobros/actions.ts::obtenerConexionCobros",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/crm/actions.ts::agregarEtiqueta",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/crm/actions.ts::crearNota",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/crm/actions.ts::eliminarFoto",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/crm/actions.ts::eliminarNota",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarClientesCRM",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarCumpleanerosDelMes",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarEtiquetasNegocio",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarFotos",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarHistorialCliente",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarNotas",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/crm/actions.ts::listarReservasCompletadas",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/crm/actions.ts::obtenerBeneficiosLealtadCliente",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/crm/actions.ts::obtenerResumenCliente",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/crm/actions.ts::quitarEtiqueta",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/dashboard-actions.ts::obtenerLineaTiempoDia",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/dashboard-actions.ts::obtenerMetricasLealtadNegocio",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/dashboard-actions.ts::obtenerRankingSemana",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/dashboard-actions.ts::obtenerResumenDia",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::aprobarMemoriaIa",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::consultarEstadoCompraIa",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::crearPromptIa",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::historialMemoriaIa",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::listarConsumoIa",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::listarFuncionesHabilitadasNegocio",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::listarMemoriaIa",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::listarPaquetesDisponiblesIa",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::listarPromptsIa",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::obtenerRoiIa",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::obtenerSaldoCreditosIa",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::olvidarMemoriaIa",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::ajustarStock",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::atenderSolicitud",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::cancelarSolicitud",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::configurarConsumo",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::configurarStockMinimo",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::crearSolicitudReposicion",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::listarConsumoPorServicio",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::listarMovimientos",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::listarSolicitudesPendientes",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::listarStock",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::quitarConsumo",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/inventario/actions.ts::registrarMovimiento",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::alternarCampanaSellosAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::alternarPlanMembresia",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::alternarReglaCashbackAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::bloquearGiftCardAdmin",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::configurarReferidosAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::confirmarSugerenciaAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::crearCampanaSellosAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::crearCuentaCorporativaAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::crearPlanMembresia",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::crearReglaCashbackAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::generarSugerenciasAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarCampanasSellos",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarCuentasCorporativas",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarFamiliasNegocio",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarGiftCards",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarMiembrosVip",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarNivelesVip",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarPlanesMembresia",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarReglasCashback",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarReglasRecompensa",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::listarSugerenciasAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::obtenerConfigReferidos",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/marca/actions.ts::guardarMarca",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/marca/actions.ts::solicitarActivacionMarca",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/marca/actions.ts::subirLogoMarca",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/onboarding/actions.ts::cancelarInvitacion",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/onboarding/actions.ts::crearOActualizarNegocio",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/onboarding/actions.ts::elegirPlan",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/onboarding/actions.ts::enviarAAprobacion",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/onboarding/actions.ts::guardarSede",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/onboarding/actions.ts::subirLogo",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/politica/actions.ts::guardarAnticipo",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/politica/actions.ts::guardarPolitica",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/politica/actions.ts::obtenerAnticipo",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/politica/actions.ts::obtenerPolitica",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/pos/actions.ts::actualizarProducto",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/pos/actions.ts::anularEgresoCaja",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/pos/actions.ts::cambiarEstadoProducto",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/pos/actions.ts::completarVenta",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/pos/actions.ts::crearProducto",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/pos/actions.ts::listarProductos",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/pos/actions.ts::listarReservasParaCobrar",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/pos/actions.ts::obtenerCierreCaja",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/pos/actions.ts::obtenerPuntosDisponibles",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/reportes/actions.ts::listarResenas",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/reportes/actions.ts::obtenerHorariosMuertos",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/reportes/actions.ts::obtenerIngresosPeriodo",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/reportes/actions.ts::obtenerMiPosicionMarketplace",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/reportes/actions.ts::obtenerRankingStaffPeriodo",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/reportes/actions.ts::obtenerServiciosTop",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/reportes/actions.ts::reportarResena",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/reportes/actions.ts::responderResena",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::actualizarSede",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::eliminarExcepcion",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::guardarExcepcion",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::marcarSedePrincipal",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::reabrirSede",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::trasladarStaff",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::actualizarCombo",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::actualizarServicio",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::alternarStaffServicio",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::cambiarEstadoCombo",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::cambiarEstadoServicio",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::crearCombo",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::crearServicio",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::eliminarServicio",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::listarStaffAsignable",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/servicios/actions.ts::subirImagenServicio",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/soporte/actions.ts::crearTicket",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/soporte/actions.ts::obtenerHiloTicket",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/soporte/actions.ts::responderTicket",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/staff/actions.ts::listarInvitacionesPendientes",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/staff/actions.ts::listarStaff",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/staff/actions.ts::obtenerHistorialStaff",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/staff/actions.ts::promoverGuardian",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/staff/actions.ts::reactivarStaff",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/staff/actions.ts::retirarStaff",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/staff/actions.ts::revocarGuardian",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/staff/actions.ts::suspenderStaff",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::cancelarDowngradeProgramado",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::cancelarMiNegocio",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::consultarEstadoUpgrade",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::listarPagosSuscripcion",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::obtenerCatalogoPlanes",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::obtenerMiSuscripcion",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::solicitarDowngrade",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/wallet/actions.ts::listarMovimientosWallet",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/wallet/actions.ts::obtenerMiWallet",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::cancelarCampana",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::contarSegmento",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::obtenerResumenWhatsApp",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::solicitarRecarga",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/perfil/actions.ts::actualizarPerfil",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/perfil/foto-actions.ts::quitarFotoPerfil",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/privacidad/actions.ts::guardarPreferenciasPrivacidad",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/reserva/[id]/actions-cita.ts::calificarAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/reserva/[id]/actions-cita.ts::enviarMensajeAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/reserva/[id]/actions-cita.ts::listarMensajesAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/reserva/[id]/actions-cita.ts::marcarLeidoAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/reserva/[id]/actions-cita.ts::slotsReprogramarAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/reserva/[id]/actions.ts::cancelarReservaAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/reserva/[id]/pago/actions.ts::consultarEstadoPago",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/staff/agenda/actions.ts::listarMisCitas",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/staff/clientes/actions.ts::listarMisClientes",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/staff/lealtad/actions.ts::obtenerMisReferidosStaff",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/staff/lealtad/actions.ts::obtenerSellosOtorgadosPorMi",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/staff/nivel/actions.ts::obtenerMiNivel",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::actualizarMiPerfilStaff",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::crearMiBloqueo",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::eliminarMiBloqueo",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::guardarDiaDisponibilidad",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::listarMiDisponibilidad",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::listarMisBloqueos",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::obtenerMiPerfilStaff",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::obtenerMisGanancias",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "components/marketplace/actions.ts::contarResultadosAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "components/privacidad/acciones-cookies.ts::guardarEleccionCookies",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  },
+  {
+   "k": "components/sistema/actions.ts::consultarEstadoSistemaAction",
+   "motivo": "Control autorizado ejecutó la acción; los 6 ajenos no leyeron ni escribieron en B"
+  }
+ ],
+ "SEGURA_DIFERENCIAL": [
+  {
+   "k": "app/membresias/[id]/actions.ts::congelarMiMembresia",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Esa acción no es posible en el estado actual de tu Membresía»"
+  },
+  {
+   "k": "app/membresias/[id]/actions.ts::reactivarMiMembresia",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Esa acción no es posible en el estado actual de tu Membresía»"
+  },
+  {
+   "k": "app/panel/ads/actions.ts::activarCampana",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Tu Wallet no tiene saldo suficiente para cubrir al menos un »"
+  },
+  {
+   "k": "app/panel/ads/actions.ts::crearCampana",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Necesitas el Plan Studio o superior para crear campañas publ»"
+  },
+  {
+   "k": "app/panel/ads/actions.ts::pausarCampana",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Esa campaña no está en un estado que permita esta acción.»"
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::crearCitaManual",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Ese horario ya no está disponible — elige otro.»"
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::reasignarStaff",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Ese Staff no está disponible en ese horario.»"
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::reprogramarCita",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Ese horario ya no está disponible — elige otro.»"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::comprarPaqueteIa",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Falta MERCADOPAGO_ACCESS_TOKEN en el entorno.»"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::guardarMemoriaIa",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «new row for relation \"ai_memoria_negocio\" violates check con»"
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::descartarSugerenciaAction",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «TRANSICION_INVALIDA»"
+  },
+  {
+   "k": "app/panel/onboarding/actions.ts::invitarStaff",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Tu plan no permite más Staff — puedes seguir sin invitar y s»"
+  },
+  {
+   "k": "app/panel/pos/actions.ts::registrarEgresoCaja",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «No se pudo completar la operación.»"
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::cerrarSedeTemporal",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «No puedes cerrar tu única sede operativa — el negocio quedar»"
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::crearSede",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Tu plan no permite más sedes. Haz un upgrade para agregar ot»"
+  },
+  {
+   "k": "app/panel/sedes/actions.ts::eliminarSede",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «No puedes cerrar tu única sede operativa — el negocio quedar»"
+  },
+  {
+   "k": "app/panel/staff/actions.ts::cancelarInvitacion",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Esa invitación ya no está pendiente.»"
+  },
+  {
+   "k": "app/panel/staff/actions.ts::crearInvitacionStaff",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Tu plan no permite más Staff. Haz un upgrade para sumar otro»"
+  },
+  {
+   "k": "app/panel/staff/actions.ts::reenviarInvitacion",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Esa invitación ya no está pendiente.»"
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::iniciarPagoPlan",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Falta MERCADOPAGO_ACCESS_TOKEN en el entorno.»"
+  },
+  {
+   "k": "app/panel/suscripcion/actions.ts::iniciarUpgrade",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «No se pudo calcular el monto a cobrar.»"
+  },
+  {
+   "k": "app/panel/suscripcion/prueba.ts::elegirPais",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «El país no se puede cambiar con un plan en curso. Contacta a»"
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::guardarPlantilla",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Los marcadores {{1}}, {{2}}… del texto deben coincidir, en o»"
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::programarCampana",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Esa acción no está disponible en el estado actual.»"
+  },
+  {
+   "k": "app/reserva/[id]/actions-cita.ts::llegueAction",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Esta cita ya no está activa.»"
+  },
+  {
+   "k": "app/reserva/[id]/actions-cita.ts::reprogramarAction",
+   "motivo": "Ajenos autenticados DENEGADOS por autorización; controles superan esa barrera y se detienen en regla de negocio/validación: «Ese horario ya no está disponible. Elige otro.»"
+  }
+ ],
+ "NO_VIOLACION_REVISADA": [
+  {
+   "k": "app/checkout/membresia/[planId]/actions.ts::iniciarCompraMembresia",
+   "motivo": "Compra propia: cada actor crea SU pago pendiente por una membresía pública del negocio B (el comprador es quien llama)."
+  },
+  {
+   "k": "app/cuenta/actions.ts::exportarDatosAccion",
+   "motivo": "Exporta datos PROPIOS; incluye ese favorito propio."
+  },
+  {
+   "k": "app/gift-cards/comprar/actions.ts::iniciarCompraGiftCard",
+   "motivo": "Compra propia: gift card BLOQUEADA a nombre del comprador (verificado: comprador_id = actor)."
+  },
+  {
+   "k": "app/negocio/[slug]/actions.ts::alternarFavorito",
+   "motivo": "Favorito PROPIO (la fila es del actor) de un negocio público."
+  },
+  {
+   "k": "app/negocio/[slug]/reservar/actions.ts::unirseListaEspera",
+   "motivo": "Inscripción propia en la lista de espera pública (verificado: cliente_id = actor en cada fila)."
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::listarServiciosActivos",
+   "motivo": "Catálogo público del negocio (RLS: solo negocio ACTIVO)."
+  },
+  {
+   "k": "app/panel/auditoria/actions.ts::listarAuditoriaNegocio",
+   "motivo": "Devuelve solo lo que RLS permite al actor; el 'lee B' es del propio negocio de un actor A cuando sus filas citan nombres de prueba."
+  },
+  {
+   "k": "app/panel/soporte/actions.ts::listarMisTickets",
+   "motivo": "Tickets PROPIOS del actor."
+  }
+ ],
+ "VIOLACION": [],
+ "INCONCLUSA": [
+  {
+   "k": "app/cuenta/actions.ts::solicitarEliminacionAccion",
+   "motivo": "Controles sin ejecutar: Escribe ELIMINAR para confirmar."
+  },
+  {
+   "k": "app/gift-cards/canjear/actions.ts::consultarMiGiftCard",
+   "motivo": "Controles sin ejecutar: invalid salt"
+  },
+  {
+   "k": "app/invitacion/[id]/actions.ts::responderInvitacion",
+   "motivo": "Controles sin ejecutar: Esta invitación no es para tu cuenta — inicia sesi"
+  },
+  {
+   "k": "app/lealtad/actions.ts::registrarEventoFraude",
+   "motivo": "Controles sin ejecutar: "
+  },
+  {
+   "k": "app/lealtad/actions.ts::registrarReferido",
+   "motivo": "Controles sin ejecutar: Ese código de referido no existe."
+  },
+  {
+   "k": "app/login/actions.ts::cambiarContrasena",
+   "motivo": "Controles sin ejecutar: La contraseña actual no es correcta."
+  },
+  {
+   "k": "app/login/actions.ts::crearContrasena",
+   "motivo": "Controles sin ejecutar: Mínimo 12 caracteres"
+  },
+  {
+   "k": "app/login/actions.ts::restablecerContrasena",
+   "motivo": "Controles sin ejecutar: Mínimo 12 caracteres"
+  },
+  {
+   "k": "app/mi-look/actions.ts::compartirFotos",
+   "motivo": "Controles sin ejecutar: Foto inválida."
+  },
+  {
+   "k": "app/negocio/[slug]/profesional/[staffId]/actions.ts::masResenasAction",
+   "motivo": "Controles sin ejecutar: Negocio no disponible."
+  },
+  {
+   "k": "app/negocio/[slug]/reservar/actions.ts::crearReservaAction",
+   "motivo": "Controles sin ejecutar: Ese horario acaba de ocuparse. Elige otro, ya actu"
+  },
+  {
+   "k": "app/notificaciones/preferencias-actions.ts::suscribirPushAction",
+   "motivo": "Controles sin ejecutar: Este navegador no entregó una suscripción válida."
+  },
+  {
+   "k": "app/pagos/actions.ts::pedirDevolucion",
+   "motivo": "Controles sin ejecutar: No tienes saldo disponible."
+  },
+  {
+   "k": "app/panel/agenda/actions.ts::marcarNoShow",
+   "motivo": "Controles sin ejecutar: No tienes permiso sobre esa reserva. // Solo una cita confirmada puede marcarse como no pr"
+  },
+  {
+   "k": "app/panel/crm/actions.ts::subirFoto",
+   "motivo": "Controles sin ejecutar: new row violates row-level security policy // new row violates row-level security policy for tab // new row violates row-level security policy \"reserv"
+  },
+  {
+   "k": "app/panel/ia/actions.ts::restaurarVersionMemoriaIa",
+   "motivo": "Controles sin ejecutar: No tienes permiso sobre este negocio."
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::crearReglaRecompensaAction",
+   "motivo": "Controles sin ejecutar: Esta función no está incluida en tu plan. Mejora t // No tienes permiso sobre este negocio. // Disparador inválido."
+  },
+  {
+   "k": "app/panel/lealtad/actions.ts::sembrarNivelesVipAction",
+   "motivo": "Controles sin ejecutar: Esta función no está incluida en tu plan. Mejora t // No tienes permiso sobre este negocio. // Este negocio ya tiene niveles VIP configurados."
+  },
+  {
+   "k": "app/panel/pos/actions.ts::canjearGiftCardEnPos",
+   "motivo": "Controles sin ejecutar: invalid salt"
+  },
+  {
+   "k": "app/panel/suscripcion/prueba.ts::iniciarPrueba",
+   "motivo": "Controles sin ejecutar: Completa teléfono, documento y verificación del di"
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::cancelarRecarga",
+   "motivo": "Controles sin ejecutar: Solicitud inválida."
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::crearCampana",
+   "motivo": "Controles sin ejecutar: Revisa los datos de la campaña."
+  },
+  {
+   "k": "app/panel/whatsapp/actions.ts::eliminarPlantilla",
+   "motivo": "Controles sin ejecutar: Plantilla inválida."
+  },
+  {
+   "k": "app/perfil/foto-actions.ts::subirFotoPerfil",
+   "motivo": "Controles sin ejecutar: No pudimos procesar la foto."
+  },
+  {
+   "k": "app/reserva/[id]/pago/actions.ts::confirmarSinAnticipo",
+   "motivo": "Controles sin ejecutar: La reserva expiró o cambió de estado. Elige un hor // No pudimos confirmar la reserva. Intenta de nuevo."
+  },
+  {
+   "k": "app/reserva/[id]/pago/actions.ts::iniciarPagoSena",
+   "motivo": "Controles sin ejecutar: La reserva expiró o cambió de estado. Elige un hor // No pudimos registrar tu aceptación. Intenta de nue"
+  },
+  {
+   "k": "app/staff/agenda/actions.ts::hacerCheckIn",
+   "motivo": "Controles sin ejecutar: Esa cita no es tuya. // Solo puedes hacer check-in de una cita confirmada."
+  },
+  {
+   "k": "app/staff/agenda/actions.ts::hacerCheckOut",
+   "motivo": "Controles sin ejecutar: Esa cita no es tuya. // Solo puedes hacer check-out de una cita en curso."
+  },
+  {
+   "k": "app/staff/perfil/actions.ts::subirFotoPerfilStaff",
+   "motivo": "Controles sin ejecutar: Imagen inválida."
+  },
+  {
+   "k": "lib/geo/direccion-desde-coordenadas.ts::direccionDesdeCoordenadas",
+   "motivo": "Controles sin ejecutar: No pudimos obtener la dirección. Escríbela a mano."
+  }
+ ],
+ "OMITIDA": [
+  {
+   "k": "app/login/actions.ts::enviarCodigo",
+   "motivo": "Login/registro/Google/cierre de sesión: se analizan solo en estático"
+  },
+  {
+   "k": "app/login/actions.ts::iniciarSesionConContrasena",
+   "motivo": "Login/registro/Google/cierre de sesión: se analizan solo en estático"
+  },
+  {
+   "k": "app/login/actions.ts::iniciarSesionConGoogle",
+   "motivo": "Login/registro/Google/cierre de sesión: se analizan solo en estático"
+  },
+  {
+   "k": "app/login/actions.ts::solicitarRecuperacion",
+   "motivo": "Login/registro/Google/cierre de sesión: se analizan solo en estático"
+  },
+  {
+   "k": "app/login/actions.ts::verificarCodigo",
+   "motivo": "Login/registro/Google/cierre de sesión: se analizan solo en estático"
+  },
+  {
+   "k": "app/login/registro-actions.ts::crearCuentaRegistro",
+   "motivo": "Login/registro/Google/cierre de sesión: se analizan solo en estático"
+  },
+  {
+   "k": "app/perfil/actions.ts::cerrarSesion",
+   "motivo": "Login/registro/Google/cierre de sesión: se analizan solo en estático"
+  }
+ ]
+}

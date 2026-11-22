@@ -37,7 +37,7 @@ export function FormularioIngreso({ siguiente, aviso }: { siguiente: string; avi
     }
     setLoading(true);
     setError(null);
-    const res = await iniciarSesionConContrasena(email, password);
+    const res = await iniciarSesionConContrasena(email, password, siguiente);
     if (!res.ok) {
       setLoading(false);
       if ("sinVerificar" in res && res.sinVerificar) setSinVerificar(true);
@@ -47,7 +47,7 @@ export function FormularioIngreso({ siguiente, aviso }: { siguiente: string; avi
     // Super Admin a su panel; el resto a su destino (el servidor desvía a «Completa tu perfil»
     // o a /legal/aceptar si hace falta, y cada rol aterriza en su propia zona).
     // Navegación completa al cambiar la sesión: nada de la caché del router de antes de ingresar.
-    window.location.assign(res.esSupersu ? (siguiente !== "/" ? siguiente : "/admin") : siguiente);
+    window.location.assign(res.destino);
   }
 
   async function onVerificarAhora() {

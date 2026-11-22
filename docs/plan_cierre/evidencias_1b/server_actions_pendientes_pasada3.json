@@ -1,0 +1,501 @@
+{
+ "bloqueados": [],
+ "fallosImport": {},
+ "detalle": [
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/sedes/actions.ts",
+   "accion": "trasladarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "revocarGuardian",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "suspenderStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "anonimo",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "reactivarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "NO_AUTENTICADO",
+   "fugaB": false,
+   "bytes": 37,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/sedes/actions.ts",
+   "accion": "trasladarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre esta sede.",
+   "fugaB": false,
+   "bytes": 57,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "revocarGuardian",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "suspenderStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "intruso",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "reactivarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/sedes/actions.ts",
+   "accion": "trasladarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre esta sede.",
+   "fugaB": false,
+   "bytes": 57,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "revocarGuardian",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "suspenderStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-a",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "reactivarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/sedes/actions.ts",
+   "accion": "trasladarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre esta sede.",
+   "fugaB": false,
+   "bytes": 57,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "revocarGuardian",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "suspenderStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-a1",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "reactivarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/sedes/actions.ts",
+   "accion": "trasladarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre esta sede.",
+   "fugaB": false,
+   "bytes": 57,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "revocarGuardian",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "suspenderStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-a",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "reactivarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/sedes/actions.ts",
+   "accion": "trasladarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre esta sede.",
+   "fugaB": false,
+   "bytes": 57,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "revocarGuardian",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "suspenderStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-a",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "reactivarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/sedes/actions.ts",
+   "accion": "trasladarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre esta sede.",
+   "fugaB": false,
+   "bytes": 57,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "revocarGuardian",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "suspenderStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "cliente-b",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "reactivarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/sedes/actions.ts",
+   "accion": "trasladarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre esta sede.",
+   "fugaB": false,
+   "bytes": 57,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "revocarGuardian",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "suspenderStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "pro-b1",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "reactivarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/sedes/actions.ts",
+   "accion": "trasladarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre esta sede.",
+   "fugaB": false,
+   "bytes": 57,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "revocarGuardian",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "suspenderStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "guardian-b",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "reactivarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/sedes/actions.ts",
+   "accion": "trasladarStaff",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": [
+    "evento_auditoria",
+    "vinculo_staff_negocio",
+    "perfil_B"
+   ]
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "revocarGuardian",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": [
+    "evento_auditoria",
+    "vinculo_staff_negocio",
+    "perfil_B"
+   ]
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "suspenderStaff",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": [
+    "evento_auditoria",
+    "vinculo_staff_negocio",
+    "perfil_B"
+   ]
+  },
+  {
+   "actor": "dueno-b",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "reactivarStaff",
+   "estado": "EJECUTADA",
+   "ok": true,
+   "fugaB": false,
+   "bytes": 11,
+   "escrituraB": [
+    "evento_auditoria",
+    "vinculo_staff_negocio"
+   ]
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/sedes/actions.ts",
+   "accion": "trasladarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre esta sede.",
+   "fugaB": false,
+   "bytes": 57,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "revocarGuardian",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "suspenderStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  },
+  {
+   "actor": "super",
+   "archivo": "app/panel/staff/actions.ts",
+   "accion": "reactivarStaff",
+   "estado": "EJECUTADA",
+   "ok": false,
+   "error": "No tienes permiso sobre este Staff.",
+   "fugaB": false,
+   "bytes": 58,
+   "escrituraB": []
+  }
+ ]
+}

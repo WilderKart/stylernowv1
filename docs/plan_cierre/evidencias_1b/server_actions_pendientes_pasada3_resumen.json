@@ -1,0 +1,31 @@
+{
+ "VIOLACION": [],
+ "LIMPIA_CON_CONTROL": [
+  {
+   "k": "app/panel/sedes/actions.ts::trasladarStaff",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/staff/actions.ts::revocarGuardian",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/staff/actions.ts::suspenderStaff",
+   "control": [
+    "dueno-b"
+   ]
+  },
+  {
+   "k": "app/panel/staff/actions.ts::reactivarStaff",
+   "control": [
+    "dueno-b"
+   ]
+  }
+ ],
+ "INCONCLUSA": [],
+ "NO_EJECUTADA": []
+}

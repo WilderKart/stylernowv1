@@ -97,7 +97,7 @@ export async function actualizarSede(datos: {
     // `negocio`, la política de SELECT de `sede` depende de la tabla `negocio`
     // (ya committeada), no de sí misma — no aplica aquí el problema de
     // INSERT...RETURNING que sí afecta a `negocio` (ver actions.ts de onboarding).
-    const { error } = await supabase
+    const { data: filas, error } = await supabase
       .from("sede")
       .update({
         nombre: datos.nombre,
@@ -107,8 +107,11 @@ export async function actualizarSede(datos: {
         latitud: datos.latitud,
         longitud: datos.longitud,
       })
-      .eq("id", datos.sedeId);
+      .eq("id", datos.sedeId)
+      .select("id");
     if (error) return { ok: false, error: traducirError(error.message) };
+    // Sin filas actualizadas = la sede no es de esta persona (RLS): no se informa éxito.
+    if (!filas || filas.length === 0) return { ok: false, error: "No tienes permiso sobre esta sede." };
 
     revalidatePath("/panel/sedes");
     revalidatePath(`/panel/sedes/${datos.sedeId}`);
