@@ -1,7 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-/** Las RPC y tablas del Centro de Cumplimiento (migraciones 150-154) aún no están en los tipos generados. */
+/** Las RPC y tablas del Centro de Cumplimiento (migraciones 151-155) aún no están en los tipos generados. */
 export type RespuestaRpc<T = unknown> = { data: T | null; error: { message: string } | null };
 type Resultado = Promise<{ data: unknown; error: { message: string } | null }>;
 export type ClienteSinTipos = {

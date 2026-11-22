@@ -1,4 +1,4 @@
--- 146 — Fase 2: repositorio central de evidencias legales (append-only, con hash encadenado).
+-- 147 — Fase 2: repositorio central de evidencias legales (append-only, con hash encadenado).
 --
 -- Una fila = un evento demostrable: quién (titular y su rol en ese momento), sobre qué documento o
 -- finalidad, qué texto exacto y versión se le presentó, qué hizo (acepta, acepta tácitamente,

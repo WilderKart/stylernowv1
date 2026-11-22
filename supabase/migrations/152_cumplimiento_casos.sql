@@ -1,4 +1,4 @@
--- 151 · Centro de Cumplimiento y PQRS — Grupo B: se AMPLÍA el sistema de tickets existente (ticket_soporte / ticket_mensaje).
+-- 152 · Centro de Cumplimiento y PQRS — Grupo B: se AMPLÍA el sistema de tickets existente (ticket_soporte / ticket_mensaje).
 --       No se crea un segundo sistema de tickets.
 --
 --  * Radicación pública sin cuenta (`caso_radicar`, solo service_role: la llama el servidor tras Turnstile + rate limit).

@@ -1,8 +1,8 @@
--- Pruebas de las migraciones 145-148 (evidencias legales, invitación y autorizaciones de Staff,
+-- Pruebas de las migraciones 146-149 (evidencias legales, invitación y autorizaciones de Staff,
 -- Centro de Evidencias). Fase 5 del encargo del 2026-11-16.
 --
 -- Solo contra la base LOCAL (supabase start), nunca contra producción:
---   docker exec -i supabase_db_stylernow psql -U postgres -d postgres -v ON_ERROR_STOP=1 -q < tests/sql/evidencias_145_148.sql
+--   docker exec -i supabase_db_stylernow psql -U postgres -d postgres -v ON_ERROR_STOP=1 -q < tests/sql/evidencias_145_149.sql
 -- Todo ocurre en una transacción que termina en ROLLBACK: no deja datos ni funciones auxiliares.
 -- Cada bloque lanza 'FALLA: …' si el comportamiento no es el esperado.
 --
@@ -121,7 +121,7 @@ insert into _t_contadores select 'evidencias', count(*) from public.evidencia_le
 insert into _t_contadores select 'auditoria', count(*) from public.evento_auditoria where entidad_tipo = 'evidencia_legal';
 
 -- ════════════════════════════════════════════════════════════════════════════
--- 145 · aceptacion_legal y texto_legal: solo por función, hora del servidor, inmutables
+-- 146 · aceptacion_legal y texto_legal: solo por función, hora del servidor, inmutables
 -- ════════════════════════════════════════════════════════════════════════════
 set local role authenticated;
 select public._t_como('00000000-0000-0000-0007-0000000000a3');
@@ -173,7 +173,7 @@ select public._t_igual('145 huella automática del texto',
   encode(sha256(convert_to('Texto de prueba', 'UTF8')), 'hex'));
 
 -- ════════════════════════════════════════════════════════════════════════════
--- 146 · Repositorio: las aceptaciones generan evidencias; RLS; inmutable; cadena verificable
+-- 147 · Repositorio: las aceptaciones generan evidencias; RLS; inmutable; cadena verificable
 -- ════════════════════════════════════════════════════════════════════════════
 select public._t_igual('146 dos evidencias nuevas (expresa + tácita)',
   (select count(*) from public.evidencia_legal where usuario_id = '00000000-0000-0000-0007-0000000000a3'), 2::bigint);
@@ -380,7 +380,7 @@ select public._t_rechaza('147 cliente no consulta autorizaciones', $q$select cou
 reset role;
 
 -- ════════════════════════════════════════════════════════════════════════════
--- 148 · Centro de Evidencias: solo SuperSU, todo auditado, huellas recalculadas
+-- 149 · Centro de Evidencias: solo SuperSU, todo auditado, huellas recalculadas
 -- ════════════════════════════════════════════════════════════════════════════
 -- El SuperSU no lee la tabla: el id se resuelve antes, como postgres.
 create temp table _t_ids as select 'a4_trat' as clave, id from public.evidencia_legal where usuario_id = '00000000-0000-0000-0007-0000000000a4' and documento = 'AUTORIZACION_STAFF_TRATAMIENTO';

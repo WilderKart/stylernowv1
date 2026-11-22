@@ -1,8 +1,8 @@
--- 150 · Centro de Cumplimiento y PQRS — Grupo A/C: catálogo de tipos de caso, catálogo de plazos (versionado y con estado de
+-- 151 · Centro de Cumplimiento y PQRS — Grupo A/C: catálogo de tipos de caso, catálogo de plazos (versionado y con estado de
 --       verificación jurídica) y calendario de días hábiles de Colombia.
 --
 -- Reglas de diseño
---  * Los plazos NO están en el código: viven en `caso_plazo_regla` y los edita el SuperAdmin (por RPC auditada, migración 151).
+--  * Los plazos NO están en el código: viven en `caso_plazo_regla` y los edita el SuperAdmin (por RPC auditada, migración 152).
 --  * Cada regla declara su `estado_verificacion`. Solo VERIFICADO_LEGALMENTE se presenta como obligación legal. Lo demás se
 --    muestra como «provisional» o «plazo interno» (el sistema nunca lo vende como ley).
 --  * Verificados literalmente el 2026-11-17 (Función Pública, Gestor Normativo): Ley 1581/2012 art. 14 (consulta: 10 días hábiles,
@@ -12,7 +12,7 @@
 --    en una tabla editable. NO están verificados contra el calendario oficial del año: `verificado = false` hasta que alguien
 --    los confirme (decreto/calendario oficial).
 --  * Reversión: drop table caso_plazo_regla, caso_tipo, festivo_co cascade; drop function de este archivo (nada más depende de ellos
---    hasta la migración 151).
+--    hasta la migración 152).
 
 -- ── Tipos de caso ──────────────────────────────────────────────────────────
 create table if not exists public.caso_tipo (

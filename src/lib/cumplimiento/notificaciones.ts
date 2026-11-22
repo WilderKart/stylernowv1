@@ -4,7 +4,7 @@ import { adaptadorSms } from "./adaptador-sms";
 import { adminSinTipos, leerConfig, rpcServicio, urlSitio } from "./servidor";
 
 /**
- * Procesa la cola `cumplimiento_notificacion` (migración 152). Reutiliza el adaptador de correo existente (Resend); no hay una segunda
+ * Procesa la cola `cumplimiento_notificacion` (migración 153). Reutiliza el adaptador de correo existente (Resend); no hay una segunda
  * infraestructura de correo. SMS pasa por su adaptador, hoy sin proveedor: nunca se marca «enviado» sin identificador del proveedor.
  * El CRM no necesita envío: su «entrega» es la fila persistida (la ve el SuperAdmin en el Centro).
  */

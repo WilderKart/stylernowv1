@@ -1,5 +1,5 @@
--- Pruebas del Centro de Cumplimiento y PQRS (migraciones 150-154 sobre 145/146/148). SOLO base local; termina en ROLLBACK.
---   docker exec -i supabase_db_stylernow-cierre psql -U postgres -d cumplimiento -v ON_ERROR_STOP=1 < tests/sql/cumplimiento_150_154.sql
+-- Pruebas del Centro de Cumplimiento y PQRS (migraciones 151-155 sobre 145/146/148). SOLO base local; termina en ROLLBACK.
+--   docker exec -i supabase_db_stylernow-cierre psql -U postgres -d cumplimiento -v ON_ERROR_STOP=1 < tests/sql/cumplimiento_150_155.sql
 -- Cada bloque lanza 'FALLA: …' si el comportamiento no es el esperado.
 begin;
 

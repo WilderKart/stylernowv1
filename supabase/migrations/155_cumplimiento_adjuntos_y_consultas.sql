@@ -1,4 +1,4 @@
--- 154 · Centro de Cumplimiento y PQRS — adjuntos privados y consultas del SuperAdmin (dashboard, bandejas, detalle).
+-- 155 · Centro de Cumplimiento y PQRS — adjuntos privados y consultas del SuperAdmin (dashboard, bandejas, detalle).
 --
 -- Adjuntos: bucket PRIVADO `casos-adjuntos` sin ninguna política en storage.objects → ni anon ni authenticated leen ni escriben; solo el
 -- servidor (service_role) sube y genera enlaces firmados de corta vida para el SuperAdmin. Tipos permitidos verificados por contenido

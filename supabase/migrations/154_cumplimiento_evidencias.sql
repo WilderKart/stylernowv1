@@ -1,4 +1,4 @@
--- 153 · Centro de Cumplimiento y PQRS — Grupo F: los eventos de un caso se copian al repositorio de evidencias legales
+-- 154 · Centro de Cumplimiento y PQRS — Grupo F: los eventos de un caso se copian al repositorio de evidencias legales
 --       (146: append-only, hash SHA-256 encadenado). No se crea otra infraestructura de evidencias.
 --
 -- Ajustes MÍNIMOS y aditivos al repositorio:

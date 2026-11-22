@@ -1,4 +1,4 @@
--- 152 · Centro de Cumplimiento y PQRS — Grupo D/E: configuración, cola de notificaciones (correo, CRM y SMS preparado pero
+-- 153 · Centro de Cumplimiento y PQRS — Grupo D/E: configuración, cola de notificaciones (correo, CRM y SMS preparado pero
 --       DESHABILITADO) y motor de SLA con alertas idempotentes.
 --
 --  * Todo destino es configuración (tabla), editable desde el CRM: el celular, el correo de alertas, el remitente, el correo de
