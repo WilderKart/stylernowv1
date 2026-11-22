@@ -1,4 +1,4 @@
-> **NO VIGENTE · NO PUBLICAR.** Borrador paralelo anterior, **superado** por los textos canónicos `TERMINOS_v4_borrador.txt` y `POLITICA_DATOS_v3_texto.txt` (publicados por la migración 149). Se conserva solo como historial: su idea central (el negocio aliado como responsable independiente de los datos de sus clientes) se rescató, reescrita, en la cláusula 9A de los Términos canónicos; el resto prohíbe usos que el CRM del producto sí permite y pretende trasladar a TAWILSTACK sanciones que son personales.
+> **NO VIGENTE · NO PUBLICAR.** Borrador paralelo anterior, **superado** por los textos canónicos `TERMINOS_v4_borrador.txt` y `POLITICA_DATOS_v3_texto.txt` (publicados por la migración 150). Se conserva solo como historial: su idea central (el negocio aliado como responsable independiente de los datos de sus clientes) se rescató, reescrita, en la cláusula 9A de los Términos canónicos; el resto prohíbe usos que el CRM del producto sí permite y pretende trasladar a TAWILSTACK sanciones que son personales.
 
 # Términos y Condiciones para Comercios Aliados
 

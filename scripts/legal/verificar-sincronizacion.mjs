@@ -7,7 +7,7 @@ import path from "node:path";
 const raiz = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")), "..", "..");
 const leer = (f) => fs.readFileSync(path.join(raiz, f), "utf8").replace(/\r\n/g, "\n");
 const norm = (s) => s.replace(/^\n+|\s+$/g, "");
-const MIGRACION = "supabase/migrations/149_textos_legales_tawilstack.sql";
+const MIGRACION = "supabase/migrations/150_textos_legales_tawilstack.sql";
 const m = leer(MIGRACION);
 const bloque = (tag) => {
   const a = m.indexOf("$" + tag + "$");

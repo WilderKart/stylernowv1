@@ -1,6 +1,6 @@
 # Auditoría de alineación normativa — textos legales de StylerNow (Colombia)
 
-Fecha: 2026-11-17 · Documentos auditados: `POLITICA_DATOS_v3_texto.txt` (política) y `TERMINOS_v4_borrador.txt` (términos), tal como los publica la migración 149 · Responsable: TAWILSTACK S.A.S. (NIT en trámite).
+Fecha: 2026-11-17 · Documentos auditados: `POLITICA_DATOS_v3_texto.txt` (política) y `TERMINOS_v4_borrador.txt` (términos), tal como los publica la migración 150 · Responsable: TAWILSTACK S.A.S. (NIT en trámite).
 
 **Alcance y límites.** Es una auditoría técnica y de redacción hecha por un asistente de software, contrastando los textos con (a) la investigación normativa de `INVESTIGACION_NORMATIVA.md` (artículos leídos en fuentes oficiales el 2026-11-16, con las salvedades de su §12), (b) los hechos del código (`DICTAMEN_DATOS_TECNICOS_Y_RETENCION.md`) y (c) el estado de la base de datos de producción medido el 2026-11-17 en modo lectura. **No es asesoría jurídica ni sustituye a un abogado colombiano.** Donde no pude verificar el texto literal de una norma lo digo.
 
@@ -57,8 +57,8 @@ Leyenda: ✅ cubierto en el texto y coherente con el código · ◑ cubierto en 
 
 | Hallazgo | Gravedad | Acción |
 |---|---|---|
-| La política publicada en producción identifica al responsable como «StylerNow, NIT xxxxx», con la dirección anterior | Alta | Corregido en el texto nuevo; **se corrige al aplicar la migración 149 (no aplicada)** |
-| Los Términos vigentes en producción son un texto corto (versión 2); la migración 115 nunca insertó su versión 3 | Alta | La migración 149 inserta TERMINOS 3 y POLITICA_DATOS 3 (versiones máx + 1) y se detiene si el estado no es el esperado |
+| La política publicada en producción identifica al responsable como «StylerNow, NIT xxxxx», con la dirección anterior | Alta | Corregido en el texto nuevo; **se corrige al aplicar la migración 150 (no aplicada)** |
+| Los Términos vigentes en producción son un texto corto (versión 2); la migración 115 nunca insertó su versión 3 | Alta | La migración 150 inserta TERMINOS 3 y POLITICA_DATOS 3 (versiones máx + 1) y se detiene si el estado no es el esperado |
 | El borrador de Términos decía que el acceso es solo con código de 6 dígitos o Google; la app usa correo y contraseña | Alta | Corregido (§4 de los Términos) |
 | La política afirmaba guardar IP y User-Agent en registros de inicio de sesión (no ocurre) y omitía a Sentry, Cloudflare Turnstile y Nominatim | Alta | Corregido; se advierte además que **Supabase sí guarda IP y navegador por sesión** (la propuesta previa decía lo contrario) |
 | Base legal de «interés legítimo» en un borrador paralelo | Alta | Borrador marcado **no vigente** |
@@ -73,7 +73,7 @@ Leyenda: ✅ cubierto en el texto y coherente con el código · ◑ cubierto en 
 3. Cambios de interfaz: rótulo/dos casillas, aviso de privacidad para visitantes y control de la Ley 2300 en el servidor.
 4. Política de retención aprobada y automatizada; manual interno de protección de datos.
 5. Confirmar RNBD y contratos de transmisión con proveedores.
-6. Aplicar la migración 149 solo cuando se decida publicar (reacepción de todos los usuarios).
+6. Aplicar la migración 150 solo cuando se decida publicar (reacepción de todos los usuarios).
 
 ## 6. Identidad operadora (cambio del 2026-11-17)
 Ambos textos dejan claro que **StylerNow es un producto operado por TAWILSTACK S.A.S.** y no una persona jurídica distinta: la Política §1 y los Términos §1 establecen que toda referencia a StylerNow como parte (derechos, obligaciones, cobros, responsabilidad, tratamiento de datos) se entiende hecha a TAWILSTACK S.A.S., que responde ante los usuarios y ante las autoridades.

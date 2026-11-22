@@ -13,7 +13,7 @@ Actualización: 2026-11-17. TAWILSTACK S.A.S. opera StylerNow, su producto SaaS.
 |---|---|---|
 | Términos y Condiciones (clientes y negocios) | `TERMINOS_v4_borrador.txt` (fuente canónica; se publica como **TERMINOS versión 3** en la tabla) | Texto actualizado a TAWILSTACK y corregido (ver §3). Pendiente: revisión de abogado. |
 | Política de Tratamiento de Datos Personales | `POLITICA_DATOS_v3_texto.txt` (fuente canónica; se publica como **POLITICA_DATOS versión 3**) | Texto actualizado y alineado con el código y con la Ley 1581 (ver §3). Pendiente: revisión de abogado. |
-| Migración de publicación | `supabase/migrations/149_textos_legales_tawilstack.sql` | **Generada** de las dos fuentes. **No aplicada.** Aborta si las versiones previas no son las esperadas. |
+| Migración de publicación | `supabase/migrations/150_textos_legales_tawilstack.sql` | **Generada** de las dos fuentes. **No aplicada.** Aborta si las versiones previas no son las esperadas. |
 | Verificador de sincronización | `scripts/legal/verificar-sincronizacion.mjs` | Pasa: la migración coincide con ambas fuentes. |
 | Alineación con la norma colombiana | `AUDITORIA_NORMATIVA_COLOMBIA.md` | Cuadro requisito por requisito, con lo cubierto y lo pendiente. |
 | Investigación, dictamen, revisión y retención | `INVESTIGACION_NORMATIVA.md`, `DICTAMEN_DATOS_TECNICOS_Y_RETENCION.md`, `REVISION_JURIDICA_BORRADORES.md`, `POLITICA_RETENCION_BORRADOR.md` | Documentos de trabajo internos (no se publican). |
@@ -28,13 +28,13 @@ Nota sobre numeración: los nombres de archivo conservan «v4» (términos) y «
 **Términos:** aceptación y autorización descritas según la casilla real; **acceso con correo y contraseña** (el texto anterior decía solo código de 6 dígitos o Google, ya inexacto); cláusula 9A de datos de Clientes (negocio como responsable independiente, usos permitidos, horarios Ley 2300, incidentes en 24 horas, indemnidad sin trasladar sanciones personales); salud y pruebas de sensibilidad bajo responsabilidad del negocio; retracto del consumidor; límite de responsabilidad frente al cliente solo en lo permitido por la ley de consumo; fuerza mayor; reporte de contenido; Ley 527 de 1999; peticiones, quejas y reclamos.
 
 ## 4. Pendientes (no los inventé)
-1. ~~NIT~~ **Resuelto 2026-11-18**: NIT 902127652-0 (dígito de verificación comprobado por módulo 11). Fuentes y migración 149 regeneradas y sincronizadas. Pendiente: que el abogado lo contraste con el certificado de existencia y representación legal.
+1. ~~NIT~~ **Resuelto 2026-11-18**: NIT 902127652-0 (dígito de verificación comprobado por módulo 11). Fuentes y migración 150 regeneradas y sincronizadas. Pendiente: que el abogado lo contraste con el certificado de existencia y representación legal.
 2. **Revisión de un abogado colombiano** (ver `AUDITORIA_NORMATIVA_COLOMBIA.md` §3). Los arts. 8, 12, 14, 15, 16, 17 y 26 de la Ley 1581 se verificaron literalmente el 2026-11-17; faltan los de la Ley 1480 y la lista de países con nivel adecuado.
 3. **Confirmar con el propietario**: el área de atención de datos es «el equipo de TAWILSTACK» con el correo y teléfono informados; el plazo de 15 días hábiles para peticiones, quejas y reclamos generales; los plazos de retención de la sección 7 de la política.
 4. **Interfaz** (próximo cambio de código): rótulo de la casilla, valorar dos casillas, aviso de privacidad para visitantes y control de franjas Ley 2300 en el servidor (`TEXTOS_UI_CONSENTIMIENTO.md`).
 5. **Política de retención** (`POLITICA_RETENCION_BORRADOR.md`) y procesos de borrado: hoy varias tablas técnicas no tienen borrado automático; la política pública promete solo lo que existe.
 6. **RNBD:** confirmar si TAWILSTACK está obligada (activos totales > 100 000 UVT); probablemente no.
-7. **Aplicar la migración 149** cuando se decida publicar: activará la reaceptación de todos los usuarios y reemplazará los textos con «NIT xxxxx». No se aplicó.
+7. **Aplicar la migración 150** cuando se decida publicar: activará la reaceptación de todos los usuarios y reemplazará los textos con «NIT xxxxx». No se aplicó.
 
 ## 5. Documento de referencia recibido
 El PDF `_política de tratamiento y protección datos personales.pdf` (carpeta `docs/politica tratamiento de datos/`) es la Guía G-IC-16 del Ministerio de Justicia y del Derecho (2020), una política **institucional** de una entidad pública. Se usó solo como lista de comprobación de estructura (glosario, principios, derechos, deberes, procedimientos, seguridad e incidentes). No se copiaron sus finalidades, canales ni procedimientos.

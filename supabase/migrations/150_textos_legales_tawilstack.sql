@@ -1,4 +1,4 @@
--- 149 · Publica nuevas versiones de los Términos y Condiciones y de la Política de Tratamiento de Datos Personales (TAWILSTACK S.A.S.), sin cambios de esquema.
+-- 150 · Publica nuevas versiones de los Términos y Condiciones y de la Política de Tratamiento de Datos Personales (TAWILSTACK S.A.S.), sin cambios de esquema.
 -- Fuentes canónicas (esta migración se GENERA de ellas; no se edita a mano): docs/legal/TERMINOS_v4_borrador.txt (desde la línea del título) y docs/legal/POLITICA_DATOS_v3_texto.txt.
 -- Verificación de sincronización: node scripts/legal/verificar-sincronizacion.mjs
 -- cambio_material = true activa el flujo existente de reaceptación.

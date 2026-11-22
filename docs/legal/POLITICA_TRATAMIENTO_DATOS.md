@@ -1,6 +1,6 @@
 # Política de Tratamiento de Datos Personales (borrador paralelo)
 
-> **NO VIGENTE · NO PUBLICAR.** Borrador paralelo anterior, **superado** por los textos canónicos `TERMINOS_v4_borrador.txt` y `POLITICA_DATOS_v3_texto.txt` (publicados por la migración 149). Se conserva solo como historial: invoca el «interés legítimo» como base de tratamiento, que no existe en la Ley 1581 de 2012 (todo tratamiento requiere autorización previa, expresa e informada o una excepción del artículo 10), y afirma tratamientos (IP en evidencias, resolución de pantalla, geolocalización sin acción de la persona) que el código no realiza. La política que se publica es `POLITICA_DATOS_v3_texto.txt`.
+> **NO VIGENTE · NO PUBLICAR.** Borrador paralelo anterior, **superado** por los textos canónicos `TERMINOS_v4_borrador.txt` y `POLITICA_DATOS_v3_texto.txt` (publicados por la migración 150). Se conserva solo como historial: invoca el «interés legítimo» como base de tratamiento, que no existe en la Ley 1581 de 2012 (todo tratamiento requiere autorización previa, expresa e informada o una excepción del artículo 10), y afirma tratamientos (IP en evidencias, resolución de pantalla, geolocalización sin acción de la persona) que el código no realiza. La política que se publica es `POLITICA_DATOS_v3_texto.txt`.
 
 ## 1. Identificación del responsable del tratamiento
 

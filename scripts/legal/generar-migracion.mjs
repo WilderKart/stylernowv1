@@ -1,5 +1,5 @@
 // Uso: node scripts/legal/generar-migracion.mjs
-// Genera supabase/migrations/149_textos_legales_tawilstack.sql a partir de las dos fuentes canónicas. Nunca se edita la migración a mano.
+// Genera supabase/migrations/150_textos_legales_tawilstack.sql a partir de las dos fuentes canónicas. Nunca se edita la migración a mano.
 import fs from "node:fs";
 import path from "node:path";
 const R = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")), "..", "..") + path.sep;
@@ -60,5 +60,5 @@ $publicar$;
 
 commit;
 `;
-fs.writeFileSync(R + "supabase/migrations/149_textos_legales_tawilstack.sql", sql, "utf8");
+fs.writeFileSync(R + "supabase/migrations/150_textos_legales_tawilstack.sql", sql, "utf8");
 console.log("migración generada:", sql.length, "caracteres");

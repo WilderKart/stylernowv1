@@ -1,4 +1,4 @@
-> **NO VIGENTE · NO PUBLICAR.** Borrador paralelo anterior, **superado** por los textos canónicos `TERMINOS_v4_borrador.txt` y `POLITICA_DATOS_v3_texto.txt` (publicados por la migración 149). Se conserva solo como historial: describe el cobro «en nombre del negocio» (contradice el cobro directo sin custodia), trata datos técnicos de forma genérica y fija la jurisdicción de forma menos precisa que la sección 20 de los Términos canónicos.
+> **NO VIGENTE · NO PUBLICAR.** Borrador paralelo anterior, **superado** por los textos canónicos `TERMINOS_v4_borrador.txt` y `POLITICA_DATOS_v3_texto.txt` (publicados por la migración 150). Se conserva solo como historial: describe el cobro «en nombre del negocio» (contradice el cobro directo sin custodia), trata datos técnicos de forma genérica y fija la jurisdicción de forma menos precisa que la sección 20 de los Términos canónicos.
 
 # Términos y Condiciones de Uso para Usuarios
 
