@@ -206,4 +206,4 @@ reset role;
 select public._t_igual('lectura: 2 lecturas auditadas', (select count(*) from public.evento_auditoria where accion = 'DOCUMENTO_VERIFICACION_LEIDO' and negocio_id = '00000000-0000-0000-0009-0000000001a0')::int, 2);
 
 rollback;
-select 'OK: onboarding_verificacion_150 — todas las pruebas pasaron' as resultado;
+select 'OK: onboarding_verificacion_157 — todas las pruebas pasaron' as resultado;

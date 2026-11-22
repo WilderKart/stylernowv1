@@ -148,10 +148,10 @@ Controles negativos: sin 162 falla en «crear servicio» (esperaba bloqueo, obtu
 
 | Suite | Línea base | Ahora |
 |---|---|---|
-| aislamiento_multiempresa, anticipos_129, cobro_directo_119, limites_plan_149, onboarding_verificacion_150, prueba_antiabuso_135, registro_pendiente_127, registro_telefono_128, roles_151, roles_155_config_sesion_publicacion, seguridad_regresion, webhook_130 | PASA | **PASA** |
-| roles_157_normalizacion (.sh) | PASA | **PASA** |
+| aislamiento_multiempresa, anticipos_129, cobro_directo_119, limites_plan_156, onboarding_verificacion_157, prueba_antiabuso_135, registro_pendiente_127, registro_telefono_128, roles_151, roles_162_config_sesion_publicacion, seguridad_regresion, webhook_130 | PASA | **PASA** |
+| roles_163_normalizacion (.sh) | PASA | **PASA** |
 | roles_http.sh (38 comprobaciones de la Fase 1) | PASA 38/38 | **PASA 38/38** |
-| restringida_160 | — | **PASA** |
+| restringida_164 | — | **PASA** |
 | auditoria_123, libro_122, whatsapp_120 (SuperSU único) | roja | roja (mismo error); **PASAN descendiendo al SuperSU existente** antes y después |
 | directiva_116_118 | roja (SuperSU) | roja (SuperSU); descendiendo al SuperSU: antes fallaba en «vencida debe pasar a REQUIERE_PLAN: EN_MORA» (efecto de 133); **ahora PASA** (la regla nueva lo cumple) |
 | f0_05, f1b_139, f1b_promociones_140 (SuperSU) | roja | roja, **mismos conteos** (19 / 28 / 3 casos) con y sin 160–164 |

@@ -8,7 +8,7 @@ Fecha: 2026-11-19. Rama `feat/onboarding-v2` (worktree `stylernow-onboarding`). 
 |---|---|---|---|
 | **1** Roles por capacidades, cupo único, sesiones, publicación (migr. 149-157) | Roles derivados (OWNER/ADMIN/ADMIN_BARBER/BARBER), delegación mínima de BUSINESS_ADMIN, perfil profesional del propietario por plan, `_capacidad_profesional`, invitaciones con rol, `session_version`/invalidación, publicación con foto + consentimiento, normalización 157 | `roles_151`, `roles_155`, `roles_157`, concurrencia, HTTP 38/38, compat código↔base | Decisiones de la sección 5 (dos factores, proxy, foto, delegación, GRANT del cron, textos legales); producción sin tocar |
 | **2A** Barberos adicionales con pago manual por Checkout Pro (170-178) | Lotes con precio/cantidad/periodo congelados, máquina de 11 estados, webhook/conciliación con validación completa, cron diario (avisos 7/3/1, gracia 3, suspensión), pantallas propietario y CRM, reembolsos como registro auditado | SQL (~300 aserciones), concurrencia, HTTP 48/48, integración con Mercado Pago SIMULADO 9/9, navegador (propietario, admin 403, CRM), vitest | Pago real en sandbox; ejecución real de reembolsos (solo registro); decisiones 1 y 2 de la sección 5 |
-| **2B** Suscripción restringida (160-164) | Estado operativo central, 30 días en hora de Bogotá, guardia en 26 tablas y 36 RPC, banner y pantalla de cumplimiento, configuración SuperAdmin | `restringida_160` (12 bloques), HTTP 33/33, navegador, vitest | Cinco decisiones de la sección 5; cobertura no incluida (cuenta de cobro MP, verificación, WhatsApp, gift cards POS, mapa) |
+| **2B** Suscripción restringida (160-164) | Estado operativo central, 30 días en hora de Bogotá, guardia en 26 tablas y 36 RPC, banner y pantalla de cumplimiento, configuración SuperAdmin | `restringida_164` (12 bloques), HTTP 33/33, navegador, vitest | Cinco decisiones de la sección 5; cobertura no incluida (cuenta de cobro MP, verificación, WhatsApp, gift cards POS, mapa) |
 | **3** Pertenencia, licencias, prevención de compartición | **NADA**: es solo diseño (`FASE3_...DISENO.md`). SIN migraciones ni bloqueos reales | — | No se implementa hasta cerrar 2A/2B y reconciliar el historial de migraciones |
 
 ## 2. Pruebas ejecutadas y resultados REALES
@@ -19,8 +19,8 @@ Corrida final de esta sesión: **9 suites con falla, 0 con residuo, configuraci�
 
 | Suite | Resultado | ¿Preexistente o nuevo? | Causa |
 |---|---|---|---|
-| adicionales_170, **adicionales_restringida_180 (nueva)**, restringida_160, aislamiento_multiempresa, anticipos_129, cobro_directo_119, limites_plan_149, onboarding_verificacion_150, prueba_antiabuso_135, registro_pendiente_127, registro_telefono_128, rendimiento_131, seguridad_regresion, webhook_130 | PASA | — | `rendimiento_131` volvió a pasar tras indexar las 19 FK de `adicional_*` |
-| roles_151, roles_155_config_sesion_publicacion, roles_157_normalizacion, roles_151_concurrencia | PASA | nuevas de Fase 1 | — |
+| adicionales_170, **adicionales_restringida_180 (nueva)**, restringida_164, aislamiento_multiempresa, anticipos_129, cobro_directo_119, limites_plan_156, onboarding_verificacion_157, prueba_antiabuso_135, registro_pendiente_127, registro_telefono_128, rendimiento_131, seguridad_regresion, webhook_130 | PASA | — | `rendimiento_131` volvió a pasar tras indexar las 19 FK de `adicional_*` |
+| roles_151, roles_162_config_sesion_publicacion, roles_163_normalizacion, roles_151_concurrencia | PASA | nuevas de Fase 1 | — |
 | f1b_compat_codigo_vs_base, f1b_compat_control_negativo, hotfix_staff_nulo_verificacion | PASA | — | — |
 | **suscripcion_133** | **PASA (corregida la prueba)** | era «preexistente» | Dependía de SIGNATURE/CO con precio; en la base local está en NULL desde antes de 160-178. La prueba ahora fija sus precios dentro de la transacción (ver sección 3) |
 | adicionales_170_concurrencia, adicionales_http (48), roles_http (38), restringida_http (33) | PASA | — | — |
@@ -33,7 +33,7 @@ Corrida final de esta sesión: **9 suites con falla, 0 con residuo, configuraci�
 | Prueba | Resultado | Notas |
 |---|---|---|
 | `adicionales_restringida_180.sql` (NUEVA) | PASA | Demuestra: plan principal restringido + adicional pagado y activo → sigue no operativa (`negocio_operativo`, `_estado_operativo_en`, sin reservas, invitar/modificar negocio bloqueados); el cron de adicionales y suspender/reactivar el adicional no tocan la principal; al pagar el plan se restaura (operativa, reservas, ya invita usando el cupo adicional); además 51.900 en los 4 planes, máximo 50 configurable, gracia 3, avisos 7/3/1, admin delegado sin acceso, periodo/precio/cantidad congelados por compra |
-| `adicionales_169.sql`, `adicionales_170_concurrencia.sh`, `adicionales_http.sh` (48) | PASAN | Ver FASE2A |
+| `adicionales_169.sql`, `adicionales_169_concurrencia.sh`, `adicionales_http.sh` (48) | PASAN | Ver FASE2A |
 | `tests/integracion/adicionales-pagos.test.ts` (`ADICIONALES_INT=1`) | PASA 9/9 | Mercado Pago SIMULADO (no sandbox real) |
 | vitest (`npx vitest run`) | ver 2.3 | |
 | `npx tsc --noEmit` | PASA (exit 0), también tras regenerar `database.ts` | |

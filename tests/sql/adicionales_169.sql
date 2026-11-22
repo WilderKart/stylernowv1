@@ -1,7 +1,7 @@
 -- Pruebas de las migraciones 169-177 (barberos adicionales, FASE 2A). Solo contra la base LOCAL:
 --   docker exec -i supabase_db_stylernow psql -U postgres -d postgres -v ON_ERROR_STOP=1 -q < tests/sql/adicionales_169.sql
 -- Transacción terminada en ROLLBACK: no deja datos. Cada bloque lanza 'FALLA …' si el comportamiento no es el esperado.
--- Concurrencia real (dos sesiones): tests/sql/adicionales_170_concurrencia.sh. HTTP con JWT: tests/sql/adicionales_http.sh.
+-- Concurrencia real (dos sesiones): tests/sql/adicionales_169_concurrencia.sh. HTTP con JWT: tests/sql/adicionales_http.sh.
 -- Negocios: N1 essential (propietario O1, admin ADM) · N2 studio (O2) · NG signature (OG) · NX ajeno (OX).
 -- Pagos: aplicar_evento_pago se llama como lo hace sincronizar.ts (el estado real lo trae Mercado Pago; aquí se simula el resultado).
 

@@ -119,4 +119,4 @@ set local role anon;
 select public._t_rechaza('anon no lee cupos', $q$select public.cupo_plan_negocio('00000000-0000-0000-0008-0000000001a0')$q$, 'permission denied');
 
 rollback;
-select 'OK: limites_plan_149 — todas las pruebas pasaron' as resultado;
+select 'OK: limites_plan_156 — todas las pruebas pasaron' as resultado;

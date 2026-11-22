@@ -1,5 +1,5 @@
 -- Prueba de la migración 163 (normalización de negocios existentes) con fixtures "antiguos". Solo contra la base LOCAL.
--- La línea '-- INCLUDE157' se sustituye por el contenido de la migración: ejecutar con  bash tests/sql/roles_157_normalizacion.sh
+-- La línea '-- INCLUDE157' se sustituye por el contenido de la migración: ejecutar con  bash tests/sql/roles_163_normalizacion.sh
 -- Todo dentro de una transacción terminada en ROLLBACK. Otros negocios de la base local también se normalizan dentro de la
 -- transacción (no se escribe nada real); las comprobaciones se limitan a los fixtures y a los huérfanos globales.
 begin;
@@ -113,4 +113,4 @@ select public._t_igual('idempotente: mismos vínculos', (select count(*) from pu
   (select 1 from vin_antes a where a.id = v.id and a.estado = v.estado and a.presta_servicios = v.presta_servicios and a.es_admin = v.es_admin))::int, 0);
 
 rollback;
-select 'OK: roles_157_normalizacion — todas las comprobaciones pasaron' as resultado;
+select 'OK: roles_163_normalizacion — todas las comprobaciones pasaron' as resultado;

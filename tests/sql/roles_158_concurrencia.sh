@@ -1,7 +1,7 @@
 #!/bin/bash
 # Concurrencia REAL del cupo (migración 159): N sesiones simultáneas intentan usar los cupos libres de un negocio Studio (límite 5).
 # Solo contra la base LOCAL (contenedor supabase_db_stylernow). Crea fixtures confirmados (prefijo 000b-), los usa y los elimina al final;
-# NO toca datos de otros negocios. Uso:  bash tests/sql/roles_151_concurrencia.sh
+# NO toca datos de otros negocios. Uso:  bash tests/sql/roles_158_concurrencia.sh
 # Resultado esperado: con el candado, exactamente 2 invitaciones se crean y 4 reciben PLAN_LIMIT_EXCEEDED.
 # Control negativo: sustituye temporalmente _cupo_bloquear por una función vacía y demuestra que SIN el candado se sobrepasa el cupo.
 set -u

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Concurrencia REAL de los barberos adicionales (migraciones 169-177). Solo contra la base LOCAL (supabase_db_stylernow).
 # Crea fixtures CONFIRMADOS propios (prefijo 00f3-), los usa y los elimina al final; no toca datos de otros negocios. Uso:
-#   bash tests/sql/adicionales_170_concurrencia.sh
+#   bash tests/sql/adicionales_169_concurrencia.sh
 # Escenarios (varias sesiones psql a la vez, cada una reteniendo su transacción 2 s para forzar el solapamiento):
 #   A. Cupo con adicionales: Essential (límite 1) con un lote ACTIVO de 2 (tope 3) y 6 invitaciones simultáneas → exactamente 3 se crean y 3 reciben PLAN_LIMIT_EXCEEDED.
 #   B. Webhook duplicado simultáneo: 5 sesiones aplican el MISMO pago aprobado → exactamente 1 activa, 4 son YA_PROCESADO; periodo_n = 1, tope = 1 + cantidad.

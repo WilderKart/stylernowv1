@@ -57,7 +57,7 @@ Cobertura vs requisito 2:
 | No aceptable por otro destinatario | SÍ por correo; el `id` por sí solo no basta | misma función |
 | Aceptada no reutilizable | **NO** (ver «resucita») | 152:189 |
 | Sin invitación si no hay cupo pagado, disponible y activo | SÍ en base (Fase 1) y con adicionales cuando cierre Fase 2 | 152 |
-| Propietario no invita más que los cupos | SÍ (función + trigger de respaldo; concurrencia probada en Fase 1) | `roles_151_concurrencia.sh` |
+| Propietario no invita más que los cupos | SÍ (función + trigger de respaldo; concurrencia probada en Fase 1) | `roles_158_concurrencia.sh` |
 | Nada depende del frontend | SÍ en cupo; **NO** en el insert directo permitido por RLS (el propietario puede crear/actualizar filas sin pasar por la RPC; solo el trigger de cupo lo frena) | política `invitacion_staff_insert_negocio` |
 
 Hueco adicional (por lectura de política, NO probado con escritura porque esta tarea es de solo lectura): `vinculo_write_barberia` es `FOR ALL` para el propietario. Un propietario podría insertar un vínculo para cualquier `staff_id` existente que no tenga vínculo activo (p. ej. un RETIRADO de otro negocio) **sin invitación ni consentimiento** del profesional; solo lo frenan el índice único y el trigger de cupo. Hay que cerrarlo (ver 4.3).

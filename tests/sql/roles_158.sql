@@ -2,7 +2,7 @@
 -- delegación mínima). Solo contra la base LOCAL:
 --   docker exec -i supabase_db_stylernow psql -U postgres -d postgres -v ON_ERROR_STOP=1 -q < tests/sql/roles_158.sql
 -- Transacción terminada en ROLLBACK: no deja datos. Cada bloque lanza 'FALLA …' si el comportamiento no es el esperado.
--- La concurrencia real (dos sesiones) y la normalización de datos tienen sus propios scripts: roles_151_concurrencia.sh y
+-- La concurrencia real (dos sesiones) y la normalización de datos tienen sus propios scripts: roles_158_concurrencia.sh y
 -- roles_155_normalizacion.sh.
 -- Negocios: NE essential (propietario atiende) · NS studio (propietario solo administra) · NP prestige (propietario atiende, opcional)
 --           NG signature · NX ajeno (intruso) · NEx essential ya en exceso · ND studio con suscripción activa (downgrade) · NE2 essential (alta)

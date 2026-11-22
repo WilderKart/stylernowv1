@@ -42,14 +42,14 @@ echo "suite                                        result residuo"
 for f in tests/sql/*.sql; do
   n=$(basename "$f" .sql)
   case "$n" in hotfix_staff_nulo_previo|hotfix_staff_nulo_posterior) continue;; esac   # se corren con su .sh
-  case "$n" in roles_157_normalizacion) continue;; esac                              # necesita su .sh (inyecta la migración)
+  case "$n" in roles_163_normalizacion) continue;; esac                              # necesita su .sh (inyecta la migración)
   correr "$n" bash -c "$DB < '$f'"
 done
-correr roles_157_normalizacion bash tests/sql/roles_157_normalizacion.sh
+correr roles_163_normalizacion bash tests/sql/roles_163_normalizacion.sh
 correr hotfix_staff_nulo_verificacion bash tests/sql/hotfix_staff_nulo_verificacion.sh
 correr f1b_compat_control_negativo bash tests/sql/f1b_compat_control_negativo.sh
-correr roles_151_concurrencia bash tests/sql/roles_151_concurrencia.sh
-[ -f tests/sql/adicionales_170_concurrencia.sh ] && correr adicionales_170_concurrencia bash tests/sql/adicionales_170_concurrencia.sh
+correr roles_151_concurrencia bash tests/sql/roles_158_concurrencia.sh
+[ -f tests/sql/adicionales_169_concurrencia.sh ] && correr adicionales_170_concurrencia bash tests/sql/adicionales_169_concurrencia.sh
 if [ -n "${CUENTAS:-}" ] && [ -n "${ANON_DESDE:-}" ]; then
   for s in roles_http adicionales_http restringida_http; do [ -f "tests/sql/$s.sh" ] && correr "$s" bash "tests/sql/$s.sh"; done
 else

@@ -1,6 +1,6 @@
 -- Pruebas de 155 (invalidación de sesión controlada), configuración del perfil del propietario por plan (153), suspendidos que ocupan
 -- cupo (152), alcance mínimo de BUSINESS_ADMIN (154) y publicación del profesional (foto + consentimiento). Solo base LOCAL:
---   docker exec -i supabase_db_stylernow psql -U postgres -d postgres -v ON_ERROR_STOP=1 -q < tests/sql/roles_155_config_sesion_publicacion.sql
+--   docker exec -i supabase_db_stylernow psql -U postgres -d postgres -v ON_ERROR_STOP=1 -q < tests/sql/roles_162_config_sesion_publicacion.sql
 -- Transacción terminada en ROLLBACK. NO desactiva ningún trigger de seguridad. Un único SuperSU: se desciende al existente dentro de la transacción.
 -- Actores (prefijo 000d-): O dueño Studio · A BUSINESS_ADMIN · B1/B2 barberos · X dueño ajeno · S SuperSU · E dueño Essential.
 
@@ -309,4 +309,4 @@ select public._t_igual('retirado: sigue usando su agenda privada', (select count
 reset role;
 
 rollback;
-select 'OK: roles_155_config_sesion_publicacion — todas las pruebas pasaron' as resultado;
+select 'OK: roles_162_config_sesion_publicacion — todas las pruebas pasaron' as resultado;
