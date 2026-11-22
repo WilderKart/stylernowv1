@@ -1,3 +1,5 @@
+> **Superada por `docs/INTEGRACION_LIBERACION.md` (2026-11-22).** La numeración de esta matriz es la anterior a la renumeración: la secuencia vigente es 145–178.
+
 # Matriz de control de migraciones — 2026-11-18
 
 Producción: Supabase `wxokamgnrpyhobkqjylm`. Código desplegado: `main` = `6901871` (Vercel, READY).
