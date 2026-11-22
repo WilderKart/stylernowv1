@@ -17,6 +17,7 @@ import { execSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { describe, it, vi } from "vitest";
+import { ARGS } from "./server-actions-argumentos";
 
 const API = process.env.API_URL ?? "";
 const ANON = process.env.ANON_KEY ?? "";
@@ -24,6 +25,8 @@ const SERVICE = process.env.SERVICE_ROLE_KEY ?? "";
 const PW = process.env.PW_PRUEBAS ?? "";
 const ETIQUETA = process.env.ETIQUETA ?? "ejecucion";
 const SOLO = process.env.SOLO_ARCHIVO ?? ""; // filtro opcional por ruta
+const SOLO_ACC = (process.env.SOLO_ACCIONES ?? "").split(",").filter(Boolean); // filtro opcional por nombre de acción
+const SOLO_CON_ARGS = process.env.SOLO_CON_ARGS === "1"; // solo acciones con argumentos hechos a mano
 const habilitado = process.env.PRUEBAS_LOCALES_FASE1B === "1" && API === "http://127.0.0.1:55321" && ANON && SERVICE && PW;
 
 let actual: SupabaseClient;
@@ -150,7 +153,7 @@ describe.skipIf(!habilitado)("Fase 1B · Server Actions fuera de /admin con sesi
     }) as typeof fetch;
 
     const inv: Inv[] = JSON.parse(readFileSync("docs/plan_cierre/evidencias_1b/inventario_server_actions.json", "utf8")).filter(
-      (a: Inv) => !SOLO || a.archivo.includes(SOLO)
+      (a: Inv) => (!SOLO || a.archivo.includes(SOLO)) && (!SOLO_ACC.length || SOLO_ACC.includes(a.accion)) && (!SOLO_CON_ARGS || !!ARGS[a.archivo.replace("src/", "") + "::" + a.accion])
     );
     const ctx: Ctx = {
       sede: "00000000-0000-0000-0006-0000000002b0",
@@ -166,9 +169,30 @@ describe.skipIf(!habilitado)("Fase 1B · Server Actions fuera de /admin con sesi
       sugerencia: uno(`select id from public.recompensa_sugerencia where negocio_id='${NEG_B}' limit 1`, "11111111-1111-4111-8111-111111111111"),
       prompt: uno(`select id from public.ai_prompt where negocio_id='${NEG_B}' limit 1`, "11111111-1111-4111-8111-111111111111"),
       memoria: uno(`select id from public.ai_memoria_negocio where negocio_id='${NEG_B}' limit 1`, "11111111-1111-4111-8111-111111111111"),
-      invitacion: uno(`select id from public.invitacion where negocio_id='${NEG_B}' limit 1`, "11111111-1111-4111-8111-111111111111"),
       pago: uno(`select id from public.pago where negocio_id='${NEG_B}' limit 1`, "11111111-1111-4111-8111-111111111111"),
       venta: uno(`select id from public.venta_producto where negocio_id='${NEG_B}' limit 1`, "11111111-1111-4111-8111-111111111111"),
+      negocio: NEG_B,
+      servicio2: uno(`select id from public.servicio where negocio_id='${NEG_B}' order by id offset 1 limit 1`, "11111111-1111-4111-8111-111111111111"),
+      reserva0: "00000000-0000-0000-0006-0000000004b0",
+      reserva1: "00000000-0000-0000-0006-0000000004b1",
+      reserva2: "00000000-0000-0000-0006-0000000004b2",
+      reserva3: "00000000-0000-0000-0006-0000000004b3",
+      vinculoGuardian: "00000000-0000-0000-0006-0000000002b2",
+      cmem: uno(`select id from public.cliente_membresia where negocio_id='${NEG_B}' limit 1`, "11111111-1111-4111-8111-111111111111"),
+      giftCard: uno(`select id from public.gift_card where negocio_id='${NEG_B}' limit 1`, "11111111-1111-4111-8111-111111111111"),
+      giftCardCodigo: uno(`select codigo from public.gift_card where negocio_id='${NEG_B}' limit 1`, "X"),
+      egreso: uno(`select id from public.egreso_caja where negocio_id='${NEG_B}' limit 1`, "11111111-1111-4111-8111-111111111111"),
+      solicitud: uno(`select id from public.solicitud_reposicion where negocio_id='${NEG_B}' limit 1`, "11111111-1111-4111-8111-111111111111"),
+      invitacion: uno(`select id from public.invitacion_staff where negocio_id='${NEG_B}' order by created_at limit 1`, "11111111-1111-4111-8111-111111111111"),
+      campanaAds: uno(`select id from public.campana_publicitaria where negocio_id='${NEG_B}' limit 1`, "11111111-1111-4111-8111-111111111111"),
+      sello: uno(`select id from public.sello_campana where negocio_id='${NEG_B}' limit 1`, "11111111-1111-4111-8111-111111111111"),
+      cashback: uno(`select id from public.cashback_regla where negocio_id='${NEG_B}' limit 1`, "11111111-1111-4111-8111-111111111111"),
+      resena: uno(`select id from public.resena where negocio_id='${NEG_B}' limit 1`, "11111111-1111-4111-8111-111111111111"),
+      combo: uno(`select id from public.servicio_combo where negocio_id='${NEG_B}' limit 1`, "11111111-1111-4111-8111-111111111111"),
+      plantillaWa: uno(`select id from public.whatsapp_plantilla where negocio_id='${NEG_B}' limit 1`, "11111111-1111-4111-8111-111111111111"),
+      campanaWa: uno(`select id from public.whatsapp_campana where negocio_id='${NEG_B}' limit 1`, "11111111-1111-4111-8111-111111111111"),
+      paqueteWa: uno(`select id from public.whatsapp_paquete limit 1`, "11111111-1111-4111-8111-111111111111"),
+      paquete: uno(`select id from public.ai_paquete_creditos limit 1`, "11111111-1111-4111-8111-111111111111"),
     };
 
     admin = createClient(API, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -210,7 +234,8 @@ describe.skipIf(!habilitado)("Fase 1B · Server Actions fuera de /admin con sesi
           salida.push({ ...base, estado: "OMITIDA" });
           continue;
         }
-        const args = a.params.map((p) => argumento(p, ctx, a.archivo));
+        const manual = ARGS[a.archivo.replace("src/", "") + "::" + a.accion];
+        const args = manual ? manual(ctx) : a.params.map((p) => argumento(p, ctx, a.archivo));
         const antes = huellaB();
         let res: unknown;
         let lanzo = "";

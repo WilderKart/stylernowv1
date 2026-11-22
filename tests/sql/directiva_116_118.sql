@@ -386,6 +386,9 @@ end $$;
 reset role;
 
 -- Vence la prueba (como postgres) y corre el mantenimiento.
+-- CRITERIO VIGENTE (migración 133, supersede el de 118): la prueba vencida NO pasa directo a REQUIERE_PLAN; entra primero en EN_MORA con
+-- gracia (configuracion_plataforma.suscripcion_gracia_dias, 3 por defecto) y sigue recibiendo reservas. Vencida la gracia, pasa a
+-- REQUIERE_PLAN conservando el historial (prueba_fin). Sigue vigente de 118: sin cobro automático y una sola prueba por negocio.
 update public.suscripcion set prueba_fin = now() - interval '1 minute' where negocio_id = '00000000-0000-0000-0000-0000000000b1';
 set local role service_role;
 do $$
@@ -393,8 +396,21 @@ declare s public.suscripcion;
 begin
   perform public.mantenimiento_suscripciones();
   select * into s from public.suscripcion where negocio_id = '00000000-0000-0000-0000-0000000000b1';
+  if s.estado <> 'EN_MORA' or s.prueba_fin is null or s.gracia_fin is null or s.gracia_fin <= now() then
+    raise exception 'FALLA 133: la prueba sin tarjeta vencida debe entrar en EN_MORA con gracia vigente y conservar prueba_fin: % / %', s.estado, s.gracia_fin;
+  end if;
+end $$;
+reset role;
+-- Vence la gracia (como postgres) y vuelve a correr el mantenimiento.
+update public.suscripcion set gracia_fin = now() - interval '1 minute' where negocio_id = '00000000-0000-0000-0000-0000000000b1';
+set local role service_role;
+do $$
+declare s public.suscripcion;
+begin
+  perform public.mantenimiento_suscripciones();
+  select * into s from public.suscripcion where negocio_id = '00000000-0000-0000-0000-0000000000b1';
   if s.estado <> 'REQUIERE_PLAN' or s.prueba_fin is null then
-    raise exception 'FALLA 118: la prueba sin tarjeta vencida debe pasar a REQUIERE_PLAN conservando historial: %', s.estado;
+    raise exception 'FALLA 118/133: vencida la gracia la prueba sin tarjeta debe pasar a REQUIERE_PLAN conservando historial: %', s.estado;
   end if;
   begin
     perform public.iniciar_prueba_negocio_srv('00000000-0000-0000-0000-0000000000a1', '00000000-0000-0000-0000-0000000000b1',
@@ -403,7 +419,7 @@ begin
   exception when others then
     if sqlerrm not like '%PRUEBA_YA_USADA%' then raise; end if;
   end;
-  raise notice 'OK 118: vencimiento sin cobro y una sola prueba por negocio';
+  raise notice 'OK 118/133: prueba vencida -> EN_MORA con gracia -> REQUIERE_PLAN, sin cobro y una sola prueba por negocio';
 end $$;
 reset role;
 
