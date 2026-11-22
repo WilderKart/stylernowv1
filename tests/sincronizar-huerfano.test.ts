@@ -6,8 +6,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-const insertAuditoria = vi.fn(async () => ({ error: null }));
-const reembolsarEspia = vi.fn();
+const { insertAuditoria, reembolsarEspia } = vi.hoisted(() => ({
+  insertAuditoria: vi.fn(async (..._a: unknown[]) => ({ error: null })),
+  reembolsarEspia: vi.fn(),
+}));
 
 vi.mock("@/lib/supabase/admin", () => ({
   createAdminClient: () => ({
