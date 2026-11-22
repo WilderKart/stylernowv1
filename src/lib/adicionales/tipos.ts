@@ -1,5 +1,5 @@
 /**
- * Barberos adicionales (FASE 2A). Tipos de lo que devuelven las RPC de las migraciones 170-178.
+ * Barberos adicionales (FASE 2A). Tipos de lo que devuelven las RPC de las migraciones 169-177.
  * Ningún precio, plazo ni fecha se calcula aquí: todo llega de la base (precio por plan, función de fechas en America/Bogota,
  * máquina de estados). Este módulo solo describe y da formato.
  */

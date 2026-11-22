@@ -19,7 +19,7 @@ import { usePathname } from "next/navigation";
 export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** Perfil profesional activo: añade el acceso a la agenda propia (/staff). */ prestaServicios?: boolean }) {
   const pathname = usePathname();
 
-  // Administrador delegado (migración 154): su superficie son los módulos revisados para él. Hoy solo el equipo; el resto del panel
+  // Administrador delegado (migración 161): su superficie son los módulos revisados para él. Hoy solo el equipo; el resto del panel
   // sigue siendo del propietario hasta revisar sus políticas (denegado por defecto).
   const items = rol === "ADMIN"
     ? [{ href: "/panel/staff", etiqueta: "Equipo" }, ...(prestaServicios ? [{ href: "/staff", etiqueta: "Mi agenda" }] : [])]

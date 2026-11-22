@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 /**
- * Verificación de negocios (SuperSU). Cero confianza: aquí se exige SuperSU y las funciones de la migración 150
+ * Verificación de negocios (SuperSU). Cero confianza: aquí se exige SuperSU y las funciones de la migración 157
  * lo vuelven a exigir en la base, validan la transición permitida y dejan cada decisión en el historial inmutable.
  */
 

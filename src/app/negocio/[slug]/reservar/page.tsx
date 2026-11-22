@@ -78,7 +78,7 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
     }))
     .filter((c) => c.servicio_ids.length >= 2 && c.servicio_ids.every((id) => idsServiciosActivos.has(id)));
 
-  // FASE 2B: negocio con la suscripción restringida (la base lo decide, ver migración 160): no ofrece el flujo de reserva.
+  // FASE 2B: negocio con la suscripción restringida (la base lo decide, ver migración 164): no ofrece el flujo de reserva.
   const aceptaReservas = await negocioAceptaReservas(negocio.id);
 
   if (!aceptaReservas || !sedes?.length || !servicios?.length) {

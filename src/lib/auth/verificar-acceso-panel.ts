@@ -15,7 +15,7 @@ import { resolverContexto, type ContextoUsuario, type RolPanel } from "@/lib/aut
  * como trabajo futuro en `ADR_016_Authorization_Refactor.md` — no se ejecuta
  * aquí para no arriesgar código de autorización ya verificado.
  *
- * "ADMIN" (administrador delegado, migración 151/154) es OPT-IN: una página solo lo admite si lo pide expresamente en
+ * "ADMIN" (administrador delegado, migración 158/161) es OPT-IN: una página solo lo admite si lo pide expresamente en
  * `rolesPermitidos`. Las ~27 páginas existentes piden ["BARBERIA","GUARDIAN"], así que un administrador recibe 403 en todas ellas
  * salvo en las que se revisaron para él (hoy solo /panel/staff). Denegado por defecto.
  */

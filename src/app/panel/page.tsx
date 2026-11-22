@@ -80,7 +80,7 @@ export default async function PanelPage() {
     redirect("/staff");
   }
 
-  // Administrador delegado (BUSINESS_ADMIN / ADMIN_BARBER): hoy su superficie es el equipo (migración 154, denegado por defecto).
+  // Administrador delegado (BUSINESS_ADMIN / ADMIN_BARBER): hoy su superficie es el equipo (migración 161, denegado por defecto).
   if (contexto.rol === "ADMIN") {
     redirect("/panel/staff");
   }

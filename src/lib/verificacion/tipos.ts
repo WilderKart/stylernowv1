@@ -1,4 +1,4 @@
-/** Tipos de documento y estados de la verificación del negocio (migración 150). Compartido por panel, CRM y API. */
+/** Tipos de documento y estados de la verificación del negocio (migración 157). Compartido por panel, CRM y API. */
 
 export const TIPOS_DOCUMENTO = [
   { valor: "EXISTENCIA_COMERCIAL", etiqueta: "Certificado de existencia comercial", grupo: "Existencia del negocio" },

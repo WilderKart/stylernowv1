@@ -21,7 +21,7 @@ import { derivarRolEquipo, type RolEquipo } from "@/lib/auth/roles-equipo";
  */
 
 /**
- * BARBERIA = propietario (BUSINESS_OWNER). ADMIN = administrador delegado (BUSINESS_ADMIN o ADMIN_BARBER, migración 151/154) con el
+ * BARBERIA = propietario (BUSINESS_OWNER). ADMIN = administrador delegado (BUSINESS_ADMIN o ADMIN_BARBER, migración 158/161) con el
  * conjunto MÍNIMO de permisos delegados; las páginas que no lo admitan expresamente lo rechazan (forbidden). El rol detallado del equipo
  * está en `rolEquipo`; el rol del Panel solo decide a qué superficie entra.
  */
@@ -55,7 +55,7 @@ export interface ContextoUsuario {
    * vínculo todavía (NINGUNO real). */
   estadoVinculo: EstadoVinculoPanel;
   permisos: PermisosPanel;
-  /** Rol del equipo derivado de capacidades (migración 151). `null` solo si no hay negocio. */
+  /** Rol del equipo derivado de capacidades (migración 158). `null` solo si no hay negocio. */
   rolEquipo: RolEquipo | null;
   /** Administra el negocio (propietario o administrador delegado ACTIVO). */
   esAdmin: boolean;
@@ -126,7 +126,7 @@ export async function resolverContexto(): Promise<ContextoUsuario> {
   const negocio = negocios?.[0] ?? null;
 
   if (negocio) {
-    // El propietario puede además tener perfil profesional (migración 153): una misma cuenta administra y atiende. Antes este
+    // El propietario puede además tener perfil profesional (migración 160): una misma cuenta administra y atiende. Antes este
     // resolver devolvía staffVinculoId=null y no miraba el vínculo, así que quien atendía perdía su agenda.
     const { data: propio } = await supabase
       .from("vinculo_staff_negocio")

@@ -217,7 +217,7 @@ export async function subirFotoPrincipal(negocioId: string, dataUrl: string): Pr
       publicId: "fachada",
       maxBytes: 8 * 1024 * 1024,
     });
-    // RPC de la migración 150: valida dueño, host de Cloudinary y la carpeta del propio negocio.
+    // RPC de la migración 157: valida dueño, host de Cloudinary y la carpeta del propio negocio.
     const { error } = await (supabase as unknown as {
       rpc: (n: string, a: object) => Promise<{ error: { message: string } | null }>;
     }).rpc("fijar_foto_principal_negocio", {

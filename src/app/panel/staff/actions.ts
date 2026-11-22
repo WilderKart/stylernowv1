@@ -134,7 +134,7 @@ export async function listarStaff(
 
     const [{ data, error, count }, { data: negocioDueno }] = await Promise.all([
       q,
-      // El propietario no se guarda en el vínculo: se reconoce por ser el dueño del negocio (migración 151).
+      // El propietario no se guarda en el vínculo: se reconoce por ser el dueño del negocio (migración 158).
       supabase.from("negocio").select("owner_user_id").eq("id", filtro.negocioId).maybeSingle(),
     ]);
     if (error) return { ok: false, error: error.message };
@@ -279,7 +279,7 @@ export async function listarInvitacionesPendientes(
 
 // ── Ciclo de vida del vínculo ────────────────────────────────────────────
 
-// ── Roles del equipo y perfil profesional del propietario (migraciones 152 y 153) ─────────
+// ── Roles del equipo y perfil profesional del propietario (migraciones 159 y 160) ─────────
 
 /** Cambia el rol de un integrante. Solo el propietario; el servidor valida el cupo (un rol que presta servicios lo consume). */
 export async function cambiarRolEquipo(vinculoId: string, rol: RolAsignable): Promise<Resultado> {

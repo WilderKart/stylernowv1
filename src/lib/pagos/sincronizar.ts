@@ -106,7 +106,7 @@ async function aplicar(pagoId: string, pagoPasarela: PagoPasarela): Promise<Resu
 
   const posterior = ESTADOS_DISPUTA.has(pagoPasarela.estadoCrudo) || ESTADOS_REEMBOLSO.has(pagoPasarela.estadoCrudo);
   if (pagoPasarela.estado === "PENDIENTE" && !posterior) {
-    // Barberos adicionales (migración 174): Mercado Pago informa «pendiente» → el lote pasa a PAGO_PENDIENTE.
+    // Barberos adicionales (migración 173): Mercado Pago informa «pendiente» → el lote pasa a PAGO_PENDIENTE.
     // La función solo actúa sobre pagos de concepto STAFF_EXTRA; para cualquier otro pago no hace nada. Nunca activa cupos.
     await marcarAdicionalPendiente(pagoId, pagoPasarela.id);
     return { estado: "PENDIENTE" };
@@ -431,7 +431,7 @@ async function sincronizarConPago(
  */
 async function marcarAdicionalPendiente(pagoId: string, idTransaccion: string): Promise<void> {
   try {
-    // La función es de la migración 174 (aún no está en los tipos generados).
+    // La función es de la migración 173 (aún no está en los tipos generados).
     const admin = createAdminClient() as unknown as {
       rpc: (n: string, a: object) => Promise<{ data: unknown; error: { message: string } | null }>;
     };

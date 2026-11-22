@@ -21,7 +21,7 @@ export async function obtenerUsoNegocio(negocioId: string): Promise<UsoNegocio> 
   const supabase = await createClient();
   const [sedes, cupo, fundador, negocio] = await Promise.all([
     supabase.from("sede").select("id", { count: "exact", head: true }).eq("negocio_id", negocioId).eq("cerrada_permanente", false),
-    // Mismo criterio que invitar, aceptar y bajar de plan: la función central de capacidad (migración 152), no un conteo propio.
+    // Mismo criterio que invitar, aceptar y bajar de plan: la función central de capacidad (migración 159), no un conteo propio.
     obtenerCupoPlan(negocioId),
     supabase
       .from("suscripcion_fundador")

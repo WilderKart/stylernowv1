@@ -4,7 +4,7 @@ import { mapearCapacidad, type CapacidadFila, type CapacidadProfesional } from "
 
 /**
  * Cupos y funciones del plan vigente de un negocio. La base de datos es la única fuente de verdad: este módulo solo lee
- * `cupo_plan_negocio` (migraciones 149 y 152), que a su vez delega la cuenta de profesionales en la función central
+ * `cupo_plan_negocio` (migraciones 156 y 159), que a su vez delega la cuenta de profesionales en la función central
  * `_capacidad_profesional`. Ningún otro código vuelve a contar vínculos o invitaciones por su cuenta.
  */
 export interface CupoPlan {

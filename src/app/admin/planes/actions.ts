@@ -60,7 +60,7 @@ export interface PaisPlanes {
 export interface PlanBase {
   codigo: PlanCodigo;
   nombre: string;
-  /** Perfil profesional del propietario (migración 153): configuración única que leen la base y la interfaz. */
+  /** Perfil profesional del propietario (migración 160): configuración única que leen la base y la interfaz. */
   perfilPropietario: { porDefecto: boolean; autoAlta: boolean; puedeActivar: boolean; puedeDesactivar: boolean };
 }
 export interface PrecioPlan {
@@ -286,7 +286,7 @@ export async function guardarCaracteristica(c: Caracteristica, motivo: string): 
   }
 }
 
-// ── Perfil profesional del propietario por plan (migración 153) ───────────────
+// ── Perfil profesional del propietario por plan (migración 160) ───────────────
 
 export async function guardarPerfilPropietarioPlan(
   plan: PlanCodigo,

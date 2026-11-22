@@ -10,14 +10,14 @@ const leer = (f: string) => readFileSync(path.join(MIGRACIONES, f), "utf8");
 
 describe("barberos adicionales · vocabulario único y migraciones", () => {
   it("las etiquetas de la interfaz cubren exactamente los estados definidos en la base (máquina única)", () => {
-    const sql = leer("171_adicionales_modelo_lotes.sql");
+    const sql = leer("170_adicionales_modelo_lotes.sql");
     const bloque = sql.slice(sql.indexOf("insert into public.adicional_estado_def"), sql.indexOf("create table if not exists public.adicional_transicion"));
     const enBase = [...bloque.matchAll(/^\s*\('([A-Z_]+)'/gm)].map((m) => m[1]).sort();
     expect(enBase.length).toBe(11);
     expect(Object.keys(ETIQUETA_ESTADO).sort()).toEqual(enBase);
   });
 
-  it("cada migración 170-178 tiene su reversión", () => {
+  it("cada migración 169-177 tiene su reversión", () => {
     for (const n of [170, 171, 172, 173, 174, 175, 176, 177, 178]) {
       const archivos = readdirSyncSafe();
       expect(archivos.some((f) => f.startsWith(`${n}_`) && f.endsWith(".sql")), `falta ${n}.sql`).toBe(true);
@@ -25,7 +25,7 @@ describe("barberos adicionales · vocabulario único y migraciones", () => {
     }
   });
 
-  it("todas las funciones SECURITY DEFINER de las migraciones 170-178 fijan search_path y revocan a public, anon y authenticated", () => {
+  it("todas las funciones SECURITY DEFINER de las migraciones 169-177 fijan search_path y revocan a public, anon y authenticated", () => {
     for (const f of readdirSyncSafe().filter((x) => /^17[0-8]_/.test(x) && x.endsWith(".sql") && !x.includes("REVERSION"))) {
       const sql = leer(f);
       const definer = [...sql.matchAll(/create or replace function public\.(\w+)\([\s\S]*?security definer set search_path = public/gi)].map((m) => m[1]);
@@ -64,7 +64,7 @@ describe("barberos adicionales · mensajes y presentación", () => {
     expect(fechaAdicional("2026-12-18T04:30:00Z", "es-CO")).toMatch(/17/);   // 23:30 del 17 en Bogotá
   });
   it("el código y la base usan el mismo concepto de pago", () => {
-    const sql = leer("174_adicionales_rpc_propietario.sql");
+    const sql = leer("173_adicionales_rpc_propietario.sql");
     expect(sql).toContain("'concepto', 'STAFF_EXTRA'");
     expect(readFileSync(path.resolve(__dirname, "../src/app/panel/suscripcion/actions.ts"), "utf8")).toContain('m.concepto === "STAFF_EXTRA"');
   });

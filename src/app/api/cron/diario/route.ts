@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
     resultado.conciliacion_pagos = { error: e instanceof Error ? e.message : "error inesperado" };
   }
 
-  // Barberos adicionales (migración 176). Va DESPUÉS de la conciliación de pagos (un pago aprobado hoy se aplica antes de evaluar
+  // Barberos adicionales (migración 175). Va DESPUÉS de la conciliación de pagos (un pago aprobado hoy se aplica antes de evaluar
   // vencimientos) y ANTES del outbox (los avisos que genera salen en esta misma corrida). Idempotente: una corrida por día de Bogotá,
   // avisos 7/3/1, gracia de 3 días y suspensión; no toca renovaciones de planes principales.
   try {

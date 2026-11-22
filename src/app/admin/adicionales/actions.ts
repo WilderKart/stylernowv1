@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 /**
- * SuperAdmin · Barberos adicionales (FASE 2A, migraciones 177 y 178).
+ * SuperAdmin · Barberos adicionales (FASE 2A, migraciones 176 y 177).
  * Patrón de /admin/planes y /admin/reglas: cada acción verifica la sesión aquí y la RPC vuelve a exigir `is_supersu()`, un motivo
  * (≥5 caracteres) y deja auditoría con valor anterior y nuevo. Nada del navegador se usa sin validar con zod. Cambiar un precio
  * nunca altera lotes vigentes. No hay reembolsos automáticos: aquí solo se REGISTRA la solicitud, la decisión y la ejecución manual.

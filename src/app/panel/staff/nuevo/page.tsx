@@ -11,7 +11,7 @@ export const metadata = { title: "Invitar al equipo" };
 
 export default async function InvitarStaffPage() {
   const contexto = await verificarAccesoPanel(["BARBERIA", "ADMIN", "GUARDIAN"], "/panel/staff/nuevo");
-  // Invitar es del propietario y del administrador delegado (03-Business-Rules/01_Roles.md + migración 154).
+  // Invitar es del propietario y del administrador delegado (03-Business-Rules/01_Roles.md + migración 161).
   if (!contexto.permisos.invitarStaff) redirect("/panel/staff");
 
   const supabase = await createClient();

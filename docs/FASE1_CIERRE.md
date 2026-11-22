@@ -6,7 +6,7 @@ Complementa a `docs/FASE1_ROLES_CUPOS_INFORME.md`. Todo contra Supabase LOCAL (D
 
 ## A. IMPLEMENTADO
 
-### A.1 Roles y permisos (migraciones 151, 154)
+### A.1 Roles y permisos (migraciones 158, 161)
 - Roles derivados de capacidades en `vinculo_staff_negocio` (`es_admin`, `presta_servicios`): BUSINESS_OWNER (derivado de `negocio.owner_user_id`), BUSINESS_ADMIN, ADMIN_BARBER, BARBER; SUPER_ADMIN sin cambios; no existe «OWNER». Guardian queda intacto (alcance por sede).
 - `is_admin_de(negocio)`, `rol_equipo(...)`. `is_barberia_de` / `is_staff_de` no cambian. Aplicación: resolver con `RolPanel = "ADMIN"` opt-in, registro `PERMISOS_ADMIN_DELEGADO` (lista cerrada).
 - Delegación MÍNIMA a administradores: ver equipo/invitaciones, invitar BARBER, cancelar/reenviar invitaciones a BARBER, suspender/reactivar/retirar/trasladar profesionales que no son administradores. Negado y probado: suscripción, pagos, plan, propiedad, verificación, configuración de planes, cambiar roles, Guardian, perfil del propietario.

@@ -34,7 +34,7 @@ function aCita(r: FilaReserva): CitaPendiente {
 }
 
 /**
- * Pantalla de «cumplimiento de citas pendientes» (migración 160). Con la suscripción restringida el negocio no puede recibir ni modificar
+ * Pantalla de «cumplimiento de citas pendientes» (migración 164). Con la suscripción restringida el negocio no puede recibir ni modificar
  * operaciones nuevas, pero SÍ honrar lo ya confirmado: aquí ve sus citas confirmadas (completables), el histórico y el camino a pagar.
  * Nada se oculta ni se elimina. El alcance lo da RLS (Guardian solo ve su sede); el estado, la base (`negocio_estado_operativo`).
  */

@@ -1,5 +1,5 @@
 /**
- * Roles del equipo de un negocio (FASE 1, migración 151). Puro (sin servidor): lo comparten el resolver, las pantallas y las pruebas.
+ * Roles del equipo de un negocio (FASE 1, migración 158). Puro (sin servidor): lo comparten el resolver, las pantallas y las pruebas.
  *
  * El rol NO se guarda: se DERIVA de capacidades, igual que la función SQL `_rol_equipo`:
  *   propietario (negocio.owner_user_id)                 -> BUSINESS_OWNER   (puede además tener perfil profesional)
@@ -46,7 +46,7 @@ export const DESCRIPCION_ROL: Record<RolAsignable, string> = {
   ADMIN_BARBER: "Administra el equipo y además atiende clientes. Ocupa un cupo de profesional.",
 };
 
-/** Lo que consume `capacidad_profesional_negocio` / `cupo_plan_negocio.capacidad` (migración 152), ya con nombres de la aplicación. */
+/** Lo que consume `capacidad_profesional_negocio` / `cupo_plan_negocio.capacidad` (migración 159), ya con nombres de la aplicación. */
 export interface CapacidadProfesional {
   planCodigo: string;
   incluidos: number | null;

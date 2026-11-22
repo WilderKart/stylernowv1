@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { EstadoOperativo } from "@/lib/suscripcion/estado-operativo-puro";
 
 /**
- * Aviso del estado «suscripción restringida» (migración 160). Solo MUESTRA lo que decidió la base (`negocio_estado_operativo`): no
+ * Aviso del estado «suscripción restringida» (migración 164). Solo MUESTRA lo que decidió la base (`negocio_estado_operativo`): no
  * calcula fechas ni reglas. En restricción la app sigue navegable; el banner dice qué se puede hacer y lleva a pagar.
  *
  * `puedePagar` = quien mira es el propietario (solo él entra a /panel/suscripcion); el resto ve el aviso sin botón.

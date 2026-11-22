@@ -4,7 +4,7 @@ Fecha: 2026-11-18. Rama `feat/onboarding-v2` (worktree `stylernow-onboarding`). 
 
 > Estado honesto: «PASÓ» = se ejecutó y se vio pasar. «NO VERIFICADO» = no se ejecutó.
 
-## 1. Modelo de datos (migraciones 170-178)
+## 1. Modelo de datos (migraciones 169-177)
 
 | Tabla | Para qué |
 |---|---|
@@ -40,7 +40,7 @@ Cupos fungibles: un lote aporta `cantidad` al tope; no se atan a profesionales c
 | 177 | RPC SuperAdmin (config, precio, listar, detalle, acciones, activación manual) | 170-173 |
 | 178 | reembolsos y cola de revisión (RPC admin) | 171, 173, 177 (`_adicional_exige_supersu`) |
 
-Todas con reversión `*_REVERSION.sql.txt`. **PASÓ** la cadena completa: revertir 178→170 y reaplicar 170→178 (dos veces); además las reversiones de 175 restauran `aplicar_evento_pago`, `solicitar_pago_plan` y `solicitar_upgrade_plan` byte a byte (comparado con `pg_get_functiondef`). Las migraciones 160-164 del otro agente no se tocaron. `database.ts` no se regeneró (las RPC se llaman con casts, como las de 130/133).
+Todas con reversión `*_REVERSION.sql.txt`. **PASÓ** la cadena completa: revertir 178→170 y reaplicar 170→178 (dos veces); además las reversiones de 175 restauran `aplicar_evento_pago`, `solicitar_pago_plan` y `solicitar_upgrade_plan` byte a byte (comparado con `pg_get_functiondef`). Las migraciones 164-168 del otro agente no se tocaron. `database.ts` no se regeneró (las RPC se llaman con casts, como las de 130/133).
 
 ## 3. RPC y permisos
 
@@ -71,7 +71,7 @@ Propietario (`authenticated`, autoriza `is_barberia_de` con `coalesce(...,false)
 
 | Prueba | Resultado |
 |---|---|
-| `tests/sql/adicionales_170.sql` (≈290 aserciones, transacción con rollback) | **PASÓ** (una corrida inicial falló con `PLAN_SIN_PRECIO` en el paso «un adicional pendiente no bloquea pagar el plan»; no se reprodujo en 5 corridas posteriores; causa: el agente de la Fase 2B borró por error la fila plan_precio STUDIO/CO y la repuso; verificado ahora: STUDIO/CO = 139900 presente y mi suite no depende de residuos, solo de ese precio de catálogo) |
+| `tests/sql/adicionales_169.sql` (≈290 aserciones, transacción con rollback) | **PASÓ** (una corrida inicial falló con `PLAN_SIN_PRECIO` en el paso «un adicional pendiente no bloquea pagar el plan»; no se reprodujo en 5 corridas posteriores; causa: el agente de la Fase 2B borró por error la fila plan_precio STUDIO/CO y la repuso; verificado ahora: STUDIO/CO = 139900 presente y mi suite no depende de residuos, solo de ese precio de catálogo) |
 | `tests/sql/adicionales_170_concurrencia.sh` (sesiones simultáneas reales) | **PASÓ**: 6 invitaciones con tope 3 → 3 creadas / 3 `PLAN_LIMIT_EXCEEDED`; 5 webhooks duplicados del mismo pago → 1 activación, 4 `YA_PROCESADO`, periodo 1; 5 contrataciones simultáneas → 1 lote y 1 pago. Limpia sus fixtures |
 | `tests/sql/adicionales_http.sh` (JWT reales contra PostgREST) | **PASÓ 48/48**: propietario, admin delegado (NO cotiza/inicia/consulta/renueva/cancela), IDOR con otro propietario y anónimo, escrituras directas bloqueadas (403), funciones de servidor/internas bloqueadas, pendiente/rechazado no suben el tope, aprobado confirmado en servidor sube +3, cancelar conserva cupo, SuperAdmin (excepción con motivo, auditada) |
 | `tests/integracion/adicionales-pagos.test.ts` (`ADICIONALES_INT=1`) | **PASÓ 9/9**: webhook firmado real + `sincronizar.ts` + `crearPreferenciaDePago` + BD local; aprobado, duplicado, pendiente, rechazado→aprobado, fuera de orden, importe distinto, referencia `ADIC-…` sin reembolso, lote ajeno/inexistente, webhook tardío (401) y conciliación, plan + adicional conviviendo |

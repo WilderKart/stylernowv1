@@ -5,7 +5,7 @@
 Fecha: 2026-11-18. Rama `feat/onboarding-v2` (worktree `stylernow-onboarding`). Todo se probó SOLO contra Supabase local (Docker). No se tocó producción, no hay commits, merges ni push.
 
 > Estado honesto: lo marcado «PASÓ» se ejecutó y se vio pasar; lo marcado «NO VERIFICADO» no se ejecutó.
-> **Las secciones 0 y 10 (cierre) sustituyen a lo que digan las secciones 1–9 donde se contradigan** (p. ej. la normalización pasó a ser la migración **157** y SÍ está aplicada en la base local; el defecto de `session_version` SÍ se corrigió, en la migración 155).
+> **Las secciones 0 y 10 (cierre) sustituyen a lo que digan las secciones 1–9 donde se contradigan** (p. ej. la normalización pasó a ser la migración **157** y SÍ está aplicada en la base local; el defecto de `session_version` SÍ se corrigió, en la migración 162).
 
 ---
 
@@ -42,7 +42,7 @@ Resultados finales de ejecución: ver sección 10.
 4. **`resolverContexto()` ignoraba el vínculo del propietario** (devolvía `BARBERIA` con `staffVinculoId = null`): un propietario que atiende no tenía su agenda en el Panel. (`obtenerContextoStaff()` y `/staff` ya funcionaban por separado: el hueco era el Panel.) Corregido.
 5. **Visibilidad pública sin distinguir quién atiende.** `negocio_staff_publico`, `slots_disponibles`, `staff_perfil_publico`, `marketplace_buscar` (conteo de staff) y la política `staff_select_publico` tomaban cualquier vínculo ACTIVO. Con el modelo nuevo un administrador puro aparecería como profesional. Corregido.
 6. **`is_barberia_de` aparece en ~110 políticas RLS y 95 funciones.** Delegar de verdad la administración exige revisar cada una: no se hizo (ver 4.5 y decisiones pendientes).
-7. **DEFECTO PREEXISTENTE, no corregido:** `suspender_staff` y `trasladar_staff` (083) llaman a `incrementar_session_version()` dentro de una función definer; el trigger `perfil_proteger_columnas_sensibles` (084) lo rechaza si `auth.uid()` no es nulo y el actor no es SuperSU → **la acción falla para el propietario** («NO_AUTORIZADO: session_version no se puede modificar directamente»). Verificado en la base local con el propietario de «Barbería Sandbox». Intenté arreglarlo con un parche mínimo (`current_user in ('authenticated','anon')`) y el clasificador de permisos lo bloqueó por tocar un trigger de seguridad; **no lo apliqué** (queda como decisión pendiente, con el parche descrito en la sección 9). Mi función `cambiar_rol_equipo` NO llama a `incrementar_session_version` por esta razón, y `tests/sql/roles_151.sql` desactiva ese trigger solo dentro de su transacción (ROLLBACK) para poder probar la autorización delegada de suspender/trasladar.
+7. **DEFECTO PREEXISTENTE, no corregido:** `suspender_staff` y `trasladar_staff` (083) llaman a `incrementar_session_version()` dentro de una función definer; el trigger `perfil_proteger_columnas_sensibles` (084) lo rechaza si `auth.uid()` no es nulo y el actor no es SuperSU → **la acción falla para el propietario** («NO_AUTORIZADO: session_version no se puede modificar directamente»). Verificado en la base local con el propietario de «Barbería Sandbox». Intenté arreglarlo con un parche mínimo (`current_user in ('authenticated','anon')`) y el clasificador de permisos lo bloqueó por tocar un trigger de seguridad; **no lo apliqué** (queda como decisión pendiente, con el parche descrito en la sección 9). Mi función `cambiar_rol_equipo` NO llama a `incrementar_session_version` por esta razón, y `tests/sql/roles_158.sql` desactiva ese trigger solo dentro de su transacción (ROLLBACK) para poder probar la autorización delegada de suspender/trasladar.
 8. **Suites que el encargo daba por verdes y estaban rojas en la línea base:** `auditoria_123`, `libro_122`, `whatsapp_120` fallan por `ux_perfil_supersu_unico` (un único SuperSU; los scripts intentan crear otro). Con el SuperSU descendido dentro de la transacción pasan (6.2).
 9. **Publicación del propietario que atiende:** `staff_es_publicable` exige foto + consentimiento `AUTORIZACION_STAFF_PUBLICACION` (o ventana de transición hasta 2026-12-16). Un propietario Essential que activa su perfil no aparece en la reserva pública hasta que suba foto y autorice la publicación en `/staff/perfil` (que ya existe y le funciona). Es una decisión de producto pendiente: el alta de Essential podría pedirlo.
 
@@ -117,13 +117,13 @@ Nuevo `is_admin_de(negocio)` (propietario o administrador ACTIVO; `coalesce(…,
 
 | # | Archivo | Qué hace | Reversión |
 |---|---|---|---|
-| 151 | `151_modelo_roles_capacidades.sql` | columnas `es_admin`, `presta_servicios`, `rol_invitado`, `plan.propietario_profesional_por_defecto`; `is_admin_de`, `rol_equipo`; triggers de visibilidad/asignación; parches por ancla de `negocio_staff_publico`, `slots_disponibles`, `staff_perfil_publico`, `marketplace_buscar`; vista con capacidades; auditoría del vínculo ampliada | `151_…_REVERSION.sql.txt` |
-| 152 | `152_funcion_central_de_cupo.sql` | `_capacidad_profesional`, `_cupo_bloquear`, `capacidad_profesional_negocio`, triggers de respaldo, `cupo_plan_negocio`, `crear_invitacion_staff` (firma nueva con rol; **DROP** de la firma vieja), `responder_invitacion`, downgrade, `cambiar_rol_equipo` | `152_…_REVERSION.sql.txt` |
-| 153 | `153_perfil_profesional_del_propietario.sql` | `_activar_perfil_propietario`, `activar_/desactivar_perfil_profesional_propietario`, parche de `completar_onboarding_negocio` | `153_…_REVERSION.sql.txt` |
-| 154 | `154_delegacion_administrativa_minima.sql` | `_puede_gestionar_vinculo/_invitacion`; parches de `suspender/reactivar/retirar/trasladar_staff`, `cancelar/reenviar_invitacion`; lectura del equipo para administradores | `154_…_REVERSION.sql.txt` |
-| 155 | `155_normalizacion_roles_existentes.sql` | Normalización de datos. **NO APLICADA** | `155_…_REVERSION.sql.txt` (probada en transacción) |
+| 151 | `158_modelo_roles_capacidades.sql` | columnas `es_admin`, `presta_servicios`, `rol_invitado`, `plan.propietario_profesional_por_defecto`; `is_admin_de`, `rol_equipo`; triggers de visibilidad/asignación; parches por ancla de `negocio_staff_publico`, `slots_disponibles`, `staff_perfil_publico`, `marketplace_buscar`; vista con capacidades; auditoría del vínculo ampliada | `151_…_REVERSION.sql.txt` |
+| 152 | `159_funcion_central_de_cupo.sql` | `_capacidad_profesional`, `_cupo_bloquear`, `capacidad_profesional_negocio`, triggers de respaldo, `cupo_plan_negocio`, `crear_invitacion_staff` (firma nueva con rol; **DROP** de la firma vieja), `responder_invitacion`, downgrade, `cambiar_rol_equipo` | `152_…_REVERSION.sql.txt` |
+| 153 | `160_perfil_profesional_del_propietario.sql` | `_activar_perfil_propietario`, `activar_/desactivar_perfil_profesional_propietario`, parche de `completar_onboarding_negocio` | `153_…_REVERSION.sql.txt` |
+| 154 | `161_delegacion_administrativa_minima.sql` | `_puede_gestionar_vinculo/_invitacion`; parches de `suspender/reactivar/retirar/trasladar_staff`, `cancelar/reenviar_invitacion`; lectura del equipo para administradores | `154_…_REVERSION.sql.txt` |
+| 155 | `162_normalizacion_roles_existentes.sql` | Normalización de datos. **NO APLICADA** | `155_…_REVERSION.sql.txt` (probada en transacción) |
 
-Todas las funciones nuevas: `SECURITY DEFINER` con `search_path` fijo; `REVOKE` de `public, anon, authenticated` y `GRANT` solo a quien corresponde (internas: a nadie); parches con `pg_get_functiondef` + `replace` con ancla exacta que lanza excepción si no existe, e idempotentes; CREATE OR REPLACE con parámetros nuevos → `DROP` explícito de la firma vieja. La base local registra `schema_migrations` solo hasta 137: 151–154 se aplicaron a mano. Las migraciones 152 y 153 dependen de las anclas de 149 y 150 (sin commitear en esta rama).
+Todas las funciones nuevas: `SECURITY DEFINER` con `search_path` fijo; `REVOKE` de `public, anon, authenticated` y `GRANT` solo a quien corresponde (internas: a nadie); parches con `pg_get_functiondef` + `replace` con ancla exacta que lanza excepción si no existe, e idempotentes; CREATE OR REPLACE con parámetros nuevos → `DROP` explícito de la firma vieja. La base local registra `schema_migrations` solo hasta 137: 151–154 se aplicaron a mano. Las migraciones 159 y 160 dependen de las anclas de 149 y 150 (sin commitear en esta rama).
 
 Prueba de reversión: tras revertir 154→151, las **16 funciones parcheadas quedaron idénticas** al texto original (`diff` contra el volcado previo), las 3 políticas y el trigger de auditoría idénticos, y desaparecieron los objetos nuevos; reaplicadas 151→154 las pruebas vuelven a pasar. Con la reversión de 155 en transacción: 8 → 2 vínculos activos (el estado inicial).
 
@@ -132,7 +132,7 @@ Prueba de reversión: tras revertir 154→151, las **16 funciones parcheadas que
 ## 5. Archivos modificados / creados
 
 SQL: `supabase/migrations/151…155` (+ 5 reversiones `.sql.txt`).
-Pruebas: `tests/sql/roles_151.sql`, `tests/sql/roles_151_concurrencia.sh`, `tests/sql/roles_155_normalizacion.sql` + `.sh`, `tests/roles-equipo.test.ts`.
+Pruebas: `tests/sql/roles_158.sql`, `tests/sql/roles_151_concurrencia.sh`, `tests/sql/roles_155_normalizacion.sql` + `.sh`, `tests/roles-equipo.test.ts`.
 Código nuevo: `src/lib/auth/roles-equipo.ts`, `src/components/panel/tarjeta-perfil-profesional.tsx`.
 Código modificado: `src/lib/auth/permission-registry.ts`, `src/lib/auth/resolver-contexto.ts`, `src/lib/auth/verificar-acceso-panel.ts`, `src/lib/auth/require-staff.ts`, `src/lib/planes/cupo.ts`, `src/app/panel/suscripcion/datos.ts`, `src/app/panel/staff/actions.ts`, `src/app/panel/staff/lista-staff.tsx`, `src/app/panel/staff/page.tsx`, `src/app/panel/staff/nuevo/page.tsx`, `src/app/panel/staff/nuevo/formulario-invitacion.tsx`, `src/app/panel/staff/[id]/page.tsx`, `src/app/panel/staff/[id]/detalle-staff.tsx`, `src/app/panel/page.tsx`, `src/components/panel/panel-nav.tsx`, `src/app/staff/layout.tsx`, `src/types/database.ts` (editado a mano: columnas, vista y RPC nuevas; `cupo_plan_negocio` ya no se llama con un cast).
 
@@ -147,7 +147,7 @@ Mismas suites, mismo resultado antes y después de 151–154. **Verdes:** aislam
 ### 6.2 Suites rojas por SuperSU
 Copias temporales (no versionadas) con el SuperSU descendido dentro de la transacción: **auditoria_123, libro_122, whatsapp_120 PASAN con 151–154 aplicadas.** directiva_116_118, f0_05, f1b_139 y f1b_promociones_140 siguen fallando con el mismo mensaje con y sin mis migraciones (comparado revirtiendo 151–154): su causa es ajena.
 
-### 6.3 `tests/sql/roles_151.sql` — PASÓ completa
+### 6.3 `tests/sql/roles_158.sql` — PASÓ completa
 Cubre: Essential con propietario que atiende (activar, idempotencia, reactivar reutiliza la misma fila, desactivar, bloqueo por reservas futuras, alta automática); Studio con propietario solo administrador; propietario de Prestige que atiende de forma opcional; BUSINESS_ADMIN, ADMIN_BARBER, BARBER; cupos 1/5/15/50 (+ parámetro de adicionales 5 → 55); invitaciones vigentes, vencidas, canceladas, rechazadas y aceptadas (la aceptación no cuenta doble); cambio de rol que no evade el tope (RPC y escritura directa); exceso (Essential 2/1: nadie retirado, no se puede agregar); un suspendido sigue ocupando; downgrade con el mismo criterio; el administrador puro no aparece en `negocio_staff_publico`, `slots_disponibles`, perfil público ni recibe servicios/reservas; IDOR (16 casos contra el negocio ajeno); `REVOKE` verificado con `aclexplode` para public/anon/authenticated en internas y RPC (más llamadas reales como anon con «permission denied»); la firma vieja de `crear_invitacion_staff` ya no existe.
 `tests/sql/roles_155_normalizacion.sql` — PASÓ (antes/después, sin huérfanos en reservas/staff_servicio/vínculos/disponibilidad/bloqueos/niveles/puntajes, exceso 2/1 marcado, propietario con reservas futuras no se toca, idempotente).
 
@@ -168,21 +168,21 @@ Ver sección 7.
 - **BUSINESS_ADMIN:** `/panel` lo lleva a `/panel/staff`; `/panel/servicios` y `/panel/suscripcion` dan «NO TIENES ACCESO A ESTA SECCIÓN»; `/staff` muestra «Tu rol es administrativo»; el formulario de invitación solo ofrece sede (no hay selector de rol: solo BARBER); en el detalle de otro administrador no aparece ningún botón de gestión.
 - **Propietario Essential con perfil profesional:** el menú muestra «MI AGENDA»; `/staff` lo lleva a `/staff/agenda`; el Resumen dice «Atiendes clientes»; con el cupo lleno `/panel/staff/nuevo` muestra el aviso de plan y deja invitar solo un administrador.
 - Dos defectos de interfaz encontrados en esa pasada y corregidos después (verificados solo por build/tsc, no en navegador): la tarea «Invita a tu equipo» del asistente se marcaba completa solo por el perfil del propietario, y el texto «1 cupo de los 1».
-- Efecto de mis pruebas de reversión: revertir 151 elimina las columnas, así que el administrador de prueba volvió a ser BARBER y hubo que restaurarlo a mano; además la primera versión de la reversión dejó la vista `vista_staff_negocio` sin SELECT para `authenticated` (la lista de equipo salía vacía). Lo vi en el navegador, repuse el privilegio, corregí la reversión (guarda y repone el ACL exacto) y añadí una comprobación de privilegio real a `roles_151.sql`. Reversión y reaplicación se repitieron y pasan.
+- Efecto de mis pruebas de reversión: revertir 151 elimina las columnas, así que el administrador de prueba volvió a ser BARBER y hubo que restaurarlo a mano; además la primera versión de la reversión dejó la vista `vista_staff_negocio` sin SELECT para `authenticated` (la lista de equipo salía vacía). Lo vi en el navegador, repuse el privilegio, corregí la reversión (guarda y repone el ACL exacto) y añadí una comprobación de privilegio real a `roles_158.sql`. Reversión y reaplicación se repitieron y pasan.
 - **Datos de prueba que quedan en la base local** (no se borran hasta que el usuario diga «listo»): 4 cuentas `f1-dueno-studio`, `f1-dueno-essential`, `f1-admin`, `f1-barbero` (@stylernow.test), 2 negocios `f1-studio` y `f1-essential` con sus sedes/suscripciones/vínculos y 1 invitación a `f1-invitado-admin@stylernow.test`.
 
 ---
 
 ## 8. Qué NO se verificó
 
-- Producción: nada (prohibido). Las migraciones 151–155 no se probaron contra la base de producción ni contra una copia de sus datos; el orden de despliegue respecto de 139–150 está sin decidir.
+- Producción: nada (prohibido). Las migraciones 158–162 no se probaron contra la base de producción ni contra una copia de sus datos; el orden de despliegue respecto de 139–150 está sin decidir.
 - El camino HTTP real de PostgREST/RLS: las pruebas SQL emulan al usuario con `set role` + claims; no se llamó a la API HTTP con JWT reales para cada RPC.
 - Aceptar una invitación de administrador desde la pantalla pública `/invitacion/[id]` (que no muestra el rol) ni el texto del correo de invitación (no distingue rol).
 - Las pantallas con planes Studio/Prestige/Signature en el navegador (ver 7 para lo que sí se recorrió).
 - Que `suspender_staff`/`trasladar_staff` funcionen para el propietario en la base local: **no funcionan** por el defecto preexistente (hallazgo 7).
 - El cobro de «barberos adicionales» (Fase 3): solo existe el parámetro.
 - En el navegador no se probaron: «Dejar de atender» (solo SQL), aceptar una invitación de administrador desde el enlace, ni los mensajes de error de cupo en pantalla (solo el aviso de equipo completo). Tampoco se probaron las pantallas con una sesión Signature/Prestige.
-- Estado de la base local al terminar: migraciones 151–154 **aplicadas a mano** (no registradas en `schema_migrations`); 155 **sin aplicar**.
+- Estado de la base local al terminar: migraciones 158–161 **aplicadas a mano** (no registradas en `schema_migrations`); 155 **sin aplicar**.
 
 ## 9. Riesgos y decisiones pendientes
 

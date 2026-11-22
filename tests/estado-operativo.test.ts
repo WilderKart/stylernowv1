@@ -9,7 +9,7 @@ import {
   traducirErrorRestriccion,
 } from "@/lib/suscripcion/estado-operativo-puro";
 
-// El espejo TypeScript NO recalcula nada: solo da forma a lo que devuelve la función SQL negocio_estado_operativo (migración 160).
+// El espejo TypeScript NO recalcula nada: solo da forma a lo que devuelve la función SQL negocio_estado_operativo (migración 164).
 
 describe("interpretarEstadoOperativo (espejo de negocio_estado_operativo)", () => {
   it("lee un negocio operativo en prueba", () => {
@@ -78,11 +78,11 @@ describe("una sola fuente de verdad (sin cálculos de fechas de suscripción fue
     }
   });
   it("las migraciones del ciclo (161) usan la función central de fechas, no intervalos sueltos", () => {
-    const m = leer("supabase/migrations/161_suscripcion_ciclo_30_dias_bogota.sql");
+    const m = leer("supabase/migrations/165_suscripcion_ciclo_30_dias_bogota.sql");
     expect(m).toContain("suscripcion_fecha_limite");
     expect(m).not.toMatch(/interval '1 month'/);
   });
-  it("las migraciones 160-164 existen con su reversión", () => {
+  it("las migraciones 164-168 existen con su reversión", () => {
     const dir = path.join(raiz, "supabase/migrations");
     const archivos = readdirSync(dir);
     for (const n of ["160", "161", "162", "163", "164"]) {

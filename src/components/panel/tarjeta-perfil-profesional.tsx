@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 /**
- * Perfil profesional del propietario (migración 153). El propietario administra; si además atiende clientes activa su propio perfil
+ * Perfil profesional del propietario (migración 160). El propietario administra; si además atiende clientes activa su propio perfil
  * (fila staff + vínculo, ocupa un cupo del plan) sin crear otra cuenta. La regla real (cupo, reservas futuras) la hace cumplir el
  * servidor: esta tarjeta solo informa y llama a las acciones.
  */

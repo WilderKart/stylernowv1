@@ -171,9 +171,9 @@ export function tienePermiso(rol: Rol, modulo: string, accion: string): boolean 
 }
 
 /**
- * Administrador delegado (BUSINESS_ADMIN / ADMIN_BARBER, migraciones 151 y 154): conjunto MÍNIMO de permisos del Panel que el
+ * Administrador delegado (BUSINESS_ADMIN / ADMIN_BARBER, migraciones 158 y 161): conjunto MÍNIMO de permisos del Panel que el
  * propietario delega, a nivel de NEGOCIO. Es una lista cerrada (denegado por defecto) y solo incluye lo que la base de datos ya
- * hace cumplir con `is_admin_de` en las RPC de equipo (migración 154). Lo que NO está aquí no se delega en esta fase:
+ * hace cumplir con `is_admin_de` en las RPC de equipo (migración 161). Lo que NO está aquí no se delega en esta fase:
  *   · facturación/suscripción/plan, pagos y cobros, verificación del negocio, propiedad, auditoría y configuración del negocio;
  *   · cambiar roles, dar permisos administrativos, promover/revocar Guardian y activar el perfil profesional del propietario;
  *   · servicios, sedes, agenda completa, clientes y reportes: sus políticas RLS siguen siendo del propietario (~110 políticas sin

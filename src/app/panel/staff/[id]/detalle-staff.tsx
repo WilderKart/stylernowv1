@@ -178,7 +178,7 @@ export function DetalleStaff({
         ) : null}
       </Card>
 
-      {/* ── Rol en el equipo (migración 151/152) ───────────────────────── */}
+      {/* ── Rol en el equipo (migración 158/159) ───────────────────────── */}
       <Card className="mb-6">
         <div className="mb-1 flex items-center justify-between gap-2">
           <p className="text-[13px] font-bold text-text">Rol en el equipo</p>

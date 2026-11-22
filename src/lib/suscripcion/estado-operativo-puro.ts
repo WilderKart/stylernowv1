@@ -1,6 +1,6 @@
 /**
  * Parte PURA del espejo del estado operativo (sin servidor ni red): tipos, interpretación de la respuesta de la base y textos.
- * No calcula fechas ni reglas: solo da forma a lo que devuelve `negocio_estado_operativo` (migración 160).
+ * No calcula fechas ni reglas: solo da forma a lo que devuelve `negocio_estado_operativo` (migración 164).
  */
 
 export type FaseOperativa = "PRUEBA" | "PAGADO" | "GRACIA" | "RESTRINGIDO" | "EN_CONFIGURACION" | "SIN_SUSCRIPCION" | "OPERATIVO";

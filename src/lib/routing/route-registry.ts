@@ -76,7 +76,7 @@ export const RUTAS: RutaRegistro[] = [
   { path: "/panel/ads", publica: false, roles: ["barberia", "guardian"] },
   { path: "/panel/marca", publica: false, roles: ["barberia"] },
   { path: "/panel/suscripcion", publica: false, roles: ["barberia", "guardian"] },
-  // Cumplimiento de citas pendientes con la suscripción restringida (migración 160): agenda histórica y citas confirmadas completables.
+  // Cumplimiento de citas pendientes con la suscripción restringida (migración 164): agenda histórica y citas confirmadas completables.
   { path: "/panel/cumplimiento", publica: false, roles: ["barberia", "guardian"] },
   { path: "/panel/reportes", publica: false, roles: ["barberia", "guardian"] },
   { path: "/panel/lealtad", publica: false, roles: ["barberia", "guardian"] },

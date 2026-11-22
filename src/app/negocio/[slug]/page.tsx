@@ -48,7 +48,7 @@ async function cargarNegocio(slug: string) {
         .order("precio_base"),
       supabase.rpc("negocio_staff_publico", { p_negocio_id: negocio.id }),
       supabase.rpc("negocio_resenas_publicas", { p_negocio_id: negocio.id, p_limite: 8 }),
-      // Insignia: solo un booleano (migración 150); nunca documentos ni datos de la verificación.
+      // Insignia: solo un booleano (migración 157); nunca documentos ni datos de la verificación.
       (supabase as unknown as { rpc: (n: string, a: object) => Promise<{ data: boolean | null }> }).rpc("negocio_verificado", { p_negocio_id: negocio.id }),
     ]);
 
@@ -185,7 +185,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
   };
 
   const sinDisponibilidad = servicios.length === 0 || sedes.length === 0;
-  // FASE 2B: suscripción restringida (decide la base, migración 160). La página sigue visible; solo se pausan las reservas nuevas.
+  // FASE 2B: suscripción restringida (decide la base, migración 164). La página sigue visible; solo se pausan las reservas nuevas.
   const aceptaReservas = await negocioAceptaReservas(negocio.id);
   const marca = await obtenerMarcaPublica(negocio.id);
   // Mi Marca publicada: el nombre y el logo de marca sustituyen a los del negocio en la portada.

@@ -84,7 +84,7 @@ export interface NegocioAdmin {
   createdAt: string;
   suscripcionEstado: string | null;
   suscripcionCausa: string | null;
-  /** Estado operativo derivado por la base (migración 160/164); `null` si no se pudo leer. */
+  /** Estado operativo derivado por la base (migración 164/168); `null` si no se pudo leer. */
   operativo: EstadoOperativoAdmin | null;
 }
 

@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 /**
- * Cumplimiento de citas ya confirmadas con la suscripción restringida (migración 160).
+ * Cumplimiento de citas ya confirmadas con la suscripción restringida (migración 164).
  * Solo se llaman RPC que la base permite sobre citas PREVIAS: completar en caja SIN productos, no-show y cancelar. La autorización real
  * (dueño/Guardian de ESE negocio y de esa sede) la decide cada RPC; aquí no se recibe ni se confía en ningún negocio_id del navegador.
  */

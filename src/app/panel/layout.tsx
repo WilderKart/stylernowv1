@@ -32,7 +32,7 @@ async function PanelGuardado({ children }: { children: React.ReactNode }) {
 
   if (!user) redirect("/login?next=/panel");
 
-  // FASE 2B: aviso de suscripción restringida/gracia en TODO el panel. El estado lo decide la base (migración 160); aquí solo se muestra.
+  // FASE 2B: aviso de suscripción restringida/gracia en TODO el panel. El estado lo decide la base (migración 164); aquí solo se muestra.
   const contexto = await resolverContexto();
   const estado = contexto.negocioId ? await obtenerEstadoOperativo(contexto.negocioId) : null;
 

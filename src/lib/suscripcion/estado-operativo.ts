@@ -7,7 +7,7 @@ import { DESCONOCIDO, interpretarEstadoOperativo, MENSAJE_RESTRINGIDA, type Esta
 export * from "./estado-operativo-puro";
 
 /**
- * Espejo TypeScript del estado «suscripción restringida» (migración 160).
+ * Espejo TypeScript del estado «suscripción restringida» (migración 164).
  *
  * NO recalcula nada: la regla vive en UNA función SQL (`negocio_estado_operativo`) que deriva el estado de las fechas en hora de Colombia.
  * Este módulo solo la llama, tipa su respuesta y traduce el error `SUSCRIPCION_RESTRINGIDA` que lanzan los disparadores/RPC.

@@ -53,7 +53,7 @@ function fallo(e: unknown): { ok: false; error: string } {
 export interface DatosReglas {
   limites: { totalMin: number; totalMax: number; parcialMin: number; pctMin: number; pctMax: number; maxIntentos: number };
   prueba: { dias: number; modalidad: "SIN_TARJETA" | "CON_TARJETA" | "AMBAS"; graciaDias: number; aviso1: number; aviso2: number };
-  /** Ciclo de la suscripción restringida (migraciones 160/164): periodo pagado, gracia de la prueba y si la gracia deja operar. */
+  /** Ciclo de la suscripción restringida (migraciones 164/168): periodo pagado, gracia de la prueba y si la gracia deja operar. */
   ciclo: { periodoDias: number; pruebaGraciaDias: number; graciaOpera: boolean };
   comisionDefault: number;
   cambiosComision: {
@@ -196,7 +196,7 @@ const esquemaCiclo = z
   })
   .strict();
 
-/** Ciclo de la suscripción principal (migración 164): periodo pagado, gracia de la prueba y si la gracia deja operar. Aplica a los pagos y vencimientos desde ahora. */
+/** Ciclo de la suscripción principal (migración 168): periodo pagado, gracia de la prueba y si la gracia deja operar. Aplica a los pagos y vencimientos desde ahora. */
 export async function guardarConfigCiclo(entrada: z.input<typeof esquemaCiclo>): Promise<Resultado> {
   try {
     const d = esquemaCiclo.parse(entrada);

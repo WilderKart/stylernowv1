@@ -18,8 +18,8 @@ Worktree `C:\Users\karni\Documents\stylernow-onboarding`, rama `feat/onboarding-
 ## Pruebas ejecutadas
 | Prueba | Resultado |
 |---|---|
-| `tests/sql/limites_plan_149.sql` | pasa |
-| `tests/sql/onboarding_verificacion_150.sql` | pasa |
+| `tests/sql/limites_plan_156.sql` | pasa |
+| `tests/sql/onboarding_verificacion_157.sql` | pasa |
 | Suites previas (aislamiento, seguridad_regresion, auditoria_123, libro, 127, 128, 129, 130, 131, 135, whatsapp, cobro_directo) | pasan |
 | `tsc`, `eslint` (0 errores), `vitest` 127, `next build` | pasan |
 | Navegador local (build de producción, Cloudinary simulado): alta completa, validación de ciudad, plan, prueba, panel, límite de Staff, verificación, CRM, 404 al documento ajeno, 401 sin sesión, 403 con origen ajeno | pasan |

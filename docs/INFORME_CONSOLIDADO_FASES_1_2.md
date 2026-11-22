@@ -33,7 +33,7 @@ Corrida final de esta sesión: **9 suites con falla, 0 con residuo, configuraci�
 | Prueba | Resultado | Notas |
 |---|---|---|
 | `adicionales_restringida_180.sql` (NUEVA) | PASA | Demuestra: plan principal restringido + adicional pagado y activo → sigue no operativa (`negocio_operativo`, `_estado_operativo_en`, sin reservas, invitar/modificar negocio bloqueados); el cron de adicionales y suspender/reactivar el adicional no tocan la principal; al pagar el plan se restaura (operativa, reservas, ya invita usando el cupo adicional); además 51.900 en los 4 planes, máximo 50 configurable, gracia 3, avisos 7/3/1, admin delegado sin acceso, periodo/precio/cantidad congelados por compra |
-| `adicionales_170.sql`, `adicionales_170_concurrencia.sh`, `adicionales_http.sh` (48) | PASAN | Ver FASE2A |
+| `adicionales_169.sql`, `adicionales_170_concurrencia.sh`, `adicionales_http.sh` (48) | PASAN | Ver FASE2A |
 | `tests/integracion/adicionales-pagos.test.ts` (`ADICIONALES_INT=1`) | PASA 9/9 | Mercado Pago SIMULADO (no sandbox real) |
 | vitest (`npx vitest run`) | ver 2.3 | |
 | `npx tsc --noEmit` | PASA (exit 0), también tras regenerar `database.ts` | |
@@ -94,30 +94,30 @@ Adicionales en TODOS los planes; 51.900 COP por adicional y mismo precio inicial
 | Núm. actual | Archivo / origen | Depende de | Reversión | Colisión / nota |
 |---|---|---|---|---|
 | 138-144 | `138_crear_grupo_familiar…` a `144_cerrar_crear_reserva_directo` (varias ramas) | — | no auditada aquí | 139-144 SIN aplicar en la base local (`f1b_141_142` roja por eso) |
-| 145, 146, 148 | `feat/centro-cumplimiento` y `feat/evidencias-legales` (aceptación legal solo servidor, repositorio de evidencias, centro de evidencias SuperSU) | 144 | no auditada aquí | **145 y 146 también existen en el worktree de cierre con OTRO contenido** (`145_quitar_maintain_a_roles_publicos`, `146_session_version_desde_funciones_definer`): colisión de numeración |
+| 145, 146, 148 | `feat/centro-cumplimiento` y `feat/evidencias-legales` (aceptación legal solo servidor, repositorio de evidencias, centro de evidencias SuperSU) | 144 | no auditada aquí | **145 y 146 también existen en el worktree de cierre con OTRO contenido** (`146_quitar_maintain_a_roles_publicos`, `147_session_version_desde_funciones_definer`): colisión de numeración |
 | 147 | `stylernow-evidencias` (staff invitación y autorizaciones), SIN commitear | 145, 146 | no auditada | Aporta `autorizar_staff`/`aceptar_invitacion_staff` que Fase 1 necesita |
-| 149 | `149_limites_de_plan_servidor` (esta rama) | 049, 144 | sí (`.sql.txt` según FASE1) | **Colisión**: `stylernow-legal` usa `149_textos_legales_tawilstack` |
-| 150 | `150_onboarding_v2_y_verificacion` (esta rama) | 149 | sí | **Colisión** con `150_cumplimiento_catalogos_y_calendario` (cumplimiento) |
-| 151 | `151_modelo_roles_capacidades` | 149 | sí | **Colisión** con `151_cumplimiento_casos` |
-| 152 | `152_funcion_central_de_cupo` | 151 | sí | **Colisión** con `152_cumplimiento_notificaciones_y_sla` |
-| 153 | `153_perfil_profesional_del_propietario` | 151, 152 | sí | **Colisión** con `153_cumplimiento_evidencias` |
-| 154 | `154_delegacion_administrativa_minima` | 151 | sí | **Colisión** con `154_cumplimiento_adjuntos_y_consultas` |
-| 155 | `155_invalidar_sesion_controlada` | 151; **146 de cierre** (`session_version` desde funciones definer) | sí | Pendiente de decisión 8 |
-| 157 | `157_normalizacion_roles_existentes` (datos) | 151-155 | sí | Solo aplicada en LOCAL; no hay 156 a propósito |
-| 160 | `160_estado_operativo_suscripcion` | 133, 118, 090 | sí | — |
-| 161 | `161_suscripcion_ciclo_30_dias_bogota` | 160, 133 | sí | — |
-| 162 | `162_guardia_operativa_tablas` | 160 | sí | — |
-| 163 | `163_guardia_operativa_rpc` | 160, 162, **151**, 129/144, 149 | sí | Va después de 151 |
-| 164 | `164_config_suscripcion_superadmin` | 160 | sí | — |
-| 170 | `170_adicionales_config_precios_fechas` | `pais`, `plan`, 123 | sí | — |
-| 171 | `171_adicionales_modelo_lotes` | 170 | sí | — |
-| 172 | `172_adicionales_notificaciones` | 171, 124 | sí | — |
-| 173 | `173_adicionales_motor_estados_y_capacidad` | 171, 172, **152** | sí | — |
-| 174 | `174_adicionales_rpc_propietario` | 170-173 | sí | — |
-| 175 | `175_adicionales_integracion_pagos` | 171-174, 133, 049 | sí (restaura byte a byte) | — |
-| 176 | `176_adicionales_mantenimiento_diario` | 170-173 | sí | — |
-| 177 | `177_adicionales_rpc_superadmin` | 170-173 | sí | — |
-| 178 | `178_adicionales_reembolsos_y_revision_admin` | 171, 173, 177 | sí | — |
+| 149 | `156_limites_de_plan_servidor` (esta rama) | 049, 144 | sí (`.sql.txt` según FASE1) | **Colisión**: `stylernow-legal` usa `156_textos_legales_tawilstack` |
+| 150 | `157_onboarding_v2_y_verificacion` (esta rama) | 149 | sí | **Colisión** con `157_cumplimiento_catalogos_y_calendario` (cumplimiento) |
+| 151 | `158_modelo_roles_capacidades` | 149 | sí | **Colisión** con `158_cumplimiento_casos` |
+| 152 | `159_funcion_central_de_cupo` | 151 | sí | **Colisión** con `159_cumplimiento_notificaciones_y_sla` |
+| 153 | `160_perfil_profesional_del_propietario` | 151, 152 | sí | **Colisión** con `160_cumplimiento_evidencias` |
+| 154 | `161_delegacion_administrativa_minima` | 151 | sí | **Colisión** con `161_cumplimiento_adjuntos_y_consultas` |
+| 155 | `162_invalidar_sesion_controlada` | 151; **146 de cierre** (`session_version` desde funciones definer) | sí | Pendiente de decisión 8 |
+| 157 | `163_normalizacion_roles_existentes` (datos) | 151-155 | sí | Solo aplicada en LOCAL; no hay 156 a propósito |
+| 160 | `164_estado_operativo_suscripcion` | 133, 118, 090 | sí | — |
+| 161 | `165_suscripcion_ciclo_30_dias_bogota` | 160, 133 | sí | — |
+| 162 | `166_guardia_operativa_tablas` | 160 | sí | — |
+| 163 | `167_guardia_operativa_rpc` | 160, 162, **151**, 129/144, 149 | sí | Va después de 151 |
+| 164 | `168_config_suscripcion_superadmin` | 160 | sí | — |
+| 170 | `169_adicionales_config_precios_fechas` | `pais`, `plan`, 123 | sí | — |
+| 171 | `170_adicionales_modelo_lotes` | 170 | sí | — |
+| 172 | `171_adicionales_notificaciones` | 171, 124 | sí | — |
+| 173 | `172_adicionales_motor_estados_y_capacidad` | 171, 172, **152** | sí | — |
+| 174 | `173_adicionales_rpc_propietario` | 170-173 | sí | — |
+| 175 | `174_adicionales_integracion_pagos` | 171-174, 133, 049 | sí (restaura byte a byte) | — |
+| 176 | `175_adicionales_mantenimiento_diario` | 170-173 | sí | — |
+| 177 | `176_adicionales_rpc_superadmin` | 170-173 | sí | — |
+| 178 | `177_adicionales_reembolsos_y_revision_admin` | 171, 173, 177 | sí | — |
 | 20261111000000 | `…marketplace_buscar_texto_ciudad_categoria` | — | n/d | Prefijo por fecha, ya existía |
 
 ### 7.3 Orden recomendado

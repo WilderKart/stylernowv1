@@ -346,7 +346,7 @@ Convención del repo: cada migración con su `NNN_..._REVERSION.sql.txt`, escrit
 Código (no es migración): UI del propietario (`/panel/suscripcion`, `/panel/staff`), server actions, `/admin/adicionales`, módulo `src/lib/pagos/suscripciones/*`, ruta `/api/webhooks/mercadopago/suscripciones`, ajustes de `cupo.ts`/`AvisoPlan`, tipos (`database.ts` regenerado), entrada en route-registry.
 
 ### 4.1 Plan de pruebas
-**SQL** (carpeta `tests/sql/`, estilo `limites_plan_149.sql`, sobre la base local; limpiar solo lo creado y respetar memoria: borrar wallet/venta_producto antes de borrar un negocio de prueba; no borrar datos QA sin "listo"):
+**SQL** (carpeta `tests/sql/`, estilo `limites_plan_156.sql`, sobre la base local; limpiar solo lo creado y respetar memoria: borrar wallet/venta_producto antes de borrar un negocio de prueba; no borrar datos QA sin "listo"):
 1. Pago aprobado (A): contrato → ACTIVO, `vigente_hasta` correcto, cupo +cantidad, historial y auditoría, libro (`PAGO_A_STYLERNOW`).
 2. Rechazado: contrato permanece sin cupo; reintento permitido.
 3. Pendiente: PAGO_PENDIENTE sin cupo.
