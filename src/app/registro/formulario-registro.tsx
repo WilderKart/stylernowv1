@@ -29,13 +29,22 @@ type Campo = "tipo" | "email" | "password" | "confirmar" | "terminos";
  * confirmación + aceptación legal. Al crearla se envía el código de verificación y se pasa a
  * /registro/verificar. El tipo solo decide el recorrido (negocio → onboarding); el servidor lo
  * valida y arma el destino, y nunca lo trata como permiso.
- * El profesional (staff) no se registra aquí: entra por invitación de su barbería.
+ * Con `invitacion` (Staff invitado): correo del invitado BLOQUEADO, sin selector de tipo ni Google;
+ * el servidor vuelve a leer la invitación y usa SU correo, nunca el del formulario.
  */
-export function FormularioRegistro({ siguiente, tipoInicial }: { siguiente: string; tipoInicial: TipoCuenta | null }) {
+export function FormularioRegistro({
+  siguiente,
+  tipoInicial,
+  invitacion,
+}: {
+  siguiente: string;
+  tipoInicial: TipoCuenta | null;
+  invitacion?: { id: string; email: string; negocio: string } | null;
+}) {
   const t = useT();
   const router = useRouter();
   const [tipo, setTipo] = useState<TipoCuenta | null>(tipoInicial);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(invitacion?.email ?? "");
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
   const [acepta, setAcepta] = useState(false);
@@ -50,7 +59,7 @@ export function FormularioRegistro({ siguiente, tipoInicial }: { siguiente: stri
   async function onCrear(e: React.FormEvent) {
     e.preventDefault();
     // Aviso inmediato (el servidor vuelve a validar todo).
-    if (!tipo) {
+    if (!tipo && !invitacion) {
       document.getElementById("tipo-cuenta")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return setError({ campo: "tipo", texto: t("auth.err_tipo") });
     }
@@ -62,7 +71,16 @@ export function FormularioRegistro({ siguiente, tipoInicial }: { siguiente: stri
 
     setLoading(true);
     setError(null);
-    const res = await registrarCuenta({ tipo, email, password, confirmar, aceptaTerminos: acepta, siguiente, turnstile: tokenTs });
+    const res = await registrarCuenta({
+      tipo: invitacion ? "staff" : tipo,
+      email,
+      password,
+      confirmar,
+      aceptaTerminos: acepta,
+      siguiente,
+      turnstile: tokenTs,
+      invitacion: invitacion?.id,
+    });
     // Cada token sirve una sola vez: se pide uno nuevo por si hay que reintentar.
     controlTs.current?.reiniciar();
     if (!res.ok) {
@@ -105,9 +123,10 @@ export function FormularioRegistro({ siguiente, tipoInicial }: { siguiente: stri
           <Hot>{t("auth.reg_t2")}</Hot>
         </>
       }
-      intro={t("auth.reg_intro")}
+      intro={invitacion ? `Te uniste por invitación de ${invitacion.negocio}. Crea tu cuenta con el correo invitado y verifícalo.` : t("auth.reg_intro")}
     >
       <form onSubmit={onCrear} className="flex flex-col gap-4" noValidate>
+        {invitacion ? null : (
         <div id="tipo-cuenta" className="mb-1 flex scroll-mt-20 flex-col gap-2">
           <SelectorTipoCuenta
             valor={tipo}
@@ -120,6 +139,7 @@ export function FormularioRegistro({ siguiente, tipoInicial }: { siguiente: stri
           />
           {error?.campo === "tipo" ? <ErrorForm className="mt-1" >{error.texto}</ErrorForm> : null}
         </div>
+        )}
 
         <div className="flex flex-col gap-2">
           <Input
@@ -132,6 +152,8 @@ export function FormularioRegistro({ siguiente, tipoInicial }: { siguiente: stri
             placeholder={t("login.correo_ph")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            readOnly={Boolean(invitacion)}
+            aria-readonly={Boolean(invitacion) || undefined}
             aria-invalid={error?.campo === "email" || undefined}
           />
           {errorDe("email")}
@@ -177,10 +199,13 @@ export function FormularioRegistro({ siguiente, tipoInicial }: { siguiente: stri
           <ArrowUpRight className="size-[18px]" aria-hidden />
         </Button>
 
-        <Separador>{t("login.o")}</Separador>
-        <BotonGoogle texto={t("login.google_registro")} onClick={onGoogle} cargando={googleCargando} />
-
-        <CambioPantalla pregunta={t("auth.ya_tienes")} accion={t("auth.ingresa")} href={`/login${qs}`} />
+        {invitacion ? null : (
+          <>
+            <Separador>{t("login.o")}</Separador>
+            <BotonGoogle texto={t("login.google_registro")} onClick={onGoogle} cargando={googleCargando} />
+            <CambioPantalla pregunta={t("auth.ya_tienes")} accion={t("auth.ingresa")} href={`/login${qs}`} />
+          </>
+        )}
       </form>
     </PantallaAuth>
   );

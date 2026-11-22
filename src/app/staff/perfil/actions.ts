@@ -1,5 +1,6 @@
 "use server";
 
+import { configCloudinary, subirImagenCloudinary } from "@/lib/almacenamiento/cloudinary";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -62,6 +63,22 @@ export async function subirFotoPerfilStaff(dataUrl: string): Promise<Resultado<{
     const ext = mime.split("/")[1] === "jpeg" ? "jpg" : mime.split("/")[1];
     const bytes = Buffer.from(base64, "base64");
     if (bytes.byteLength > 5 * 1024 * 1024) return { ok: false, error: "La imagen no puede superar 5 MB." };
+
+    // Cloudinary (decisión B) solo si está configurado; si no, Supabase Storage como hasta hoy.
+    // La foto es de entrega pública (es la que se publica con autorización); la visibilidad la
+    // decide `staff_es_publicable`, no la URL. No se migran ni borran fotos anteriores.
+    if (configCloudinary()) {
+      try {
+        const subida = await subirImagenCloudinary({ bytes, mime, carpeta: `stylernow/staff/${userId}`, publicId: "foto" });
+        await supabase.from("staff").update({ foto_url: subida.url }).eq("usuario_id", userId);
+        revalidatePath("/staff/perfil");
+        return { ok: true, data: { url: subida.url } };
+      } catch (e) {
+        const codigo = e instanceof Error ? e.message : "";
+        if (codigo === "TIPO_NO_PERMITIDO") return { ok: false, error: "Usa una imagen JPG, PNG o WebP." };
+        return { ok: false, error: "No pudimos subir la foto. Intenta de nuevo." };
+      }
+    }
 
     const ruta = `${userId}/foto.${ext}`;
     const { error: eUpload } = await supabase.storage.from("avatars").upload(ruta, bytes, { contentType: mime, upsert: true });
@@ -211,5 +228,89 @@ export async function eliminarMiBloqueo(id: string): Promise<Resultado> {
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
+// ── Autorizaciones del profesional (tratamiento y publicación) ────────────────
+// Toda la regla vive en la base (`autorizar_staff`, `revocar_publicacion_staff`,
+// `estado_autorizaciones_staff`, migración 148): el negocio sale del vínculo propio y la
+// evidencia queda en el repositorio legal; aquí solo se traducen errores.
+
+export interface MisAutorizaciones {
+  tieneFoto: boolean;
+  tratamiento: string | null;
+  tratamientoAt: string | null;
+  publicacion: string | null;
+  publicacionAt: string | null;
+  publicable: boolean;
+  enTransicion: boolean;
+  transicionFin: string | null;
+}
+
+const ERRORES_AUTORIZACION: Record<string, string> = {
+  REQUIERE_TRATAMIENTO: "Primero autoriza el tratamiento de tus datos para tu vínculo profesional.",
+  SIN_VINCULO: "No encontramos tu vínculo activo con un negocio.",
+  TEXTO_NO_DISPONIBLE: "El texto de esta autorización no está disponible. Intenta más tarde.",
+  NO_AUTENTICADO: "Tu sesión venció. Vuelve a ingresar.",
+};
+
+function errorAutorizacion(mensaje: string) {
+  const clave = Object.keys(ERRORES_AUTORIZACION).find((k) => mensaje.includes(k));
+  return clave ? ERRORES_AUTORIZACION[clave] : "No pudimos guardar tu decisión. Intenta de nuevo.";
+}
+
+type Rpc = { rpc: (n: string, a?: object) => Promise<{ data: unknown; error: { message: string } | null }> };
+
+export async function obtenerMisAutorizaciones(negocioId: string): Promise<Resultado<MisAutorizaciones>> {
+  try {
+    const { supabase, userId } = await usuarioActual();
+    const { data, error } = await (supabase as unknown as Rpc).rpc("estado_autorizaciones_staff", { p_negocio: negocioId });
+    if (error) return { ok: false, error: errorAutorizacion(error.message) };
+    const fila = ((data ?? []) as Array<Record<string, unknown>>).find((f) => f.staff_id === userId);
+    if (!fila) return { ok: false, error: ERRORES_AUTORIZACION.SIN_VINCULO };
+    return {
+      ok: true,
+      data: {
+        tieneFoto: Boolean(fila.tiene_foto),
+        tratamiento: (fila.tratamiento as string | null) ?? null,
+        tratamientoAt: (fila.tratamiento_at as string | null) ?? null,
+        publicacion: (fila.publicacion as string | null) ?? null,
+        publicacionAt: (fila.publicacion_at as string | null) ?? null,
+        publicable: Boolean(fila.publicable),
+        enTransicion: Boolean(fila.en_transicion),
+        transicionFin: (fila.transicion_fin as string | null) ?? null,
+      },
+    };
+  } catch {
+    return { ok: false, error: "No pudimos cargar tus autorizaciones." };
+  }
+}
+
+/** Otorga una autorización desde el perfil. Nunca se marca sola: requiere esta acción explícita. */
+export async function autorizarDesdePerfil(documento: "tratamiento" | "publicacion"): Promise<Resultado> {
+  try {
+    const { supabase } = await usuarioActual();
+    const { error } = await (supabase as unknown as Rpc).rpc("autorizar_staff", {
+      p_documento: documento === "tratamiento" ? "AUTORIZACION_STAFF_TRATAMIENTO" : "AUTORIZACION_STAFF_PUBLICACION",
+      p_canal: "perfil",
+    });
+    if (error) return { ok: false, error: errorAutorizacion(error.message) };
+    revalidatePath("/staff/perfil");
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "No pudimos guardar tu decisión. Intenta de nuevo." };
+  }
+}
+
+/** Revoca la publicación del perfil (nuevo evento REVOCA; la aceptación previa se conserva como evidencia). */
+export async function revocarPublicacion(): Promise<Resultado> {
+  try {
+    const { supabase } = await usuarioActual();
+    const { error } = await (supabase as unknown as Rpc).rpc("revocar_publicacion_staff");
+    if (error) return { ok: false, error: errorAutorizacion(error.message) };
+    revalidatePath("/staff/perfil");
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "No pudimos guardar tu decisión. Intenta de nuevo." };
   }
 }

@@ -18,10 +18,19 @@ import { iniciarSesionConContrasena, iniciarSesionConGoogle, reenviarCodigoVerif
  * El código por correo ya no es un método de ingreso. Crear cuenta vive en /registro y
  * recuperar la contraseña en /login/olvide: cada pantalla tiene una sola acción principal.
  */
-export function FormularioIngreso({ siguiente, aviso }: { siguiente: string; aviso?: "recuperada" | "enlace" }) {
+export function FormularioIngreso({
+  siguiente,
+  aviso,
+  invitacion,
+}: {
+  siguiente: string;
+  aviso?: "recuperada" | "enlace";
+  /** Staff invitado que ya tiene cuenta: correo precargado y aviso de la invitación. */
+  invitacion?: { email: string; negocio: string } | null;
+}) {
   const t = useT();
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(invitacion?.email ?? "");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleCargando, setGoogleCargando] = useState(false);
@@ -101,6 +110,7 @@ export function FormularioIngreso({ siguiente, aviso }: { siguiente: string; avi
       intro={t("auth.ing_intro")}
     >
       <form onSubmit={onIngresar} className="flex flex-col gap-4" noValidate>
+        {invitacion ? <Aviso>Ingresa con tu cuenta para continuar con la invitación de {invitacion.negocio}.</Aviso> : null}
         {aviso === "recuperada" ? <Aviso>{t("auth.aviso_recuperada")}</Aviso> : null}
         {aviso === "enlace" ? <Aviso>{t("auth.aviso_enlace")}</Aviso> : null}
 

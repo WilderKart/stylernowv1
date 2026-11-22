@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import {
   Activity,
   BookOpen,
+  FileCheck,
   ChartColumn,
   Crown,
   HeartPulse,
@@ -65,6 +66,7 @@ const GRUPOS: { titulo?: string; items: Item[] }[] = [
     items: [
       { href: "/admin/reglas", etiqueta: "Reglas y políticas", icono: Scale },
       { href: "/admin/libro", etiqueta: "Libro contable", icono: BookOpen },
+      { href: "/admin/evidencias", etiqueta: "Evidencias legales", icono: FileCheck },
       { href: "/admin/auditoria", etiqueta: "Auditoría", icono: Activity },
       { href: "/admin/sistema", etiqueta: "Estado del sistema", icono: HeartPulse },
       { href: "/admin/configuracion", etiqueta: "Configuración", icono: Settings },

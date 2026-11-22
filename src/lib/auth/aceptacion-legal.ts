@@ -1,5 +1,23 @@
 import type { createClient } from "@/lib/supabase/server";
 
+type Supa = Awaited<ReturnType<typeof createClient>>;
+/** Origen de la aceptación (columna `aceptacion_legal.origen`, migración 146). */
+export type OrigenAceptacion = "registro" | "perfil" | "legal_aceptar" | "ingreso";
+
+/**
+ * Única vía de escritura (migración 146): la función `registrar_aceptacion_legal` toma la identidad
+ * de la sesión y la hora del servidor, y solo admite versiones VIGENTES. El navegador ya no puede
+ * insertar, cambiar ni borrar filas de `aceptacion_legal`.
+ */
+async function registrarEnServidor(supabase: Supa, ids: string[], origen: OrigenAceptacion, tipo: "EXPRESA" | "TACITA") {
+  if (!ids.length) return;
+  const { error } = await (supabase as unknown as { rpc: (n: string, a: object) => Promise<{ error: { message: string } | null }> }).rpc(
+    "registrar_aceptacion_legal",
+    { p_texto_ids: ids, p_origen: origen, p_tipo: tipo }
+  );
+  if (error) console.error("[aceptacion-legal] no se pudo registrar", origen, tipo, error.message);
+}
+
 export interface TextoLegalPendiente {
   id: string;
   tipo: string;
@@ -62,14 +80,9 @@ export async function registrarAceptacionLegal(
     }
   }
 
-  if (paraAceptarEnSilencio.length) {
-    await supabase
-      .from("aceptacion_legal")
-      .upsert(
-        paraAceptarEnSilencio.map((texto_legal_id) => ({ usuario_id: usuarioId, texto_legal_id })),
-        { onConflict: "usuario_id,texto_legal_id", ignoreDuplicates: true }
-      );
-  }
+  // Regla vigente (no se cambia aquí): los cambios NO materiales se registran al ingresar sin acción
+  // de la persona. La evidencia los marca como TÁCITOS para no aparentar una aceptación expresa.
+  if (paraAceptarEnSilencio.length) await registrarEnServidor(supabase, paraAceptarEnSilencio, "ingreso", "TACITA");
 
   return { pendientesMateriales };
 }
@@ -137,42 +150,26 @@ export async function faltaAceptarVigentes(
 }
 
 /**
- * Registro con contraseña (2026-11-15): la casilla se marca ANTES de existir la sesión, así que
- * `registrarCuenta` guarda en los metadatos de Auth la hora y las versiones exactas aceptadas.
- * Al verificar el correo (ya con sesión) se convierten en filas de `aceptacion_legal` (con su
- * `aceptado_at`) y se fija `perfil.consentimiento_datos_at`. Solo se registran versiones que siguen
- * existiendo; si el texto cambió en medio, la versión nueva queda pendiente y se pide en /legal/aceptar.
+ * Registro con contraseña: desde la migración 146 la aceptación se guarda EN EL SERVIDOR en el mismo
+ * instante del registro (`registrar_aceptacion_legal_registro`, con la hora del servidor), no al
+ * verificar el correo ni con la hora de los metadatos de Auth (que el usuario puede editar).
+ * Esta función solo dice si la cuenta vino del registro con casilla (para enrutar) y, para cuentas
+ * creadas ANTES de la 145 que aún no tienen la fila, la registra ahora con la hora real de servidor.
  */
 export async function registrarAceptacionDeRegistro(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Supa,
   usuario: { id: string; user_metadata?: Record<string, unknown> | null }
 ): Promise<boolean> {
   const meta = usuario.user_metadata ?? {};
   const ids = Array.isArray(meta.acepta_legal_ids) ? meta.acepta_legal_ids.filter((x): x is string => typeof x === "string") : [];
-  if (typeof meta.acepta_legal_at !== "string" || !ids.length) return false;
+  if (!ids.length) return false;
   const vigentes = new Set(await idsTextosVigentes(supabase));
   const validos = ids.filter((id) => vigentes.has(id));
-  if (!validos.length) return false;
-  await aceptarTextosLegales(supabase, usuario.id, validos);
-  await supabase
-    .from("perfil")
-    .update({ consentimiento_datos_at: meta.acepta_legal_at })
-    .eq("id", usuario.id)
-    .is("consentimiento_datos_at", null);
+  if (validos.length) await registrarEnServidor(supabase, validos, "registro", "EXPRESA");
   return true;
 }
 
-/** Acepta explícitamente los textos legales pendientes (usado por `/legal/aceptar`). */
-export async function aceptarTextosLegales(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  usuarioId: string,
-  textoLegalIds: string[]
-) {
-  if (!textoLegalIds.length) return;
-  await supabase
-    .from("aceptacion_legal")
-    .upsert(
-      textoLegalIds.map((texto_legal_id) => ({ usuario_id: usuarioId, texto_legal_id })),
-      { onConflict: "usuario_id,texto_legal_id", ignoreDuplicates: true }
-    );
+/** Aceptación EXPRESA de textos vigentes (casilla marcada o botón «Aceptar»), con su origen. */
+export async function aceptarTextosLegales(supabase: Supa, _usuarioId: string, textoLegalIds: string[], origen: OrigenAceptacion = "legal_aceptar") {
+  await registrarEnServidor(supabase, textoLegalIds, origen, "EXPRESA");
 }

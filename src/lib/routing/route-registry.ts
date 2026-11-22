@@ -54,7 +54,9 @@ export const RUTAS: RutaRegistro[] = [
   { path: "/gift-cards", publica: false, roles: ["cliente"] },
   { path: "/checkout/membresia", publica: false, roles: ["cliente"], dinamica: true },
   { path: "/reserva", publica: false, roles: ["cliente"], dinamica: true },
-  { path: "/invitacion", publica: false, roles: ["staff", "cliente"], dinamica: true },
+  // Pública: la pantalla de bienvenida no requiere sesión (solo muestra negocio y correo enmascarado);
+  // aceptar o rechazar exige sesión del correo invitado, validado en la base.
+  { path: "/invitacion", publica: true, roles: ["staff", "cliente"], dinamica: true },
 
   // Panel — Barbería/Guardian
   { path: "/panel", publica: false, roles: ["barberia", "guardian"] },
