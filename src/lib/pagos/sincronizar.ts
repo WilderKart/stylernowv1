@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { buscarPagoPorReferencia, obtenerPago, reembolsar, type PagoPasarela } from "./mercadopago";
+import { buscarPagoPorReferencia, obtenerPago, type PagoPasarela } from "./mercadopago";
 import { conexionesDeCuenta, cuentaDePago, cuentaVendedorDeConexion, tokenDeConexion } from "./conexiones";
 import { entornoPagos, liveModeCoincide } from "./entorno";
 import { procesarReembolsosSinFallar } from "./reembolsos";
@@ -368,7 +368,7 @@ async function sincronizarConPago(
   const admin = createAdminClient();
 
   // Webhook cuyo `external_reference` no corresponde a ningún `pago` conocido:
-  // se registra como HUERFANO para revisión y se devuelve el dinero si se cobró
+  // se registra como HUERFANO y pasa a revisión (sin reembolso automático)
   // (05-API/06_Webhooks.md, caso límite — nunca se descarta en silencio).
   const { data: pagoFila } =
     pagoId && /^[0-9a-f-]{36}$/i.test(pagoId)
@@ -409,17 +409,14 @@ async function sincronizarConPago(
       },
     });
 
-    // Se devuelve desde la misma cuenta que lo cobró. Clave estable: el reintento no duplica.
-    // Si la cuenta se identificó solo por el user_id del aviso (URL del panel), NO se reembolsa
-    // automáticamente: ese vendedor puede tener ventas ajenas a StylerNow en su cuenta.
+    // Cuenta identificada solo por el user_id del aviso (URL del panel): puede tener ventas ajenas a StylerNow; se deja el motivo propio.
     if (!opciones.reembolsarHuerfano) return { estado: "REQUIERE_REVISION", motivo: "HUERFANO_CUENTA_VENDEDOR" };
-    // Barberos adicionales (FASE 2A): una referencia que no tiene forma de `pago.id` (p. ej. «ADIC-<lote>», de otro concepto o de
-    // un flujo futuro) NO es un huérfano de reserva: no se reembolsa a ciegas. Queda registrada arriba (WEBHOOK_HUERFANO) y se
-    // devuelve a revisión para que SuperAdmin decida con la cola auditable. Los huérfanos con forma de UUID conservan la regla
-    // histórica (05-API/06_Webhooks.md).
-    if (!pagoId || !/^[0-9a-f-]{36}$/i.test(pagoId)) return { estado: "REQUIERE_REVISION", motivo: "REFERENCIA_NO_RECONOCIDA" };
-    if (pasarela.estado === "APROBADO") await reembolsar(pasarela.id, undefined, `huerfano-${pasarela.id}`, token);
-    return { estado: "REEMBOLSADO", motivo: "HUERFANO" };
+    // Decisión del propietario (2026-11-22): TODO huérfano va a revisión, sin reembolso automático. Un pago que no corresponde a ningún
+    // `pago` conocido (referencia con forma de UUID, «ADIC-<lote>», de otro concepto o de un flujo futuro) puede ser una venta legítima
+    // o un cobro del mismo vendedor: se registra arriba (WEBHOOK_HUERFANO) y SuperAdmin decide con la cola auditable. Devolver dinero
+    // a ciegas desde el servidor es irreversible; el reembolso, si procede, lo ejecuta una persona.
+    const uuidLike = !!pagoId && /^[0-9a-f-]{36}$/i.test(pagoId);
+    return { estado: "REQUIERE_REVISION", motivo: uuidLike ? "HUERFANO_A_REVISION" : "REFERENCIA_NO_RECONOCIDA" };
   }
 
   return aplicar(pago.id, pasarela);
