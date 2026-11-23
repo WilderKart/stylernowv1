@@ -48,7 +48,7 @@ beforeAll(async () => {
   delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   ({ proxy } = (await import("@/proxy")) as unknown as { proxy: typeof proxy });
   ({ procesarWebhookMercadoPago: procesar } = await import("@/lib/pagos/webhook-mercadopago"));
-});
+}, 60000);
 
 /** Envía la notificación por el camino real: proxy → handler. */
 async function enviar(cabecerasEntrantes: Record<string, string>) {

@@ -37,6 +37,8 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+      - name: Secretos en bundle
+        run: npm run check:bundle
 
   auditoria-dependencias:
     runs-on: ubuntu-latest

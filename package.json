@@ -8,9 +8,13 @@
     "start": "next start",
     "lint": "eslint",
     "check:auth": "node tools/check-auth-coverage.mjs",
+    "check:bundle": "node tools/check-bundle-secrets.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:concurrencia": "node tools/test-concurrencia.mjs",
+    "backup:remoto": "node tools/backup-supabase.mjs",
+    "restore:drill": "node tools/restaurar-backup.mjs",
+    "check:paridad": "node tools/verificar-paridad-migraciones.mjs",
     "docs:routes": "node tools/generar-route-registry-doc.mjs"
   },
   "dependencies": {
