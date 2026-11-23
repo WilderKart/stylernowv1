@@ -1,5 +1,6 @@
 "use server";
 
+import { exigirOperativo, MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -14,6 +15,12 @@ async function usuarioActual() {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("NO_AUTENTICADO");
   return { supabase, userId: user.id };
+}
+
+async function exigirAccesoReportes(negocioId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const operativo = await exigirOperativo(negocioId);
+  if (!operativo.ok) return { ok: false, error: MENSAJE_RESTRINGIDA };
+  return { ok: true };
 }
 
 export interface PuntoIngreso {
@@ -31,6 +38,8 @@ export async function obtenerIngresosPeriodo(datos: {
 }): Promise<Resultado<PuntoIngreso[]>> {
   try {
     const { supabase } = await usuarioActual();
+    const gate = await exigirAccesoReportes(datos.negocioId);
+    if (!gate.ok) return gate;
     const { data, error } = await supabase.rpc("reportes_ingresos_periodo", {
       p_negocio_id: datos.negocioId,
       p_sede_id: datos.sedeId ?? undefined,
@@ -58,6 +67,8 @@ export interface ServicioTop {
 export async function obtenerServiciosTop(negocioId: string, sedeId?: string | null): Promise<Resultado<ServicioTop[]>> {
   try {
     const { supabase } = await usuarioActual();
+    const gate = await exigirAccesoReportes(negocioId);
+    if (!gate.ok) return gate;
     const { data, error } = await supabase.rpc("reportes_servicios_top", {
       p_negocio_id: negocioId,
       p_sede_id: sedeId ?? undefined,
@@ -93,6 +104,8 @@ export async function obtenerRankingStaffPeriodo(datos: {
 }): Promise<Resultado<RankingStaffReporte[]>> {
   try {
     const { supabase } = await usuarioActual();
+    const gate = await exigirAccesoReportes(datos.negocioId);
+    if (!gate.ok) return gate;
     const { data, error } = await supabase.rpc("reportes_ranking_staff", {
       p_negocio_id: datos.negocioId,
       p_sede_id: datos.sedeId ?? undefined,
@@ -123,6 +136,8 @@ export async function obtenerRankingStaffPeriodo(datos: {
 export async function obtenerMiPosicionMarketplace(negocioId: string): Promise<Resultado<string>> {
   try {
     const { supabase } = await usuarioActual();
+    const gate = await exigirAccesoReportes(negocioId);
+    if (!gate.ok) return gate;
     const { data, error } = await supabase.rpc("marketplace_mi_posicion", { p_negocio_id: negocioId });
     if (error) return { ok: false, error: error.message };
     return { ok: true, data: data as string };
@@ -145,6 +160,8 @@ export interface ResenaRecibida {
 export async function listarResenas(negocioId: string): Promise<Resultado<ResenaRecibida[]>> {
   try {
     const { supabase } = await usuarioActual();
+    const gate = await exigirAccesoReportes(negocioId);
+    if (!gate.ok) return gate;
     const { data, error } = await supabase
       .from("resena")
       .select("id, calificacion, comentario, respuesta_negocio, created_at, cliente:cliente_id (nombre)")
@@ -173,6 +190,11 @@ export async function reportarResena(resenaId: string, motivo: string): Promise<
   try {
     const { supabase } = await usuarioActual();
     if (!motivo.trim()) return { ok: false, error: "Cuéntanos el motivo del reporte." };
+    const { data: resena } = await supabase.from("resena").select("negocio_id").eq("id", resenaId).maybeSingle();
+    if (resena?.negocio_id) {
+      const gate = await exigirAccesoReportes(resena.negocio_id);
+      if (!gate.ok) return gate;
+    }
     const { error } = await supabase.rpc("reportar_resena", { p_resena_id: resenaId, p_motivo: motivo.trim() });
     if (error) return { ok: false, error: error.message };
     revalidatePath("/panel/reportes");
@@ -186,6 +208,11 @@ export async function responderResena(resenaId: string, respuesta: string): Prom
   try {
     const { supabase } = await usuarioActual();
     if (!respuesta.trim()) return { ok: false, error: "La respuesta no puede estar vacía." };
+    const { data: resena } = await supabase.from("resena").select("negocio_id").eq("id", resenaId).maybeSingle();
+    if (resena?.negocio_id) {
+      const gate = await exigirAccesoReportes(resena.negocio_id);
+      if (!gate.ok) return gate;
+    }
     const { error } = await supabase.from("resena").update({ respuesta_negocio: respuesta.trim() }).eq("id", resenaId);
     if (error) return { ok: false, error: error.message };
     revalidatePath("/panel/reportes");
@@ -214,6 +241,8 @@ export interface HorarioMuerto {
 export async function obtenerHorariosMuertos(negocioId: string): Promise<Resultado<HorarioMuerto[]>> {
   try {
     const { supabase } = await usuarioActual();
+    const gate = await exigirAccesoReportes(negocioId);
+    if (!gate.ok) return gate;
     const { data, error } = await supabase.rpc("detectar_horarios_muertos", { p_negocio_id: negocioId });
     if (error) return { ok: false, error: error.message };
     return {

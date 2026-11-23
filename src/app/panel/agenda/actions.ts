@@ -372,3 +372,19 @@ export async function marcarNoShow(reservaId: string, motivo?: string): Promise<
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
   }
 }
+
+/** Completa una cita fuera de POS: dispara fidelidad idempotente sin cobrar productos. */
+export async function completarCitaSinPos(reservaId: string): Promise<Resultado> {
+  try {
+    const { supabase } = await usuarioActual();
+    const rpc = supabase.rpc.bind(supabase) as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+    const { error } = await rpc("completar_reserva_sin_pos", { p_reserva_id: reservaId });
+    if (error) return { ok: false, error: traducirError(error.message) };
+    revalidatePath("/panel/agenda");
+    revalidatePath("/panel/lealtad");
+    revalidatePath("/panel/pos");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}

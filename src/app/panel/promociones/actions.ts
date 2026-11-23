@@ -1,6 +1,7 @@
 "use server";
 
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { exigirOperativo, MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -31,6 +32,7 @@ type Resultado<T = undefined> = ({ ok: true } & (T extends undefined ? object : 
 const MENSAJES: Record<string, string> = {
   NO_AUTENTICADO: "Inicia sesión para continuar.",
   NO_AUTORIZADO: "Solo el dueño del negocio puede administrar las promociones.",
+  SUSCRIPCION_RESTRINGIDA: MENSAJE_RESTRINGIDA,
   oferta_negocio_porcentaje_max_chk: "Un descuento en porcentaje no puede ser mayor que 100 %.",
 };
 
@@ -40,7 +42,7 @@ function traducir(m: string) {
 }
 
 /** Negocio del dueño derivado de la sesión en el servidor (nunca del navegador). Solo el dueño: guardian y profesional quedan fuera. */
-async function sesionDueno() {
+async function sesionDueno(opciones?: { requerirOperativo?: boolean }) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -48,6 +50,10 @@ async function sesionDueno() {
   if (!user) throw new Error("NO_AUTENTICADO");
   const contexto = await resolverContexto();
   if (contexto.rol !== "BARBERIA" || !contexto.negocioId || contexto.userId !== user.id) throw new Error("NO_AUTORIZADO");
+  if (opciones?.requerirOperativo) {
+    const operativo = await exigirOperativo(contexto.negocioId);
+    if (!operativo.ok) throw new Error("SUSCRIPCION_RESTRINGIDA");
+  }
   return { supabase, negocioId: contexto.negocioId };
 }
 
@@ -130,7 +136,7 @@ export async function crearPromocion(datos: EntradaPromocion): Promise<Resultado
   try {
     const p = entrada.safeParse(datos);
     if (!p.success) return { ok: false, error: p.error.issues[0]?.message ?? "Datos inválidos." };
-    const { supabase, negocioId } = await sesionDueno();
+    const { supabase, negocioId } = await sesionDueno({ requerirOperativo: true });
     const { error } = await supabase.from("oferta_negocio").insert({ ...aFila(p.data), negocio_id: negocioId, activa: true });
     if (error) return { ok: false, error: traducir(error.message) };
     revalidatePath("/panel/promociones");
@@ -145,7 +151,7 @@ export async function actualizarPromocion(id: string, datos: EntradaPromocion): 
     if (!z.string().uuid().safeParse(id).success) return { ok: false, error: "Promoción inválida." };
     const p = entrada.safeParse(datos);
     if (!p.success) return { ok: false, error: p.error.issues[0]?.message ?? "Datos inválidos." };
-    const { supabase, negocioId } = await sesionDueno();
+    const { supabase, negocioId } = await sesionDueno({ requerirOperativo: true });
     const { data, error } = await supabase.from("oferta_negocio").update(aFila(p.data)).eq("id", id).eq("negocio_id", negocioId).select("id");
     if (error) return { ok: false, error: traducir(error.message) };
     if (!data?.length) return { ok: false, error: "No encontramos esa promoción en tu negocio." };
@@ -160,7 +166,7 @@ export async function actualizarPromocion(id: string, datos: EntradaPromocion): 
 export async function cambiarEstadoPromocion(id: string, activa: boolean): Promise<Resultado> {
   try {
     if (!z.string().uuid().safeParse(id).success || typeof activa !== "boolean") return { ok: false, error: "Promoción inválida." };
-    const { supabase, negocioId } = await sesionDueno();
+    const { supabase, negocioId } = await sesionDueno({ requerirOperativo: true });
     const { data, error } = await supabase.from("oferta_negocio").update({ activa }).eq("id", id).eq("negocio_id", negocioId).select("id");
     if (error) return { ok: false, error: traducir(error.message) };
     if (!data?.length) return { ok: false, error: "No encontramos esa promoción en tu negocio." };
@@ -175,7 +181,7 @@ export async function cambiarEstadoPromocion(id: string, activa: boolean): Promi
 export async function eliminarPromocion(id: string): Promise<Resultado> {
   try {
     if (!z.string().uuid().safeParse(id).success) return { ok: false, error: "Promoción inválida." };
-    const { supabase, negocioId } = await sesionDueno();
+    const { supabase, negocioId } = await sesionDueno({ requerirOperativo: true });
     const { data, error } = await supabase.from("oferta_negocio").delete().eq("id", id).eq("negocio_id", negocioId).select("id");
     if (error) return { ok: false, error: traducir(error.message) };
     if (!data?.length) return { ok: false, error: "No encontramos esa promoción en tu negocio." };

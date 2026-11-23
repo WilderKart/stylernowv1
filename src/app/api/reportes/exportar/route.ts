@@ -1,8 +1,10 @@
 import { generarExcel } from "@/lib/export/excel";
 import { generarReportePdf } from "@/lib/export/pdf";
+import { exigirOperativo } from "@/lib/suscripcion/estado-operativo";
 import { createClient } from "@/lib/supabase/server";
 import { formatCOP } from "@/lib/utils";
 import type { NextRequest } from "next/server";
+import { z } from "zod";
 
 /**
  * GET /api/reportes/exportar — ADR-014, Fase D. Ruta dedicada (no Server
@@ -13,23 +15,36 @@ import type { NextRequest } from "next/server";
  * propia autorización (`tiene_acceso_interno`) — esta ruta nunca decide
  * por sí misma quién puede exportar qué.
  */
+const ESQUEMA_EXPORTAR = z.object({
+  negocioId: z.string().uuid(),
+  formato: z.enum(["excel", "pdf"]),
+  desde: z.string().date().optional(),
+  hasta: z.string().date().optional(),
+  agrupacion: z.enum(["semana", "mes"]).default("mes"),
+});
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const negocioId = searchParams.get("negocioId");
-  const formato = searchParams.get("formato"); // "excel" | "pdf"
-  const desde = searchParams.get("desde") ?? undefined;
-  const hasta = searchParams.get("hasta") ?? undefined;
-  const agrupacion = (searchParams.get("agrupacion") as "semana" | "mes") ?? "mes";
-
-  if (!negocioId || (formato !== "excel" && formato !== "pdf")) {
+  const parse = ESQUEMA_EXPORTAR.safeParse({
+    negocioId: searchParams.get("negocioId") ?? undefined,
+    formato: searchParams.get("formato") ?? undefined,
+    desde: searchParams.get("desde") ?? undefined,
+    hasta: searchParams.get("hasta") ?? undefined,
+    agrupacion: searchParams.get("agrupacion") ?? "mes",
+  });
+  if (!parse.success) {
     return new Response("Parámetros inválidos", { status: 400 });
   }
+  const { negocioId, formato, desde, hasta, agrupacion } = parse.data;
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return new Response("No autorizado", { status: 401 });
+
+  const operativo = await exigirOperativo(negocioId);
+  if (!operativo.ok) return new Response("Suscripción restringida", { status: 403 });
 
   const [{ data: ingresos, error }, { data: negocio }] = await Promise.all([
     supabase.rpc("reportes_ingresos_periodo", { p_negocio_id: negocioId, p_desde: desde, p_hasta: hasta, p_agrupacion: agrupacion }),

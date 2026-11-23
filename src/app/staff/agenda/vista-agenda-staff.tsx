@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/card";
 import { hora, sumarDias } from "@/lib/formato";
 import { useEffect, useState } from "react";
-import { hacerCheckIn, hacerCheckOut, listarMisCitas, type CitaStaff } from "./actions";
+import { completarCitaSinPos, hacerCheckIn, hacerCheckOut, listarMisCitas, type CitaStaff } from "./actions";
 
 const ESTADO_TONO: Record<string, "success" | "danger" | "accent" | "neutral"> = {
   CONFIRMADA: "accent",
@@ -67,6 +67,15 @@ export function VistaAgendaStaff({
     cargarFecha(fecha);
   }
 
+  async function onCompletarSinPos(id: string) {
+    setAccionando(id);
+    setError(null);
+    const res = await completarCitaSinPos(id);
+    setAccionando(null);
+    if (!res.ok) return setError(res.error);
+    cargarFecha(fecha);
+  }
+
   return (
     <div>
       <div className="mb-5 flex items-center justify-between gap-3">
@@ -123,7 +132,12 @@ export function VistaAgendaStaff({
                       Check-out
                     </Button>
                   ) : null}
-                  {c.checkoutAt ? <p className="self-center text-[11px] text-text-faint">Atención finalizada — falta cobrar en Caja</p> : null}
+                  {c.checkoutAt && c.estado !== "COMPLETADA" ? (
+                    <Button size="sm" variant="ghost" loading={accionando === c.id} onClick={() => onCompletarSinPos(c.id)}>
+                      Completar sin POS
+                    </Button>
+                  ) : null}
+                  {c.checkoutAt && c.estado !== "COMPLETADA" ? <p className="self-center text-[11px] text-text-faint">Atención finalizada — falta cobrar en Caja</p> : null}
                 </div>
               </li>
             );

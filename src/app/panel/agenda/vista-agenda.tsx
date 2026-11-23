@@ -8,9 +8,10 @@ import { formatCOP } from "@/lib/utils";
 import { Fragment, useCallback, useEffect, useState, useTransition } from "react";
 import { useEnLinea } from "@/lib/hooks/use-en-linea";
 import {
+  marcarNoShow,
   buscarClienteExistente,
   cancelarCita,
-  marcarNoShow,
+  completarCitaSinPos,
   crearBloqueo,
   crearCitaManual,
   eliminarBloqueo,
@@ -585,6 +586,16 @@ function PanelCita({
     onCambio();
   }
 
+  async function onCompletarSinPos() {
+    if (!confirm("¿Marcar esta cita como completada sin cobro en POS? Se activará la fidelidad correspondiente una sola vez.")) return;
+    setCargando(true);
+    setError(null);
+    const res = await completarCitaSinPos(cita.id);
+    setCargando(false);
+    if (!res.ok) return setError(res.error);
+    onCambio();
+  }
+
   async function onConfirmarCancelar() {
     setCargando(true);
     setError(null);
@@ -635,6 +646,11 @@ function PanelCita({
                   </Button>
                 ) : null}
               </>
+            ) : null}
+            {["CONFIRMADA", "EN_CURSO"].includes(cita.estado) ? (
+              <Button variant="secondary" loading={cargando} onClick={onCompletarSinPos}>
+                Completar sin POS
+              </Button>
             ) : null}
             {cita.estado !== "COMPLETADA" && cita.estado !== "NO_SHOW" ? (
               <Button variant="danger" onClick={() => setAccion("cancelar")}>

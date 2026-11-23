@@ -56,7 +56,7 @@ export function VistaAds({
 
       {planInsuficiente ? (
         <Card className="mb-6 border-accent/30 bg-accent-soft">
-          <p className="text-[12.5px] text-text-muted">Necesitas el Plan Studio o superior para crear campañas publicitarias.</p>
+          <p className="text-[12.5px] text-text-muted">Tu plan actual no incluye campañas publicitarias. Actualiza tu plan para continuar.</p>
         </Card>
       ) : null}
 

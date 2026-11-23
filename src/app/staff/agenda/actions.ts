@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
 type Resultado<T = undefined> =
   | ({ ok: true } & (T extends undefined ? object : { data: T }))
@@ -17,10 +18,13 @@ async function usuarioActual() {
 }
 
 const MENSAJES_ERROR: Record<string, string> = {
+  NO_AUTENTICADO: "Inicia sesión para continuar.",
   RESERVA_NO_ENCONTRADA: "No encontramos esa cita.",
   NO_AUTORIZADO: "Esa cita no es tuya.",
   RESERVA_NO_INICIABLE: "Solo puedes hacer check-in de una cita confirmada.",
   RESERVA_NO_FINALIZABLE: "Solo puedes hacer check-out de una cita en curso.",
+  RESERVA_NO_COMPLETABLE: "Esta cita ya no se puede completar.",
+  SUSCRIPCION_RESTRINGIDA: "La suscripción del negocio no permite completar esta acción.",
 };
 
 function traducirError(mensaje: string) {
@@ -105,5 +109,21 @@ export async function hacerCheckOut(reservaId: string): Promise<Resultado> {
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
+export async function completarCitaSinPos(reservaId: string): Promise<Resultado> {
+  try {
+    const id = z.string().uuid("Cita inválida.").parse(reservaId);
+    const { supabase } = await usuarioActual();
+    const rpc = supabase.rpc.bind(supabase) as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+    const { error } = await rpc("completar_reserva_sin_pos", { p_reserva_id: id });
+    if (error) return { ok: false, error: traducirError(error.message) };
+    revalidatePath("/staff/agenda");
+    revalidatePath("/panel/agenda");
+    revalidatePath("/panel/lealtad");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? traducirError(e.message) : "Error inesperado." };
   }
 }
