@@ -21,6 +21,8 @@ function traducir(m: string) {
 
 async function rpc(nombre: string, args: object): Promise<Resultado> {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "NO_AUTENTICADO" };
   const { error } = await (supabase as unknown as RpcSinTipos).rpc(nombre, args);
   if (error) return { ok: false, error: traducir(error.message) };
   revalidatePath("/panel/verificacion");

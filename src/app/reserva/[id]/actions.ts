@@ -26,6 +26,8 @@ export async function cancelarReservaAction(
   motivo?: string
 ): Promise<ResultadoCancelacion> {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, mensaje: "No tienes permiso para cancelar esta reserva." };
 
   const { data, error } = await supabase.rpc("cancelar_reserva", {
     p_reserva_id: reservaId,

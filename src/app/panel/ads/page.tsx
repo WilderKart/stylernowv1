@@ -14,12 +14,19 @@ export default async function AdsPage() {
   const negocioId = contexto.negocioId!;
   const campanasRes = await listarMisCampanas(negocioId);
 
+  const supabase = await createClient();
+  const { data: planOk, error: planErr } = await supabase.rpc("negocio_tiene_funcion", {
+    p_negocio_id: negocioId,
+    p_clave: "publicidad_extra",
+  });
+  const planInsuficiente = planErr ? false : !planOk;
+
   return (
     <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <VistaAds
         negocioId={negocioId}
-        planInsuficiente={false}
+        planInsuficiente={planInsuficiente}
         campanasIniciales={campanasRes.ok ? campanasRes.data : []}
         errorInicial={campanasRes.ok ? null : campanasRes.error}
       />

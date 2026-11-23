@@ -9,15 +9,17 @@ export function ColaModeracion({ resenasIniciales, errorInicial }: { resenasInic
   const [resenas, setResenas] = useState(resenasIniciales);
   const [error, setError] = useState(errorInicial);
   const [accionando, setAccionando] = useState<string | null>(null);
+  const [dialogo, setDialogo] = useState<{ id: string; accion: "MANTENER" | "ELIMINAR"; motivo: string } | null>(null);
 
-  async function onModerar(resenaId: string, accion: "MANTENER" | "ELIMINAR") {
-    setAccionando(resenaId);
-    setError(null);
-    const motivo = prompt(`Motivo de la decisión (${accion === "ELIMINAR" ? "eliminar" : "mantener"}):`) ?? undefined;
-    const res = await moderarResena(resenaId, accion, motivo);
+  function onModerar(resenaId: string, accion: "MANTENER" | "ELIMINAR") { setDialogo({ id: resenaId, accion, motivo: "" }); }
+  async function confirmarModerar() {
+    if (!dialogo) return;
+    setAccionando(dialogo.id); setError(null);
+    const res = await moderarResena(dialogo.id, dialogo.accion, dialogo.motivo.trim() || undefined);
     setAccionando(null);
     if (!res.ok) return setError(res.error);
-    setResenas((prev) => prev.filter((r) => r.id !== resenaId));
+    setResenas((prev) => prev.filter((r) => r.id !== dialogo.id));
+    setDialogo(null);
   }
 
   if (error) {
@@ -33,6 +35,8 @@ export function ColaModeracion({ resenasIniciales, errorInicial }: { resenasInic
   }
 
   return (
+    <>
+    {dialogo ? (<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4" role="dialog" aria-modal="true"><div className="w-full max-w-md rounded-2xl border border-border bg-surface p-5"><p className="text-[14px] font-bold text-text">{dialogo.accion==="ELIMINAR"?"Eliminar rese?a":"Mantener rese?a"}</p><label className="mt-3 block text-[11px] font-semibold text-text-faint">Motivo (opcional)<textarea value={dialogo.motivo} onChange={(e)=>setDialogo({...dialogo,motivo:e.target.value})} className="mt-1 min-h-[72px] w-full rounded-xl border border-border bg-bg p-2.5 text-[12.5px] text-text outline-none" maxLength={300}/></label><div className="mt-4 flex gap-2 justify-end"><Button size="sm" variant="ghost" onClick={()=>setDialogo(null)}>Cancelar</Button><Button size="sm" variant={dialogo.accion==="ELIMINAR"?"danger":"primary"} loading={accionando===dialogo.id} onClick={confirmarModerar}>Confirmar</Button></div></div></div>) : null}
     <ul className="flex flex-col gap-2.5">
       {resenas.map((r) => (
         <li key={r.id} className="rounded-2xl border border-border-subtle bg-surface p-4">
@@ -55,5 +59,6 @@ export function ColaModeracion({ resenasIniciales, errorInicial }: { resenasInic
         </li>
       ))}
     </ul>
+    </>
   );
 }

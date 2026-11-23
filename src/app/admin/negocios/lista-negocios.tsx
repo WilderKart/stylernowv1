@@ -57,6 +57,7 @@ export function ListaNegocios({
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(errorInicial);
   const [accionando, setAccionando] = useState<string | null>(null);
+  const [dialogo, setDialogo] = useState<null | { tipo: "RECHAZAR"|"MORA"|"REACTIVAR_PAGO"|"SUSPENDER"|"BAJA"; negocioId: string; motivo: string }>(null);
 
   async function onFiltrar(nuevoFiltro: string) {
     setFiltro(nuevoFiltro);
@@ -76,6 +77,22 @@ export function ListaNegocios({
   const t = texto.trim().toLowerCase();
   const visibles = t ? negocios.filter((n) => `${n.nombre} ${n.ciudad ?? ""}`.toLowerCase().includes(t)) : negocios;
 
+
+  async function confirmarDialogo() {
+    if (!dialogo) return;
+    const motivo = dialogo.motivo.trim();
+    if (motivo.length < 3) return setError("Indica un motivo (m?nimo 3 caracteres).");
+    const id = dialogo.negocioId;
+    const acciones = {
+      RECHAZAR: () => rechazarNegocio(id, motivo),
+      MORA: () => marcarNegocioEnMora(id, motivo),
+      REACTIVAR_PAGO: () => forzarReactivacionPagoExterno(id, motivo),
+      SUSPENDER: () => suspenderNegocio(id, motivo, "INFRACCION"),
+      BAJA: () => cancelarNegocio(id, motivo),
+    } as const;
+    setDialogo(null);
+    await ejecutar(id, acciones[dialogo.tipo]);
+  }
   async function ejecutar(negocioId: string, fn: () => Promise<{ ok: boolean; error?: string }>) {
     setAccionando(negocioId);
     setError(null);
@@ -109,6 +126,22 @@ export function ListaNegocios({
         ))}
       </div>
 
+      
+      {dialogo ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-5 shadow-sm">
+            <p className="text-[14px] font-bold text-text">{ {RECHAZAR:"Rechazar negocio",MORA:"Marcar en mora",REACTIVAR_PAGO:"Forzar reactivaci?n por pago externo",SUSPENDER:"Suspender negocio",BAJA:"Dar de baja definitiva"}[dialogo.tipo] }</p>
+            {dialogo.tipo==="BAJA" ? <p className="mt-1 text-[12px] text-danger">Esta acci?n no se puede revertir.</p> : null}
+            <label className="mt-3 block text-[11px] font-semibold text-text-faint">Motivo
+              <textarea value={dialogo.motivo} onChange={(e)=>setDialogo({...dialogo,motivo:e.target.value})} className="mt-1 min-h-[72px] w-full rounded-xl border border-border bg-bg p-2.5 text-[12.5px] text-text outline-none focus:border-accent/60" maxLength={300} />
+            </label>
+            <div className="mt-4 flex justify-end gap-2">
+              <Button size="sm" variant="ghost" onClick={()=>setDialogo(null)}>Cancelar</Button>
+              <Button size="sm" variant={dialogo.tipo==="BAJA"||dialogo.tipo==="SUSPENDER"||dialogo.tipo==="RECHAZAR"?"danger":"primary"} loading={accionando===dialogo.negocioId} disabled={dialogo.motivo.trim().length<3} onClick={confirmarDialogo}>Confirmar</Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       {error ? <p className="mb-4 text-[12.5px] font-semibold text-danger">{error}</p> : null}
 
       {cargando ? (
@@ -161,8 +194,7 @@ export function ListaNegocios({
                       variant="danger"
                       loading={accionando === n.id}
                       onClick={() => {
-                        const motivo = prompt("Motivo del rechazo:");
-                        if (motivo) ejecutar(n.id, () => rechazarNegocio(n.id, motivo));
+                        setDialogo({ tipo: "RECHAZAR", negocioId: n.id, motivo: "" });
                       }}
                     >
                       Rechazar
@@ -175,8 +207,7 @@ export function ListaNegocios({
                     variant="ghost"
                     loading={accionando === n.id}
                     onClick={() => {
-                      const motivo = prompt("Motivo (ej. la pasarela reportó un cobro fallido):");
-                      if (motivo) ejecutar(n.id, () => marcarNegocioEnMora(n.id, motivo));
+                      setDialogo({ tipo: "MORA", negocioId: n.id, motivo: "" });
                     }}
                   >
                     Marcar en mora
@@ -188,8 +219,7 @@ export function ListaNegocios({
                     variant="secondary"
                     loading={accionando === n.id}
                     onClick={() => {
-                      const motivo = prompt("Motivo (ej. pagó por transferencia manual verificada):");
-                      if (motivo) ejecutar(n.id, () => forzarReactivacionPagoExterno(n.id, motivo));
+                      setDialogo({ tipo: "REACTIVAR_PAGO", negocioId: n.id, motivo: "" });
                     }}
                   >
                     Forzar reactivación (pago externo)
@@ -201,8 +231,7 @@ export function ListaNegocios({
                     variant="danger"
                     loading={accionando === n.id}
                     onClick={() => {
-                      const motivo = prompt("Motivo de la suspensión:");
-                      if (motivo) ejecutar(n.id, () => suspenderNegocio(n.id, motivo, "INFRACCION"));
+                      setDialogo({ tipo: "SUSPENDER", negocioId: n.id, motivo: "" });
                     }}
                   >
                     Suspender
@@ -219,10 +248,7 @@ export function ListaNegocios({
                     variant="ghost"
                     loading={accionando === n.id}
                     onClick={() => {
-                      const motivo = prompt("Motivo de la baja definitiva:");
-                      if (motivo && confirm("¿Dar de baja este negocio de forma definitiva? No se puede revertir.")) {
-                        ejecutar(n.id, () => cancelarNegocio(n.id, motivo));
-                      }
+                      setDialogo({ tipo: "BAJA", negocioId: n.id, motivo: "" });
                     }}
                   >
                     Dar de baja

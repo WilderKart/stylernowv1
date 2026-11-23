@@ -210,6 +210,8 @@ function ProductoFila({
 }) {
   const [cantidad, setCantidad] = useState("");
   const [minimo, setMinimo] = useState(String(producto.stockMinimo));
+  const [ajustando, setAjustando] = useState(false);
+  const [conteo, setConteo] = useState(String(producto.stockActual));
 
   return (
     <li className="rounded-2xl border border-border-subtle bg-surface p-4">
@@ -265,13 +267,13 @@ function ProductoFila({
             <button
               type="button"
               onClick={() => {
-                const nuevo = prompt("Nuevo conteo físico de stock:", String(producto.stockActual));
-                if (nuevo != null && !Number.isNaN(Number(nuevo))) onAjustar(producto.productoId, Number(nuevo));
+                setConteo(String(producto.stockActual)); setAjustando(true);
               }}
               className="text-[11.5px] font-semibold text-text-muted underline"
             >
               Ajustar por conteo físico
             </button>
+            {ajustando ? (<div className="mt-2 flex flex-wrap items-end gap-2 rounded-xl border border-border bg-surface p-3"><label className="flex flex-col gap-1 text-[11px] font-semibold text-text-faint">Nuevo conteo f?sico<input type="number" min={0} value={conteo} onChange={(e)=>setConteo(e.target.value)} className="h-9 w-28 rounded-lg border border-border bg-bg px-2 text-[12px] text-text"/></label><Button size="sm" onClick={()=>{const n=Number(conteo); if(!Number.isNaN(n)&&n>=0){onAjustar(producto.productoId,n); setAjustando(false);}}}>Guardar conteo</Button><Button size="sm" variant="ghost" onClick={()=>setAjustando(false)}>Cancelar</Button></div>) : null}
           </div>
 
           {puedeConfigurarReglas ? (

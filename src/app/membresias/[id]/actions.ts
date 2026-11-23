@@ -19,6 +19,8 @@ function traducirError(mensaje: string) {
 
 export async function cancelarMiMembresia(id: string): Promise<Resultado> {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "NO_AUTORIZADO" };
   const { error } = await supabase.rpc("cancelar_membresia", { p_cliente_membresia_id: id });
   if (error) return { ok: false, error: traducirError(error.message) };
   revalidatePath(`/membresias/${id}`);
@@ -27,6 +29,8 @@ export async function cancelarMiMembresia(id: string): Promise<Resultado> {
 
 export async function congelarMiMembresia(id: string, dias: 7 | 15 | 30): Promise<Resultado> {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "NO_AUTORIZADO" };
   const { error } = await supabase.rpc("congelar_membresia", { p_cliente_membresia_id: id, p_dias: dias });
   if (error) return { ok: false, error: traducirError(error.message) };
   revalidatePath(`/membresias/${id}`);
@@ -35,6 +39,8 @@ export async function congelarMiMembresia(id: string, dias: 7 | 15 | 30): Promis
 
 export async function reactivarMiMembresia(id: string): Promise<Resultado> {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "NO_AUTORIZADO" };
   const { error } = await supabase.rpc("reactivar_membresia_congelada", { p_cliente_membresia_id: id });
   if (error) return { ok: false, error: traducirError(error.message) };
   revalidatePath(`/membresias/${id}`);

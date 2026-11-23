@@ -134,6 +134,8 @@ export function VistaSuscripcion({
   const [suscripcion, setSuscripcion] = useState(suscripcionInicial);
   const [procesando, setProcesando] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [downgradePendiente, setDowngradePendiente] = useState<PlanCodigo | null>(null);
+  const [motivoBaja, setMotivoBaja] = useState("");
   const [pagoPendienteId, setPagoPendienteId] = useState<string | null>(null);
   const [urlCheckout, setUrlCheckout] = useState<string | null>(null);
 
@@ -192,20 +194,7 @@ export function VistaSuscripcion({
     setUrlCheckout(res.url);
   }
 
-  async function onDowngrade(planCodigo: PlanCodigo) {
-    if (
-      !confirm(
-        `¿Programar el downgrade a ${planCodigo}? Se hace efectivo al inicio de tu próximo ciclo, el ${fechaCorta(suscripcion.fechaProximoCobro, locale)}.`,
-      )
-    )
-      return;
-    setProcesando(planCodigo);
-    setError(null);
-    const res = await solicitarDowngrade(negocioId, planCodigo);
-    setProcesando(null);
-    if (!res.ok) return setError(res.error);
-    setSuscripcion((s) => ({ ...s, planCodigoDestino: planCodigo }));
-  }
+  function onDowngrade(planCodigo: PlanCodigo) { setDowngradePendiente(planCodigo); }
 
   async function onCancelarDowngrade() {
     setProcesando("cancelar-downgrade");
@@ -217,15 +206,14 @@ export function VistaSuscripcion({
   }
 
   async function onCancelarNegocio() {
-    const motivo = prompt("Motivo de la baja definitiva de tu negocio:");
-    if (!motivo) return;
-    if (!confirm("¿Dar de baja tu negocio de forma definitiva? Se cancelan tus reservas futuras con reembolso 100% y no se puede revertir.")) return;
+    const motivo = motivoBaja.trim();
+    if (motivo.length < 3) return setError("Indica el motivo de la baja (m?nimo 3 caracteres).");
     setProcesando("cancelar-negocio");
     setError(null);
     const res = await cancelarMiNegocio(negocioId, motivo);
     setProcesando(null);
     if (!res.ok) return setError(res.error);
-    router.push("/panel");
+    setBajaAbierta(false); setMotivoBaja(""); router.push("/panel");
   }
 
   async function onIniciarPrueba(e: React.FormEvent) {

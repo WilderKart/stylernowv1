@@ -51,10 +51,6 @@ function fallo(e: unknown): { ok: false; error: string } {
   return { ok: false, error: traducirError(e instanceof Error ? e.message : String(e)) };
 }
 
-async function cliente() {
-  return createClient();
-}
-
 const uuid = z.string().uuid("Identificador inválido.");
 
 async function sesionDuenoLealtad(
@@ -87,9 +83,9 @@ async function sesionDuenoLealtad(
 
 async function exigirNegocioDeRecurso(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  tabla: "membresia_plan" | "sello_campana" | "cashback_regla" | "gift_card" | "recompensa_regla" | "recompensa_sugerencia",
+  tabla: "membresia_plan" | "sello_campana" | "cashback_regla" | "gift_card" | "recompensa_regla" | "recompensa_sugerencia" | "vip_miembro" | "corporativo_cuenta",
   recursoId: string
-) {
+): Promise<string> {
   const id = uuid.parse(recursoId);
   const { data } = await supabase.from(tabla).select("negocio_id").eq("id", id).maybeSingle();
   const negocioId = (data as { negocio_id?: string | null } | null)?.negocio_id;
@@ -495,5 +491,57 @@ export async function descartarSugerenciaAction(sugerenciaId: string): Promise<R
     await sesionDuenoLealtad(negocioId, { requerirOperativo: true, funcion: "fidelizacion" });
     const { error } = await supabase.rpc("descartar_sugerencia_recompensa", { p_sugerencia_id: id.data });
     if (error) return { ok: false, error: traducirError(error.message) }; revalidatePath("/panel/lealtad"); return { ok: true };
+  } catch (e) { return fallo(e); }
+}
+
+
+// VIP - gesti?n
+const esquemaAsignarVip = z.object({ negocioId: uuid, clienteId: uuid, nivelId: uuid });
+export async function asignarVipAction(datos: z.input<typeof esquemaAsignarVip>): Promise<Resultado> {
+  const p = esquemaAsignarVip.safeParse(datos); if (!p.success) return { ok: false, error: p.error.issues[0]?.message ?? "Datos inv?lidos." };
+  try { const { supabase, negocioId } = await sesionDuenoLealtad(p.data.negocioId, { requerirOperativo: true, funcion: "fidelizacion" });
+    const { error } = await supabase.rpc("asignar_vip", { p_cliente_id: p.data.clienteId, p_negocio_id: negocioId, p_nivel_id: p.data.nivelId });
+    if (error) return { ok: false, error: traducirError(error.message) }; revalidatePath("/panel/lealtad"); return { ok: true };
+  } catch (e) { return fallo(e); }
+}
+const esquemaDegradarVip = z.object({ miembroId: uuid, nivelNuevoId: uuid, motivo: z.string().trim().min(3).max(300) });
+export async function degradarVipAction(datos: z.input<typeof esquemaDegradarVip>): Promise<Resultado> {
+  const p = esquemaDegradarVip.safeParse(datos); if (!p.success) return { ok: false, error: p.error.issues[0]?.message ?? "Datos inv?lidos." };
+  try { const supabase = await createClient(); const negocioId = await exigirNegocioDeRecurso(supabase, "vip_miembro", p.data.miembroId);
+    await sesionDuenoLealtad(negocioId, { requerirOperativo: true, funcion: "fidelizacion" });
+    const { error } = await supabase.rpc("degradar_vip", { p_vip_miembro_id: p.data.miembroId, p_nivel_nuevo_id: p.data.nivelNuevoId, p_motivo: p.data.motivo });
+    if (error) return { ok: false, error: traducirError(error.message) }; revalidatePath("/panel/lealtad"); return { ok: true };
+  } catch (e) { return fallo(e); }
+}
+const esquemaEvaluarVip = z.object({ negocioId: uuid, clienteId: uuid });
+export async function evaluarAscensoVipAction(datos: z.input<typeof esquemaEvaluarVip>): Promise<Resultado> {
+  const p = esquemaEvaluarVip.safeParse(datos); if (!p.success) return { ok: false, error: p.error.issues[0]?.message ?? "Datos inv?lidos." };
+  try { const { supabase, negocioId } = await sesionDuenoLealtad(p.data.negocioId, { requerirOperativo: true, funcion: "fidelizacion" });
+    const { error } = await supabase.rpc("evaluar_ascenso_vip_automatico", { p_cliente_id: p.data.clienteId, p_negocio_id: negocioId });
+    if (error) return { ok: false, error: traducirError(error.message) }; revalidatePath("/panel/lealtad"); return { ok: true };
+  } catch (e) { return fallo(e); }
+}
+
+// Gift cards corporativas / lote
+const esquemaLoteGiftCards = z.object({ cuentaId: uuid, cantidad: z.number().int().min(1).max(200), montoCadaUna: z.number().finite().positive() });
+export async function crearLoteGiftCardsCorporativoAction(datos: z.input<typeof esquemaLoteGiftCards>): Promise<Resultado<{ creadas: number }>> {
+  const p = esquemaLoteGiftCards.safeParse(datos); if (!p.success) return { ok: false, error: p.error.issues[0]?.message ?? "Datos inv?lidos." };
+  try { const supabase = await createClient(); const negocioId = await exigirNegocioDeRecurso(supabase, "corporativo_cuenta", p.data.cuentaId);
+    await sesionDuenoLealtad(negocioId, { requerirOperativo: true, funcion: "fidelizacion" });
+    const { data, error } = await supabase.rpc("crear_lote_gift_cards_corporativo", { p_cuenta_id: p.data.cuentaId, p_cantidad: p.data.cantidad, p_monto_cada_una: p.data.montoCadaUna });
+    if (error) return { ok: false, error: traducirError(error.message) }; revalidatePath("/panel/lealtad");
+    const creadas = Array.isArray(data) ? data.length : (typeof data === "number" ? data : p.data.cantidad);
+    return { ok: true, data: { creadas } };
+  } catch (e) { return fallo(e); }
+}
+
+
+export interface EventoFraudeNegocio { id: string; tipo: string; severidad: string; revisado: boolean; createdAt: string; payload: unknown; }
+export async function listarAlertasFraudeNegocio(negocioId: string): Promise<Resultado<EventoFraudeNegocio[]>> {
+  try { const { supabase, negocioId: id } = await sesionDuenoLealtad(negocioId, { funcion: "fidelizacion" });
+    const { data, error } = await (supabase.rpc as unknown as (name: string, args: Record<string, unknown>) => Promise<{ data: unknown[] | null; error: { message: string } | null }>)("listar_eventos_fraude_negocio", { p_negocio_id: id, p_revisado: false });
+    if (error) return { ok: false, error: traducirError(error.message) };
+    const filas = (data ?? []) as Array<Record<string, unknown>>;
+    return { ok: true, data: filas.map((e) => ({ id: String(e.id ?? ""), tipo: String(e.tipo ?? ""), severidad: String(e.severidad ?? ""), revisado: Boolean(e.revisado), createdAt: String(e.created_at ?? ""), payload: (e.payload && typeof e.payload === "object" ? e.payload : {}) as Record<string, unknown> })) };
   } catch (e) { return fallo(e); }
 }

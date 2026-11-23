@@ -11,20 +11,23 @@ set local lock_timeout = '5s';
 --    elimina el gate de plan en crear_campana_publicitaria para alinear con v3.
 -- ---------------------------------------------------------------------------
 do $$
-declare v_def text; v_nuevo text;
+declare
+  v_def text;
+  v_nuevo text;
 begin
   v_def := pg_get_functiondef('public.crear_campana_publicitaria(uuid,text,text,numeric,numeric,timestamptz,jsonb)'::regprocedure);
+  -- v3: Ads extra disponible en todos los planes; se elimina gate por plan_codigo.
   v_nuevo := regexp_replace(
     v_def,
-    E'\\s*select \\* into v_negocio from public\\.negocio where id = p_negocio_id;\\s*if v_negocio\\.plan_codigo = ''ESSENTIAL'' then raise exception ''PLAN_INSUFICIENTE''; end if;',
-    E'\n  select * into v_negocio from public.negocio where id = p_negocio_id;\n  -- v3: Ads extra disponible en todos los planes; el gate comercial se controla por producto/config, no por plan.',
-    'i'
+    E'\\s*if\\s+v_negocio\\.plan_codigo\\s*(=|in)\\s*\\(?\\s*''(ESSENTIAL|RAVEN)''(?:\\s*,\\s*''(ESSENTIAL|RAVEN)'')?\\s*\\)?\\s*then\\s*raise exception ''PLAN_INSUFICIENTE'';\\s*end if;',
+    E'\n  -- v3: Ads extra disponible en todos los planes; el gate comercial se controla por producto/config, no por plan.',
+    'in'
   );
   if v_nuevo = v_def then
-    -- fallback por si la funcion aun conserva RAVEN o formato distinto
-    v_nuevo := regexp_replace(v_def, E'if v_negocio\\.plan_codigo = ''RAVEN'' then raise exception ''PLAN_INSUFICIENTE''; end if;', '-- v3: Ads extra disponible en todos los planes.', 'i');
+    raise notice 'crear_campana_publicitaria: no se encontr? gate de plan para parchear (posiblemente ya alineada)';
+  else
+    execute v_nuevo;
   end if;
-  if v_nuevo <> v_def then execute v_nuevo; end if;
 end $$;
 
 -- ---------------------------------------------------------------------------
@@ -276,8 +279,13 @@ begin
   v_resultado_pipeline := public.ejecutar_pipeline_evento('venta_completada', v_evento);
 
   insert into public.evento_auditoria (entidad_tipo, entidad_id, accion, actor_tipo, actor_id, negocio_id, payload_despues)
-  values ('reserva', p_reserva_id, 'RESERVA_COMPLETADA_SIN_POS', case when coalesce(public.is_supersu(), false) then 'SISTEMA' else 'STAFF' end, v_actor, v_reserva.negocio_id, v_evento)
-  on conflict do nothing;
+  select 'reserva', p_reserva_id, 'RESERVA_COMPLETADA_SIN_POS',
+    case when coalesce(public.is_supersu(), false) then 'SISTEMA' else 'STAFF' end,
+    v_actor, v_reserva.negocio_id, v_evento
+  where not exists (
+    select 1 from public.evento_auditoria ea
+    where ea.entidad_tipo = 'reserva' and ea.entidad_id = p_reserva_id and ea.accion = 'RESERVA_COMPLETADA_SIN_POS'
+  );
 
   return v_evento || jsonb_build_object('ok', true, 'idempotente', false, 'pipeline', v_resultado_pipeline);
 end;
@@ -285,5 +293,33 @@ $fn$;
 
 revoke all on function public.completar_reserva_sin_pos(uuid) from public, anon;
 grant execute on function public.completar_reserva_sin_pos(uuid) to authenticated, service_role;
+
+
+-- ---------------------------------------------------------------------------
+-- 4) Alertas antifraude visibles para el negocio (solo lectura interna).
+-- ---------------------------------------------------------------------------
+create or replace function public.listar_eventos_fraude_negocio(p_negocio_id uuid, p_revisado boolean default false)
+returns setof public.lealtad_fraude_evento
+language plpgsql stable security definer set search_path = public as $fn$
+begin
+  if auth.uid() is null then raise exception 'NO_AUTENTICADO'; end if;
+  if not (
+    coalesce(public.is_supersu(), false)
+    or public.is_barberia_de(p_negocio_id)
+    or public.is_guardian_de_negocio(p_negocio_id)
+  ) then
+    raise exception 'NO_AUTORIZADO';
+  end if;
+  return query
+    select *
+    from public.lealtad_fraude_evento
+    where negocio_id = p_negocio_id and revisado = coalesce(p_revisado, false)
+    order by created_at desc
+    limit 100;
+end;
+$fn$;
+
+revoke all on function public.listar_eventos_fraude_negocio(uuid, boolean) from public, anon;
+grant execute on function public.listar_eventos_fraude_negocio(uuid, boolean) to authenticated, service_role;
 
 commit;

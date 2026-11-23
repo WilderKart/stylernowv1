@@ -7,6 +7,8 @@ import { formatCOP } from "@/lib/utils";
 import { useState } from "react";
 import {
   alternarCampanaSellosAction,
+  asignarVipAction,
+  evaluarAscensoVipAction,
   alternarPlanMembresia,
   alternarReglaCashbackAction,
   bloquearGiftCardAdmin,
@@ -20,6 +22,7 @@ import {
   descartarSugerenciaAction,
   generarSugerenciasAction,
   sembrarNivelesVipAction,
+  listarNivelesVip,
   type CampanaSellos,
   type CuentaCorporativa,
   type FamiliaAdmin,
@@ -31,9 +34,10 @@ import {
   type ReglaCashback,
   type ReglaRecompensa,
   type SugerenciaRecompensa,
+  type EventoFraudeNegocio,
 } from "./actions";
 
-const TABS = ["Membresías", "Gift Cards", "Referidos", "Sellos", "Cashback", "Club VIP", "Familias", "Empresas", "Recompensas IA"] as const;
+const TABS = ["Membresías", "Gift Cards", "Referidos", "Sellos", "Cashback", "Club VIP", "Familias", "Empresas", "Recompensas IA", "Antifraude"] as const;
 type Tab = (typeof TABS)[number];
 
 // Calculado una sola vez al cargar el módulo (no en cada render) para no
@@ -66,6 +70,7 @@ export function VistaLealtadPanel(props: {
   cuentasCorpIniciales: CuentaCorporativa[];
   reglasRecompensaIniciales: ReglaRecompensa[];
   sugerenciasIniciales: SugerenciaRecompensa[];
+  alertasFraudeIniciales: EventoFraudeNegocio[];
 }) {
   const bloqueada = (t: Tab) => {
     const f = REQUIERE[t];
@@ -113,6 +118,7 @@ export function VistaLealtadPanel(props: {
       {tab === "Familias" && !bloqueada("Familias") ? <TabFamilias familiasIniciales={props.familiasIniciales} /> : null}
       {tab === "Empresas" && !bloqueada("Empresas") ? <TabCorporativo negocioId={props.negocioId} cuentasIniciales={props.cuentasCorpIniciales} /> : null}
       {tab === "Recompensas IA" && !bloqueada("Recompensas IA") ? <TabRecompensas negocioId={props.negocioId} reglasIniciales={props.reglasRecompensaIniciales} sugerenciasIniciales={props.sugerenciasIniciales} /> : null}
+        {tab === "Antifraude" && !bloqueada("Antifraude") ? <TabAntifraude alertas={props.alertasFraudeIniciales} /> : null}
     </main>
   );
 }
@@ -432,83 +438,54 @@ function TabCashback({ negocioId, reglasIniciales }: { negocioId: string; reglas
 // ── Club VIP ────────────────────────────────────────────────────────────
 
 function TabVip({ negocioId, nivelesIniciales, miembrosIniciales }: { negocioId: string; nivelesIniciales: NivelVip[]; miembrosIniciales: MiembroVip[] }) {
-  const niveles = nivelesIniciales;
-  const [guardando, setGuardando] = useState(false);
+  const [niveles, setNiveles] = useState(nivelesIniciales);
+  const [miembros] = useState(miembrosIniciales);
+  const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [asignar, setAsignar] = useState({ clienteId: "", nivelId: "" });
+  const [evaluarClienteId, setEvaluarClienteId] = useState("");
 
-  async function onSembrar() {
-    setGuardando(true);
-    setError(null);
-    const res = await sembrarNivelesVipAction(negocioId);
-    setGuardando(false);
-    if (!res.ok) return setError(res.error);
-    window.location.reload();
-  }
+  async function onSembrar() { setMsg(null); setError(null); const res = await sembrarNivelesVipAction(negocioId); if (!res.ok) return setError(res.error); const r = await listarNivelesVip(negocioId); if (r.ok) setNiveles(r.data); setMsg("Niveles Bronce, Plata y Oro creados."); }
+  async function onAsignar() { setMsg(null); setError(null); if (!asignar.clienteId || !asignar.nivelId) return setError("Selecciona cliente y nivel."); const res = await asignarVipAction({ negocioId, clienteId: asignar.clienteId, nivelId: asignar.nivelId }); if (!res.ok) return setError(res.error); setMsg("Miembro VIP asignado."); setAsignar({ clienteId: "", nivelId: "" }); }
+  async function onEvaluar() { setMsg(null); setError(null); if (!evaluarClienteId) return setError("Selecciona un cliente para evaluar ascenso."); const res = await evaluarAscensoVipAction({ negocioId, clienteId: evaluarClienteId }); if (!res.ok) return setError(res.error); setMsg("Ascenso evaluado."); }
 
   return (
     <div>
-      <ErrorTexto error={error} />
-      {niveles.length === 0 ? (
-        <Card className="mb-4">
-          <p className="mb-2 text-[12px] text-text-faint">Todavía no configuraste niveles VIP. Empieza con los 4 niveles estándar (Bronze/Silver/Gold/Black) — los puedes renombrar después.</p>
-          <Button size="sm" loading={guardando} onClick={onSembrar}>
-            Crear niveles estándar
-          </Button>
-        </Card>
-      ) : (
-        <ul className="mb-4 flex flex-col gap-2">
-          {niveles.map((n) => (
-            <li key={n.id} className="rounded-2xl border border-border-subtle bg-surface p-3.5">
-              <p className="text-[13px] font-semibold text-text">{n.nombre}</p>
-              {n.beneficios ? <p className="text-[11px] text-text-faint">{n.beneficios}</p> : null}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <h2 className="font-display mb-2 text-[12px] font-bold uppercase text-text">Miembros VIP</h2>
-      {miembrosIniciales.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-[12.5px] text-text-faint">Sin miembros VIP asignados todavía.</p>
-      ) : (
-        <ul className="flex flex-col gap-1.5">
-          {miembrosIniciales.map((m) => (
-            <li key={m.clienteId} className="flex items-center justify-between rounded-xl border border-border-subtle bg-surface px-3 py-2">
-              <p className="text-[12.5px] text-text-muted">{m.clienteNombre}</p>
-              <div className="flex items-center gap-2">
-                <Badge tone="accent">{m.nivelNombre}</Badge>
-                <span className="text-[10.5px] text-text-faint">{m.origen === "AUTOMATICO" ? "auto" : "manual"}</span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="mb-3 flex items-center justify-between gap-3"><div><h2 className="font-display text-[14px] font-bold text-text">Club VIP</h2><p className="text-[11.5px] text-text-faint">Asigna miembros y eval?a ascensos autom?ticos.</p></div>{niveles.length === 0 ? <Button size="sm" onClick={onSembrar}>Crear Bronce/Plata/Oro</Button> : null}</div>
+      {msg ? <p className="mb-2 text-[12px] font-semibold text-success">{msg}</p> : null}{error ? <p className="mb-2 text-[12px] font-semibold text-danger">{error}</p> : null}
+      {niveles.length > 0 ? <div className="mb-4 grid gap-2 rounded-2xl border border-border-subtle bg-surface p-3 sm:grid-cols-3">
+        <label className="text-[11px] font-semibold text-text-faint">Cliente<select value={asignar.clienteId} onChange={(e)=>setAsignar(p=>({...p,clienteId:e.target.value}))} className="mt-1 h-9 w-full rounded-lg border border-border bg-bg px-2 text-[12px] text-text"><option value="">Selecciona</option>{miembros.map(m=><option key={m.clienteId} value={m.clienteId}>{m.clienteNombre}</option>)}</select></label>
+        <label className="text-[11px] font-semibold text-text-faint">Nivel<select value={asignar.nivelId} onChange={(e)=>setAsignar(p=>({...p,nivelId:e.target.value}))} className="mt-1 h-9 w-full rounded-lg border border-border bg-bg px-2 text-[12px] text-text"><option value="">Selecciona</option>{niveles.map(n=><option key={n.id} value={n.id}>{n.nombre}</option>)}</select></label>
+        <div className="flex items-end"><Button size="sm" onClick={onAsignar}>Asignar</Button></div>
+        <label className="text-[11px] font-semibold text-text-faint sm:col-span-2">Evaluar ascenso<select value={evaluarClienteId} onChange={(e)=>setEvaluarClienteId(e.target.value)} className="mt-1 h-9 w-full rounded-lg border border-border bg-bg px-2 text-[12px] text-text"><option value="">Selecciona cliente</option>{miembros.map(m=><option key={m.clienteId} value={m.clienteId}>{m.clienteNombre}</option>)}</select></label>
+        <div className="flex items-end"><Button size="sm" variant="secondary" onClick={onEvaluar}>Evaluar ascenso</Button></div>
+      </div> : null}
+      <div className="mb-4 flex gap-2">{niveles.map(n=><Card key={n.id} className="flex-1 text-center"><p className="text-[13px] font-bold text-text">{n.nombre}</p>{n.beneficios ? <p className="mt-0.5 text-[10.5px] text-text-faint">{n.beneficios}</p> : null}</Card>)}</div>
+      {miembros.length === 0 ? <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-[12.5px] text-text-faint">Sin miembros VIP todav?a.</p> : <ul className="flex flex-col gap-2">{miembros.map(m=><li key={m.clienteId} className="rounded-2xl border border-border-subtle bg-surface px-4 py-3"><p className="text-[13px] font-semibold text-text">{m.clienteNombre}</p><p className="text-[11px] text-text-faint">{m.nivelNombre} ? {m.origen}</p></li>)}</ul>}
     </div>
   );
 }
 
-// ── Familias ────────────────────────────────────────────────────────────
 
 function TabFamilias({ familiasIniciales }: { familiasIniciales: FamiliaAdmin[] }) {
   if (familiasIniciales.length === 0) {
-    return <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-[12.5px] text-text-faint">Sin grupos familiares específicos de tu negocio todavía (los Clientes también pueden crear grupos generales de plataforma).</p>;
+    return <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-[12.5px] text-text-faint">Sin grupos familiares registrados.</p>;
   }
   return (
-    <ul className="flex flex-col gap-2">
-      {familiasIniciales.map((f) => (
-        <li key={f.id} className="flex items-center justify-between rounded-2xl border border-border-subtle bg-surface p-3.5">
-          <div>
-            <p className="text-[13px] font-semibold text-text">{f.nombre}</p>
-            <p className="text-[11px] text-text-faint">Titular: {f.titularNombre}</p>
-          </div>
-          <Badge tone="neutral">{f.miembros} miembro(s)</Badge>
-        </li>
-      ))}
-    </ul>
+    <div>
+      <h2 className="font-display mb-2 text-[14px] font-bold text-text">Familias</h2>
+      <p className="mb-3 text-[11.5px] text-text-faint">Grupos familiares asociados a tu negocio (solo lectura).</p>
+      <ul className="flex flex-col gap-2">
+        {familiasIniciales.map((f) => (
+          <li key={f.id} className="flex items-center justify-between rounded-2xl border border-border-subtle bg-surface px-4 py-3">
+            <div><p className="text-[13px] font-semibold text-text">{f.nombre}</p><p className="text-[11px] text-text-faint">Titular: {f.titularNombre}</p></div>
+            <Badge tone="neutral">{f.miembros} miembros</Badge>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
-
-// ── Empresas (Suscripciones corporativas) ──────────────────────────────
-
 function TabCorporativo({ negocioId, cuentasIniciales }: { negocioId: string; cuentasIniciales: CuentaCorporativa[] }) {
   const [cuentas, setCuentas] = useState(cuentasIniciales);
   const [creando, setCreando] = useState(false);
@@ -682,6 +659,30 @@ function TabRecompensas({ negocioId, reglasIniciales, sugerenciasIniciales }: { 
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+
+function TabAntifraude({ alertas }: { alertas: EventoFraudeNegocio[] }) {
+  if (alertas.length === 0) {
+    return <p className="rounded-2xl border border-dashed border-border px-4 py-10 text-center text-[12.5px] text-text-faint">Sin alertas antifraude pendientes.</p>;
+  }
+  return (
+    <div>
+      <h2 className="font-display mb-2 text-[14px] font-bold text-text">Alertas antifraude</h2>
+      <p className="mb-3 text-[11.5px] text-text-faint">Alertas de tu negocio. La revisi?n final la realiza SuperSU en /admin/lealtad.</p>
+      <ul className="flex flex-col gap-2">
+        {alertas.map((a) => (
+          <li key={a.id} className="rounded-2xl border border-border-subtle bg-surface p-3.5">
+            <div className="flex items-center gap-2">
+              <p className="text-[12.5px] font-semibold text-text">{a.tipo.replaceAll("_", " ")}</p>
+              <Badge tone={a.severidad === "ALTA" ? "danger" : a.severidad === "MEDIA" ? "accent" : "neutral"}>{a.severidad}</Badge>
+            </div>
+            <p className="mt-1 text-[10.5px] text-text-faint">{new Date(a.createdAt).toLocaleString("es-CO")}</p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

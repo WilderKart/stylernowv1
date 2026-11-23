@@ -12,6 +12,7 @@ import {
   listarReglasCashback,
   listarReglasRecompensa,
   listarSugerenciasAction,
+  listarAlertasFraudeNegocio,
   obtenerConfigReferidos,
 } from "./actions";
 import { VistaLealtadPanel } from "./vista-lealtad-panel";
@@ -34,7 +35,7 @@ export default async function LealtadPanelPage() {
     ? negocioPlan.plan_codigo.charAt(0) + negocioPlan.plan_codigo.slice(1).toLowerCase()
     : "actual";
 
-  const [planes, giftCards, referidoConfig, campanasSellos, reglasCashback, nivelesVip, miembrosVip, familias, cuentasCorp, reglasRecompensa, sugerencias] = await Promise.all([
+  const [planes, giftCards, referidoConfig, campanasSellos, reglasCashback, nivelesVip, miembrosVip, familias, cuentasCorp, reglasRecompensa, sugerencias, alertasFraude] = await Promise.all([
     listarPlanesMembresia(negocioId),
     listarGiftCards(negocioId),
     obtenerConfigReferidos(negocioId),
@@ -46,6 +47,7 @@ export default async function LealtadPanelPage() {
     listarCuentasCorporativas(negocioId),
     listarReglasRecompensa(negocioId),
     listarSugerenciasAction(negocioId),
+    listarAlertasFraudeNegocio(negocioId),
   ]);
 
   return (
@@ -66,6 +68,7 @@ export default async function LealtadPanelPage() {
         cuentasCorpIniciales={cuentasCorp.ok ? cuentasCorp.data : []}
         reglasRecompensaIniciales={reglasRecompensa.ok ? reglasRecompensa.data : []}
         sugerenciasIniciales={sugerencias.ok ? sugerencias.data : []}
+        alertasFraudeIniciales={alertasFraude.ok ? alertasFraude.data : []}
       />
     </div>
   );

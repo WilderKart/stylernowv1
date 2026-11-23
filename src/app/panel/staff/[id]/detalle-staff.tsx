@@ -68,6 +68,7 @@ export function DetalleStaff({
   const [error, setError] = useState<string | null>(null);
   const [accionando, setAccionando] = useState(false);
   const [destino, setDestino] = useState("");
+  const [confirmar, setConfirmar] = useState<null | { tipo: "PROMOVER"|"REVOCAR"|"RETIRAR"; motivo?: string } | { tipo: "SUSPENDER"; motivo: string }>(null);
   const rolActual: RolAsignable = rolEquipo === "BUSINESS_OWNER" ? "BARBER" : rolEquipo;
   const [rolNuevo, setRolNuevo] = useState<RolAsignable>(rolActual);
 
@@ -84,35 +85,17 @@ export function DetalleStaff({
     router.refresh();
   }
 
-  async function onPromover() {
-    if (!confirm(`¿Dar el perfil Guardian a ${staff.nombre}? Va a poder administrar toda su sede.`)) return;
-    ejecutar(() => promoverGuardian(staff.vinculo_id!));
-  }
-  async function onRevocar() {
-    if (!confirm(`¿Quitarle el perfil Guardian a ${staff.nombre}?`)) return;
-    ejecutar(() => revocarGuardian(staff.vinculo_id!));
-  }
-  async function onSuspender() {
-    const motivo = prompt(`¿Por qué suspendes a ${staff.nombre}? (opcional)`) ?? undefined;
-    ejecutar(() => suspenderStaff(staff.vinculo_id!, motivo));
-  }
-  async function onReactivar() {
-    ejecutar(() => reactivarStaff(staff.vinculo_id!));
-  }
-  async function onRetirar() {
-    if (
-      !confirm(
-        `¿Eliminar el acceso de ${staff.nombre}? Pierde el acceso al instante. Su historial se conserva.`
-      )
-    )
-      return;
-    const motivo = prompt("Motivo (opcional)") ?? undefined;
-    setAccionando(true);
-    setError(null);
-    const res = await retirarStaff(staff.vinculo_id!, motivo);
-    setAccionando(false);
-    if (!res.ok) return setError(res.error);
-    router.push("/panel/staff");
+  function onPromover() { setConfirmar({ tipo: "PROMOVER" }); }
+  function onRevocar() { setConfirmar({ tipo: "REVOCAR" }); }
+  function onSuspender() { setConfirmar({ tipo: "SUSPENDER", motivo: "" }); }
+  async function onReactivar() { ejecutar(() => reactivarStaff(staff.vinculo_id!)); }
+  function onRetirar() { setConfirmar({ tipo: "RETIRAR", motivo: "" }); }
+  async function ejecutarConfirmado() {
+    if (!confirmar) return;
+    if (confirmar.tipo === "PROMOVER") { setConfirmar(null); return ejecutar(() => promoverGuardian(staff.vinculo_id!)); }
+    if (confirmar.tipo === "REVOCAR") { setConfirmar(null); return ejecutar(() => revocarGuardian(staff.vinculo_id!)); }
+    if (confirmar.tipo === "SUSPENDER") { const m = confirmar.motivo.trim() || undefined; setConfirmar(null); return ejecutar(() => suspenderStaff(staff.vinculo_id!, m)); }
+    if (confirmar.tipo === "RETIRAR") { const m = confirmar.motivo?.trim() || undefined; setAccionando(true); setError(null); const res = await retirarStaff(staff.vinculo_id!, m); setAccionando(false); if (!res.ok) return setError(res.error); setConfirmar(null); router.push("/panel/staff"); }
   }
   async function onTrasladar() {
     if (!destino) return;
@@ -121,6 +104,34 @@ export function DetalleStaff({
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-6 sm:px-10">
+
+      {confirmar ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-5 shadow-sm">
+            <p className="text-[14px] font-bold text-text">
+              {confirmar.tipo === "PROMOVER" ? `Dar perfil Guardian a ${staff.nombre}` :
+               confirmar.tipo === "REVOCAR" ? `Quitar perfil Guardian a ${staff.nombre}` :
+               confirmar.tipo === "SUSPENDER" ? `Suspender a ${staff.nombre}` :
+               `Eliminar acceso de ${staff.nombre}`}
+            </p>
+            <p className="mt-1 text-[12px] text-text-muted">
+              {confirmar.tipo === "PROMOVER" ? "Podr? administrar toda su sede." :
+               confirmar.tipo === "REVOCAR" ? "Perder? los permisos de Guardian." :
+               confirmar.tipo === "SUSPENDER" ? "Puedes indicar un motivo opcional." :
+               "Pierde el acceso al instante. Su historial se conserva."}
+            </p>
+            {confirmar.tipo === "SUSPENDER" || confirmar.tipo === "RETIRAR" ? (
+              <label className="mt-3 block text-[11px] font-semibold text-text-faint">Motivo (opcional)
+                <textarea value={confirmar.motivo ?? ""} onChange={(e)=>setConfirmar(confirmar ? { ...confirmar, motivo: e.target.value } : confirmar)} className="mt-1 min-h-[72px] w-full rounded-xl border border-border bg-bg p-2.5 text-[12.5px] text-text outline-none focus:border-accent/60" maxLength={300} />
+              </label>
+            ) : null}
+            <div className="mt-4 flex gap-2 justify-end">
+              <Button size="sm" variant="ghost" onClick={() => setConfirmar(null)}>Cancelar</Button>
+              <Button size="sm" variant={confirmar.tipo === "RETIRAR" || confirmar.tipo === "SUSPENDER" ? "danger" : "primary"} loading={accionando} onClick={ejecutarConfirmado}>Confirmar</Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       {error ? (
         <p role="alert" className="mb-4 text-[12.5px] font-semibold text-danger">
           {error}
