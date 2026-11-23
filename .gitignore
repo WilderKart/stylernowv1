@@ -48,3 +48,7 @@ next-env.d.ts
 
 # Clave de cifrado de los respaldos locales (generada, nunca versionar)
 .respaldo-clave.local
+
+# Salidas de Playwright
+/test-results/
+/playwright-report/

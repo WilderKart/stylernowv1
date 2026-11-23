@@ -16,6 +16,8 @@
     "restore:drill": "node tools/restaurar-backup.mjs",
     "check:paridad": "node tools/verificar-paridad-migraciones.mjs",
     "check:legal": "node scripts/legal/verificar-sincronizacion.mjs",
+    "e2e:preparar": "node tools/preparar-e2e.mjs",
+    "e2e": "playwright test",
     "docs:routes": "node tools/generar-route-registry-doc.mjs"
   },
   "dependencies": {

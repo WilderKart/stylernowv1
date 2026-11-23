@@ -18,6 +18,7 @@ const nextConfig: NextConfig = {
     authInterrupts: true,
   },
   poweredByHeader: false,
+  allowedDevOrigins: ["127.0.0.1"],
   async headers() {
     return [
       {
