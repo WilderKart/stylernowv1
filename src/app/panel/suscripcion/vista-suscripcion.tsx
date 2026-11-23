@@ -179,7 +179,7 @@ export function VistaSuscripcion({
     setError(null);
     const res = await iniciarUpgrade(negocioId, planCodigo);
     setProcesando(null);
-    if (!res.ok) return setError(res.mensaje);
+    if (!res.ok) return setError(res.error);
     setPagoPendienteId(res.pagoId);
     setUrlCheckout(res.url);
   }
@@ -224,7 +224,7 @@ export function VistaSuscripcion({
     const res = await cancelarMiNegocio(negocioId, motivo);
     setProcesando(null);
     if (!res.ok) return setError(res.error);
-    setBajaAbierta(false); setMotivoBaja(""); router.push("/panel");
+    setMotivoBaja(""); router.push("/panel");
   }
 
   async function onIniciarPrueba(e: React.FormEvent) {
