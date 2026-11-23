@@ -35,12 +35,30 @@ jobs:
         run: npm run check:auth
       - name: Textos legales sincronizados
         run: npm run check:legal
-      - name: Pruebas unitarias
-        run: npm test
+      - name: Pruebas unitarias y cobertura
+        run: npm run test:coverage
       - name: Build
         run: npm run build
       - name: Secretos en bundle
         run: npm run check:bundle
+
+  mutacion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ejemplo.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: anon-de-relleno
+      SUPABASE_SECRET_KEY: secreta-de-relleno
+      NEXT_PUBLIC_SITE_URL: https://ejemplo.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Pruebas de mutación Fase 7
+        run: npm run mutation
 
   e2e-roles:
     runs-on: ubuntu-latest

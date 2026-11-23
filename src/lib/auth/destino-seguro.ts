@@ -12,16 +12,16 @@
  * se queda en ese mismo origen.
  */
 const ORIGEN_FICTICIO = "https://destino-seguro.invalid";
+const DESTINO_POR_DEFECTO = "/";
 
 export function destinoSeguro(valor: string | string[] | null | undefined): string {
   const v = Array.isArray(valor) ? valor[0] : valor;
-  if (!v || !v.startsWith("/") || v.startsWith("//")) return "/";
-  if (/[\\\u0000-\u001f\u007f]/.test(v)) return "/";
+  if (!v || !v.startsWith("/") || v.startsWith("//")) return DESTINO_POR_DEFECTO;
+  if (/[\\\u0000-\u001f\u007f]/.test(v)) return DESTINO_POR_DEFECTO;
   try {
     const url = new URL(v, ORIGEN_FICTICIO);
-    if (url.origin !== ORIGEN_FICTICIO) return "/";
+    return url.origin === ORIGEN_FICTICIO ? v : DESTINO_POR_DEFECTO;
   } catch {
-    return "/";
+    return DESTINO_POR_DEFECTO;
   }
-  return v;
 }
