@@ -33,6 +33,8 @@ jobs:
         run: npm run lint
       - name: Cobertura de autorización (rutas privadas con guardia explícita)
         run: npm run check:auth
+      - name: Textos legales sincronizados
+        run: npm run check:legal
       - name: Pruebas unitarias
         run: npm test
       - name: Build

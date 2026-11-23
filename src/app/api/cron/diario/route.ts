@@ -75,6 +75,15 @@ export async function GET(request: NextRequest) {
     resultado.limite_tasa_limpiado = { error: e instanceof Error ? e.message : "error inesperado" };
   }
 
+  // Ley 1581 / política v3: purga de intentos de ingreso, huellas de anuncios y de prueba gratuita,
+  // y anonimización de las huellas de prueba una vez vencida la cookie sn_disp (730 días).
+  try {
+    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("purgar_retencion_1581");
+    resultado.retencion_1581 = error ? { error: error.message } : data;
+  } catch (e) {
+    resultado.retencion_1581 = { error: e instanceof Error ? e.message : "error inesperado" };
+  }
+
   // --- Cliente (C01 / C15): tareas defensivas; un fallo aquí no afecta a las anteriores. ---
   try {
     const { data, error } = await admin.rpc("generar_recordatorios_cita", { p_ventana_horas: 24 });

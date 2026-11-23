@@ -15,6 +15,7 @@
     "backup:remoto": "node tools/backup-supabase.mjs",
     "restore:drill": "node tools/restaurar-backup.mjs",
     "check:paridad": "node tools/verificar-paridad-migraciones.mjs",
+    "check:legal": "node scripts/legal/verificar-sincronizacion.mjs",
     "docs:routes": "node tools/generar-route-registry-doc.mjs"
   },
   "dependencies": {
