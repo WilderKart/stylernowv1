@@ -1,4 +1,4 @@
-﻿-- 184_sincronia_b1_fidelidad_ads_gates.sql
+-- 184_sincronia_b1_fidelidad_ads_gates.sql
 -- B1: fidelidad idempotente al completar cita fuera de POS + alineacion Ads v3 + guards.
 -- No aplica DB remota; solo repo. Requiere revision antes de aplicar.
 
