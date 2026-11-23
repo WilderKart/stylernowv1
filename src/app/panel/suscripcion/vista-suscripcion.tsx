@@ -179,7 +179,7 @@ export function VistaSuscripcion({
     setError(null);
     const res = await iniciarUpgrade(negocioId, planCodigo);
     setProcesando(null);
-    if (!res.ok) return setError(res.error);
+    if (!res.ok) return setError(res.mensaje);
     setPagoPendienteId(res.pagoId);
     setUrlCheckout(res.url);
   }
@@ -202,7 +202,7 @@ export function VistaSuscripcion({
     setError(null);
     const res = await solicitarDowngrade(negocioId, downgradePendiente);
     setProcesando(null);
-    if (!res.ok) return setError(res.mensaje);
+    if (!res.ok) return setError(res.error);
     setDowngradePendiente(null);
     router.refresh();
   }
