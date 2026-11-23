@@ -4,6 +4,7 @@ import { ConexionNoDisponible, conexionesDeCuenta, reportarFalloConexion, revisa
 import { diagnosticoFirma, ErrorMercadoPago, obtenerContracargo, obtenerMerchantOrder, verificarFirma } from "./mercadopago";
 import { sincronizarNotificacion, type OrigenNotificacion, type TrazaSincronizacion } from "./sincronizar";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { enviarAlertaOperativa, type DetalleAlerta } from "@/lib/observabilidad/alertas";
 
 /**
  * Webhook de Mercado Pago (Checkout Pro clásico, Preferences API + OAuth por barbería).
@@ -69,10 +70,19 @@ export async function procesarWebhookMercadoPago(request: Request): Promise<Resp
   // `x-request-id-origen`: la firma se calcula con el id ORIGINAL del proveedor.
   const requestIdHeader = (request.headers.get("x-request-id-origen") ?? request.headers.get("x-request-id") ?? "").slice(0, 200);
 
+  const alertar = (codigo: string, detalle: DetalleAlerta = {}, severidad: "warning" | "error" = "error") =>
+    enviarAlertaOperativa({
+      tipo: "WEBHOOK_ERROR",
+      titulo: `Webhook Mercado Pago: ${codigo}`,
+      detalle: { codigo, tipo, ...detalle },
+      severidad,
+    });
+
   // ── 1 · Autenticidad ────────────────────────────────────────────────────
   const firmaValida = verificarFirma({ firma, requestId: requestIdHeader || null, dataId });
   if (firmaValida === null && esProduccion()) {
     console.error("[webhook mercadopago] MERCADOPAGO_WEBHOOK_SECRET no configurado: notificación rechazada");
+    await alertar("SECRETO_NO_CONFIGURADO", { request_id: requestIdHeader || "sin-request-id", data_id: dataId?.slice(0, 40) || "sin-data-id" });
     return new Response("webhook no configurado", { status: 503 });
   }
   if (firmaValida === false) {
@@ -94,6 +104,7 @@ export async function procesarWebhookMercadoPago(request: Request): Promise<Resp
         dataIdCuerpo: cuerpo?.data?.id != null ? String(cuerpo.data.id) : null,
       }),
     });
+    await alertar("FIRMA_INVALIDA", { request_id: requestIdHeader || "sin-request-id", data_id: dataId?.slice(0, 40) || "sin-data-id" }, "warning");
     return new Response("firma inválida", { status: 401 });
   }
   const etiquetaFirma = firmaValida === true ? "VALIDA" : "SIN_SECRETO_LOCAL";
@@ -120,6 +131,7 @@ export async function procesarWebhookMercadoPago(request: Request): Promise<Resp
   });
   if (reg.error) {
     console.error("[webhook mercadopago] no se pudo registrar la notificación", reg.error.message);
+    await alertar("REGISTRO_NO_DISPONIBLE", { request_id: requestId, data_id: dataId?.slice(0, 40) || "sin-data-id" });
     return new Response("registro no disponible", { status: 500 }); // Mercado Pago reintenta
   }
   if (reg.data === false) return Response.json({ recibido: true, duplicado: true });
@@ -137,7 +149,10 @@ export async function procesarWebhookMercadoPago(request: Request): Promise<Resp
       p_live_mode: traza?.liveMode ?? null,
       p_error: error ?? null,
     });
-    if (e) console.error("[webhook mercadopago] no se pudo guardar el resultado", e.message);
+    if (e) {
+      console.error("[webhook mercadopago] no se pudo guardar el resultado", e.message);
+      await alertar("RESULTADO_NO_GUARDADO", { request_id: requestId, resultado: res.slice(0, 80) }, "warning");
+    }
   };
 
   // ── 3 y 4 · Consulta al proveedor y efecto ───────────────────────────────
@@ -208,6 +223,7 @@ export async function procesarWebhookMercadoPago(request: Request): Promise<Resp
     }
     await resultado(!reintentar, codigo, undefined, e instanceof Error ? e.message : String(e));
     console.error("[webhook mercadopago] fallo procesando", { tipo, dataId: dataId?.slice(0, 40), codigo });
+    await alertar(codigo, { request_id: requestId, data_id: dataId?.slice(0, 40) || "sin-data-id" }, reintentar ? "error" : "warning");
     // Transitorio → 500 (Mercado Pago reintenta). Permanente → 200 con el error registrado.
     return reintentar ? new Response("error procesando", { status: 500 }) : Response.json({ recibido: true, resultado: codigo });
   }

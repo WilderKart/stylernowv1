@@ -135,7 +135,9 @@ describe("Fase 7 · codificación y validación Web Push", () => {
 describe("Fase 7 · envío Web Push", () => {
   it("envía POST con cabeceras exactas y devuelve el Location como evidencia", async () => {
     const sub = suscripcionDePrueba();
-    const fetchPush = vi.fn(async () => respuesta(201, { Location: "https://fcm.googleapis.com/m/123" }));
+    const fetchPush = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(
+      async () => respuesta(201, { Location: "https://fcm.googleapis.com/m/123" })
+    );
     const resultado = await enviarPushA(sub, Buffer.from("hola"), clavesDePrueba(), fetchPush);
     expect(resultado).toEqual({ ok: true, idExterno: "https://fcm.googleapis.com/m/123" });
     expect(fetchPush).toHaveBeenCalledTimes(1);
@@ -176,7 +178,9 @@ describe("Fase 7 · envío Web Push", () => {
       [503, { ok: false, codigo: "HTTP_503", reintentable: true, expirada: false }],
     ];
     for (const [status, esperado] of casos) {
-      const fetchPush = vi.fn(async () => respuesta(status));
+      const fetchPush = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(
+      async () => respuesta(status)
+    );
       await expect(enviarPushA(sub, Buffer.from("hola"), clavesDePrueba(), fetchPush)).resolves.toEqual(esperado);
     }
     const caido = vi.fn(async () => {
@@ -192,7 +196,9 @@ describe("Fase 7 · envío Web Push", () => {
 
   it("no llama a la red con endpoints o suscripciones inválidos", async () => {
     const sub = suscripcionDePrueba();
-    const fetchPush = vi.fn(async () => respuesta(201));
+    const fetchPush = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(
+      async () => respuesta(201)
+    );
     await expect(
       enviarPushA({ ...sub, endpoint: "https://evil.example.com/x/abcdefghijk" }, Buffer.from("hola"), clavesDePrueba(), fetchPush)
     ).resolves.toEqual({ ok: false, codigo: "ENDPOINT_NO_PERMITIDO", reintentable: false, expirada: true });

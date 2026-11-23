@@ -14,12 +14,19 @@ export async function GET() {
   if (!cupo.ok) {
     return new Response("demasiadas peticiones", { status: 429, headers: { "Retry-After": String(cupo.retryAfter) } });
   }
+  const configurado = (nombre: string) => (process.env[nombre]?.trim() ? "configurado" : "sin_configurar");
+  const chequeos = {
+    sentry: configurado("NEXT_PUBLIC_SENTRY_DSN"),
+    cron: configurado("CRON_SECRET"),
+    alertas: configurado("ALERTAS_WEBHOOK_URL"),
+  };
   return Response.json(
     {
       status: "ok",
       version: process.env.NEXT_PUBLIC_APP_VERSION ?? "desconocida",
       region: process.env.VERCEL_REGION ?? "local",
       timestamp: new Date().toISOString(),
+      chequeos,
     },
     { headers: { "Cache-Control": "no-store" } },
   );

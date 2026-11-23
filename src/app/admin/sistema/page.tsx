@@ -5,6 +5,7 @@ import { CircleAlert, CircleCheck, CircleX, RefreshCw } from "lucide-react";
 import { EncabezadoAdmin } from "../_componentes/encabezado-admin";
 import { rpcAdmin } from "../_componentes/rpc";
 import { Caja, TituloCaja } from "../_componentes/ui-admin";
+import { ProbarAlertas } from "./probar-alertas";
 
 export const dynamic = "force-dynamic";
 
@@ -155,6 +156,8 @@ export default async function AdminSistemaPage() {
           </div>
         </div>
       </Caja>
+
+      <ProbarAlertas />
 
       <Caja>
         <TituloCaja>Servicios</TituloCaja>
