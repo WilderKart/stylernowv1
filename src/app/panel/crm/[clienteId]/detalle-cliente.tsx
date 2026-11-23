@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { comprimirADataUrl } from "@/lib/imagen/comprimir";
 import { formatCOP } from "@/lib/utils";
 import { useRef, useState } from "react";
 
@@ -323,16 +324,16 @@ function SeccionFotos({
       return;
     }
     setSubiendo(true);
-    const dataUrl: string = await new Promise((resolve, reject) => {
-      const lector = new FileReader();
-      lector.onload = () => resolve(lector.result as string);
-      lector.onerror = reject;
-      lector.readAsDataURL(archivo);
-    });
-    const res = await subirFoto({ negocioId, clienteId, reservaId, dataUrl, consentimiento: true });
+    // Foto de resultados: WebP 0.8, ancho máx. 1280 px (utilidad central).
+    const comprimida = await comprimirADataUrl(archivo, "media");
+    if (!comprimida.ok) {
+      setSubiendo(false);
+      return onError(comprimida.error);
+    }
+    const res = await subirFoto({ negocioId, clienteId, reservaId, dataUrl: comprimida.data, consentimiento: true });
     setSubiendo(false);
     if (!res.ok) return onError(res.error);
-    onCambio([{ id: crypto.randomUUID(), url: dataUrl, createdAt: new Date().toISOString() }, ...fotos]);
+    onCambio([{ id: crypto.randomUUID(), url: comprimida.data, createdAt: new Date().toISOString() }, ...fotos]);
   }
 
   async function onEliminar(id: string) {

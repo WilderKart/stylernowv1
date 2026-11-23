@@ -51,7 +51,10 @@ export async function proxy(request: NextRequest) {
   requestHeaders.set("x-request-id", crypto.randomUUID());
   requestHeaders.set(cabeceraCsp, csp);
 
-  const { response, user } = await updateSession(request, requestHeaders);
+  const { pathname, search } = request.nextUrl;
+  const { response, user, sesionRevocada } = await updateSession(request, requestHeaders, {
+    rutaProtegida: !esRutaPublica(pathname) && !pathname.startsWith("/api/"),
+  });
   response.headers.set(cabeceraCsp, csp);
   // En modo solo-reporte el navegador ignora frame-ancestors; estas tres sí se aplican siempre (solo en la respuesta,
   // nunca en la petición: si estuvieran en la petición Next tomaría este CSP sin script-src y no pondría el nonce).
@@ -59,7 +62,17 @@ export async function proxy(request: NextRequest) {
     response.headers.set("Content-Security-Policy", "frame-ancestors 'none'; base-uri 'self'; object-src 'none'");
   }
 
-  const { pathname, search } = request.nextUrl;
+  // Session Version (migración 181): la sesión quedó revocada (cambio de contraseña, suspensión,
+  // traslado…). `updateSession` ya la cerró y limpió las cookies; se reenvía esa limpieza al redirect.
+  if (sesionRevocada) {
+    const login = new URL("/login", request.url);
+    login.searchParams.set("revocada", "1");
+    login.searchParams.set("next", `${pathname}${search}`);
+    const r = NextResponse.redirect(login);
+    response.cookies.getAll().forEach((c) => r.cookies.set(c));
+    return r;
+  }
+
   // ADR-015 auditoría (2026-09-16, evidencia real con curl+sesión): las
   // rutas /api/** (Route Handlers) NUNCA pasan por el redirect a /login —
   // ya devuelven su propio 401/403 real (verificado: sin cookie → 401,

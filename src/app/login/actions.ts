@@ -13,6 +13,7 @@ import { destinoInicial, destinoPorIntencion, fijarIntencionRegistro } from "@/l
 import { obtenerInvitacionPendiente } from "@/lib/invitaciones/invitacion-pendiente";
 import { limitar, ipDelLlamador } from "@/lib/rate-limit";
 import { MENSAJE_TURNSTILE, verificarTurnstile } from "@/lib/seguridad/turnstile";
+import * as Sentry from "@sentry/nextjs";
 import { headers } from "next/headers";
 import { z } from "zod";
 
@@ -38,8 +39,8 @@ const TIPO_CUENTA = z.enum(["cliente", "negocio"]);
 async function limitarEnvioCorreo(email: string) {
   const limite = await verificarRateLimitAuth(email, "otp_envio");
   if (!limite.ok) return limite;
-  const porIp = await limitar("otp-ip", await ipDelLlamador(), 8, 600);
-  const porCorreo = await limitar("otp-correo", email, 5, 600);
+  const porIp = await limitar("otp-ip", await ipDelLlamador(), 8, 600, { failClosed: true });
+  const porCorreo = await limitar("otp-correo", email, 5, 600, { failClosed: true });
   if (!porIp.ok || !porCorreo.ok) {
     const espera = Math.max(!porIp.ok ? porIp.retryAfter : 0, !porCorreo.ok ? porCorreo.retryAfter : 0);
     return { ok: false as const, error: `Demasiados intentos. Espera ${Math.ceil(espera / 60)} min y vuelve a intentarlo.` };
@@ -278,7 +279,7 @@ export async function iniciarSesionConContrasena(emailCrudo: string, password: s
 
   const limite = await verificarRateLimitAuth(email, "password_login");
   if (!limite.ok) return { ok: false as const, error: limite.error };
-  const porIp = await limitar("login-ip", await ipDelLlamador(), 30, 600);
+  const porIp = await limitar("login-ip", await ipDelLlamador(), 30, 600, { failClosed: true });
   if (!porIp.ok) return { ok: false as const, error: "Demasiados intentos. Espera unos minutos antes de volver a intentar." };
 
   const supabase = await createClient();
@@ -303,7 +304,7 @@ export async function solicitarRecuperacion(emailCrudo: string, turnstile?: unkn
   if (!correo.success) return { ok: false as const, error: "Escribe un correo válido." };
   const email = correo.data;
   if (!(await verificarTurnstile(turnstile, "recuperar"))) return { ok: false as const, error: MENSAJE_TURNSTILE };
-  const porIp = await limitar("recuperar-ip", await ipDelLlamador(), 8, 600);
+  const porIp = await limitar("recuperar-ip", await ipDelLlamador(), 8, 600, { failClosed: true });
   if (!porIp.ok) return { ok: false as const, error: "Demasiados intentos. Espera unos minutos antes de volver a intentar." };
   const limite = await verificarRateLimitAuth(email, "password_recovery");
   if (!limite.ok) return { ok: false as const, error: limite.error };
@@ -314,8 +315,12 @@ export async function solicitarRecuperacion(emailCrudo: string, turnstile?: unkn
   });
   await registrarIntentoAuth(email, "password_recovery", !error);
   // Nunca revelar si el email existe o no — siempre "ok" del lado del
-  // usuario, el error real (si lo hay) solo se loguea server-side.
-  if (error) console.error("[solicitarRecuperacion]", error.message);
+  // usuario; el error real se registra server-side para poder diagnosticar
+  // fallos de SMTP/entrega sin filtrar nada a la pantalla.
+  if (error) {
+    console.error("[solicitarRecuperacion]", error.message);
+    Sentry.captureException(error, { tags: { flujo: "recuperacion_contrasena" } });
+  }
   return { ok: true as const };
 }
 

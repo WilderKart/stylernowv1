@@ -3,6 +3,7 @@
 import { Chip, ChipGroup, Label, Meta, Num, Panel, Poster, SectionTitle, Status } from "@/components/brutal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { comprimirADataUrl } from "@/lib/imagen/comprimir";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
@@ -114,22 +115,22 @@ function FormularioMarca({ nombreNegocio, logoNegocio, marca }: { nombreNegocio:
   const secundarioOk = HEX.test(secundario);
   const nombreOk = nombre.trim().length >= 1 && nombre.trim().length <= 60;
 
-  function elegirArchivo(e: React.ChangeEvent<HTMLInputElement>) {
+  async function elegirArchivo(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     e.target.value = "";
     if (!f) return;
-    if (!["image/png", "image/jpeg", "image/webp"].includes(f.type)) return void toast.error("Usa una imagen PNG, JPG o WebP.");
-    if (f.size > 5 * 1024 * 1024) return void toast.error("La imagen no puede superar 5 MB.");
-    const lector = new FileReader();
-    lector.onload = async () => {
-      setSubiendo(true);
-      const r = await subirLogoMarca(String(lector.result));
+    setSubiendo(true);
+    // Logo de negocio: WebP 0.8, ancho máx. 1280 px (utilidad central). Valida tipo y 5 MB.
+    const comprimida = await comprimirADataUrl(f, "media");
+    if (!comprimida.ok) {
       setSubiendo(false);
-      if (!r.ok) return void toast.error(r.error);
-      setLogoUrl(r.data.url);
-      toast.success("Logo subido. Guarda para aplicarlo.");
-    };
-    lector.readAsDataURL(f);
+      return void toast.error(comprimida.error);
+    }
+    const r = await subirLogoMarca(comprimida.data);
+    setSubiendo(false);
+    if (!r.ok) return void toast.error(r.error);
+    setLogoUrl(r.data.url);
+    toast.success("Logo subido. Guarda para aplicarlo.");
   }
 
   function guardar(publicar: boolean) {

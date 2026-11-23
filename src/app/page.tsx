@@ -8,6 +8,7 @@ import { NegocioCardPortada } from "@/components/marketplace/negocio-card-portad
 import { EmptyState } from "@/components/brutal";
 import { buscarNegociosFiltrado } from "@/lib/cliente/profesionales";
 import { registrarEventoAnuncio } from "@/lib/ads/registrar-evento";
+import { limitar, ipDelLlamador } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -54,6 +55,11 @@ export default async function HomePage(props: PageProps<"/">) {
   const ordenValido = (["CALIFICACION", "PRECIO", "RECIENTE"] as const).find((o) => o === orden) ?? "RELEVANCIA";
 
   const busqueda = async () => {
+    // SEC-13: el buscador (`marketplace_buscar`/`_filtrado`) es costoso y lo puede disparar
+    // un anónimo. Límite de borde por IP (fail-open: una caída de la BD de cupos no puede
+    // tumbar la portada pública).
+    const cupo = await limitar("marketplace-busqueda", await ipDelLlamador(), 90, 60);
+    if (!cupo.ok) return { data: [], error: null };
     if (avanzado) {
       const r = await buscarNegociosFiltrado({
         texto,

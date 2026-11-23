@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { comprimirADataUrl } from "@/lib/imagen/comprimir";
 import { formatCOP } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -85,13 +86,13 @@ function SeccionDatos({ perfilInicial }: { perfilInicial: MiPerfilStaff }) {
   async function onCambiarFoto(archivo: File) {
     setSubiendoFoto(true);
     setError(null);
-    const dataUrl: string = await new Promise((resolve, reject) => {
-      const lector = new FileReader();
-      lector.onload = () => resolve(lector.result as string);
-      lector.onerror = reject;
-      lector.readAsDataURL(archivo);
-    });
-    const res = await subirFotoPerfilStaff(dataUrl);
+    // Avatar de staff: WebP 0.8, lado máx. 512 px (utilidad central).
+    const comprimida = await comprimirADataUrl(archivo, "avatar");
+    if (!comprimida.ok) {
+      setSubiendoFoto(false);
+      return setError(comprimida.error);
+    }
+    const res = await subirFotoPerfilStaff(comprimida.data);
     setSubiendoFoto(false);
     if (!res.ok) return setError(res.error);
     setFotoUrl(res.data.url);

@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/database";
+import type { User } from "@supabase/supabase-js";
 
 /**
  * Refresca la sesión de Supabase en cada request (05-API/02_Auth.md: rotación
@@ -9,10 +10,11 @@ import type { Database } from "@/types/database";
  * resuelve rol/onboarding/permisos aquí, eso sigue siendo 100% server-side
  * en `requireRole()`.
  */
-export async function updateSession(request: NextRequest, requestHeaders?: Headers): Promise<{
-  response: NextResponse;
-  user: import("@supabase/supabase-js").User | null;
-}> {
+export async function updateSession(
+  request: NextRequest,
+  requestHeaders?: Headers,
+  opciones?: { rutaProtegida?: boolean }
+): Promise<{ response: NextResponse; user: User | null; sesionRevocada: boolean }> {
   const reenviar = requestHeaders ? { headers: requestHeaders } : request;
   let supabaseResponse = NextResponse.next({ request: reenviar });
 
@@ -29,7 +31,7 @@ export async function updateSession(request: NextRequest, requestHeaders?: Heade
       "[proxy] Faltan NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY en este entorno. " +
         "Configuralas en Vercel → Project Settings → Environment Variables y vuelve a desplegar."
     );
-    return { response: supabaseResponse, user: null };
+    return { response: supabaseResponse, user: null, sesionRevocada: false };
   }
 
   const supabase = createServerClient<Database>(
@@ -56,5 +58,38 @@ export async function updateSession(request: NextRequest, requestHeaders?: Heade
     data: { user },
   } = await supabase.auth.getUser();
 
-  return { response: supabaseResponse, user };
+  // Session Version (migración 181, SEC-9/CR-4): si el Custom Access Token Hook de
+  // Supabase está habilitado, `session_version` viaja como claim del JWT. Se compara
+  // con el valor actual en `perfil`: si difieren, la sesión fue revocada (cambio de
+  // contraseña, recuperación, suspensión, traslado o revocación de Guardian) y se
+  // cierra de inmediato en vez de esperar a que el token expire (~1 h). Si el hook
+  // aún no está activo, no hay claim → fail-safe (no bloquea nada).
+  if (user && opciones?.rutaProtegida && (await sesionRevocada(supabase, user))) {
+    await supabase.auth.signOut();
+    return { response: supabaseResponse, user: null, sesionRevocada: true };
+  }
+
+  return { response: supabaseResponse, user, sesionRevocada: false };
+}
+
+/** true si el `session_version` del token quedó obsoleto frente a la base. */
+async function sesionRevocada(
+  supabase: ReturnType<typeof createServerClient<Database>>,
+  user: User
+): Promise<boolean> {
+  try {
+    const { data } = await supabase.auth.getClaims();
+    const claim = (data?.claims as Record<string, unknown> | undefined)?.session_version;
+    if (typeof claim !== "number") return false; // hook no habilitado → fail-safe
+    const { data: perfil } = await supabase
+      .from("perfil")
+      .select("session_version")
+      .eq("id", user.id)
+      .maybeSingle();
+    const actual = perfil?.session_version;
+    if (typeof actual !== "number") return false;
+    return actual !== claim;
+  } catch {
+    return false; // ante cualquier fallo del control, no bloquear al usuario
+  }
 }

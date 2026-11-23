@@ -4,6 +4,7 @@ import { autorizarPublicacion, retirarPublicacion, type EstadoPublicacion } from
 import { subirFotoPerfilStaff } from "@/app/staff/perfil/actions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { comprimirADataUrl } from "@/lib/imagen/comprimir";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -34,14 +35,11 @@ export function TarjetaVisibilidadPublica({ estado }: { estado: EstadoPublicacio
   }
 
   async function onFoto(archivo: File) {
-    const dataUrl: string = await new Promise((resolve, reject) => {
-      const l = new FileReader();
-      l.onload = () => resolve(l.result as string);
-      l.onerror = reject;
-      l.readAsDataURL(archivo);
-    });
+    // Foto profesional: WebP 0.8, lado máx. 512 px (utilidad central).
+    const comprimida = await comprimirADataUrl(archivo, "avatar");
+    if (!comprimida.ok) return setError(comprimida.error);
     await ejecutar(async () => {
-      const r = await subirFotoPerfilStaff(dataUrl);
+      const r = await subirFotoPerfilStaff(comprimida.data);
       return r.ok ? { ok: true } : { ok: false, error: r.error };
     });
   }

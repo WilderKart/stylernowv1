@@ -5,36 +5,12 @@ import { Avatar } from "@/components/brutal";
 import { Camera, Trash2 } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
 import { useT } from "@/lib/i18n/proveedor";
+import { comprimirImagen } from "@/lib/imagen/comprimir";
 import { quitarFotoPerfil, subirFotoPerfil } from "./foto-actions";
 
-const MAX_ORIGINAL_BYTES = 10 * 1024 * 1024; // lo que la persona puede elegir: hasta 10 MB
-const LADO_MAXIMO = 1024; // se reduce antes de enviar (ligero y rápido)
+const MAX_ORIGINAL_BYTES = 5 * 1024 * 1024; // la persona puede elegir hasta 5 MB (regla central de subidas)
 
-/** Reduce la foto en el navegador: lado máx. 1024 px, WebP ~0,85. Devuelve null si el navegador no puede leerla. */
-async function reducir(archivo: File): Promise<Blob | null> {
-  try {
-    const bitmap = await createImageBitmap(archivo);
-    const escala = Math.min(1, LADO_MAXIMO / Math.max(bitmap.width, bitmap.height));
-    const ancho = Math.max(1, Math.round(bitmap.width * escala));
-    const alto = Math.max(1, Math.round(bitmap.height * escala));
-    const lienzo = document.createElement("canvas");
-    lienzo.width = ancho;
-    lienzo.height = alto;
-    const ctx = lienzo.getContext("2d");
-    if (!ctx) return null;
-    ctx.drawImage(bitmap, 0, 0, ancho, alto);
-    bitmap.close();
-    for (const calidad of [0.85, 0.7, 0.55]) {
-      const blob = await new Promise<Blob | null>((res) => lienzo.toBlob(res, "image/webp", calidad));
-      if (blob && blob.size <= 1_800_000) return blob;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-/** Avatar del perfil con subida opcional de foto (hasta 10 MB). */
+/** Avatar del perfil con subida opcional de foto (hasta 5 MB). */
 export function FotoPerfil({ nombre, avatarUrl }: { nombre: string; avatarUrl: string | null }) {
   const t = useT();
   const [url, setUrl] = useState(avatarUrl);
@@ -50,10 +26,11 @@ export function FotoPerfil({ nombre, avatarUrl }: { nombre: string; avatarUrl: s
     if (!/^image\/(jpeg|png|webp)$/.test(archivo.type)) return setError(t("foto.formato"));
     if (archivo.size > MAX_ORIGINAL_BYTES) return setError(t("foto.pesada"));
     iniciar(async () => {
-      const reducida = await reducir(archivo);
-      if (!reducida) return setError(t("foto.ilegible"));
+      // Avatar: WebP calidad 0.8, lado máx. 512 px (utilidad central).
+      const comprimida = await comprimirImagen(archivo, "avatar");
+      if (!comprimida.ok) return setError(t("foto.ilegible"));
       const datos = new FormData();
-      datos.append("foto", new File([reducida], "foto.webp", { type: "image/webp" }));
+      datos.append("foto", comprimida.data);
       const r = await subirFotoPerfil(datos);
       if (r.ok) setUrl(r.data.url);
       else setError(r.error);

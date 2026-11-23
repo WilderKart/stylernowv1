@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CATEGORIAS_ONBOARDING } from "@/lib/categorias-onboarding";
-import { leerComoDataUrl } from "@/lib/imagen/leer-como-data-url";
+import { comprimirADataUrl } from "@/lib/imagen/comprimir";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Flower2, PenTool, Scissors, Sparkles, UserRound } from "lucide-react";
 import Link from "next/link";
@@ -51,11 +51,11 @@ export function PasoDatos({
   async function elegirImagen(archivo: File | undefined, destino: "logo" | "foto") {
     if (!archivo) return;
     setErrorImagen(null);
-    // Las Server Actions aceptan ~1 MB: se reduce en el navegador (ver leerComoDataUrl).
-    const r = await leerComoDataUrl(archivo, 8, destino === "foto" ? 1600 : 800);
+    // Las Server Actions aceptan ~1 MB: se comprime en el navegador con la utilidad central.
+    const r = await comprimirADataUrl(archivo, "media");
     if (!r.ok) return setErrorImagen(r.error);
-    if (destino === "logo") setLogoPendiente(r.dataUrl);
-    else setFotoPendiente(r.dataUrl);
+    if (destino === "logo") setLogoPendiente(r.data);
+    else setFotoPendiente(r.data);
   }
 
   async function onSubmit(e: React.FormEvent) {

@@ -3,7 +3,7 @@
 import { subirFotoPrincipal } from "@/app/panel/onboarding/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { leerComoDataUrl } from "@/lib/imagen/leer-como-data-url";
+import { comprimirADataUrl } from "@/lib/imagen/comprimir";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -44,12 +44,12 @@ export function VistaPerfilPublico({ negocio, hayImagenes }: { negocio: NegocioP
     if (!archivo) return;
     setSubiendo(true);
     setAviso(null);
-    const leida = await leerComoDataUrl(archivo, 8, 1600);
+    const leida = await comprimirADataUrl(archivo, "media");
     if (!leida.ok) {
       setSubiendo(false);
       return setAviso({ tipo: "error", texto: leida.error });
     }
-    const r = await subirFotoPrincipal(negocio.id, leida.dataUrl);
+    const r = await subirFotoPrincipal(negocio.id, leida.data);
     setSubiendo(false);
     if (r.ok) {
       setFoto(r.data.url);
