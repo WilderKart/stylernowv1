@@ -195,6 +195,17 @@ export function VistaSuscripcion({
   }
 
   function onDowngrade(planCodigo: PlanCodigo) { setDowngradePendiente(planCodigo); }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async function confirmarDowngrade() {
+    if (!downgradePendiente) return;
+    setProcesando("downgrade");
+    setError(null);
+    const res = await solicitarDowngrade(negocioId, downgradePendiente);
+    setProcesando(null);
+    if (!res.ok) return setError(res.mensaje);
+    setDowngradePendiente(null);
+    router.refresh();
+  }
 
   async function onCancelarDowngrade() {
     setProcesando("cancelar-downgrade");

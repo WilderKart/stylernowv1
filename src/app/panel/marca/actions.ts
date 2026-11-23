@@ -1,6 +1,7 @@
 "use server";
 
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { exigirOperativo } from "@/lib/suscripcion/estado-operativo";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -9,6 +10,7 @@ type Resultado<T = undefined> =
   | { ok: false; error: string };
 
 const MENSAJES_ERROR: Record<string, string> = {
+  SUSCRIPCION_RESTRINGIDA: "Tu suscripci?n no permite esta acci?n en este momento.",
   NO_AUTORIZADO: "No tienes permiso sobre este negocio.",
   ADDON_MI_MARCA_REQUERIDO: "Tu negocio aún no tiene activo el add-on Mi Marca.",
   ASUNTO_REQUERIDO: "Falta el asunto de la solicitud.",
@@ -42,6 +44,8 @@ export interface FormularioMarca {
 export async function guardarMarca(f: FormularioMarca): Promise<Resultado> {
   try {
     const { supabase, negocioId } = await contextoBarberia();
+    const op = await exigirOperativo(negocioId);
+    if (!op.ok) return { ok: false, error: MENSAJES_ERROR.SUSCRIPCION_RESTRINGIDA };
     const nombre = f.nombre.trim();
     const slogan = f.slogan.trim();
     if (nombre.length < 1 || nombre.length > 60) return { ok: false, error: "El nombre de marca debe tener entre 1 y 60 caracteres." };
