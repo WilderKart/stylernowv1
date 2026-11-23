@@ -10,6 +10,7 @@
     "check:auth": "node tools/check-auth-coverage.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:concurrencia": "node tools/test-concurrencia.mjs",
     "docs:routes": "node tools/generar-route-registry-doc.mjs"
   },
   "dependencies": {
