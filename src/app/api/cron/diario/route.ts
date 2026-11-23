@@ -28,6 +28,15 @@ import type { NextRequest } from "next/server";
  * agregan su tarea aquí en vez de abrir una infraestructura de cron nueva
  * cada vez.
  */
+function conteoBacklog(valor: unknown): Record<string, number> | undefined {
+  if (!valor || typeof valor !== "object" || Array.isArray(valor)) return undefined;
+  const out: Record<string, number> = {};
+  for (const [k, v] of Object.entries(valor as Record<string, unknown>)) {
+    if (typeof v === "number" && Number.isFinite(v)) out[k] = v;
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
 export async function GET(request: NextRequest) {
   const secreto = process.env.CRON_SECRET;
   const auth = request.headers.get("authorization");
@@ -36,136 +45,105 @@ export async function GET(request: NextRequest) {
     return new Response("no autorizado", { status: 401 });
   }
 
+  const inicioCron = Date.now();
   const admin = createAdminClient();
   const resultado: Record<string, unknown> = {};
+  const metricas: Array<{ tarea: string; duracion_ms: number; ok: boolean; backlog?: Record<string, number> }> = [];
 
-  const { data: reservasExpiradas, error: e1 } = await admin.rpc("expirar_reservas_vencidas");
-  resultado.reservas_expiradas = e1 ? { error: e1.message } : reservasExpiradas;
-
-  const { data: downgrades, error: e2 } = await admin.rpc("ejecutar_downgrades_programados");
-  resultado.downgrades = e2 ? { error: e2.message } : downgrades;
-
-  const { data: creditosIa, error: e3 } = await admin.rpc("otorgar_creditos_plan_mensual");
-  resultado.creditos_ia_otorgados = e3 ? { error: e3.message } : creditosIa;
-
-  const { data: roiSnapshot, error: e4 } = await admin.rpc("generar_roi_snapshot_mensual");
-  resultado.roi_ia_snapshot = e4 ? { error: e4.message } : roiSnapshot;
-
-  // Centro de Cumplimiento y PQRS: motor de SLA (prioridades, alertas, escalamiento, desistimiento) y despacho de alertas.
-  // Idempotente: cada alerta tiene clave única. Con un cron diario las alertas de horas dependen además de que el SuperAdmin
-  // abra el Centro (que también evalúa) o de pasar a un cron más frecuente (plan Pro de Vercel).
-  try {
-    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("cumplimiento_evaluar_sla");
-    resultado.cumplimiento_sla = error ? { error: error.message } : data;
-    resultado.cumplimiento_envios = await procesarNotificacionesCumplimiento(50);
-  } catch (e) {
-    resultado.cumplimiento = { error: e instanceof Error ? e.message : "error inesperado" };
-  }
-
-  try {
-    resultado.suscripciones = await ejecutarCicloSuscripciones();
-  } catch (e) {
-    resultado.suscripciones = { error: e instanceof Error ? e.message : "error inesperado" };
-  }
-
-  try {
-    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("limpiar_limite_tasa");
-    resultado.limite_tasa_limpiado = error ? { error: error.message } : data;
-  } catch (e) {
-    resultado.limite_tasa_limpiado = { error: e instanceof Error ? e.message : "error inesperado" };
-  }
-
-  // Ley 1581 / política v3: purga de intentos de ingreso, huellas de anuncios y de prueba gratuita,
-  // y anonimización de las huellas de prueba una vez vencida la cookie sn_disp (730 días).
-  try {
-    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("purgar_retencion_1581");
-    resultado.retencion_1581 = error ? { error: error.message } : data;
-  } catch (e) {
-    resultado.retencion_1581 = { error: e instanceof Error ? e.message : "error inesperado" };
-  }
-
-  // --- Cliente (C01 / C15): tareas defensivas; un fallo aquí no afecta a las anteriores. ---
-  try {
-    const { data, error } = await admin.rpc("generar_recordatorios_cita", { p_ventana_horas: 24 });
-    resultado.recordatorios_cita = error ? { error: error.message } : data;
-  } catch (e) {
-    resultado.recordatorios_cita = { error: e instanceof Error ? e.message : "error inesperado" };
-  }
-
-  try {
-    resultado.eliminacion_cuentas = await procesarEliminacionesCuenta(admin);
-  } catch (e) {
-    resultado.eliminacion_cuentas = { error: e instanceof Error ? e.message : "error inesperado" };
-  }
-
-  // Migración 117: cambios de comisión programados por Super Admin cuya fecha llegó.
-  try {
-    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("aplicar_comisiones_programadas");
-    resultado.comisiones_programadas = error ? { error: error.message } : data;
-  } catch (e) {
-    resultado.comisiones_programadas = { error: e instanceof Error ? e.message : "error inesperado" };
-  }
-
-  // Migración 120: lote mensual de conversaciones de WhatsApp de cada plan (idempotente por mes).
-  try {
-    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("whatsapp_otorgar_lotes_plan_mes");
-    resultado.whatsapp_lotes_plan = error ? { error: error.message } : data;
-  } catch (e) {
-    resultado.whatsapp_lotes_plan = { error: e instanceof Error ? e.message : "error inesperado" };
-  }
-
-  // Pagos PENDIENTE cuyo webhook no llegó: se reconsultan en Mercado Pago (solo aplica lo que la
-  // pasarela confirma). Antes de reembolsos: un pago tardío de una reserva expirada encola su devolución.
-  try {
-    resultado.conciliacion_pagos = await reconciliarPagosPendientes(30);
-  } catch (e) {
-    resultado.conciliacion_pagos = { error: e instanceof Error ? e.message : "error inesperado" };
-  }
-
-  // Barberos adicionales (migración 175). Va DESPUÉS de la conciliación de pagos (un pago aprobado hoy se aplica antes de evaluar
-  // vencimientos) y ANTES del outbox (los avisos que genera salen en esta misma corrida). Idempotente: una corrida por día de Bogotá,
-  // avisos 7/3/1, gracia de 3 días y suspensión; no toca renovaciones de planes principales.
-  try {
-    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("adicional_mantenimiento_srv", {});
-    resultado.adicionales = error ? { error: error.message } : data;
-  } catch (e) {
-    resultado.adicionales = { error: e instanceof Error ? e.message : "error inesperado" };
-  }
-
-  // Va al final: la eliminación de cuentas y las cascadas del día también encolan reembolsos.
-  try {
-    resultado.reembolsos = await procesarReembolsosPendientes(50);
-  } catch (e) {
-    resultado.reembolsos = { error: e instanceof Error ? e.message : "error inesperado" };
-  }
-
-  // Migración 124: outbox de notificaciones (email/push/panel). Después de reembolsos, que también encolan avisos.
-  // Sin RESEND_API_KEY / claves VAPID los mensajes quedan CANAL_NO_HABILITADO; nunca se marcan enviados.
-  try {
-    resultado.notificaciones = await procesarOutbox(200);
-  } catch (e) {
-    resultado.notificaciones = { error: e instanceof Error ? e.message : "error inesperado" };
-  }
-
-  // Migración 127: cuentas que validaron el código pero nunca pulsaron «Crear cuenta» (más de 24 h,
-  // sin reservas, negocios, vínculos ni compras). No son cuentas creadas: se elimina el acceso.
-  try {
-    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("cuentas_registro_abandonado", { p_horas: 24, p_limite: 50 });
-    if (error) {
-      resultado.registros_abandonados = { error: error.message };
-    } else {
-      let eliminadas = 0;
-      for (const f of (data ?? []) as { usuario_id: string }[]) {
-        const { error: e } = await admin.auth.admin.deleteUser(f.usuario_id);
-        if (!e) eliminadas += 1;
-      }
-      resultado.registros_abandonados = { eliminadas };
+  async function ejecutarTarea<T>(tarea: string, fn: () => Promise<T>): Promise<T | { error: string }> {
+    const t0 = Date.now();
+    try {
+      const valor = await fn();
+      metricas.push({ tarea, duracion_ms: Date.now() - t0, ok: true, backlog: conteoBacklog(valor) });
+      return valor;
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "error inesperado";
+      metricas.push({ tarea, duracion_ms: Date.now() - t0, ok: false });
+      return { error: msg };
     }
-  } catch (e) {
-    resultado.registros_abandonados = { error: e instanceof Error ? e.message : "error inesperado" };
   }
 
-  return Response.json({ ok: true, ejecutado_at: new Date().toISOString(), ...resultado });
+  resultado.reservas_expiradas = await ejecutarTarea("reservas_expiradas", async () => {
+    const { data, error } = await admin.rpc("expirar_reservas_vencidas");
+    if (error) throw new Error(error.message);
+    return data;
+  });
+
+  resultado.downgrades = await ejecutarTarea("downgrades", async () => {
+    const { data, error } = await admin.rpc("ejecutar_downgrades_programados");
+    if (error) throw new Error(error.message);
+    return data;
+  });
+
+  resultado.creditos_ia_otorgados = await ejecutarTarea("creditos_ia_otorgados", async () => {
+    const { data, error } = await admin.rpc("otorgar_creditos_plan_mensual");
+    if (error) throw new Error(error.message);
+    return data;
+  });
+
+  resultado.roi_ia_snapshot = await ejecutarTarea("roi_ia_snapshot", async () => {
+    const { data, error } = await admin.rpc("generar_roi_snapshot_mensual");
+    if (error) throw new Error(error.message);
+    return data;
+  });
+
+  resultado.cumplimiento_sla = await ejecutarTarea("cumplimiento_sla", async () => {
+    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("cumplimiento_evaluar_sla");
+    if (error) throw new Error(error.message);
+    return data;
+  });
+  resultado.cumplimiento_envios = await ejecutarTarea("cumplimiento_envios", async () => procesarNotificacionesCumplimiento(50));
+  resultado.suscripciones = await ejecutarTarea("suscripciones", async () => ejecutarCicloSuscripciones());
+  resultado.limite_tasa_limpiado = await ejecutarTarea("limite_tasa_limpiado", async () => {
+    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("limpiar_limite_tasa");
+    if (error) throw new Error(error.message);
+    return data;
+  });
+  resultado.retencion_1581 = await ejecutarTarea("retencion_1581", async () => {
+    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("purgar_retencion_1581");
+    if (error) throw new Error(error.message);
+    return data;
+  });
+  resultado.recordatorios_cita = await ejecutarTarea("recordatorios_cita", async () => {
+    const { data, error } = await admin.rpc("generar_recordatorios_cita", { p_ventana_horas: 24 });
+    if (error) throw new Error(error.message);
+    return data;
+  });
+  resultado.eliminacion_cuentas = await ejecutarTarea("eliminacion_cuentas", async () => procesarEliminacionesCuenta(admin));
+  resultado.comisiones_programadas = await ejecutarTarea("comisiones_programadas", async () => {
+    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("aplicar_comisiones_programadas");
+    if (error) throw new Error(error.message);
+    return data;
+  });
+  resultado.whatsapp_lotes_plan = await ejecutarTarea("whatsapp_lotes_plan", async () => {
+    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("whatsapp_otorgar_lotes_plan_mes");
+    if (error) throw new Error(error.message);
+    return data;
+  });
+  resultado.conciliacion_pagos = await ejecutarTarea("conciliacion_pagos", async () => reconciliarPagosPendientes(30));
+  resultado.adicionales = await ejecutarTarea("adicionales", async () => {
+    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("adicional_mantenimiento_srv", {});
+    if (error) throw new Error(error.message);
+    return data;
+  });
+  resultado.reembolsos = await ejecutarTarea("reembolsos", async () => procesarReembolsosPendientes(50));
+  resultado.notificaciones = await ejecutarTarea("notificaciones", async () => procesarOutbox(200));
+  resultado.registros_abandonados = await ejecutarTarea("registros_abandonados", async () => {
+    const { data, error } = await (admin as unknown as RpcSinTipos).rpc("cuentas_registro_abandonado", { p_horas: 24, p_limite: 50 });
+    if (error) throw new Error(error.message);
+    let eliminadas = 0;
+    for (const f of (data ?? []) as { usuario_id: string }[]) {
+      const { error: e } = await admin.auth.admin.deleteUser(f.usuario_id);
+      if (!e) eliminadas += 1;
+    }
+    return { eliminadas };
+  });
+
+  const duracion_ms = Date.now() - inicioCron;
+  const fallidas = metricas.filter((m) => !m.ok).length;
+  console.info(JSON.stringify({ evento: "cron.diario", duracion_ms, tareas: metricas.length, fallidas, metricas }));
+
+  return Response.json({ ok: true, ejecutado_at: new Date().toISOString(), duracion_ms, metricas, ...resultado });
 }
 
 type AdminClient = ReturnType<typeof createAdminClient>;

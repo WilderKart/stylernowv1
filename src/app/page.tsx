@@ -58,8 +58,8 @@ export default async function HomePage(props: PageProps<"/">) {
     // SEC-13: el buscador (`marketplace_buscar`/`_filtrado`) es costoso y lo puede disparar
     // un anónimo. Límite de borde por IP (fail-open: una caída de la BD de cupos no puede
     // tumbar la portada pública).
-    const cupo = await limitar("marketplace-busqueda", await ipDelLlamador(), 90, 60);
-    if (!cupo.ok) return { data: [], error: null };
+    const cupo = await limitar("marketplace-busqueda", await ipDelLlamador(), 90, 60, { failClosed: true });
+    if (!cupo.ok) return { data: [], error: { message: "Demasiadas búsquedas. Espera un momento e inténtalo de nuevo." } };
     if (avanzado) {
       const r = await buscarNegociosFiltrado({
         texto,

@@ -74,7 +74,8 @@ export async function listarClientesCRM(filtro: FiltroCRM): Promise<Resultado<{ 
         .from("reserva")
         .select("cliente_id")
         .eq("negocio_id", filtro.negocioId)
-        .eq("sede_id", filtro.sedeId);
+        .eq("sede_id", filtro.sedeId)
+        .limit(5000);
       listasAIntersecar.push([...new Set((reservasSede ?? []).map((r) => r.cliente_id))]);
     }
     if (filtro.etiqueta) {
@@ -82,11 +83,16 @@ export async function listarClientesCRM(filtro: FiltroCRM): Promise<Resultado<{ 
         .from("cliente_etiqueta")
         .select("cliente_id")
         .eq("negocio_id", filtro.negocioId)
-        .eq("etiqueta", filtro.etiqueta);
+        .eq("etiqueta", filtro.etiqueta)
+        .limit(5000);
       listasAIntersecar.push([...new Set((conEtiqueta ?? []).map((e) => e.cliente_id))]);
     }
     if (filtro.soloConConsentimientoMarketing) {
-      const { data: conConsentimiento } = await supabase.from("perfil").select("id").eq("consentimiento_marketing", true);
+      const { data: conConsentimiento } = await supabase
+        .from("perfil")
+        .select("id")
+        .eq("consentimiento_marketing", true)
+        .limit(5000);
       listasAIntersecar.push([...new Set((conConsentimiento ?? []).map((p) => p.id))]);
     }
 
@@ -125,8 +131,8 @@ export async function listarClientesCRM(filtro: FiltroCRM): Promise<Resultado<{ 
         q = q.order("cliente_nombre", { ascending: true });
     }
 
-    const offset = filtro.offset ?? 0;
-    const limite = filtro.limite ?? 20;
+    const offset = Math.max(filtro.offset ?? 0, 0);
+    const limite = Math.min(Math.max(filtro.limite ?? 20, 1), 100);
     q = q.range(offset, offset + limite - 1);
 
     const { data, error, count } = await q;
@@ -357,7 +363,8 @@ export async function listarNotas(negocioId: string, clienteId: string): Promise
       .select("id, texto, created_at, autor_id")
       .eq("negocio_id", negocioId)
       .eq("cliente_id", clienteId)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(200);
     if (error) return { ok: false, error: error.message };
 
     const autorIds = [...new Set((data ?? []).map((n) => n.autor_id))];
@@ -415,7 +422,11 @@ export async function eliminarNota(id: string, clienteId: string): Promise<Resul
 export async function listarEtiquetasNegocio(negocioId: string): Promise<Resultado<string[]>> {
   try {
     const { supabase } = await usuarioActual();
-    const { data, error } = await supabase.from("cliente_etiqueta").select("etiqueta").eq("negocio_id", negocioId);
+    const { data, error } = await supabase
+      .from("cliente_etiqueta")
+      .select("etiqueta")
+      .eq("negocio_id", negocioId)
+      .limit(500);
     if (error) return { ok: false, error: error.message };
     return { ok: true, data: [...new Set((data ?? []).map((e) => e.etiqueta))].sort() };
   } catch (e) {
@@ -555,7 +566,8 @@ export async function listarReservasCompletadas(negocioId: string, clienteId: st
       .eq("cliente_id", clienteId)
       .eq("estado", "COMPLETADA")
       .order("hora_inicio", { ascending: false })
-      .limit(20);
+      .limit(20)
+      .range(0, 19);
     if (error) return { ok: false, error: error.message };
     return { ok: true, data: (data ?? []).map((r) => ({ id: r.id, horaInicio: r.hora_inicio })) };
   } catch (e) {

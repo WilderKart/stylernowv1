@@ -198,6 +198,7 @@ export async function buscarClienteExistente(negocioId: string, busqueda: string
       .from("reserva")
       .select("cliente_id")
       .eq("negocio_id", negocioId)
+      .order("hora_inicio", { ascending: false })
       .limit(500);
     const clienteIds = [...new Set((reservas ?? []).map((r) => r.cliente_id))];
     if (clienteIds.length === 0) return { ok: true, data: [] };
