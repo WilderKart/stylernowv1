@@ -5,6 +5,7 @@ import type { EstadoVerificacion } from "@/lib/verificacion/tipos";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { decidirVerificacion } from "../actions";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 type Decision = "VERIFICADA" | "REQUIERE_CORRECCION" | "RECHAZADA" | "REVOCADA";
 
@@ -24,6 +25,8 @@ export function FormularioDecision({ negocioId, estado }: { negocioId: string; e
   const [motivo, setMotivo] = useState("");
   const [ocupado, setOcupado] = useState<Decision | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmDecision, setConfirmDecision] = useState<Decision | null>(null);
 
   if (opciones.length === 0) {
     return (
@@ -33,16 +36,38 @@ export function FormularioDecision({ negocioId, estado }: { negocioId: string; e
     );
   }
 
-  async function decidir(valor: Decision) {
-    setError(null);
+  function handleDecidir(valor: Decision) {
+    setConfirmDecision(valor);
+    setConfirmOpen(true);
+  }
+
+  function handleConfirmarDecision() {
+    setConfirmOpen(false);
     if (motivo.trim().length < 10) return setError("Escribe el motivo de la decisión (mínimo 10 caracteres).");
-    if (!window.confirm("¿Confirmas esta decisión? Quedará registrada con tu usuario y el motivo.")) return;
+    const valor = confirmDecision!;
     setOcupado(valor);
-    const r = await decidirVerificacion({ negocioId, nuevo: valor, motivo });
-    setOcupado(null);
-    if (!r.ok) return setError(r.error);
-    setMotivo("");
-    router.refresh();
+    decidirVerificacion({ negocioId, nuevo: valor, motivo })
+      .then((r) => {
+        setOcupado(null);
+        if (!r.ok) return setError(r.error);
+        setMotivo("");
+        router.refresh();
+      })
+      .catch(() => setOcupado(null));
+    setConfirmDecision(null);
+  }
+
+  function handleCancelarDecision() {
+    setConfirmOpen(false);
+    setConfirmDecision(null);
+  }
+
+  if (opciones.length === 0) {
+    return (
+      <p className="border-2 border-dashed border-border px-3 py-3 text-[12.5px] text-text-muted">
+        No hay decisiones disponibles en este estado. {estado === "EN_REVISION" ? "" : "Solo se decide cuando el negocio envía la verificación a revisión, o para revocar una verificación vigente."}
+      </p>
+    );
   }
 
   return (
@@ -71,12 +96,22 @@ export function FormularioDecision({ negocioId, estado }: { negocioId: string; e
             variant={o.valor === "VERIFICADA" ? "primary" : "danger"}
             loading={ocupado === o.valor}
             disabled={ocupado !== null}
-            onClick={() => decidir(o.valor)}
+            onClick={() => handleDecidir(o.valor)}
           >
             {o.etiqueta}
           </Button>
         ))}
       </div>
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        onConfirm={handleConfirmarDecision}
+        onCancel={handleCancelarDecision}
+        title="Confirmar decisión"
+        description="¿Confirmas esta decisión? Quedará registrada con tu usuario y el motivo."
+        confirmLabel="Confirmar"
+        cancelLabel="Cancelar"
+      />
     </section>
   );
 }

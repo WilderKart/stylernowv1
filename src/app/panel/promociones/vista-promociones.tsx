@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { formatCOP } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   actualizarPromocion,
   cambiarEstadoPromocion,
@@ -63,6 +64,8 @@ export function VistaPromociones({ promociones, historial }: { promociones: Prom
   const [f, setF] = useState<Formulario>(VACIO);
   const [mensaje, setMensaje] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
   const [pendiente, iniciar] = useTransition();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [promoAEliminar, setPromoAEliminar] = useState<string | null>(null);
 
   function abrirNueva() {
     setF({ ...VACIO, desde: hoy() });
@@ -112,6 +115,19 @@ export function VistaPromociones({ promociones, historial }: { promociones: Prom
 
   function alternarDia(d: number) {
     setF((x) => ({ ...x, dias: x.dias.includes(d) ? x.dias.filter((y) => y !== d) : [...x.dias, d] }));
+  }
+
+  function handleConfirmarEliminar() {
+    setConfirmOpen(false);
+    if (promoAEliminar) {
+      ejecutar(() => eliminarPromocion(promoAEliminar), "Promoción eliminada.");
+    }
+    setPromoAEliminar(null);
+  }
+
+  function handleCancelarEliminar() {
+    setConfirmOpen(false);
+    setPromoAEliminar(null);
   }
 
   return (
@@ -243,7 +259,8 @@ export function VistaPromociones({ promociones, historial }: { promociones: Prom
                       variant="danger"
                       disabled={pendiente}
                       onClick={() => {
-                        if (window.confirm(`¿Eliminar la promoción «${p.titulo}»? Quedará registrada en tu historial.`)) ejecutar(() => eliminarPromocion(p.id), "Promoción eliminada.");
+                        setPromoAEliminar(p.id);
+                        setConfirmOpen(true);
                       }}
                     >
                       Eliminar
@@ -255,6 +272,17 @@ export function VistaPromociones({ promociones, historial }: { promociones: Prom
           })}
         </ul>
       )}
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        onConfirm={handleConfirmarEliminar}
+        onCancel={handleCancelarEliminar}
+        title="Confirmar eliminación"
+        description="¿Eliminar la promoción? Quedará registrada en tu historial."
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+      />
 
       <section aria-labelledby="historial-promos">
         <h2 id="historial-promos" className="sn-label mb-2">

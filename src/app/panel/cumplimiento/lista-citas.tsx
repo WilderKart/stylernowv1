@@ -22,20 +22,6 @@ export function ListaCitasPendientes({ citas, puedeActuar }: { citas: CitaPendie
   const [pendiente, iniciar] = useTransition();
   const [mensaje, setMensaje] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
 
-  function accion(fn: (id: string) => Promise<{ ok: true } | { ok: false; error: string }>, id: string, confirmacion?: string) {
-    if (confirmacion && !window.confirm(confirmacion)) return;
-    setMensaje(null);
-    iniciar(async () => {
-      const r = await fn(id);
-      if (r.ok) {
-        setMensaje({ tipo: "ok", texto: "Listo." });
-        router.refresh();
-      } else {
-        setMensaje({ tipo: "error", texto: r.error });
-      }
-    });
-  }
-
   if (citas.length === 0) {
     return <p className="text-[12.5px] text-text-muted">No tienes citas confirmadas pendientes de cumplir.</p>;
   }
@@ -60,13 +46,63 @@ export function ListaCitasPendientes({ citas, puedeActuar }: { citas: CitaPendie
           </div>
           {puedeActuar ? (
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" disabled={pendiente} onClick={() => accion(completarCitaPrevia, c.id, "¿Cobrar en efectivo y completar esta cita?")}>
+              <Button
+                size="sm"
+                disabled={pendiente}
+                onClick={() => {
+                  if (!window.confirm("¿Cobrar en efectivo y completar esta cita?")) return;
+                  setMensaje(null);
+                  iniciar(async () => {
+                    const r = await completarCitaPrevia(c.id);
+                    if (r.ok) {
+                      setMensaje({ tipo: "ok", texto: "Listo." });
+                      router.refresh();
+                    } else {
+                      setMensaje({ tipo: "error", texto: r.error });
+                    }
+                  });
+                }}
+              >
                 Cobrar y completar
               </Button>
-              <Button size="sm" variant="secondary" disabled={pendiente} onClick={() => accion(marcarNoShowCitaPrevia, c.id, "¿Marcar que el cliente no se presentó?")}>
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={pendiente}
+                onClick={() => {
+                  if (!window.confirm("¿Marcar que el cliente no se presentó?")) return;
+                  setMensaje(null);
+                  iniciar(async () => {
+                    const r = await marcarNoShowCitaPrevia(c.id);
+                    if (r.ok) {
+                      setMensaje({ tipo: "ok", texto: "Listo." });
+                      router.refresh();
+                    } else {
+                      setMensaje({ tipo: "error", texto: r.error });
+                    }
+                  });
+                }}
+              >
                 No se presentó
               </Button>
-              <Button size="sm" variant="danger" disabled={pendiente} onClick={() => accion(cancelarCitaPrevia, c.id, "¿Cancelar esta cita? Se avisará al cliente.")}>
+              <Button
+                size="sm"
+                variant="danger"
+                disabled={pendiente}
+                onClick={() => {
+                  if (!window.confirm("¿Cancelar esta cita? Se avisará al cliente.")) return;
+                  setMensaje(null);
+                  iniciar(async () => {
+                    const r = await cancelarCitaPrevia(c.id);
+                    if (r.ok) {
+                      setMensaje({ tipo: "ok", texto: "Listo." });
+                      router.refresh();
+                    } else {
+                      setMensaje({ tipo: "error", texto: r.error });
+                    }
+                  });
+                }}
+              >
                 Cancelar cita
               </Button>
             </div>

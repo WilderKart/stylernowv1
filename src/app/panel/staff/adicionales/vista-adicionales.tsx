@@ -13,6 +13,7 @@ import {
 import { formatCOP } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   actualizarEstadoAdicionales,
   cancelarRenovacionAdicional,
@@ -141,7 +142,12 @@ function TarjetaLote({ l, ocupado, onRenovar, onCancelar }: { l: LoteAdicional; 
           </Button>
         ) : null}
         {l.puede_cancelar && !l.cancelar_renovacion ? (
-          <Button size="sm" variant="secondary" disabled={ocupado} onClick={() => onCancelar(l.id)}>
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={ocupado}
+            onClick={() => onCancelar(l.id)}
+          >
             {T.cancelarRenov}
           </Button>
         ) : null}
@@ -175,7 +181,9 @@ export function VistaAdicionales({ negocioId, inicial }: { negocioId: string; in
   const [aviso, setAviso] = useState<Aviso>(null);
   const [pendiente, iniciar] = useTransition();
   const [ocupadoLote, setOcupadoLote] = useState<string | null>(null);
-  const [esperando, setEsperando] = useState(params.get("desde") === "pago");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [loteCancelar, setLoteCancelar] = useState<string | null>(null);
+  const [esperando, setEsperando] = useState(false);
   const intentos = useRef(0);
 
   const refrescar = useCallback(async () => {
@@ -239,29 +247,48 @@ export function VistaAdicionales({ negocioId, inicial }: { negocioId: string; in
     });
   }
 
-  function cancelar(id: string) {
-    if (!window.confirm("¿Cancelar la renovación? Conservas el cupo ya pagado hasta su vencimiento y no se reembolsa el periodo pagado.")) return;
-    setAviso(null);
-    setOcupadoLote(id);
-    iniciar(async () => {
-      const r = await cancelarRenovacionAdicional(id);
-      setOcupadoLote(null);
-      if (!r.ok) return setAviso({ tipo: "error", texto: r.error });
-      setAviso({ tipo: "ok", texto: "Listo: no se renovará. Conservas el cupo hasta el vencimiento." });
-      await refrescar();
-    });
+  function cancelarRenovacion(id: string) {
+    setLoteCancelar(id);
+    setConfirmOpen(true);
   }
 
   const visibles = panel.lotes.filter((l) => l.estado !== "EXPIRADO_SIN_PAGO");
 
   return (
     <div className="flex flex-col gap-5">
-      {esperando ? (
-        <p role="status" className="border-2 border-border p-3 text-[13px] font-bold">
-          {T.esperando}
-        </p>
+      {confirmOpen && (
+        <ConfirmDialog
+          isOpen={confirmOpen}
+          onOpenChange={setConfirmOpen}
+          onConfirm={() => {
+            const id = loteCancelar;
+            setLoteCancelar(null);
+            setConfirmOpen(false);
+            if (!id) return;
+            setAviso(null);
+            setOcupadoLote(id);
+            iniciar(async () => {
+              const r = await cancelarRenovacionAdicional(id);
+              setOcupadoLote(null);
+              if (!r.ok) return setAviso({ tipo: "error", texto: r.error });
+              setAviso({ tipo: "ok", texto: "Listo: no se renovará. Conservas el cupo hasta el vencimiento." });
+              await refrescar();
+            });
+          }}
+          onCancel={() => {
+            setLoteCancelar(null);
+            setConfirmOpen(false);
+          }}
+          title="Confirmar cancelación"
+          description="¿Cancelar la renovación? Conservas el cupo ya pagado hasta su vencimiento y no se reembolsa el periodo pagado."
+          confirmLabel="Cancelar renovación"
+          cancelLabel="Cancelar"
+        />
+      )}
+
+      {aviso ? (
+        <Mensaje aviso={aviso} />
       ) : null}
-      <Mensaje aviso={aviso} />
 
       {cap ? (
         <section aria-labelledby="cap-titulo" className="flex flex-col gap-3">
@@ -283,7 +310,7 @@ export function VistaAdicionales({ negocioId, inicial }: { negocioId: string; in
               <p className="font-display text-[15px] font-bold uppercase text-text">Tu equipo supera tu capacidad</p>
               <p className="mt-1.5 text-[13px] leading-relaxed text-text-muted">
                 Tienes {cap.exceso} {cap.exceso === 1 ? "profesional" : "profesionales"} por encima de tu tope. No retiramos a nadie, pero no podrás sumar ni invitar a más hasta
-                regularizar {cap.exceso} {cap.exceso === 1 ? "cupo" : "cupos"}: renueva o contrata barberos adicionales, o actualiza tu plan.
+                regularizar {cap.exceso} {cap.exceso === 1 ? "cupo" : "cupos"} renueva o contrata barberos adicionales, o actualiza tu plan.
               </p>
             </Card>
           ) : null}
@@ -368,22 +395,11 @@ export function VistaAdicionales({ negocioId, inicial }: { negocioId: string; in
           </Card>
         )}
       </section>
-
-      <section aria-labelledby="lotes-titulo" className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 id="lotes-titulo" className="section">
-            {T.tusGrupos}
-          </h2>
-          <Button size="sm" variant="ghost" disabled={pendiente} onClick={() => iniciar(async () => void (await refrescar()))}>
-            {T.actualizar}
-          </Button>
-        </div>
-        {visibles.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-border px-4 py-10 text-center text-[12.5px] text-text-faint">{T.ninguno}</p>
-        ) : (
-          visibles.map((l) => <TarjetaLote key={l.id} l={l} ocupado={ocupadoLote === l.id} onRenovar={renovar} onCancelar={cancelar} />)
-        )}
-      </section>
+      {visibles.length === 0 ? (
+        <p className="rounded-2xl border border-dashed border-border px-4 py-10 text-center text-[12.5px] text-text-faint">{T.ninguno}</p>
+      ) : (
+        visibles.map((l) => <TarjetaLote key={l.id} l={l} ocupado={ocupadoLote === l.id} onRenovar={renovar} onCancelar={cancelarRenovacion} />
+      ))}
     </div>
   );
 }
