@@ -266,13 +266,25 @@ function SeccionResenas({ resenasIniciales }: { resenasIniciales: ResenaRecibida
     setTexto("");
   }
 
+    const [reportandoId, setReportandoId] = useState<string | null>(null);
+  const [motivoReporte, setMotivoReporte] = useState("");
+
   async function onReportar(resenaId: string) {
-    const motivo = prompt("¿Por qué quieres reportar esta reseña? (lenguaje abusivo, contenido falso, etc.)");
-    if (!motivo) return;
+    setReportandoId(resenaId);
+    setMotivoReporte("");
     setError(null);
-    const res = await reportarResena(resenaId, motivo);
+  }
+
+  async function confirmarReporte() {
+    if (!reportandoId || !motivoReporte.trim()) return;
+    setGuardando(true);
+    setError(null);
+    const res = await reportarResena(reportandoId, motivoReporte.trim());
+    setGuardando(false);
     if (!res.ok) return setError(res.error);
-    setResenas((prev) => prev.filter((r) => r.id !== resenaId));
+    setResenas((prev) => prev.filter((r) => r.id !== reportandoId));
+    setReportandoId(null);
+    setMotivoReporte("");
   }
 
   return (
@@ -331,6 +343,21 @@ function SeccionResenas({ resenasIniciales }: { resenasIniciales: ResenaRecibida
                   </button>
                 </div>
               )}
+              {reportandoId === r.id ? (
+                <div className="mt-2 flex flex-col gap-2">
+                  <textarea
+                    value={motivoReporte}
+                    onChange={(e) => setMotivoReporte(e.target.value)}
+                    placeholder="Cu?ntanos el motivo del reporte..."
+                    className="min-h-[70px] rounded-xl border border-border bg-bg p-2.5 text-[12.5px] text-text outline-none focus:border-accent/60"
+                    maxLength={500}
+                  />
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="danger" loading={guardando} disabled={!motivoReporte.trim()} onClick={confirmarReporte}>Enviar reporte</Button>
+                    <Button size="sm" variant="ghost" onClick={() => { setReportandoId(null); setMotivoReporte(""); }}>Cancelar</Button>
+                  </div>
+                </div>
+              ) : null}
             </li>
           ))}
         </ul>

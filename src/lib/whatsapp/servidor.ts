@@ -1,5 +1,6 @@
 import "server-only";
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
+import { exigirOperativo } from "@/lib/suscripcion/estado-operativo";
 import { createClient } from "@/lib/supabase/server";
 
 /** Las RPC de la migracion 120 aun no estan en src/types/database.ts (se regenera al aplicarla). */
@@ -18,7 +19,7 @@ export async function llamarRpcWhatsApp<T>(
  * Sesion del dueno del negocio. El negocio se deriva de auth.uid() en el servidor (nunca del navegador);
  * las RPC vuelven a validar la pertenencia con is_barberia_de().
  */
-export async function sesionDuenoWhatsApp() {
+export async function sesionDuenoWhatsApp(opciones?: { requerirOperativo?: boolean }) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -26,6 +27,10 @@ export async function sesionDuenoWhatsApp() {
   if (!user) throw new Error("NO_AUTENTICADO");
   const contexto = await resolverContexto();
   if (contexto.rol !== "BARBERIA" || !contexto.negocioId || contexto.userId !== user.id) throw new Error("NO_AUTORIZADO");
+  if (opciones?.requerirOperativo) {
+    const operativo = await exigirOperativo(contexto.negocioId);
+    if (!operativo.ok) throw new Error("SUSCRIPCION_RESTRINGIDA");
+  }
   return { supabase, negocioId: contexto.negocioId };
 }
 

@@ -45,7 +45,7 @@ export async function guardarPlantilla(entrada: z.input<typeof esquemaPlantilla>
   const p = esquemaPlantilla.safeParse(entrada);
   if (!p.success) return { ok: false, error: "Revisa los datos de la plantilla." };
   try {
-    const { supabase, negocioId } = await sesionDuenoWhatsApp();
+    const { supabase, negocioId } = await sesionDuenoWhatsApp({ requerirOperativo: true });
     const { data, error } = await llamarRpcWhatsApp<string>(supabase, "whatsapp_plantilla_guardar", {
       p_plantilla_id: p.data.plantillaId,
       p_negocio_id: negocioId,
@@ -67,7 +67,7 @@ export async function eliminarPlantilla(plantillaId: string): Promise<Resultado>
   const id = z.uuid().safeParse(plantillaId);
   if (!id.success) return { ok: false, error: "Plantilla inválida." };
   try {
-    const { supabase } = await sesionDuenoWhatsApp();
+    const { supabase } = await sesionDuenoWhatsApp({ requerirOperativo: true });
     const { error } = await llamarRpcWhatsApp(supabase, "whatsapp_plantilla_eliminar", { p_plantilla_id: id.data });
     if (error) return fallo(error);
     revalidatePath(RUTA);
@@ -104,7 +104,7 @@ export async function crearCampana(entrada: z.input<typeof esquemaCampana>): Pro
   const c = esquemaCampana.safeParse(entrada);
   if (!c.success) return { ok: false, error: "Revisa los datos de la campaña." };
   try {
-    const { supabase, negocioId } = await sesionDuenoWhatsApp();
+    const { supabase, negocioId } = await sesionDuenoWhatsApp({ requerirOperativo: true });
     const { data, error } = await llamarRpcWhatsApp<string>(supabase, "whatsapp_campana_crear", {
       p_negocio_id: negocioId,
       p_plantilla_id: c.data.plantillaId,
@@ -124,7 +124,7 @@ export async function programarCampana(campanaId: string): Promise<Resultado<{ e
   const id = z.uuid().safeParse(campanaId);
   if (!id.success) return { ok: false, error: "Campaña inválida." };
   try {
-    const { supabase } = await sesionDuenoWhatsApp();
+    const { supabase } = await sesionDuenoWhatsApp({ requerirOperativo: true });
     const { data, error } = await llamarRpcWhatsApp<EstadoCampana>(supabase, "whatsapp_campana_programar", { p_campana_id: id.data });
     if (error || !data) return fallo(error ?? "SIN_DATOS");
     revalidatePath(RUTA);
@@ -138,7 +138,7 @@ export async function cancelarCampana(campanaId: string): Promise<Resultado> {
   const id = z.uuid().safeParse(campanaId);
   if (!id.success) return { ok: false, error: "Campaña inválida." };
   try {
-    const { supabase } = await sesionDuenoWhatsApp();
+    const { supabase } = await sesionDuenoWhatsApp({ requerirOperativo: true });
     const { error } = await llamarRpcWhatsApp(supabase, "whatsapp_campana_cancelar", { p_campana_id: id.data });
     if (error) return fallo(error);
     revalidatePath(RUTA);
@@ -153,7 +153,7 @@ export async function solicitarRecarga(paqueteId: string): Promise<Resultado<{ c
   const id = z.uuid().safeParse(paqueteId);
   if (!id.success) return { ok: false, error: "Paquete inválido." };
   try {
-    const { supabase, negocioId } = await sesionDuenoWhatsApp();
+    const { supabase, negocioId } = await sesionDuenoWhatsApp({ requerirOperativo: true });
     const { data, error } = await llamarRpcWhatsApp<string>(supabase, "whatsapp_solicitar_recarga", {
       p_negocio_id: negocioId,
       p_paquete_id: id.data,
@@ -170,7 +170,7 @@ export async function cancelarRecarga(compraId: string): Promise<Resultado> {
   const id = z.uuid().safeParse(compraId);
   if (!id.success) return { ok: false, error: "Solicitud inválida." };
   try {
-    const { supabase } = await sesionDuenoWhatsApp();
+    const { supabase } = await sesionDuenoWhatsApp({ requerirOperativo: true });
     const { error } = await llamarRpcWhatsApp(supabase, "whatsapp_cancelar_recarga", { p_compra_id: id.data });
     if (error) return fallo(error);
     revalidatePath(RUTA);

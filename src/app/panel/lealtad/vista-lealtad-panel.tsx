@@ -205,21 +205,38 @@ function TabMembresias({ negocioId, planesIniciales }: { negocioId: string; plan
 function TabGiftCards({ giftCardsIniciales }: { giftCardsIniciales: GiftCardAdmin[] }) {
   const [giftCards, setGiftCards] = useState(giftCardsIniciales);
   const [error, setError] = useState<string | null>(null);
+  const [bloqueandoId, setBloqueandoId] = useState<string | null>(null);
+  const [motivoBloqueo, setMotivoBloqueo] = useState("");
+  const [guardando, setGuardando] = useState(false);
 
-  async function onBloquear(id: string) {
-    const motivo = prompt("Motivo del bloqueo:");
-    if (!motivo) return;
-    const res = await bloquearGiftCardAdmin(id, motivo);
+  async function onBloquear() {
+    if (!bloqueandoId) return;
+    if (motivoBloqueo.trim().length < 3) return setError("Indica el motivo del bloqueo (m?nimo 3 caracteres).");
+    setGuardando(true);
+    setError(null);
+    const res = await bloquearGiftCardAdmin(bloqueandoId, motivoBloqueo.trim());
+    setGuardando(false);
     if (!res.ok) return setError(res.error);
-    setGiftCards((prev) => prev.map((g) => (g.id === id ? { ...g, estado: "BLOQUEADA" } : g)));
+    setGiftCards((prev) => prev.map((g) => (g.id === bloqueandoId ? { ...g, estado: "BLOQUEADA" } : g)));
+    setBloqueandoId(null);
+    setMotivoBloqueo("");
   }
 
   return (
     <div>
-      <p className="mb-3 text-[12px] text-text-faint">Las Gift Cards las compra el Cliente desde su propio StylerWallet. Aquí solo administras las emitidas por tu negocio.</p>
+      <p className="mb-3 text-[12px] text-text-faint">Las Gift Cards las compra el Cliente desde su propio StylerWallet. Aqu? solo administras las emitidas por tu negocio.</p>
       <ErrorTexto error={error} />
+      {bloqueandoId ? (
+        <Card className="mb-4 flex flex-col gap-2.5">
+          <Input label="Motivo del bloqueo" value={motivoBloqueo} onChange={(e) => setMotivoBloqueo(e.target.value)} maxLength={300} />
+          <div className="flex gap-2">
+            <Button size="sm" loading={guardando} onClick={onBloquear}>Confirmar bloqueo</Button>
+            <Button size="sm" variant="ghost" onClick={() => { setBloqueandoId(null); setMotivoBloqueo(""); }}>Cancelar</Button>
+          </div>
+        </Card>
+      ) : null}
       {giftCards.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-[12.5px] text-text-faint">Todavía no se compró ninguna Gift Card de tu negocio.</p>
+        <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-[12.5px] text-text-faint">Todav?a no se compr? ninguna Gift Card de tu negocio.</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {giftCards.map((g) => (
@@ -231,7 +248,7 @@ function TabGiftCards({ giftCardsIniciales }: { giftCardsIniciales: GiftCardAdmi
               <div className="flex items-center gap-2">
                 <Badge tone={g.estado === "ACTIVA" ? "success" : g.estado === "CANJEADA" ? "neutral" : "danger"}>{g.estado}</Badge>
                 {g.estado === "ACTIVA" ? (
-                  <Button size="sm" variant="ghost" onClick={() => onBloquear(g.id)}>
+                  <Button size="sm" variant="ghost" onClick={() => { setBloqueandoId(g.id); setMotivoBloqueo(""); setError(null); }}>
                     Bloquear
                   </Button>
                 ) : null}
@@ -567,7 +584,7 @@ function TabRecompensas({ negocioId, reglasIniciales, sugerenciasIniciales }: { 
   const [reglas, setReglas] = useState(reglasIniciales);
   const [sugerencias, setSugerencias] = useState(sugerenciasIniciales);
   const [creando, setCreando] = useState(false);
-  const [disparador, setDisparador] = useState("CLIENTE_INACTIVO");
+  const [disparador, setDisparador] = useState<"CLIENTE_INACTIVO"|"CUMPLEANOS"|"OBJETIVO_LOGRADO"|"RIESGO_ABANDONO"|"MEJOR_HORARIO">("CLIENTE_INACTIVO");
   const [montoCredito, setMontoCredito] = useState("");
   const [guardando, setGuardando] = useState(false);
   const [generando, setGenerando] = useState(false);
@@ -625,7 +642,7 @@ function TabRecompensas({ negocioId, reglasIniciales, sugerenciasIniciales }: { 
         <Card className="mb-4 flex flex-col gap-2.5">
           <div className="flex flex-col gap-2">
             <label className="text-[11.5px] font-bold uppercase text-text-muted">Disparador</label>
-            <select value={disparador} onChange={(e) => setDisparador(e.target.value)} className="h-[52px] rounded-[13px] border border-border bg-surface px-3 text-[13px] text-text">
+            <select value={disparador} onChange={(e) => setDisparador(e.target.value as typeof disparador)} className="h-[52px] rounded-[13px] border border-border bg-surface px-3 text-[13px] text-text">
               {Object.entries(DISPARADOR_ETIQUETA).map(([v, l]) => (
                 <option key={v} value={v}>{l}</option>
               ))}
