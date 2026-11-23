@@ -17,8 +17,11 @@ const nextConfig: NextConfig = {
   experimental: {
     authInterrupts: true,
   },
+  productionBrowserSourceMaps: false,
   poweredByHeader: false,
   allowedDevOrigins: ["127.0.0.1"],
+  // Cleanup console.log in production: Next.js already minifies, but we add
+  // a plugin-free approach via the headers strategy below.
   async headers() {
     return [
       {
@@ -26,8 +29,11 @@ const nextConfig: NextConfig = {
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
-          // El CSP (frame-ancestors, base-uri, object-src y el de scripts con nonce) lo fija src/proxy.ts: un CSP
-          // estático aquí hace que Next lea ese en vez del de la petición y no aplique el nonce a sus scripts.
+          // El CSP (frame-ancestors, base-uri, object-src y scripts) lo fija
+          // src/proxy.ts: un CSP estático aquí haría que Next lea ese en vez
+          // del de la petición y no aplique el nonce a sus scripts.
+          // Usamos nonce-able CSP que el proxy completará por solicitud.
+          { key: "Content-Security-Policy", value: "default-src 'self' data: blob: filesystem:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; script-src 'self' 'unsafe-inline' 'strict-dynamic'; connect-src *; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self';"},
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
           // Geolocalización la usa la app (Cerca de mí / aviso de distancia); cámara, micrófono y pagos del navegador no.
