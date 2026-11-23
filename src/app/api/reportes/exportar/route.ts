@@ -1,5 +1,6 @@
 import { generarExcel } from "@/lib/export/excel";
 import { generarReportePdf } from "@/lib/export/pdf";
+import { resolverContexto } from "@/lib/auth/resolver-contexto";
 import { exigirOperativo } from "@/lib/suscripcion/estado-operativo";
 import { createClient } from "@/lib/supabase/server";
 import { formatCOP } from "@/lib/utils";
@@ -37,15 +38,18 @@ export async function GET(request: NextRequest) {
   }
   const { negocioId, formato, desde, hasta, agrupacion } = parse.data;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return new Response("No autorizado", { status: 401 });
+
+  const contexto = await resolverContexto();
+  if (!contexto.userId) return new Response("No autorizado", { status: 401 });
+  if (contexto.rol !== "BARBERIA" && contexto.rol !== "GUARDIAN" && contexto.rol !== "ADMIN") {
+    return new Response("No autorizado", { status: 403 });
+  }
+  if (contexto.negocioId !== negocioId) return new Response("No autorizado", { status: 403 });
 
   const operativo = await exigirOperativo(negocioId);
-  if (!operativo.ok) return new Response("Suscripción restringida", { status: 403 });
+  if (!operativo.ok) return new Response("Suscripci?n restringida", { status: 403 });
 
+  const supabase = await createClient();
   const [{ data: ingresos, error }, { data: negocio }] = await Promise.all([
     supabase.rpc("reportes_ingresos_periodo", { p_negocio_id: negocioId, p_desde: desde, p_hasta: hasta, p_agrupacion: agrupacion }),
     supabase.from("negocio").select("nombre").eq("id", negocioId).single(),

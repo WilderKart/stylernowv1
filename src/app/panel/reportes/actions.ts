@@ -1,5 +1,6 @@
 "use server";
 
+import { resolverContexto } from "@/lib/auth/resolver-contexto";
 import { exigirOperativo, MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
@@ -18,6 +19,13 @@ async function usuarioActual() {
 }
 
 async function exigirAccesoReportes(negocioId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const contexto = await resolverContexto();
+  if (contexto.rol !== "BARBERIA" && contexto.rol !== "GUARDIAN" && contexto.rol !== "ADMIN") {
+    return { ok: false, error: "No autorizado." };
+  }
+  if (contexto.negocioId !== negocioId) {
+    return { ok: false, error: "No autorizado." };
+  }
   const operativo = await exigirOperativo(negocioId);
   if (!operativo.ok) return { ok: false, error: MENSAJE_RESTRINGIDA };
   return { ok: true };

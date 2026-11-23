@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { duracion, hora, sumarDias } from "@/lib/formato";
 import { formatCOP } from "@/lib/utils";
 import { Fragment, useCallback, useEffect, useState, useTransition } from "react";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useEnLinea } from "@/lib/hooks/use-en-linea";
 import {
   marcarNoShow,
@@ -323,6 +324,7 @@ function DiaGrid({
   const { inicio, fin } = ventanaDelDia(sede.horarioBase, fecha);
   const totalSlots = Math.max(1, Math.ceil((fin - inicio) / 30));
   const [arrastrando, setArrastrando] = useState<string | null>(null);
+  const [bloqueoAQuitar, setBloqueoAQuitar] = useState<string | null>(null);
 
   function slotDe(iso: string) {
     const d = new Date(iso);
@@ -391,9 +393,7 @@ function DiaGrid({
                     key={b.id}
                     type="button"
                     title="Toca para quitar el bloqueo"
-                    onClick={() => {
-                      if (confirm("¿Quitar este bloqueo de horario?")) onQuitarBloqueo(b.id);
-                    }}
+                    onClick={() => setBloqueoAQuitar(b.id)}
                     className="absolute inset-x-0 flex items-center justify-center bg-[repeating-linear-gradient(45deg,var(--color-border-subtle),var(--color-border-subtle)_6px,transparent_6px,transparent_12px)] px-1 text-center text-[10px] text-text-faint"
                     style={{ top: inicioSlot * 24, height: (finSlot - inicioSlot) * 24 }}
                   >
@@ -436,8 +436,23 @@ function DiaGrid({
         })}
       </div>
       <p className="border-t border-border-subtle p-2 text-center text-[11px] text-text-faint">
-        Arrastra una cita a otra columna para reasignarla a otro Staff (mismo horario) · toca una cita para reprogramar, cancelar o ver el detalle.
+        Arrastra una cita a otra columna para reasignarla a otro Staff (mismo horario) — toca una cita para reprogramar, cancelar o ver el detalle.
       </p>
+      <ConfirmDialog
+        isOpen={bloqueoAQuitar !== null}
+        onOpenChange={(open) => {
+          if (!open) setBloqueoAQuitar(null);
+        }}
+        onConfirm={() => {
+          if (bloqueoAQuitar) onQuitarBloqueo(bloqueoAQuitar);
+          setBloqueoAQuitar(null);
+        }}
+        onCancel={() => setBloqueoAQuitar(null)}
+        title="Quitar bloqueo"
+        description="¿Quitar este bloqueo de horario?"
+        confirmLabel="Quitar"
+        cancelLabel="Volver"
+      />
     </div>
   );
 }
@@ -540,6 +555,8 @@ function PanelCita({
   const [motivo, setMotivo] = useState("");
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmarNoShow, setConfirmarNoShow] = useState(false);
+  const [confirmarCompletarSinPos, setConfirmarCompletarSinPos] = useState(false);
 
   async function cargarSlotsReprogramar(fecha: string) {
     setCargando(true);
@@ -577,22 +594,22 @@ function PanelCita({
   const [yaEmpezo] = useState(() => new Date(cita.horaInicio).getTime() <= Date.now());
 
   async function onNoShow() {
-    if (!confirm("¿Marcar que el cliente no se presentó? El anticipo no se devuelve.")) return;
     setCargando(true);
     setError(null);
     const res = await marcarNoShow(cita.id, motivo);
     setCargando(false);
     if (!res.ok) return setError(res.error);
+    setConfirmarNoShow(false);
     onCambio();
   }
 
   async function onCompletarSinPos() {
-    if (!confirm("¿Marcar esta cita como completada sin cobro en POS? Se activará la fidelidad correspondiente una sola vez.")) return;
     setCargando(true);
     setError(null);
     const res = await completarCitaSinPos(cita.id);
     setCargando(false);
     if (!res.ok) return setError(res.error);
+    setConfirmarCompletarSinPos(false);
     onCambio();
   }
 
@@ -641,14 +658,14 @@ function PanelCita({
                 </Button>
                 {/* Solo después de la hora de inicio; la base de datos lo vuelve a validar. */}
                 {yaEmpezo ? (
-                  <Button variant="secondary" loading={cargando} onClick={onNoShow}>
-                    No se presentó
-                  </Button>
+              <Button variant="secondary" loading={cargando} onClick={() => setConfirmarNoShow(true)}>
+                No se presentó
+              </Button>
                 ) : null}
               </>
             ) : null}
             {["CONFIRMADA", "EN_CURSO"].includes(cita.estado) ? (
-              <Button variant="secondary" loading={cargando} onClick={onCompletarSinPos}>
+              <Button variant="secondary" loading={cargando} onClick={() => setConfirmarCompletarSinPos(true)}>
                 Completar sin POS
               </Button>
             ) : null}
@@ -729,13 +746,34 @@ function PanelCita({
               Cancelar desde el negocio siempre reembolsa el 100% del Anticipo al Cliente.
             </p>
             <Button variant="danger" loading={cargando} onClick={onConfirmarCancelar}>
-              Confirmar cancelación
+              Confirmar cancelaci?n
             </Button>
             <Button variant="ghost" onClick={() => setAccion("detalle")}>
               Volver
             </Button>
           </div>
         )}
+        {error ? <p className="mt-2 text-[12px] font-semibold text-danger">{error}</p> : null}
+        <ConfirmDialog
+          isOpen={confirmarNoShow}
+          onOpenChange={setConfirmarNoShow}
+          onConfirm={onNoShow}
+          onCancel={() => setConfirmarNoShow(false)}
+          title="Marcar no se present?"
+          description="?Marcar que el cliente no se present?? El anticipo no se devuelve."
+          confirmLabel="Marcar no show"
+          cancelLabel="Volver"
+        />
+        <ConfirmDialog
+          isOpen={confirmarCompletarSinPos}
+          onOpenChange={setConfirmarCompletarSinPos}
+          onConfirm={onCompletarSinPos}
+          onCancel={() => setConfirmarCompletarSinPos(false)}
+          title="Completar sin POS"
+          description="?Marcar esta cita como completada sin cobro en POS? Se activar? la fidelidad correspondiente una sola vez."
+          confirmLabel="Completar"
+          cancelLabel="Volver"
+        />
       </div>
     </div>
   );

@@ -12,11 +12,7 @@ export default async function AdsPage() {
   const contexto = await verificarAccesoPanel(["BARBERIA"], "/panel/ads");
 
   const negocioId = contexto.negocioId!;
-  const supabase = await createClient();
-  const [{ data: negocio }, campanasRes] = await Promise.all([
-    supabase.from("negocio").select("plan_codigo").eq("id", negocioId).single(),
-    listarMisCampanas(negocioId),
-  ]);
+  const campanasRes = await listarMisCampanas(negocioId);
 
   return (
     <div className="flex min-h-dvh flex-col bg-app">
