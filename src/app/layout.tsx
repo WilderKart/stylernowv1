@@ -7,7 +7,9 @@ import { PwaManager } from "@/components/pwa/pwa-manager";
 import { SistemaCliente } from "@/components/sistema";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata, Viewport } from "next";
-import { Archivo, Space_Mono } from "next/font/google";
+import { Archivo, Fraunces, Space_Mono } from "next/font/google";
+import { SincronizarTema } from "@/components/tema/tema-cliente";
+import { obtenerModoTema, obtenerTemaEfectivo } from "@/lib/tema/servidor";
 import "./globals.css";
 
 // Archivo variable: eje de ancho (62–125 %) para títulos condensados y secciones
@@ -24,6 +26,16 @@ const spaceMono = Space_Mono({
   subsets: ["latin"],
   weight: ["400", "700"],
   display: "swap",
+});
+
+// Serif suave para los temas de spa, salón y uñas (solo se descarga cuando una página la usa).
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  axes: ["opsz"],
+  style: ["normal", "italic"],
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -67,15 +79,18 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const idioma = await obtenerIdioma();
+  const tema = await obtenerTemaEfectivo();
+  const modoTema = await obtenerModoTema();
   return (
     <html
       lang={idioma}
-      data-theme="light"
+      data-theme={tema}
       suppressHydrationWarning
-      className={`${archivo.variable} ${spaceMono.variable} h-full antialiased`}
+      className={`${archivo.variable} ${spaceMono.variable} ${fraunces.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-app text-text">
         <IdiomaProvider idioma={idioma}>{children}</IdiomaProvider>
+        <SincronizarTema modoInicial={modoTema} />
         <BloquearZoom />
         <PwaManager />
         <SistemaCliente />

@@ -63,16 +63,16 @@ export function ResumenBarberia({
   return (
     <div className="flex flex-col gap-5">
       {/* Encabezado */}
-      <header className="border-2 border-border bg-[#0a0a0a] bg-[radial-gradient(120%_140%_at_85%_0%,#ff4d00_0%,#7a2600_45%,#0a0a0a_100%)] p-5 text-white shadow-hard sm:p-6">
+      <header className="border-2 border-border bg-[image:var(--hero-gradient)] p-5 text-[var(--hero-text)] shadow-hard sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.66px] text-white/80">{nombre}</p>
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.66px] opacity-80">{nombre}</p>
             <h1 className="font-display mt-1 text-[clamp(26px,7vw,40px)] font-bold uppercase leading-none">Resumen de hoy</h1>
           </div>
           <Link
             href="/panel/verificacion"
             aria-label={`Estado del negocio: ${badge.texto}. Ver verificación`}
-            className="inline-flex items-center gap-2 border-2 border-[#0a0a0a] bg-white px-3 py-1.5 text-[12px] font-bold uppercase text-[#0a0a0a] shadow-hard-sm"
+            className="inline-flex items-center gap-2 border-2 border-ink bg-paper px-3 py-1.5 text-[12px] font-bold uppercase text-ink shadow-hard-sm"
           >
             <ShieldCheck className="size-4 text-[#0a8a4a]" aria-hidden />
             {badge.texto}
@@ -82,7 +82,7 @@ export function ResumenBarberia({
 
       {/* Cifras del día */}
       {resumen ? (
-        <section aria-label="Cifras de hoy" className="grid grid-cols-2 gap-px border-2 border-border bg-[#0a0a0a] shadow-hard lg:grid-cols-4">
+        <section aria-label="Cifras de hoy" className="grid grid-cols-2 gap-px border-2 border-border bg-border shadow-hard lg:grid-cols-4">
           <Kpi etiqueta="Ingresos de hoy" valor={formatCOP(resumen.ingresosHoy)} />
           <Kpi etiqueta="Citas de hoy" valor={String(resumen.citasHoy)} />
           <Kpi etiqueta="Ocupación" valor={resumen.ocupacionPct != null ? `${resumen.ocupacionPct}%` : "—"} />
@@ -171,10 +171,10 @@ export function ResumenBarberia({
 
 function Kpi({ etiqueta, valor, detalle }: { etiqueta: string; valor: string; detalle?: string }) {
   return (
-    <div className="bg-[#c2410c] bg-[linear-gradient(135deg,#ff4d00_0%,#a33300_100%)] px-4 py-3.5 text-white">
-      <p className="font-mono text-[10.5px] font-bold uppercase tracking-[0.66px] text-white/85">{etiqueta}</p>
+    <div className="bg-[image:var(--kpi-gradient)] px-4 py-3.5 text-[var(--hero-text)]">
+      <p className="font-mono text-[10.5px] font-bold uppercase tracking-[0.66px] opacity-85">{etiqueta}</p>
       <p className="font-display mt-1 text-[clamp(20px,5vw,28px)] font-bold leading-none">{valor}</p>
-      {detalle ? <p className="mt-1 truncate text-[11px] text-white/85">{detalle}</p> : null}
+      {detalle ? <p className="mt-1 truncate text-[11px] opacity-85">{detalle}</p> : null}
     </div>
   );
 }

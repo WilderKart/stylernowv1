@@ -1,7 +1,8 @@
 /* Barra superior del recorrido del Cliente (maqueta 2026-11-15). Medidas de la maqueta de 392 px;
    en móviles más angostos todo se reduce en proporción (1u = 100vw/392, máximo 1 px). */
 .barra {
-  --u: min(1px, calc(100vw / 392));
+  /* 450 (y no 392): deja sitio al botón de modo oscuro sin que «Crear cuenta» se salga en móviles. */
+  --u: min(1px, calc(100vw / 450));
   position: sticky;
   top: 0;
   z-index: 20;

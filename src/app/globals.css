@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "../styles/brutalist.css" layer(components);
+@import "../styles/temas-suaves.css";
 
 /* StylerNow — sistema de diseño brutalista (blanco #FFF / negro #0A0A0A / naranja señal #FF4D00).
    Fuente de verdad: stylernow-prototipo/css/tokens.css. Tema claro por defecto;
@@ -62,6 +63,20 @@
 }
 
 :root {
+  /* Tokens de navegación y portadas del panel: el sistema brutalista los fija; los temas suaves los redefinen. */
+  --nav-bg: #0a0a0a;
+  --nav-text: #ffffff;
+  --nav-muted: rgba(255, 255, 255, 0.7);
+  --nav-accent: #ff4d00;
+  --nav-active-bg: rgba(255, 255, 255, 0.1);
+  --nav-borde: rgba(255, 255, 255, 0.1);
+  --hero-gradient: radial-gradient(120% 140% at 85% 0%, #ff4d00 0%, #7a2600 45%, #0a0a0a 100%);
+  --kpi-gradient: linear-gradient(135deg, #ff4d00 0%, #a33300 100%);
+  --hero-text: #ffffff;
+  --line-input: var(--line);
+  --sombra-banner: 4px 4px 0 0 var(--signal);
+  --r-card: 0px;
+  --r-ctl: 0px;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;

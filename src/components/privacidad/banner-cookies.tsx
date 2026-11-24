@@ -57,7 +57,7 @@ export function BannerCookies() {
       <section
         role="region"
         aria-label={t("ck.aria")}
-        className="pointer-events-auto flex flex-col gap-3 border-2 border-white bg-[#0a0a0a] p-4 text-white shadow-[4px_4px_0_0_var(--signal)]"
+        className="pointer-events-auto flex flex-col gap-3 border-2 border-paper bg-ink p-4 text-paper shadow-[var(--sombra-banner)]"
       >
         <span className="font-mono text-xs leading-4 font-bold tracking-[0.72px] text-signal">00 / COOKIES</span>
         <p className="body break-words">

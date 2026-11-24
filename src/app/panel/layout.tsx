@@ -5,6 +5,7 @@ import CargandoPanel from "./loading";
 import { BannerSuscripcion } from "@/components/panel/banner-suscripcion";
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
 import { obtenerEstadoOperativo } from "@/lib/suscripcion/estado-operativo";
+import { verticalDeCategorias } from "@/lib/tema/vertical";
 
 export const metadata = {
   title: { template: "%s · Panel Negocio · StylerNow", default: "Panel Negocio" },
@@ -36,8 +37,15 @@ async function PanelGuardado({ children }: { children: React.ReactNode }) {
   const contexto = await resolverContexto();
   const estado = contexto.negocioId ? await obtenerEstadoOperativo(contexto.negocioId) : null;
 
+  // Tema visual según la categoría principal del negocio (barbería y tattoo conservan el diseño original).
+  let vertical: ReturnType<typeof verticalDeCategorias> = null;
+  if (contexto.negocioId) {
+    const { data: n } = await supabase.from("negocio").select("categoria").eq("id", contexto.negocioId).maybeSingle();
+    vertical = verticalDeCategorias(n?.categoria);
+  }
+
   return (
-    <div className="min-h-dvh bg-app pb-16 lg:pb-0 lg:pl-60">
+    <div className="min-h-dvh bg-app pb-16 lg:pb-0 lg:pl-60" data-vertical={vertical ?? undefined}>
       {estado ? <BannerSuscripcion estado={estado} puedePagar={contexto.rol === "BARBERIA"} /> : null}
       {children}
     </div>

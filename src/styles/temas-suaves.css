@@ -1,0 +1,450 @@
+/* StylerNow — temas «suaves» por categoría de negocio: spa, salón de belleza y estudio de uñas.
+ *
+ * Barbería y tattoo NO usan esto: conservan el sistema brutalista tal cual. Un tema suave solo se activa cuando
+ * una página pone data-vertical="spa|salon|unas" en un contenedor (perfil público del negocio y panel del negocio).
+ *
+ * Cómo funciona:
+ *  1. Los colores, radios, sombras y fuentes de toda la app salen de variables (--bg, --text, --signal…). Aquí se
+ *     redefinen por categoría, en claro Y en oscuro (el modo oscuro es obligatorio en los tres).
+ *  2. Una capa estructural suaviza lo que el brutalismo fija en el código: esquinas, bordes gruesos, mayúsculas,
+ *     tipografía condensada, íconos de trazo cuadrado y sombras duras.
+ *  3. `html:has([data-vertical])` hace que también el fondo de la página y los diálogos (que viven fuera del
+ *     contenedor) tomen el tema, sin destellos y sin JavaScript.
+ *  4. `data-tema-vista` (+ `data-modo="dark"`) aplica el mismo tema a un solo contenedor: lo usa la vista previa
+ *     de /admin/temas para mostrar varios temas a la vez.
+ *
+ * Contraste (WCAG AA): el texto va siempre en el tono oscuro/claro de la paleta; los pasteles se usan para
+ * rellenos y detalles. Verificado con scripts/verificar-contraste-temas.mjs.
+ */
+
+/* ───────────────────────── SPA · claro ───────────────────────── */
+[data-vertical="spa"],
+[data-tema-vista="spa"],
+html:has([data-vertical="spa"]) {
+  --bg: #fffdf9;
+  --app-bg: #f6f0e6;
+  --surface: #efe6d8;
+  --surface-2: #e5d9c6;
+  --ink: #2f2a24;
+  --paper: #fffdf9;
+  --signal: #b2bda3;
+  --signal-pressed: #9fac8f;
+  --text: #2f2a24;
+  --text-muted: #645c51;
+  --text-faint: #756c5f;
+  --text-disabled: #9a9183;
+  --accent-text: #4a6650;
+  --line: #cfc3ae;
+  --line-input: #948873;
+  --grid: #e3d8c5;
+  --grid-soft: #e8dece;
+  --shadow-ink: #2f2a24;
+  --focus: #4a6650;
+  --success: #a8d5b5;
+  --warning: #e9c877;
+  --danger: #d9766b;
+  --info: #2f2a24;
+  --scrim: rgba(47, 42, 36, 0.55);
+  --sn-shadow-hard: 0 12px 28px -14px rgba(74, 60, 40, 0.35);
+  --sn-shadow-hard-sm: 0 6px 16px -10px rgba(74, 60, 40, 0.3);
+  --nav-bg: #fffdf9;
+  --nav-text: #2f2a24;
+  --nav-muted: rgba(47, 42, 36, 0.66);
+  --nav-accent: #4a6650;
+  --nav-active-bg: rgba(74, 102, 80, 0.12);
+  --nav-borde: #e3d8c5;
+  --hero-gradient: linear-gradient(135deg, #dce4d2 0%, #b2bda3 55%, #8fa088 100%);
+  --kpi-gradient: linear-gradient(135deg, #c9d3bc, #a5b398);
+  --hero-text: #2f2a24;
+  --r-card: 22px;
+  --sombra-banner: var(--sn-shadow-hard);
+  --r-ctl: 999px;
+  color-scheme: light;
+}
+
+/* ───────────────────────── SPA · oscuro ───────────────────────── */
+[data-theme="dark"] [data-vertical="spa"],
+[data-tema-vista="spa"][data-modo="dark"],
+html[data-theme="dark"]:has([data-vertical="spa"]) {
+  --bg: #181f19;
+  --app-bg: #111611;
+  --surface: #202921;
+  --surface-2: #2a352c;
+  --ink: #101712;
+  --paper: #edefe8;
+  --signal: #a9bfa0;
+  --signal-pressed: #bdd1b5;
+  --text: #edefe8;
+  --text-muted: #b3bbaf;
+  --text-faint: #97a194;
+  --text-disabled: #6f7a6d;
+  --accent-text: #b9cdb0;
+  --line: #344036;
+  --line-input: #6d7e6f;
+  --grid: #2a352c;
+  --grid-soft: #243027;
+  --shadow-ink: #000000;
+  --focus: #b9cdb0;
+  --success: #7fbf92;
+  --warning: #d9bc6a;
+  --danger: #e88b80;
+  --info: #edefe8;
+  --scrim: rgba(0, 0, 0, 0.7);
+  --sn-shadow-hard: 0 12px 28px -14px rgba(0, 0, 0, 0.7);
+  --sn-shadow-hard-sm: 0 6px 16px -10px rgba(0, 0, 0, 0.6);
+  --nav-bg: #141a15;
+  --nav-text: #edefe8;
+  --nav-muted: rgba(237, 239, 232, 0.66);
+  --nav-accent: #b9cdb0;
+  --nav-active-bg: rgba(185, 205, 176, 0.14);
+  --nav-borde: #2a352c;
+  --hero-gradient: linear-gradient(135deg, #2c3a2f 0%, #1e2820 60%, #161d17 100%);
+  --kpi-gradient: linear-gradient(135deg, #34463a, #26332a);
+  --hero-text: #edefe8;
+  color-scheme: dark;
+}
+
+/* ───────────────────────── SALÓN · claro ───────────────────────── */
+[data-vertical="salon"],
+[data-tema-vista="salon"],
+html:has([data-vertical="salon"]) {
+  --bg: #fffdfd;
+  --app-bg: #f7f1f1;
+  --surface: #f0e5e5;
+  --surface-2: #e6d8d8;
+  --ink: #33253a;
+  --paper: #fffdfd;
+  --signal: #ddbabd;
+  --signal-pressed: #cfa5a9;
+  --text: #2b2230;
+  --text-muted: #62566a;
+  --text-faint: #72667a;
+  --text-disabled: #9a8fa0;
+  --accent-text: #7a3f74;
+  --line: #d8c8cc;
+  --line-input: #8e7f94;
+  --grid: #eadcdd;
+  --grid-soft: #efe3e3;
+  --shadow-ink: #33253a;
+  --focus: #7a3f74;
+  --success: #a9d6b6;
+  --warning: #e6c98b;
+  --danger: #d9788b;
+  --info: #33253a;
+  --scrim: rgba(43, 34, 48, 0.55);
+  --sn-shadow-hard: 0 12px 28px -14px rgba(90, 50, 80, 0.32);
+  --sn-shadow-hard-sm: 0 6px 16px -10px rgba(90, 50, 80, 0.28);
+  --nav-bg: #fffdfd;
+  --nav-text: #2b2230;
+  --nav-muted: rgba(43, 34, 48, 0.66);
+  --nav-accent: #7a3f74;
+  --nav-active-bg: rgba(122, 63, 116, 0.1);
+  --nav-borde: #eadcdd;
+  --hero-gradient: linear-gradient(135deg, #f1d9dc 0%, #ddbabd 50%, #c59bb8 100%);
+  --kpi-gradient: linear-gradient(135deg, #e8c8cb, #d2a9c0);
+  --hero-text: #2b2230;
+  --r-card: 20px;
+  --sombra-banner: var(--sn-shadow-hard);
+  --r-ctl: 999px;
+  color-scheme: light;
+}
+
+/* ───────────────────────── SALÓN · oscuro ───────────────────────── */
+[data-theme="dark"] [data-vertical="salon"],
+[data-tema-vista="salon"][data-modo="dark"],
+html[data-theme="dark"]:has([data-vertical="salon"]) {
+  --bg: #1e171f;
+  --app-bg: #161117;
+  --surface: #291f2b;
+  --surface-2: #352a37;
+  --ink: #120d13;
+  --paper: #f3ecf2;
+  --signal: #e3b5be;
+  --signal-pressed: #f0c9d1;
+  --text: #f3ecf2;
+  --text-muted: #c5b8c4;
+  --text-faint: #a89ba7;
+  --text-disabled: #7a6f79;
+  --accent-text: #ddaad6;
+  --line: #42344a;
+  --line-input: #85708c;
+  --grid: #2e2430;
+  --grid-soft: #281f2a;
+  --shadow-ink: #000000;
+  --focus: #ddaad6;
+  --success: #86c79a;
+  --warning: #ddbe79;
+  --danger: #ee8c9e;
+  --info: #f3ecf2;
+  --scrim: rgba(0, 0, 0, 0.7);
+  --sn-shadow-hard: 0 12px 28px -14px rgba(0, 0, 0, 0.7);
+  --sn-shadow-hard-sm: 0 6px 16px -10px rgba(0, 0, 0, 0.6);
+  --nav-bg: #181319;
+  --nav-text: #f3ecf2;
+  --nav-muted: rgba(243, 236, 242, 0.66);
+  --nav-accent: #ddaad6;
+  --nav-active-bg: rgba(221, 170, 214, 0.14);
+  --nav-borde: #2e2430;
+  --hero-gradient: linear-gradient(135deg, #3b2a40 0%, #2a1f2d 60%, #1c141e 100%);
+  --kpi-gradient: linear-gradient(135deg, #46304d, #32243a);
+  --hero-text: #f3ecf2;
+  color-scheme: dark;
+}
+
+/* ───────────────────────── UÑAS · claro ───────────────────────── */
+[data-vertical="unas"],
+[data-tema-vista="unas"],
+html:has([data-vertical="unas"]) {
+  --bg: #fffcfa;
+  --app-bg: #faf2ec;
+  --surface: #f3e5db;
+  --surface-2: #ead7c9;
+  --ink: #3a2a26;
+  --paper: #fffcfa;
+  --signal: #f2bea0;
+  --signal-pressed: #e8a988;
+  --text: #3a2a26;
+  --text-muted: #6c5750;
+  --text-faint: #7a645c;
+  --text-disabled: #a08f87;
+  --accent-text: #a24e36;
+  --line: #ddc9bc;
+  --line-input: #9a8174;
+  --grid: #ebdccf;
+  --grid-soft: #f0e3d8;
+  --shadow-ink: #3a2a26;
+  --focus: #a24e36;
+  --success: #a7d4b2;
+  --warning: #eacb86;
+  --danger: #dd7f72;
+  --info: #3a2a26;
+  --scrim: rgba(58, 42, 38, 0.55);
+  --sn-shadow-hard: 0 12px 28px -14px rgba(120, 70, 50, 0.32);
+  --sn-shadow-hard-sm: 0 6px 16px -10px rgba(120, 70, 50, 0.28);
+  --nav-bg: #fffcfa;
+  --nav-text: #3a2a26;
+  --nav-muted: rgba(58, 42, 38, 0.66);
+  --nav-accent: #a24e36;
+  --nav-active-bg: rgba(162, 78, 54, 0.1);
+  --nav-borde: #ebdccf;
+  --hero-gradient: linear-gradient(135deg, #fbe3d4 0%, #f2bea0 50%, #d9a38e 100%);
+  --kpi-gradient: linear-gradient(135deg, #f6cdb4, #e2ae98);
+  --hero-text: #3a2a26;
+  --r-card: 24px;
+  --sombra-banner: var(--sn-shadow-hard);
+  --r-ctl: 999px;
+  color-scheme: light;
+}
+
+/* ───────────────────────── UÑAS · oscuro ───────────────────────── */
+[data-theme="dark"] [data-vertical="unas"],
+[data-tema-vista="unas"][data-modo="dark"],
+html[data-theme="dark"]:has([data-vertical="unas"]) {
+  --bg: #211916;
+  --app-bg: #181210;
+  --surface: #2d221d;
+  --surface-2: #3a2c25;
+  --ink: #150f0d;
+  --paper: #f8efe9;
+  --signal: #f2bea0;
+  --signal-pressed: #f7cdb5;
+  --text: #f8efe9;
+  --text-muted: #cdbbb0;
+  --text-faint: #b09e94;
+  --text-disabled: #7e6f66;
+  --accent-text: #f4b08e;
+  --line: #47362d;
+  --line-input: #8a7366;
+  --grid: #33261f;
+  --grid-soft: #2b201b;
+  --shadow-ink: #000000;
+  --focus: #f4b08e;
+  --success: #8ac79b;
+  --warning: #e3c27f;
+  --danger: #f0907f;
+  --info: #f8efe9;
+  --scrim: rgba(0, 0, 0, 0.7);
+  --sn-shadow-hard: 0 12px 28px -14px rgba(0, 0, 0, 0.7);
+  --sn-shadow-hard-sm: 0 6px 16px -10px rgba(0, 0, 0, 0.6);
+  --nav-bg: #1a1411;
+  --nav-text: #f8efe9;
+  --nav-muted: rgba(248, 239, 233, 0.66);
+  --nav-accent: #f4b08e;
+  --nav-active-bg: rgba(244, 176, 142, 0.14);
+  --nav-borde: #33261f;
+  --hero-gradient: linear-gradient(135deg, #4a3329 0%, #33231c 60%, #211713 100%);
+  --kpi-gradient: linear-gradient(135deg, #5a3e31, #3e2b22);
+  --hero-text: #f8efe9;
+  color-scheme: dark;
+}
+
+/* ───────────────── Tipografía, formas y detalles comunes a los tres ───────────────── */
+[data-vertical],
+[data-tema-vista],
+html:has([data-vertical]) {
+  --sn-font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --sn-font-mono: var(--font-archivo), system-ui, sans-serif; /* las etiquetas «técnicas» pasan a sans suave */
+  --stretch-condensed: 100%;
+  --stretch-expanded: 100%;
+  --border-thick: 1px;
+  --icon-stroke: 1.75;
+}
+
+:is([data-vertical], [data-tema-vista], html:has([data-vertical])) {
+  /* Fondo de la página con el color del tema (la regla base ya usa --app-bg; esto cubre contenedores propios). */
+  &[data-tema-vista] {
+    background: var(--app-bg);
+    color: var(--text);
+  }
+
+  /* Esquinas: tarjetas y bloques redondeados; controles en píldora; círculos intactos. */
+  & *:not([class*="rounded-full"]):not(.sn-seal):not(.sn-avatar) {
+    border-radius: var(--r-card);
+  }
+  & :is(button, .sn-btn, .sn-chip, input:not([type="checkbox"]):not([type="radio"]), select):not([class*="rounded-full"]):not(.sn-seal):not(.sn-avatar) {
+    border-radius: var(--r-ctl);
+  }
+  & textarea:not([class*="rounded-full"]) {
+    border-radius: 18px;
+  }
+  & :is(svg, path, circle, line, polyline, polygon, rect, text, tspan, option, optgroup) {
+    border-radius: 0;
+  }
+
+  /* Títulos: serif suave en frase normal; la palabra de acento va en cursiva. */
+  & :is(.poster-1, .poster-2, .poster-3, .poster-4, .poster-5, .poster-xl, .poster-lg, .sn-poster, .section, .sn-section, .font-display) {
+    font-family: var(--sn-font-display);
+    font-stretch: 100%;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: -0.012em;
+    line-height: 1.1;
+  }
+  & .font-display :is(.text-accent, .sn-hot) {
+    font-style: italic;
+  }
+  & .sn-hot {
+    color: var(--accent-text);
+    font-style: italic;
+  }
+  & .uppercase {
+    text-transform: none;
+  }
+
+  /* Etiquetas pequeñas: sans con espaciado amplio, como un «eyebrow» editorial. */
+  & :is(.sn-label, .sn-meta, .label, .meta, .sn-help, .sn-mono) {
+    font-family: var(--sn-font-sans);
+    font-stretch: 100%;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  & .sn-num {
+    font-family: var(--sn-font-sans);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+
+  /* Botones y chips: frase normal, sin sombra dura ni «hundirse» al presionar. */
+  & :is(.sn-btn, .sn-chip, .sn-seg button, .sn-field label) {
+    font: 600 14px/1.25 var(--sn-font-sans);
+    font-stretch: 100%;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  & .sn-btn--primary {
+    border-color: transparent;
+  }
+  & :is(.sn-btn--primary, .sn-chip):active {
+    transform: translateY(1px);
+    box-shadow: none;
+  }
+
+  /* Bordes finos (decorativos) y campos con borde de contraste suficiente. */
+  & :is(.border-2, .border-y-2) {
+    border-width: 1px;
+  }
+  & .border-2 {
+    border-width: 1px;
+  }
+  & .border-b-2 {
+    border-bottom-width: 1px;
+  }
+  & .border-t-2 {
+    border-top-width: 1px;
+  }
+  & :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]) {
+    border-color: var(--line-input);
+  }
+
+  /* Íconos de trazo redondeado y más fino. */
+  & svg.lucide {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Barra de pestañas del cliente: clara y suave (no negra). */
+  & .sn-tabbar {
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+    border-radius: 0;
+  }
+  & .sn-tab {
+    color: var(--text-muted);
+    border-right: 0;
+    font: 500 11px/14px var(--sn-font-sans);
+    letter-spacing: 0.02em;
+    text-transform: none;
+    border-radius: 0;
+  }
+  & .sn-tab.is-active {
+    background: var(--nav-active-bg);
+    color: var(--accent-text);
+    font-weight: 700;
+  }
+
+  /* Cabecera y hojas. */
+  & .sn-header {
+    border-bottom: 1px solid var(--line);
+  }
+  & .sn-sheet {
+    border-top: 1px solid var(--line);
+    border-radius: var(--r-card) var(--r-card) 0 0;
+  }
+}
+
+/* Foco visible con el color del tema. */
+:is([data-vertical], [data-tema-vista], html:has([data-vertical])) :focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Botón primario: el relleno pastel no lleva marco oscuro. */
+:is([data-vertical], [data-tema-vista], html:has([data-vertical])) .bg-signal.border-ink {
+  border-color: transparent;
+}
+
+/* Marquesina y fotos sin imagen: más suaves que en el diseño original. */
+:is([data-vertical], [data-tema-vista], html:has([data-vertical])) {
+  & .sn-marquee {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+  }
+  & .sn-marquee__track span {
+    font: 500 italic 22px/1 var(--sn-font-display);
+    font-stretch: 100%;
+    text-transform: none;
+  }
+  /* Sin foto: degradado del tema (nunca la foto de stock de una barbería). */
+  & .sn-photo {
+    background-image: var(--hero-gradient);
+    background-color: var(--surface);
+  }
+}
+
+/* Filas y franjas a todo el ancho (solo borde superior/inferior) no se redondean: se verían cortadas en los bordes. */
+:is([data-vertical], [data-tema-vista], html:has([data-vertical])) :is(.border-b, .border-t, .border-y, .border-b-2, .border-t-2):not(.border):not(.border-2) {
+  border-radius: 0;
+}

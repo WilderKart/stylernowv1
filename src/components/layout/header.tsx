@@ -1,6 +1,7 @@
 import { ScreenHeader } from "@/components/brutal";
 import { contarNoLeidas } from "@/lib/cliente/notificaciones";
 import { Bell } from "lucide-react";
+import { BotonTema } from "@/components/tema/tema-cliente";
 import Link from "next/link";
 import { Suspense } from "react";
 import { obtenerT } from "@/lib/i18n/servidor";
@@ -57,6 +58,7 @@ export async function Header({ autenticado, etiqueta }: { autenticado: boolean; 
       </Link>
       {etiqueta ? <span className={`sn-num hidden sm:block ${h.etiqueta}`}>{etiqueta}</span> : null}
       <span className={h.separador} aria-hidden />
+      <BotonTema className="sn-iconbtn !w-9 shrink-0" />
       {autenticado ? (
         <>
           <Suspense fallback={<Campana cantidad={0} t={t} />}>

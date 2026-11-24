@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { FormIdiomaRegion } from "./form-idioma-region";
 import { obtenerT } from "@/lib/i18n/servidor";
+import { SelectorTema } from "@/components/tema/tema-cliente";
+import { obtenerModoTema } from "@/lib/tema/servidor";
 
 export async function generateMetadata() {
   const t = await obtenerT();
@@ -19,10 +21,14 @@ export default async function IdiomaRegionPage() {
 
   const r = await obtenerPreferencias();
   const prefs = r.ok ? r.data : null;
+  const modoTema = await obtenerModoTema();
 
   return (
     <Pantalla>
       <FormIdiomaRegion paisInicial={prefs?.pais ?? "CO"} localeInicial={prefs?.locale ?? "es"} enOnboarding={prefs ? !prefs.onboarding_completo : true} />
+      <div className="mt-8 px-4">
+        <SelectorTema modoInicial={modoTema} />
+      </div>
     </Pantalla>
   );
 }

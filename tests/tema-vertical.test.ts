@@ -1,0 +1,42 @@
+import { describe, expect, it } from "vitest";
+import { verticalDeCategorias } from "@/lib/tema/vertical";
+import { temaEfectivo } from "@/lib/tema/preferencia";
+
+describe("verticalDeCategorias", () => {
+  it("barbería y tattoo conservan el diseño original", () => {
+    expect(verticalDeCategorias(["barberia"])).toBeNull();
+    expect(verticalDeCategorias(["tatuajes"])).toBeNull();
+    expect(verticalDeCategorias(["grooming"])).toBeNull();
+  });
+  it("spa, salón y uñas tienen tema propio", () => {
+    expect(verticalDeCategorias(["spa"])).toBe("spa");
+    expect(verticalDeCategorias(["masajes"])).toBe("spa");
+    expect(verticalDeCategorias(["salon"])).toBe("salon");
+    expect(verticalDeCategorias(["manicura"])).toBe("unas");
+    expect(verticalDeCategorias(["lashista"])).toBe("unas");
+  });
+  it("manda la primera categoría", () => {
+    expect(verticalDeCategorias(["barberia", "manicura", "grooming"])).toBeNull();
+    expect(verticalDeCategorias(["manicura", "barberia"])).toBe("unas");
+  });
+  it("tolera vacío, nulo y mayúsculas", () => {
+    expect(verticalDeCategorias(null)).toBeNull();
+    expect(verticalDeCategorias([])).toBeNull();
+    expect(verticalDeCategorias([" SPA "])).toBe("spa");
+  });
+});
+
+describe("temaEfectivo", () => {
+  it("respeta la elección explícita", () => {
+    expect(temaEfectivo("dark", "light")).toBe("dark");
+    expect(temaEfectivo("light", "dark")).toBe("light");
+  });
+  it("en automático usa lo que declaró el dispositivo", () => {
+    expect(temaEfectivo("auto", "dark")).toBe("dark");
+    expect(temaEfectivo("auto", undefined)).toBe("light");
+  });
+  it("sin cookie, claro (comportamiento anterior)", () => {
+    expect(temaEfectivo(undefined, "dark")).toBe("light");
+    expect(temaEfectivo("raro", "dark")).toBe("light");
+  });
+});

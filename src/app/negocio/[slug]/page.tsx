@@ -1,3 +1,4 @@
+import { verticalDeCategorias } from "@/lib/tema/vertical";
 import { Label, Marquee, Meta, Num, Photo, ProCard, Stars, Status } from "@/components/brutal";
 import { FOTOS_RESPALDO, FOTO_NEGOCIO_RESPALDO, nivelATier } from "@/components/negocio/nivel";
 import { horarioDeHoy } from "@/components/negocio/horario";
@@ -202,10 +203,13 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
   const nombreVisible = marca?.nombreMarca ?? negocio.nombre;
   const partesNombre = nombreVisible.split(" ");
   const mitad = Math.ceil(partesNombre.length / 2);
+  // Los temas suaves (spa, salón, uñas) no usan las fotos de stock de barbería cuando el negocio aún no sube las suyas.
+  const vertical = verticalDeCategorias(negocio.categoria);
 
   return (
     <div
       className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-app"
+      data-vertical={vertical ?? undefined}
       // Mi Marca (add-on): el negocio redefine su acento y su tinta; los colores ya vienen validados #RRGGBB.
       style={marca ? ({ "--signal": marca.colorPrimario, "--ink": marca.colorSecundario } as React.CSSProperties) : undefined}
     >
@@ -228,7 +232,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
         {/* ── Portada ───────────────────────────────────────────────── */}
         <div className="relative">
           <Photo
-            src={marca?.logoUrl ?? negocio.foto_principal_url ?? negocio.logo_url ?? FOTO_NEGOCIO_RESPALDO}
+            src={marca?.logoUrl ?? negocio.foto_principal_url ?? negocio.logo_url ?? (vertical ? null : FOTO_NEGOCIO_RESPALDO)}
             alt={nombreVisible}
             className="h-[250px] w-full"
           />
@@ -387,7 +391,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
                   name={p.nombre}
                   role={p.especialidad ?? undefined}
                   tier={nivelATier(p.nivel)}
-                  photo={p.foto_url ?? FOTOS_RESPALDO[i % FOTOS_RESPALDO.length]}
+                  photo={p.foto_url ?? (vertical ? null : FOTOS_RESPALDO[i % FOTOS_RESPALDO.length])}
                 />
               ))}
             </div>

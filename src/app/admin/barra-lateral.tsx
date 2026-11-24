@@ -75,6 +75,7 @@ const GRUPOS: { titulo?: string; items: Item[] }[] = [
       { href: "/admin/auditoria", etiqueta: "Auditoría", icono: Activity },
       { href: "/admin/sistema", etiqueta: "Estado del sistema", icono: HeartPulse },
       { href: "/admin/configuracion", etiqueta: "Configuración", icono: Settings },
+      { href: "/admin/temas", etiqueta: "Temas por categoría", icono: Sparkles },
     ],
   },
 ];
