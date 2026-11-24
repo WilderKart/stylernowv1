@@ -20,6 +20,7 @@ import type { NegocioData, SedeData } from "./tipos";
  */
 export function Wizard({
   perfilEmail,
+  categoriaSugerida,
   negocioInicial,
   sedeInicial,
   planInicial,
@@ -29,6 +30,7 @@ export function Wizard({
   hayImagenes,
 }: {
   perfilEmail: string;
+  categoriaSugerida?: string[];
   negocioInicial: NegocioData | null;
   sedeInicial: SedeData | null;
   planInicial: string | null;
@@ -76,6 +78,7 @@ export function Wizard({
           <PasoDatos
             negocio={negocio}
             perfilEmail={perfilEmail}
+            categoriaSugerida={categoriaSugerida}
             hayImagenes={hayImagenes}
             onGuardado={setNegocio}
             onContinuar={() => ir(2)}

@@ -9,6 +9,7 @@ export const CATEGORIAS_ONBOARDING = [
   { valor: "salon", etiqueta: "Salón de belleza", icono: "Sparkles" },
   { valor: "spa", etiqueta: "Spa", icono: "Flower2" },
   { valor: "tatuajes", etiqueta: "Tatuajes", icono: "PenTool" },
+  { valor: "manicura", etiqueta: "Estudio de uñas", icono: "Hand" },
   { valor: "grooming", etiqueta: "Grooming Man", icono: "UserRound" },
 ] as const;
 

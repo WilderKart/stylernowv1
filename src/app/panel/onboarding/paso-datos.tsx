@@ -5,14 +5,14 @@ import { Input } from "@/components/ui/input";
 import { CATEGORIAS_ONBOARDING } from "@/lib/categorias-onboarding";
 import { comprimirADataUrl } from "@/lib/imagen/comprimir";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Flower2, PenTool, Scissors, Sparkles, UserRound } from "lucide-react";
+import { ArrowRight, Flower2, Hand, PenTool, Scissors, Sparkles, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { crearOActualizarNegocio, subirFotoPrincipal, subirLogo } from "./actions";
 import { TituloPaso } from "./encabezado-pasos";
 import type { NegocioData } from "./tipos";
 
-const ICONOS = { Scissors, Sparkles, Flower2, PenTool, UserRound } as const;
+const ICONOS = { Scissors, Sparkles, Flower2, PenTool, Hand, UserRound } as const;
 
 const NOTA_FOTO =
   "Esta será la fotografía principal que verán tus clientes en StylerNow. Sube una imagen actual de la fachada de tu negocio, que permita reconocer el establecimiento. Procura que esté bien iluminada y sea nítida.";
@@ -21,17 +21,20 @@ export function PasoDatos({
   negocio,
   perfilEmail,
   hayImagenes,
+  categoriaSugerida,
   onGuardado,
   onContinuar,
 }: {
   negocio: NegocioData | null;
   perfilEmail: string;
   hayImagenes: boolean;
+  /** Tipo de negocio que la persona eligió al crear su cuenta (solo preselecciona; puede cambiarlo). */
+  categoriaSugerida?: string[];
   onGuardado: (n: NegocioData) => void;
   onContinuar: () => void;
 }) {
   const [nombre, setNombre] = useState(negocio?.nombre ?? "");
-  const [categoria, setCategoria] = useState<string[]>(negocio?.categoria ?? []);
+  const [categoria, setCategoria] = useState<string[]>(negocio?.categoria?.length ? negocio.categoria : (categoriaSugerida ?? []));
   const [ciudad, setCiudad] = useState(negocio?.ciudad ?? "");
   const [descripcion, setDescripcion] = useState(negocio?.descripcion ?? "");
   const [telefono, setTelefono] = useState(negocio?.telefono_contacto ?? "");

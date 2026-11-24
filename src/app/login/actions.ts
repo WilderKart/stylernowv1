@@ -9,12 +9,13 @@ import { guardarEnHistorial } from "@/lib/auth/password-history";
 import { registrarIntentoAuth, verificarRateLimitAuth } from "@/lib/auth/rate-limit-auth";
 import { googleProvider } from "@/lib/auth/providers/google-provider";
 import { destinoSeguro } from "@/lib/auth/destino-seguro";
+import { esCategoriaRegistro } from "@/lib/tema/vertical";
 import { destinoInicial, destinoPorIntencion, fijarIntencionRegistro } from "@/lib/auth/destino-inicial";
 import { obtenerInvitacionPendiente } from "@/lib/invitaciones/invitacion-pendiente";
 import { limitar, ipDelLlamador } from "@/lib/rate-limit";
 import { MENSAJE_TURNSTILE, verificarTurnstile } from "@/lib/seguridad/turnstile";
 import * as Sentry from "@sentry/nextjs";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { z } from "zod";
 
 /**
@@ -59,6 +60,8 @@ async function limitarEnvioCorreo(email: string) {
  */
 export async function registrarCuenta(datos: {
   tipo: unknown;
+  /** Tipo de negocio (negocio) o servicio que busca (cliente). */
+  categoria?: unknown;
   email: string;
   password: string;
   confirmar: string;
@@ -68,7 +71,7 @@ export async function registrarCuenta(datos: {
   invitacion?: unknown;
 }): Promise<
   | { ok: true; email: string; siguiente: string }
-  | { ok: false; campo?: "tipo" | "email" | "password" | "confirmar" | "terminos"; error: string }
+  | { ok: false; campo?: "tipo" | "categoria" | "email" | "password" | "confirmar" | "terminos"; error: string }
 > {
   // Staff invitado: el correo y el destino salen de la invitación PENDIENTE (servidor), no del formulario.
   const invitacion = datos.invitacion === undefined ? null : await obtenerInvitacionPendiente(datos.invitacion);
@@ -77,6 +80,9 @@ export async function registrarCuenta(datos: {
   }
   const tipo = invitacion ? ({ success: true, data: "staff" } as const) : TIPO_CUENTA.safeParse(datos.tipo);
   if (!tipo.success) return { ok: false, campo: "tipo", error: "Elige qué tipo de cuenta quieres crear." };
+  // La categoría solo da aspecto y preselección (nunca permisos). Un negocio debe elegirla; un cliente puede omitirla.
+  const categoria = esCategoriaRegistro(datos.categoria) ? datos.categoria : null;
+  if (tipo.data === "negocio" && !categoria) return { ok: false, campo: "categoria", error: "Elige el tipo de negocio." };
   const correo = CORREO.safeParse(invitacion ? invitacion.email : datos.email);
   if (!correo.success) return { ok: false, campo: "email", error: "Escribe un correo válido." };
   const email = correo.data;
@@ -126,7 +132,11 @@ export async function registrarCuenta(datos: {
   // La intención se guarda SOLO en una cuenta realmente nueva: un correo existente no cambia nada.
   if (data.user && (data.user.identities?.length ?? 0) > 0) {
     await guardarEnHistorial(data.user.id, datos.password);
-    await fijarIntencionRegistro(data.user.id, tipo.data);
+    await fijarIntencionRegistro(data.user.id, tipo.data, categoria);
+    // Cliente: el servicio que busca queda como interés del perfil (la app se adapta a él).
+    if (tipo.data === "cliente" && categoria) {
+      await createAdminClient().from("perfil").update({ categorias_interes: [categoria] }).eq("id", data.user.id);
+    }
     // Evidencia de la casilla marcada: en el mismo instante y con la hora del servidor.
     const { error: eAcepta } = await (createAdminClient() as unknown as { rpc: (n: string, a: object) => Promise<{ error: { message: string } | null }> }).rpc(
       "registrar_aceptacion_legal_registro",
@@ -253,12 +263,16 @@ export async function crearContrasena(password: string) {
  * OTP o password. `siguiente` viaja como `next` en el `redirectTo` para que
  * el callback vuelva exactamente donde el usuario intentaba entrar.
  */
-export async function iniciarSesionConGoogle(siguienteCrudo: string, tipoCrudo?: unknown) {
+export async function iniciarSesionConGoogle(siguienteCrudo: string, tipoCrudo?: unknown, categoriaCrudo?: unknown) {
   // Desde «Crear cuenta» llega el tipo elegido: el servidor arma el `next` (onboarding o destino de
   // cliente). El callback solo lo usa para enrutar y, en una cuenta nueva, para guardar la intención.
   const tipo = tipoCrudo === undefined ? null : TIPO_CUENTA.safeParse(tipoCrudo);
   if (tipo && !tipo.success) return { ok: false as const, error: "Elige qué tipo de cuenta quieres crear." };
   const siguiente = tipo ? destinoPorIntencion(tipo.data, destinoSeguro(siguienteCrudo)) : destinoSeguro(siguienteCrudo);
+  // Categoría elegida (solo aspecto y preselección): cookie de 30 min que /auth/callback consume al crear la cuenta.
+  if (tipo?.success && esCategoriaRegistro(categoriaCrudo)) {
+    (await cookies()).set("sn_cat_reg", categoriaCrudo, { path: "/", maxAge: 60 * 30, httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production" });
+  }
   const redirectTo = `${await origenActual()}/auth/callback?next=${encodeURIComponent(siguiente)}`;
   return googleProvider.login(redirectTo);
 }

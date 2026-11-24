@@ -6,6 +6,7 @@ import { BannerSuscripcion } from "@/components/panel/banner-suscripcion";
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
 import { obtenerEstadoOperativo } from "@/lib/suscripcion/estado-operativo";
 import { verticalDeCategorias } from "@/lib/tema/vertical";
+import { categoriaRegistroDe } from "@/lib/auth/destino-inicial";
 
 export const metadata = {
   title: { template: "%s · Panel Negocio · StylerNow", default: "Panel Negocio" },
@@ -42,6 +43,9 @@ async function PanelGuardado({ children }: { children: React.ReactNode }) {
   if (contexto.negocioId) {
     const { data: n } = await supabase.from("negocio").select("categoria").eq("id", contexto.negocioId).maybeSingle();
     vertical = verticalDeCategorias(n?.categoria);
+  } else {
+    // Aún sin negocio (alta en curso): el diseño sigue al tipo que eligió al crear su cuenta.
+    vertical = verticalDeCategorias([categoriaRegistroDe(user) ?? ""]);
   }
 
   return (

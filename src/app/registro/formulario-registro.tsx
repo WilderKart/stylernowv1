@@ -20,9 +20,11 @@ import {
 } from "../login/_componentes/campos";
 import { ErrorForm, Hot, PantallaAuth, Separador } from "../login/_componentes/pantalla-auth";
 import { iniciarSesionConGoogle, registrarCuenta } from "../login/actions";
+import { SelectorServicio } from "./selector-servicio";
+import { verticalDeCategorias, type CategoriaRegistro } from "@/lib/tema/vertical";
 import { SelectorTipoCuenta, type TipoCuenta } from "./tipo-cuenta";
 
-type Campo = "tipo" | "email" | "password" | "confirmar" | "terminos";
+type Campo = "tipo" | "categoria" | "email" | "password" | "confirmar" | "terminos";
 
 /**
  * CREAR CUENTA (rediseño 2026-11-16): tipo de cuenta (cliente o negocio) + correo + contraseña +
@@ -44,6 +46,7 @@ export function FormularioRegistro({
   const t = useT();
   const router = useRouter();
   const [tipo, setTipo] = useState<TipoCuenta | null>(tipoInicial);
+  const [categoria, setCategoria] = useState<CategoriaRegistro | null>(null);
   const [email, setEmail] = useState(invitacion?.email ?? "");
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
@@ -63,6 +66,10 @@ export function FormularioRegistro({
       document.getElementById("tipo-cuenta")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return setError({ campo: "tipo", texto: t("auth.err_tipo") });
     }
+    if (tipo === "negocio" && !categoria && !invitacion) {
+      document.getElementById("servicio-registro")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return setError({ campo: "categoria", texto: t("auth.err_cat_neg") });
+    }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return setError({ campo: "email", texto: t("auth.err_correo") });
     if (!cumpleReglas(password)) return setError({ campo: "password", texto: t("auth.err_pw") });
     if (password !== confirmar) return setError({ campo: "confirmar", texto: t("auth.no_coinciden") });
@@ -73,6 +80,7 @@ export function FormularioRegistro({
     setError(null);
     const res = await registrarCuenta({
       tipo: invitacion ? "staff" : tipo,
+      categoria: invitacion ? undefined : categoria,
       email,
       password,
       confirmar,
@@ -101,7 +109,11 @@ export function FormularioRegistro({
     }
     setGoogleCargando(true);
     setError(null);
-    const res = await iniciarSesionConGoogle(siguiente, tipo);
+    if (tipo === "negocio" && !categoria) {
+      document.getElementById("servicio-registro")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return setError({ campo: "categoria", texto: t("auth.err_cat_neg") });
+    }
+    const res = await iniciarSesionConGoogle(siguiente, tipo, categoria);
     if (!res.ok) {
       setGoogleCargando(false);
       setError({ texto: res.error });
@@ -112,7 +124,11 @@ export function FormularioRegistro({
 
   const errorDe = (c: Campo) => (error?.campo === c ? <ErrorForm>{error.texto}</ErrorForm> : null);
 
+  // El aspecto de la pantalla cambia al elegir spa, salón o uñas (barbería y tattoo conservan el diseño original).
+  const vertical = verticalDeCategorias(categoria ? [categoria] : null);
+
   return (
+    <div data-tema-vista={vertical ?? undefined} className={vertical ? "min-h-dvh" : undefined}>
     <PantallaAuth
       indice={t("auth.i_registro")}
       volver={tipoInicial === "negocio" ? "/para-negocios" : "/"}
@@ -140,6 +156,22 @@ export function FormularioRegistro({
           {error?.campo === "tipo" ? <ErrorForm className="mt-1" >{error.texto}</ErrorForm> : null}
         </div>
         )}
+
+        {tipo && !invitacion ? (
+          <div className="flex flex-col gap-2">
+            <SelectorServicio
+              tipo={tipo}
+              valor={categoria}
+              onChange={(v) => {
+                setCategoria(v);
+                if (error?.campo === "categoria") setError(null);
+              }}
+              error={error?.campo === "categoria"}
+              idError="error-categoria"
+            />
+            {error?.campo === "categoria" ? <ErrorForm className="mt-1">{error.texto}</ErrorForm> : null}
+          </div>
+        ) : null}
 
         <div className="flex flex-col gap-2">
           <Input
@@ -208,5 +240,6 @@ export function FormularioRegistro({
         )}
       </form>
     </PantallaAuth>
+    </div>
   );
 }

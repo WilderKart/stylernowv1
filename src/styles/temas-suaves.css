@@ -64,6 +64,7 @@ html:has([data-vertical="spa"]) {
 
 /* ───────────────────────── SPA · oscuro ───────────────────────── */
 [data-theme="dark"] [data-vertical="spa"],
+[data-theme="dark"] [data-tema-vista="spa"],
 [data-tema-vista="spa"][data-modo="dark"],
 html[data-theme="dark"]:has([data-vertical="spa"]) {
   --bg: #181f19;
@@ -151,6 +152,7 @@ html:has([data-vertical="salon"]) {
 
 /* ───────────────────────── SALÓN · oscuro ───────────────────────── */
 [data-theme="dark"] [data-vertical="salon"],
+[data-theme="dark"] [data-tema-vista="salon"],
 [data-tema-vista="salon"][data-modo="dark"],
 html[data-theme="dark"]:has([data-vertical="salon"]) {
   --bg: #1e171f;
@@ -238,6 +240,7 @@ html:has([data-vertical="unas"]) {
 
 /* ───────────────────────── UÑAS · oscuro ───────────────────────── */
 [data-theme="dark"] [data-vertical="unas"],
+[data-theme="dark"] [data-tema-vista="unas"],
 [data-tema-vista="unas"][data-modo="dark"],
 html[data-theme="dark"]:has([data-vertical="unas"]) {
   --bg: #211916;

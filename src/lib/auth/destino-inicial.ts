@@ -40,10 +40,12 @@ export function destinoPorIntencion(intencion: IntencionRegistro, siguiente: str
  * `registro_pendiente` (migración 127) y `provider` se conservan. Un fallo aquí no rompe el
  * registro: la persona solo pierde el desvío automático (puede ir a «Para negocios» cuando quiera).
  */
-export async function fijarIntencionRegistro(userId: string, intencion: IntencionRegistro) {
+export async function fijarIntencionRegistro(userId: string, intencion: IntencionRegistro, categoria?: string | null) {
   try {
     const admin = createAdminClient();
-    const { error } = await admin.auth.admin.updateUserById(userId, { app_metadata: { intencion_registro: intencion } });
+    const { error } = await admin.auth.admin.updateUserById(userId, {
+      app_metadata: { intencion_registro: intencion, ...(categoria ? { categoria_registro: categoria } : {}) },
+    });
     if (error) console.error("[fijarIntencionRegistro]", error.message);
   } catch (e) {
     console.error("[fijarIntencionRegistro]", e instanceof Error ? e.message : e);
@@ -69,4 +71,10 @@ export async function destinoInicial(supabase: ClienteSupabase, user: User, sigu
     .eq("onboarding_completo", true)
     .limit(1);
   return data && data.length > 0 ? "/panel" : RUTA_ONBOARDING;
+}
+
+/** Categoría elegida al crear la cuenta (negocio: tipo de negocio; cliente: servicio que busca). Solo para preseleccionar y dar aspecto. */
+export function categoriaRegistroDe(user: Pick<User, "app_metadata"> | null | undefined): string | null {
+  const v = user?.app_metadata?.categoria_registro;
+  return typeof v === "string" ? v : null;
 }

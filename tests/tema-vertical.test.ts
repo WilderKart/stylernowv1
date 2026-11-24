@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { verticalDeCategorias } from "@/lib/tema/vertical";
+import { esCategoriaRegistro, OPCIONES_SERVICIO_REGISTRO, verticalDeCategorias } from "@/lib/tema/vertical";
 import { temaEfectivo } from "@/lib/tema/preferencia";
 
 describe("verticalDeCategorias", () => {
@@ -38,5 +38,17 @@ describe("temaEfectivo", () => {
   it("sin cookie, claro (comportamiento anterior)", () => {
     expect(temaEfectivo(undefined, "dark")).toBe("light");
     expect(temaEfectivo("raro", "dark")).toBe("light");
+  });
+});
+
+describe("categoría elegida al crear la cuenta", () => {
+  it("solo acepta las opciones ofrecidas", () => {
+    for (const o of OPCIONES_SERVICIO_REGISTRO) expect(esCategoriaRegistro(o.valor)).toBe(true);
+    expect(esCategoriaRegistro("grooming")).toBe(false);
+    expect(esCategoriaRegistro("<script>")).toBe(false);
+    expect(esCategoriaRegistro(undefined)).toBe(false);
+  });
+  it("cada opción de spa, salón y uñas tiene tema; barbería y tattoo no", () => {
+    expect(OPCIONES_SERVICIO_REGISTRO.map((o) => verticalDeCategorias([o.valor]))).toEqual([null, null, "salon", "spa", "unas"]);
   });
 });

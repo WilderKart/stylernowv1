@@ -3,6 +3,9 @@ import { destinoSeguro } from "@/lib/auth/destino-seguro";
 import { destinoInicial, fijarIntencionRegistro, intencionDe, RUTA_ONBOARDING } from "@/lib/auth/destino-inicial";
 import { registrarEventoIdentidad } from "@/lib/auth/identity-events";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { esCategoriaRegistro } from "@/lib/tema/vertical";
+import { cookies } from "next/headers";
 import type { EmailOtpType, User } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -93,7 +96,13 @@ export async function GET(request: NextRequest) {
     // servidor (onboarding = negocio). Solo enruta — no da permisos — y solo se fija una vez, en una
     // cuenta todavía pendiente; una cuenta existente nunca cambia de intención por un `next`.
     if (registroPendiente && !esRecuperacion && intencionDe(user) === null) {
-      await fijarIntencionRegistro(user.id, next.startsWith(RUTA_ONBOARDING) ? "negocio" : "cliente");
+      const intencion = next.startsWith(RUTA_ONBOARDING) ? "negocio" : "cliente";
+      const cat = (await cookies()).get("sn_cat_reg")?.value;
+      const categoria = esCategoriaRegistro(cat) ? cat : null;
+      await fijarIntencionRegistro(user.id, intencion, categoria);
+      if (intencion === "cliente" && categoria) {
+        await createAdminClient().from("perfil").update({ categorias_interes: [categoria] }).eq("id", user.id);
+      }
     }
     if (registroPendiente && !esRecuperacion) {
       return NextResponse.redirect(`${origin}/login?next=${encodeURIComponent(next)}`);

@@ -1,3 +1,4 @@
+import { categoriaRegistroDe } from "@/lib/auth/destino-inicial";
 import { obtenerConfigPrueba } from "@/app/panel/suscripcion/config-prueba";
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
 import { listarPaisesActivos, obtenerCatalogoPais } from "@/lib/planes/catalogo";
@@ -65,6 +66,7 @@ export default async function OnboardingNegocioPage() {
   return (
     <Wizard
       perfilEmail={user.email ?? ""}
+      categoriaSugerida={categoriaRegistroDe(user) ? [categoriaRegistroDe(user) as string] : undefined}
       negocioInicial={negocio ?? null}
       sedeInicial={sede ?? null}
       planInicial={suscripcion?.plan_codigo ?? null}

@@ -20,3 +20,19 @@ export function verticalDeCategorias(categorias: readonly string[] | null | unde
   const principal = categorias?.[0]?.trim().toLowerCase();
   return (principal && POR_CATEGORIA[principal]) || null;
 }
+
+/**
+ * Qué se le pregunta al crear la cuenta: el tipo de negocio (si es un negocio) o el servicio que busca (si es cliente).
+ * Los valores coinciden con las categorías de negocio del sistema (src/lib/categorias-negocio.ts).
+ */
+export const OPCIONES_SERVICIO_REGISTRO = [
+  { valor: "barberia", clave: "home.cat_barberia" },
+  { valor: "tatuajes", clave: "home.cat_tattoo" },
+  { valor: "salon", clave: "home.cat_salon" },
+  { valor: "spa", clave: "home.cat_spa" },
+  { valor: "manicura", clave: "home.cat_unas" },
+] as const;
+
+export type CategoriaRegistro = (typeof OPCIONES_SERVICIO_REGISTRO)[number]["valor"];
+
+export const esCategoriaRegistro = (v: unknown): v is CategoriaRegistro => OPCIONES_SERVICIO_REGISTRO.some((o) => o.valor === v);

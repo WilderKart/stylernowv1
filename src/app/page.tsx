@@ -1,4 +1,5 @@
 import { patronSinTildes } from "@/lib/busqueda/sin-tildes";
+import { verticalDeCategorias } from "@/lib/tema/vertical";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
 import { BloquesLanzamiento } from "@/components/inicio/bloques-lanzamiento";
@@ -116,6 +117,13 @@ export default async function HomePage(props: PageProps<"/">) {
   const hayPaginaSiguiente = vista === "lista" && todosLosResultados.length > TAM_PAGINA;
   const negocios = hayPaginaSiguiente ? todosLosResultados.slice(0, TAM_PAGINA) : todosLosResultados;
 
+  let interes: string[] | null = null;
+  if (user) {
+    const { data: p } = await supabase.from("perfil").select("categorias_interes").eq("id", user.id).maybeSingle();
+    interes = p?.categorias_interes ?? null;
+  }
+  const verticalCliente = verticalDeCategorias(interes);
+
   const hayFiltros = Boolean(texto || ciudad || categoria || avanzado);
   // Portada (maqueta 2026-11-15): sin filtros ni mapa. Los filtros no se muestran ahí a quien aún no
   // ingresa; siguen intactos en resultados, en el mapa y para quien ya tiene sesión.
@@ -162,6 +170,8 @@ export default async function HomePage(props: PageProps<"/">) {
       <SeleccionMapaProvider>
       <main className="mx-auto w-full max-w-5xl flex-1">
         {portada ? <Portada /> : null}
+
+        <div data-tema-vista={verticalCliente ?? undefined}>
 
         {banners && banners.length > 0 ? (
           <div className="grid grid-cols-1 gap-3 px-4 pt-4 sm:grid-cols-2 sm:px-6">
@@ -300,6 +310,7 @@ export default async function HomePage(props: PageProps<"/">) {
         {catalogoCorto ? <BloquesLanzamiento variante="negocios" conSesion={Boolean(user)} /> : null}
         </>
         ) : null}
+        </div>
       </main>
       </SeleccionMapaProvider>
 
