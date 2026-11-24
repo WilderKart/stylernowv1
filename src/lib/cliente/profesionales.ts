@@ -1,3 +1,4 @@
+import { patronSinTildes } from "@/lib/busqueda/sin-tildes";
 ﻿import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { unstable_cache } from "next/cache";
@@ -150,7 +151,7 @@ export interface NegocioMarketplace {
 const buscarNegociosFiltradoCached = unstable_cache(
   async (f: FiltrosMarketplace): Promise<Resultado<NegocioMarketplace[]>> =>
     llamarRpc<NegocioMarketplace[]>("marketplace_buscar_filtrado", {
-      ...(f.texto ? { p_texto: f.texto } : {}),
+      ...(f.texto && patronSinTildes(f.texto) ? { p_texto: patronSinTildes(f.texto) } : {}),
       ...(f.ciudad ? { p_ciudad: f.ciudad } : {}),
       ...(f.categoria ? { p_categoria: f.categoria } : {}),
       p_orden: f.orden ?? "RELEVANCIA",

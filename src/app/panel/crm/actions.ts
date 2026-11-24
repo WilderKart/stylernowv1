@@ -1,4 +1,5 @@
 "use server";
+import { patronSinTildes } from "@/lib/busqueda/sin-tildes";
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
@@ -108,7 +109,7 @@ export async function listarClientesCRM(filtro: FiltroCRM): Promise<Resultado<{ 
     if (idsPermitidos) q = q.in("cliente_id", idsPermitidos);
     if (filtro.busqueda?.trim()) {
       const b = filtro.busqueda.trim().replace(/[%_,()]/g, " ").trim();
-      if (b) q = q.or(`cliente_nombre.ilike.%${b}%,cliente_telefono.ilike.%${b}%`);
+      if (b) q = q.or(`cliente_nombre.ilike.%${patronSinTildes(b)}%,cliente_telefono.ilike.%${b}%`);
     }
     if (filtro.ltvMin != null || filtro.soloVip) q = q.gte("ltv", Math.max(filtro.ltvMin ?? 0, filtro.soloVip ? UMBRAL_VIP : 0));
     if (filtro.ltvMax != null) q = q.lte("ltv", filtro.ltvMax);

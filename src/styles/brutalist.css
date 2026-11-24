@@ -82,7 +82,7 @@ svg.lucide{width:20px;height:20px;stroke-width:var(--icon-stroke);stroke-linecap
 .sn-sheet__head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--grid);padding-bottom:var(--space-3);margin-bottom:var(--space-4)}
 
 /* Foto B/N (marcador) */
-.sn-photo{background-color:#1a1a1a;background-image:radial-gradient(circle at 65% 35%,#9a9a9a 0,#4a4a4a 22%,#141414 46%);filter:grayscale(1) contrast(1.3);position:relative;overflow:hidden}
+.sn-photo{background-color:#1a1a1a;background-image:radial-gradient(circle at 65% 35%,#9a9a9a 0,#4a4a4a 22%,#141414 46%);position:relative;overflow:hidden}
 
 /* Tarjeta de barbería numerada */
 .sn-shop{width:100%;background:var(--app-bg);border:var(--border-thick) solid var(--line);display:flex;flex-direction:column;transition:transform var(--dur-fast) var(--ease-snap),box-shadow var(--dur-fast)}

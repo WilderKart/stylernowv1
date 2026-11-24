@@ -136,7 +136,7 @@ export default async function ProfesionalPage(props: PageProps<"/negocio/[slug]/
           <Photo
             src={profesional.foto_url ?? FOTOS_RESPALDO[indice % FOTOS_RESPALDO.length]}
             alt={profesional.nombre}
-            className="h-[300px] w-full grayscale"
+            className="h-[300px] w-full"
           />
           <Link
             href={`/negocio/${negocio.slug}`}
@@ -211,7 +211,7 @@ export default async function ProfesionalPage(props: PageProps<"/negocio/[slug]/
           <div className="grid grid-cols-3 gap-0.5 px-4 pb-4">
             {portafolio.map((f) => (
               <div key={f.foto_id} className="relative aspect-square min-w-0 overflow-hidden border-2 border-line">
-                <Photo src={f.url} alt={t("prof.trabajo_de", { nombre: profesional.nombre })} className="h-full w-full grayscale" />
+                <Photo src={f.url} alt={t("prof.trabajo_de", { nombre: profesional.nombre })} className="h-full w-full" />
                 {f.momento ? (
                   <span className="sn-label absolute bottom-0 left-0 bg-ink px-1.5 py-0.5 text-[10px] text-paper">
                     {f.momento === "ANTES" ? t("prof.antes") : t("prof.despues")}

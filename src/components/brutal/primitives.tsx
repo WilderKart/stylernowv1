@@ -156,7 +156,7 @@ export function Avatar({
     >
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element -- avatar pequeño, URL de Storage ya optimizada
-        <img src={src} alt="" className="size-full object-cover grayscale" />
+        <img src={src} alt="" className="size-full object-cover" />
       ) : (
         iniciales
       )}
@@ -207,7 +207,7 @@ export function Marquee({
   );
 }
 
-/** Foto en B/N; si no hay imagen muestra el marcador del sistema. */
+/** Foto a color (sin filtros); si no hay imagen muestra el marcador del sistema. */
 export function Photo({ src, alt = "", className }: { src?: string | null; alt?: string; className?: string }) {
   return (
     <div className={cn("sn-photo", className)} role={alt ? "img" : undefined} aria-label={alt || undefined}>

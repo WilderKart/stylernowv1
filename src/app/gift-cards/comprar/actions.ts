@@ -1,4 +1,5 @@
 "use server";
+import { patronSinTildes } from "@/lib/busqueda/sin-tildes";
 
 import { crearPreferenciaDePago } from "@/lib/pagos/cobro";
 import { leerPagoPropio } from "@/lib/pagos/leer-pago-propio";
@@ -27,7 +28,7 @@ export interface NegocioBusqueda {
 export async function buscarNegociosParaGiftCard(texto: string): Promise<NegocioBusqueda[]> {
   if (!texto.trim()) return [];
   const supabase = await createClient();
-  const { data } = await supabase.rpc("marketplace_buscar", { p_texto: texto.trim(), p_limite: 6 });
+  const { data } = await supabase.rpc("marketplace_buscar", { p_texto: patronSinTildes(texto) || undefined, p_limite: 6 });
   return (data ?? []).map((n) => ({ id: n.id, nombre: n.nombre, slug: n.slug }));
 }
 

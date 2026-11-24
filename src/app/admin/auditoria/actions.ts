@@ -1,4 +1,5 @@
 "use server";
+import { patronSinTildes } from "@/lib/busqueda/sin-tildes";
 
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
@@ -87,7 +88,7 @@ export async function buscarNegociosAuditoria(texto: string): Promise<Resultado<
     const { data, error } = await supabase
       .from("negocio")
       .select("id, nombre")
-      .ilike("nombre", `%${t}%`)
+      .ilike("nombre", `%${patronSinTildes(t)}%`)
       .order("nombre")
       .limit(10);
     if (error) return { ok: false, error: mensaje(new Error(error.message)) };

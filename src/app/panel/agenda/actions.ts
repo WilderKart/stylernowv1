@@ -1,4 +1,5 @@
 "use server";
+import { patronSinTildes } from "@/lib/busqueda/sin-tildes";
 
 import { MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
 import { procesarReembolsosSinFallar } from "@/lib/pagos/reembolsos";
@@ -207,7 +208,7 @@ export async function buscarClienteExistente(negocioId: string, busqueda: string
       .from("perfil")
       .select("id, nombre, telefono, email")
       .in("id", clienteIds)
-      .or(`nombre.ilike.%${b}%,telefono.ilike.%${b}%,email.ilike.%${b}%`)
+      .or(`nombre.ilike.%${patronSinTildes(b)}%,telefono.ilike.%${b}%,email.ilike.%${b}%`)
       .limit(10);
     if (error) return { ok: false, error: error.message };
     return { ok: true, data: data ?? [] };

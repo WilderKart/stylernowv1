@@ -1,3 +1,4 @@
+import { patronSinTildes } from "@/lib/busqueda/sin-tildes";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
 import { Portada } from "@/components/inicio/portada";
@@ -79,7 +80,7 @@ export default async function HomePage(props: PageProps<"/">) {
         : { data: null, error: { message: r.error } };
     }
     const r = await supabase.rpc("marketplace_buscar", {
-      p_texto: texto,
+      p_texto: texto ? patronSinTildes(texto) || undefined : undefined,
       p_ciudad: ciudad,
       p_categoria: categoria,
       p_orden: orden ?? "RELEVANCIA",
@@ -159,7 +160,7 @@ export default async function HomePage(props: PageProps<"/">) {
               const contenido = (
                 <>
                   {/* eslint-disable-next-line @next/next/no-img-element -- imagen editorial de SuperSU, URL arbitraria (no forma parte del set de dominios optimizables de next/image) */}
-                  <img src={b.imagen_url} alt={b.texto ?? ""} className="h-32 w-full object-cover grayscale" />
+                  <img src={b.imagen_url} alt={b.texto ?? ""} className="h-32 w-full object-cover" />
                   {b.texto ? <span className="sn-label block bg-ink px-3 py-2 text-paper">{b.texto}</span> : null}
                 </>
               );

@@ -1,4 +1,5 @@
 "use server";
+import { patronSinTildes } from "@/lib/busqueda/sin-tildes";
 
 import { MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
 import { enviarInvitacionStaff } from "@/lib/correo/invitacion-staff";
@@ -111,7 +112,7 @@ export async function listarStaff(
     if (filtro.sedeId) q = q.eq("sede_id", filtro.sedeId);
     if (filtro.busqueda?.trim()) {
       const b = filtro.busqueda.trim().replace(/[%_,()]/g, " ").trim();
-      if (b) q = q.or(`nombre.ilike.%${b}%,especialidad.ilike.%${b}%,email.ilike.%${b}%`);
+      if (b) q = q.or(`nombre.ilike.%${patronSinTildes(b)}%,especialidad.ilike.%${patronSinTildes(b)}%,email.ilike.%${b}%`);
     }
 
     switch (filtro.orden ?? "nombre_asc") {
