@@ -11,7 +11,7 @@ const FOTO: Record<CategoriaRegistro, { src: string | null; lado: "izq" | "der";
   barberia: { src: "/img/auth/barberia.webp", lado: "izq" },
   tatuajes: { src: "/img/auth/tattoo.webp", lado: "der", posicion: "60% 50%" },
   salon: { src: "/img/auth/salon.webp", lado: "izq" },
-  spa: { src: null, lado: "der" },
+  spa: { src: "/img/auth/spa.webp", lado: "der", posicion: "50% 50%" },
   manicura: { src: "/img/auth/unas.webp", lado: "izq", posicion: "30% 50%" },
 };
 

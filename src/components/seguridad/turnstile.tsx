@@ -48,6 +48,10 @@ export const Turnstile = React.forwardRef<ControlTurnstile, { accion: "registro"
     const caja = React.useRef<HTMLDivElement>(null);
     const id = React.useRef<string | null>(null);
     const alToken = React.useRef(onToken);
+    // Si el widget falla (dominio no autorizado, red del móvil, navegador integrado…) se avisa con el código en vez de
+    // dejar el formulario «cargando» sin explicación, y se ofrece reintentar.
+    const [fallo, setFallo] = React.useState<string | null>(null);
+    const reintentos = React.useRef(0);
     React.useEffect(() => {
       alToken.current = onToken;
     }, [onToken]);
@@ -55,6 +59,7 @@ export const Turnstile = React.forwardRef<ControlTurnstile, { accion: "registro"
     React.useImperativeHandle(ref, () => ({
       reiniciar: () => {
         alToken.current(null);
+        setFallo(null);
         if (id.current && window.turnstile) window.turnstile.reset(id.current);
       },
     }));
@@ -70,12 +75,29 @@ export const Turnstile = React.forwardRef<ControlTurnstile, { accion: "registro"
             theme: "auto",
             language: "es",
             size: "flexible",
-            callback: (t: string) => alToken.current(t),
+            callback: (t: string) => {
+              setFallo(null);
+              alToken.current(t);
+            },
             "expired-callback": () => alToken.current(null),
-            "error-callback": () => alToken.current(null),
+            "timeout-callback": () => alToken.current(null),
+            "error-callback": (codigo?: unknown) => {
+              alToken.current(null);
+              // Un reintento automático (muchos fallos del móvil son pasajeros); si persiste, se muestra el código.
+              if (reintentos.current < 1 && id.current && window.turnstile) {
+                reintentos.current += 1;
+                window.turnstile.reset(id.current);
+                return true;
+              }
+              setFallo(codigo ? String(codigo) : "desconocido");
+              return true;
+            },
           });
         })
-        .catch(() => alToken.current(null));
+        .catch(() => {
+          alToken.current(null);
+          setFallo("script");
+        });
       return () => {
         vivo = false;
         if (id.current && window.turnstile) window.turnstile.remove(id.current);
@@ -83,6 +105,28 @@ export const Turnstile = React.forwardRef<ControlTurnstile, { accion: "registro"
       };
     }, [accion]);
 
-    return <div ref={caja} className="min-h-[65px] w-full" />;
+    return (
+      <div className="flex w-full flex-col gap-2">
+        <div ref={caja} className="min-h-[65px] w-full" />
+        {fallo ? (
+          <div role="alert" className="flex flex-col gap-1.5 border border-danger p-3 text-[13px] leading-snug text-text">
+            <p>No pudimos validar que eres una persona (código {fallo}). Revisa tu conexión, desactiva VPN o bloqueadores y vuelve a intentar. Si estás en una app (Instagram, Facebook…), abre esta página en Chrome o Safari.</p>
+            <button
+              type="button"
+              className="self-start font-semibold underline underline-offset-4"
+              onClick={() => {
+                reintentos.current = 0;
+                setFallo(null);
+                alToken.current(null);
+                if (id.current && window.turnstile) window.turnstile.reset(id.current);
+                else window.location.reload();
+              }}
+            >
+              Reintentar
+            </button>
+          </div>
+        ) : null}
+      </div>
+    );
   }
 );
