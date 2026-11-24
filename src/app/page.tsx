@@ -1,6 +1,7 @@
 import { patronSinTildes } from "@/lib/busqueda/sin-tildes";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
+import { BloquesLanzamiento } from "@/components/inicio/bloques-lanzamiento";
 import { Portada } from "@/components/inicio/portada";
 import { Filtros } from "@/components/marketplace/filtros";
 import { SeleccionMapaProvider, ZonaFiltros } from "@/components/marketplace/seleccion-mapa";
@@ -119,7 +120,15 @@ export default async function HomePage(props: PageProps<"/">) {
   // Portada (maqueta 2026-11-15): sin filtros ni mapa. Los filtros no se muestran ahí a quien aún no
   // ingresa; siguen intactos en resultados, en el mapa y para quien ya tiene sesión.
   const portada = !hayFiltros && vista === "lista";
-  const mostrarFiltros = !portada || Boolean(user);
+  // Debajo de «Explora negocios cerca de ti»: mientras el catálogo es pequeño la portada no puede verse a medias.
+  //  · Sin sesión: el listado solo aparece cuando hay suficientes negocios (UMBRAL_LISTADO); antes, bloques de lanzamiento.
+  //  · Con sesión: se ve el listado si hay al menos un negocio; sin negocios, los bloques de lanzamiento.
+  // Ajustable sin desplegar: UMBRAL_LISTADO_PORTADA en Vercel (p. ej. 999 para forzar la portada de lanzamiento).
+  const UMBRAL_LISTADO = Number(process.env.UMBRAL_LISTADO_PORTADA) > 0 ? Number(process.env.UMBRAL_LISTADO_PORTADA) : 6;
+  const hayError = Boolean(error);
+  const sinCatalogo = portada && !hayError && (negocios.length === 0 || (!user && negocios.length < UMBRAL_LISTADO));
+  const catalogoCorto = portada && !hayError && !sinCatalogo && negocios.length < UMBRAL_LISTADO;
+  const mostrarFiltros = (!portada || Boolean(user)) && !sinCatalogo;
 
   function urlConVista(nuevaVista: "lista" | "mapa") {
     const siguiente = new URLSearchParams();
@@ -188,6 +197,10 @@ export default async function HomePage(props: PageProps<"/">) {
           </div>
         ) : null}
 
+        {sinCatalogo ? <BloquesLanzamiento variante="completo" conSesion={Boolean(user)} /> : null}
+
+        {!sinCatalogo ? (
+        <>
         <div className={e.seccion}>
           {portada ? (
             <h2 className={e.titulo}>
@@ -284,6 +297,9 @@ export default async function HomePage(props: PageProps<"/">) {
             ) : null}
           </>
         )}
+        {catalogoCorto ? <BloquesLanzamiento variante="negocios" conSesion={Boolean(user)} /> : null}
+        </>
+        ) : null}
       </main>
       </SeleccionMapaProvider>
 
