@@ -6,6 +6,11 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import s from "./auth-dividido.module.css";
 
+/** Deja el aspecto actual de la pantalla como definitivo para lo que sigue (p. ej. de «Crear cuenta» a «Verifica tu correo»). */
+export function fijarAspectoActual() {
+  document.documentElement.dataset.aspectoFijo = "1";
+}
+
 /** Imagen de cada categoría y de qué lado queda: se alternan para que cada cambio de categoría se vea como un giro. */
 const FOTO: Record<CategoriaRegistro, { src: string | null; lado: "izq" | "der"; posicion?: string }> = {
   barberia: { src: "/img/auth/barberia.webp", lado: "izq" },
@@ -31,11 +36,14 @@ export function AuthDividido({ categoria, viva = false, children }: { categoria:
   useEffect(() => {
     if (!viva) return;
     const html = document.documentElement;
+    delete html.dataset.aspectoFijo;
     const original = html.getAttribute("data-vertical");
     const v = { spa: "spa", salon: "salon", manicura: "unas" }[activa as string];
     if (categoria && v) html.setAttribute("data-vertical", v);
     else html.removeAttribute("data-vertical");
     return () => {
+      // Tras crear la cuenta el aspecto elegido se conserva (verificación, onboarding): no se restaura el original.
+      if (html.dataset.aspectoFijo === "1") return;
       if (original) html.setAttribute("data-vertical", original);
       else html.removeAttribute("data-vertical");
     };

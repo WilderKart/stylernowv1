@@ -8,7 +8,7 @@ export const metadata = { title: "Solicitudes del equipo" };
 export default async function SolicitudesPage() {
   // Decide la barbería (propietario) o el Guardian de la sede; la base lo vuelve a exigir en cada decisión.
   const contexto = await verificarAccesoPanel(["BARBERIA", "GUARDIAN"], "/panel/staff/solicitudes");
-  const datos = await listarSolicitudesPendientes();
+  const datos = await listarSolicitudesPendientes(contexto.negocioId);
 
   return (
     <div className="flex min-h-dvh flex-col bg-app">

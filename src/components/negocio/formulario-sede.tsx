@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { direccionDesdeCoordenadas } from "@/lib/geo/direccion-desde-coordenadas";
 import { ubicarDireccion, validarUbicacion } from "@/lib/geo/validar-ubicacion";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 // maplibre solo existe en el navegador: se carga sin renderizado en el servidor.
 const MapaUbicacion = dynamic(() => import("./mapa-ubicacion").then((m) => m.MapaUbicacion), {
@@ -118,6 +118,18 @@ export function FormularioSede({
     setCoordenadas(p);
     setDiscrepancia(null);
     setConfirmaDiscrepancia(false);
+  }
+
+  // Al poner o arrastrar el pin en el mapa, el cajón de dirección se rellena con la dirección exacta de ese punto
+  // (sigue siendo editable: también se puede escribir a mano). Solo cuenta la última respuesta.
+  const peticionPin = useRef(0);
+  async function moverDesdeMapa(p: { lat: number; lng: number }) {
+    moverPunto(p);
+    const mia = ++peticionPin.current;
+    const r = await direccionDesdeCoordenadas(p.lat, p.lng);
+    if (mia !== peticionPin.current || !r.ok) return;
+    if (r.direccion) setDireccion(r.direccion);
+    if (r.ciudad) setCiudad(r.ciudad);
   }
 
   async function ubicarPorDireccion() {
@@ -248,11 +260,11 @@ export function FormularioSede({
             </Button>
           </div>
         </div>
-        <MapaUbicacion punto={coordenadas} onCambio={moverPunto} />
+        <MapaUbicacion punto={coordenadas} onCambio={moverDesdeMapa} />
         <p className="text-[11.5px] text-text-faint">
           {coordenadas
             ? `Marcador en ${coordenadas.lat.toFixed(5)}, ${coordenadas.lng.toFixed(5)}. Arrástralo o toca el mapa para ajustarlo.`
-            : "Escribe tu dirección y pulsa «Ubicar en el mapa», o toca el mapa para colocar el marcador."}
+            : "Escribe tu dirección y pulsa «Ubicar en el mapa», o toca el mapa para colocar el marcador: la dirección se rellena sola."}
         </p>
         {discrepancia ? (
           <div role="alert" className="border-2 border-danger bg-danger-soft p-3">

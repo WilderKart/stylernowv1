@@ -51,12 +51,21 @@ function tituloAccion(accion: string) {
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
 
+function contarNegocios(supabase: Awaited<ReturnType<typeof createClient>>, estado: string) {
+  return supabase.from("negocio").select("id", { count: "exact", head: true }).eq("estado", estado);
+}
+
 export async function obtenerTablero(desde: Date, hasta: Date): Promise<Tablero> {
   const supabase = await createClient();
 
-  const [perf, negs, serie, evts] = await Promise.all([
+  const [perf, nAct, nPen, nSus, nRec, nCan, serie, evts] = await Promise.all([
     supabase.from("perfil").select("id", { count: "exact", head: true }),
-    supabase.from("negocio").select("estado").limit(10_000),
+    // Conteo exacto por estado en la base (sin traer filas ni topes).
+    contarNegocios(supabase, "ACTIVO"),
+    contarNegocios(supabase, "PENDIENTE_APROBACION"),
+    contarNegocios(supabase, "SUSPENDIDO"),
+    contarNegocios(supabase, "RECHAZADO"),
+    contarNegocios(supabase, "CANCELADO"),
     // Serie diaria agregada en la base (zona horaria de Colombia), migración 137.
     rpcAdmin<{ serie: { dia: string; reservas: number; canceladas: number }[] }>("admin_reporte", {
       p_desde: desde.toISOString(),
@@ -70,16 +79,12 @@ export async function obtenerTablero(desde: Date, hasta: Date): Promise<Tablero>
   ]);
 
   const negociosPorEstado: Tablero["negociosPorEstado"] = {
-    ACTIVO: 0,
-    PENDIENTE_APROBACION: 0,
-    SUSPENDIDO: 0,
-    RECHAZADO: 0,
-    CANCELADO: 0,
+    ACTIVO: nAct.count ?? 0,
+    PENDIENTE_APROBACION: nPen.count ?? 0,
+    SUSPENDIDO: nSus.count ?? 0,
+    RECHAZADO: nRec.count ?? 0,
+    CANCELADO: nCan.count ?? 0,
   };
-  for (const n of negs.data ?? []) {
-    const e = n.estado as keyof typeof negociosPorEstado;
-    if (e in negociosPorEstado) negociosPorEstado[e] += 1;
-  }
 
   const dias: DiaReservas[] = (serie.ok ? serie.data.serie : []).map((d) => ({
     dia: d.dia,

@@ -70,6 +70,12 @@
   --nav-accent: #ff4d00;
   --nav-active-bg: rgba(255, 255, 255, 0.1);
   --nav-borde: rgba(255, 255, 255, 0.1);
+  --side-bg: var(--nav-bg);
+  --side-text: var(--nav-text);
+  --side-muted: var(--nav-muted);
+  --side-accent: var(--nav-accent);
+  --side-active-bg: var(--nav-active-bg);
+  --side-borde: var(--nav-borde);
   --hero-gradient: radial-gradient(120% 140% at 85% 0%, #ff4d00 0%, #7a2600 45%, #0a0a0a 100%);
   --kpi-gradient: linear-gradient(135deg, #ff4d00 0%, #a33300 100%);
   --hero-text: #ffffff;

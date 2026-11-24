@@ -21,7 +21,7 @@ import {
 import { ErrorForm, Hot, PantallaAuth, Separador } from "../login/_componentes/pantalla-auth";
 import { iniciarSesionConGoogle, registrarCuenta } from "../login/actions";
 import { SelectorServicio } from "./selector-servicio";
-import { AuthDividido } from "@/components/auth/auth-dividido";
+import { AuthDividido, fijarAspectoActual } from "@/components/auth/auth-dividido";
 import type { CategoriaRegistro } from "@/lib/tema/vertical";
 import { SelectorTipoCuenta, type TipoCuenta } from "./tipo-cuenta";
 
@@ -98,6 +98,7 @@ export function FormularioRegistro({
       return;
     }
     // El destino lo devuelve el servidor (negocio → onboarding); viaja por sessionStorage, no por la URL.
+    fijarAspectoActual();
     guardarVerificacion(res.email, res.siguiente);
     router.push(`/registro/verificar${res.siguiente !== "/" ? `?next=${encodeURIComponent(res.siguiente)}` : ""}`);
   }

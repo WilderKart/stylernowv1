@@ -145,7 +145,7 @@ export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** 
     <div className="flex flex-col gap-4">
       {grupos.map((g) => (
         <section key={g.titulo} aria-label={g.titulo}>
-          <h3 className="px-3 pb-1 font-mono text-[10px] font-bold uppercase tracking-[0.66px] text-[var(--nav-muted)]">{g.titulo}</h3>
+          <h3 className="px-3 pb-1 font-mono text-[10px] font-bold uppercase tracking-[0.66px] text-[var(--side-muted)]">{g.titulo}</h3>
           <ul className="flex flex-col gap-0.5">
             {g.items.map((item) => {
               const activo = esActivo(item.href);
@@ -158,14 +158,14 @@ export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** 
                     aria-current={activo ? "page" : undefined}
                     className={cn(
                       "flex min-h-11 items-center gap-3 border-l-4 px-3 py-2.5 text-[12.5px] font-bold uppercase tracking-wide transition-colors",
-                      activo ? "border-[var(--nav-accent)] bg-[var(--nav-active-bg)] text-[var(--nav-accent)]" : "border-transparent text-[var(--nav-muted)] hover:bg-[var(--nav-active-bg)] hover:text-[var(--nav-text)]"
+                      activo ? "border-[var(--side-accent)] bg-[var(--side-active-bg)] text-[var(--side-accent)]" : "border-transparent text-[var(--side-muted)] hover:bg-[var(--side-active-bg)] hover:text-[var(--side-text)]"
                     )}
                   >
                     {conIconos ? (
                       Icono ? (
                         <Icono className="size-4 shrink-0" aria-hidden />
                       ) : (
-                        <span className="w-4 shrink-0 text-center text-[var(--nav-accent)]" aria-hidden>
+                        <span className="w-4 shrink-0 text-center text-[var(--side-accent)]" aria-hidden>
                           ▪
                         </span>
                       )
@@ -184,16 +184,16 @@ export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** 
   return (
     <>
       {/* Escritorio: barra lateral oscura fija. */}
-      <aside aria-label="Navegación del panel" className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col bg-[var(--nav-bg)] text-[var(--nav-text)] lg:flex">
+      <aside aria-label="Navegación del panel" className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col bg-[var(--side-bg)] text-[var(--side-text)] lg:flex">
         <Link href="/panel" className="px-5 py-5 font-display text-[22px] font-bold uppercase leading-none tracking-tight">
-          STYLER<span className="text-[var(--nav-accent)]">NOW</span>
+          STYLER<span className="text-[var(--side-accent)]">NOW</span>
         </Link>
         <nav className="flex-1 overflow-y-auto px-2 pb-4">{listaGrupos(true)}</nav>
-        <div className="flex items-center justify-between border-t border-[var(--nav-borde)] px-4 py-2">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.66px] text-[var(--nav-muted)]">Apariencia</span>
-          <BotonTema className="flex size-10 items-center justify-center border-2 border-[var(--nav-borde)]" />
+        <div className="flex items-center justify-between border-t border-[var(--side-borde)] px-4 py-2">
+          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.66px] text-[var(--side-muted)]">Apariencia</span>
+          <BotonTema className="flex size-10 items-center justify-center border-2 border-[var(--side-borde)]" />
         </div>
-        {rol === "GUARDIAN" ? <p className="border-t border-[var(--nav-borde)] px-5 py-3 text-[11px] font-bold uppercase tracking-wide text-[var(--nav-accent)]">Guardian</p> : null}
+        {rol === "GUARDIAN" ? <p className="border-t border-[var(--side-borde)] px-5 py-3 text-[11px] font-bold uppercase tracking-wide text-[var(--side-accent)]">Guardian</p> : null}
       </aside>
 
       {/* Móvil: barra superior con botón de menú. */}
@@ -218,12 +218,12 @@ export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** 
       {abierto ? (
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menú del panel">
           <button type="button" aria-label="Cerrar menú" className="absolute inset-0 bg-[var(--scrim)]" onClick={() => setAbierto(false)} />
-          <div className="absolute inset-y-0 left-0 flex w-[84%] max-w-[320px] flex-col bg-[var(--nav-bg)] text-[var(--nav-text)] shadow-[4px_0_0_0_var(--nav-accent)]">
+          <div className="absolute inset-y-0 left-0 flex w-[84%] max-w-[320px] flex-col bg-[var(--side-bg)] text-[var(--side-text)] shadow-[4px_0_0_0_var(--side-accent)]">
             <div className="flex items-center justify-between px-4 py-3">
               <span className="font-display text-[20px] font-bold uppercase leading-none">
-                STYLER<span className="text-[var(--nav-accent)]">NOW</span>
+                STYLER<span className="text-[var(--side-accent)]">NOW</span>
               </span>
-              <button type="button" onClick={() => setAbierto(false)} aria-label="Cerrar menú" className="flex size-11 items-center justify-center border-2 border-[var(--nav-borde)]">
+              <button type="button" onClick={() => setAbierto(false)} aria-label="Cerrar menú" className="flex size-11 items-center justify-center border-2 border-[var(--side-borde)]">
                 <X className="size-5" aria-hidden />
               </button>
             </div>
@@ -236,7 +236,7 @@ export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** 
       {inferior.length > 0 ? (
         <nav
           aria-label="Accesos rápidos"
-          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-white/10 bg-[#0a0a0a] pb-[env(safe-area-inset-bottom)] lg:hidden"
+          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-[var(--nav-borde)] bg-[var(--nav-bg)] pb-[env(safe-area-inset-bottom)] lg:hidden"
         >
           {inferior.map(({ href, etiqueta, Icono }) => {
             const activo = esActivo(href);
@@ -247,7 +247,7 @@ export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** 
                 aria-current={activo ? "page" : undefined}
                 className={cn(
                   "flex min-h-14 flex-col items-center justify-center gap-1 text-[10.5px] font-bold uppercase tracking-wide",
-                  activo ? "text-[#ff4d00]" : "text-white/70"
+                  activo ? "text-[var(--nav-accent)]" : "text-[var(--nav-muted)]"
                 )}
               >
                 <Icono className="size-5" aria-hidden />

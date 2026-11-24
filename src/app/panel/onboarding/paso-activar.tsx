@@ -6,6 +6,7 @@ import { obtenerDispositivoId, rasgosDelEquipo } from "@/lib/prueba/huella-dispo
 import type { CicloFacturacion } from "@/lib/planes/precios";
 import { cn } from "@/lib/utils";
 import { Check, CreditCard, Gift, Info } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { activarPruebaYCompletar, type ResumenAlta } from "./actions";
 import { TituloPaso } from "./encabezado-pasos";
@@ -29,6 +30,9 @@ export function PasoActivar({
   onVolver: () => void;
   onListo: (r: ResumenAlta) => void;
 }) {
+  const router = useRouter();
+  // «Agregar método de pago» ahora: al activar la prueba se lleva directo a registrar el medio de pago (en caliente).
+  const [agregarPago, setAgregarPago] = useState(false);
   const [telefono, setTelefono] = useState(telefonoInicial);
   const [documento, setDocumento] = useState("");
   const [activando, setActivando] = useState(false);
@@ -52,6 +56,7 @@ export function PasoActivar({
     });
     setActivando(false);
     if (!r.ok) return setError(r.error);
+    if (agregarPago) return router.push("/panel/suscripcion?agregar_pago=1");
     onListo(r.data);
   }
 
@@ -64,32 +69,53 @@ export function PasoActivar({
       />
 
       <div className="flex flex-col gap-3">
-        <div className="border-2 border-ink bg-accent-soft p-4 shadow-hard" aria-label="Opción seleccionada">
-          <div className="flex items-start gap-3">
-            <Gift className="mt-0.5 !size-6 shrink-0 text-accent" aria-hidden />
-            <div className="flex flex-1 flex-col gap-1">
-              <p className="font-display text-[15px] font-bold uppercase text-text">Probar sin tarjeta</p>
-              <p className="text-[13px] leading-relaxed text-text-muted">
-                Activa tu plan ahora y agrega un método de pago antes de terminar los {diasPrueba} días.
-              </p>
-            </div>
-            <span aria-hidden className="mt-1 flex size-5 shrink-0 items-center justify-center border-2 border-ink bg-ink text-signal">
-              <Check className="!size-3.5" />
+        <div role="radiogroup" aria-label="Cómo iniciar la prueba" className="flex flex-col gap-3">
+          <button
+            type="button"
+            role="radio"
+            aria-checked={!agregarPago}
+            onClick={() => setAgregarPago(false)}
+            className={cn("sn-card-btn border-2 p-4 text-left", !agregarPago ? "border-ink bg-accent-soft shadow-hard" : "border-dashed border-border")}
+          >
+            <span className="flex items-start gap-3">
+              <Gift className="mt-0.5 !size-6 shrink-0 text-accent" aria-hidden />
+              <span className="flex flex-1 flex-col gap-1">
+                <span className="font-display text-[15px] font-bold uppercase text-text">Probar sin tarjeta</span>
+                <span className="text-[13px] leading-relaxed text-text-muted">
+                  Activa tu plan ahora y agrega un método de pago antes de terminar los {diasPrueba} días.
+                </span>
+              </span>
+              {!agregarPago ? (
+                <span aria-hidden className="mt-1 flex size-5 shrink-0 items-center justify-center border-2 border-ink bg-ink text-signal">
+                  <Check className="!size-3.5" />
+                </span>
+              ) : null}
             </span>
-          </div>
-        </div>
+          </button>
 
-        <div className={cn("border-2 border-dashed border-border p-4")}>
-          <div className="flex items-start gap-3">
-            <CreditCard className="mt-0.5 !size-6 shrink-0 text-text-muted" aria-hidden />
-            <div className="flex flex-1 flex-col gap-1">
-              <p className="font-display text-[15px] font-bold uppercase text-text">Agregar método de pago</p>
-              <p className="text-[13px] leading-relaxed text-text-muted">
-                Se hace desde «Plan y facturación» una vez activa tu prueba. Los métodos disponibles dependen de tu país. PSE, cuando esté
-                disponible, es un pago puntual por periodo: no se renueva solo.
-              </p>
-            </div>
-          </div>
+          <button
+            type="button"
+            role="radio"
+            aria-checked={agregarPago}
+            onClick={() => setAgregarPago(true)}
+            className={cn("sn-card-btn border-2 p-4 text-left", agregarPago ? "border-ink bg-accent-soft shadow-hard" : "border-dashed border-border")}
+          >
+            <span className="flex items-start gap-3">
+              <CreditCard className="mt-0.5 !size-6 shrink-0 text-accent" aria-hidden />
+              <span className="flex flex-1 flex-col gap-1">
+                <span className="font-display text-[15px] font-bold uppercase text-text">Agregar método de pago ahora</span>
+                <span className="text-[13px] leading-relaxed text-text-muted">
+                  Al activar tu prueba te llevamos directo a registrar tu medio de pago, sin buscarlo después. Los métodos disponibles
+                  dependen de tu país. PSE, cuando esté disponible, es un pago puntual por periodo: no se renueva solo.
+                </span>
+              </span>
+              {agregarPago ? (
+                <span aria-hidden className="mt-1 flex size-5 shrink-0 items-center justify-center border-2 border-ink bg-ink text-signal">
+                  <Check className="!size-3.5" />
+                </span>
+              ) : null}
+            </span>
+          </button>
         </div>
       </div>
 

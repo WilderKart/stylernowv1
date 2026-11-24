@@ -46,7 +46,7 @@ export function SelectorPlanes({
           onChange={onCicloChange}
           options={[
             { value: "MENSUAL", label: "Mensual" },
-            { value: "ANUAL", label: `Anual · ${pais.mesesPagadosAnual} meses` },
+            { value: "ANUAL", label: pais.mesesPagadosAnual < 12 ? `Anual · ${12 - pais.mesesPagadosAnual} meses gratis` : "Anual" },
           ]}
         />
         {pais.cuposFundadorRestantes > 0 ? (
@@ -90,7 +90,7 @@ export function SelectorPlanes({
                   disabled={bloqueado}
                   aria-pressed={activo}
                   onClick={() => onChange(p.codigo)}
-                  className={cn("flex w-full items-start gap-3 p-4 text-left", activo ? "bg-signal text-ink" : "bg-bg text-text")}
+                  className={cn("sn-card-btn flex w-full items-start gap-3 p-4 text-left", activo ? "bg-signal text-ink" : "bg-bg text-text")}
                 >
                   <span
                     aria-hidden
@@ -161,7 +161,7 @@ export function SelectorPlanes({
               aria-pressed={activo}
               onClick={() => onChange(p.codigo)}
               className={cn(
-                "flex flex-col gap-3 border-2 border-border p-4 text-left transition-[transform,box-shadow] duration-100",
+                "sn-card-btn flex flex-col gap-3 border-2 border-border p-4 text-left transition-[transform,box-shadow] duration-100",
                 activo ? "bg-signal text-ink shadow-hard" : "bg-bg text-text active:translate-x-1 active:translate-y-1",
                 bloqueado && "cursor-not-allowed border-dashed opacity-50",
               )}

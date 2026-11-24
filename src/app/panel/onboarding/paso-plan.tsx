@@ -1,6 +1,7 @@
 "use client";
 
 import { elegirPais } from "@/app/panel/suscripcion/prueba";
+import { CotizarSignature } from "@/components/planes/cotizar-signature";
 import { Chip } from "@/components/brutal";
 import { SelectorPlanes } from "@/components/planes/selector-planes";
 import { Button } from "@/components/ui/button";
@@ -93,9 +94,8 @@ export function PasoPlan({
           diasPrueba={diasPrueba}
         />
       ) : null}
-      <p className="sn-meta">
-        Los precios y límites salen de la configuración vigente de StylerNow. ¿Cadena o franquicia (Signature)? Habla con ventas desde soporte.
-      </p>
+      <p className="sn-meta">Los precios y límites salen de la configuración vigente de StylerNow.</p>
+      <CotizarSignature />
 
       {error ? (
         <p role="alert" className="border-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger">

@@ -457,25 +457,36 @@ html:has([data-vertical]) {
     stroke-linejoin: round;
   }
 
-  /* La barra inferior del cliente es igual para todos los negocios: se fija a su diseño original. */
-  & .sn-tabbar,
-  & .sn-tabbar * {
-    border-radius: 0;
-  }
+  /* Barra inferior: clara, redondeada y sin el negro agresivo del diseño original (que solo conservan barbería y tattoo). */
   & .sn-tabbar {
-    background: #0a0a0a;
-    border-top: 1px solid #0a0a0a;
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+    border-radius: 22px 22px 0 0;
+    box-shadow: 0 -10px 26px -18px rgba(0, 0, 0, 0.35);
+    padding-inline: 6px;
   }
   & .sn-tab {
-    color: #a3a3a3;
-    font: 400 11px/14px var(--font-space-mono), ui-monospace, monospace;
-    letter-spacing: 0.66px;
-    text-transform: uppercase;
+    color: var(--text-muted);
+    border-right: 0;
+    margin: 6px 3px;
+    border-radius: 16px;
+    font: 500 11px/14px var(--sn-font-sans);
+    letter-spacing: 0.02em;
+    text-transform: none;
   }
   & .sn-tab.is-active {
-    background: #fe5400;
-    color: #0a0a0a;
-    font-weight: 700;
+    background: var(--nav-active-bg);
+    color: var(--accent-text);
+    font-weight: 600;
+  }
+  & nav[aria-label="Accesos rápidos"] {
+    border-radius: 22px 22px 0 0;
+    box-shadow: 0 -10px 26px -18px rgba(0, 0, 0, 0.35);
+  }
+  & nav[aria-label="Accesos rápidos"] a {
+    text-transform: none;
+    letter-spacing: 0.02em;
+    font-weight: 500;
   }
 
   /* Cabecera y hojas. */
@@ -571,4 +582,65 @@ html:has([data-vertical]) {
   & .sn-tipo-icono {
     stroke-width: 1.4 !important;
   }
+}
+
+/* Títulos con color propio (sin ser fuertes) y degradado suave de fondo del panel. */
+:is([data-vertical], [data-tema-vista], html:has([data-vertical])) {
+  & :is(h1, h2, h3, .poster-1, .poster-2, .poster-3, .poster-4, .poster-5, .poster-xl, .poster-lg, .sn-poster, .section, .sn-section):not([class*="--side-"]):not([class*="--nav-"]) {
+    color: var(--title, var(--text));
+  }
+  /* Sobre rellenos de color (botones, tarjeta elegida) el título hereda el color del relleno: así nunca pierde contraste. */
+  & :is(.bg-signal, .sn-btn--primary, .sn-tipo-tarjeta.is-elegida) :is(h1, h2, h3, [class*="poster"], .font-display) {
+    color: inherit;
+  }
+  & :is(.sn-card-btn) {
+    border-radius: var(--r-card);
+  }
+  &:is(div).bg-app {
+    background-image: var(--panel-bg, none);
+  }
+}
+.sn-card-btn.sn-card-btn {
+  border-radius: var(--r-card);
+}
+:is([data-vertical], [data-tema-vista], html:has([data-vertical])) .sn-card-btn {
+  border-radius: var(--r-card) !important;
+}
+
+/* Barra lateral del panel (escritorio): más oscura que el centro, como la parte operativa. Titulares y fondo por categoría. */
+[data-vertical="salon"], [data-tema-vista="salon"], html[data-vertical="salon"], html:has([data-vertical="salon"]) {
+  --side-bg: #4a3a63; --side-text: #fbf7ff; --side-muted: rgba(251, 247, 255, 0.74); --side-accent: #ecdcff;
+  --side-active-bg: rgba(255, 255, 255, 0.15); --side-borde: rgba(255, 255, 255, 0.16);
+  --title: #50307f;
+  --panel-bg: linear-gradient(160deg, #f3e9fa 0%, #f8e4ec 52%, #fbe9dc 100%);
+}
+[data-theme="dark"] [data-vertical="salon"], [data-theme="dark"] [data-tema-vista="salon"], [data-tema-vista="salon"][data-modo="dark"], html[data-theme="dark"][data-vertical="salon"], html[data-theme="dark"]:has([data-vertical="salon"]) {
+  --side-bg: #2d2342; --side-text: #f5f0fa; --side-muted: rgba(245, 240, 250, 0.7); --side-accent: #dbc9f2;
+  --side-active-bg: rgba(219, 201, 242, 0.16); --side-borde: rgba(255, 255, 255, 0.1);
+  --title: #e8d9fb;
+  --panel-bg: linear-gradient(160deg, #1b1626 0%, #1f1a2b 60%, #241b2a 100%);
+}
+[data-vertical="spa"], [data-tema-vista="spa"], html[data-vertical="spa"], html:has([data-vertical="spa"]) {
+  --side-bg: #3f5444; --side-text: #f6f8f0; --side-muted: rgba(246, 248, 240, 0.74); --side-accent: #dbe8cf;
+  --side-active-bg: rgba(255, 255, 255, 0.15); --side-borde: rgba(255, 255, 255, 0.16);
+  --title: #1f3526;
+  --panel-bg: linear-gradient(160deg, #f6f0e6 0%, #ecefe2 55%, #e4ebdc 100%);
+}
+[data-theme="dark"] [data-vertical="spa"], [data-theme="dark"] [data-tema-vista="spa"], [data-tema-vista="spa"][data-modo="dark"], html[data-theme="dark"][data-vertical="spa"], html[data-theme="dark"]:has([data-vertical="spa"]) {
+  --side-bg: #25322a; --side-text: #edefe8; --side-muted: rgba(237, 239, 232, 0.7); --side-accent: #b9cdb0;
+  --side-active-bg: rgba(185, 205, 176, 0.16); --side-borde: rgba(255, 255, 255, 0.1);
+  --title: #d3e4c8;
+  --panel-bg: linear-gradient(160deg, #0f140f 0%, #131913 60%, #161d17 100%);
+}
+[data-vertical="unas"], [data-tema-vista="unas"], html[data-vertical="unas"], html:has([data-vertical="unas"]) {
+  --side-bg: #1f3160; --side-text: #f3f6ff; --side-muted: rgba(243, 246, 255, 0.74); --side-accent: #ffa58c;
+  --side-active-bg: rgba(255, 255, 255, 0.15); --side-borde: rgba(255, 255, 255, 0.16);
+  --title: #2c44a8;
+  --panel-bg: linear-gradient(160deg, #eaf0fd 0%, #f2edfb 58%, #fdeae3 100%);
+}
+[data-theme="dark"] [data-vertical="unas"], [data-theme="dark"] [data-tema-vista="unas"], [data-tema-vista="unas"][data-modo="dark"], html[data-theme="dark"][data-vertical="unas"], html[data-theme="dark"]:has([data-vertical="unas"]) {
+  --side-bg: #1b2750; --side-text: #eef2ff; --side-muted: rgba(238, 242, 255, 0.7); --side-accent: #ff9d82;
+  --side-active-bg: rgba(255, 157, 130, 0.16); --side-borde: rgba(255, 255, 255, 0.1);
+  --title: #c2d0ff;
+  --panel-bg: linear-gradient(160deg, #0b1122 0%, #0e1426 60%, #141a30 100%);
 }
