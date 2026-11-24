@@ -1,5 +1,6 @@
 "use server";
 
+import { avisoPorFallosDePipeline } from "@/lib/pipeline/fallos";
 import { MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
@@ -202,6 +203,8 @@ export interface ResultadoVenta {
   propina: number;
   puntosCanjeados: number;
   puntosOtorgados: number;
+  /** Presente si algún handler del pipeline falló (la venta sí se completó). */
+  aviso?: string;
 }
 
 export async function completarVenta(datos: {
@@ -231,6 +234,8 @@ export async function completarVenta(datos: {
       puntos_otorgados: number;
     };
 
+    const aviso = avisoPorFallosDePipeline(data, "completar_venta_pos");
+
     // El ascenso VIP automático (Lealtad, ADR-011) ya no se llama desde
     // aquí: es un handler del Pipeline de Eventos venta_completada
     // (migración 070-072), ejecutado dentro de la misma transacción de
@@ -245,6 +250,7 @@ export async function completarVenta(datos: {
         propina: r.propina,
         puntosCanjeados: r.puntos_canjeados,
         puntosOtorgados: r.puntos_otorgados,
+        aviso,
       },
     };
   } catch (e) {

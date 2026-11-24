@@ -3,6 +3,7 @@ import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { createClient } from "@/lib/supabase/server";
 import {
   listarResenas,
+  obtenerFuncionesReportes,
   obtenerHorariosMuertos,
   obtenerIngresosPeriodo,
   obtenerMiPosicionMarketplace,
@@ -19,14 +20,19 @@ export default async function ReportesPage() {
   const negocioId = contexto.negocioId!;
   const sedeId = contexto.rol === "GUARDIAN" ? contexto.sedeId : null;
   const supabase = await createClient();
+  const funciones = await obtenerFuncionesReportes(negocioId);
+
+  const sedesLista = contexto.rol === "BARBERIA"
+    ? (await supabase.from("sede").select("id, nombre").eq("negocio_id", negocioId).eq("cerrada_permanente", false).order("nombre")).data ?? []
+    : [];
+  // Sin el consolidado (Signature), con varias sedes se arranca en la primera.
+  const sedeInicial = sedeId ?? (!funciones.consolidado && sedesLista.length > 1 ? sedesLista[0].id : null);
 
   const [sedesRes, ingresosRes, serviciosRes, rankingRes, resenasRes, posicionRes, horariosMuertosRes] = await Promise.all([
-    contexto.rol === "BARBERIA"
-      ? supabase.from("sede").select("id, nombre").eq("negocio_id", negocioId).eq("cerrada_permanente", false).order("nombre")
-      : Promise.resolve({ data: null }),
-    obtenerIngresosPeriodo({ negocioId, sedeId, agrupacion: "semana" }),
-    obtenerServiciosTop(negocioId, sedeId),
-    obtenerRankingStaffPeriodo({ negocioId, sedeId }),
+    Promise.resolve({ data: contexto.rol === "BARBERIA" ? sedesLista : null }),
+    obtenerIngresosPeriodo({ negocioId, sedeId: sedeInicial, agrupacion: "semana" }),
+    obtenerServiciosTop(negocioId, sedeInicial),
+    obtenerRankingStaffPeriodo({ negocioId, sedeId: sedeInicial }),
     listarResenas(negocioId),
     // marketplace_mi_posicion() exige ser la Barbería dueña — Guardian no
     // tiene alcance sobre esto (03-Business-Rules/01_Roles.md, Permisos).
@@ -40,7 +46,9 @@ export default async function ReportesPage() {
       <VistaReportes
         negocioId={negocioId}
         sedeIdFijo={sedeId}
+        sedeIdInicial={sedeInicial}
         sedes={sedesRes.data ?? null}
+        funciones={funciones}
         ingresosIniciales={ingresosRes.ok ? ingresosRes.data : []}
         serviciosIniciales={serviciosRes.ok ? serviciosRes.data : []}
         rankingInicial={rankingRes.ok ? rankingRes.data : []}

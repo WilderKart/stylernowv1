@@ -39,24 +39,20 @@ export async function decidirVerificacion(entrada: z.input<typeof esquema>): Pro
   if (!aprobando && p.data.motivo.length < 10) return { ok: false, error: MENSAJES.MOTIVO_REQUERIDO };
   const motivo = aprobando && p.data.motivo.length < 10 ? "Documentos revisados y aprobados por el equipo de StylerNow." : p.data.motivo;
   const supabase = (await createClient()) as unknown as RpcSinTipos;
-  const { error } = await supabase.rpc("admin_decidir_verificacion", {
-    p_negocio_id: p.data.negocioId,
-    p_nuevo: p.data.nuevo,
-    p_motivo: motivo,
-  });
-  if (error) return { ok: false, error: traducir(error.message) };
-
-  // Un solo botón: al verificar los documentos, si el negocio seguía esperando aprobación, también se da de alta
-  // (misma función de SuperSU que usa «Aprobar» en Negocios; si ya estaba activo, no hace nada).
   if (aprobando) {
-    const { data: n } = await (supabase as unknown as { from: (t: string) => { select: (c: string) => { eq: (k: string, v: string) => { maybeSingle: () => Promise<{ data: { estado: string } | null }> } } } })
-      .from("negocio").select("estado").eq("id", p.data.negocioId).maybeSingle();
-    if (n?.estado === "PENDIENTE_APROBACION") {
-      const { error: eAprobar } = await supabase.rpc("aprobar_negocio", { p_negocio_id: p.data.negocioId });
-      if (eAprobar) return { ok: false, error: "La verificación quedó aprobada, pero no pudimos dar de alta el negocio. Apruébalo desde Negocios." };
-      revalidatePath("/admin/negocios");
-      revalidatePath("/admin");
-    }
+    // Atómico (migración 190): verificar y dar de alta el negocio en una sola transacción. Si el negocio ya estaba
+    // VERIFICADO pero pendiente (estado mixto de antes), también lo recupera.
+    const { error } = await supabase.rpc("admin_aprobar_verificacion_y_negocio", { p_negocio_id: p.data.negocioId, p_motivo: motivo });
+    if (error) return { ok: false, error: traducir(error.message) };
+    revalidatePath("/admin/negocios");
+    revalidatePath("/admin");
+  } else {
+    const { error } = await supabase.rpc("admin_decidir_verificacion", {
+      p_negocio_id: p.data.negocioId,
+      p_nuevo: p.data.nuevo,
+      p_motivo: motivo,
+    });
+    if (error) return { ok: false, error: traducir(error.message) };
   }
   revalidatePath("/admin/verificaciones");
   revalidatePath("/admin/verificaciones/" + p.data.negocioId);

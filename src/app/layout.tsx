@@ -1,3 +1,4 @@
+import { ConfirmHost } from "@/components/ui/confirmar";
 import { AnaliticaConsentida } from "@/components/privacidad/analitica";
 import { BannerCookies } from "@/components/privacidad/banner-cookies";
 import { IdiomaProvider } from "@/lib/i18n/proveedor";
@@ -102,6 +103,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col bg-app text-text">
         <IdiomaProvider idioma={idioma}>{children}</IdiomaProvider>
+        <ConfirmHost />
         <SincronizarTema modoInicial={modoTema} />
         <BloquearZoom />
         <PwaManager />

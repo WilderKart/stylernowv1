@@ -1,5 +1,6 @@
 "use client";
 
+import { confirmar } from "@/components/ui/confirmar";
 import { Badge, Card } from "@/components/ui/card";
 import { formatCOP } from "@/lib/utils";
 import { useEffect, useState, useTransition } from "react";
@@ -239,8 +240,8 @@ function SeccionMemoria({ negocioId, memoriaInicial }: { negocioId: string; memo
     });
   }
 
-  function olvidar(m: MemoriaIa) {
-    if (!confirm(`¿Olvidar la memoria de "${m.categoria}"? Esto la borra permanentemente (no se puede deshacer).`)) return;
+  async function olvidar(m: MemoriaIa) {
+    if (!(await confirmar(`¿Olvidar la memoria de "${m.categoria}"? Esto la borra permanentemente (no se puede deshacer).`))) return;
     iniciarTransicion(async () => {
       const r = await olvidarMemoriaIa(m.id);
       if (!r.ok) { toast.error(r.error); return; }

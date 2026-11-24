@@ -119,6 +119,7 @@ export async function unirseListaEspera(args: {
     fecha_deseada_fin: args.fecha,
   });
 
-  if (error) return { ok: false, mensaje: error.message };
+  // 23505 = ya estás en la lista para esa fecha/servicios (índice único, migración 190): es un éxito idempotente.
+  if (error && error.code !== "23505") return { ok: false, mensaje: "No pudimos anotarte en la lista de espera. Intenta de nuevo." };
   return { ok: true, mensaje: "Listo. Te avisamos apenas se libere un cupo ese día." };
 }

@@ -9,6 +9,7 @@ import {
   obtenerRankingStaffPeriodo,
   reportarResena,
   responderResena,
+  type FuncionesReportes,
   type HorarioMuerto,
   type PuntoIngreso,
   type RankingStaffReporte,
@@ -34,7 +35,9 @@ function formatearHora(hora: string) {
 export function VistaReportes({
   negocioId,
   sedeIdFijo,
+  sedeIdInicial,
   sedes,
+  funciones,
   ingresosIniciales,
   serviciosIniciales,
   rankingInicial,
@@ -44,6 +47,8 @@ export function VistaReportes({
 }: {
   negocioId: string;
   sedeIdFijo: string | null;
+  sedeIdInicial: string | null;
+  funciones: FuncionesReportes;
   sedes: { id: string; nombre: string }[] | null;
   ingresosIniciales: PuntoIngreso[];
   serviciosIniciales: ServicioTop[];
@@ -52,7 +57,7 @@ export function VistaReportes({
   posicionMarketplace: string | null;
   horariosMuertos: HorarioMuerto[];
 }) {
-  const [sedeId, setSedeId] = useState<string>(sedeIdFijo ?? "");
+  const [sedeId, setSedeId] = useState<string>(sedeIdFijo ?? sedeIdInicial ?? "");
   const [agrupacion, setAgrupacion] = useState<"semana" | "mes">("semana");
   const [ingresos, setIngresos] = useState(ingresosIniciales);
   const [ranking, setRanking] = useState(rankingInicial);
@@ -87,7 +92,7 @@ export function VistaReportes({
               onChange={(e) => onCambiarFiltro(e.target.value, agrupacion)}
               className="h-9 rounded-lg border border-border bg-bg px-2 text-[12px] text-text outline-none"
             >
-              <option value="">Todas las sedes</option>
+              {funciones.consolidado ? <option value="">Todas las sedes</option> : null}
               {sedes.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.nombre}
@@ -95,6 +100,7 @@ export function VistaReportes({
               ))}
             </select>
           ) : null}
+          {funciones.periodo ? (
           <div className="flex gap-1 rounded-none border border-border p-1">
             <button
               type="button"
@@ -111,6 +117,9 @@ export function VistaReportes({
               Mes
             </button>
           </div>
+          ) : (
+            <span className="text-[11.5px] font-bold text-text-muted">Del día</span>
+          )}
         </div>
       </div>
 

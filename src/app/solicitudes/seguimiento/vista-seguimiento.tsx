@@ -66,26 +66,42 @@ export function VistaSeguimiento() {
     return () => clearTimeout(id);
   }, []);
 
+  const [enviandoMensaje, setEnviandoMensaje] = useState(false);
+  const [enviandoEnlace, setEnviandoEnlace] = useState(false);
+
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
+    if (enviandoMensaje) return; // guard de doble envío
+    setEnviandoMensaje(true);
     setAviso(null);
-    const r = await responderCaso(numero, token, mensaje);
-    if (!r.ok) return setAviso(r.error ?? "No pudimos enviar tu mensaje.");
-    setMensaje("");
-    setAviso("Mensaje enviado. Gracias.");
-    await consultar(numero, token);
+    try {
+      const r = await responderCaso(numero, token, mensaje);
+      if (!r.ok) return setAviso(r.error ?? "No pudimos enviar tu mensaje.");
+      setMensaje("");
+      setAviso("Mensaje enviado. Gracias.");
+      await consultar(numero, token);
+    } finally {
+      setEnviandoMensaje(false);
+    }
   }
 
   async function pedirEnlace(e: React.FormEvent) {
     e.preventDefault();
+    if (enviandoEnlace) return; // evita rotar el token dos veces (el enlace viejo quedaría inválido)
+    setEnviandoEnlace(true);
     setAviso(null);
-    const r = await reenviarEnlace(numero, email, ts);
-    controlTs.current?.reiniciar();
-    setAviso(
-      r.ok
-        ? "Si el número y el correo coinciden con una solicitud, te enviamos un enlace nuevo. Revisa tu bandeja y la carpeta de spam."
-        : (r.error ?? "No pudimos procesar la solicitud."),
-    );
+    try {
+      const r = await reenviarEnlace(numero, email, ts);
+      setAviso(
+        r.ok
+          ? "Si el número y el correo coinciden con una solicitud, te enviamos un enlace nuevo. Revisa tu bandeja y la carpeta de spam."
+          : (r.error ?? "No pudimos procesar la solicitud."),
+      );
+    } finally {
+      // Turnstile se reinicia solo al terminar (el token es de un solo uso).
+      controlTs.current?.reiniciar();
+      setEnviandoEnlace(false);
+    }
   }
 
   if (caso) {
@@ -126,7 +142,7 @@ export function VistaSeguimiento() {
           <form onSubmit={enviar} className="mt-4 flex flex-col gap-3">
             <label htmlFor="msg" className="font-mono text-xs font-bold tracking-wide uppercase">Escribir un mensaje</label>
             <textarea id="msg" value={mensaje} onChange={(e) => setMensaje(e.target.value)} minLength={2} maxLength={5000} rows={4} required className={campo} />
-            <Button type="submit" variant="primary" disabled={mensaje.trim().length < 2}>Enviar mensaje</Button>
+            <Button type="submit" variant="primary" disabled={enviandoMensaje || mensaje.trim().length < 2}>Enviar mensaje</Button>
           </form>
         ) : null}
         {aviso ? <p role="status" className="mt-3 text-sm">{aviso}</p> : null}
@@ -159,7 +175,7 @@ export function VistaSeguimiento() {
           <p className="text-xs text-text-muted">Escribe el número de radicación (arriba) y el correo con el que radicaste. Te enviaremos un enlace nuevo; el anterior dejará de funcionar.</p>
           <Input label="Correo con el que radicaste" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           <Turnstile ref={controlTs} accion="seguimiento" onToken={setTs} />
-          <Button type="submit" variant="secondary" disabled={!ts}>Enviarme un enlace nuevo</Button>
+          <Button type="submit" variant="secondary" disabled={!ts || enviandoEnlace}>Enviarme un enlace nuevo</Button>
         </form>
       ) : null}
       {aviso ? <p role="status" className="text-sm">{aviso}</p> : null}

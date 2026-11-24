@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -609,6 +610,7 @@ function PanelCita({
     const res = await completarCitaSinPos(cita.id);
     setCargando(false);
     if (!res.ok) return setError(res.error);
+    if (res.aviso) toast.warning(res.aviso);
     setConfirmarCompletarSinPos(false);
     onCambio();
   }

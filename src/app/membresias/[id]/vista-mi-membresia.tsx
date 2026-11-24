@@ -1,5 +1,6 @@
 "use client";
 
+import { confirmar } from "@/components/ui/confirmar";
 import { Fila, Filas, Sec, TicketCita } from "@/app/lealtad/ui-cliente";
 import { Status } from "@/components/brutal";
 import { Button } from "@/components/ui/button";
@@ -53,8 +54,8 @@ export function VistaMiMembresia({ membresia, negocioNombre }: { membresia: Memb
   const [pendiente, iniciarTransicion] = useTransition();
   const [mostrarCongelar, setMostrarCongelar] = useState(false);
 
-  function cancelar() {
-    if (!confirm(t("mm.confirm_cancelar"))) return;
+  async function cancelar() {
+    if (!(await confirmar(t("mm.confirm_cancelar")))) return;
     iniciarTransicion(async () => {
       const r = await cancelarMiMembresia(membresia.id);
       if (!r.ok) { toast.error(r.error); return; }

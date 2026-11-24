@@ -1,5 +1,6 @@
 "use client";
 
+import { confirmar } from "@/components/ui/confirmar";
 import { Button } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -261,7 +262,7 @@ function SeccionBanners({ bannersIniciales }: { bannersIniciales: BannerAdmin[] 
   }
 
   async function eliminar(id: string) {
-    if (!confirm("¿Eliminar este banner?")) return;
+    if (!(await confirmar("¿Eliminar este banner?"))) return;
     setError(null);
     const res = await eliminarBanner(id);
     if (!res.ok) return setError(res.error);

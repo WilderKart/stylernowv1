@@ -1,5 +1,6 @@
 "use client";
 
+import { confirmar } from "@/components/ui/confirmar";
 import {
   cerrarSedeTemporal,
   eliminarExcepcion,
@@ -73,7 +74,7 @@ export function DetalleSede({
   const operativa = !sede.cerrada_permanente && !sede.cerrada_temporalmente;
 
   async function onCerrarTemporal() {
-    if (!confirm("¿Cerrar esta sede temporalmente? No se podrán crear nuevas reservas hasta reabrirla.")) return;
+    if (!(await confirmar("¿Cerrar esta sede temporalmente? No se podrán crear nuevas reservas hasta reabrirla."))) return;
     setAccionando(true);
     setError(null);
     const res = await cerrarSedeTemporal(sede.id);
@@ -93,9 +94,9 @@ export function DetalleSede({
 
   async function onEliminar() {
     if (
-      !confirm(
+      !(await confirmar(
         "¿Eliminar esta sede? Quedará cerrada permanentemente. No se puede eliminar si tiene reservas activas."
-      )
+      ))
     )
       return;
     setAccionando(true);

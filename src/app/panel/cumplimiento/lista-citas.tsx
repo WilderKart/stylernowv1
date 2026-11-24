@@ -1,5 +1,6 @@
 "use client";
 
+import { confirmar } from "@/components/ui/confirmar";
 import { Button } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/card";
 import { fechaHoraLarga } from "@/lib/formato";
@@ -69,8 +70,8 @@ export function ListaCitasPendientes({ citas, puedeActuar }: { citas: CitaPendie
                 size="sm"
                 variant="secondary"
                 disabled={pendiente}
-                onClick={() => {
-                  if (!window.confirm("¿Marcar que el cliente no se presentó?")) return;
+                onClick={async () => {
+                  if (!(await confirmar("¿Marcar que el cliente no se presentó?"))) return;
                   setMensaje(null);
                   iniciar(async () => {
                     const r = await marcarNoShowCitaPrevia(c.id);
@@ -89,8 +90,8 @@ export function ListaCitasPendientes({ citas, puedeActuar }: { citas: CitaPendie
                 size="sm"
                 variant="danger"
                 disabled={pendiente}
-                onClick={() => {
-                  if (!window.confirm("¿Cancelar esta cita? Se avisará al cliente.")) return;
+                onClick={async () => {
+                  if (!(await confirmar("¿Cancelar esta cita? Se avisará al cliente."))) return;
                   setMensaje(null);
                   iniciar(async () => {
                     const r = await cancelarCitaPrevia(c.id);

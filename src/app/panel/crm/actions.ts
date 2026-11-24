@@ -58,86 +58,49 @@ export interface FiltroCRM {
   limite?: number;
 }
 
+type VistaCrmFila = {
+  cliente_id: string;
+  cliente_nombre: string;
+  cliente_foto_url: string | null;
+  cliente_telefono: string | null;
+  visitas: number;
+  ultima_visita: string | null;
+  ltv: number | string;
+};
+
 export async function listarClientesCRM(filtro: FiltroCRM): Promise<Resultado<{ items: ClienteCRM[]; total: number }>> {
   try {
     const { supabase } = await usuarioActual();
 
-    // Todos los filtros que no son columnas directas de vista_crm_cliente
-    // (sede, etiqueta, consentimiento de marketing) se resuelven ANTES,
-    // como listas de cliente_id, e intersecan entre sí — así la
-    // paginación (.range()) sigue siendo correcta: nunca se filtra
-    // después de haber cortado la página, que dejaría páginas vacías con
-    // resultados reales más adelante.
-    const listasAIntersecar: string[][] = [];
-
-    if (filtro.sedeId) {
-      const { data: reservasSede } = await supabase
-        .from("reserva")
-        .select("cliente_id")
-        .eq("negocio_id", filtro.negocioId)
-        .eq("sede_id", filtro.sedeId)
-        .limit(5000);
-      listasAIntersecar.push([...new Set((reservasSede ?? []).map((r) => r.cliente_id))]);
-    }
-    if (filtro.etiqueta) {
-      const { data: conEtiqueta } = await supabase
-        .from("cliente_etiqueta")
-        .select("cliente_id")
-        .eq("negocio_id", filtro.negocioId)
-        .eq("etiqueta", filtro.etiqueta)
-        .limit(5000);
-      listasAIntersecar.push([...new Set((conEtiqueta ?? []).map((e) => e.cliente_id))]);
-    }
-    if (filtro.soloConConsentimientoMarketing) {
-      const { data: conConsentimiento } = await supabase
-        .from("perfil")
-        .select("id")
-        .eq("consentimiento_marketing", true)
-        .limit(5000);
-      listasAIntersecar.push([...new Set((conConsentimiento ?? []).map((p) => p.id))]);
-    }
-
-    const idsPermitidos: string[] | null =
-      listasAIntersecar.length === 0
-        ? null
-        : listasAIntersecar.reduce((acc, lista) => acc.filter((id) => lista.includes(id)));
-    if (idsPermitidos !== null && idsPermitidos.length === 0) {
-      return { ok: true, data: { items: [], total: 0 } };
-    }
-
-    let q = supabase.from("vista_crm_cliente").select("*", { count: "exact" }).eq("negocio_id", filtro.negocioId);
-    if (idsPermitidos) q = q.in("cliente_id", idsPermitidos);
-    if (filtro.busqueda?.trim()) {
-      const b = filtro.busqueda.trim().replace(/[%_,()]/g, " ").trim();
-      if (b) q = q.or(`cliente_nombre.ilike.%${patronSinTildes(b)}%,cliente_telefono.ilike.%${b}%`);
-    }
-    if (filtro.ltvMin != null || filtro.soloVip) q = q.gte("ltv", Math.max(filtro.ltvMin ?? 0, filtro.soloVip ? UMBRAL_VIP : 0));
-    if (filtro.ltvMax != null) q = q.lte("ltv", filtro.ltvMax);
-    if (filtro.ultimaVisitaDespues) q = q.gte("ultima_visita", filtro.ultimaVisitaDespues);
-    if (filtro.ultimaVisitaAntes) q = q.lte("ultima_visita", filtro.ultimaVisitaAntes);
-    if (filtro.primeraVisitaDespues) q = q.gte("primera_visita", filtro.primeraVisitaDespues);
-    if (filtro.primeraVisitaAntes) q = q.lte("primera_visita", filtro.primeraVisitaAntes);
-
-    switch (filtro.orden ?? "nombre") {
-      case "visitas_desc":
-        q = q.order("visitas", { ascending: false });
-        break;
-      case "ltv_desc":
-        q = q.order("ltv", { ascending: false });
-        break;
-      case "ultima_visita_desc":
-        q = q.order("ultima_visita", { ascending: false, nullsFirst: false });
-        break;
-      default:
-        q = q.order("cliente_nombre", { ascending: true });
-    }
-
+    // Todos los filtros (sede, etiqueta, consentimiento, búsqueda, rangos y orden) se resuelven en UNA consulta SQL
+    // (migración 191): sin topes fijos, sin intersecar listas en memoria y con total/paginación reales.
     const offset = Math.max(filtro.offset ?? 0, 0);
-    const limite = Math.min(Math.max(filtro.limite ?? 20, 1), 100);
-    q = q.range(offset, offset + limite - 1);
-
-    const { data, error, count } = await q;
+    const limite = Math.min(Math.max(filtro.limite ?? 20, 1), 5000);
+    const b = filtro.busqueda?.trim().replace(/[%_,()]/g, " ").trim() ?? "";
+    const rpc = supabase.rpc as unknown as (
+      n: string,
+      a: Record<string, unknown>
+    ) => Promise<{ data: { fila: Record<string, unknown>; total: number | string }[] | null; error: { message: string } | null }>;
+    const { data: filas, error } = await rpc.call(supabase, "crm_clientes_filtrados", {
+      p_negocio_id: filtro.negocioId,
+      p_sede_id: filtro.sedeId ?? null,
+      p_etiqueta: filtro.etiqueta ?? null,
+      p_solo_consentimiento: filtro.soloConConsentimientoMarketing ?? false,
+      p_patron_nombre: b ? `%${patronSinTildes(b)}%` : null,
+      p_patron_telefono: b ? `%${b}%` : null,
+      p_ltv_min: filtro.ltvMin != null || filtro.soloVip ? Math.max(filtro.ltvMin ?? 0, filtro.soloVip ? UMBRAL_VIP : 0) : null,
+      p_ltv_max: filtro.ltvMax ?? null,
+      p_ultima_despues: filtro.ultimaVisitaDespues ?? null,
+      p_ultima_antes: filtro.ultimaVisitaAntes ?? null,
+      p_primera_despues: filtro.primeraVisitaDespues ?? null,
+      p_primera_antes: filtro.primeraVisitaAntes ?? null,
+      p_orden: filtro.orden ?? "nombre",
+      p_offset: offset,
+      p_limite: limite,
+    });
     if (error) return { ok: false, error: error.message };
+    const data = (filas ?? []).map((f) => f.fila as unknown as VistaCrmFila);
+    const count = filas && filas.length > 0 ? Number(filas[0].total) : 0;
 
     const clienteIds = (data ?? []).map((r) => r.cliente_id!);
     const { data: etiquetasData } = clienteIds.length
@@ -162,7 +125,7 @@ export async function listarClientesCRM(filtro: FiltroCRM): Promise<Resultado<{ 
       esVip: Number(r.ltv) >= UMBRAL_VIP,
     }));
 
-    return { ok: true, data: { items, total: count ?? 0 } };
+    return { ok: true, data: { items, total: count } };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
   }

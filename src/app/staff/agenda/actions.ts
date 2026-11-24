@@ -1,11 +1,12 @@
 "use server";
 
+import { avisoPorFallosDePipeline } from "@/lib/pipeline/fallos";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 type Resultado<T = undefined> =
-  | ({ ok: true } & (T extends undefined ? object : { data: T }))
+  | ({ ok: true; aviso?: string } & (T extends undefined ? object : { data: T }))
   | { ok: false; error: string };
 
 async function usuarioActual() {
@@ -121,13 +122,13 @@ export async function completarCitaSinPos(reservaId: string): Promise<Resultado>
   try {
     const id = z.string().uuid("Cita inválida.").parse(reservaId);
     const { supabase } = await usuarioActual();
-    const rpc = supabase.rpc.bind(supabase) as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
-    const { error } = await rpc("completar_reserva_sin_pos", { p_reserva_id: id });
+    const rpc = supabase.rpc.bind(supabase) as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data?: unknown; error: { message: string } | null }>;
+    const { data, error } = await rpc("completar_reserva_sin_pos", { p_reserva_id: id });
     if (error) return { ok: false, error: traducirError(error.message) };
     revalidatePath("/staff/agenda");
     revalidatePath("/panel/agenda");
     revalidatePath("/panel/lealtad");
-    return { ok: true };
+    return { ok: true, aviso: avisoPorFallosDePipeline(data, "completar_reserva_sin_pos") };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? traducirError(e.message) : "Error inesperado." };
   }

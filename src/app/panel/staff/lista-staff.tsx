@@ -1,5 +1,6 @@
 "use client";
 
+import { confirmar } from "@/components/ui/confirmar";
 import { Button } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -153,7 +154,7 @@ export function ListaStaff({
   }
 
   async function onCancelar(id: string) {
-    if (!confirm("¿Cancelar esta invitación?")) return;
+    if (!(await confirmar("¿Cancelar esta invitación?"))) return;
     const anterior = invitaciones;
     setInvitaciones((prev) => prev.filter((i) => i.id !== id));
     const res = await cancelarInvitacion(id);

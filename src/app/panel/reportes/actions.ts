@@ -31,6 +31,28 @@ async function exigirAccesoReportes(negocioId: string): Promise<{ ok: true } | {
   return { ok: true };
 }
 
+export interface FuncionesReportes {
+  periodo: boolean;
+  avanzados: boolean;
+  consolidado: boolean;
+}
+
+/** Banderas del plan (migración 192). Ante cualquier fallo se asume el plan más restrictivo. */
+export async function obtenerFuncionesReportes(negocioId: string): Promise<FuncionesReportes> {
+  const restrictivo = { periodo: false, avanzados: false, consolidado: false };
+  try {
+    const supabase = await createClient();
+    const rpc = supabase.rpc as unknown as (n: string, a: object) => Promise<{ data: Partial<FuncionesReportes> | null; error: unknown }>;
+    const { data, error } = await rpc.call(supabase, "negocio_reportes_funciones", { p_negocio_id: negocioId });
+    if (error || !data) return restrictivo;
+    return { periodo: data.periodo === true, avanzados: data.avanzados === true, consolidado: data.consolidado === true };
+  } catch {
+    return restrictivo;
+  }
+}
+
+const MENSAJE_PLAN = "Esta función no está incluida en tu plan actual.";
+
 export interface PuntoIngreso {
   periodo: string;
   ingresos: number;
@@ -48,11 +70,21 @@ export async function obtenerIngresosPeriodo(datos: {
     const { supabase } = await usuarioActual();
     const gate = await exigirAccesoReportes(datos.negocioId);
     if (!gate.ok) return gate;
+    const f = await obtenerFuncionesReportes(datos.negocioId);
+    // Essential: solo "del día" (el rango se fuerza a hoy, sin importar lo que mande el cliente).
+    const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Bogota" }).format(new Date());
+    const desde = f.periodo ? datos.desde : hoy;
+    const hasta = f.periodo ? datos.hasta : hoy;
+    // Signature: consolidado de todas las sedes. Sin él, una barbería con varias sedes debe elegir una.
+    if (!datos.sedeId && !f.consolidado) {
+      const { count } = await supabase.from("sede").select("id", { count: "exact", head: true }).eq("negocio_id", datos.negocioId).eq("cerrada_permanente", false);
+      if ((count ?? 0) > 1) return { ok: false, error: MENSAJE_PLAN };
+    }
     const { data, error } = await supabase.rpc("reportes_ingresos_periodo", {
       p_negocio_id: datos.negocioId,
       p_sede_id: datos.sedeId ?? undefined,
-      p_desde: datos.desde ?? undefined,
-      p_hasta: datos.hasta ?? undefined,
+      p_desde: desde ?? undefined,
+      p_hasta: hasta ?? undefined,
       p_agrupacion: datos.agrupacion,
     });
     if (error) return { ok: false, error: error.message };
@@ -77,6 +109,7 @@ export async function obtenerServiciosTop(negocioId: string, sedeId?: string | n
     const { supabase } = await usuarioActual();
     const gate = await exigirAccesoReportes(negocioId);
     if (!gate.ok) return gate;
+    if (!(await obtenerFuncionesReportes(negocioId)).periodo) return { ok: false, error: MENSAJE_PLAN };
     const { data, error } = await supabase.rpc("reportes_servicios_top", {
       p_negocio_id: negocioId,
       p_sede_id: sedeId ?? undefined,
@@ -114,6 +147,7 @@ export async function obtenerRankingStaffPeriodo(datos: {
     const { supabase } = await usuarioActual();
     const gate = await exigirAccesoReportes(datos.negocioId);
     if (!gate.ok) return gate;
+    if (!(await obtenerFuncionesReportes(datos.negocioId)).avanzados) return { ok: false, error: MENSAJE_PLAN };
     const { data, error } = await supabase.rpc("reportes_ranking_staff", {
       p_negocio_id: datos.negocioId,
       p_sede_id: datos.sedeId ?? undefined,
@@ -251,6 +285,7 @@ export async function obtenerHorariosMuertos(negocioId: string): Promise<Resulta
     const { supabase } = await usuarioActual();
     const gate = await exigirAccesoReportes(negocioId);
     if (!gate.ok) return gate;
+    if (!(await obtenerFuncionesReportes(negocioId)).avanzados) return { ok: false, error: MENSAJE_PLAN };
     const { data, error } = await supabase.rpc("detectar_horarios_muertos", { p_negocio_id: negocioId });
     if (error) return { ok: false, error: error.message };
     return {

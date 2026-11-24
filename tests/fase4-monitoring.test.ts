@@ -21,8 +21,19 @@ describe("Fase 4 · healthcheck de /api/monitoring", () => {
     delete process.env.SUPABASE_SECRET_KEY;
   });
 
-  it("devuelve estado, versión y timestamp sin exponer secretos", async () => {
-    const respuesta = await GET();
+  it("público: solo devuelve {status:'ok'} (sin huella de configuración)", async () => {
+    const respuesta = await GET(new Request("http://localhost/api/monitoring"));
+    const cuerpo = (await respuesta.json()) as Record<string, unknown>;
+
+    expect(respuesta.status).toBe(200);
+    expect(cuerpo).toEqual({ status: "ok" });
+    expect(respuesta.headers.get("cache-control")).toBe("no-store");
+  });
+
+  it("con el token interno devuelve estado, versión y timestamp sin exponer secretos", async () => {
+    process.env.CRON_SECRET = "secreto-de-prueba";
+    const respuesta = await GET(new Request("http://localhost/api/monitoring", { headers: { authorization: "Bearer secreto-de-prueba" } }));
+    delete process.env.CRON_SECRET;
     const cuerpo = (await respuesta.json()) as Record<string, unknown>;
 
     expect(respuesta.status).toBe(200);
@@ -36,7 +47,7 @@ describe("Fase 4 · healthcheck de /api/monitoring", () => {
     estado.ok = false;
     estado.retryAfter = 17;
 
-    const respuesta = await GET();
+    const respuesta = await GET(new Request("http://localhost/api/monitoring"));
 
     expect(respuesta.status).toBe(429);
     expect(respuesta.headers.get("retry-after")).toBe("17");

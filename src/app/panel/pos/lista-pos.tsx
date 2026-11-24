@@ -153,6 +153,7 @@ function ModalCobro({
     setProcesando(false);
     if (!res.ok) return setError(res.error);
     setResultado(res.data);
+    if (res.data.aviso) toast.warning(res.data.aviso);
   }
 
   if (resultado) {

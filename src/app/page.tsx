@@ -108,8 +108,7 @@ export default async function HomePage(props: PageProps<"/">) {
   // debe ralentizar el render de la búsqueda.
   const campanasEnPantalla = [...new Set((resultados ?? []).map((n) => n.campana_id).filter((id): id is string => Boolean(id)))];
   if (campanasEnPantalla.length > 0) {
-    const { data: { user: usuarioImpresion } } = await supabase.auth.getUser();
-    void Promise.all(campanasEnPantalla.map((id) => registrarEventoAnuncio("IMPRESION", id, null, usuarioImpresion?.id ?? null)));
+    void Promise.all(campanasEnPantalla.map((id) => registrarEventoAnuncio("IMPRESION", id, null, user?.id ?? null)));
   }
 
   // "Abierto hoy" lo resuelve la BD con disponibilidad real (marketplace_buscar_filtrado).

@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/card";
 import { hora, sumarDias } from "@/lib/formato";
@@ -63,6 +64,7 @@ export function VistaAgendaStaff({
     const res = await hacerCheckIn(id);
     setAccionando(null);
     if (!res.ok) return setError(res.error);
+    if (res.aviso) toast.warning(res.aviso);
     cargarFecha(fecha);
   }
 

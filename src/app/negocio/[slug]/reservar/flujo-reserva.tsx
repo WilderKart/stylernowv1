@@ -205,16 +205,22 @@ export function FlujoReserva({
     }
   }
 
+  const [enviandoEspera, setEnviandoEspera] = useState(false);
   async function anotarseEnEspera() {
-    if (!sede) return;
-    const r = await unirseListaEspera({
-      negocioId: negocio.id,
-      sedeId: sede.id,
-      servicioIds,
-      staffId,
-      fecha,
-    });
-    setAvisoEspera(r.mensaje);
+    if (!sede || enviandoEspera) return; // guard de doble envío (el servidor además es idempotente)
+    setEnviandoEspera(true);
+    try {
+      const r = await unirseListaEspera({
+        negocioId: negocio.id,
+        sedeId: sede.id,
+        servicioIds,
+        staffId,
+        fecha,
+      });
+      setAvisoEspera(r.mensaje);
+    } finally {
+      setEnviandoEspera(false);
+    }
   }
 
   const dias = Array.from({ length: DIAS_VISIBLES }, (_, i) => sumarDias(hoyISO(tz), i));
@@ -534,7 +540,7 @@ export function FlujoReserva({
                       <Status tone="ok">{avisoEspera}</Status>
                     </div>
                   ) : (
-                    <Button size="sm" variant="secondary" className="mt-4" onClick={anotarseEnEspera}>
+                    <Button size="sm" variant="secondary" className="mt-4" disabled={enviandoEspera} onClick={anotarseEnEspera}>
                       {t("res.avisarme")}
                     </Button>
                   )}
@@ -552,7 +558,7 @@ export function FlujoReserva({
                           <Status tone="ok">{avisoEspera}</Status>
                         </div>
                       ) : (
-                        <Button size="sm" variant="secondary" className="mt-3" onClick={anotarseEnEspera}>
+                        <Button size="sm" variant="secondary" className="mt-3" disabled={enviandoEspera} onClick={anotarseEnEspera}>
                           {t("res.avisarme")}
                         </Button>
                       )}

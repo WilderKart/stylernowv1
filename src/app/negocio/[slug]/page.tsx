@@ -156,8 +156,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
   // Marketplace Ads (Módulo 6.2): un clic en un resultado patrocinado se
   // cobra en tiempo real contra el Wallet del propio Negocio anunciante.
   if (campanaId) {
-    const { data: { user: usuarioClic } } = await supabaseVisita.auth.getUser();
-    await registrarEventoAnuncio("CLIC", campanaId, negocio.id, usuarioClic?.id ?? null);
+    await registrarEventoAnuncio("CLIC", campanaId, negocio.id, usuarioVip?.id ?? null);
   }
 
   // schema.org LocalBusiness: requisito explícito de SEO de 02-UX/04_Marketplace.md.
