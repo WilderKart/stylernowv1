@@ -6,13 +6,16 @@ import { Input } from "@/components/ui/input";
 import { comprimirADataUrl } from "@/lib/imagen/comprimir";
 import { formatCOP } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   actualizarMiPerfilStaff,
   autorizarDesdePerfil,
   revocarPublicacion,
   type MisAutorizaciones,
+  cancelarSolicitudAusencia,
   crearMiBloqueo,
+  listarMisSolicitudes,
+  type MisSolicitudes,
   eliminarMiBloqueo,
   guardarDiaDisponibilidad,
   subirFotoPerfilStaff,
@@ -178,6 +181,17 @@ function SeccionDisponibilidad({
   const [dias, setDias] = useState(disponibilidadInicial);
   const [guardando, setGuardando] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [estadoHorario, setEstadoHorario] = useState<MisSolicitudes["horario"]>(null);
+
+  useEffect(() => {
+    let vivo = true;
+    void listarMisSolicitudes(vinculoId).then((r) => {
+      if (vivo && r.ok) setEstadoHorario(r.data.horario);
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [vinculoId]);
 
   async function guardarDia(diaSemana: number, horaInicio: string, horaFin: string, activo: boolean) {
     setGuardando(diaSemana);
@@ -185,6 +199,7 @@ function SeccionDisponibilidad({
     const res = await guardarDiaDisponibilidad(vinculoId, sedeId, diaSemana, activo ? horaInicio : null, activo ? horaFin : null);
     setGuardando(null);
     if (!res.ok) return setError(res.error);
+    setEstadoHorario(res.data.estado === "PENDIENTE" ? { estado: "PENDIENTE", motivoDecision: null } : null);
     setDias((prev) => prev.map((d) => (d.diaSemana === diaSemana ? { ...d, horaInicio: activo ? horaInicio : null, horaFin: activo ? horaFin : null } : d)));
   }
 
@@ -192,6 +207,16 @@ function SeccionDisponibilidad({
     <section>
       <h2 className="font-display mb-1 text-[13px] font-bold uppercase text-text">Mi Disponibilidad</h2>
       <p className="mb-3 text-[11.5px] text-text-faint">Horario semanal base — una franja por día.</p>
+      {estadoHorario?.estado === "PENDIENTE" ? (
+        <p role="status" className="mb-3 border-l-4 border-accent bg-accent-soft px-3 py-2 text-[12px] leading-relaxed text-text">
+          Tu cambio de horario <b>está pendiente de aprobación</b> de la barbería (ya le avisamos). Mientras tanto sigue vigente tu horario anterior.
+        </p>
+      ) : null}
+      {estadoHorario?.estado === "RECHAZADA" ? (
+        <p role="status" className="mb-3 border-l-4 border-danger bg-danger-soft px-3 py-2 text-[12px] leading-relaxed text-text">
+          La barbería no aprobó tu último cambio de horario{estadoHorario.motivoDecision ? `: ${estadoHorario.motivoDecision}` : "."}
+        </p>
+      ) : null}
       {error ? <p className="mb-2 text-[12px] font-semibold text-danger">{error}</p> : null}
       <ul className="flex flex-col gap-2">
         {dias.map((d) => (
@@ -260,14 +285,46 @@ function SeccionBloqueos({ vinculoId, bloqueosIniciales }: { vinculoId: string; 
   const [form, setForm] = useState({ fechaInicio: "", fechaFin: "", motivo: "" });
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
+  const [tipo, setTipo] = useState<"PERMISO" | "VACACIONES" | "INCAPACIDAD" | "OTRO">("PERMISO");
+  const [solicitudes, setSolicitudes] = useState<MisSolicitudes["ausencias"]>([]);
+
+  async function cargarSolicitudes() {
+    const r = await listarMisSolicitudes(vinculoId);
+    if (r.ok) setSolicitudes(r.data.ausencias);
+  }
+  useEffect(() => {
+    let vivo = true;
+    void listarMisSolicitudes(vinculoId).then((r) => {
+      if (vivo && r.ok) setSolicitudes(r.data.ausencias);
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [vinculoId]);
+
+  async function cancelarSolicitud(id: string) {
+    setError(null);
+    const r = await cancelarSolicitudAusencia(id);
+    if (!r.ok) return setError(r.error);
+    await cargarSolicitudes();
+  }
 
   async function crear() {
     if (!form.fechaInicio || !form.fechaFin) return setError("Completa las fechas de inicio y fin.");
     setGuardando(true);
     setError(null);
-    const res = await crearMiBloqueo(vinculoId, new Date(form.fechaInicio).toISOString(), new Date(form.fechaFin).toISOString(), form.motivo);
+    const res = await crearMiBloqueo(vinculoId, new Date(form.fechaInicio).toISOString(), new Date(form.fechaFin).toISOString(), form.motivo, tipo);
     setGuardando(false);
     if (!res.ok) return setError(res.error);
+    if (res.data.estado === "PENDIENTE") {
+      setAviso("Tu solicitud fue enviada a la barbería. Cuando la apruebe, quedará registrada y tu agenda se bloqueará en esas fechas.");
+      setForm({ fechaInicio: "", fechaFin: "", motivo: "" });
+      setCreando(false);
+      await cargarSolicitudes();
+      return;
+    }
+    setAviso(null);
     setBloqueos((prev) =>
       [...prev, { id: crypto.randomUUID(), fechaInicio: form.fechaInicio, fechaFin: form.fechaFin, motivo: form.motivo || null }].sort((a, b) =>
         a.fechaInicio.localeCompare(b.fechaInicio)
@@ -299,14 +356,55 @@ function SeccionBloqueos({ vinculoId, bloqueosIniciales }: { vinculoId: string; 
             <Input label="Desde" type="datetime-local" value={form.fechaInicio} onChange={(e) => setForm({ ...form, fechaInicio: e.target.value })} />
             <Input label="Hasta" type="datetime-local" value={form.fechaFin} onChange={(e) => setForm({ ...form, fechaFin: e.target.value })} />
           </div>
+          <label className="flex flex-col gap-1.5">
+            <span className="sn-label">Tipo</span>
+            <select
+              value={tipo}
+              onChange={(e) => setTipo(e.target.value as typeof tipo)}
+              className="min-h-11 w-full border-2 border-border bg-bg px-3 text-[14px] text-text outline-none focus:shadow-hard"
+            >
+              <option value="PERMISO">Permiso</option>
+              <option value="VACACIONES">Vacaciones</option>
+              <option value="INCAPACIDAD">Incapacidad</option>
+              <option value="OTRO">Otro</option>
+            </select>
+          </label>
           <Input label="Motivo (opcional)" value={form.motivo} onChange={(e) => setForm({ ...form, motivo: e.target.value })} />
           <Button size="sm" loading={guardando} onClick={crear}>
-            Guardar ausencia
+            Enviar ausencia
           </Button>
         </Card>
       ) : null}
 
+      {aviso ? (
+        <p role="status" className="mb-3 border-l-4 border-accent bg-accent-soft px-3 py-2 text-[12px] leading-relaxed text-text">
+          {aviso}
+        </p>
+      ) : null}
       {error ? <p className="mb-2 text-[12px] font-semibold text-danger">{error}</p> : null}
+
+      {solicitudes.length > 0 ? (
+        <ul className="mb-3 flex flex-col gap-2" aria-label="Solicitudes de ausencia">
+          {solicitudes.map((x) => (
+            <li key={x.id} className="flex items-center justify-between gap-3 border-2 border-border px-3.5 py-2.5">
+              <div className="min-w-0">
+                <p className="text-[12.5px] font-semibold text-text">
+                  {new Date(x.fechaInicio).toLocaleDateString("es-CO")} — {new Date(x.fechaFin).toLocaleDateString("es-CO")}{" "}
+                  <span className={x.estado === "PENDIENTE" ? "text-accent" : "text-danger"}>
+                    · {x.estado === "PENDIENTE" ? "Pendiente de aprobación" : "No aprobada"}
+                  </span>
+                </p>
+                {x.estado === "RECHAZADA" && x.motivoDecision ? <p className="text-[11px] text-text-faint">{x.motivoDecision}</p> : null}
+              </div>
+              {x.estado === "PENDIENTE" ? (
+                <button type="button" onClick={() => void cancelarSolicitud(x.id)} className="shrink-0 text-[11px] font-semibold text-danger">
+                  Cancelar
+                </button>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       {bloqueos.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-border px-4 py-6 text-center text-[12.5px] text-text-faint">Sin ausencias próximas.</p>

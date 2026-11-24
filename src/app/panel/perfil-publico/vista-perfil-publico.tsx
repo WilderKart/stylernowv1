@@ -1,9 +1,9 @@
 "use client";
 
-import { subirFotoPrincipal } from "@/app/panel/onboarding/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { comprimirADataUrl } from "@/lib/imagen/comprimir";
+import { GaleriaNegocio } from "./galeria-negocio";
+import type { FotoGaleria } from "./galeria-actions";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -20,14 +20,12 @@ interface NegocioPerfil {
   logo_url: string | null;
 }
 
-export function VistaPerfilPublico({ negocio, hayImagenes }: { negocio: NegocioPerfil; hayImagenes: boolean }) {
+export function VistaPerfilPublico({ negocio, hayImagenes, fotos }: { negocio: NegocioPerfil; hayImagenes: boolean; fotos: FotoGaleria[] | null }) {
   const router = useRouter();
   const [descripcion, setDescripcion] = useState(negocio.descripcion ?? "");
   const [telefono, setTelefono] = useState(negocio.telefono_contacto ?? "");
   const [email, setEmail] = useState(negocio.email_contacto ?? "");
-  const [foto, setFoto] = useState(negocio.foto_principal_url);
   const [guardando, setGuardando] = useState(false);
-  const [subiendo, setSubiendo] = useState(false);
   const [aviso, setAviso] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
 
   async function guardar(e: React.FormEvent) {
@@ -38,24 +36,6 @@ export function VistaPerfilPublico({ negocio, hayImagenes }: { negocio: NegocioP
     setGuardando(false);
     setAviso(r.ok ? { tipo: "ok", texto: "Cambios guardados." } : { tipo: "error", texto: r.error });
     if (r.ok) router.refresh();
-  }
-
-  async function cambiarFoto(archivo: File | undefined) {
-    if (!archivo) return;
-    setSubiendo(true);
-    setAviso(null);
-    const leida = await comprimirADataUrl(archivo, "media");
-    if (!leida.ok) {
-      setSubiendo(false);
-      return setAviso({ tipo: "error", texto: leida.error });
-    }
-    const r = await subirFotoPrincipal(negocio.id, leida.data);
-    setSubiendo(false);
-    if (r.ok) {
-      setFoto(r.data.url);
-      setAviso({ tipo: "ok", texto: "Fotografía actualizada." });
-      router.refresh();
-    } else setAviso({ tipo: "error", texto: r.error });
   }
 
   return (
@@ -75,34 +55,18 @@ export function VistaPerfilPublico({ negocio, hayImagenes }: { negocio: NegocioP
         .
       </p>
 
-      <div className="flex flex-col gap-2">
-        <span className="sn-label">Fotografía principal (fachada)</span>
-        <div className="relative flex aspect-[16/10] w-full items-center justify-center overflow-hidden border-2 border-dashed border-border bg-surface">
-          {foto ? (
+      {fotos === null ? (
+        <div className="flex flex-col gap-2">
+          <span className="sn-label">Fotografía principal (fachada)</span>
+          {negocio.foto_principal_url ? (
             // eslint-disable-next-line @next/next/no-img-element -- fotografía propia del negocio
-            <img src={foto} alt="Fachada del negocio" className="size-full object-cover" />
-          ) : (
-            <span className="font-mono text-[11px] font-bold uppercase tracking-wide text-text-muted">Sin fotografía</span>
-          )}
+            <img src={negocio.foto_principal_url} alt="Fachada del negocio" className="aspect-[16/10] w-full border-2 border-border object-cover" />
+          ) : null}
+          <p className="text-[12.5px] text-text-muted">Estamos activando la galería de fotos (hasta 5). Vuelve en unos minutos.</p>
         </div>
-        <p className="border-l-4 border-accent bg-accent-soft px-3 py-2 text-[12.5px] leading-relaxed text-text">
-          Esta es la fotografía principal que verán tus clientes en StylerNow. Usa una imagen actual de la fachada, bien iluminada y nítida.
-        </p>
-        {hayImagenes ? (
-          <label className="inline-flex w-fit cursor-pointer items-center border-2 border-border px-3 py-2 font-mono text-[11px] font-bold uppercase text-text hover:bg-text hover:text-bg">
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className="sr-only"
-              disabled={subiendo}
-              onChange={(e) => void cambiarFoto(e.target.files?.[0])}
-            />
-            {subiendo ? "Subiendo…" : foto ? "Reemplazar fotografía" : "Subir fotografía"}
-          </label>
-        ) : (
-          <p className="text-[12.5px] text-text-muted">La carga de fotografías no está disponible por ahora.</p>
-        )}
-      </div>
+      ) : (
+        <GaleriaNegocio negocioId={negocio.id} fotos={fotos} hayImagenes={hayImagenes} />
+      )}
 
       <form onSubmit={guardar} className="flex flex-col gap-5">
         <label className="flex flex-col gap-2">

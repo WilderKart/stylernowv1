@@ -52,6 +52,15 @@ async function cargarNegocio(slug: string) {
       (supabase as unknown as { rpc: (n: string, a: object) => Promise<{ data: boolean | null }> }).rpc("negocio_verificado", { p_negocio_id: negocio.id }),
     ]);
 
+  // Galería (migración 185): si la tabla aún no existe o está vacía, el perfil sigue con la foto principal.
+  const { data: fotosGaleria } = await (supabase as unknown as {
+    from: (t: string) => { select: (c: string) => { eq: (k: string, v: string) => { order: (c: string) => Promise<{ data: { url: string; es_principal: boolean }[] | null }> } } };
+  })
+    .from("negocio_foto")
+    .select("url, es_principal")
+    .eq("negocio_id", negocio.id)
+    .order("orden");
+
   const calificaciones = (resenas ?? []).map((r) => r.calificacion);
   const promedio =
     calificaciones.length > 0
@@ -66,6 +75,7 @@ async function cargarNegocio(slug: string) {
     resenas: resenas ?? [],
     promedio,
     verificado: verificado === true,
+    galeria: (fotosGaleria ?? []).filter((f) => !f.es_principal).map((f) => f.url),
   };
 }
 
@@ -104,7 +114,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
   const datos = await cargarNegocio(slug);
   if (!datos) notFound();
 
-  const { negocio, sedes, servicios, staff, resenas, promedio, verificado } = datos;
+  const { negocio, sedes, servicios, staff, resenas, promedio, verificado, galeria } = datos;
   const sede = sedes[0];
   const horarioHoy = sede ? horarioDeHoy(sede.horario_base, sede.zona_horaria ?? TZ_POR_DEFECTO) : null;
   const favoritoInicial = await esFavorito(negocio.id);
@@ -234,6 +244,16 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
           <BotonCompartir nombre={negocio.nombre} slug={negocio.slug} />
           <BotonFavorito negocioId={negocio.id} slug={negocio.slug} favoritoInicial={favoritoInicial} />
         </div>
+
+        {galeria.length > 0 ? (
+          <ul aria-label="Más fotos del negocio" className="flex gap-2 overflow-x-auto px-4 pt-3">
+            {galeria.map((url, i) => (
+              <li key={url} className="shrink-0">
+                <Photo src={url} alt={`${nombreVisible} ${i + 2}`} className="!h-[88px] !w-[120px] border-2 border-line" />
+              </li>
+            ))}
+          </ul>
+        ) : null}
 
         <div className="px-4 pt-3.5 pb-1.5">
           <Num>

@@ -239,3 +239,28 @@ export async function leerDocumentoPrivado(
     longitud: res.headers.get("content-length"),
   };
 }
+
+/**
+ * Borra una imagen pública (`upload`) de Cloudinary. Solo servidor, firmado con el secreto.
+ * Se usa al eliminar o reemplazar una foto de la galería; un fallo aquí no debe romper la operación del usuario
+ * (el registro en la base ya cambió), así que devuelve un booleano en vez de lanzar.
+ */
+export async function borrarImagenCloudinary(publicId: string, config?: ConfigCloudinary): Promise<boolean> {
+  const cfg = config ?? configCloudinary();
+  if (!cfg || !publicId) return false;
+  const params: Record<string, string | number> = { public_id: publicId, invalidate: "true", timestamp: Math.floor(Date.now() / 1000) };
+  const cuerpo = new FormData();
+  for (const [k, v] of Object.entries(params)) cuerpo.append(k, String(v));
+  cuerpo.append("api_key", cfg.apiKey);
+  cuerpo.append("signature", firmarParametros(params, cfg.apiSecret));
+  try {
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(cfg.cloudName)}/image/destroy`, {
+      method: "POST",
+      body: cuerpo,
+      cache: "no-store",
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}

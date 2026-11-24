@@ -153,25 +153,109 @@ export async function listarMiDisponibilidad(vinculoId: string): Promise<Resulta
   }
 }
 
-// V1: una sola franja horaria por día (simplificación consistente con el
-// resto del proyecto — la tabla soporta múltiples franjas, pero no había
-// ningún caso de uso concreto de turnos partidos para Staff todavía).
+type RpcLibre = { rpc: (n: string, a: object) => Promise<{ data: unknown; error: { message: string } | null }> };
+type DesdeLibre = { from: (t: string) => any }; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+const MENSAJES_SOLICITUD: Record<string, string> = {
+  HORARIO_INVALIDO: "Revisa las horas: la hora de fin debe ser posterior a la de inicio.",
+  RANGO_INVALIDO: "La fecha de fin debe ser posterior al inicio.",
+  RANGO_EN_EL_PASADO: "La ausencia debe terminar en el futuro.",
+  DEMASIADAS_SOLICITUDES_PENDIENTES: "Ya tienes varias solicitudes pendientes. Espera la respuesta de la barbería.",
+  NO_AUTORIZADO: "No tienes permiso para esta acción.",
+  SEDE_INVALIDA: "La sede no es válida.",
+  SOLICITUD_NO_CANCELABLE: "Esa solicitud ya no se puede cancelar.",
+};
+function traducirSolicitud(m: string) {
+  const k = Object.keys(MENSAJES_SOLICITUD).find((c) => m.includes(c));
+  return k ? MENSAJES_SOLICITUD[k] : "No pudimos guardar el cambio. Intenta de nuevo.";
+}
+
+/** La migración 187 aún no está aplicada en esa base: se usa el camino anterior (directo) para no cortar a nadie. */
+const funcionNoExiste = (e: { message: string }) => /could not find the function|schema cache|PGRST202/i.test(e.message);
+
+export type EstadoSolicitud = "APROBADA" | "PENDIENTE";
+
+/**
+ * Cambia un día del horario semanal. En ESSENTIAL (y si quien edita es el propietario) se aplica de una; desde STUDIO hacia
+ * arriba queda como PROPUESTA que la barbería debe aprobar, y se le avisa. La decisión la toma la base (solicitar_cambio_horario).
+ * V1: una franja por día (la tabla admite varias, pero no hay un caso de uso de turnos partidos todavía).
+ */
 export async function guardarDiaDisponibilidad(
   vinculoId: string,
   sedeId: string,
   diaSemana: number,
   horaInicio: string | null,
   horaFin: string | null
-): Promise<Resultado> {
+): Promise<Resultado<{ estado: EstadoSolicitud }>> {
   try {
     const supabase = (await usuarioActual()).supabase;
-    await supabase.from("disponibilidad").delete().eq("vinculo_id", vinculoId).eq("dia_semana", diaSemana);
-    if (horaInicio && horaFin) {
-      const { error } = await supabase
-        .from("disponibilidad")
-        .insert({ vinculo_id: vinculoId, sede_id: sedeId, dia_semana: diaSemana, hora_inicio: horaInicio, hora_fin: horaFin });
-      if (error) return { ok: false, error: error.message };
+    // Base: la propuesta pendiente (si ya hay una) o el horario vigente.
+    const { data: pend } = await (supabase as unknown as DesdeLibre)
+      .from("solicitud_horario").select("propuesta").eq("vinculo_id", vinculoId).eq("sede_id", sedeId).eq("estado", "PENDIENTE").maybeSingle();
+    let semana: { dia_semana: number; hora_inicio: string; hora_fin: string }[];
+    if (pend?.propuesta) {
+      semana = pend.propuesta as typeof semana;
+    } else {
+      const { data: actual } = await supabase.from("disponibilidad").select("dia_semana, hora_inicio, hora_fin").eq("vinculo_id", vinculoId).eq("sede_id", sedeId);
+      semana = (actual ?? []).map((d) => ({ dia_semana: d.dia_semana, hora_inicio: d.hora_inicio, hora_fin: d.hora_fin }));
     }
+    semana = semana.filter((d) => d.dia_semana !== diaSemana);
+    if (horaInicio && horaFin) semana.push({ dia_semana: diaSemana, hora_inicio: horaInicio, hora_fin: horaFin });
+    const { data, error } = await (supabase as unknown as RpcLibre).rpc("solicitar_cambio_horario", { p_vinculo_id: vinculoId, p_sede_id: sedeId, p_dias: semana });
+    if (error && funcionNoExiste(error)) {
+      await supabase.from("disponibilidad").delete().eq("vinculo_id", vinculoId).eq("dia_semana", diaSemana);
+      if (horaInicio && horaFin) {
+        const { error: e2 } = await supabase
+          .from("disponibilidad")
+          .insert({ vinculo_id: vinculoId, sede_id: sedeId, dia_semana: diaSemana, hora_inicio: horaInicio, hora_fin: horaFin });
+        if (e2) return { ok: false, error: "No pudimos guardar el horario. Intenta de nuevo." };
+      }
+      revalidatePath("/staff/perfil");
+      return { ok: true, data: { estado: "APROBADA" } };
+    }
+    if (error) return { ok: false, error: traducirSolicitud(error.message) };
+    revalidatePath("/staff/perfil");
+    return { ok: true, data: { estado: data === "PENDIENTE" ? "PENDIENTE" : "APROBADA" } };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
+export interface MisSolicitudes {
+  horario: { estado: "PENDIENTE" | "RECHAZADA"; motivoDecision: string | null } | null;
+  ausencias: { id: string; tipo: string; fechaInicio: string; fechaFin: string; motivo: string | null; estado: "PENDIENTE" | "RECHAZADA"; motivoDecision: string | null }[];
+}
+
+/** Solicitudes pendientes o rechazadas recientemente (las aprobadas ya son parte de la agenda). */
+export async function listarMisSolicitudes(vinculoId: string): Promise<Resultado<MisSolicitudes>> {
+  try {
+    const supabase = (await usuarioActual()).supabase as unknown as DesdeLibre;
+    const desde = new Date(Date.now() - 30 * 86400000).toISOString();
+    const [h, a] = await Promise.all([
+      supabase.from("solicitud_horario").select("estado, motivo_decision, created_at").eq("vinculo_id", vinculoId).in("estado", ["PENDIENTE", "RECHAZADA"]).gte("created_at", desde).order("created_at", { ascending: false }).limit(1),
+      supabase.from("solicitud_ausencia").select("id, tipo, fecha_inicio, fecha_fin, motivo, estado, motivo_decision").eq("vinculo_id", vinculoId).in("estado", ["PENDIENTE", "RECHAZADA"]).gte("created_at", desde).order("created_at", { ascending: false }).limit(10),
+    ]);
+    const hf = (h.data ?? [])[0];
+    return {
+      ok: true,
+      data: {
+        horario: hf ? { estado: hf.estado, motivoDecision: hf.motivo_decision } : null,
+        ausencias: ((a.data ?? []) as Record<string, string | null>[]).map((x) => ({
+          id: x.id as string, tipo: x.tipo as string, fechaInicio: x.fecha_inicio as string, fechaFin: x.fecha_fin as string,
+          motivo: x.motivo, estado: x.estado as "PENDIENTE" | "RECHAZADA", motivoDecision: x.motivo_decision,
+        })),
+      },
+    };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
+export async function cancelarSolicitudAusencia(id: string): Promise<Resultado> {
+  try {
+    const supabase = (await usuarioActual()).supabase as unknown as RpcLibre;
+    const { error } = await supabase.rpc("cancelar_solicitud_ausencia", { p_solicitud_id: id });
+    if (error) return { ok: false, error: traducirSolicitud(error.message) };
     revalidatePath("/staff/perfil");
     return { ok: true };
   } catch (e) {
@@ -204,16 +288,31 @@ export async function listarMisBloqueos(vinculoId: string): Promise<Resultado<Bl
   }
 }
 
-export async function crearMiBloqueo(vinculoId: string, fechaInicio: string, fechaFin: string, motivo: string): Promise<Resultado> {
+export async function crearMiBloqueo(
+  vinculoId: string,
+  fechaInicio: string,
+  fechaFin: string,
+  motivo: string,
+  tipo: "PERMISO" | "VACACIONES" | "INCAPACIDAD" | "OTRO" = "PERMISO"
+): Promise<Resultado<{ estado: EstadoSolicitud }>> {
   try {
     const supabase = (await usuarioActual()).supabase;
     if (new Date(fechaFin) <= new Date(fechaInicio)) return { ok: false, error: "La fecha de fin debe ser posterior al inicio." };
-    const { error } = await supabase
-      .from("bloqueo_ausencia")
-      .insert({ vinculo_id: vinculoId, fecha_inicio: fechaInicio, fecha_fin: fechaFin, motivo: motivo || null });
-    if (error) return { ok: false, error: error.message };
+    // ESSENTIAL / propietario: queda registrada de una. Desde STUDIO: se envía a la barbería para su aprobación.
+    const { data, error } = await (supabase as unknown as RpcLibre).rpc("solicitar_ausencia", {
+      p_vinculo_id: vinculoId, p_inicio: fechaInicio, p_fin: fechaFin, p_tipo: tipo, p_motivo: motivo || null,
+    });
+    if (error && funcionNoExiste(error)) {
+      const { error: e2 } = await supabase
+        .from("bloqueo_ausencia")
+        .insert({ vinculo_id: vinculoId, fecha_inicio: fechaInicio, fecha_fin: fechaFin, motivo: motivo || null });
+      if (e2) return { ok: false, error: "No pudimos guardar la ausencia. Intenta de nuevo." };
+      revalidatePath("/staff/perfil");
+      return { ok: true, data: { estado: "APROBADA" } };
+    }
+    if (error) return { ok: false, error: traducirSolicitud(error.message) };
     revalidatePath("/staff/perfil");
-    return { ok: true };
+    return { ok: true, data: { estado: data === "PENDIENTE" ? "PENDIENTE" : "APROBADA" } };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
   }
@@ -222,8 +321,9 @@ export async function crearMiBloqueo(vinculoId: string, fechaInicio: string, fec
 export async function eliminarMiBloqueo(id: string): Promise<Resultado> {
   try {
     const supabase = (await usuarioActual()).supabase;
-    const { error } = await supabase.from("bloqueo_ausencia").delete().eq("id", id);
+    const { data: borradas, error } = await supabase.from("bloqueo_ausencia").delete().eq("id", id).select("id");
     if (error) return { ok: false, error: error.message };
+    if (!borradas || borradas.length === 0) return { ok: false, error: "Para quitar una ausencia aprobada, pídele a tu barbería que la elimine." };
     revalidatePath("/staff/perfil");
     return { ok: true };
   } catch (e) {

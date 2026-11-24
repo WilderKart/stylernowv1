@@ -2,11 +2,12 @@
 
 import type { RolPanel } from "@/lib/auth/resolver-contexto";
 import { cn } from "@/lib/utils";
-import { CalendarDays, Gift, LayoutDashboard, Scissors, Settings, ShieldCheck, Users, type LucideIcon } from "lucide-react";
+import { CalendarDays, Gift, LayoutDashboard, Menu, Scissors, Settings, ShieldCheck, Users, X, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
-/** Iconos de la barra lateral (escritorio). Los módulos sin icono propio usan un cuadro de la marca. */
+/** Iconos de la barra lateral y del menú. Los módulos sin icono propio usan un cuadro de la marca. */
 const ICONOS: Record<string, LucideIcon> = {
   "/panel": LayoutDashboard,
   "/panel/agenda": CalendarDays,
@@ -17,59 +18,118 @@ const ICONOS: Record<string, LucideIcon> = {
   "/panel/perfil-publico": Settings,
 };
 
+interface Item {
+  href: string;
+  etiqueta: string;
+}
+interface Grupo {
+  titulo: string;
+  items: Item[];
+}
+
 /**
- * Navegación del Panel Negocio (02-UX/09_Business_Panel.md, ADR-006:
- * compartida entre Barbería y Guardian con ítems condicionados por rol).
+ * Navegación del Panel Negocio (02-UX/09_Business_Panel.md, ADR-006: compartida entre Barbería y Guardian con ítems
+ * condicionados por rol). Solo lista módulos que YA EXISTEN como pantalla real.
  *
- * Solo lista módulos que YA EXISTEN como pantalla real — "Sedes" no
- * aparece para Guardian a propósito (administra la suya desde su propio
- * Resumen, no gestiona una lista de sedes ajenas). Cada módulo nuevo agrega
- * su propia entrada aquí, ya filtrada por rol — nunca una lista separada.
- *
- * Escritorio: barra lateral oscura fija. Móvil: franja superior con todos los
- * módulos + barra inferior con los cuatro accesos de uso diario.
+ * Los módulos están AGRUPADOS por tema (Operación, Equipo, Marketing, Dinero, Mi negocio) para que la lista larga se lea
+ * de un vistazo. Escritorio: barra lateral oscura fija. Móvil: barra superior con botón de menú (cajón con los mismos
+ * grupos) + barra inferior con los cuatro accesos de uso diario. Ya no hay franja con desplazamiento horizontal.
  */
 export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** Perfil profesional activo: añade el acceso a la agenda propia (/staff). */ prestaServicios?: boolean }) {
   const pathname = usePathname();
+  const [abierto, setAbierto] = useState(false);
 
+  useEffect(() => {
+    if (!abierto) return;
+    const alTeclear = (e: KeyboardEvent) => e.key === "Escape" && setAbierto(false);
+    document.addEventListener("keydown", alTeclear);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", alTeclear);
+      document.body.style.overflow = "";
+    };
+  }, [abierto]);
+
+  const dueno = rol === "BARBERIA";
   // Administrador delegado (migración 161): su superficie son los módulos revisados para él. Hoy solo el equipo; el resto del panel
   // sigue siendo del propietario hasta revisar sus políticas (denegado por defecto).
-  const items = rol === "ADMIN"
-    ? [{ href: "/panel/staff", etiqueta: "Equipo" }, ...(prestaServicios ? [{ href: "/staff", etiqueta: "Mi agenda" }] : [])]
-    : [
-    { href: "/panel", etiqueta: "Resumen" },
-    ...(rol === "BARBERIA" ? [{ href: "/panel/sedes", etiqueta: "Sedes" }] : []),
-    ...(rol === "BARBERIA" ? [{ href: "/panel/perfil-publico", etiqueta: "Perfil público" }] : []),
-    ...(rol === "BARBERIA" ? [{ href: "/panel/verificacion", etiqueta: "Verificación" }] : []),
-    // Agenda, Staff y Servicios son compartidos entre Barbería y Guardian
-    // (ADR-006) — el alcance lo resuelve la propia pantalla vía `permisos`,
-    // nunca un ítem de nav distinto por rol.
-    { href: "/panel/agenda", etiqueta: "Agenda" },
-    { href: "/panel/crm", etiqueta: "Clientes" },
-    { href: "/panel/pos", etiqueta: "Caja" },
-    { href: "/panel/inventario", etiqueta: "Inventario" },
-    { href: "/panel/staff", etiqueta: "Staff" },
-    { href: "/panel/servicios", etiqueta: "Servicios" },
-    { href: "/panel/reportes", etiqueta: "Reportes" },
-    ...(rol === "BARBERIA" ? [{ href: "/panel/promociones", etiqueta: "Promociones" }] : []),
-    ...(rol === "BARBERIA" ? [{ href: "/panel/ads", etiqueta: "Publicidad" }] : []),
-    ...(rol === "BARBERIA" ? [{ href: "/panel/lealtad", etiqueta: "Lealtad" }] : []),
-    ...(rol === "BARBERIA" ? [{ href: "/panel/ia", etiqueta: "IA" }] : []),
-    ...(rol === "BARBERIA" ? [{ href: "/panel/whatsapp", etiqueta: "WhatsApp" }] : []),
-    ...(rol === "BARBERIA" ? [{ href: "/panel/politica", etiqueta: "Anticipo y cancelaciones" }] : []),
-    ...(rol === "BARBERIA" ? [{ href: "/panel/cobros", etiqueta: "Cobros" }] : []),
-    ...(rol === "BARBERIA" ? [{ href: "/panel/libro", etiqueta: "Libro" }] : []),
-    ...(rol === "BARBERIA" ? [{ href: "/panel/wallet", etiqueta: "Wallet" }] : []),
-    ...(rol === "BARBERIA" ? [{ href: "/panel/marca", etiqueta: "Mi Marca" }] : []),
-    ...(rol === "BARBERIA" ? [{ href: "/panel/suscripcion", etiqueta: "Mi Plan" }] : []),
-    { href: "/panel/soporte", etiqueta: "Soporte" },
-    ...(prestaServicios && rol === "BARBERIA" ? [{ href: "/staff", etiqueta: "Mi agenda" }] : []),
-    ...(rol === "BARBERIA" ? [{ href: "/panel/auditoria", etiqueta: "Auditoría" }] : []),
-  ];
+  const grupos: Grupo[] =
+    rol === "ADMIN"
+      ? [{ titulo: "Equipo", items: [{ href: "/panel/staff", etiqueta: "Equipo" }, ...(prestaServicios ? [{ href: "/staff", etiqueta: "Mi agenda" }] : [])] }]
+      : [
+          {
+            titulo: "Operación",
+            items: [
+              { href: "/panel", etiqueta: "Resumen" },
+              { href: "/panel/agenda", etiqueta: "Agenda" },
+              { href: "/panel/crm", etiqueta: "Clientes" },
+              { href: "/panel/pos", etiqueta: "Caja" },
+              { href: "/panel/inventario", etiqueta: "Inventario" },
+              ...(prestaServicios && dueno ? [{ href: "/staff", etiqueta: "Mi agenda" }] : []),
+            ],
+          },
+          {
+            titulo: "Equipo y servicios",
+            items: [
+              { href: "/panel/staff", etiqueta: "Staff" },
+              { href: "/panel/staff/solicitudes", etiqueta: "Solicitudes" },
+              { href: "/panel/servicios", etiqueta: "Servicios" },
+              ...(dueno ? [{ href: "/panel/sedes", etiqueta: "Sedes" }] : []),
+            ],
+          },
+          ...(dueno
+            ? [
+                {
+                  titulo: "Marketing",
+                  items: [
+                    { href: "/panel/promociones", etiqueta: "Promociones" },
+                    { href: "/panel/ads", etiqueta: "Publicidad" },
+                    { href: "/panel/lealtad", etiqueta: "Lealtad" },
+                    { href: "/panel/whatsapp", etiqueta: "WhatsApp" },
+                    { href: "/panel/ia", etiqueta: "IA" },
+                  ],
+                },
+                {
+                  titulo: "Dinero",
+                  items: [
+                    { href: "/panel/cobros", etiqueta: "Cobros" },
+                    { href: "/panel/libro", etiqueta: "Libro" },
+                    { href: "/panel/wallet", etiqueta: "Wallet" },
+                    { href: "/panel/reportes", etiqueta: "Reportes" },
+                    { href: "/panel/politica", etiqueta: "Anticipo y cancelaciones" },
+                    { href: "/panel/suscripcion", etiqueta: "Mi Plan" },
+                  ],
+                },
+                {
+                  titulo: "Mi negocio",
+                  items: [
+                    { href: "/panel/perfil-publico", etiqueta: "Perfil público" },
+                    { href: "/panel/marca", etiqueta: "Mi Marca" },
+                    { href: "/panel/verificacion", etiqueta: "Verificación" },
+                    { href: "/panel/auditoria", etiqueta: "Auditoría" },
+                    { href: "/panel/soporte", etiqueta: "Soporte" },
+                  ],
+                },
+              ]
+            : [
+                {
+                  titulo: "Más",
+                  items: [
+                    { href: "/panel/reportes", etiqueta: "Reportes" },
+                    { href: "/panel/soporte", etiqueta: "Soporte" },
+                  ],
+                },
+              ]),
+        ];
 
-  const esActivo = (href: string) => (href === "/panel" ? pathname === "/panel" : pathname.startsWith(href));
+  const esActivo = (href: string) => {
+    if (href === "/panel") return pathname === "/panel";
+    // «Staff» no debe quedar activo cuando se está en su subpágina «Solicitudes».
+    if (href === "/panel/staff") return pathname.startsWith("/panel/staff") && !pathname.startsWith("/panel/staff/solicitudes");
+    return pathname.startsWith(href);
+  };
 
-  // Barra inferior móvil: los cuatro accesos de uso diario (el resto sigue en la franja superior).
+  // Barra inferior móvil: los cuatro accesos de uso diario.
   const inferior =
     rol === "ADMIN"
       ? []
@@ -77,10 +137,48 @@ export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** 
           { href: "/panel", etiqueta: "Inicio", Icono: LayoutDashboard },
           { href: "/panel/agenda", etiqueta: "Agenda", Icono: CalendarDays },
           { href: "/panel/staff", etiqueta: "Barberos", Icono: Users },
-          rol === "BARBERIA"
-            ? { href: "/panel/perfil-publico", etiqueta: "Ajustes", Icono: Settings }
-            : { href: "/panel/soporte", etiqueta: "Soporte", Icono: Settings },
+          dueno ? { href: "/panel/perfil-publico", etiqueta: "Ajustes", Icono: Settings } : { href: "/panel/soporte", etiqueta: "Soporte", Icono: Settings },
         ];
+
+  const listaGrupos = (conIconos: boolean, alNavegar?: () => void) => (
+    <div className="flex flex-col gap-4">
+      {grupos.map((g) => (
+        <section key={g.titulo} aria-label={g.titulo}>
+          <h3 className="px-3 pb-1 font-mono text-[10px] font-bold uppercase tracking-[0.66px] text-white/45">{g.titulo}</h3>
+          <ul className="flex flex-col gap-0.5">
+            {g.items.map((item) => {
+              const activo = esActivo(item.href);
+              const Icono = ICONOS[item.href];
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={alNavegar}
+                    aria-current={activo ? "page" : undefined}
+                    className={cn(
+                      "flex min-h-11 items-center gap-3 border-l-4 px-3 py-2.5 text-[12.5px] font-bold uppercase tracking-wide transition-colors",
+                      activo ? "border-[#ff4d00] bg-white/10 text-[#ff4d00]" : "border-transparent text-white/75 hover:bg-white/5 hover:text-white"
+                    )}
+                  >
+                    {conIconos ? (
+                      Icono ? (
+                        <Icono className="size-4 shrink-0" aria-hidden />
+                      ) : (
+                        <span className="w-4 shrink-0 text-center text-[#ff4d00]" aria-hidden>
+                          ▪
+                        </span>
+                      )
+                    ) : null}
+                    {item.etiqueta}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
+    </div>
+  );
 
   return (
     <>
@@ -89,60 +187,44 @@ export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** 
         <Link href="/panel" className="px-5 py-5 font-display text-[22px] font-bold uppercase leading-none tracking-tight">
           STYLER<span className="text-[#ff4d00]">NOW</span>
         </Link>
-        <nav className="flex-1 overflow-y-auto px-2 pb-4">
-          <ul className="flex flex-col gap-0.5">
-            {items.map((item) => {
-              const activo = esActivo(item.href);
-              const Icono = ICONOS[item.href];
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    aria-current={activo ? "page" : undefined}
-                    className={cn(
-                      "flex items-center gap-3 border-l-4 px-3 py-2.5 text-[12.5px] font-bold uppercase tracking-wide transition-colors",
-                      activo ? "border-[#ff4d00] bg-white/10 text-[#ff4d00]" : "border-transparent text-white/70 hover:bg-white/5 hover:text-white"
-                    )}
-                  >
-                    {Icono ? (
-                      <Icono className="size-4 shrink-0" aria-hidden />
-                    ) : (
-                      <span className="w-4 shrink-0 text-center text-[#ff4d00]" aria-hidden>
-                        ▪
-                      </span>
-                    )}
-                    {item.etiqueta}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-        {rol === "GUARDIAN" ? (
-          <p className="border-t border-white/10 px-5 py-3 text-[11px] font-bold uppercase tracking-wide text-[#ff4d00]">Guardian</p>
-        ) : null}
+        <nav className="flex-1 overflow-y-auto px-2 pb-4">{listaGrupos(true)}</nav>
+        {rol === "GUARDIAN" ? <p className="border-t border-white/10 px-5 py-3 text-[11px] font-bold uppercase tracking-wide text-[#ff4d00]">Guardian</p> : null}
       </aside>
 
-      {/* Móvil: franja superior con todos los módulos. */}
-      <nav className="border-b border-border-subtle bg-surface lg:hidden">
-        <div className="mx-auto flex w-full max-w-4xl gap-1 overflow-x-auto px-5 sm:px-10">
-          {items.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "shrink-0 border-b-2 px-3.5 py-3 text-[12.5px] font-bold uppercase tracking-wide transition-colors",
-                esActivo(item.href) ? "border-accent text-accent" : "border-transparent text-text-faint hover:text-text-muted"
-              )}
-            >
-              {item.etiqueta}
-            </Link>
-          ))}
-          {rol === "GUARDIAN" ? (
-            <span className="ml-auto flex shrink-0 items-center text-[11px] font-bold uppercase tracking-wide text-accent">Guardian</span>
-          ) : null}
+      {/* Móvil: barra superior con botón de menú. */}
+      <header className="sticky top-0 z-30 flex items-center justify-between bg-[#0a0a0a] px-4 py-2.5 text-white lg:hidden">
+        <Link href="/panel" className="font-display text-[20px] font-bold uppercase leading-none tracking-tight">
+          STYLER<span className="text-[#ff4d00]">NOW</span>
+        </Link>
+        <button
+          type="button"
+          onClick={() => setAbierto(true)}
+          aria-label="Abrir menú"
+          aria-expanded={abierto}
+          className="flex min-h-11 items-center gap-2 border-2 border-white/30 px-3 font-mono text-[11px] font-bold uppercase"
+        >
+          <Menu className="size-4" aria-hidden />
+          Menú
+        </button>
+      </header>
+
+      {/* Móvil: cajón con los módulos agrupados. */}
+      {abierto ? (
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menú del panel">
+          <button type="button" aria-label="Cerrar menú" className="absolute inset-0 bg-black/70" onClick={() => setAbierto(false)} />
+          <div className="absolute inset-y-0 left-0 flex w-[84%] max-w-[320px] flex-col bg-[#0a0a0a] text-white shadow-[4px_0_0_0_#ff4d00]">
+            <div className="flex items-center justify-between px-4 py-3">
+              <span className="font-display text-[20px] font-bold uppercase leading-none">
+                STYLER<span className="text-[#ff4d00]">NOW</span>
+              </span>
+              <button type="button" onClick={() => setAbierto(false)} aria-label="Cerrar menú" className="flex size-11 items-center justify-center border-2 border-white/30">
+                <X className="size-5" aria-hidden />
+              </button>
+            </div>
+            <nav className="flex-1 overflow-y-auto px-2 pb-6">{listaGrupos(true, () => setAbierto(false))}</nav>
+          </div>
         </div>
-      </nav>
+      ) : null}
 
       {/* Móvil: barra inferior de uso diario. */}
       {inferior.length > 0 ? (

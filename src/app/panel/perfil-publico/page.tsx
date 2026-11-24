@@ -2,6 +2,7 @@ import { almacenamientoDeImagenesDisponible } from "@/app/panel/onboarding/actio
 import { PanelNav } from "@/components/panel/panel-nav";
 import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { createClient } from "@/lib/supabase/server";
+import { listarGaleria } from "./galeria-actions";
 import { VistaPerfilPublico } from "./vista-perfil-publico";
 
 export const metadata = { title: "Perfil público" };
@@ -15,11 +16,13 @@ export default async function PerfilPublicoPage() {
     .eq("id", contexto.negocioId!)
     .single();
 
+  const galeria = await listarGaleria(contexto.negocioId!);
+
   return (
     <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-8 sm:px-10">
-        {negocio ? <VistaPerfilPublico negocio={negocio} hayImagenes={await almacenamientoDeImagenesDisponible()} /> : null}
+        {negocio ? <VistaPerfilPublico negocio={negocio} hayImagenes={await almacenamientoDeImagenesDisponible()} fotos={galeria.ok ? galeria.data : null} /> : null}
       </main>
     </div>
   );

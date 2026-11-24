@@ -22,6 +22,11 @@ const MENSAJES_ERROR: Record<string, string> = {
   RESERVA_NO_ENCONTRADA: "No encontramos esa cita.",
   NO_AUTORIZADO: "Esa cita no es tuya.",
   RESERVA_NO_INICIABLE: "Solo puedes hacer check-in de una cita confirmada.",
+  CHECKIN_SOLO_EL_DIA_DE_LA_CITA: "El check-in solo se puede hacer el día de la cita. Si el cliente te pidió moverla, usa «Reprogramar».",
+  CLIENTE_DEBE_SOLICITARLO: "Solo puedes reprogramar si el cliente lo solicitó. Confírmalo para continuar.",
+  HORARIO_NO_DISPONIBLE: "Ese horario ya no está disponible. Elige otro.",
+  HORARIO_INVALIDO: "Elige un horario futuro.",
+  RESERVA_NO_REAGENDABLE: "Esta cita ya no se puede reprogramar.",
   RESERVA_NO_FINALIZABLE: "Solo puedes hacer check-out de una cita en curso.",
   RESERVA_NO_COMPLETABLE: "Esta cita ya no se puede completar.",
   SUSCRIPCION_RESTRINGIDA: "La suscripción del negocio no permite completar esta acción.",
@@ -122,6 +127,47 @@ export async function completarCitaSinPos(reservaId: string): Promise<Resultado>
     revalidatePath("/staff/agenda");
     revalidatePath("/panel/agenda");
     revalidatePath("/panel/lealtad");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? traducirError(e.message) : "Error inesperado." };
+  }
+}
+
+export interface HorarioLibre {
+  horaInicio: string;
+  horaFin: string;
+}
+
+/** Horarios libres para mover una de MIS citas (mismo barbero y servicios). La base vuelve a validar quién puede. */
+export async function listarHorariosParaReprogramar(reservaId: string, fecha: string): Promise<Resultado<HorarioLibre[]>> {
+  try {
+    const id = z.string().uuid().parse(reservaId);
+    const dia = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).parse(fecha);
+    const { supabase } = await usuarioActual();
+    const rpc = supabase.rpc.bind(supabase) as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data: { hora_inicio: string; hora_fin: string }[] | null; error: { message: string } | null }>;
+    const { data, error } = await rpc("slots_para_reagendar", { p_reserva_id: id, p_fecha: dia });
+    if (error) return { ok: false, error: traducirError(error.message) };
+    return { ok: true, data: (data ?? []).map((x) => ({ horaInicio: x.hora_inicio, horaFin: x.hora_fin })) };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? traducirError(e.message) : "Error inesperado." };
+  }
+}
+
+/**
+ * El barbero mueve la cita SOLO porque el cliente lo pidió (clienteSolicito debe ser true: queda en auditoría).
+ * La agenda se actualiza al instante y se le avisa al cliente.
+ */
+export async function reprogramarCitaPorSolicitudDelCliente(reservaId: string, horaISO: string, clienteSolicito: boolean): Promise<Resultado> {
+  try {
+    const id = z.string().uuid().parse(reservaId);
+    if (!clienteSolicito) return { ok: false, error: traducirError("CLIENTE_DEBE_SOLICITARLO") };
+    const hora = z.string().datetime({ offset: true }).parse(horaISO);
+    const { supabase } = await usuarioActual();
+    const rpc = supabase.rpc.bind(supabase) as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+    const { error } = await rpc("reagendar_reserva", { p_reserva_id: id, p_nuevo_inicio: hora, p_cliente_solicito: true });
+    if (error) return { ok: false, error: traducirError(error.message) };
+    revalidatePath("/staff/agenda");
+    revalidatePath("/panel/agenda");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? traducirError(e.message) : "Error inesperado." };
