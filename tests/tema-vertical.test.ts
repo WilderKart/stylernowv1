@@ -52,3 +52,15 @@ describe("categoría elegida al crear la cuenta", () => {
     expect(OPCIONES_SERVICIO_REGISTRO.map((o) => verticalDeCategorias([o.valor]))).toEqual([null, null, "salon", "spa", "unas"]);
   });
 });
+
+describe("categoriaDeAspecto", () => {
+  it("lleva categorías afines a una de las cinco opciones", async () => {
+    const { categoriaDeAspecto } = await import("@/lib/tema/vertical");
+    expect(categoriaDeAspecto("estilismo")).toBe("salon");
+    expect(categoriaDeAspecto("masajes")).toBe("spa");
+    expect(categoriaDeAspecto("lashista")).toBe("manicura");
+    expect(categoriaDeAspecto("tatuajes")).toBe("tatuajes");
+    expect(categoriaDeAspecto("<x>")).toBeNull();
+    expect(categoriaDeAspecto(null)).toBeNull();
+  });
+});

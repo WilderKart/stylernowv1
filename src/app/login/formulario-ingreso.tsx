@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/i18n/proveedor";
 import { ArrowUpRight, ChevronLeft, Scissors, User } from "lucide-react";
-import Image from "next/image";
+import { AuthDividido } from "@/components/auth/auth-dividido";
+import type { CategoriaRegistro } from "@/lib/tema/vertical";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useSyncExternalStore } from "react";
@@ -28,7 +29,9 @@ export function FormularioIngreso({
   siguiente,
   aviso,
   invitacion,
+  categoria = null,
 }: {
+  categoria?: CategoriaRegistro | null;
   siguiente: string;
   aviso?: "recuperada" | "enlace";
   /** Staff invitado que ya tiene cuenta: correo precargado y aviso de la invitación. */
@@ -105,36 +108,7 @@ export function FormularioIngreso({
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-app lg:grid lg:grid-cols-2">
-      {/* Panel visual / marca — solo escritorio */}
-      <aside className="relative hidden overflow-hidden bg-ink lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col">
-        <Image src="/images/login-barber-bg.jpg" alt="" fill priority sizes="50vw" className="object-cover" />
-        <div className="absolute inset-0 bg-[rgba(10,10,10,0.55)]" aria-hidden />
-        <div className="relative z-10 flex flex-1 flex-col justify-between gap-10 px-8 pt-8 pb-[21rem] xl:px-12 xl:pt-12 xl:pb-[21rem]">
-          <span className="font-display text-2xl leading-none font-black tracking-tight text-white uppercase">
-            Styler<span className="text-signal">Now</span>
-          </span>
-
-          <Poster as="h1" size={1} className="text-white xl:text-[88px]">
-            {t("auth.ing_t1")}
-            <br />
-            {t("auth.ing_t2")}
-            <br />
-            <Hot>{t("auth.ing_t3")}</Hot>
-          </Poster>
-
-          <Link
-            href="/para-negocios"
-            className="inline-flex w-fit max-w-sm flex-col gap-1 border-2 border-ink bg-signal px-5 py-4 text-ink shadow-hard transition-transform duration-100 ease-[cubic-bezier(0.2,0,0,1)] hover:-translate-y-0.5"
-          >
-            <span className="font-display text-lg leading-tight font-black uppercase">{t("login.negocio_q")}</span>
-            <span className="flex items-center gap-2 font-mono text-sm leading-4 font-bold tracking-[0.72px] text-white uppercase">
-              {t("login.negocio_cta")}
-            </span>
-          </Link>
-        </div>
-      </aside>
-
+    <AuthDividido categoria={categoria}>
       {/* Panel de formulario */}
       <div className="flex min-h-dvh flex-col bg-app">
         <div className="sticky top-0 z-[3] flex min-h-[52px] items-center gap-2 border-b border-[var(--grid)] bg-app py-1 pr-2 pl-1">
@@ -146,14 +120,14 @@ export function FormularioIngreso({
 
         <div className={`flex flex-1 flex-col px-4 pt-3 lg:pt-0 ${bannerCookies ? "pb-80 lg:pb-60" : "pb-16 lg:pb-0"}`}>
           <div className="mx-auto flex w-full max-w-lg flex-col lg:my-auto lg:max-w-md">
-            <Poster as="h1" size={3} className="pt-1 pb-4 break-words lg:hidden">
+            <Poster as="h1" size={3} className="pt-1 pb-4 break-words lg:pb-6 lg:text-[56px]">
               {t("auth.ing_t1")}
               <br />
               {t("auth.ing_t2")}
               <br />
               <Hot>{t("auth.ing_t3")}</Hot>
             </Poster>
-            <p className="body mb-4 text-text-muted break-words lg:mb-2">{t("auth.ing_intro")}</p>
+            <p className="body mb-4 text-text-muted break-words">{t("auth.ing_intro")}</p>
 
             <form onSubmit={onIngresar} className="flex flex-col gap-4" noValidate>
               {invitacion ? <Aviso>Ingresa con tu cuenta para continuar con la invitación de {invitacion.negocio}.</Aviso> : null}
@@ -209,10 +183,10 @@ export function FormularioIngreso({
                 <User className="size-5 shrink-0 text-text" aria-hidden />
               </Link>
 
-              {/* Registro de negocios — solo móvil (en escritorio vive en el panel izquierdo) */}
+              {/* Registro de negocios */}
               <Link
                 href="/para-negocios"
-                className="flex items-center justify-between gap-3 border-2 border-ink bg-signal px-4 py-3.5 text-ink shadow-hard transition-transform duration-100 ease-[cubic-bezier(0.2,0,0,1)] hover:-translate-y-0.5 lg:hidden"
+                className="flex items-center justify-between gap-3 border-2 border-ink bg-signal px-4 py-3.5 text-ink shadow-hard transition-transform duration-100 ease-[cubic-bezier(0.2,0,0,1)] hover:-translate-y-0.5"
               >
                 <span className="flex min-w-0 flex-col gap-0.5">
                   <span className="font-mono text-xs leading-4 font-bold tracking-[0.72px] uppercase">{t("login.negocio_q")}</span>
@@ -226,7 +200,7 @@ export function FormularioIngreso({
           </div>
         </div>
       </div>
-    </div>
+    </AuthDividido>
   );
 }
 

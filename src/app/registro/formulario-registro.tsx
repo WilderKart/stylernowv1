@@ -21,7 +21,8 @@ import {
 import { ErrorForm, Hot, PantallaAuth, Separador } from "../login/_componentes/pantalla-auth";
 import { iniciarSesionConGoogle, registrarCuenta } from "../login/actions";
 import { SelectorServicio } from "./selector-servicio";
-import { verticalDeCategorias, type CategoriaRegistro } from "@/lib/tema/vertical";
+import { AuthDividido } from "@/components/auth/auth-dividido";
+import type { CategoriaRegistro } from "@/lib/tema/vertical";
 import { SelectorTipoCuenta, type TipoCuenta } from "./tipo-cuenta";
 
 type Campo = "tipo" | "categoria" | "email" | "password" | "confirmar" | "terminos";
@@ -124,11 +125,8 @@ export function FormularioRegistro({
 
   const errorDe = (c: Campo) => (error?.campo === c ? <ErrorForm>{error.texto}</ErrorForm> : null);
 
-  // El aspecto de la pantalla cambia al elegir spa, salón o uñas (barbería y tattoo conservan el diseño original).
-  const vertical = verticalDeCategorias(categoria ? [categoria] : null);
-
   return (
-    <div data-tema-vista={vertical ?? undefined} className={vertical ? "min-h-dvh" : undefined}>
+    <AuthDividido categoria={categoria} viva>
     <PantallaAuth
       indice={t("auth.i_registro")}
       volver={tipoInicial === "negocio" ? "/para-negocios" : "/"}
@@ -240,6 +238,6 @@ export function FormularioRegistro({
         )}
       </form>
     </PantallaAuth>
-    </div>
+    </AuthDividido>
   );
 }

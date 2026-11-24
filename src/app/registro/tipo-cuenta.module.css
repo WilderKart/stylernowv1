@@ -52,7 +52,7 @@
   color: #0a0a0a;
 }
 .elegida::before {
-  background: #fe5400;
+  background: var(--brand, #fe5400);
 }
 .conError::before {
   border-color: var(--danger);

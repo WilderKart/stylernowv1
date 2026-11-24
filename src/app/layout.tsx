@@ -7,9 +7,11 @@ import { PwaManager } from "@/components/pwa/pwa-manager";
 import { SistemaCliente } from "@/components/sistema";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata, Viewport } from "next";
-import { Archivo, Fraunces, Space_Mono } from "next/font/google";
+import { Archivo, Cormorant_Garamond, Fraunces, Italiana, Jost, Sacramento, Space_Mono } from "next/font/google";
 import { SincronizarTema } from "@/components/tema/tema-cliente";
 import { obtenerModoTema, obtenerTemaEfectivo } from "@/lib/tema/servidor";
+import { obtenerCategoriaAspecto } from "@/lib/tema/categoria-cookie";
+import { verticalDeCategorias } from "@/lib/tema/vertical";
 import "./globals.css";
 
 // Archivo variable: eje de ancho (62–125 %) para títulos condensados y secciones
@@ -37,6 +39,13 @@ const fraunces = Fraunces({
   display: "swap",
   preload: false,
 });
+
+// Tipografías delicadas de los temas spa (caligrafía), salón (serif fina) y uñas (sans elegante). Solo se descargan
+// cuando una página las usa (preload apagado): barbería y tattoo no pagan nada por ellas.
+const cormorant = Cormorant_Garamond({ variable: "--font-cormorant", subsets: ["latin"], weight: ["300", "400", "500", "600"], style: ["normal", "italic"], display: "swap", preload: false });
+const jost = Jost({ variable: "--font-jost", subsets: ["latin"], display: "swap", preload: false });
+const sacramento = Sacramento({ variable: "--font-sacramento", subsets: ["latin"], weight: "400", display: "swap", preload: false });
+const italiana = Italiana({ variable: "--font-italiana", subsets: ["latin"], weight: "400", display: "swap", preload: false });
 
 export const metadata: Metadata = {
   title: {
@@ -81,12 +90,15 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const idioma = await obtenerIdioma();
   const tema = await obtenerTemaEfectivo();
   const modoTema = await obtenerModoTema();
+  // Aspecto elegido (cookie decorativa validada en el servidor): spa, salón y uñas rediseñan toda la app.
+  const vertical = verticalDeCategorias([(await obtenerCategoriaAspecto()) ?? ""]);
   return (
     <html
       lang={idioma}
       data-theme={tema}
+      data-vertical={vertical ?? undefined}
       suppressHydrationWarning
-      className={`${archivo.variable} ${spaceMono.variable} ${fraunces.variable} h-full antialiased`}
+      className={`${archivo.variable} ${spaceMono.variable} ${fraunces.variable} ${cormorant.variable} ${jost.variable} ${sacramento.variable} ${italiana.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-app text-text">
         <IdiomaProvider idioma={idioma}>{children}</IdiomaProvider>

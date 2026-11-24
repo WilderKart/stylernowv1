@@ -20,6 +20,7 @@
 /* ───────────────────────── SPA · claro ───────────────────────── */
 [data-vertical="spa"],
 [data-tema-vista="spa"],
+html[data-vertical="spa"],
 html:has([data-vertical="spa"]) {
   --bg: #fffdf9;
   --app-bg: #f6f0e6;
@@ -59,6 +60,8 @@ html:has([data-vertical="spa"]) {
   --r-card: 22px;
   --sombra-banner: var(--sn-shadow-hard);
   --r-ctl: 999px;
+  --brand: var(--signal);
+  --brand-text: var(--accent-text);
   color-scheme: light;
 }
 
@@ -66,6 +69,7 @@ html:has([data-vertical="spa"]) {
 [data-theme="dark"] [data-vertical="spa"],
 [data-theme="dark"] [data-tema-vista="spa"],
 [data-tema-vista="spa"][data-modo="dark"],
+html[data-theme="dark"][data-vertical="spa"],
 html[data-theme="dark"]:has([data-vertical="spa"]) {
   --bg: #181f19;
   --app-bg: #111611;
@@ -102,12 +106,15 @@ html[data-theme="dark"]:has([data-vertical="spa"]) {
   --hero-gradient: linear-gradient(135deg, #2c3a2f 0%, #1e2820 60%, #161d17 100%);
   --kpi-gradient: linear-gradient(135deg, #34463a, #26332a);
   --hero-text: #edefe8;
+  --brand: var(--signal);
+  --brand-text: var(--accent-text);
   color-scheme: dark;
 }
 
 /* ───────────────────────── SALÓN · claro ───────────────────────── */
 [data-vertical="salon"],
 [data-tema-vista="salon"],
+html[data-vertical="salon"],
 html:has([data-vertical="salon"]) {
   --bg: #fffdfd;
   --app-bg: #f7f1f1;
@@ -147,6 +154,8 @@ html:has([data-vertical="salon"]) {
   --r-card: 20px;
   --sombra-banner: var(--sn-shadow-hard);
   --r-ctl: 999px;
+  --brand: var(--signal);
+  --brand-text: var(--accent-text);
   color-scheme: light;
 }
 
@@ -154,6 +163,7 @@ html:has([data-vertical="salon"]) {
 [data-theme="dark"] [data-vertical="salon"],
 [data-theme="dark"] [data-tema-vista="salon"],
 [data-tema-vista="salon"][data-modo="dark"],
+html[data-theme="dark"][data-vertical="salon"],
 html[data-theme="dark"]:has([data-vertical="salon"]) {
   --bg: #1e171f;
   --app-bg: #161117;
@@ -190,51 +200,59 @@ html[data-theme="dark"]:has([data-vertical="salon"]) {
   --hero-gradient: linear-gradient(135deg, #3b2a40 0%, #2a1f2d 60%, #1c141e 100%);
   --kpi-gradient: linear-gradient(135deg, #46304d, #32243a);
   --hero-text: #f3ecf2;
+  --brand: var(--signal);
+  --brand-text: var(--accent-text);
   color-scheme: dark;
 }
 
-/* ───────────────────────── UÑAS · claro ───────────────────────── */
+/* ───────────────────────── UÑAS · claro ─────────────────────────
+ * Paleta tomada de las uñas de la referencia: pasteles sobre crema (amarillo mantequilla, menta, celeste, lila y rosa).
+ * El lila es el color de marca; el resto de pasteles se reparte en degradados y detalles.
+ */
 [data-vertical="unas"],
 [data-tema-vista="unas"],
+html[data-vertical="unas"],
 html:has([data-vertical="unas"]) {
-  --bg: #fffcfa;
-  --app-bg: #faf2ec;
-  --surface: #f3e5db;
-  --surface-2: #ead7c9;
-  --ink: #3a2a26;
-  --paper: #fffcfa;
-  --signal: #f2bea0;
-  --signal-pressed: #e8a988;
-  --text: #3a2a26;
-  --text-muted: #6c5750;
-  --text-faint: #7a645c;
-  --text-disabled: #a08f87;
-  --accent-text: #a24e36;
-  --line: #ddc9bc;
-  --line-input: #9a8174;
-  --grid: #ebdccf;
-  --grid-soft: #f0e3d8;
-  --shadow-ink: #3a2a26;
-  --focus: #a24e36;
-  --success: #a7d4b2;
-  --warning: #eacb86;
-  --danger: #dd7f72;
-  --info: #3a2a26;
-  --scrim: rgba(58, 42, 38, 0.55);
-  --sn-shadow-hard: 0 12px 28px -14px rgba(120, 70, 50, 0.32);
-  --sn-shadow-hard-sm: 0 6px 16px -10px rgba(120, 70, 50, 0.28);
-  --nav-bg: #fffcfa;
-  --nav-text: #3a2a26;
-  --nav-muted: rgba(58, 42, 38, 0.66);
-  --nav-accent: #a24e36;
-  --nav-active-bg: rgba(162, 78, 54, 0.1);
-  --nav-borde: #ebdccf;
-  --hero-gradient: linear-gradient(135deg, #fbe3d4 0%, #f2bea0 50%, #d9a38e 100%);
-  --kpi-gradient: linear-gradient(135deg, #f6cdb4, #e2ae98);
-  --hero-text: #3a2a26;
+  --bg: #fffdfb;
+  --app-bg: #faf7f3;
+  --surface: #f2ece6;
+  --surface-2: #e9e0d8;
+  --ink: #2d2a3a;
+  --paper: #fffdfb;
+  --signal: #cbbaee;
+  --signal-pressed: #b9a5e6;
+  --text: #2d2a3a;
+  --text-muted: #5d5870;
+  --text-faint: #6c6780;
+  --text-disabled: #a09bb0;
+  --accent-text: #5a4691;
+  --line: #e1d9e8;
+  --line-input: #8c84a3;
+  --grid: #ece5ee;
+  --grid-soft: #f2ecf2;
+  --shadow-ink: #2d2a3a;
+  --focus: #5a4691;
+  --success: #a8d8b9;
+  --warning: #f3e5a1;
+  --danger: #e58aa0;
+  --info: #2d2a3a;
+  --scrim: rgba(45, 42, 58, 0.55);
+  --sn-shadow-hard: 0 12px 28px -14px rgba(90, 70, 145, 0.3);
+  --sn-shadow-hard-sm: 0 6px 16px -10px rgba(90, 70, 145, 0.26);
+  --nav-bg: #fffdfb;
+  --nav-text: #2d2a3a;
+  --nav-muted: rgba(45, 42, 58, 0.66);
+  --nav-accent: #5a4691;
+  --nav-active-bg: rgba(138, 112, 214, 0.13);
+  --nav-borde: #ece5ee;
+  --hero-gradient: linear-gradient(120deg, #fbefb2 0%, #c8e9d4 27%, #b9d9f4 55%, #d5c8f3 80%, #f7bfcd 100%);
+  --kpi-gradient: linear-gradient(135deg, #c8e9d4, #b9d9f4);
+  --hero-text: #2d2a3a;
   --r-card: 24px;
   --sombra-banner: var(--sn-shadow-hard);
   --r-ctl: 999px;
+  --brand: var(--signal);
+  --brand-text: var(--accent-text);
   color-scheme: light;
 }
 
@@ -242,42 +260,45 @@ html:has([data-vertical="unas"]) {
 [data-theme="dark"] [data-vertical="unas"],
 [data-theme="dark"] [data-tema-vista="unas"],
 [data-tema-vista="unas"][data-modo="dark"],
+html[data-theme="dark"][data-vertical="unas"],
 html[data-theme="dark"]:has([data-vertical="unas"]) {
-  --bg: #211916;
-  --app-bg: #181210;
-  --surface: #2d221d;
-  --surface-2: #3a2c25;
-  --ink: #150f0d;
-  --paper: #f8efe9;
-  --signal: #f2bea0;
-  --signal-pressed: #f7cdb5;
-  --text: #f8efe9;
-  --text-muted: #cdbbb0;
-  --text-faint: #b09e94;
-  --text-disabled: #7e6f66;
-  --accent-text: #f4b08e;
-  --line: #47362d;
-  --line-input: #8a7366;
-  --grid: #33261f;
-  --grid-soft: #2b201b;
+  --bg: #1e1b28;
+  --app-bg: #161420;
+  --surface: #282434;
+  --surface-2: #332e43;
+  --ink: #110f18;
+  --paper: #f4f0fa;
+  --signal: #cdbcf0;
+  --signal-pressed: #dccff6;
+  --text: #f4f0fa;
+  --text-muted: #c8c1d8;
+  --text-faint: #aba4be;
+  --text-disabled: #766f8a;
+  --accent-text: #d9cbf7;
+  --line: #3b3551;
+  --line-input: #80789b;
+  --grid: #2d293b;
+  --grid-soft: #262233;
   --shadow-ink: #000000;
-  --focus: #f4b08e;
-  --success: #8ac79b;
-  --warning: #e3c27f;
-  --danger: #f0907f;
-  --info: #f8efe9;
+  --focus: #d9cbf7;
+  --success: #8fd0a5;
+  --warning: #e6d58e;
+  --danger: #f08aa2;
+  --info: #f4f0fa;
   --scrim: rgba(0, 0, 0, 0.7);
   --sn-shadow-hard: 0 12px 28px -14px rgba(0, 0, 0, 0.7);
   --sn-shadow-hard-sm: 0 6px 16px -10px rgba(0, 0, 0, 0.6);
-  --nav-bg: #1a1411;
-  --nav-text: #f8efe9;
-  --nav-muted: rgba(248, 239, 233, 0.66);
-  --nav-accent: #f4b08e;
-  --nav-active-bg: rgba(244, 176, 142, 0.14);
-  --nav-borde: #33261f;
-  --hero-gradient: linear-gradient(135deg, #4a3329 0%, #33231c 60%, #211713 100%);
-  --kpi-gradient: linear-gradient(135deg, #5a3e31, #3e2b22);
-  --hero-text: #f8efe9;
+  --nav-bg: #181520;
+  --nav-text: #f4f0fa;
+  --nav-muted: rgba(244, 240, 250, 0.66);
+  --nav-accent: #d9cbf7;
+  --nav-active-bg: rgba(205, 188, 240, 0.15);
+  --nav-borde: #2d293b;
+  --hero-gradient: linear-gradient(120deg, #55503a 0%, #35514a 27%, #31506a 55%, #4b3f6c 80%, #6a4258 100%);
+  --kpi-gradient: linear-gradient(135deg, #35514a, #31506a);
+  --hero-text: #f4f0fa;
+  --brand: var(--signal);
+  --brand-text: var(--accent-text);
   color-scheme: dark;
 }
 
@@ -285,12 +306,32 @@ html[data-theme="dark"]:has([data-vertical="unas"]) {
 [data-vertical],
 [data-tema-vista],
 html:has([data-vertical]) {
-  --sn-font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  --sn-font-mono: var(--font-archivo), system-ui, sans-serif; /* las etiquetas «técnicas» pasan a sans suave */
   --stretch-condensed: 100%;
   --stretch-expanded: 100%;
   --border-thick: 1px;
-  --icon-stroke: 1.75;
+  --icon-stroke: 1.5;
+  font-family: var(--sn-font-sans);
+}
+
+/* Tipografía de cada categoría (gratuitas, de Google Fonts): spa = caligrafía fina (Sacramento) con Cormorant y Jost;
+ * salón = Cormorant Garamond (serif editorial fina) con Jost; uñas = Italiana (sans elegante) con Jost. */
+:is([data-vertical="spa"], [data-tema-vista="spa"], html:has([data-vertical="spa"])) {
+  --sn-font-poster: var(--font-sacramento), "Brush Script MT", cursive;
+  --sn-font-display: var(--font-cormorant), Georgia, "Times New Roman", serif;
+  --sn-font-sans: var(--font-jost), system-ui, sans-serif;
+  --sn-font-mono: var(--font-jost), system-ui, sans-serif;
+}
+:is([data-vertical="salon"], [data-tema-vista="salon"], html:has([data-vertical="salon"])) {
+  --sn-font-poster: var(--font-cormorant), Georgia, "Times New Roman", serif;
+  --sn-font-display: var(--font-cormorant), Georgia, "Times New Roman", serif;
+  --sn-font-sans: var(--font-jost), system-ui, sans-serif;
+  --sn-font-mono: var(--font-jost), system-ui, sans-serif;
+}
+:is([data-vertical="unas"], [data-tema-vista="unas"], html:has([data-vertical="unas"])) {
+  --sn-font-poster: var(--font-italiana), "Century Gothic", system-ui, sans-serif;
+  --sn-font-display: var(--font-italiana), "Century Gothic", system-ui, sans-serif;
+  --sn-font-sans: var(--font-jost), system-ui, sans-serif;
+  --sn-font-mono: var(--font-jost), system-ui, sans-serif;
 }
 
 :is([data-vertical], [data-tema-vista], html:has([data-vertical])) {
@@ -316,12 +357,31 @@ html:has([data-vertical]) {
 
   /* Títulos: serif suave en frase normal; la palabra de acento va en cursiva. */
   & :is(.poster-1, .poster-2, .poster-3, .poster-4, .poster-5, .poster-xl, .poster-lg, .sn-poster, .section, .sn-section, .font-display) {
+    font-family: var(--sn-font-poster, var(--sn-font-display));
+    font-stretch: 100%;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    line-height: 1.12;
+  }
+  & :is(h1, h2, h3, h4) {
     font-family: var(--sn-font-display);
     font-stretch: 100%;
     font-weight: 500;
     text-transform: none;
-    letter-spacing: -0.012em;
-    line-height: 1.1;
+    letter-spacing: 0;
+  }
+  /* Todo el peso «negrita» del diseño original se afina: delicado, no pesado. */
+  & :is(.font-black, .font-extrabold, .font-bold) {
+    font-weight: 600;
+    font-stretch: 100%;
+  }
+  & :is(.font-display, .font-mono) {
+    font-stretch: 100%;
+  }
+  & .font-mono {
+    font-family: var(--sn-font-mono);
+    letter-spacing: 0.04em;
   }
   & .font-display :is(.text-accent, .sn-hot) {
     font-style: italic;
@@ -329,6 +389,10 @@ html:has([data-vertical]) {
   & .sn-hot {
     color: var(--accent-text);
     font-style: italic;
+  }
+  /* La caligrafía del spa ya es cursiva: no se inclina otra vez. */
+  &:is([data-vertical="spa"], [data-tema-vista="spa"], html:has([data-vertical="spa"])) :is(.sn-hot, .font-display .text-accent) {
+    font-style: normal;
   }
   & .uppercase {
     text-transform: none;
@@ -339,7 +403,7 @@ html:has([data-vertical]) {
     font-family: var(--sn-font-sans);
     font-stretch: 100%;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 500;
     letter-spacing: 0.09em;
     text-transform: uppercase;
   }
@@ -351,7 +415,7 @@ html:has([data-vertical]) {
 
   /* Botones y chips: frase normal, sin sombra dura ni «hundirse» al presionar. */
   & :is(.sn-btn, .sn-chip, .sn-seg button, .sn-field label) {
-    font: 600 14px/1.25 var(--sn-font-sans);
+    font: 500 14px/1.25 var(--sn-font-sans);
     font-stretch: 100%;
     letter-spacing: 0;
     text-transform: none;
@@ -450,4 +514,54 @@ html:has([data-vertical]) {
 /* Filas y franjas a todo el ancho (solo borde superior/inferior) no se redondean: se verían cortadas en los bordes. */
 :is([data-vertical], [data-tema-vista], html:has([data-vertical])) :is(.border-b, .border-t, .border-y, .border-b-2, .border-t-2):not(.border):not(.border-2) {
   border-radius: 0;
+}
+
+/* ───────── «¿Qué tipo de cuenta quieres crear?»: tarjetas suaves (en barbería y tattoo siguen inclinadas y naranja) ───────── */
+:is([data-vertical], [data-tema-vista], html:has([data-vertical])) {
+  & .sn-tipo-tarjeta {
+    transform: none;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s;
+  }
+  & .sn-tipo-tarjeta::before {
+    border: 1px solid var(--line-input);
+    border-radius: var(--r-card);
+    background: var(--bg);
+    box-shadow: var(--sn-shadow-hard-sm);
+    transform: none;
+    transition: background 0.4s, border-color 0.4s, box-shadow 0.4s;
+  }
+  & .sn-tipo-tarjeta:hover::before {
+    box-shadow: var(--sn-shadow-hard);
+  }
+  & .sn-tipo-tarjeta:active::before {
+    transform: none;
+    box-shadow: var(--sn-shadow-hard-sm);
+  }
+  & .sn-tipo-tarjeta.is-elegida {
+    color: var(--hero-text);
+  }
+  & .sn-tipo-tarjeta.is-elegida::before {
+    background: var(--hero-gradient);
+    border-color: var(--accent-text);
+  }
+  & .sn-tipo-titulo {
+    font-family: var(--sn-font-poster, var(--sn-font-display));
+    font-stretch: 100%;
+    font-weight: 400;
+    font-size: 26px;
+    line-height: 1.05;
+    text-transform: none;
+  }
+  & .sn-tipo-indicador {
+    border: 1px solid var(--text);
+  }
+  & .sn-tipo-tarjeta.is-elegida .sn-tipo-indicador {
+    border-color: var(--hero-text);
+  }
+  & .sn-tipo-tarjeta.is-elegida .sn-tipo-indicador::after {
+    background: var(--hero-text);
+  }
+  & .sn-tipo-icono {
+    stroke-width: 1.4 !important;
+  }
 }

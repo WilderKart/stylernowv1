@@ -11,6 +11,7 @@ import { googleProvider } from "@/lib/auth/providers/google-provider";
 import { destinoSeguro } from "@/lib/auth/destino-seguro";
 import { esCategoriaRegistro } from "@/lib/tema/vertical";
 import { destinoInicial, destinoPorIntencion, fijarIntencionRegistro } from "@/lib/auth/destino-inicial";
+import { fijarAspectoDeCuenta, fijarCategoriaAspecto } from "@/lib/tema/categoria-cookie";
 import { obtenerInvitacionPendiente } from "@/lib/invitaciones/invitacion-pendiente";
 import { limitar, ipDelLlamador } from "@/lib/rate-limit";
 import { MENSAJE_TURNSTILE, verificarTurnstile } from "@/lib/seguridad/turnstile";
@@ -133,6 +134,7 @@ export async function registrarCuenta(datos: {
   if (data.user && (data.user.identities?.length ?? 0) > 0) {
     await guardarEnHistorial(data.user.id, datos.password);
     await fijarIntencionRegistro(data.user.id, tipo.data, categoria);
+    await fijarCategoriaAspecto(categoria); // solo aspecto: la pantalla de verificación y el onboarding ya salen con el diseño elegido
     // Cliente: el servicio que busca queda como interés del perfil (la app se adapta a él).
     if (tipo.data === "cliente" && categoria) {
       await createAdminClient().from("perfil").update({ categorias_interes: [categoria] }).eq("id", data.user.id);
@@ -306,6 +308,7 @@ export async function iniciarSesionConContrasena(emailCrudo: string, password: s
     return { ok: false as const, error: "Correo o contraseña incorrectos." };
   }
   const esSupersu = data.user ? await esSupersuCuenta(supabase, data.user.id) : false;
+  if (data.user) await fijarAspectoDeCuenta(supabase, data.user);
   const siguiente = destinoSeguro(siguienteCrudo);
   // Destino resuelto en el servidor: quien se registró como negocio y dejó el onboarding a medias lo
   // retoma aquí; el Super Admin va a /admin (su rol solo viene de la base de datos).

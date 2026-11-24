@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { esCategoriaRegistro } from "@/lib/tema/vertical";
 import { cookies } from "next/headers";
+import { fijarAspectoDeCuenta, fijarCategoriaAspecto } from "@/lib/tema/categoria-cookie";
 import type { EmailOtpType, User } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -100,10 +101,12 @@ export async function GET(request: NextRequest) {
       const cat = (await cookies()).get("sn_cat_reg")?.value;
       const categoria = esCategoriaRegistro(cat) ? cat : null;
       await fijarIntencionRegistro(user.id, intencion, categoria);
+      await fijarCategoriaAspecto(categoria);
       if (intencion === "cliente" && categoria) {
         await createAdminClient().from("perfil").update({ categorias_interes: [categoria] }).eq("id", user.id);
       }
     }
+    if (!registroPendiente) await fijarAspectoDeCuenta(supabase, user);
     if (registroPendiente && !esRecuperacion) {
       return NextResponse.redirect(`${origin}/login?next=${encodeURIComponent(next)}`);
     }

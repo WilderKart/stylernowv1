@@ -31,7 +31,7 @@
   text-transform: uppercase;
 }
 .now {
-  color: #fe5400;
+  color: var(--brand-text, #fe5400);
 }
 .etiqueta {
   flex: 1;

@@ -61,7 +61,7 @@
   left: 8px;
   z-index: 1;
   padding: 2px 7px;
-  background: #fe5400;
+  background: var(--brand, #fe5400);
   color: #0a0a0a;
   font: 700 11px/14px var(--sn-font-mono);
   text-transform: uppercase;
@@ -121,7 +121,7 @@
   white-space: nowrap;
 }
 .estrella {
-  color: #fe5400;
+  color: var(--brand-text, #fe5400);
   font-size: 15px;
   margin-right: 4px;
 }

@@ -36,3 +36,13 @@ export const OPCIONES_SERVICIO_REGISTRO = [
 export type CategoriaRegistro = (typeof OPCIONES_SERVICIO_REGISTRO)[number]["valor"];
 
 export const esCategoriaRegistro = (v: unknown): v is CategoriaRegistro => OPCIONES_SERVICIO_REGISTRO.some((o) => o.valor === v);
+
+/** Lleva cualquier categoría de negocio a una de las cinco opciones de aspecto (p. ej. estilismo → salon). */
+export function categoriaDeAspecto(cat: string | null | undefined): CategoriaRegistro | null {
+  const v = verticalDeCategorias(cat ? [cat] : null);
+  if (v === "spa") return "spa";
+  if (v === "salon") return "salon";
+  if (v === "unas") return "manicura";
+  const limpia = cat?.trim().toLowerCase();
+  return esCategoriaRegistro(limpia) ? limpia : null;
+}

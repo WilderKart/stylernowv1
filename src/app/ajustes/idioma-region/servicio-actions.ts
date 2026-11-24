@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { esCategoriaRegistro } from "@/lib/tema/vertical";
+import { fijarCategoriaAspecto } from "@/lib/tema/categoria-cookie";
 import { revalidatePath } from "next/cache";
 
 /** Guarda el servicio que busca el cliente (interés del perfil). Solo da aspecto a su portada; nunca permisos. */
@@ -17,6 +18,7 @@ export async function guardarServicioPreferido(categoria: unknown): Promise<{ ok
     .update({ categorias_interes: categoria ? [categoria] : [] })
     .eq("id", user.id);
   if (error) return { ok: false, error: "No pudimos guardar tu elección. Intenta de nuevo." };
-  revalidatePath("/");
+  await fijarCategoriaAspecto(categoria);
+  revalidatePath("/", "layout");
   return { ok: true };
 }

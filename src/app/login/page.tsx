@@ -8,6 +8,7 @@ import { CompletarPerfil } from "./completar-perfil";
 import { obtenerInvitacionPendiente } from "@/lib/invitaciones/invitacion-pendiente";
 import { FormularioIngreso } from "./formulario-ingreso";
 import { requiereAceptacionEnPerfil } from "./registro-actions";
+import { obtenerCategoriaAspecto } from "@/lib/tema/categoria-cookie";
 
 export async function generateMetadata() {
   const t = await obtenerT();
@@ -43,5 +44,5 @@ export default async function LoginPage(props: PageProps<"/login">) {
   const aviso = params.recuperada === "1" ? "recuperada" : params.error ? "enlace" : undefined;
   // Staff invitado con cuenta: correo precargado (sale de la invitación, en el servidor).
   const invitacion = await obtenerInvitacionPendiente(Array.isArray(params.invitacion) ? params.invitacion[0] : params.invitacion);
-  return <FormularioIngreso siguiente={siguiente} aviso={aviso} invitacion={invitacion ? { email: invitacion.email, negocio: invitacion.negocio } : null} />;
+  return <FormularioIngreso categoria={await obtenerCategoriaAspecto()} siguiente={siguiente} aviso={aviso} invitacion={invitacion ? { email: invitacion.email, negocio: invitacion.negocio } : null} />;
 }

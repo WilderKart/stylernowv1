@@ -34,7 +34,7 @@ export function SelectorTipoCuenta({
         {opciones.map(({ v, Icono, titulo, desc }) => {
           const elegida = valor === v;
           return (
-            <label key={v} className={[s.tarjeta, elegida ? s.elegida : "", error ? s.conError : ""].join(" ")}>
+            <label key={v} className={[s.tarjeta, "sn-tipo-tarjeta", elegida ? `${s.elegida} is-elegida` : "", error ? s.conError : ""].join(" ")}>
               <input
                 type="radio"
                 name="tipo-cuenta"
@@ -44,9 +44,9 @@ export function SelectorTipoCuenta({
                 className={s.radio}
                 required
               />
-              <span className={s.indicador} aria-hidden />
-              <Icono className={s.icono} aria-hidden />
-              <span className={s.titulo}>{titulo}</span>
+              <span className={`${s.indicador} sn-tipo-indicador`} aria-hidden />
+              <Icono className={`${s.icono} sn-tipo-icono`} aria-hidden />
+              <span className={`${s.titulo} sn-tipo-titulo`}>{titulo}</span>
               <span className={s.descripcion}>{desc}</span>
             </label>
           );

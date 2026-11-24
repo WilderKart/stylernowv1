@@ -1,6 +1,7 @@
 /* Página «Para negocios» (referencia 2026-11-16). Móvil primero; en escritorio se recompone a dos columnas. */
 .pagina {
-  --naranja: #fe5400;
+  --naranja: var(--brand, #fe5400);
+  --naranja-texto: var(--brand-text, #fe5400);
   --linea: var(--text);
   --gris: #f2f2f2;
   background: var(--app-bg);
@@ -24,7 +25,7 @@
   line-height: 0.95;
 }
 .naranja {
-  color: var(--naranja);
+  color: var(--naranja-texto);
 }
 
 /* ── Encabezado ── */
@@ -82,7 +83,7 @@
   text-decoration: none;
 }
 .navAncha a:hover {
-  color: var(--naranja);
+  color: var(--naranja-texto);
 }
 .menu {
   position: relative;
@@ -392,7 +393,7 @@ details[open] > summary .signo::after {
   font-weight: 900;
   font-size: 27px;
   line-height: 1;
-  color: var(--naranja);
+  color: var(--naranja-texto);
 }
 .itemTitulo {
   font-family: var(--sn-font-display);
@@ -639,7 +640,7 @@ details[open] > summary .signo::after {
   width: 20px !important;
   height: 20px !important;
   margin-top: 0;
-  color: var(--naranja);
+  color: var(--naranja-texto);
   stroke-width: 3 !important;
 }
 .verTodo > summary {

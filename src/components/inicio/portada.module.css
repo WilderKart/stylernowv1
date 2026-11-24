@@ -5,7 +5,8 @@
  */
 .portada {
   container-type: inline-size;
-  --naranja: #fe5400;
+  --naranja: var(--brand, #fe5400);
+  --naranja-texto: var(--brand-text, #fe5400);
   --linea: var(--text);
   overflow-x: clip;
 }
@@ -74,7 +75,7 @@
   line-height: calc(var(--u) * 51);
 }
 .caliente {
-  color: var(--naranja);
+  color: var(--naranja-texto);
 }
 
 .bajada {

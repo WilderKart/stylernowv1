@@ -21,7 +21,7 @@
   display: inline-block;
   margin-right: 8px;
   word-spacing: 3px;
-  color: #fe5400;
+  color: var(--brand-text, #fe5400);
   transform: skewX(-12deg);
 }
 .vistas {

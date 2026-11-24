@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { fijarCategoriaAspecto } from "@/lib/tema/categoria-cookie";
 import { revalidatePath } from "next/cache";
 
 export type ResultadoPerfil = { ok: true } | { ok: false; error: string };
@@ -61,5 +62,6 @@ export async function actualizarPerfil(datos: {
 export async function cerrarSesion() {
   const supabase = await createClient();
   await supabase.auth.signOut();
+  await fijarCategoriaAspecto(null);
   revalidatePath("/", "layout");
 }
