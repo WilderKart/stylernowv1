@@ -9,7 +9,7 @@ import s from "./auth-dividido.module.css";
 /** Imagen de cada categoría y de qué lado queda: se alternan para que cada cambio de categoría se vea como un giro. */
 const FOTO: Record<CategoriaRegistro, { src: string | null; lado: "izq" | "der"; posicion?: string }> = {
   barberia: { src: "/img/auth/barberia.webp", lado: "izq" },
-  tatuajes: { src: "/img/auth/tattoo.webp", lado: "der", posicion: "60% 50%" },
+  tatuajes: { src: "/img/auth/tattoo.webp", lado: "der", posicion: "50% 8%" },
   salon: { src: "/img/auth/salon.webp", lado: "izq" },
   spa: { src: "/img/auth/spa.webp", lado: "der", posicion: "50% 50%" },
   manicura: { src: "/img/auth/unas.webp", lado: "izq", posicion: "30% 50%" },

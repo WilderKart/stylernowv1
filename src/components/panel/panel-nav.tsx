@@ -236,7 +236,7 @@ export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** 
       {inferior.length > 0 ? (
         <nav
           aria-label="Accesos rápidos"
-          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-[var(--nav-borde)] bg-[var(--nav-bg)] pb-[env(safe-area-inset-bottom)] lg:hidden"
+          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-white/10 bg-[#0a0a0a] pb-[env(safe-area-inset-bottom)] lg:hidden"
         >
           {inferior.map(({ href, etiqueta, Icono }) => {
             const activo = esActivo(href);
@@ -247,7 +247,7 @@ export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** 
                 aria-current={activo ? "page" : undefined}
                 className={cn(
                   "flex min-h-14 flex-col items-center justify-center gap-1 text-[10.5px] font-bold uppercase tracking-wide",
-                  activo ? "text-[var(--nav-accent)]" : "text-[var(--nav-muted)]"
+                  activo ? "text-[#ff4d00]" : "text-white/70"
                 )}
               >
                 <Icono className="size-5" aria-hidden />

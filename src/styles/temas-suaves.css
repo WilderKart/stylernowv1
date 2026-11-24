@@ -116,42 +116,42 @@ html[data-theme="dark"]:has([data-vertical="spa"]) {
 [data-tema-vista="salon"],
 html[data-vertical="salon"],
 html:has([data-vertical="salon"]) {
-  --bg: #fffdfd;
-  --app-bg: #f7f1f1;
-  --surface: #f0e5e5;
-  --surface-2: #e6d8d8;
-  --ink: #33253a;
-  --paper: #fffdfd;
-  --signal: #ddbabd;
-  --signal-pressed: #cfa5a9;
-  --text: #2b2230;
-  --text-muted: #62566a;
-  --text-faint: #72667a;
-  --text-disabled: #9a8fa0;
-  --accent-text: #7a3f74;
-  --line: #d8c8cc;
-  --line-input: #8e7f94;
-  --grid: #eadcdd;
-  --grid-soft: #efe3e3;
-  --shadow-ink: #33253a;
-  --focus: #7a3f74;
-  --success: #a9d6b6;
-  --warning: #e6c98b;
-  --danger: #d9788b;
-  --info: #33253a;
-  --scrim: rgba(43, 34, 48, 0.55);
-  --sn-shadow-hard: 0 12px 28px -14px rgba(90, 50, 80, 0.32);
-  --sn-shadow-hard-sm: 0 6px 16px -10px rgba(90, 50, 80, 0.28);
-  --nav-bg: #fffdfd;
-  --nav-text: #2b2230;
-  --nav-muted: rgba(43, 34, 48, 0.66);
-  --nav-accent: #7a3f74;
-  --nav-active-bg: rgba(122, 63, 116, 0.1);
-  --nav-borde: #eadcdd;
-  --hero-gradient: linear-gradient(135deg, #f1d9dc 0%, #ddbabd 50%, #c59bb8 100%);
-  --kpi-gradient: linear-gradient(135deg, #e8c8cb, #d2a9c0);
-  --hero-text: #2b2230;
-  --r-card: 20px;
+  --bg: #fcfaff;
+  --app-bg: #f4eefa;
+  --surface: #ece4f4;
+  --surface-2: #e2d8ee;
+  --ink: #3f3452;
+  --paper: #fcfaff;
+  --signal: #d8c7ec;
+  --signal-pressed: #c9b5e3;
+  --text: #3f3452;
+  --text-muted: #655a78;
+  --text-faint: #766b88;
+  --text-disabled: #a79eb8;
+  --accent-text: #6a5590;
+  --line: #e0d6ec;
+  --line-input: #8d82a3;
+  --grid: #e8def2;
+  --grid-soft: #efe7f6;
+  --shadow-ink: #3f3452;
+  --focus: #6a5590;
+  --success: #b7d8bd;
+  --warning: #f1dca8;
+  --danger: #ee9db2;
+  --info: #3f3452;
+  --scrim: rgba(63, 52, 82, 0.55);
+  --sn-shadow-hard: 0 14px 30px -16px rgba(106, 85, 144, 0.34);
+  --sn-shadow-hard-sm: 0 6px 16px -10px rgba(106, 85, 144, 0.28);
+  --nav-bg: #fcfaff;
+  --nav-text: #3f3452;
+  --nav-muted: rgba(63, 52, 82, 0.66);
+  --nav-accent: #6a5590;
+  --nav-active-bg: rgba(139, 120, 168, 0.14);
+  --nav-borde: #e8def2;
+  --hero-gradient: linear-gradient(160deg, #efe3f5 0%, #f5d9e4 48%, #f8dcc8 100%);
+  --kpi-gradient: linear-gradient(135deg, #e3e8dc, #e4e1f0);
+  --hero-text: #3f3452;
+  --r-card: 24px;
   --sombra-banner: var(--sn-shadow-hard);
   --r-ctl: 999px;
   --brand: var(--signal);
@@ -165,90 +165,87 @@ html:has([data-vertical="salon"]) {
 [data-tema-vista="salon"][data-modo="dark"],
 html[data-theme="dark"][data-vertical="salon"],
 html[data-theme="dark"]:has([data-vertical="salon"]) {
-  --bg: #1e171f;
-  --app-bg: #161117;
-  --surface: #291f2b;
-  --surface-2: #352a37;
-  --ink: #120d13;
-  --paper: #f3ecf2;
-  --signal: #e3b5be;
-  --signal-pressed: #f0c9d1;
-  --text: #f3ecf2;
-  --text-muted: #c5b8c4;
-  --text-faint: #a89ba7;
-  --text-disabled: #7a6f79;
-  --accent-text: #ddaad6;
-  --line: #42344a;
-  --line-input: #85708c;
-  --grid: #2e2430;
-  --grid-soft: #281f2a;
+  --bg: #1f1a2b;
+  --app-bg: #171320;
+  --surface: #292236;
+  --surface-2: #342c44;
+  --ink: #120e1b;
+  --paper: #f5f0fa;
+  --signal: #d2bfe8;
+  --signal-pressed: #e1d2f2;
+  --text: #f5f0fa;
+  --text-muted: #c9c0d8;
+  --text-faint: #ada3bf;
+  --text-disabled: #78708c;
+  --accent-text: #dbc9f2;
+  --line: #3d3450;
+  --line-input: #837a9c;
+  --grid: #2e2740;
+  --grid-soft: #272036;
+  --focus: #dbc9f2;
+  --success: #8fc99a;
+  --warning: #e2cd8e;
+  --danger: #ee8fa5;
+  --info: #f5f0fa;
   --shadow-ink: #000000;
-  --focus: #ddaad6;
-  --success: #86c79a;
-  --warning: #ddbe79;
-  --danger: #ee8c9e;
-  --info: #f3ecf2;
   --scrim: rgba(0, 0, 0, 0.7);
   --sn-shadow-hard: 0 12px 28px -14px rgba(0, 0, 0, 0.7);
   --sn-shadow-hard-sm: 0 6px 16px -10px rgba(0, 0, 0, 0.6);
-  --nav-bg: #181319;
-  --nav-text: #f3ecf2;
-  --nav-muted: rgba(243, 236, 242, 0.66);
-  --nav-accent: #ddaad6;
-  --nav-active-bg: rgba(221, 170, 214, 0.14);
-  --nav-borde: #2e2430;
-  --hero-gradient: linear-gradient(135deg, #3b2a40 0%, #2a1f2d 60%, #1c141e 100%);
-  --kpi-gradient: linear-gradient(135deg, #46304d, #32243a);
-  --hero-text: #f3ecf2;
+  --nav-bg: #1a1625;
+  --nav-text: #f5f0fa;
+  --nav-muted: rgba(245, 240, 250, 0.66);
+  --nav-accent: #dbc9f2;
+  --nav-active-bg: rgba(210, 191, 232, 0.15);
+  --nav-borde: #2e2740;
+  --hero-gradient: linear-gradient(160deg, #3b2f52 0%, #4a3350 50%, #4d3a45 100%);
+  --kpi-gradient: linear-gradient(135deg, #3a4a3e, #3a3452);
+  --hero-text: #f5f0fa;
   --brand: var(--signal);
   --brand-text: var(--accent-text);
   color-scheme: dark;
 }
 
-/* ───────────────────────── UÑAS · claro ─────────────────────────
- * Paleta tomada de las uñas de la referencia: pasteles sobre crema (amarillo mantequilla, menta, celeste, lila y rosa).
- * El lila es el color de marca; el resto de pasteles se reparte en degradados y detalles.
- */
+/* ───────────────────────── UÑAS · claro ───────────────────────── */
 [data-vertical="unas"],
 [data-tema-vista="unas"],
 html[data-vertical="unas"],
 html:has([data-vertical="unas"]) {
-  --bg: #fffdfb;
-  --app-bg: #faf7f3;
-  --surface: #f2ece6;
-  --surface-2: #e9e0d8;
-  --ink: #2d2a3a;
-  --paper: #fffdfb;
-  --signal: #cbbaee;
-  --signal-pressed: #b9a5e6;
-  --text: #2d2a3a;
-  --text-muted: #5d5870;
-  --text-faint: #6c6780;
-  --text-disabled: #a09bb0;
-  --accent-text: #5a4691;
-  --line: #e1d9e8;
-  --line-input: #8c84a3;
-  --grid: #ece5ee;
-  --grid-soft: #f2ecf2;
-  --shadow-ink: #2d2a3a;
-  --focus: #5a4691;
+  --bg: #ffffff;
+  --app-bg: #f1f4fd;
+  --surface: #e3eaf9;
+  --surface-2: #d6dff5;
+  --ink: #1b2a4e;
+  --paper: #ffffff;
+  --signal: #f4876a;
+  --signal-pressed: #ea7253;
+  --text: #1b2a4e;
+  --text-muted: #4d5a7c;
+  --text-faint: #5d6a8c;
+  --text-disabled: #9aa5c0;
+  --accent-text: #b03a20;
+  --line: #d5ddf0;
+  --line-input: #7a86a8;
+  --grid: #e3e9f7;
+  --grid-soft: #eaeffa;
+  --shadow-ink: #1b2a4e;
+  --focus: #b03a20;
   --success: #a8d8b9;
-  --warning: #f3e5a1;
-  --danger: #e58aa0;
-  --info: #2d2a3a;
-  --scrim: rgba(45, 42, 58, 0.55);
-  --sn-shadow-hard: 0 12px 28px -14px rgba(90, 70, 145, 0.3);
-  --sn-shadow-hard-sm: 0 6px 16px -10px rgba(90, 70, 145, 0.26);
-  --nav-bg: #fffdfb;
-  --nav-text: #2d2a3a;
-  --nav-muted: rgba(45, 42, 58, 0.66);
-  --nav-accent: #5a4691;
-  --nav-active-bg: rgba(138, 112, 214, 0.13);
-  --nav-borde: #ece5ee;
-  --hero-gradient: linear-gradient(120deg, #fbefb2 0%, #c8e9d4 27%, #b9d9f4 55%, #d5c8f3 80%, #f7bfcd 100%);
-  --kpi-gradient: linear-gradient(135deg, #c8e9d4, #b9d9f4);
-  --hero-text: #2d2a3a;
-  --r-card: 24px;
+  --warning: #f3dfa2;
+  --danger: #f28ea3;
+  --info: #1b2a4e;
+  --scrim: rgba(27, 42, 78, 0.55);
+  --sn-shadow-hard: 0 14px 30px -16px rgba(27, 42, 78, 0.34);
+  --sn-shadow-hard-sm: 0 6px 16px -10px rgba(27, 42, 78, 0.28);
+  --nav-bg: #ffffff;
+  --nav-text: #1b2a4e;
+  --nav-muted: rgba(27, 42, 78, 0.66);
+  --nav-accent: #b03a20;
+  --nav-active-bg: rgba(244, 135, 106, 0.16);
+  --nav-borde: #e3e9f7;
+  --hero-gradient: linear-gradient(135deg, #dde6fc 0%, #c9d6f8 62%, #f8c4b4 100%);
+  --kpi-gradient: linear-gradient(135deg, #dde6fc, #cbd8f7);
+  --hero-text: #1b2a4e;
+  --r-card: 26px;
   --sombra-banner: var(--sn-shadow-hard);
   --r-ctl: 999px;
   --brand: var(--signal);
@@ -262,41 +259,41 @@ html:has([data-vertical="unas"]) {
 [data-tema-vista="unas"][data-modo="dark"],
 html[data-theme="dark"][data-vertical="unas"],
 html[data-theme="dark"]:has([data-vertical="unas"]) {
-  --bg: #1e1b28;
-  --app-bg: #161420;
-  --surface: #282434;
-  --surface-2: #332e43;
-  --ink: #110f18;
-  --paper: #f4f0fa;
-  --signal: #cdbcf0;
-  --signal-pressed: #dccff6;
-  --text: #f4f0fa;
-  --text-muted: #c8c1d8;
-  --text-faint: #aba4be;
-  --text-disabled: #766f8a;
-  --accent-text: #d9cbf7;
-  --line: #3b3551;
-  --line-input: #80789b;
-  --grid: #2d293b;
-  --grid-soft: #262233;
-  --shadow-ink: #000000;
-  --focus: #d9cbf7;
+  --bg: #141c33;
+  --app-bg: #0e1426;
+  --surface: #1c2644;
+  --surface-2: #26325a;
+  --ink: #0b1020;
+  --paper: #eef2ff;
+  --signal: #f4876a;
+  --signal-pressed: #f79a80;
+  --text: #eef2ff;
+  --text-muted: #bcc6e4;
+  --text-faint: #9ea9cf;
+  --text-disabled: #6a759d;
+  --accent-text: #ff9d82;
+  --line: #2e3a62;
+  --line-input: #7380ac;
+  --grid: #222d50;
+  --grid-soft: #1b2542;
+  --focus: #ff9d82;
   --success: #8fd0a5;
   --warning: #e6d58e;
-  --danger: #f08aa2;
-  --info: #f4f0fa;
+  --danger: #f2788d;
+  --info: #eef2ff;
+  --shadow-ink: #000000;
   --scrim: rgba(0, 0, 0, 0.7);
   --sn-shadow-hard: 0 12px 28px -14px rgba(0, 0, 0, 0.7);
   --sn-shadow-hard-sm: 0 6px 16px -10px rgba(0, 0, 0, 0.6);
-  --nav-bg: #181520;
-  --nav-text: #f4f0fa;
-  --nav-muted: rgba(244, 240, 250, 0.66);
-  --nav-accent: #d9cbf7;
-  --nav-active-bg: rgba(205, 188, 240, 0.15);
-  --nav-borde: #2d293b;
-  --hero-gradient: linear-gradient(120deg, #55503a 0%, #35514a 27%, #31506a 55%, #4b3f6c 80%, #6a4258 100%);
-  --kpi-gradient: linear-gradient(135deg, #35514a, #31506a);
-  --hero-text: #f4f0fa;
+  --nav-bg: #10172b;
+  --nav-text: #eef2ff;
+  --nav-muted: rgba(238, 242, 255, 0.66);
+  --nav-accent: #ff9d82;
+  --nav-active-bg: rgba(244, 135, 106, 0.16);
+  --nav-borde: #222d50;
+  --hero-gradient: linear-gradient(135deg, #27346b 0%, #1e2a55 62%, #4a2f3d 100%);
+  --kpi-gradient: linear-gradient(135deg, #27346b, #1e2a55);
+  --hero-text: #eef2ff;
   --brand: var(--signal);
   --brand-text: var(--accent-text);
   color-scheme: dark;
@@ -357,6 +354,15 @@ html:has([data-vertical]) {
 
   /* Títulos: serif suave en frase normal; la palabra de acento va en cursiva. */
   & :is(.poster-1, .poster-2, .poster-3, .poster-4, .poster-5, .poster-xl, .poster-lg, .sn-poster, .section, .sn-section, .font-display) {
+    font-family: var(--sn-font-display);
+  }
+  & :is(.section, .sn-section, .font-display) {
+    font-stretch: 100%;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  /* Solo los titulares grandes (póster) llevan la tipografía de lucimiento; logotipos y títulos chicos usan la de lectura. */
+  & :is(.poster-1, .poster-2, .poster-3, .poster-4, .poster-5, .poster-xl, .poster-lg, .sn-poster) {
     font-family: var(--sn-font-poster, var(--sn-font-display));
     font-stretch: 100%;
     font-weight: 400;
@@ -451,23 +457,24 @@ html:has([data-vertical]) {
     stroke-linejoin: round;
   }
 
-  /* Barra de pestañas del cliente: clara y suave (no negra). */
-  & .sn-tabbar {
-    background: var(--bg);
-    border-top: 1px solid var(--line);
+  /* La barra inferior del cliente es igual para todos los negocios: se fija a su diseño original. */
+  & .sn-tabbar,
+  & .sn-tabbar * {
     border-radius: 0;
+  }
+  & .sn-tabbar {
+    background: #0a0a0a;
+    border-top: 1px solid #0a0a0a;
   }
   & .sn-tab {
-    color: var(--text-muted);
-    border-right: 0;
-    font: 500 11px/14px var(--sn-font-sans);
-    letter-spacing: 0.02em;
-    text-transform: none;
-    border-radius: 0;
+    color: #a3a3a3;
+    font: 400 11px/14px var(--font-space-mono), ui-monospace, monospace;
+    letter-spacing: 0.66px;
+    text-transform: uppercase;
   }
   & .sn-tab.is-active {
-    background: var(--nav-active-bg);
-    color: var(--accent-text);
+    background: #fe5400;
+    color: #0a0a0a;
     font-weight: 700;
   }
 
