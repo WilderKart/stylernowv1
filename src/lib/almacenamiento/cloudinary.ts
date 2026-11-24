@@ -202,15 +202,40 @@ export async function subirDocumentoPrivado(opciones: {
   return { publicId: json.public_id, version: json.version, formato: json.format, bytes: json.bytes ?? opciones.bytes.byteLength };
 }
 
-/** Descarga un documento privado desde el servidor con URL firmada (esa URL nunca sale del servidor). */
+/**
+ * Descarga un documento privado desde el servidor. Se usa la API de descarga privada de Cloudinary (firmada con el
+ * secreto, solo servidor): a diferencia de la URL de entrega, no queda bloqueada por la restricción de Cloudinary a
+ * servir PDF/ZIP públicamente, que era la causa de «no disponible» al abrir certificados en PDF.
+ * Si esa vía falla, se intenta la URL firmada de entrega (imágenes). Ninguna URL sale del servidor.
+ */
 export async function leerDocumentoPrivado(
   publicId: string,
   version: number,
   formato: string,
   config?: ConfigCloudinary,
 ): Promise<{ cuerpo: ReadableStream<Uint8Array>; tipo: string; longitud: string | null }> {
-  const url = urlFirmada(publicId, { version, formato, config });
-  const res = await fetch(url, { cache: "no-store" });
+  const cfg = config ?? configCloudinary();
+  if (!cfg) throw new Error("CLOUDINARY_NO_CONFIGURADO");
+
+  const params: Record<string, string | number> = {
+    public_id: publicId,
+    format: formato,
+    type: "authenticated",
+    timestamp: Math.floor(Date.now() / 1000),
+  };
+  const consulta = new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)]));
+  consulta.set("api_key", cfg.apiKey);
+  consulta.set("signature", firmarParametros(params, cfg.apiSecret));
+  let res = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(cfg.cloudName)}/image/download?${consulta}`, { cache: "no-store" });
+  if (!res.ok || !res.body) {
+    res = await fetch(urlFirmada(publicId, { version, formato, config: cfg }), { cache: "no-store" });
+  }
   if (!res.ok || !res.body) throw new Error("DOCUMENTO_NO_DISPONIBLE");
-  return { cuerpo: res.body, tipo: res.headers.get("content-type") ?? "application/octet-stream", longitud: res.headers.get("content-length") };
+  const tipoFormato: Record<string, string> = { pdf: "application/pdf", jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp" };
+  const declarado = res.headers.get("content-type");
+  return {
+    cuerpo: res.body,
+    tipo: tipoFormato[formato.toLowerCase()] ?? declarado ?? "application/octet-stream",
+    longitud: res.headers.get("content-length"),
+  };
 }

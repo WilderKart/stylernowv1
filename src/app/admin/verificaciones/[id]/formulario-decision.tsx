@@ -11,7 +11,7 @@ type Decision = "VERIFICADA" | "REQUIERE_CORRECCION" | "RECHAZADA" | "REVOCADA";
 
 const OPCIONES: Record<string, { valor: Decision; etiqueta: string }[]> = {
   EN_REVISION: [
-    { valor: "VERIFICADA", etiqueta: "Verificar" },
+    { valor: "VERIFICADA", etiqueta: "Verificar y dar de alta" },
     { valor: "REQUIERE_CORRECCION", etiqueta: "Pedir corrección" },
     { valor: "RECHAZADA", etiqueta: "Rechazar" },
   ],
@@ -43,8 +43,8 @@ export function FormularioDecision({ negocioId, estado }: { negocioId: string; e
 
   function handleConfirmarDecision() {
     setConfirmOpen(false);
-    if (motivo.trim().length < 10) return setError("Escribe el motivo de la decisión (mínimo 10 caracteres).");
     const valor = confirmDecision!;
+    if (valor !== "VERIFICADA" && motivo.trim().length < 10) return setError("Escribe el motivo de la decisión (mínimo 10 caracteres).");
     setOcupado(valor);
     decidirVerificacion({ negocioId, nuevo: valor, motivo })
       .then((r) => {

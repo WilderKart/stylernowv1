@@ -26,6 +26,14 @@ const TONO: Record<EstadoVerificacion, "neutral" | "success" | "danger" | "accen
   REVOCADA: "danger",
 };
 
+const NEGOCIO_TEXTO: Record<string, { texto: string; badge: string; tono: "neutral" | "success" | "danger" | "accent" }> = {
+  PENDIENTE_APROBACION: { texto: "Esperando aprobación del equipo de StylerNow", badge: "EN REVISIÓN", tono: "accent" },
+  ACTIVO: { texto: "Aprobado y activo", badge: "APROBADO", tono: "success" },
+  SUSPENDIDO: { texto: "Suspendido", badge: "SUSPENDIDO", tono: "danger" },
+  RECHAZADO: { texto: "Rechazado", badge: "RECHAZADO", tono: "danger" },
+  CANCELADO: { texto: "Cancelado", badge: "CANCELADO", tono: "danger" },
+};
+
 const GRUPOS = Array.from(new Set(TIPOS_DOCUMENTO.map((t) => t.grupo)));
 
 function tamano(b: number) {
@@ -36,9 +44,11 @@ export function VistaVerificacion({
   negocioId,
   inicial,
   almacenamiento,
+  estadoNegocio,
 }: {
   negocioId: string;
   inicial: MiVerificacion;
+  estadoNegocio: string | null;
   almacenamiento: boolean;
 }) {
   const router = useRouter();
@@ -92,13 +102,33 @@ export function VistaVerificacion({
         </p>
       </header>
 
+      {estadoNegocio ? (
+        <Card className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="sn-label">Tu negocio en StylerNow</p>
+            <p className="mt-1 text-[15px] font-semibold text-text">{NEGOCIO_TEXTO[estadoNegocio]?.texto ?? estadoNegocio}</p>
+          </div>
+          <Badge tone={NEGOCIO_TEXTO[estadoNegocio]?.tono ?? "neutral"}>{NEGOCIO_TEXTO[estadoNegocio]?.badge ?? estadoNegocio}</Badge>
+        </Card>
+      ) : null}
+
       <Card className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="sn-label">Estado</p>
+          <p className="sn-label">Insignia de verificación (documentos)</p>
           <p className="mt-1 text-[15px] font-semibold text-text">{ETIQUETA_ESTADO[v.estado]}</p>
+          {v.estado === "VERIFICADA" && v.decidida_at ? (
+            <p className="mt-0.5 text-[12px] text-text-faint">Aprobada el {new Date(v.decidida_at).toLocaleDateString("es-CO")}</p>
+          ) : null}
         </div>
-        <Badge tone={TONO[v.estado]}>{v.estado.replaceAll("_", " ")}</Badge>
+        <Badge tone={TONO[v.estado]}>{v.estado === "VERIFICADA" ? "APROBADA" : v.estado.replaceAll("_", " ")}</Badge>
       </Card>
+
+      {estadoNegocio === "ACTIVO" && v.estado !== "VERIFICADA" ? (
+        <p className="text-[12.5px] leading-relaxed text-text-muted">
+          Tu negocio ya está aprobado y puede operar. La insignia de verificación es un paso aparte, opcional y sin costo: el equipo revisa tus
+          documentos y, si todo está bien, tu perfil público muestra la marca de «Verificado».
+        </p>
+      ) : null}
 
       {v.motivo ? (
         <Card className="border-danger bg-danger-soft">

@@ -92,7 +92,7 @@ export function AsistenteBienvenida({ datos }: { datos: DatosAsistente }) {
       accion: datos.verificacion === "NO_INICIADA" ? "INICIAR VERIFICACIÓN" : "VER MI VERIFICACIÓN",
       href: "/panel/verificacion",
       hecha: verificada,
-      estado: verificada ? "Verificado" : datos.verificacion === "EN_REVISION" ? "En revisión" : "Pendiente",
+      estado: verificada ? "Verificado" : datos.verificacion === "EN_REVISION" ? "Documentos en revisión" : "Pendiente",
     },
   ];
   const hechas = tareas.filter((t) => t.hecha).length;

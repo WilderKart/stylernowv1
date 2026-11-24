@@ -35,12 +35,15 @@ export function DashboardResumen({
   ranking,
   timeline,
   erroresParciales,
+  soloRanking = false,
 }: {
   resumen: ResumenDia | null;
   ranking: RankingStaffItem[];
   timeline: CitaDelDia[];
   /** Alguna de las 3 consultas falló — no rompemos toda la pantalla por eso. */
   erroresParciales: string[];
+  /** El resumen nuevo ya muestra KPIs, próxima cita y agenda del día: aquí solo queda el ranking. */
+  soloRanking?: boolean;
 }) {
   return (
     <div className="mt-2 flex flex-col gap-6">
@@ -50,7 +53,7 @@ export function DashboardResumen({
         </p>
       ) : null}
 
-      {resumen ? (
+      {resumen && !soloRanking ? (
         <section className="grid grid-cols-3 gap-2.5">
           <Card className="items-center text-center">
             <p className="text-[10.5px] font-bold uppercase tracking-wide text-text-faint">
@@ -73,7 +76,7 @@ export function DashboardResumen({
         </section>
       ) : null}
 
-      {resumen?.proximaCita ? (
+      {soloRanking ? null : resumen?.proximaCita ? (
         <Card className="border-accent/30 bg-accent-soft">
           <p className="text-[10.5px] font-bold uppercase tracking-wide text-accent">
             Próxima cita
@@ -89,7 +92,7 @@ export function DashboardResumen({
         </p>
       ) : null}
 
-      <section>
+      <section hidden={soloRanking}>
         <h2 className="font-display mb-3 text-[15px] font-bold uppercase text-text">
           Agenda de hoy
         </h2>

@@ -37,7 +37,7 @@ async function PanelGuardado({ children }: { children: React.ReactNode }) {
   const estado = contexto.negocioId ? await obtenerEstadoOperativo(contexto.negocioId) : null;
 
   return (
-    <div className="min-h-dvh bg-app">
+    <div className="min-h-dvh bg-app pb-16 lg:pb-0 lg:pl-60">
       {estado ? <BannerSuscripcion estado={estado} puedePagar={contexto.rol === "BARBERIA"} /> : null}
       {children}
     </div>

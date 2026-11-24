@@ -2,6 +2,7 @@ import { configCloudinary, subirDocumentoPrivado, tipoRealDeArchivo } from "@/li
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { TAMANO_MAXIMO_DOCUMENTO, TIPOS_DOCUMENTO } from "@/lib/verificacion/tipos";
+import sharp from "sharp";
 import type { NextRequest } from "next/server";
 
 type RpcSinTipos = { rpc: (n: string, a?: object) => Promise<{ data: unknown; error: { message: string } | null }> };
@@ -54,9 +55,28 @@ export async function POST(request: NextRequest) {
     return json({ error: "La verificación no admite documentos en este momento." }, 409);
   }
 
-  const bytes = Buffer.from(await archivo.arrayBuffer());
-  const mime = tipoRealDeArchivo(bytes);
+  const original = Buffer.from(await archivo.arrayBuffer());
+  let mime = tipoRealDeArchivo(original);
   if (!mime) return json({ error: "Sube un PDF, JPG, PNG o WebP." }, 400);
+
+  // Las fotos se comprimen (lado mayor 2000 px, WebP calidad 80, orientación corregida y sin metadatos como el GPS):
+  // siguen siendo legibles para revisar el documento y ocupan una fracción. El PDF se guarda tal cual.
+  let bytes = original;
+  if (mime !== "application/pdf") {
+    try {
+      const comprimida = await sharp(original, { limitInputPixels: 80_000_000 })
+        .rotate()
+        .resize({ width: 2000, height: 2000, fit: "inside", withoutEnlargement: true })
+        .webp({ quality: 80 })
+        .toBuffer();
+      if (comprimida.byteLength < original.byteLength) {
+        bytes = comprimida;
+        mime = "image/webp";
+      }
+    } catch {
+      return json({ error: "No pudimos leer la imagen. Prueba con otra foto o súbela en PDF." }, 400);
+    }
+  }
 
   let subido;
   try {

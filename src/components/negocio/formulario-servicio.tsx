@@ -143,14 +143,14 @@ export function FormularioServicio({
 
       <div className="grid grid-cols-2 gap-3">
         <Input
-          label="Buffer previo (min)"
+          label="Preparación antes (min)"
           type="number"
           min={0}
           value={bufferPrevio}
           onChange={(e) => setBufferPrevio(e.target.value)}
         />
         <Input
-          label="Buffer posterior (min)"
+          label="Limpieza después (min)"
           type="number"
           min={0}
           value={bufferPosterior}
@@ -158,7 +158,7 @@ export function FormularioServicio({
         />
       </div>
       <p className="text-[11px] text-text-faint">
-        Los buffers son tiempo de limpieza/preparación — ocupan la agenda del Staff pero nunca se cobran ni se muestran al Cliente.
+        Son minutos extra para preparar el puesto antes y limpiarlo después. Bloquean la agenda del barbero, pero no se cobran ni los ve el cliente.
       </p>
 
       {error ? <p className="text-[12.5px] text-danger">{error}</p> : null}

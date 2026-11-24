@@ -1,6 +1,7 @@
 import { DashboardResumen } from "@/components/panel/dashboard-resumen";
 import { EnlaceReserva } from "@/components/panel/enlace-reserva";
 import { AsistenteBienvenida } from "@/components/panel/asistente-bienvenida";
+import { ResumenBarberia } from "@/components/panel/resumen-barberia";
 import { PanelNav } from "@/components/panel/panel-nav";
 import { TarjetaPerfilProfesional } from "@/components/panel/tarjeta-perfil-profesional";
 import { TarjetaVisibilidadPublica } from "@/components/panel/tarjeta-visibilidad-publica";
@@ -12,9 +13,7 @@ import { createClient } from "@/lib/supabase/server";
 import { obtenerEstadoOperativo } from "@/lib/suscripcion/estado-operativo";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { AnimatedCounter } from "@/components/ui/animated-counter";
-import { formatCOP } from "@/lib/utils";
-import { obtenerLineaTiempoDia, obtenerMetricasLealtadNegocio, obtenerRankingSemana, obtenerResumenDia, type MetricasLealtadNegocio } from "./dashboard-actions";
+import { obtenerLineaTiempoDia, obtenerMetricasLealtadNegocio, obtenerRankingSemana, obtenerResumenDia } from "./dashboard-actions";
 
 export const metadata = { title: "Panel" };
 
@@ -35,22 +34,6 @@ async function cargarDashboard(negocioId: string, sedeId: string | null) {
       erroresParciales.length > 0 ? ["No pudimos cargar todo el resumen del día — prueba recargar."] : [],
   };
 }
-
-const ESTADO_TONO = {
-  PENDIENTE_APROBACION: "neutral",
-  ACTIVO: "success",
-  SUSPENDIDO: "danger",
-  RECHAZADO: "danger",
-  CANCELADO: "danger",
-} as const;
-
-const ESTADO_TEXTO = {
-  PENDIENTE_APROBACION: "En revisión por el equipo de StylerNow",
-  ACTIVO: "Activo",
-  SUSPENDIDO: "Suspendido",
-  RECHAZADO: "Rechazado",
-  CANCELADO: "Cancelado",
-} as const;
 
 /**
  * Raíz del Panel Negocio — ADR-006: compartida entre Barbería y Guardian,
@@ -203,10 +186,14 @@ export default async function PanelPage() {
   return (
     <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} prestaServicios={contexto.prestaServicios} />
-      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 py-8 sm:px-10">
-        <h1 className="font-display mb-6 text-[24px] font-bold uppercase text-text">
-          {negocio.nombre}
-        </h1>
+      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-5 py-6 sm:px-10 sm:py-8">
+        <ResumenBarberia
+          nombre={negocio.nombre}
+          estadoNegocio={negocio.estado}
+          resumen={dashboardBarberia?.resumen ?? null}
+          citas={dashboardBarberia?.timeline ?? []}
+          lealtad={metricasLealtad}
+        />
 
         <AsistenteBienvenida datos={datosAsistente} />
 
@@ -222,16 +209,6 @@ export default async function PanelPage() {
         />
 
         {estadoPublicacion?.ok ? <TarjetaVisibilidadPublica estado={estadoPublicacion.data} /> : null}
-
-        <Card className="mb-6 flex items-center justify-between">
-          <div>
-            <p className="text-[11.5px] font-bold uppercase tracking-wide text-text-muted">Estado</p>
-            <p className="mt-1 text-[15px] font-semibold text-text">
-              {ESTADO_TEXTO[negocio.estado]}
-            </p>
-          </div>
-          <Badge tone={ESTADO_TONO[negocio.estado]}>{negocio.estado}</Badge>
-        </Card>
 
         {negocio.estado === "PENDIENTE_APROBACION" ? (
           <Card className="mb-6 border-accent/30 bg-accent-soft">
@@ -271,50 +248,22 @@ export default async function PanelPage() {
 
         {negocio.estado === "ACTIVO" ? <EnlaceReserva slug={negocio.slug} /> : null}
 
-        {metricasLealtad ? <TarjetasLealtad metricas={metricasLealtad} /> : null}
-
         {dashboardBarberia ? (
           <DashboardResumen
             resumen={dashboardBarberia.resumen}
             ranking={dashboardBarberia.ranking}
             timeline={dashboardBarberia.timeline}
             erroresParciales={dashboardBarberia.erroresParciales}
+            soloRanking
           />
         ) : (
-          <p className="mt-4 rounded-2xl border border-dashed border-border px-4 py-6 text-center text-[12.5px] text-text-faint">
+          <p className="rounded-2xl border border-dashed border-border px-4 py-6 text-center text-[12.5px] text-text-faint">
             El resumen del día se activa apenas tu negocio quede{" "}
-            <strong className="text-text">Activo</strong> — necesita Sedes y Staff aprobados
+            <strong className="text-text">Aprobado</strong> — necesita Sedes y Staff aprobados
             para tener datos reales que mostrar.
           </p>
         )}
       </div>
     </div>
-  );
-}
-
-/** Lealtad transversal (ADR-011 + extensión del fundador): KPIs de Lealtad en el Dashboard. */
-function TarjetasLealtad({ metricas }: { metricas: MetricasLealtadNegocio }) {
-  return (
-    <section className="mb-6">
-      <h2 className="font-display mb-2 text-[12px] font-bold uppercase text-text">Lealtad</h2>
-      <div className="grid grid-cols-3 gap-2">
-        <Card className="p-3 text-center">
-          <AnimatedCounter value={metricas.membresiasActivas} className="text-[16px] font-bold text-text" />
-          <p className="mt-0.5 text-[9px] uppercase tracking-wide text-text-faint">Membresías</p>
-        </Card>
-        <Card className="p-3 text-center">
-          <AnimatedCounter value={metricas.miembrosVip} className="text-[16px] font-bold text-text" />
-          <p className="mt-0.5 text-[9px] uppercase tracking-wide text-text-faint">Miembros VIP</p>
-        </Card>
-        <Card className="p-3 text-center">
-          <AnimatedCounter value={metricas.sellosCampanasActivas} className="text-[16px] font-bold text-text" />
-          <p className="mt-0.5 text-[9px] uppercase tracking-wide text-text-faint">Campañas Sellos</p>
-        </Card>
-      </div>
-      <p className="mt-2 text-[11px] text-text-faint">
-        Cashback otorgado este mes: <strong className="text-text">{formatCOP(metricas.cashbackOtorgadoMes)}</strong>
-        {" · "}Referidos completados este mes: <strong className="text-text">{metricas.referidosCompletadosMes}</strong>
-      </p>
-    </section>
   );
 }

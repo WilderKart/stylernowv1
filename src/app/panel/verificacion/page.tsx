@@ -16,6 +16,9 @@ export default async function VerificacionPage() {
   const { data } = await (supabase as unknown as {
     rpc: (n: string, a: object) => Promise<{ data: MiVerificacion | null }>;
   }).rpc("mi_verificacion_negocio", { p_negocio_id: negocioId });
+  // El negocio se aprueba en /admin/negocios (estado del negocio); la insignia de verificación es otro proceso
+  // (documentos). Se muestran por separado para que "negocio aprobado" nunca parezca "en revisión".
+  const { data: negocio } = await supabase.from("negocio").select("estado").eq("id", negocioId).maybeSingle();
   const inicial: MiVerificacion = data ?? {
     estado: "NO_INICIADA" as EstadoVerificacion,
     motivo: null,
@@ -28,7 +31,7 @@ export default async function VerificacionPage() {
     <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-8 sm:px-10">
-        <VistaVerificacion negocioId={negocioId} inicial={inicial} almacenamiento={await almacenamientoDeImagenesDisponible()} />
+        <VistaVerificacion negocioId={negocioId} inicial={inicial} estadoNegocio={negocio?.estado ?? null} almacenamiento={await almacenamientoDeImagenesDisponible()} />
       </main>
     </div>
   );

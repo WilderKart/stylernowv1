@@ -159,6 +159,7 @@ export async function aprobarNegocio(negocioId: string): Promise<Resultado> {
     const { error } = await supabase.rpc("aprobar_negocio", { p_negocio_id: negocioId });
     if (error) return { ok: false, error: traducirError(error.message) };
     revalidatePath("/admin/negocios");
+    revalidatePath("/panel", "layout"); // el panel del dueño lee el mismo estado: que no quede desfasado
     revalidatePath("/admin");
     return { ok: true };
   } catch (e) {
@@ -172,6 +173,7 @@ export async function rechazarNegocio(negocioId: string, motivo: string): Promis
     const { error } = await supabase.rpc("rechazar_negocio", { p_negocio_id: negocioId, p_motivo: motivo });
     if (error) return { ok: false, error: traducirError(error.message) };
     revalidatePath("/admin/negocios");
+    revalidatePath("/panel", "layout"); // el panel del dueño lee el mismo estado: que no quede desfasado
     revalidatePath("/admin");
     return { ok: true };
   } catch (e) {
@@ -185,6 +187,7 @@ export async function suspenderNegocio(negocioId: string, motivo: string, causa:
     const { error } = await supabase.rpc("suspender_negocio", { p_negocio_id: negocioId, p_motivo: motivo, p_causa: causa });
     if (error) return { ok: false, error: traducirError(error.message) };
     revalidatePath("/admin/negocios");
+    revalidatePath("/panel", "layout"); // el panel del dueño lee el mismo estado: que no quede desfasado
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
@@ -197,6 +200,7 @@ export async function marcarNegocioEnMora(negocioId: string, motivo: string): Pr
     const { error } = await supabase.rpc("marcar_negocio_en_mora", { p_negocio_id: negocioId, p_motivo: motivo });
     if (error) return { ok: false, error: traducirError(error.message) };
     revalidatePath("/admin/negocios");
+    revalidatePath("/panel", "layout"); // el panel del dueño lee el mismo estado: que no quede desfasado
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
@@ -209,6 +213,7 @@ export async function forzarReactivacionPagoExterno(negocioId: string, motivo: s
     const { error } = await supabase.rpc("forzar_reactivacion_pago_externo", { p_negocio_id: negocioId, p_motivo: motivo });
     if (error) return { ok: false, error: traducirError(error.message) };
     revalidatePath("/admin/negocios");
+    revalidatePath("/panel", "layout"); // el panel del dueño lee el mismo estado: que no quede desfasado
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
@@ -221,6 +226,7 @@ export async function reactivarNegocio(negocioId: string): Promise<Resultado> {
     const { error } = await supabase.rpc("reactivar_negocio_supersu", { p_negocio_id: negocioId });
     if (error) return { ok: false, error: traducirError(error.message) };
     revalidatePath("/admin/negocios");
+    revalidatePath("/panel", "layout"); // el panel del dueño lee el mismo estado: que no quede desfasado
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
@@ -233,6 +239,7 @@ export async function cancelarNegocio(negocioId: string, motivo: string): Promis
     const { error } = await supabase.rpc("cancelar_negocio_supersu", { p_negocio_id: negocioId, p_motivo: motivo });
     if (error) return { ok: false, error: traducirError(error.message) };
     revalidatePath("/admin/negocios");
+    revalidatePath("/panel", "layout"); // el panel del dueño lee el mismo estado: que no quede desfasado
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
@@ -272,6 +279,7 @@ export async function activarPlanManual(d: ActivacionManualInput): Promise<Resul
     });
     if (error) return { ok: false, error: traducirError(error.message) };
     revalidatePath("/admin/negocios");
+    revalidatePath("/panel", "layout"); // el panel del dueño lee el mismo estado: que no quede desfasado
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };

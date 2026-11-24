@@ -27,21 +27,39 @@ function traducir(m: string) {
 const esquema = z.object({
   negocioId: z.string().uuid(),
   nuevo: z.enum(["VERIFICADA", "REQUIERE_CORRECCION", "RECHAZADA", "REVOCADA"]),
-  motivo: z.string().trim().min(10).max(1000),
+  motivo: z.string().trim().max(1000).default(""),
 });
 
 export async function decidirVerificacion(entrada: z.input<typeof esquema>): Promise<{ ok: true } | { ok: false; error: string }> {
   await requireSuperSU();
   const p = esquema.safeParse(entrada);
   if (!p.success) return { ok: false, error: MENSAJES.MOTIVO_REQUERIDO };
+  // Aprobar no exige redactar nada; pedir corrección, rechazar o revocar sí (lo verá el negocio).
+  const aprobando = p.data.nuevo === "VERIFICADA";
+  if (!aprobando && p.data.motivo.length < 10) return { ok: false, error: MENSAJES.MOTIVO_REQUERIDO };
+  const motivo = aprobando && p.data.motivo.length < 10 ? "Documentos revisados y aprobados por el equipo de StylerNow." : p.data.motivo;
   const supabase = (await createClient()) as unknown as RpcSinTipos;
   const { error } = await supabase.rpc("admin_decidir_verificacion", {
     p_negocio_id: p.data.negocioId,
     p_nuevo: p.data.nuevo,
-    p_motivo: p.data.motivo,
+    p_motivo: motivo,
   });
   if (error) return { ok: false, error: traducir(error.message) };
+
+  // Un solo botón: al verificar los documentos, si el negocio seguía esperando aprobación, también se da de alta
+  // (misma función de SuperSU que usa «Aprobar» en Negocios; si ya estaba activo, no hace nada).
+  if (aprobando) {
+    const { data: n } = await (supabase as unknown as { from: (t: string) => { select: (c: string) => { eq: (k: string, v: string) => { maybeSingle: () => Promise<{ data: { estado: string } | null }> } } } })
+      .from("negocio").select("estado").eq("id", p.data.negocioId).maybeSingle();
+    if (n?.estado === "PENDIENTE_APROBACION") {
+      const { error: eAprobar } = await supabase.rpc("aprobar_negocio", { p_negocio_id: p.data.negocioId });
+      if (eAprobar) return { ok: false, error: "La verificación quedó aprobada, pero no pudimos dar de alta el negocio. Apruébalo desde Negocios." };
+      revalidatePath("/admin/negocios");
+      revalidatePath("/admin");
+    }
+  }
   revalidatePath("/admin/verificaciones");
   revalidatePath("/admin/verificaciones/" + p.data.negocioId);
+  revalidatePath("/panel", "layout");
   return { ok: true };
 }
