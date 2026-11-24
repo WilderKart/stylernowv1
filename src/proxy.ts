@@ -53,11 +53,7 @@ export async function proxy(request: NextRequest) {
 
   const { pathname, search } = request.nextUrl;
   const { response, user, sesionRevocada } = await updateSession(request, requestHeaders, {
-    // /api/** también valida la revocación de sesión (session_version): un Route Handler no debe
-    // seguir sirviendo datos con un JWT revocado. Webhooks y cron no llevan sesión de usuario.
-    rutaProtegida: pathname.startsWith("/api/")
-      ? !pathname.startsWith("/api/webhooks/") && !pathname.startsWith("/api/cron/")
-      : !esRutaPublica(pathname),
+    rutaProtegida: !esRutaPublica(pathname) && !pathname.startsWith("/api/"),
   });
   response.headers.set(cabeceraCsp, csp);
   // En modo solo-reporte el navegador ignora frame-ancestors; estas tres sí se aplican siempre (solo en la respuesta,
@@ -68,12 +64,6 @@ export async function proxy(request: NextRequest) {
 
   // Session Version (migración 181): la sesión quedó revocada (cambio de contraseña, suspensión,
   // traslado…). `updateSession` ya la cerró y limpió las cookies; se reenvía esa limpieza al redirect.
-  if (sesionRevocada && pathname.startsWith("/api/")) {
-    // API: 401 JSON (nunca redirect a HTML). Se conserva la limpieza de cookies de updateSession.
-    const r = NextResponse.json({ error: "session_revoked" }, { status: 401, headers: { "Cache-Control": "no-store" } });
-    response.cookies.getAll().forEach((c) => r.cookies.set(c));
-    return r;
-  }
   if (sesionRevocada) {
     const login = new URL("/login", request.url);
     login.searchParams.set("revocada", "1");

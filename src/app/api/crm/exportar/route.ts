@@ -33,8 +33,7 @@ export async function GET(request: NextRequest) {
     listarClientesCRM({ negocioId: contexto.negocioId, limite: 5000 }),
     supabase.from("negocio").select("nombre").eq("id", contexto.negocioId).single(),
   ]);
-  if (!res.ok) console.error("[exportar] crm", res.error);
-  return new Response("No se pudo generar la exportación.", { status: 403 });
+  if (!res.ok) return new Response(res.error, { status: 403 });
 
   const filas = res.data.items.map((c) => ({
     nombre: c.nombre,
@@ -66,7 +65,6 @@ export async function GET(request: NextRequest) {
     );
     return new Response(new Uint8Array(buffer), {
       headers: {
-        "Cache-Control": "private, no-store, max-age=0, must-revalidate",
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "Content-Disposition": `attachment; filename="${nombreArchivo}.xlsx"`,
       },
@@ -88,8 +86,7 @@ export async function GET(request: NextRequest) {
   });
   return new Response(new Uint8Array(pdfBytes), {
     headers: {
-        "Cache-Control": "private, no-store, max-age=0, must-revalidate",
-              "Content-Type": "application/pdf",
+      "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="${nombreArchivo}.pdf"`,
     },
   });

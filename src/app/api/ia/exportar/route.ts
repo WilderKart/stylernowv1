@@ -36,10 +36,7 @@ export async function GET(request: NextRequest) {
     listarConsumoIa(negocioId),
     supabase.from("negocio").select("nombre").eq("id", negocioId).single(),
   ]);
-  if (!resConsumo.ok) {
-    console.error("[exportar] ia", resConsumo.error);
-    return new Response("No se pudo generar la exportación.", { status: 403 });
-  }
+  if (!resConsumo.ok) return new Response(resConsumo.error, { status: 403 });
 
   const filas = resConsumo.data.map((c) => ({
     fecha: c.createdAt.slice(0, 10),
@@ -69,7 +66,6 @@ export async function GET(request: NextRequest) {
     );
     return new Response(new Uint8Array(buffer), {
       headers: {
-        "Cache-Control": "private, no-store, max-age=0, must-revalidate",
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "Content-Disposition": `attachment; filename="${nombreArchivo}.xlsx"`,
       },
@@ -91,8 +87,7 @@ export async function GET(request: NextRequest) {
   });
   return new Response(new Uint8Array(pdfBytes), {
     headers: {
-        "Cache-Control": "private, no-store, max-age=0, must-revalidate",
-              "Content-Type": "application/pdf",
+      "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="${nombreArchivo}.pdf"`,
     },
   });

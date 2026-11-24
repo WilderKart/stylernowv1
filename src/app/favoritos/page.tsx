@@ -21,8 +21,7 @@ export default async function FavoritosPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/favoritos");
 
-  const res = await listarMisFavoritos();
-  const negocios = res.ok ? res.negocios : [];
+  const negocios = await listarMisFavoritos();
 
   return (
     <div className="flex min-h-dvh flex-col bg-app pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom))]">
@@ -36,20 +35,7 @@ export default async function FavoritosPage() {
         <div className="p-sec sm:!px-6">
           <Num>{t("fav.sec")}</Num>
         </div>
-        {!res.ok ? (
-          <div className="px-4 sm:px-6">
-            <EmptyState
-              big="!"
-              title="No pudimos cargar tus favoritos"
-              hint="Ocurrió un problema temporal. Recarga la página en unos segundos."
-              action={
-                <Link href="/favoritos" className="sn-chip !min-h-12 no-underline">
-                  Reintentar
-                </Link>
-              }
-            />
-          </div>
-        ) : negocios.length === 0 ? (
+        {negocios.length === 0 ? (
           <div className="px-4 sm:px-6">
             <EmptyState
               big="0"

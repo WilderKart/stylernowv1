@@ -47,17 +47,14 @@ export async function GET(request: NextRequest) {
   if (contexto.negocioId !== negocioId) return new Response("No autorizado", { status: 403 });
 
   const operativo = await exigirOperativo(negocioId);
-  if (!operativo.ok) return new Response("Suscripción restringida", { status: 403 });
+  if (!operativo.ok) return new Response("Suscripci?n restringida", { status: 403 });
 
   const supabase = await createClient();
   const [{ data: ingresos, error }, { data: negocio }] = await Promise.all([
     supabase.rpc("reportes_ingresos_periodo", { p_negocio_id: negocioId, p_desde: desde, p_hasta: hasta, p_agrupacion: agrupacion }),
     supabase.from("negocio").select("nombre").eq("id", negocioId).single(),
   ]);
-  if (error) {
-    console.error("[exportar] reportes", error.message);
-    return new Response("No se pudo generar la exportación.", { status: 403 });
-  }
+  if (error) return new Response(error.message, { status: 403 });
 
   const filas = (ingresos ?? []).map((p) => ({
     periodo: p.periodo!,
@@ -84,7 +81,6 @@ export async function GET(request: NextRequest) {
     );
     return new Response(new Uint8Array(buffer), {
       headers: {
-        "Cache-Control": "private, no-store, max-age=0, must-revalidate",
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "Content-Disposition": `attachment; filename="${nombreArchivo}.xlsx"`,
       },
@@ -107,8 +103,7 @@ export async function GET(request: NextRequest) {
   });
   return new Response(new Uint8Array(pdfBytes), {
     headers: {
-        "Cache-Control": "private, no-store, max-age=0, must-revalidate",
-              "Content-Type": "application/pdf",
+      "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="${nombreArchivo}.pdf"`,
     },
   });

@@ -29,13 +29,8 @@ export async function obtenerSellosOtorgadosPorMi(negocioId: string): Promise<Re
   // Vista informativa: sellos de eventos ligados a Reservas atendidas por este Staff, en este Negocio.
   const { data, error } = await supabase
     .from("sello_evento")
-    .select("sello_cliente:sello_cliente_id (sellos_actuales, campana:campana_id (nombre, sellos_requeridos, negocio_id), cliente:cliente_id (nombre)), reserva:reserva_id!inner (staff_id)")
-    .eq("tipo", "OTORGADO")
-    // Filtros y tope en SQL (antes se traía todo el historial visible por RLS y se filtraba en memoria).
-    .eq("reserva.staff_id", user.user.id)
-    .eq("sello_cliente.campana.negocio_id", negocioId)
-    .order("created_at", { ascending: false })
-    .limit(200);
+    .select("sello_cliente:sello_cliente_id (sellos_actuales, campana:campana_id (nombre, sellos_requeridos, negocio_id), cliente:cliente_id (nombre)), reserva:reserva_id (staff_id)")
+    .eq("tipo", "OTORGADO");
   if (error) return { ok: false, error: error.message };
 
   const filtrados = (data ?? []).filter((e) => (e.reserva as unknown as { staff_id: string } | null)?.staff_id === user.user!.id);

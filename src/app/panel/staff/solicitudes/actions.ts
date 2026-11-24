@@ -33,25 +33,22 @@ const MENSAJES: Record<string, string> = {
 };
 const traducir = (m: string) => MENSAJES[Object.keys(MENSAJES).find((k) => m.includes(k)) ?? ""] ?? "No pudimos completar la acción. Intenta de nuevo.";
 
-export async function listarSolicitudesPendientes(negocioId: string | undefined): Promise<{ ausencias: SolicitudAusenciaFila[]; horarios: SolicitudHorarioFila[]; disponible: boolean }> {
-  const vacio = { ausencias: [], horarios: [], disponible: true };
-  if (!negocioId) return vacio;
+export async function listarSolicitudesPendientes(): Promise<{ ausencias: SolicitudAusenciaFila[]; horarios: SolicitudHorarioFila[]; disponible: boolean }> {
   const supabase = (await createClient()) as unknown as Desde;
-  // Las solicitudes cuelgan del vínculo: se acota al negocio activo (un usuario con varios negocios no mezcla los de otro).
-  const { data: v, error: errV } = await supabase.from("vinculo_staff_negocio").select("id, staff_id").eq("negocio_id", negocioId).limit(500);
-  if (errV) return { ausencias: [], horarios: [], disponible: false };
-  const vinculosNegocio = (v ?? []).map((x: { id: string }) => x.id);
-  if (vinculosNegocio.length === 0) return vacio;
   const [a, h] = await Promise.all([
-    supabase.from("solicitud_ausencia").select("id, vinculo_id, tipo, fecha_inicio, fecha_fin, motivo").eq("estado", "PENDIENTE").in("vinculo_id", vinculosNegocio).order("created_at").order("id").limit(100),
-    supabase.from("solicitud_horario").select("id, vinculo_id, propuesta").eq("estado", "PENDIENTE").in("vinculo_id", vinculosNegocio).order("created_at").order("id").limit(100),
+    supabase.from("solicitud_ausencia").select("id, vinculo_id, tipo, fecha_inicio, fecha_fin, motivo").eq("estado", "PENDIENTE").order("created_at"),
+    supabase.from("solicitud_horario").select("id, vinculo_id, propuesta").eq("estado", "PENDIENTE").order("created_at"),
   ]);
   if (a.error || h.error) return { ausencias: [], horarios: [], disponible: false }; // migración 187 aún no aplicada
+  const vinculos = [...new Set([...(a.data ?? []), ...(h.data ?? [])].map((x: { vinculo_id: string }) => x.vinculo_id))];
   const nombres = new Map<string, string>();
-  const staffIds = [...new Set((v ?? []).map((x: { staff_id: string }) => x.staff_id))];
-  const { data: st } = staffIds.length ? await supabase.from("staff").select("usuario_id, nombre").in("usuario_id", staffIds) : { data: [] };
-  const porStaff = new Map<string, string>((st ?? []).map((x: { usuario_id: string; nombre: string }) => [x.usuario_id, x.nombre]));
-  for (const x of v ?? []) nombres.set(x.id, porStaff.get(x.staff_id) ?? "Barbero");
+  if (vinculos.length > 0) {
+    const { data: v } = await supabase.from("vinculo_staff_negocio").select("id, staff_id").in("id", vinculos);
+    const staffIds = [...new Set((v ?? []).map((x: { staff_id: string }) => x.staff_id))];
+    const { data: st } = staffIds.length ? await supabase.from("staff").select("usuario_id, nombre").in("usuario_id", staffIds) : { data: [] };
+    const porStaff = new Map<string, string>((st ?? []).map((x: { usuario_id: string; nombre: string }) => [x.usuario_id, x.nombre]));
+    for (const x of v ?? []) nombres.set(x.id, porStaff.get(x.staff_id) ?? "Barbero");
+  }
   return {
     disponible: true,
     ausencias: (a.data ?? []).map((x: { id: string; vinculo_id: string; tipo: string; fecha_inicio: string; fecha_fin: string; motivo: string | null }) => ({

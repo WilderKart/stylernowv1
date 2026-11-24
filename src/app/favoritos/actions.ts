@@ -3,50 +3,33 @@
 import type { NegocioTarjeta } from "@/components/marketplace/negocio-card";
 import { createClient } from "@/lib/supabase/server";
 
-export type ResultadoFavoritos = { ok: true; negocios: NegocioTarjeta[] } | { ok: false; error: string };
-
-export async function listarMisFavoritos(): Promise<ResultadoFavoritos> {
+export async function listarMisFavoritos(): Promise<NegocioTarjeta[]> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: true, negocios: [] };
+  if (!user) return [];
 
-  const { data: favoritos, error } = await supabase
+  const { data: favoritos } = await supabase
     .from("favorito_negocio")
     .select("negocio_id, created_at, negocio:negocio_id (id, nombre, slug, ciudad, categoria, logo_url, estado)")
     .eq("cliente_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(200);
-  // Un fallo real no debe verse como "no tienes favoritos".
-  if (error) return { ok: false, error: "FAVORITOS_NO_DISPONIBLES" };
+    .order("created_at", { ascending: false });
 
   const negocios = (favoritos ?? [])
     .map((f) => f.negocio as unknown as { id: string; nombre: string; slug: string; ciudad: string; categoria: string[]; logo_url: string | null; estado: string } | null)
     .filter((n): n is NonNullable<typeof n> => Boolean(n) && n!.estado === "ACTIVO");
 
-  if (negocios.length === 0) return { ok: true, negocios: [] };
+  if (negocios.length === 0) return [];
 
-  // Dos consultas en lote (antes eran 2 por favorito) y con tope.
-  const ids = negocios.map((n) => n.id);
-  const [{ data: resenas }, { data: servicios }] = await Promise.all([
-    supabase.from("resena").select("negocio_id, calificacion").in("negocio_id", ids).eq("estado", "VISIBLE").limit(5000),
-    supabase.from("servicio").select("negocio_id, precio_base").in("negocio_id", ids).eq("estado", "ACTIVO").order("precio_base").limit(2000),
-  ]);
-  const sumas = new Map<string, { suma: number; total: number }>();
-  for (const r of resenas ?? []) {
-    const a = sumas.get(r.negocio_id) ?? { suma: 0, total: 0 };
-    a.suma += r.calificacion;
-    a.total += 1;
-    sumas.set(r.negocio_id, a);
-  }
-  const minimos = new Map<string, number>();
-  for (const sv of servicios ?? []) if (!minimos.has(sv.negocio_id)) minimos.set(sv.negocio_id, sv.precio_base);
-
-  return {
-    ok: true,
-    negocios: negocios.map((n) => {
-      const a = sumas.get(n.id);
+  const resultados = await Promise.all(
+    negocios.map(async (n) => {
+      const [{ data: resenas }, { data: servicios }] = await Promise.all([
+        supabase.from("resena").select("calificacion").eq("negocio_id", n.id).eq("estado", "VISIBLE"),
+        supabase.from("servicio").select("precio_base").eq("negocio_id", n.id).eq("estado", "ACTIVO").order("precio_base").limit(1),
+      ]);
+      const calificaciones = (resenas ?? []).map((r) => r.calificacion);
+      const calificacion = calificaciones.length > 0 ? calificaciones.reduce((a, b) => a + b, 0) / calificaciones.length : 0;
       return {
         id: n.id,
         nombre: n.nombre,
@@ -54,11 +37,13 @@ export async function listarMisFavoritos(): Promise<ResultadoFavoritos> {
         ciudad: n.ciudad,
         categoria: n.categoria,
         logo_url: n.logo_url,
-        calificacion: a && a.total > 0 ? a.suma / a.total : 0,
-        total_resenas: a?.total ?? 0,
-        precio_desde: minimos.get(n.id) ?? null,
+        calificacion,
+        total_resenas: calificaciones.length,
+        precio_desde: servicios?.[0]?.precio_base ?? null,
         proxima_disponibilidad: null,
       };
-    }),
-  };
+    })
+  );
+
+  return resultados;
 }
