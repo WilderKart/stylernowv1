@@ -80,6 +80,8 @@ export function VistaReportes({
   }
 
   const maxIngreso = Math.max(1, ...ingresos.map((p) => p.ingresos));
+  // Essential (sin `periodo`) exporta solo el día: no se envía agrupación (el servidor la rechazaría).
+  const paramsExport = `${funciones.periodo ? `&agrupacion=${agrupacion}` : ""}${sedeId ? `&sedeId=${sedeId}` : ""}`;
 
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-8 sm:px-10">
@@ -140,13 +142,13 @@ export function VistaReportes({
           <h2 className="font-display text-[13px] font-bold uppercase text-text">Ingresos por {agrupacion}</h2>
           <div className="flex gap-2">
             <a
-              href={`/api/reportes/exportar?negocioId=${negocioId}&formato=excel&agrupacion=${agrupacion}`}
+              href={`/api/reportes/exportar?negocioId=${negocioId}&formato=excel${paramsExport}`}
               className="rounded-none border border-border px-3 py-1.5 text-[10.5px] font-bold uppercase text-text-muted hover:border-accent/40"
             >
               Excel
             </a>
             <a
-              href={`/api/reportes/exportar?negocioId=${negocioId}&formato=pdf&agrupacion=${agrupacion}`}
+              href={`/api/reportes/exportar?negocioId=${negocioId}&formato=pdf${paramsExport}`}
               className="rounded-none border border-border px-3 py-1.5 text-[10.5px] font-bold uppercase text-text-muted hover:border-accent/40"
             >
               PDF

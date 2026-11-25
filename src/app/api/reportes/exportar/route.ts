@@ -1,3 +1,5 @@
+import { obtenerFuncionesReportes } from "@/app/panel/reportes/actions";
+import { evaluarExportacionIngresos, MENSAJE_EXPORTACION_PLAN } from "@/lib/reportes/plan-exportacion";
 import { generarExcel } from "@/lib/export/excel";
 import { generarReportePdf } from "@/lib/export/pdf";
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
@@ -21,7 +23,8 @@ const ESQUEMA_EXPORTAR = z.object({
   formato: z.enum(["excel", "pdf"]),
   desde: z.string().date().optional(),
   hasta: z.string().date().optional(),
-  agrupacion: z.enum(["semana", "mes"]).default("mes"),
+  agrupacion: z.enum(["semana", "mes"]).optional(),
+  sedeId: z.string().uuid().optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -31,12 +34,13 @@ export async function GET(request: NextRequest) {
     formato: searchParams.get("formato") ?? undefined,
     desde: searchParams.get("desde") ?? undefined,
     hasta: searchParams.get("hasta") ?? undefined,
-    agrupacion: searchParams.get("agrupacion") ?? "mes",
+    agrupacion: searchParams.get("agrupacion") ?? undefined,
+    sedeId: searchParams.get("sedeId") ?? undefined,
   });
   if (!parse.success) {
     return new Response("Parámetros inválidos", { status: 400 });
   }
-  const { negocioId, formato, desde, hasta, agrupacion } = parse.data;
+  const { negocioId, formato, sedeId } = parse.data;
 
 
   const contexto = await resolverContexto();
@@ -50,8 +54,32 @@ export async function GET(request: NextRequest) {
   if (!operativo.ok) return new Response("Suscripción restringida", { status: 403 });
 
   const supabase = await createClient();
+  const { count: sedesActivas } = await supabase
+    .from("sede")
+    .select("id", { count: "exact", head: true })
+    .eq("negocio_id", negocioId)
+    .eq("cerrada_permanente", false);
+  if (sedeId) {
+    const { data: sede } = await supabase.from("sede").select("id").eq("id", sedeId).eq("negocio_id", negocioId).maybeSingle();
+    if (!sede) return new Response("No autorizado", { status: 403 });
+  }
+  const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Bogota" }).format(new Date());
+  const decision = evaluarExportacionIngresos({
+    funciones: await obtenerFuncionesReportes(negocioId),
+    agrupacion: parse.data.agrupacion,
+    desde: parse.data.desde,
+    hasta: parse.data.hasta,
+    sedeId,
+    sedesActivas: sedesActivas ?? 0,
+    hoy,
+  });
+  if (!decision.ok) {
+    return new Response(MENSAJE_EXPORTACION_PLAN, { status: 403, headers: { "Cache-Control": "private, no-store, max-age=0, must-revalidate" } });
+  }
+  const { desde, hasta, agrupacion } = decision;
+
   const [{ data: ingresos, error }, { data: negocio }] = await Promise.all([
-    supabase.rpc("reportes_ingresos_periodo", { p_negocio_id: negocioId, p_desde: desde, p_hasta: hasta, p_agrupacion: agrupacion }),
+    supabase.rpc("reportes_ingresos_periodo", { p_negocio_id: negocioId, p_sede_id: sedeId, p_desde: desde, p_hasta: hasta, p_agrupacion: agrupacion }),
     supabase.from("negocio").select("nombre").eq("id", negocioId).single(),
   ]);
   if (error) {
