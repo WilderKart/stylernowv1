@@ -55,9 +55,6 @@ async function limitarEnvioCorreo(email: string) {
  * Todo se valida aquí (la UI solo da aviso inmediato). La contraseña se crea EN el registro;
  * Supabase deja la cuenta sin confirmar y envía el código de verificación ("Confirm signup").
  *
- * Anti-enumeración: si el correo ya tiene cuenta (Supabase devuelve un usuario ficticio o
- * "User already registered" según la versión), se responde igual que para una nueva — la persona
- * ve la pantalla de verificación en ambos casos y nunca se le dice "ese correo ya existe".
  */
 export async function registrarCuenta(datos: {
   tipo: unknown;
@@ -72,7 +69,12 @@ export async function registrarCuenta(datos: {
   invitacion?: unknown;
 }): Promise<
   | { ok: true; email: string; siguiente: string }
-  | { ok: false; campo?: "tipo" | "categoria" | "email" | "password" | "confirmar" | "terminos"; error: string }
+  | {
+      ok: false;
+      campo?: "tipo" | "categoria" | "email" | "password" | "confirmar" | "terminos";
+      error: string;
+      yaRegistrado?: boolean;
+    }
 > {
   // Staff invitado: el correo y el destino salen de la invitación PENDIENTE (servidor), no del formulario.
   const invitacion = datos.invitacion === undefined ? null : await obtenerInvitacionPendiente(datos.invitacion);
@@ -117,10 +119,8 @@ export async function registrarCuenta(datos: {
     },
   });
   await registrarIntentoAuth(email, "otp_envio", !error);
-  // Correo ya registrado: misma respuesta que una cuenta nueva (anti-enumeración). No se envía
-  // código ni se toca la cuenta existente; en la verificación, «Reenviar» tampoco revela nada.
   if (error && (error.code === "user_already_exists" || /already (registered|exists)/i.test(error.message))) {
-    return { ok: true, email, siguiente };
+    return { ok: false, campo: "email", error: "Ya estás registrado", yaRegistrado: true };
   }
   if (error) {
     if (/password/i.test(error.message)) return { ok: false, campo: "password", error: "Esa contraseña no cumple los requisitos. Elige otra." };
@@ -128,9 +128,9 @@ export async function registrarCuenta(datos: {
     console.error("[registrarCuenta]", error.message);
     return { ok: false, error: "No pudimos crear tu cuenta. Intenta de nuevo en unos minutos." };
   }
-  // Solo una cuenta realmente nueva trae identidades; con un correo existente Supabase devuelve
-  // un usuario ficticio sin identidades — no se toca nada y se responde igual.
-  // La intención se guarda SOLO en una cuenta realmente nueva: un correo existente no cambia nada.
+  if (data.user && (data.user.identities?.length ?? 0) === 0) {
+    return { ok: false, campo: "email", error: "Ya estás registrado", yaRegistrado: true };
+  }
   if (data.user && (data.user.identities?.length ?? 0) > 0) {
     await guardarEnHistorial(data.user.id, datos.password);
     await fijarIntencionRegistro(data.user.id, tipo.data, categoria);
