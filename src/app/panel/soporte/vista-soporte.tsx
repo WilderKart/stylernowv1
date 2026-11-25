@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useState } from "react";
 import { crearTicket, type TicketResumen } from "./actions";
+import { ChatSoportePanel } from "./chat-soporte";
+import type { ChatSoporte } from "./chat-actions";
 
 const ESTADO_TONO: Record<string, "success" | "danger" | "accent"> = {
   ABIERTO: "accent",
@@ -17,10 +19,14 @@ export function VistaSoporte({
   negocioId,
   ticketsIniciales,
   errorInicial,
+  chatInicial,
+  errorChatInicial,
 }: {
   negocioId: string;
   ticketsIniciales: TicketResumen[];
   errorInicial: string | null;
+  chatInicial: ChatSoporte | null;
+  errorChatInicial: string | null;
 }) {
   const [tickets, setTickets] = useState(ticketsIniciales);
   const [creando, setCreando] = useState(false);
@@ -53,6 +59,8 @@ export function VistaSoporte({
           {creando ? "Cancelar" : "Nuevo ticket"}
         </Button>
       </div>
+
+      <ChatSoportePanel inicial={chatInicial} errorInicial={errorChatInicial} />
 
       {creando ? (
         <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-border-subtle bg-surface p-4">

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BotonTema } from "@/components/tema/tema-cliente";
+import { SoporteNavBadge } from "@/components/panel/soporte-nav-badge";
 
 /** Iconos de la barra lateral y del menú. Los módulos sin icono propio usan un cuadro de la marca. */
 const ICONOS: Record<string, LucideIcon> = {
@@ -22,6 +23,7 @@ const ICONOS: Record<string, LucideIcon> = {
 interface Item {
   href: string;
   etiqueta: string;
+  badgeSoporte?: boolean;
 }
 interface Grupo {
   titulo: string;
@@ -109,7 +111,7 @@ export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** 
                     { href: "/panel/marca", etiqueta: "Mi Marca" },
                     { href: "/panel/verificacion", etiqueta: "Verificación" },
                     { href: "/panel/auditoria", etiqueta: "Auditoría" },
-                    { href: "/panel/soporte", etiqueta: "Soporte" },
+                    { href: "/panel/soporte", etiqueta: "Soporte", badgeSoporte: true },
                   ],
                 },
               ]
@@ -118,7 +120,7 @@ export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** 
                   titulo: "Más",
                   items: [
                     { href: "/panel/reportes", etiqueta: "Reportes" },
-                    { href: "/panel/soporte", etiqueta: "Soporte" },
+                    { href: "/panel/soporte", etiqueta: "Soporte", badgeSoporte: true },
                   ],
                 },
               ]),
@@ -172,6 +174,7 @@ export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** 
                       )
                     ) : null}
                     {item.etiqueta}
+                    {item.badgeSoporte ? <SoporteNavBadge /> : null}
                   </Link>
                 </li>
               );

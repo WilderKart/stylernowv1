@@ -32,9 +32,20 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
-export type ContadoresAdmin = { negociosPendientes: number; ticketsAbiertos: number; resenasReportadas: number };
+export type ContadoresAdmin = {
+  negociosPendientes: number;
+  ticketsAbiertos: number;
+  resenasReportadas: number;
+  soporteChatNoLeidos: number;
+};
 
-type Item = { href: string; etiqueta: string; icono: React.ComponentType<{ className?: string }>; contador?: keyof ContadoresAdmin };
+type Item = {
+  href: string;
+  etiqueta: string;
+  icono: React.ComponentType<{ className?: string }>;
+  contador?: keyof ContadoresAdmin;
+  contadorChat?: keyof ContadoresAdmin;
+};
 
 const GRUPOS: { titulo?: string; items: Item[] }[] = [
   {
@@ -49,7 +60,7 @@ const GRUPOS: { titulo?: string; items: Item[] }[] = [
       { href: "/admin/negocios", etiqueta: "Negocios", icono: Store, contador: "negociosPendientes" },
       { href: "/admin/verificaciones", etiqueta: "Verificaciones", icono: BadgeCheck },
       { href: "/admin/usuarios", etiqueta: "Usuarios", icono: Users },
-      { href: "/admin/soporte", etiqueta: "Soporte", icono: LifeBuoy, contador: "ticketsAbiertos" },
+      { href: "/admin/soporte", etiqueta: "Soporte", icono: LifeBuoy, contador: "ticketsAbiertos", contadorChat: "soporteChatNoLeidos" },
       { href: "/admin/centro-cumplimiento", etiqueta: "Cumplimiento y PQRS", icono: Scale },
       { href: "/admin/moderacion", etiqueta: "Moderación", icono: ShieldAlert, contador: "resenasReportadas" },
     ],
@@ -128,6 +139,7 @@ function Contenido({
               {g.items.map((it) => {
                 const activo = esActivo(pathname, it.href);
                 const n = it.contador ? contadores[it.contador] : 0;
+                const nChat = it.contadorChat ? contadores[it.contadorChat] : 0;
                 const Icono = it.icono;
                 return (
                   <li key={it.href}>
@@ -152,6 +164,17 @@ function Contenido({
                           aria-label={`${n} pendientes`}
                         >
                           {n > 99 ? "99+" : n}
+                        </span>
+                      )}
+                      {nChat > 0 && (
+                        <span
+                          className={cn(
+                            "min-w-6 border px-1.5 py-0.5 text-center font-mono text-[11px] font-bold",
+                            activo ? "border-white bg-[#0a0a0a] text-white" : "border-[#ff4d00] text-[#ff4d00]",
+                          )}
+                          aria-label={`${nChat} mensajes de soporte sin leer`}
+                        >
+                          {nChat > 99 ? "99+" : nChat}
                         </span>
                       )}
                     </Link>

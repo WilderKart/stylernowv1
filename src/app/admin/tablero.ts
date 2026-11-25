@@ -12,15 +12,17 @@ const ZONA = "America/Bogota";
 
 export async function contadoresAdmin(): Promise<ContadoresAdmin> {
   const supabase = await createClient();
-  const [neg, tic, res] = await Promise.all([
+  const [neg, tic, res, chat] = await Promise.all([
     supabase.from("negocio").select("id", { count: "exact", head: true }).eq("estado", "PENDIENTE_APROBACION"),
     supabase.from("ticket_soporte").select("id", { count: "exact", head: true }).in("estado", ["ABIERTO", "EN_PROCESO"]),
     supabase.from("resena").select("id", { count: "exact", head: true }).eq("estado", "REPORTADA"),
+    supabase.from("soporte_conversacion").select("id", { count: "exact", head: true }).gt("no_leidos_admin", 0),
   ]);
   return {
     negociosPendientes: neg.count ?? 0,
     ticketsAbiertos: tic.count ?? 0,
     resenasReportadas: res.count ?? 0,
+    soporteChatNoLeidos: chat.count ?? 0,
   };
 }
 

@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 
-export type TipoAlerta = "PRUEBA" | "ERROR_5XX" | "WEBHOOK_ERROR" | "SALUD";
+export type TipoAlerta = "PRUEBA" | "ERROR_5XX" | "WEBHOOK_ERROR" | "SALUD" | "SOPORTE";
 export type SeveridadAlerta = "info" | "warning" | "error";
 export type ResultadoAlerta = "enviada" | "sin_destino" | "fallida";
 export type ValorDetalle = string | number | boolean;

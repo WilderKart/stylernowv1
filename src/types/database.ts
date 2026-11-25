@@ -7121,6 +7121,101 @@ export type Database = {
           },
         ]
       }
+      soporte_conversacion: {
+        Row: {
+          created_at: string
+          estado: string
+          id: string
+          negocio_id: string
+          no_leidos_admin: number
+          no_leidos_negocio: number
+          ultima_alerta_admin_at: string | null
+          ultima_alerta_negocio_at: string | null
+          ultimo_mensaje_at: string | null
+          ultimo_mensaje_preview: string | null
+        }
+        Insert: {
+          created_at?: string
+          estado?: string
+          id?: string
+          negocio_id: string
+          no_leidos_admin?: number
+          no_leidos_negocio?: number
+          ultima_alerta_admin_at?: string | null
+          ultima_alerta_negocio_at?: string | null
+          ultimo_mensaje_at?: string | null
+          ultimo_mensaje_preview?: string | null
+        }
+        Update: {
+          created_at?: string
+          estado?: string
+          id?: string
+          negocio_id?: string
+          no_leidos_admin?: number
+          no_leidos_negocio?: number
+          ultima_alerta_admin_at?: string | null
+          ultima_alerta_negocio_at?: string | null
+          ultimo_mensaje_at?: string | null
+          ultimo_mensaje_preview?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "soporte_conversacion_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: true
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      soporte_mensaje: {
+        Row: {
+          conversacion_id: string
+          created_at: string
+          cuerpo: string
+          id: string
+          leido_at: string | null
+          negocio_id: string
+          remitente_id: string
+          remitente_rol: string
+        }
+        Insert: {
+          conversacion_id: string
+          created_at?: string
+          cuerpo: string
+          id?: string
+          leido_at?: string | null
+          negocio_id: string
+          remitente_id: string
+          remitente_rol: string
+        }
+        Update: {
+          conversacion_id?: string
+          created_at?: string
+          cuerpo?: string
+          id?: string
+          leido_at?: string | null
+          negocio_id?: string
+          remitente_id?: string
+          remitente_rol?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "soporte_mensaje_conversacion_id_fkey"
+            columns: ["conversacion_id"]
+            isOneToOne: false
+            referencedRelation: "soporte_conversacion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "soporte_mensaje_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff: {
         Row: {
           bio: string | null
@@ -9430,6 +9525,11 @@ export type Database = {
         Args: { p_pendiente: boolean; p_usuario: string }
         Returns: undefined
       }
+      _soporte_plan_incluye: {
+        Args: { p_clave: string; p_negocio_id: string }
+        Returns: boolean
+      }
+      _soporte_rol: { Args: { p_negocio_id: string }; Returns: string }
       _staff_ultima_autorizacion: {
         Args: { p_documento: string; p_negocio: string; p_staff: string }
         Returns: {
@@ -15141,6 +15241,45 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      soporte_cambiar_estado: {
+        Args: { p_conversacion_id: string; p_estado: string }
+        Returns: {
+          created_at: string
+          estado: string
+          id: string
+          negocio_id: string
+          no_leidos_admin: number
+          no_leidos_negocio: number
+          ultima_alerta_admin_at: string | null
+          ultima_alerta_negocio_at: string | null
+          ultimo_mensaje_at: string | null
+          ultimo_mensaje_preview: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "soporte_conversacion"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      soporte_enviar_mensaje: {
+        Args: { p_cuerpo: string; p_negocio_id: string }
+        Returns: {
+          alerta_email_admin: boolean
+          alerta_email_negocio: boolean
+          alerta_webhook: boolean
+          conversacion_id: string
+          created_at: string
+          cuerpo: string
+          id: string
+          negocio_id: string
+          remitente_rol: string
+        }[]
+      }
+      soporte_marcar_leido: {
+        Args: { p_conversacion_id: string }
+        Returns: boolean
+      }
       staff_de_sede: {
         Args: { p_sede_id: string }
         Returns: {
@@ -15948,4 +16087,3 @@ export const Constants = {
     },
   },
 } as const
-
