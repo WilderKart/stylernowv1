@@ -224,10 +224,10 @@ export function ResumenSuave({
                     <Link
                       href="/panel/agenda"
                       aria-current={esHoy ? "date" : undefined}
-                      className={`pn-card flex flex-col items-center gap-1 py-2 text-[11.5px] font-medium ${esHoy ? "bg-[var(--ink)] text-[var(--paper)]" : "text-[var(--text-muted)] hover:bg-[var(--surface)]"}`}
+                      className={`pn-card flex flex-col items-center gap-1 py-2 text-[11.5px] font-medium ${esHoy ? "bg-[var(--text)] text-[var(--bg)]" : "text-[var(--text-muted)] hover:bg-[var(--surface)]"}`}
                     >
                       {d.nombre}
-                      <span className={`text-[16px] font-extrabold ${esHoy ? "text-[var(--paper)]" : "text-[var(--text)]"}`}>{d.numero}</span>
+                      <span className={`text-[16px] font-extrabold ${esHoy ? "text-[var(--bg)]" : "text-[var(--text)]"}`}>{d.numero}</span>
                     </Link>
                   </li>
                 );

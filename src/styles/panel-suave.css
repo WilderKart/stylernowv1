@@ -65,15 +65,15 @@ html:has([data-panel="suave"]) {
   /* Colores con función (indicadores, estados, gráficas). */
   --pn-violet: #6d4bd1;
   --pn-violet-soft: #ebe4fb;
-  --pn-green: #1f8f5f;
+  --pn-green: #166b47;
   --pn-green-soft: #dcf3e6;
-  --pn-orange: #c2580a;
+  --pn-orange: #9a4308;
   --pn-orange-soft: #fde7d3;
-  --pn-blue: #2a6fd6;
+  --pn-blue: #1f58b3;
   --pn-blue-soft: #dce9fb;
-  --pn-amber: #a8700a;
+  --pn-amber: #7d5206;
   --pn-amber-soft: #fbefcf;
-  --pn-rose: #c0345e;
+  --pn-rose: #a12a4e;
   --pn-rose-soft: #fadde6;
   --sn-font-poster: var(--font-jakarta), system-ui, sans-serif;
   --sn-font-display: var(--font-jakarta), system-ui, sans-serif;
@@ -194,4 +194,41 @@ html[data-theme="dark"]:has([data-panel="suave"]) {
 /* En oscuro la barra flotante se separa del fondo con un filo sutil. */
 [data-theme="dark"] .pn-side {
   box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+}
+
+/* ───────────── Tipografía del panel: una sola jerarquía, clara y sin estilo editorial ───────────── */
+[data-vertical][data-panel="suave"] :is(h1, h2, h3, h4) {
+  font-weight: 700;
+}
+[data-vertical][data-panel="suave"] h1 {
+  font-weight: 800;
+  font-size: clamp(26px, 4.4vw, 34px);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+[data-vertical][data-panel="suave"] :is(.poster-1, .poster-2, .poster-3, .poster-4, .poster-5, .poster-xl, .poster-lg, .sn-poster) {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+[data-vertical][data-panel="suave"] h1:is(.poster-1, .poster-2, .poster-3, .poster-4, .poster-5, .poster-xl, .poster-lg, .sn-poster) {
+  font-size: clamp(26px, 4.4vw, 34px);
+}
+[data-vertical][data-panel="suave"] :is(.sn-label, .sn-meta, .label, .meta, .sn-help, .sn-mono, .font-mono) {
+  font-family: var(--sn-font-sans);
+  text-transform: none;
+  letter-spacing: 0;
+}
+[data-vertical][data-panel="suave"] :is(.sn-label, .sn-meta, .label, .meta, .sn-help, .sn-mono) {
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+[data-vertical][data-panel="suave"] :is(.sn-num, .figure-sm, .figure-md, .figure-lg, .sn-fig) {
+  font-family: var(--sn-font-sans);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+[data-vertical][data-panel="suave"] :is(button, a, label, span, p, th, td, li):is(.uppercase, [class*="tracking-"]) {
+  text-transform: none;
+  letter-spacing: 0;
 }

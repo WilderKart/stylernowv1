@@ -63,6 +63,8 @@ interface Grupo {
   id: string;
   titulo: string;
   Icono: LucideIcon;
+  /** Frase corta bajo el título del banner de la categoría. */
+  descripcion?: string;
   items: Item[];
 }
 
@@ -84,6 +86,7 @@ function construirMenu(rol: RolPanel, prestaServicios: boolean): Grupo[] {
       id: "agenda",
       titulo: "Agenda",
       Icono: CalendarDays,
+      descripcion: "Gestiona tus citas, clientes, caja e inventario.",
       items: [
         { href: "/panel/agenda", etiqueta: "Agenda", Icono: CalendarDays },
         { href: "/panel/crm", etiqueta: "Clientes", Icono: Users },
@@ -96,6 +99,7 @@ function construirMenu(rol: RolPanel, prestaServicios: boolean): Grupo[] {
       id: "equipo",
       titulo: "Equipo y servicios",
       Icono: Scissors,
+      descripcion: "Administra tu equipo, solicitudes, servicios y sedes.",
       items: [
         { href: "/panel/staff", etiqueta: "Staff", Icono: UsersRound },
         { href: "/panel/staff/solicitudes", etiqueta: "Solicitudes", Icono: Inbox },
@@ -110,6 +114,7 @@ function construirMenu(rol: RolPanel, prestaServicios: boolean): Grupo[] {
         id: "marketing",
         titulo: "Marketing",
         Icono: Megaphone,
+        descripcion: "Atrae y fideliza clientes con promociones, publicidad, lealtad, WhatsApp e IA.",
         items: [
           { href: "/panel/promociones", etiqueta: "Promociones", Icono: Tag },
           { href: "/panel/ads", etiqueta: "Publicidad", Icono: Megaphone },
@@ -122,6 +127,7 @@ function construirMenu(rol: RolPanel, prestaServicios: boolean): Grupo[] {
         id: "finanzas",
         titulo: "Finanzas",
         Icono: Wallet,
+        descripcion: "Gestiona tus cobros, ventas, saldo y plan de tu negocio.",
         items: [
           { href: "/panel/cobros", etiqueta: "Cobros", Icono: CreditCard },
           { href: "/panel/libro", etiqueta: "Libro", Icono: BookOpen },
@@ -135,6 +141,7 @@ function construirMenu(rol: RolPanel, prestaServicios: boolean): Grupo[] {
         id: "negocio",
         titulo: "Mi negocio",
         Icono: Store,
+        descripcion: "Perfil público, marca, verificación, auditoría y soporte.",
         items: [
           { href: "/panel/perfil-publico", etiqueta: "Perfil público", Icono: Globe },
           { href: "/panel/marca", etiqueta: "Mi Marca", Icono: Palette },
@@ -402,10 +409,14 @@ export function PanelNavSuave({ rol, prestaServicios = false }: { rol: RolPanel;
         </div>
       </aside>
 
-      {/* Escritorio: barra de módulos hermanos de la categoría actual (como en la referencia de Finanzas). */}
+      {/* Escritorio: banner de la categoría y módulos hermanos (como en la referencia de Finanzas). */}
       {grupoActivo && grupoActivo.items.length > 1 ? (
-        <div className="mx-auto hidden w-full max-w-6xl px-4 pt-6 sm:px-8 lg:block">
-          <nav aria-label={grupoActivo.titulo} className="flex flex-wrap justify-center gap-2">
+        <div className="mx-auto hidden w-full max-w-6xl flex-wrap items-center gap-4 px-4 pt-6 sm:px-8 lg:flex">
+          <div className="pn-card min-w-[280px] flex-1 bg-[image:var(--hero-gradient)] px-6 py-4 text-[var(--hero-text)] shadow-[var(--sn-shadow-hard-sm)]">
+            <p className="text-[24px] font-extrabold leading-tight">{grupoActivo.titulo}</p>
+            {grupoActivo.descripcion ? <p className="mt-0.5 text-[13.5px] leading-snug opacity-85">{grupoActivo.descripcion}</p> : null}
+          </div>
+          <nav aria-label={grupoActivo.titulo} className="flex flex-wrap justify-end gap-2">
             {grupoActivo.items.map((i) => {
               const a = esActivo(pathname, i.href);
               return (
@@ -415,7 +426,7 @@ export function PanelNavSuave({ rol, prestaServicios = false }: { rol: RolPanel;
                   aria-current={a ? "page" : undefined}
                   className={cn(
                     "pn-pill inline-flex min-h-10 items-center gap-2 px-4 text-[13px] font-semibold shadow-[var(--sn-shadow-hard-sm)] transition-colors",
-                    a ? "bg-[var(--ink)] text-[var(--paper)]" : "bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--surface-2)]",
+                    a ? "bg-[var(--text)] text-[var(--bg)]" : "bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--surface-2)]",
                   )}
                 >
                   <i.Icono className="size-4 shrink-0" aria-hidden />
@@ -430,7 +441,7 @@ export function PanelNavSuave({ rol, prestaServicios = false }: { rol: RolPanel;
       {/* ───────── Móvil: cabecera ligera ───────── */}
       <header className="sticky top-0 z-30 flex items-center justify-between gap-2 bg-[color-mix(in_srgb,var(--app-bg)_88%,transparent)] px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md lg:hidden">
         <Link href="/panel" className="flex items-center gap-2.5 text-[var(--text)]" aria-label="StylerNow, ir al resumen">
-          <span aria-hidden className="grid size-9 place-items-center rounded-full bg-[var(--ink)] text-[15px] font-extrabold text-[var(--paper)]">
+          <span aria-hidden className="grid size-9 place-items-center rounded-full bg-[var(--text)] text-[15px] font-extrabold text-[var(--bg)]">
             S
           </span>
           <span className="text-[17px] font-extrabold tracking-tight">
@@ -533,7 +544,7 @@ export function PanelNavSuave({ rol, prestaServicios = false }: { rol: RolPanel;
                                 aria-current={a ? "page" : undefined}
                                 className={cn(
                                   "pn-card flex min-h-14 items-center gap-2.5 px-3 text-[13px] font-semibold",
-                                  a ? "bg-[var(--ink)] text-[var(--paper)]" : "bg-[var(--surface)] text-[var(--text)]",
+                                  a ? "bg-[var(--text)] text-[var(--bg)]" : "bg-[var(--surface)] text-[var(--text)]",
                                 )}
                               >
                                 <i.Icono className="size-[18px] shrink-0" aria-hidden />
