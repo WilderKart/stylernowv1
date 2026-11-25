@@ -7,6 +7,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BotonTema } from "@/components/tema/tema-cliente";
+import { PanelNavSuave } from "./panel-nav-suave";
+import { usePanelSuave } from "./panel-estilo";
 
 /** Iconos de la barra lateral y del menú. Los módulos sin icono propio usan un cuadro de la marca. */
 const ICONOS: Record<string, LucideIcon> = {
@@ -36,7 +38,16 @@ interface Grupo {
  * de un vistazo. Escritorio: barra lateral oscura fija. Móvil: barra superior con botón de menú (cajón con los mismos
  * grupos) + barra inferior con los cuatro accesos de uso diario. Ya no hay franja con desplazamiento horizontal.
  */
-export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** Perfil profesional activo: añade el acceso a la agenda propia (/staff). */ prestaServicios?: boolean }) {
+/**
+ * Punto único de entrada de la navegación del panel. Spa, salón y uñas usan el diseño unificado (PanelNavSuave);
+ * barbería y tattoo conservan la navegación original sin cambios.
+ */
+export function PanelNav(props: { rol: RolPanel; /** Perfil profesional activo: añade el acceso a la agenda propia (/staff). */ prestaServicios?: boolean }) {
+  const suave = usePanelSuave();
+  return suave ? <PanelNavSuave rol={props.rol} prestaServicios={props.prestaServicios} /> : <PanelNavClasica {...props} />;
+}
+
+function PanelNavClasica({ rol, prestaServicios = false }: { rol: RolPanel; prestaServicios?: boolean }) {
   const pathname = usePathname();
   const [abierto, setAbierto] = useState(false);
 

@@ -7,6 +7,7 @@ import { resolverContexto } from "@/lib/auth/resolver-contexto";
 import { obtenerEstadoOperativo } from "@/lib/suscripcion/estado-operativo";
 import { verticalDeCategorias } from "@/lib/tema/vertical";
 import { categoriaRegistroDe } from "@/lib/auth/destino-inicial";
+import { PanelSuaveProvider } from "@/components/panel/panel-estilo";
 
 export const metadata = {
   title: { template: "%s · Panel Negocio · StylerNow", default: "Panel Negocio" },
@@ -48,11 +49,20 @@ async function PanelGuardado({ children }: { children: React.ReactNode }) {
     vertical = verticalDeCategorias([categoriaRegistroDe(user) ?? ""]);
   }
 
+  // Spa, salón y uñas comparten un solo diseño de panel (barra lateral flotante, barra inferior móvil, tokens unificados).
+  const suave = vertical !== null;
+
   return (
-    <div className="min-h-dvh bg-app pb-16 lg:pb-0 lg:pl-60" data-vertical={vertical ?? undefined}>
-      {estado ? <BannerSuscripcion estado={estado} puedePagar={contexto.rol === "BARBERIA"} /> : null}
-      {children}
-    </div>
+    <PanelSuaveProvider suave={suave}>
+      <div
+        className={suave ? "min-h-dvh bg-app pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0 lg:pl-[112px]" : "min-h-dvh bg-app pb-16 lg:pb-0 lg:pl-60"}
+        data-vertical={vertical ?? undefined}
+        data-panel={suave ? "suave" : undefined}
+      >
+        {estado ? <BannerSuscripcion estado={estado} puedePagar={contexto.rol === "BARBERIA"} /> : null}
+        {children}
+      </div>
+    </PanelSuaveProvider>
   );
 }
 

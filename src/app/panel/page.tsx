@@ -2,6 +2,8 @@ import { DashboardResumen } from "@/components/panel/dashboard-resumen";
 import { EnlaceReserva } from "@/components/panel/enlace-reserva";
 import { AsistenteBienvenida } from "@/components/panel/asistente-bienvenida";
 import { ResumenBarberia } from "@/components/panel/resumen-barberia";
+import { ResumenSuave } from "@/components/panel/resumen-suave";
+import { verticalDeCategorias } from "@/lib/tema/vertical";
 import { PanelNav } from "@/components/panel/panel-nav";
 import { TarjetaPerfilProfesional } from "@/components/panel/tarjeta-perfil-profesional";
 import { TarjetaVisibilidadPublica } from "@/components/panel/tarjeta-visibilidad-publica";
@@ -155,7 +157,7 @@ export default async function PanelPage() {
   // rol === "BARBERIA"
   const { data: negocio } = await supabase
     .from("negocio")
-    .select("id, nombre, slug, estado, onboarding_completo, logo_url, descripcion, foto_principal_url")
+    .select("id, nombre, slug, estado, onboarding_completo, logo_url, descripcion, foto_principal_url, categoria")
     .eq("id", contexto.negocioId!)
     .single();
 
@@ -189,13 +191,23 @@ export default async function PanelPage() {
     <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} prestaServicios={contexto.prestaServicios} />
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-5 py-6 sm:px-10 sm:py-8">
-        <ResumenBarberia
-          nombre={negocio.nombre}
-          estadoNegocio={negocio.estado}
-          resumen={dashboardBarberia?.resumen ?? null}
-          citas={dashboardBarberia?.timeline ?? []}
-          lealtad={metricasLealtad}
-        />
+        {verticalDeCategorias(negocio.categoria) !== null ? (
+          <ResumenSuave
+            nombre={negocio.nombre}
+            estadoNegocio={negocio.estado}
+            resumen={dashboardBarberia?.resumen ?? null}
+            citas={dashboardBarberia?.timeline ?? []}
+            lealtad={metricasLealtad}
+          />
+        ) : (
+          <ResumenBarberia
+            nombre={negocio.nombre}
+            estadoNegocio={negocio.estado}
+            resumen={dashboardBarberia?.resumen ?? null}
+            citas={dashboardBarberia?.timeline ?? []}
+            lealtad={metricasLealtad}
+          />
+        )}
 
         {pagosPorRevisar > 0 ? (
           <Link

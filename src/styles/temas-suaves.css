@@ -339,10 +339,10 @@ html:has([data-vertical]) {
   }
 
   /* Esquinas: tarjetas y bloques redondeados; controles en píldora; círculos intactos. */
-  & *:not([class*="rounded-full"]):not(.sn-seal):not(.sn-avatar) {
+  & *:not([class*="rounded-full"]):not(.sn-seal):not(.sn-avatar):not([class*="pn-"]) {
     border-radius: var(--r-card);
   }
-  & :is(button, .sn-btn, .sn-chip, input:not([type="checkbox"]):not([type="radio"]), select):not([class*="rounded-full"]):not(.sn-seal):not(.sn-avatar) {
+  & :is(button, .sn-btn, .sn-chip, input:not([type="checkbox"]):not([type="radio"]), select):not([class*="rounded-full"]):not(.sn-seal):not(.sn-avatar):not([class*="pn-"]) {
     border-radius: var(--r-ctl);
   }
   & textarea:not([class*="rounded-full"]) {
@@ -532,11 +532,6 @@ html:has([data-vertical]) {
 /* Filas y franjas a todo el ancho (solo borde superior/inferior) no se redondean: se verían cortadas en los bordes. */
 :is([data-vertical], [data-tema-vista], html:has([data-vertical])) :is(.border-b, .border-t, .border-y, .border-b-2, .border-t-2):not(.border):not(.border-2) {
   border-radius: 0;
-}
-
-/* La barra lateral del panel llega de borde a borde: sin esquinas redondeadas. */
-:is([data-vertical], [data-tema-vista], html:has([data-vertical])) aside[aria-label="Navegación del panel"] {
-  border-radius: 0 !important;
 }
 
 /* ───────── «¿Qué tipo de cuenta quieres crear?»: tarjetas suaves (en barbería y tattoo siguen inclinadas y naranja) ───────── */

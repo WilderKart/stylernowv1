@@ -8,7 +8,7 @@ import { PwaManager } from "@/components/pwa/pwa-manager";
 import { SistemaCliente } from "@/components/sistema";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata, Viewport } from "next";
-import { Archivo, Cormorant_Garamond, Fraunces, Italiana, Jost, Sacramento, Space_Mono } from "next/font/google";
+import { Archivo, Cormorant_Garamond, Fraunces, Italiana, Jost, Plus_Jakarta_Sans, Sacramento, Space_Mono } from "next/font/google";
 import { SincronizarTema } from "@/components/tema/tema-cliente";
 import { obtenerModoTema, obtenerTemaEfectivo } from "@/lib/tema/servidor";
 import { obtenerCategoriaAspecto } from "@/lib/tema/categoria-cookie";
@@ -45,6 +45,8 @@ const fraunces = Fraunces({
 // cuando una página las usa (preload apagado): barbería y tattoo no pagan nada por ellas.
 const cormorant = Cormorant_Garamond({ variable: "--font-cormorant", subsets: ["latin"], weight: ["300", "400", "500", "600"], style: ["normal", "italic"], display: "swap", preload: false });
 const jost = Jost({ variable: "--font-jost", subsets: ["latin"], display: "swap", preload: false });
+// Tipografía única del panel de gestión de spa, salón y uñas.
+const jakarta = Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], display: "swap", preload: false });
 const sacramento = Sacramento({ variable: "--font-sacramento", subsets: ["latin"], weight: "400", display: "swap", preload: false });
 const italiana = Italiana({ variable: "--font-italiana", subsets: ["latin"], weight: "400", display: "swap", preload: false });
 
@@ -99,7 +101,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       data-theme={tema}
       data-vertical={vertical ?? undefined}
       suppressHydrationWarning
-      className={`${archivo.variable} ${spaceMono.variable} ${fraunces.variable} ${cormorant.variable} ${jost.variable} ${sacramento.variable} ${italiana.variable} h-full antialiased`}
+      className={`${archivo.variable} ${spaceMono.variable} ${fraunces.variable} ${cormorant.variable} ${jost.variable} ${sacramento.variable} ${italiana.variable} ${jakarta.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-app text-text">
         <IdiomaProvider idioma={idioma}>{children}</IdiomaProvider>
