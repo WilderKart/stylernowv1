@@ -41,11 +41,11 @@ export default function ErrorBoundary({
           {t("err.no_pudimos")}
         </p>
         {error.digest ? <Meta>{t("err.codigo_n", { codigo: error.digest })}</Meta> : null}
-        <Button size="lg" onClick={reset} className="w-full justify-between">
+        <Button size="lg" onClick={reset} className="w-full">
           <span>{t("comun.reintentar")}</span>
           <ArrowUpRight className="size-[18px]" aria-hidden />
         </Button>
-        <Button asChild variant="secondary" size="lg" className="w-full justify-between">
+        <Button asChild variant="secondary" size="lg" className="w-full">
           <Link href="/">
             <span>{t("err.volver_inicio")}</span>
             <ArrowUpRight className="size-[18px]" aria-hidden />

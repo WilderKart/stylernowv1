@@ -1,0 +1,697 @@
+/* StylerNow — capa estructural del diseño unificado (referencia iOS).
+ *
+ * Un solo diseño para toda la app y todos los tipos de negocio (barbería, tattoo, salón, uñas, spa): tarjetas y bloques
+ * redondeados, controles en píldora, bordes finos, íconos de trazo redondeado y sombras suaves. Los colores, radios y
+ * tipografías salen de las variables de globals.css; aquí solo se suaviza lo que el código heredado fija con esquinas
+ * rectas, mayúsculas y bordes gruesos. `data-tema-vista` aplica lo mismo a un solo contenedor (vista previa).
+ */
+
+/* ───────────────── Tipografía, formas y detalles comunes a los tres ───────────────── */
+:is(html, [data-tema-vista]) {
+  --stretch-condensed: 100%;
+  --stretch-expanded: 100%;
+  --border-thick: 1px;
+  --icon-stroke: 1.5;
+  font-family: var(--sn-font-sans);
+}
+
+:is(html, [data-tema-vista]) {
+  /* Fondo de la página con el color del tema (la regla base ya usa --app-bg; esto cubre contenedores propios). */
+  &[data-tema-vista] {
+    background: var(--app-bg);
+    color: var(--text);
+  }
+
+  /* Esquinas: tarjetas y bloques redondeados; controles en píldora; círculos intactos. */
+  & *:not([class*="rounded-full"]):not(.sn-seal):not(.sn-avatar):not([class*="pn-"]) {
+    border-radius: var(--r-card);
+  }
+  & :is(button, .sn-btn, .sn-chip):not([class*="rounded-full"]):not(.sn-seal):not(.sn-avatar):not([class*="pn-"]) {
+    border-radius: var(--r-ctl);
+  }
+  & :is(input:not([type="checkbox"]):not([type="radio"]), select):not([class*="rounded-full"]):not(.sn-seal):not(.sn-avatar):not([class*="pn-"]) {
+    border-radius: 14px;
+  }
+  & textarea:not([class*="rounded-full"]) {
+    border-radius: 18px;
+  }
+  & :is(svg, path, circle, line, polyline, polygon, rect, text, tspan, option, optgroup) {
+    border-radius: 0;
+  }
+
+  /* Títulos: serif suave en frase normal; la palabra de acento va en cursiva. */
+  & :is(.poster-1, .poster-2, .poster-3, .poster-4, .poster-5, .poster-xl, .poster-lg, .sn-poster, .section, .sn-section, .font-display) {
+    font-family: var(--sn-font-display);
+  }
+  & :is(.section, .sn-section, .font-display) {
+    font-stretch: 100%;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  /* Solo los titulares grandes (póster) llevan la tipografía de lucimiento; logotipos y títulos chicos usan la de lectura. */
+  & :is(.poster-1, .poster-2, .poster-3, .poster-4, .poster-5, .poster-xl, .poster-lg, .sn-poster) {
+    font-family: var(--sn-font-poster, var(--sn-font-display));
+    font-stretch: 100%;
+    font-weight: 800;
+    text-transform: none;
+    letter-spacing: -0.025em;
+    line-height: 1.08;
+  }
+  & :is(h1, h2, h3, h4) {
+    font-family: var(--sn-font-display);
+    font-stretch: 100%;
+    font-weight: 800;
+    text-transform: none;
+    letter-spacing: -0.02em;
+  }
+  /* Todo el peso «negrita» del diseño original se afina: delicado, no pesado. */
+  & :is(.font-black, .font-extrabold, .font-bold) {
+    font-weight: 700;
+    font-stretch: 100%;
+  }
+  & :is(.font-display, .font-mono) {
+    font-stretch: 100%;
+  }
+  & .font-mono {
+    font-family: var(--sn-font-mono);
+    letter-spacing: 0.04em;
+  }
+  & .font-display :is(.text-accent, .sn-hot) {
+    font-style: normal;
+  }
+  & .sn-hot {
+    color: var(--accent-text);
+    font-style: normal;
+  }
+  & .uppercase {
+    text-transform: none;
+  }
+
+  /* Etiquetas pequeñas: sans con espaciado amplio, como un «eyebrow» editorial. */
+  & :is(.sn-label, .sn-meta, .label, .meta, .sn-help, .sn-mono) {
+    font-family: var(--sn-font-sans);
+    font-stretch: 100%;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-transform: none;
+  }
+  & .sn-num {
+    font-family: var(--sn-font-sans);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  /* Botones y chips: frase normal, sin sombra dura ni «hundirse» al presionar. */
+  & :is(.sn-btn, .sn-chip, .sn-seg button, .sn-field label) {
+    font: 500 14px/1.25 var(--sn-font-sans);
+    font-stretch: 100%;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  & .sn-btn--primary {
+    border-color: transparent;
+  }
+  & :is(.sn-btn--primary, .sn-chip):active {
+    transform: translateY(1px);
+    box-shadow: none;
+  }
+
+  /* Bordes finos (decorativos) y campos con borde de contraste suficiente. */
+  & :is(.border-2, .border-y-2) {
+    border-width: 1px;
+  }
+  & .border-2 {
+    border-width: 1px;
+  }
+  & .border-b-2 {
+    border-bottom-width: 1px;
+  }
+  & .border-t-2 {
+    border-top-width: 1px;
+  }
+  & :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]) {
+    border-color: var(--line-input);
+  }
+
+  /* Íconos de trazo redondeado y más fino. */
+  & svg.lucide {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Barra inferior: clara, redondeada y sin el negro agresivo del diseño original (que solo conservan barbería y tattoo). */
+  & .sn-tabbar {
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+    border-radius: 22px 22px 0 0;
+    box-shadow: 0 -10px 26px -18px rgba(0, 0, 0, 0.35);
+    padding-inline: 6px;
+  }
+  & .sn-tab {
+    color: var(--text-muted);
+    border-right: 0;
+    margin: 6px 3px;
+    border-radius: 16px;
+    font: 500 11px/14px var(--sn-font-sans);
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+  & .sn-tab.is-active {
+    background: var(--nav-active-bg);
+    color: var(--accent-text);
+    font-weight: 600;
+  }
+  & nav[aria-label="Accesos rápidos"] {
+    border-radius: 22px 22px 0 0;
+    box-shadow: 0 -10px 26px -18px rgba(0, 0, 0, 0.35);
+  }
+  & nav[aria-label="Accesos rápidos"] a {
+    text-transform: none;
+    letter-spacing: 0.02em;
+    font-weight: 500;
+  }
+
+  /* Cabecera y hojas. */
+  & .sn-header {
+    border-bottom: 1px solid var(--line);
+  }
+  & .sn-sheet {
+    border-top: 1px solid var(--line);
+    border-radius: var(--r-card) var(--r-card) 0 0;
+  }
+}
+
+/* Foco visible con el color del tema. */
+:is(html, [data-tema-vista]) :focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Botón primario: el relleno pastel no lleva marco oscuro. */
+:is(html, [data-tema-vista]) .bg-signal.border-ink {
+  border-color: transparent;
+}
+
+/* Marquesina y fotos sin imagen: más suaves que en el diseño original. */
+:is(html, [data-tema-vista]) {
+  & .sn-marquee {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+  }
+  & .sn-marquee__track span {
+    font: 700 22px/1 var(--sn-font-display);
+    font-stretch: 100%;
+    text-transform: none;
+  }
+  /* Sin foto: degradado del tema (nunca la foto de stock de una barbería). */
+  & .sn-photo {
+    background-image: var(--hero-gradient);
+    background-color: var(--surface);
+  }
+}
+
+/* Filas y franjas a todo el ancho (solo borde superior/inferior) no se redondean: se verían cortadas en los bordes. */
+:is(html, [data-tema-vista]) :is(.border-b, .border-t, .border-y, .border-b-2, .border-t-2):not(.border):not(.border-2) {
+  border-radius: 0;
+}
+
+/* ───────── «¿Qué tipo de cuenta quieres crear?»: tarjetas suaves (en barbería y tattoo siguen inclinadas y naranja) ───────── */
+:is(html, [data-tema-vista]) {
+  & .sn-tipo-tarjeta {
+    transform: none;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s;
+  }
+  & .sn-tipo-tarjeta::before {
+    border: 1px solid var(--line-input);
+    border-radius: var(--r-card);
+    background: var(--bg);
+    box-shadow: var(--sn-shadow-hard-sm);
+    transform: none;
+    transition: background 0.4s, border-color 0.4s, box-shadow 0.4s;
+  }
+  & .sn-tipo-tarjeta:hover::before {
+    box-shadow: var(--sn-shadow-hard);
+  }
+  & .sn-tipo-tarjeta:active::before {
+    transform: none;
+    box-shadow: var(--sn-shadow-hard-sm);
+  }
+  & .sn-tipo-tarjeta.is-elegida {
+    color: var(--hero-text);
+  }
+  & .sn-tipo-tarjeta.is-elegida::before {
+    background: var(--hero-gradient);
+    border-color: var(--accent-text);
+  }
+  & .sn-tipo-titulo {
+    font-family: var(--sn-font-poster, var(--sn-font-display));
+    font-stretch: 100%;
+    font-weight: 400;
+    font-size: 26px;
+    line-height: 1.05;
+    text-transform: none;
+  }
+  & .sn-tipo-indicador {
+    border: 1px solid var(--text);
+  }
+  & .sn-tipo-tarjeta.is-elegida .sn-tipo-indicador {
+    border-color: var(--hero-text);
+  }
+  & .sn-tipo-tarjeta.is-elegida .sn-tipo-indicador::after {
+    background: var(--hero-text);
+  }
+  & .sn-tipo-icono {
+    stroke-width: 1.4 !important;
+  }
+}
+
+/* Títulos con color propio (sin ser fuertes) y degradado suave de fondo del panel. */
+:is(html, [data-tema-vista]) {
+  & :is(h1, h2, h3, .poster-1, .poster-2, .poster-3, .poster-4, .poster-5, .poster-xl, .poster-lg, .sn-poster, .section, .sn-section):not([class*="--side-"]):not([class*="--nav-"]) {
+    color: var(--title, var(--text));
+  }
+  /* Sobre rellenos de color (botones, tarjeta elegida) el título hereda el color del relleno: así nunca pierde contraste. */
+  & :is(.bg-signal, .sn-btn--primary, .sn-block-signal, .sn-tipo-tarjeta.is-elegida) :is(h1, h2, h3, [class*="poster"], .font-display) {
+    color: inherit;
+  }
+  & :is(.sn-card-btn) {
+    border-radius: var(--r-card);
+  }
+  &:is(div).bg-app {
+    background-image: var(--panel-bg, none);
+  }
+}
+.sn-card-btn.sn-card-btn {
+  border-radius: var(--r-card);
+}
+:is(html, [data-tema-vista]) .sn-card-btn {
+  border-radius: var(--r-card) !important;
+}
+
+
+/* Texto sobre el azul de marca: siempre blanco (los componentes heredados escriben «text-ink» sobre el relleno). */
+html :is(.bg-signal, .bg-accent, .sn-btn--primary) {
+  color: #ffffff;
+}
+html :is(.bg-signal, .bg-accent, .sn-btn--primary) :is(.text-ink, .text-text) {
+  color: inherit;
+}
+
+/* ───────── Componentes heredados (.sn-*): mismo lenguaje iOS que los componentes nuevos ───────── */
+html {
+  & .sn-btn {
+    justify-content: center;
+    border: 0;
+    box-shadow: none;
+    font: 600 15px/1.2 var(--sn-font-sans);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  & .sn-btn--primary {
+    background: var(--signal);
+    box-shadow: 0 10px 22px -10px rgba(11, 99, 246, 0.7);
+  }
+  & .sn-btn--primary:active,
+  & .sn-btn--primary.is-pressed {
+    transform: scale(0.98);
+    background: var(--signal-pressed);
+    box-shadow: none;
+  }
+  & .sn-btn--secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--line);
+    box-shadow: var(--sn-shadow-hard-sm);
+  }
+  & .sn-btn--secondary:active {
+    background: var(--surface);
+    color: var(--text);
+  }
+  & .sn-btn--ink {
+    background: var(--text);
+    color: var(--bg);
+  }
+  & .sn-btn:disabled,
+  & .sn-btn.is-disabled {
+    background: var(--surface-2);
+    color: var(--text-disabled);
+    border: 0;
+    box-shadow: none;
+  }
+  & .sn-chip {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    font: 600 13px/1 var(--sn-font-sans);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  & .sn-chip.is-selected {
+    background: var(--signal);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: none;
+  }
+  & .sn-chip:disabled,
+  & .sn-chip.is-disabled {
+    border-style: solid;
+    border-color: var(--line);
+    background: var(--surface);
+  }
+  & .sn-input {
+    background: var(--bg);
+    border: 1px solid var(--line-input);
+    border-radius: 14px;
+  }
+  & .sn-input.is-focus,
+  & .sn-input:focus-within {
+    border-color: var(--signal);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--signal) 20%, transparent);
+  }
+  & .sn-input.is-error {
+    border-color: var(--danger);
+    box-shadow: none;
+  }
+  & .sn-help--error {
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    color: var(--danger);
+  }
+  /* Barra inferior flotante (tarjeta blanca redondeada con la pestaña activa en azul). */
+  & .sn-tabbar {
+    height: auto;
+    min-height: 64px;
+    margin: 0 10px calc(10px + env(safe-area-inset-bottom));
+    width: auto;
+    border: 1px solid var(--line);
+    border-radius: 26px;
+    box-shadow: 0 18px 40px -16px rgba(20, 60, 160, 0.4);
+  }
+  & .sn-tab {
+    min-height: 52px;
+  }
+  & .sn-tab.is-active {
+    background: transparent;
+    color: var(--accent-text);
+  }
+  & .sn-shop {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    box-shadow: var(--sn-shadow-hard-sm);
+  }
+  & .sn-shop:active {
+    transform: scale(0.99);
+  }
+  & .sn-shop.is-featured .sn-shop__body {
+    background: var(--pn-violet-soft);
+    color: var(--text);
+  }
+  & .sn-shop.is-featured .sn-num,
+  & .sn-shop.is-featured .sn-meta {
+    color: var(--accent-text);
+  }
+  & .sn-pro {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    box-shadow: var(--sn-shadow-hard-sm);
+    overflow: hidden;
+  }
+  & .sn-tier {
+    border: 0;
+    font: 700 11px/1 var(--sn-font-sans);
+    letter-spacing: 0;
+  }
+  & .sn-tier--pro {
+    background: var(--surface-2);
+  }
+  & .sn-tier--master {
+    background: var(--signal);
+    color: #fff;
+  }
+  & .sn-iconbtn {
+    border-radius: 999px;
+  }
+  & .sn-iconbtn:active {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  & .sn-header {
+    background: var(--app-bg);
+  }
+  & .sn-sheet {
+    border-top: 0;
+    box-shadow: 0 -20px 50px -20px rgba(10, 18, 48, 0.4);
+  }
+  & .sn-sheet__grab::before {
+    background: var(--line-input);
+    border-radius: 999px;
+  }
+  & .sn-table {
+    border: 1px solid var(--line);
+    background: var(--bg);
+    border-radius: var(--r-card);
+    overflow: hidden;
+  }
+  & .sn-table th {
+    background: var(--surface-2);
+    color: var(--text);
+    border-right: 0;
+    font: 700 11px/14px var(--sn-font-sans);
+    letter-spacing: 0.04em;
+  }
+  & .sn-table td {
+    border-right: 0;
+  }
+  & .sn-table tr.is-selected td {
+    background: var(--pn-violet-soft);
+    color: var(--text);
+  }
+  & .sn-block-ink {
+    background: var(--side-bg);
+    color: #fff;
+  }
+}
+
+/* Patrones del cliente (.p-*): filas, barras y pie en el mismo lenguaje suave. */
+html {
+  & .p-top {
+    border-bottom: 0;
+    background: color-mix(in srgb, var(--app-bg) 88%, transparent);
+    backdrop-filter: blur(12px);
+  }
+  & .p-row {
+    border-bottom: 1px solid var(--line);
+  }
+  & a.p-row:active {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  & .p-row__i {
+    border: 0;
+    border-radius: 14px;
+    background: var(--pn-violet-soft);
+    color: var(--accent-text);
+  }
+  & .p-row__r {
+    font: 600 13px/1 var(--sn-font-sans);
+  }
+  & .p-foot {
+    border-top: 1px solid var(--line);
+    background: color-mix(in srgb, var(--app-bg) 92%, transparent);
+    backdrop-filter: blur(12px);
+  }
+  & .p-sec {
+    padding-top: 20px;
+  }
+}
+
+/* Control segmentado, ticket de cita, estados y barras: forma de píldora/tarjeta, sin bordes gruesos ni mayúsculas. */
+html {
+  & .sn-seg {
+    gap: 4px;
+    padding: 4px;
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+  }
+  & .sn-seg button {
+    flex: 1;
+    border-right: 0;
+    border-radius: 999px;
+    font: 600 13px/1 var(--sn-font-sans);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--text-muted);
+  }
+  & .sn-seg button[aria-pressed="true"] {
+    background: var(--signal);
+    color: #fff;
+  }
+  & .sn-ticket {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--r-card);
+    box-shadow: var(--sn-shadow-hard-sm);
+    overflow: hidden;
+  }
+  & .sn-ticket__date {
+    border-right: 1px solid var(--line);
+    background: var(--pn-violet-soft);
+    color: var(--accent-text);
+  }
+  & .sn-ticket__date b {
+    font: 800 40px/0.95 var(--sn-font-display);
+  }
+  & .sn-ticket__perf {
+    border-top: 1px dashed var(--line-input);
+  }
+  & .sn-ticket__perf::before,
+  & .sn-ticket__perf::after {
+    display: none;
+  }
+  & .sn-status {
+    border: 0;
+    border-radius: 999px;
+    padding: 5px 10px;
+    font: 600 12px/14px var(--sn-font-sans);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--text);
+  }
+  & .sn-status--ok {
+    background: var(--pn-green-soft);
+    color: var(--pn-green);
+  }
+  & .sn-status--warn {
+    background: var(--pn-amber-soft);
+    color: var(--pn-amber);
+  }
+  & .sn-status--err {
+    background: var(--pn-rose-soft);
+    color: var(--pn-rose);
+  }
+  & .sn-status--info {
+    background: var(--pn-blue-soft);
+    color: var(--pn-blue);
+    box-shadow: none;
+  }
+  & .sn-marquee--signal,
+  & .sn-block-signal {
+    background: var(--hero-gradient);
+    color: #fff;
+  }
+  & .sn-block-signal .sn-meta,
+  & .sn-block-signal .sn-label {
+    color: inherit;
+  }
+  & .sn-block-paper {
+    background: var(--bg);
+    color: var(--text);
+  }
+  & .sn-avatar {
+    background: var(--surface-2);
+    color: var(--accent-text);
+  }
+}
+
+/* Reseñas, avisos, estados vacíos, mapa y rejillas: tarjetas suaves. */
+html {
+  & .sn-review {
+    border: 1px solid var(--line);
+    background: var(--bg);
+    border-radius: var(--r-card);
+    box-shadow: var(--sn-shadow-hard-sm);
+    overflow: hidden;
+  }
+  & .sn-review__reply {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  & .sn-toast {
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 18px;
+    overflow: hidden;
+  }
+  & .sn-toast__icon {
+    border-right: 0;
+  }
+  & .sn-toast__act {
+    border-left: 1px solid var(--line);
+    font: 600 13px/1 var(--sn-font-sans);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  & .sn-empty {
+    border: 1px dashed var(--line-input);
+    background: var(--bg);
+    border-radius: var(--r-card);
+  }
+  & .sn-pin__head {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+  }
+  & .sn-pin__stem {
+    background: var(--signal);
+  }
+  & .sn-pin--signal .sn-pin__head,
+  & .sn-pin.is-selected .sn-pin__head {
+    background: var(--signal);
+    color: #fff;
+    border-color: transparent;
+  }
+  & .sn-pin--me {
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 2px var(--signal);
+  }
+  & .sn-gridcols {
+    border-top: 1px solid var(--line);
+  }
+  & .p-note {
+    font: 400 12px/16px var(--sn-font-sans);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+}
+
+/* Bloque azul de lealtad: recorta sus filas internas a la forma de la tarjeta y mantiene el texto legible. */
+html .sn-block-signal {
+  overflow: hidden;
+  border: 0;
+}
+html .sn-block-signal > * {
+  border-radius: 0;
+}
+html .sn-block-signal .bg-paper {
+  background: color-mix(in srgb, #fff 94%, transparent);
+  color: var(--ink);
+}
+
+/* Escritorio: el contenido principal aprovecha el ancho de la pantalla (ya no es una columna de teléfono centrada).
+ * Las páginas escriben un máximo estrecho en su <main>; aquí se amplía por tramos según el ancho de pantalla. */
+@media (min-width: 1024px) {
+  html main.mx-auto:is(.max-w-xl, .max-w-2xl) {
+    max-width: min(100%, 960px);
+  }
+  html main.mx-auto.max-w-3xl {
+    max-width: min(100%, 1120px);
+  }
+  html main.mx-auto:is(.max-w-4xl, .max-w-5xl, .max-w-6xl, .max-w-7xl) {
+    max-width: min(100%, 1280px);
+  }
+}
+@media (min-width: 1536px) {
+  html main.mx-auto:is(.max-w-3xl, .max-w-4xl, .max-w-5xl, .max-w-6xl, .max-w-7xl) {
+    max-width: min(100%, 1440px);
+  }
+}
+html .sn-block-signal :is(h1, h2, h3, h4, [class*="poster"], .font-display, .sn-num, .sn-meta, .sn-label) {
+  color: #fff !important;
+}
+html .sn-block-signal .bg-paper :is(h1, h2, h3, h4, [class*="poster"], .font-display, .sn-num, .sn-meta, .sn-label) {
+  color: var(--ink) !important;
+}

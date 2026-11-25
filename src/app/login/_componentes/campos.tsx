@@ -150,7 +150,7 @@ export function CasillaLegal({ checked, onChange, error }: { checked: boolean; o
 /** Botón de Google (secundario: la acción principal de cada pantalla es la del correo). */
 export function BotonGoogle({ texto, onClick, cargando }: { texto: string; onClick: () => void; cargando?: boolean }) {
   return (
-    <Button type="button" variant="secondary" size="lg" onClick={onClick} loading={cargando} className="w-full justify-between">
+    <Button type="button" variant="secondary" size="lg" onClick={onClick} loading={cargando} className="w-full">
       <span className="flex items-center gap-3">
         {/* Logo "G" de Google en sus colores oficiales. */}
         <svg aria-hidden viewBox="0 0 48 48" className="size-5 shrink-0">

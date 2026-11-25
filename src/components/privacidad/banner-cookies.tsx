@@ -50,27 +50,27 @@ export function BannerCookies() {
   if (!visible) return null;
 
   const boton =
-    "inline-flex min-h-12 items-center justify-center border-2 border-white px-3.5 font-mono text-xs leading-4 font-bold tracking-[0.72px] uppercase disabled:opacity-60";
+    "inline-flex min-h-11 items-center justify-center rounded-full px-5 text-sm font-semibold disabled:opacity-60";
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(var(--tabbar-height)+8px)] z-40 mx-auto w-full max-w-xl px-3">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(var(--tabbar-height)+24px)] z-40 mx-auto w-full max-w-xl px-3 lg:bottom-6 lg:left-6 lg:right-auto lg:mx-0 lg:max-w-md">
       <section
         role="region"
         aria-label={t("ck.aria")}
-        className="pointer-events-auto flex flex-col gap-3 border-2 border-paper bg-ink p-4 text-paper shadow-[var(--sombra-banner)]"
+        className="pointer-events-auto flex flex-col gap-3 rounded-3xl border border-border bg-bg p-5 text-text shadow-[var(--sn-shadow-hard)]"
       >
-        <span className="font-mono text-xs leading-4 font-bold tracking-[0.72px] text-signal">00 / COOKIES</span>
+        <span className="text-xs font-semibold text-accent-text">Cookies</span>
         <p className="body break-words">
           {t("ck.txt")}
         </p>
         <div className="flex flex-wrap gap-2.5">
-          <button type="button" disabled={guardando} onClick={() => elegir(true)} className={`${boton} bg-signal text-ink`}>
+          <button type="button" disabled={guardando} onClick={() => elegir(true)} className={`${boton} bg-signal text-white`}>
             {t("ck.aceptar")}
           </button>
-          <button type="button" disabled={guardando} onClick={() => elegir(false)} className={`${boton} bg-transparent text-white`}>
+          <button type="button" disabled={guardando} onClick={() => elegir(false)} className={`${boton} border border-border bg-bg text-text`}>
             {t("ck.necesarias")}
           </button>
-          <Link href="/privacidad" className="inline-flex min-h-12 items-center font-mono text-xs leading-4 font-bold tracking-[0.72px] text-white uppercase">
+          <Link href="/privacidad" className="inline-flex min-h-11 items-center text-sm font-semibold text-accent-text">
             {t("ck.ajustar")}
           </Link>
         </div>

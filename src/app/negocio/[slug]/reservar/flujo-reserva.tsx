@@ -13,6 +13,7 @@ import { cn, formatCOP } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { NavSuperiorCliente } from "@/components/layout/nav-superior-cliente";
 import { crearReservaAction, obtenerSlots, unirseListaEspera, type Slot } from "./actions";
 
 const DIAS_VISIBLES = 14;
@@ -264,6 +265,7 @@ export function FlujoReserva({
 
   return (
     <div className="flex min-h-dvh flex-col bg-app">
+      <NavSuperiorCliente />
       {/* ── Barra superior + progreso ───────────────────────────────── */}
       <div className="p-top">
         {paso > 1 ? (
@@ -278,18 +280,18 @@ export function FlujoReserva({
         <span className="sn-num min-w-0 break-words">{t("res.reserva_negocio", { nombre: negocio.nombre })}</span>
         <span className="p-top__r" />
       </div>
-      <ol className="p-steps m-0 list-none p-0" aria-label={t("res.pasos")}>
+      <ol className="m-0 mx-auto flex w-full max-w-[1280px] list-none gap-2 px-4 py-2 lg:px-8" aria-label={t("res.pasos")}>
         {PASOS.map((nombre, i) => (
           <li
             key={nombre}
             aria-current={i + 1 === paso ? "step" : undefined}
             className={cn(
-              "min-w-0 truncate border-r border-grid px-0.5 py-2 text-center font-mono text-[11px] leading-[14px] font-bold tracking-[0.66px] uppercase last:border-r-0",
-              i + 1 === paso && "bg-signal text-ink",
-              i + 1 < paso && "bg-text text-bg"
+              "min-w-0 flex-1 truncate rounded-full border border-border bg-bg px-2 py-2 text-center text-[12px] leading-[14px] font-semibold text-text-muted",
+              i + 1 === paso && "border-transparent bg-signal text-white",
+              i + 1 < paso && "border-transparent bg-[var(--pn-violet-soft)] text-accent-text"
             )}
           >
-            {String(i + 1).padStart(2, "0")} {t(nombre)}
+            {i + 1}. {t(nombre)}
           </li>
         ))}
       </ol>
@@ -297,6 +299,8 @@ export function FlujoReserva({
       {/* Aviso de distancia (no bloquea): evita reservar por error en otra ciudad. */}
       <AvisoDistancia negocio={negocio.nombre} sede={sede} />
 
+      <div className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-8 lg:px-8">
+      <div className="flex min-w-0 flex-1 flex-col">
       <main className="flex-1 pb-4">
         {/* ── Paso 1 · Servicios ──────────────────────────────────── */}
         {paso === 1 ? (
@@ -694,7 +698,7 @@ export function FlujoReserva({
         {paso < 4 ? (
           <Button
             size="lg"
-            className="w-full justify-between"
+            className="w-full"
             disabled={!puedeAvanzar}
             onClick={() => {
               setError(null);
@@ -711,11 +715,36 @@ export function FlujoReserva({
             {iconoFlecha}
           </Button>
         ) : (
-          <Button size="lg" className="w-full justify-between" loading={confirmando} onClick={confirmar}>
+          <Button size="lg" className="w-full" loading={confirmando} onClick={confirmar}>
             <span>{sena > 0 ? t("res.ir_pagar", { monto: formatCOP(sena) }) : t("res.confirmar_sin_anticipo")}</span>
             {iconoFlecha}
           </Button>
         )}
+      </div>
+      </div>
+      <aside className="hidden lg:sticky lg:top-24 lg:block">
+        <div className="flex flex-col gap-3 rounded-3xl border border-border bg-bg p-5 shadow-hard">
+          <h2 className="m-0 text-lg font-extrabold">{negocio.nombre}</h2>
+          {seleccionados.length === 0 ? (
+            <p className="m-0 text-sm text-text-muted">{t("res.t1_1")} {t("res.t1_2")}</p>
+          ) : (
+            <ul className="m-0 flex list-none flex-col gap-2 p-0">
+              {seleccionados.map((s) => (
+                <li key={s.id} className="flex items-baseline justify-between gap-3 text-sm">
+                  <span className="min-w-0 break-words">{s.nombre}</span>
+                  <b className="shrink-0">{formatCOP(s.precio_base)}</b>
+                </li>
+              ))}
+            </ul>
+          )}
+          {profesional ? <p className="m-0 text-sm text-text-muted">{profesional.nombre}</p> : null}
+          {slot ? <p className="m-0 text-sm font-semibold">{fechaCorta(fecha, tz)} · {hora(slot.hora_inicio, tz)}</p> : null}
+          <div className="flex items-baseline justify-between border-t border-border pt-3">
+            <span className="text-sm text-text-muted">Total</span>
+            <b className="text-xl">{formatCOP(montoTotal)}</b>
+          </div>
+        </div>
+      </aside>
       </div>
     </div>
   );

@@ -80,7 +80,7 @@ export function VistaTicket({ id, ticket, mensajes, error }: { id: string; ticke
             className="min-h-24 w-full resize-none border-2 border-border bg-surface px-2.5 py-2 text-[15px] leading-5 text-text outline-none placeholder:text-text-muted focus:shadow-hard"
           />
           {fallo ? <ErrorAviso>{fallo}</ErrorAviso> : null}
-          <Button type="submit" size="lg" loading={enviando} disabled={!texto.trim()} className="w-full justify-between">
+          <Button type="submit" size="lg" loading={enviando} disabled={!texto.trim()} className="w-full">
             <span>{t("ay.tk_enviar")}</span>
             <ArrowUpRight aria-hidden className="size-[18px]" />
           </Button>

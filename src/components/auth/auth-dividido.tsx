@@ -3,74 +3,34 @@
 import { useT } from "@/lib/i18n/proveedor";
 import type { CategoriaRegistro } from "@/lib/tema/vertical";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { IMAGEN_MARCA_ACCESO } from "./imagen-marca";
 import s from "./auth-dividido.module.css";
 
-/** Deja el aspecto actual de la pantalla como definitivo para lo que sigue (p. ej. de «Crear cuenta» a «Verifica tu correo»). */
-export function fijarAspectoActual() {
-  document.documentElement.dataset.aspectoFijo = "1";
-}
-
-/** Imagen de cada categoría y de qué lado queda: se alternan para que cada cambio de categoría se vea como un giro. */
-const FOTO: Record<CategoriaRegistro, { src: string | null; lado: "izq" | "der"; posicion?: string }> = {
-  barberia: { src: "/img/auth/barberia.webp", lado: "izq" },
-  tatuajes: { src: "/img/auth/tattoo.webp", lado: "der", posicion: "50% 8%" },
-  salon: { src: "/img/auth/salon.webp", lado: "izq" },
-  spa: { src: "/img/auth/spa.webp", lado: "der", posicion: "50% 50%" },
-  manicura: { src: "/img/auth/unas.webp", lado: "izq", posicion: "30% 50%" },
-};
+/** Se conserva por compatibilidad: el diseño ya no cambia según el tipo de cuenta, así que no hace nada. */
+export function fijarAspectoActual() {}
 
 /**
- * Armazón de las pantallas de acceso en escritorio: imagen del negocio a un lado y el formulario al otro. Cambiar la
- * categoría (barbería → tattoo → salón…) intercambia los lados con una transición y funde las imágenes. Solo es
- * presentación: la categoría nunca decide permisos. Con `viva`, el aspecto de TODA la pantalla (colores, fuentes) sigue
- * a la categoría en tiempo real.
+ * Armazón de las pantallas de acceso: a partir de tablet, panel azul de marca a la izquierda con un espacio para la imagen
+ * y formulario a la derecha usando todo el ancho de la pantalla; en móvil, solo el formulario con cabecera de marca.
+ * El tipo de negocio ya no cambia ni el aspecto ni la imagen.
  */
-export function AuthDividido({ categoria, viva = false, children }: { categoria: CategoriaRegistro | null; viva?: boolean; children: React.ReactNode }) {
+export function AuthDividido({ children }: { categoria?: CategoriaRegistro | null; viva?: boolean; children: React.ReactNode }) {
   const t = useT();
-  const activa: CategoriaRegistro = categoria ?? "barberia";
-  const [vistas, setVistas] = useState<CategoriaRegistro[]>([activa]);
-  if (!vistas.includes(activa)) setVistas([...vistas, activa]);
-
-  // Aspecto en vivo: pone el tema de la categoría en <html> mientras se elige y restaura el original al salir.
-  useEffect(() => {
-    if (!viva) return;
-    const html = document.documentElement;
-    delete html.dataset.aspectoFijo;
-    const original = html.getAttribute("data-vertical");
-    const v = { spa: "spa", salon: "salon", manicura: "unas" }[activa as string];
-    if (categoria && v) html.setAttribute("data-vertical", v);
-    else html.removeAttribute("data-vertical");
-    return () => {
-      // Tras crear la cuenta el aspecto elegido se conserva (verificación, onboarding): no se restaura el original.
-      if (html.dataset.aspectoFijo === "1") return;
-      if (original) html.setAttribute("data-vertical", original);
-      else html.removeAttribute("data-vertical");
-    };
-  }, [viva, activa, categoria]);
-
-  const sinTexto = activa === "barberia"; // la imagen de barbería ya trae su propio lema
   return (
-    <div className={s.raiz} data-lado={FOTO[activa].lado}>
-      <aside className={s.imagen} aria-hidden>
-        {vistas.map((c) => {
-          const f = FOTO[c];
-          return (
-            <div key={c} className={`${s.foto} ${f.src ? "" : s.spa}`} data-activa={c === activa}>
-              {f.src ? <Image src={f.src} alt="" fill sizes="50vw" priority={c === activa} className="object-cover" style={{ objectPosition: f.posicion }} /> : <b>Beauty Spa</b>}
-            </div>
-          );
-        })}
-        <div className={s.velo} />
-        <span className={s.marca} style={{ opacity: sinTexto ? 0 : 1 }}>
+    <div className={s.raiz}>
+      <aside className={s.marcaPanel}>
+        <Link href="/" className={s.logo}>
           StylerNow
-        </span>
-        <div className={s.pie} style={{ opacity: sinTexto ? 0 : 1 }}>
-          <strong>{t(`auth.img_${activa}_t`)}</strong>
-          <span>{t(`auth.img_${activa}_d`)}</span>
+        </Link>
+        <div className={s.slot} role={IMAGEN_MARCA_ACCESO ? undefined : "img"} aria-label={IMAGEN_MARCA_ACCESO ? undefined : t("auth.imagen_marca")}>
+          {IMAGEN_MARCA_ACCESO ? <Image src={IMAGEN_MARCA_ACCESO} alt="" fill sizes="50vw" priority className="object-cover" /> : <span>{t("auth.imagen_marca")}</span>}
         </div>
+        <p className={s.lema}>{t("auth.lema_marca")}</p>
       </aside>
-      <div className={s.contenido}>{children}</div>
+      <div className={s.formulario}>
+        <div className={s.contenido}>{children}</div>
+      </div>
     </div>
   );
 }

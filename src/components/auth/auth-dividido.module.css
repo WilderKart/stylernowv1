@@ -1,117 +1,83 @@
-/* Pantalla de acceso dividida (solo escritorio): imagen del negocio + formulario. Al cambiar de categoría las dos mitades
- * se intercambian de lado con una transición suave; la imagen se funde con la siguiente. En móvil no hay imagen. */
+/* Pantallas de acceso (referencia de diseño): panel azul de marca con espacio para imagen + formulario sobre gris iOS.
+ * Móvil: solo formulario. Desde 900 px: dos mitades que ocupan todo el ancho y el alto de la pantalla. */
 .raiz {
-  position: relative;
   min-height: 100dvh;
-  overflow-x: clip;
+  background: #f2f2f7;
+  display: flex;
+  flex-direction: column;
 }
-.imagen {
+:global([data-theme="dark"]) .raiz {
+  background: var(--app-bg);
+}
+.marcaPanel {
   display: none;
+}
+.formulario {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.logoMovil {
+  display: block;
+  padding: 20px 20px 4px;
+  font: 800 22px/1 var(--sn-font-display);
+  letter-spacing: -0.02em;
+  color: var(--accent-text);
+  text-decoration: none;
 }
 .contenido {
   min-width: 0;
+  flex: 1;
 }
-@media (min-width: 1024px) {
+@media (min-width: 900px) {
   .raiz {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
-  .imagen {
-    display: block;
+  .marcaPanel {
     position: sticky;
     top: 0;
-    align-self: start;
     height: 100dvh;
-    grid-column: 1;
-    grid-row: 1;
-    overflow: hidden;
-    background: var(--ink);
-    z-index: 2;
-    transition: transform 0.8s cubic-bezier(0.77, 0, 0.18, 1);
-    will-change: transform;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 32px;
+    padding: 48px clamp(32px, 4vw, 64px) 40px;
+    border-radius: 0 !important;
+    background: linear-gradient(170deg, #1765ff 0%, #2d78ff 55%, #4a88ff 100%);
+    color: #fff;
   }
-  .contenido {
-    grid-column: 2;
-    grid-row: 1;
-    transition: transform 0.8s cubic-bezier(0.77, 0, 0.18, 1);
-    will-change: transform;
+  .logo {
+    font: 800 30px/1 var(--sn-font-display);
+    letter-spacing: -0.02em;
+    color: #fff;
+    text-decoration: none;
   }
-  .raiz[data-lado="der"] .imagen {
-    transform: translateX(100%);
-  }
-  .raiz[data-lado="der"] .contenido {
-    transform: translateX(-100%);
+  .logoMovil {
+    display: none;
   }
 }
-.foto {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transform: scale(1.06);
-  transition: opacity 0.7s ease, transform 1.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.foto[data-activa="true"] {
-  opacity: 1;
-  transform: scale(1);
-}
-.velo {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(10, 10, 10, 0.66) 0%, rgba(10, 10, 10, 0) 46%), linear-gradient(to bottom, rgba(10, 10, 10, 0.4) 0%, rgba(10, 10, 10, 0) 24%);
-  pointer-events: none;
-}
-.marca {
-  position: absolute;
-  top: 28px;
-  left: 32px;
-  z-index: 3;
-  font: 800 22px/1 var(--sn-font-display);
-  letter-spacing: -0.01em;
-  color: #fff;
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
-  transition: opacity 0.5s;
-}
-.pie {
-  position: absolute;
-  left: 32px;
-  right: 32px;
-  bottom: 40px;
-  z-index: 3;
-  color: #fff;
-  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.45);
-  transition: opacity 0.5s;
-}
-.pie strong {
-  display: block;
-  font: 400 40px/1.08 var(--sn-font-poster, var(--sn-font-display));
-  max-width: 14ch;
-}
-.pie span {
-  display: block;
-  margin-top: 10px;
-  font: 400 15px/1.45 var(--sn-font-sans);
-  max-width: 34ch;
-  opacity: 0.92;
-}
-.spa {
-  background: linear-gradient(160deg, #dce4d2 0%, #b2bda3 55%, #8fa088 100%);
+.slot {
+  position: relative;
+  flex: 1;
+  max-height: 46dvh;
+  min-height: 220px;
   display: grid;
   place-items: center;
+  text-align: center;
+  padding: 24px;
+  overflow: hidden;
+  border: 2px dashed rgba(255, 255, 255, 0.7);
+  border-radius: 28px !important;
+  font: 500 16px/1.4 var(--sn-font-sans);
+  color: #fff;
 }
-.spa b {
-  font: 400 clamp(96px, 11vw, 168px) / 1 var(--font-sacramento), cursive;
-  color: #2f2a24;
-  opacity: 0.85;
-}
-@media (prefers-reduced-motion: reduce) {
-  .imagen,
-  .contenido,
-  .foto {
-    transition: none !important;
-  }
-}
-/* Las esquinas redondeadas de los temas suaves no se aplican a la imagen: va a sangre. */
-.imagen,
-.imagen * {
+.slot :global(img) {
   border-radius: 0 !important;
+}
+.lema {
+  margin: 0;
+  font: 500 15px/1.4 var(--sn-font-sans);
+  color: rgba(255, 255, 255, 0.92);
 }

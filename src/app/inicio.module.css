@@ -1,72 +1,97 @@
-/* Encabezado de sección del Home y selector Lista / Mapa (maqueta 2026-11-15). */
+/* Encabezado de sección del Home y selector Lista / Mapa (referencia de diseño). */
 .seccion {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 13px 15px 10px 17px;
+  width: 100%;
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 28px clamp(16px, 3.4vw, 56px) 14px;
 }
 .titulo {
   margin: 0;
-  font-family: var(--sn-font-display);
-  font-stretch: 75%;
-  font-weight: 900;
-  font-size: 19.5px;
-  line-height: 24px;
-  text-transform: uppercase;
+  font: 800 clamp(20px, 2.6vw, 28px) / 1.15 var(--sn-font-display);
+  letter-spacing: -0.02em;
   color: var(--text);
 }
 .numero {
-  display: inline-block;
-  margin-right: 8px;
-  word-spacing: 3px;
-  color: var(--brand-text, #fe5400);
-  transform: skewX(-12deg);
+  display: none;
 }
-.vistas {
-  display: flex;
-  gap: 5px;
-}
-.vista {
-  position: relative;
-  z-index: 0;
-  display: grid;
-  place-items: center;
-  min-width: 62px;
-  height: 24px;
-  padding: 0 8px;
-  font: 700 11.5px/1 var(--sn-font-mono);
-  letter-spacing: 0;
-  text-transform: uppercase;
-  color: var(--text);
+.verTodos {
+  font: 600 14px/1 var(--sn-font-sans);
+  color: var(--accent-text);
   text-decoration: none;
 }
-.vista::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border: 2px solid var(--text);
-  background: var(--app-bg);
-  transform: skewX(-14deg);
+.vistas {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 999px !important;
 }
-/* Área táctil de 48 px sin cambiar el dibujo. */
-.vista::after {
-  content: "";
-  position: absolute;
-  inset: -12px -3px;
+.vista {
+  display: grid;
+  place-items: center;
+  min-width: 72px;
+  min-height: 36px;
+  padding: 0 14px;
+  font: 600 13px/1 var(--sn-font-sans);
+  color: var(--text-muted);
+  text-decoration: none;
+  border-radius: 999px !important;
 }
 .activa {
-  color: var(--bg);
-  font: 800 15px/1 var(--sn-font-display);
-  font-stretch: 62.5%;
-  letter-spacing: 0.4px;
-}
-.activa::before {
-  background: var(--text);
+  color: #fff;
+  background: var(--signal);
 }
 .vista:focus-visible {
   outline: 3px solid var(--focus);
-  outline-offset: 3px;
+  outline-offset: 2px;
+}
+/* Rejilla de resultados a todo el ancho. */
+.grilla {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 3.4vw, 56px);
+}
+@media (min-width: 600px) {
+  .grilla {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 900px) {
+  .grilla {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .grilla {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+/* Móvil: la portada de negocios se desliza en horizontal como la referencia. */
+@media (max-width: 599px) {
+  .carrusel {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px;
+  }
+  .carrusel > * {
+    flex: 0 0 82%;
+    scroll-snap-align: start;
+  }
+}
+.ancho {
+  width: 100%;
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 3.4vw, 56px);
 }

@@ -1,19 +1,16 @@
 import { ScreenHeader } from "@/components/brutal";
 import { contarNoLeidas } from "@/lib/cliente/notificaciones";
-import { Bell } from "lucide-react";
+import { Bell, User } from "lucide-react";
 import { BotonTema } from "@/components/tema/tema-cliente";
 import Link from "next/link";
 import { Suspense } from "react";
 import { obtenerT } from "@/lib/i18n/servidor";
 import type { Traductor } from "@/lib/i18n/diccionario";
 import h from "./header.module.css";
+import { LogoStylerNow } from "./logo-stylernow";
 
 export function Logo() {
-  return (
-    <span className="sn-header__title" aria-label="StylerNow">
-      Styler<span className="sn-hot">Now</span>
-    </span>
-  );
+  return <LogoStylerNow />;
 }
 
 function Campana({ cantidad, t }: { cantidad: number; t: Traductor }) {
@@ -28,7 +25,7 @@ function Campana({ cantidad, t }: { cantidad: number; t: Traductor }) {
       {cantidad > 0 ? (
         <span
           aria-hidden
-          className="sn-label absolute top-1.5 right-1 grid min-w-5 place-items-center border-2 border-ink bg-signal px-1 text-[10px] leading-4 text-ink"
+          className="absolute top-0.5 right-0 grid min-w-[18px] place-items-center rounded-full bg-signal px-1 text-[10px] font-bold leading-[18px] text-white"
         >
           {texto}
         </span>
@@ -44,44 +41,52 @@ async function CampanaConContador({ t }: { t: Traductor }) {
 }
 
 /**
- * Barra superior de las pantallas de "recorrido" (maqueta 2026-11-15): logo grande a la izquierda,
- * separador vertical y el acceso del Cliente a la derecha. La API pública no cambia.
+ * Barra superior del recorrido del cliente (referencia de diseño): logo, enlaces principales, y a la derecha el acceso.
+ * En móvil solo quedan logo, tema y acceso. La API pública no cambia.
  */
-export async function Header({ autenticado, etiqueta }: { autenticado: boolean; etiqueta?: string }) {
+export async function Header({ autenticado }: { autenticado: boolean; etiqueta?: string }) {
   const t = await obtenerT();
   return (
     <header className={h.barra}>
-      <Link href="/" aria-label={t("header.inicio")} className={h.logo}>
-        <span className={h.marca} aria-hidden>
-          Styler<span className={h.now}>Now</span>
-        </span>
-      </Link>
-      {etiqueta ? <span className={`sn-num hidden sm:block ${h.etiqueta}`}>{etiqueta}</span> : null}
-      <span className={h.separador} aria-hidden />
-      <BotonTema className="sn-iconbtn !w-9 shrink-0" />
-      {autenticado ? (
-        <>
-          <Suspense fallback={<Campana cantidad={0} t={t} />}>
-            <CampanaConContador t={t} />
-          </Suspense>
-          <Link href="/mis-reservas" className={h.accion}>
-            {t("header.mis_reservas")}
-          </Link>
-        </>
-      ) : (
-        <>
-          {/* Acceso visible al registro de negocios (antes solo existía la URL /para-negocios). */}
-          <Link href="/para-negocios" className={`${h.accion} ${h.ancho}`}>
-            {t("header.para_negocios")}
-          </Link>
-          <Link href="/login" className={h.accion}>
-            {t("header.iniciar_sesion")}
-          </Link>
-          <Link href="/registro" className={`${h.accion} ${h.caja}`}>
-            {t("header.crear_cuenta")}
-          </Link>
-        </>
-      )}
+      <div className={h.interior}>
+        <Link href="/" aria-label={t("header.inicio")} className={h.logo}>
+          <LogoStylerNow />
+        </Link>
+        <nav className={h.nav} aria-label={t("header.principal")}>
+          <Link href="/">{t("header.explorar")}</Link>
+          <Link href="/?todos=1">{t("header.negocios")}</Link>
+          <Link href="/lealtad">{t("header.premios")}</Link>
+          <Link href="/para-negocios">{t("header.para_negocios")}</Link>
+        </nav>
+        <div className={h.derecha}>
+          <BotonTema className="sn-iconbtn !w-9 shrink-0" />
+          {autenticado ? (
+            <>
+              <Suspense fallback={<Campana cantidad={0} t={t} />}>
+                <CampanaConContador t={t} />
+              </Suspense>
+              <Link href="/mis-reservas" className={`${h.accion} ${h["solo-pc"]}`}>
+                {t("header.mis_reservas")}
+              </Link>
+              <Link href="/perfil" className={h.avatar} aria-label={t("header.perfil")}>
+                <User className="size-5" aria-hidden />
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className={`${h.accion} ${h["solo-pc"]}`}>
+                {t("header.iniciar_sesion")}
+              </Link>
+              <Link href="/login" className={`${h.avatar} ${h["solo-movil"]}`} aria-label={t("header.iniciar_sesion")}>
+                <User className="size-5" aria-hidden />
+              </Link>
+              <Link href="/registro" className={h.caja}>
+                {t("header.crear_cuenta")}
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
     </header>
   );
 }

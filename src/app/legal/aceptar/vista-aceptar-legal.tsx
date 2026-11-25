@@ -72,7 +72,7 @@ export function VistaAceptarLegal({
 
       {error ? <ErrorForm>{error}</ErrorForm> : null}
 
-      <Button size="lg" disabled={!todosMarcados} loading={aceptando} onClick={confirmar} className="w-full justify-between">
+      <Button size="lg" disabled={!todosMarcados} loading={aceptando} onClick={confirmar} className="w-full">
         <span>Aceptar y continuar</span>
         <ArrowUpRight className="size-[18px]" aria-hidden />
       </Button>

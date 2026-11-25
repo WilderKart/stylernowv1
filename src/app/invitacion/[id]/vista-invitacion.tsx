@@ -88,7 +88,7 @@ export function VistaInvitacion({ modo, invitacionId, negocio, emailEnmascarado,
   }
 
   return (
-    <div data-vertical="salon" data-panel="suave" className="flex min-h-dvh flex-col bg-[var(--app-bg)] text-[var(--text)]">
+    <div data-panel="suave" className="flex min-h-dvh flex-col bg-[var(--app-bg)] text-[var(--text)]">
       <header className="flex items-center gap-2 px-3 py-3 sm:px-6">
         <Link href="/" className="grid size-11 place-items-center rounded-full bg-[var(--bg)] text-[var(--text)] shadow-[var(--sn-shadow-hard-sm)]" aria-label="Volver al inicio">
           <ChevronLeft className="size-5" aria-hidden />
@@ -119,7 +119,7 @@ export function VistaInvitacion({ modo, invitacionId, negocio, emailEnmascarado,
               en un minuto.
             </p>
             {error ? <ErrorForm>{error}</ErrorForm> : null}
-            <Button size="lg" className="w-full justify-between" loading={cargando === "continuar"} onClick={onContinuar}>
+            <Button size="lg" className="w-full" loading={cargando === "continuar"} onClick={onContinuar}>
               <span>Continuar con mi invitación</span>
               <ArrowUpRight className="size-[18px]" aria-hidden />
             </Button>
@@ -131,7 +131,7 @@ export function VistaInvitacion({ modo, invitacionId, negocio, emailEnmascarado,
               Para unirte debes entrar con ese correo. Cerraremos esta sesión y te llevamos a ingresar o a crear tu cuenta con el correo invitado.
             </p>
             {error ? <ErrorForm>{error}</ErrorForm> : null}
-            <Button size="lg" className="w-full justify-between" loading={cargando === "salir"} onClick={onSalir}>
+            <Button size="lg" className="w-full" loading={cargando === "salir"} onClick={onSalir}>
               <span>Cerrar sesión y continuar con mi invitación</span>
               <ArrowUpRight className="size-[18px]" aria-hidden />
             </Button>
@@ -160,7 +160,7 @@ export function VistaInvitacion({ modo, invitacionId, negocio, emailEnmascarado,
               a los clientes.
             </p>
             {error ? <ErrorForm>{error}</ErrorForm> : null}
-            <Button size="lg" className="w-full justify-between" loading={cargando === "aceptar"} disabled={cargando !== null} onClick={() => onResponder(true)}>
+            <Button size="lg" className="w-full" loading={cargando === "aceptar"} disabled={cargando !== null} onClick={() => onResponder(true)}>
               <span>Aceptar y unirme</span>
               <ArrowUpRight className="size-[18px]" aria-hidden />
             </Button>

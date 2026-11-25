@@ -202,7 +202,7 @@ export function FormPermisos({
         <Button
           variant={listo ? "primary" : "secondary"}
           size="lg"
-          className="w-full justify-between"
+          className="w-full"
           loading={pendiente}
           disabled={ocupado !== null || !enLinea}
           onClick={empezar}

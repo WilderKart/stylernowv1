@@ -73,7 +73,7 @@ export default function GlobalError({
           >
             {t("err.global_1")}
             <br />
-            {t("err.global_2")} <span style={{ background: "#FF4D00", padding: "0 4px" }}>{t("err.global_3")}</span>
+            {t("err.global_2")} <span style={{ background: "#0B63F6", padding: "0 4px" }}>{t("err.global_3")}</span>
           </h1>
           <p style={{ margin: 0, fontSize: 15, lineHeight: "22px", color: "#525252" }}>
             {t("err.global_txt")}
@@ -91,7 +91,7 @@ export default function GlobalError({
               padding: "0 16px",
               border: "2px solid #0A0A0A",
               borderRadius: 0,
-              background: "#FF4D00",
+              background: "#0B63F6",
               color: "#0A0A0A",
               boxShadow: "4px 4px 0 0 #0A0A0A",
               font: `700 12px/16px ${mono}`,

@@ -5,7 +5,6 @@ import { Turnstile, type ControlTurnstile } from "@/components/seguridad/turnsti
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/i18n/proveedor";
-import { ArrowUpRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import {
@@ -21,7 +20,7 @@ import {
 import { ErrorForm, Hot, PantallaAuth, Separador } from "../login/_componentes/pantalla-auth";
 import { iniciarSesionConGoogle, registrarCuenta } from "../login/actions";
 import { SelectorServicio } from "./selector-servicio";
-import { AuthDividido, fijarAspectoActual } from "@/components/auth/auth-dividido";
+import { fijarAspectoActual } from "@/components/auth/auth-dividido";
 import type { CategoriaRegistro } from "@/lib/tema/vertical";
 import { SelectorTipoCuenta, type TipoCuenta } from "./tipo-cuenta";
 
@@ -127,7 +126,6 @@ export function FormularioRegistro({
   const errorDe = (c: Campo) => (error?.campo === c ? <ErrorForm>{error.texto}</ErrorForm> : null);
 
   return (
-    <AuthDividido categoria={categoria} viva>
     <PantallaAuth
       indice={t("auth.i_registro")}
       volver={tipoInicial === "negocio" ? "/para-negocios" : "/"}
@@ -225,9 +223,8 @@ export function FormularioRegistro({
         <Turnstile ref={controlTs} accion="registro" onToken={setTokenTs} />
         {error && !error.campo ? <ErrorForm>{error.texto}</ErrorForm> : null}
 
-        <Button type="submit" size="lg" loading={loading} className="w-full justify-between">
-          <span>{t("auth.crear_cuenta")}</span>
-          <ArrowUpRight className="size-[18px]" aria-hidden />
+        <Button type="submit" size="lg" loading={loading} className="w-full">
+          {t("auth.crear_cuenta")}
         </Button>
 
         {invitacion ? null : (
@@ -239,6 +236,5 @@ export function FormularioRegistro({
         )}
       </form>
     </PantallaAuth>
-    </AuthDividido>
   );
 }

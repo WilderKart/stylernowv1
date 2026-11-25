@@ -1,149 +1,6 @@
-/* StylerNow — Panel de gestión unificado para uñas, spa y salón.
- *
- * Un solo sistema visual (claro + oscuro) para los tres tipos de negocio: fondo neutro con matiz lavanda, tarjetas
- * blancas con sombra suave, barra lateral oscura flotante, tipografía Plus Jakarta Sans y color con función
- * (lila solo como acento; verde/naranja/azul/ámbar para estados).
- *
- * Barbería y tattoo NO usan esto: el layout del panel solo pone data-panel="suave" cuando la categoría es spa, salón
- * o uñas. Se carga DESPUÉS de temas-suaves.css y redefine sus variables en el mismo elemento (data-vertical + data-panel
- * pesa más que data-vertical solo), así que no hace falta !important.
- *
- * Los componentes del panel con prefijo pn- quedan fuera de la capa de esquinas global (ver temas-suaves.css).
- */
-
-/* ───────────── Claro ───────────── */
-[data-vertical][data-panel="suave"],
-html:has([data-panel="suave"]) {
-  --bg: #ffffff;
-  --app-bg: #f3f1f8;
-  --surface: #f8f6fc;
-  --surface-2: #eeeaf7;
-  --ink: #1f1b2e;
-  --paper: #ffffff;
-  --signal: #d9cdf8;
-  --signal-pressed: #c8b8f2;
-  --text: #1f1b2e;
-  --text-muted: #57536d;
-  --text-faint: #67637e;
-  --text-disabled: #9a96ad;
-  --accent-text: #5a3fb0;
-  --line: #e5e0f1;
-  --line-input: #cdc6df;
-  --grid: #ece8f5;
-  --grid-soft: #ece8f5;
-  --shadow-ink: #1f1b2e;
-  --focus: #6d4bd1;
-  --success: #bfe8cf;
-  --warning: #fbdca6;
-  --danger: #c43d3d;
-  --info: #1f1b2e;
-  --scrim: rgba(24, 18, 44, 0.5);
-  --sn-shadow-hard: 0 14px 34px -16px rgba(64, 42, 130, 0.28);
-  --sn-shadow-hard-sm: 0 6px 18px -10px rgba(64, 42, 130, 0.26);
-  --nav-bg: #ffffff;
-  --nav-text: #1f1b2e;
-  --nav-muted: rgba(31, 27, 46, 0.66);
-  --nav-accent: #5a3fb0;
-  --nav-active-bg: rgba(109, 75, 209, 0.12);
-  --nav-borde: #e5e0f1;
-  --side-bg: #1d1a26;
-  --side-text: #ffffff;
-  --side-muted: rgba(255, 255, 255, 0.72);
-  --side-accent: #ffffff;
-  --side-active-bg: rgba(255, 255, 255, 0.14);
-  --side-borde: rgba(255, 255, 255, 0.14);
-  --hero-gradient: linear-gradient(110deg, #ece3fd 0%, #d8c8f8 52%, #c2a8f2 100%);
-  --kpi-gradient: linear-gradient(135deg, #ece3fd, #d5c4f7);
-  --hero-text: #2a1f55;
-  --title: var(--text);
-  --panel-bg: radial-gradient(900px 480px at 12% -8%, rgba(176, 148, 238, 0.2), transparent 70%);
-  --r-card: 24px;
-  --r-ctl: 999px;
-  --sombra-banner: var(--sn-shadow-hard);
-  --brand: #6d4bd1;
-  --brand-text: #5a3fb0;
-  /* Colores con función (indicadores, estados, gráficas). */
-  --pn-violet: #6d4bd1;
-  --pn-violet-soft: #ebe4fb;
-  --pn-green: #166b47;
-  --pn-green-soft: #dcf3e6;
-  --pn-orange: #9a4308;
-  --pn-orange-soft: #fde7d3;
-  --pn-blue: #1f58b3;
-  --pn-blue-soft: #dce9fb;
-  --pn-amber: #7d5206;
-  --pn-amber-soft: #fbefcf;
-  --pn-rose: #a12a4e;
-  --pn-rose-soft: #fadde6;
-  --sn-font-poster: var(--font-jakarta), system-ui, sans-serif;
-  --sn-font-display: var(--font-jakarta), system-ui, sans-serif;
-  --sn-font-sans: var(--font-jakarta), system-ui, sans-serif;
-  --sn-font-mono: var(--font-jakarta), system-ui, sans-serif;
-  color-scheme: light;
-}
-
-/* ───────────── Oscuro ───────────── */
-[data-theme="dark"] [data-vertical][data-panel="suave"],
-html[data-theme="dark"]:has([data-panel="suave"]) {
-  --bg: #1d1a27;
-  --app-bg: #14121b;
-  --surface: #242031;
-  --surface-2: #2d2940;
-  --ink: #17141f;
-  --paper: #f3f0fc;
-  --signal: #cdbff8;
-  --signal-pressed: #dcd1fb;
-  --text: #f3f0fc;
-  --text-muted: #bab4d0;
-  --text-faint: #a29cbb;
-  --text-disabled: #716b88;
-  --accent-text: #d3c7fb;
-  --line: #342f46;
-  --line-input: #6a6384;
-  --grid: #2b2740;
-  --grid-soft: #2b2740;
-  --shadow-ink: #000000;
-  --focus: #cdbff8;
-  --success: #7fcf9f;
-  --warning: #e6c36e;
-  --danger: #f09a93;
-  --info: #f3f0fc;
-  --scrim: rgba(0, 0, 0, 0.72);
-  --sn-shadow-hard: 0 16px 36px -16px rgba(0, 0, 0, 0.75);
-  --sn-shadow-hard-sm: 0 6px 18px -10px rgba(0, 0, 0, 0.7);
-  --nav-bg: #1d1a27;
-  --nav-text: #f3f0fc;
-  --nav-muted: rgba(243, 240, 252, 0.68);
-  --nav-accent: #d3c7fb;
-  --nav-active-bg: rgba(205, 191, 248, 0.16);
-  --nav-borde: #342f46;
-  --side-bg: #0e0c14;
-  --side-text: #f3f0fc;
-  --side-muted: rgba(243, 240, 252, 0.7);
-  --side-accent: #ffffff;
-  --side-active-bg: rgba(255, 255, 255, 0.12);
-  --side-borde: rgba(255, 255, 255, 0.12);
-  --hero-gradient: linear-gradient(110deg, #2f2750 0%, #3a2d66 55%, #4a3a84 100%);
-  --kpi-gradient: linear-gradient(135deg, #342b58, #2a2346);
-  --hero-text: #f3f0fc;
-  --title: var(--text);
-  --panel-bg: radial-gradient(900px 480px at 12% -8%, rgba(120, 90, 210, 0.22), transparent 70%);
-  --brand: #cdbff8;
-  --brand-text: #d3c7fb;
-  --pn-violet: #b9a5f5;
-  --pn-violet-soft: #2f2750;
-  --pn-green: #6fd3a0;
-  --pn-green-soft: #1d3a2d;
-  --pn-orange: #f2a766;
-  --pn-orange-soft: #46301d;
-  --pn-blue: #8db8f5;
-  --pn-blue-soft: #1f3250;
-  --pn-amber: #e6c36e;
-  --pn-amber-soft: #44381a;
-  --pn-rose: #f08fb0;
-  --pn-rose-soft: #4a2335;
-  color-scheme: dark;
-}
+/* StylerNow — estructura del panel de gestión (mismo diseño para todos los negocios).
+ * Los colores salen de las variables globales (globals.css). Los componentes con prefijo pn- quedan fuera de la capa
+ * de esquinas global. */
 
 /* ───────────── Estructura del panel ───────────── */
 [data-panel="suave"] {
@@ -197,38 +54,38 @@ html[data-theme="dark"]:has([data-panel="suave"]) {
 }
 
 /* ───────────── Tipografía del panel: una sola jerarquía, clara y sin estilo editorial ───────────── */
-[data-vertical][data-panel="suave"] :is(h1, h2, h3, h4) {
+[data-panel="suave"] :is(h1, h2, h3, h4) {
   font-weight: 700;
 }
-[data-vertical][data-panel="suave"] h1 {
+[data-panel="suave"] h1 {
   font-weight: 800;
   font-size: clamp(26px, 4.4vw, 34px);
   line-height: 1.12;
   letter-spacing: -0.02em;
 }
-[data-vertical][data-panel="suave"] :is(.poster-1, .poster-2, .poster-3, .poster-4, .poster-5, .poster-xl, .poster-lg, .sn-poster) {
+[data-panel="suave"] :is(.poster-1, .poster-2, .poster-3, .poster-4, .poster-5, .poster-xl, .poster-lg, .sn-poster) {
   font-weight: 800;
   letter-spacing: -0.02em;
 }
-[data-vertical][data-panel="suave"] h1:is(.poster-1, .poster-2, .poster-3, .poster-4, .poster-5, .poster-xl, .poster-lg, .sn-poster) {
+[data-panel="suave"] h1:is(.poster-1, .poster-2, .poster-3, .poster-4, .poster-5, .poster-xl, .poster-lg, .sn-poster) {
   font-size: clamp(26px, 4.4vw, 34px);
 }
-[data-vertical][data-panel="suave"] :is(.sn-label, .sn-meta, .label, .meta, .sn-help, .sn-mono, .font-mono) {
+[data-panel="suave"] :is(.sn-label, .sn-meta, .label, .meta, .sn-help, .sn-mono, .font-mono) {
   font-family: var(--sn-font-sans);
   text-transform: none;
   letter-spacing: 0;
 }
-[data-vertical][data-panel="suave"] :is(.sn-label, .sn-meta, .label, .meta, .sn-help, .sn-mono) {
+[data-panel="suave"] :is(.sn-label, .sn-meta, .label, .meta, .sn-help, .sn-mono) {
   font-size: 12.5px;
   font-weight: 500;
   line-height: 1.5;
 }
-[data-vertical][data-panel="suave"] :is(.sn-num, .figure-sm, .figure-md, .figure-lg, .sn-fig) {
+[data-panel="suave"] :is(.sn-num, .figure-sm, .figure-md, .figure-lg, .sn-fig) {
   font-family: var(--sn-font-sans);
   font-weight: 700;
   letter-spacing: 0;
 }
-[data-vertical][data-panel="suave"] :is(button, a, label, span, p, th, td, li):is(.uppercase, [class*="tracking-"]) {
+[data-panel="suave"] :is(button, a, label, span, p, th, td, li):is(.uppercase, [class*="tracking-"]) {
   text-transform: none;
   letter-spacing: 0;
 }

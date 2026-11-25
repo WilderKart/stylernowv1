@@ -130,7 +130,7 @@ export function VistaPrivacidad({ estado, historial, error }: { estado: EstadoCo
             {t("priv.guardadas")}
           </p>
         ) : null}
-        <Button type="button" size="lg" loading={guardando} onClick={guardar} className="w-full justify-between">
+        <Button type="button" size="lg" loading={guardando} onClick={guardar} className="w-full">
           <span>{t("priv.guardar")}</span>
           <ArrowUpRight aria-hidden className="size-5" />
         </Button>

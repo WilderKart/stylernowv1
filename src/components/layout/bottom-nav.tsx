@@ -58,7 +58,7 @@ function Barra() {
 export function BottomNav() {
   const t = useT();
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30">
+    <div className="fixed inset-x-0 bottom-0 z-30 md:hidden">
       <Suspense fallback={<nav aria-label={t("nav.principal")} className="sn-tabbar" />}>
         <Barra />
       </Suspense>

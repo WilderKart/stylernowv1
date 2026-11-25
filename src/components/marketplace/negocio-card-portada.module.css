@@ -1,131 +1,118 @@
-/* Tarjeta de negocio del Home (maqueta 2026-11-15): foto a color, ciudad inclinada y panel con borde superior en diagonal. */
+/* Tarjeta de negocio del Home (referencia de diseño): foto arriba, avatar + nombre + calificación, chip de horario y precio. */
 .tarjeta {
-  position: relative;
-  display: block;
-  height: 215px;
-  /* La regla global deja todo en esquina recta: el redondeo se hace con clip-path y el borde con ::after. */
-  clip-path: inset(0 round 10px);
-  background: var(--app-bg);
-  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
   text-decoration: none;
-  isolation: isolate;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 22px !important;
+  box-shadow: var(--sn-shadow-hard-sm);
+  transition: transform 0.15s, box-shadow 0.15s;
 }
-.tarjeta::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  border: 2px solid var(--text);
-  border-radius: 10px;
-  pointer-events: none;
+.tarjeta:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sn-shadow-hard);
 }
-.tarjeta:focus-visible {
-  outline: none;
-}
-/* El clip-path recortaría el contorno exterior: el foco se marca en el propio borde. */
-.tarjeta:focus-visible::after {
-  border: 4px solid var(--focus);
+.portada {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: linear-gradient(150deg, #cfe0ff 0%, #8fb6ff 100%);
+  border-radius: 0 !important;
 }
 .foto {
-  position: absolute;
-  inset: 0 0 auto 0;
   width: 100%;
-  height: 178px;
+  height: 100%;
   object-fit: cover;
-  object-position: center 40%;
+  display: block;
+  border-radius: 0 !important;
 }
-.ciudad {
-  position: absolute;
-  top: 7px;
-  right: 6px;
-  z-index: 1;
-  padding: 3px 9px 2px;
-  font: 700 12px/16px var(--sn-font-mono);
-  letter-spacing: 0;
-  text-transform: uppercase;
-  color: #0a0a0a;
-  transform: rotate(-2deg);
-}
-.ciudad::before {
-  content: "";
+.inicial {
   position: absolute;
   inset: 0;
-  z-index: -1;
-  border: 2px solid #0a0a0a;
-  background: var(--app-bg);
-  transform: skewX(-12deg);
+  display: grid;
+  place-items: center;
+  font: 800 56px/1 var(--sn-font-display);
+  color: rgba(255, 255, 255, 0.9);
 }
 .patrocinado {
   position: absolute;
-  top: 7px;
-  left: 8px;
-  z-index: 1;
-  padding: 2px 7px;
-  background: var(--brand, #fe5400);
-  color: #0a0a0a;
-  font: 700 11px/14px var(--sn-font-mono);
-  text-transform: uppercase;
+  top: 10px;
+  left: 10px;
+  padding: 5px 10px;
+  font: 700 11px/1 var(--sn-font-sans);
+  color: #fff;
+  background: var(--signal);
+  border-radius: 999px !important;
 }
-.panel {
-  position: absolute;
-  inset: auto 0 0 0;
-  height: 59px;
+.cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
 }
-.panel::before {
-  content: "";
-  position: absolute;
-  inset: 6px -1px -12px 0;
-  border: 2px solid var(--text);
-  border-radius: 9px;
-  background: var(--app-bg);
-  transform: rotate(-1.6deg);
-  transform-origin: 0 0;
+.fila {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  font: 800 16px/1 var(--sn-font-display);
+  color: var(--accent-text);
+  background: var(--surface-2);
+  border-radius: 999px !important;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0 !important;
+}
+.titulos {
+  min-width: 0;
 }
 .nombre {
-  position: absolute;
-  left: 14px;
-  right: 120px;
-  top: 17px;
   margin: 0;
   overflow: hidden;
-  font-family: var(--sn-font-display);
-  font-stretch: 78%;
-  font-weight: 900;
-  font-size: 19px;
-  line-height: 20px;
-  text-transform: uppercase;
+  font: 700 15px/1.2 var(--sn-font-display);
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.disponible {
-  position: absolute;
-  right: 17px;
-  top: 15px;
-  padding: 0 4px;
-  background: #01ef6d;
-  color: #0a0a0a;
-  font: 700 11px/17px var(--sn-font-mono);
-  text-transform: uppercase;
+.meta {
+  display: block;
+  overflow: hidden;
+  font: 400 12px/1.4 var(--sn-font-sans);
+  color: var(--text-muted);
   white-space: nowrap;
-}
-.pie {
-  position: absolute;
-  left: 14px;
-  right: 17px;
-  bottom: 7px;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  font: 400 12.5px/16px var(--sn-font-mono);
-  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .estrella {
-  color: var(--brand-text, #fe5400);
-  font-size: 15px;
-  margin-right: 4px;
+  margin-right: 3px;
+  color: #f5a524;
+}
+.pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.chip {
+  padding: 6px 12px;
+  font: 600 12px/1 var(--sn-font-sans);
+  color: var(--accent-text);
+  background: var(--pn-violet-soft);
+  border-radius: 999px !important;
 }
 .precio {
-  font-size: 13.5px;
-  font-variant-numeric: tabular-nums;
+  font: 700 13px/1 var(--sn-font-sans);
 }

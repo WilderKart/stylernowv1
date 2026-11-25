@@ -36,7 +36,7 @@ export function BotonReintentar() {
           {t("mant.sigue")}
         </p>
       ) : null}
-      <Button size="lg" className="w-full justify-between" loading={pendiente} onClick={reintentar}>
+      <Button size="lg" className="w-full" loading={pendiente} onClick={reintentar}>
         <span>{t("comun.reintentar")}</span> <span aria-hidden>↗</span>
       </Button>
     </div>

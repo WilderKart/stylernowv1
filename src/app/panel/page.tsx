@@ -1,9 +1,7 @@
 import { DashboardResumen } from "@/components/panel/dashboard-resumen";
 import { EnlaceReserva } from "@/components/panel/enlace-reserva";
 import { AsistenteBienvenida } from "@/components/panel/asistente-bienvenida";
-import { ResumenBarberia } from "@/components/panel/resumen-barberia";
 import { ResumenSuave } from "@/components/panel/resumen-suave";
-import { verticalDeCategorias } from "@/lib/tema/vertical";
 import { PanelNav } from "@/components/panel/panel-nav";
 import { TarjetaPerfilProfesional } from "@/components/panel/tarjeta-perfil-profesional";
 import { TarjetaVisibilidadPublica } from "@/components/panel/tarjeta-visibilidad-publica";
@@ -188,42 +186,25 @@ export default async function PanelPage() {
   const metricasLealtad = metricasLealtadRes?.ok ? metricasLealtadRes.data : null;
   const pagosPorRevisar = negocio.estado === "ACTIVO" ? await contarPagosPorRevisar(negocio.id) : 0;
 
-  const verticalSuave = verticalDeCategorias(negocio.categoria);
-  const datosSuave = verticalSuave !== null ? await cargarDatosResumenSuave(negocio.id, negocio.estado === "ACTIVO") : null;
+  const datosSuave = await cargarDatosResumenSuave(negocio.id, negocio.estado === "ACTIVO");
 
   return (
     <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} prestaServicios={contexto.prestaServicios} />
       <div
-        className={
-          verticalSuave !== null
-            ? "mx-auto flex w-full max-w-[1680px] flex-1 flex-col gap-4 px-3 py-4 sm:gap-6 sm:px-6 sm:py-6 lg:px-8"
-            : "mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-5 py-6 sm:px-10 sm:py-8"
-        }
+        className="mx-auto flex w-full max-w-[1680px] flex-1 flex-col gap-4 px-3 py-4 sm:gap-6 sm:px-6 sm:py-6 lg:px-8"
       >
-        {verticalSuave !== null && datosSuave !== null ? (
-          <ResumenSuave
-            nombre={negocio.nombre}
-            vertical={verticalSuave}
-            datos={datosSuave}
-            pagosPorRevisar={pagosPorRevisar}
-            tareas={<AsistenteBienvenida datos={datosAsistente} suave />}
-            estadoNegocio={negocio.estado}
-            resumen={dashboardBarberia?.resumen ?? null}
-            citas={dashboardBarberia?.timeline ?? []}
-            lealtad={metricasLealtad}
-          />
-        ) : (
-          <ResumenBarberia
-            nombre={negocio.nombre}
-            estadoNegocio={negocio.estado}
-            resumen={dashboardBarberia?.resumen ?? null}
-            citas={dashboardBarberia?.timeline ?? []}
-            lealtad={metricasLealtad}
-          />
-        )}
-
-        {pagosPorRevisar > 0 ? (
+        <ResumenSuave
+          nombre={negocio.nombre}
+          datos={datosSuave}
+          pagosPorRevisar={pagosPorRevisar}
+          tareas={<AsistenteBienvenida datos={datosAsistente} suave />}
+          estadoNegocio={negocio.estado}
+          resumen={dashboardBarberia?.resumen ?? null}
+          citas={dashboardBarberia?.timeline ?? []}
+          lealtad={metricasLealtad}
+        />
+       {pagosPorRevisar > 0 ? (
           <Link
             href="/panel/pagos"
             className="flex items-center justify-between gap-3 border-2 border-accent bg-accent-soft p-4 text-[14px] font-bold text-text"
@@ -234,8 +215,6 @@ export default async function PanelPage() {
             <span aria-hidden>→</span>
           </Link>
         ) : null}
-
-        {verticalSuave === null ? <AsistenteBienvenida datos={datosAsistente} /> : null}
 
         <TarjetaPerfilProfesional
           negocioId={negocio.id}

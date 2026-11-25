@@ -1,89 +1,141 @@
 @import "tailwindcss";
 @import "../styles/brutalist.css" layer(components);
-@import "../styles/temas-suaves.css";
+@import "../styles/tema-stylernow.css";
 @import "../styles/panel-suave.css";
 
 /* StylerNow — sistema de diseño brutalista (blanco #FFF / negro #0A0A0A / naranja señal #FF4D00).
    Fuente de verdad: stylernow-prototipo/css/tokens.css. Tema claro por defecto;
    oscuro con data-theme="dark" en <html>, igual que el prototipo. */
 
-/* ---- Tokens en tiempo de ejecución (cambian con data-theme) ---- */
+/* ---- Tokens en tiempo de ejecución (cambian con data-theme) ----
+   Un solo tema para toda la app y para todos los tipos de negocio. Colores tomados de la referencia de diseño:
+   azul StylerNow, navy para texto, fondos azul muy claro, tarjetas blancas con sombra suave. */
 :root,
 [data-theme="light"] {
   --bg: #ffffff;
-  --app-bg: #f8f6f2;
-  --surface: #f2f2f2;
-  --surface-2: #e6e6e6;
-  --ink: #0a0a0a;
+  --app-bg: #f3f6fc;
+  --surface: #f6f8fd;
+  --surface-2: #e9effb;
+  --ink: #0a1230;
   --paper: #ffffff;
-  --signal: #ff4d00;
-  --signal-pressed: #e04400;
-  --text: #0a0a0a;
-  --text-muted: #5c5c5c;
-  --text-faint: #6b6b6b; /* 4.76:1 sobre #f2f2f2 (antes #767676: 4.06) */
-  --text-disabled: #8a8a8a;
-  --accent-text: #c23a00;
-  --line: #0a0a0a;
-  --grid: #0a0a0a;
-  --grid-soft: #d4d4d4;
-  --shadow-ink: #0a0a0a;
-  --focus: #ff4d00;
-  --success: #00e07a;
-  --warning: #ffd400;
-  --danger: #ff1f1f;
-  --info: #0a0a0a;
-  --scrim: rgba(10, 10, 10, 0.72);
-  --sn-shadow-hard: 4px 4px 0 0 #0a0a0a;
-  --sn-shadow-hard-sm: 2px 2px 0 0 #0a0a0a;
+  --signal: #0b63f6;
+  --signal-pressed: #0a52cf;
+  --text: #0a1230;
+  --text-muted: #4b587a;
+  --text-faint: #5f6c8c;
+  --text-disabled: #9aa5c0;
+  --accent-text: #0a55d6;
+  --line: #e3eaf7;
+  --line-input: #b9c6e2;
+  --grid: #e8eef9;
+  --grid-soft: #e8eef9;
+  --shadow-ink: #0a1230;
+  --focus: #0b63f6;
+  --success: #bfe8cf;
+  --warning: #fbdca6;
+  --danger: #c43d3d;
+  --info: #0a1230;
+  --scrim: rgba(10, 18, 48, 0.5);
+  --sn-shadow-hard: 0 14px 34px -16px rgba(20, 60, 160, 0.28);
+  --sn-shadow-hard-sm: 0 6px 18px -10px rgba(20, 60, 160, 0.24);
+  --nav-bg: #ffffff;
+  --nav-text: #0a1230;
+  --nav-muted: rgba(10, 18, 48, 0.66);
+  --nav-accent: #0a55d6;
+  --nav-active-bg: rgba(11, 99, 246, 0.1);
+  --nav-borde: #e3eaf7;
+  --side-bg: #0b1b4d;
+  --side-text: #ffffff;
+  --side-muted: rgba(255, 255, 255, 0.72);
+  --side-accent: #ffffff;
+  --side-active-bg: rgba(255, 255, 255, 0.14);
+  --side-borde: rgba(255, 255, 255, 0.14);
+  --hero-gradient: linear-gradient(135deg, #1765ff 0%, #3f83ff 100%);
+  --kpi-gradient: linear-gradient(135deg, #eaf1ff, #d7e5ff);
+  --hero-text: #ffffff;
+  --title: var(--text);
+  --panel-bg: radial-gradient(900px 480px at 12% -8%, rgba(11, 99, 246, 0.1), transparent 70%);
+  --brand: #0b63f6;
+  --brand-text: #0a55d6;
+  --pn-violet: #0b63f6;
+  --pn-violet-soft: #e3edff;
+  --pn-green: #166b47;
+  --pn-green-soft: #dcf3e6;
+  --pn-orange: #9a4308;
+  --pn-orange-soft: #fde7d3;
+  --pn-blue: #1f58b3;
+  --pn-blue-soft: #dce9fb;
+  --pn-amber: #7d5206;
+  --pn-amber-soft: #fbefcf;
+  --pn-rose: #a12a4e;
+  --pn-rose-soft: #fadde6;
   color-scheme: light;
 }
 
 [data-theme="dark"] {
-  --bg: #0a0a0a;
-  --app-bg: #0a0a0a;
-  --surface: #141414;
-  --surface-2: #1e1e1e;
-  --ink: #0a0a0a;
-  --paper: #ffffff;
-  --signal: #ff4d00;
-  --signal-pressed: #e04400;
-  --text: #ffffff;
-  --text-muted: #a3a3a3;
-  --text-faint: #8a8a8a;
-  --text-disabled: #6b6b6b;
-  --accent-text: #ff4d00;
-  --line: #ffffff;
-  --grid: #ffffff;
-  --grid-soft: #2e2e2e;
-  --shadow-ink: #ff4d00;
-  --focus: #ff4d00;
-  --scrim: rgba(0, 0, 0, 0.8);
-  --sn-shadow-hard: 4px 4px 0 0 #ff4d00;
-  --sn-shadow-hard-sm: 2px 2px 0 0 #ff4d00;
+  --bg: #121a36;
+  --app-bg: #0a1024;
+  --surface: #172044;
+  --surface-2: #1f2a55;
+  --ink: #0a1024;
+  --paper: #eef2ff;
+  --signal: #3d82ff;
+  --signal-pressed: #5a96ff;
+  --text: #eef2ff;
+  --text-muted: #aab4d6;
+  --text-faint: #8e9ac2;
+  --text-disabled: #66719a;
+  --accent-text: #8fb6ff;
+  --line: #243060;
+  --line-input: #4a5a94;
+  --grid: #243060;
+  --grid-soft: #243060;
+  --shadow-ink: #000000;
+  --focus: #6aa0ff;
+  --success: #7fcf9f;
+  --warning: #e6c36e;
+  --danger: #f09a93;
+  --info: #eef2ff;
+  --scrim: rgba(0, 0, 0, 0.72);
+  --sn-shadow-hard: 0 16px 36px -16px rgba(0, 0, 0, 0.75);
+  --sn-shadow-hard-sm: 0 6px 18px -10px rgba(0, 0, 0, 0.7);
+  --nav-bg: #121a36;
+  --nav-text: #eef2ff;
+  --nav-muted: rgba(238, 242, 255, 0.68);
+  --nav-accent: #8fb6ff;
+  --nav-active-bg: rgba(61, 130, 255, 0.18);
+  --nav-borde: #243060;
+  --side-bg: #060a1a;
+  --side-text: #eef2ff;
+  --side-muted: rgba(238, 242, 255, 0.7);
+  --side-accent: #ffffff;
+  --side-active-bg: rgba(255, 255, 255, 0.12);
+  --side-borde: rgba(255, 255, 255, 0.12);
+  --hero-gradient: linear-gradient(135deg, #1747b8 0%, #2f6be0 100%);
+  --kpi-gradient: linear-gradient(135deg, #1b2a5e, #162350);
+  --hero-text: #ffffff;
+  --panel-bg: radial-gradient(900px 480px at 12% -8%, rgba(61, 130, 255, 0.18), transparent 70%);
+  --brand: #3d82ff;
+  --brand-text: #8fb6ff;
+  --pn-violet: #8fb6ff;
+  --pn-violet-soft: #1b2a5e;
+  --pn-green: #6fd3a0;
+  --pn-green-soft: #1d3a2d;
+  --pn-orange: #f2a766;
+  --pn-orange-soft: #46301d;
+  --pn-blue: #8db8f5;
+  --pn-blue-soft: #1f3250;
+  --pn-amber: #e6c36e;
+  --pn-amber-soft: #44381a;
+  --pn-rose: #f08fb0;
+  --pn-rose-soft: #4a2335;
   color-scheme: dark;
 }
 
 :root {
-  /* Tokens de navegación y portadas del panel: el sistema brutalista los fija; los temas suaves los redefinen. */
-  --nav-bg: #0a0a0a;
-  --nav-text: #ffffff;
-  --nav-muted: rgba(255, 255, 255, 0.7);
-  --nav-accent: #ff4d00;
-  --nav-active-bg: rgba(255, 255, 255, 0.1);
-  --nav-borde: rgba(255, 255, 255, 0.1);
-  --side-bg: var(--nav-bg);
-  --side-text: var(--nav-text);
-  --side-muted: var(--nav-muted);
-  --side-accent: var(--nav-accent);
-  --side-active-bg: var(--nav-active-bg);
-  --side-borde: var(--nav-borde);
-  --hero-gradient: radial-gradient(120% 140% at 85% 0%, #ff4d00 0%, #7a2600 45%, #0a0a0a 100%);
-  --kpi-gradient: linear-gradient(135deg, #ff4d00 0%, #a33300 100%);
-  --hero-text: #ffffff;
-  --line-input: var(--line);
-  --sombra-banner: 4px 4px 0 0 var(--signal);
-  --r-card: 0px;
-  --r-ctl: 0px;
+  --sombra-banner: var(--sn-shadow-hard);
+  --r-card: 22px;
+  --r-ctl: 999px;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -95,9 +147,9 @@
   --space-16: 64px;
   --space-24: 96px;
   --radius-round: 50%;
-  --border-thick: 2px;
+  --border-thick: 1px;
   --border-hair: 1px;
-  --border-sheet: 4px;
+  --border-sheet: 1px;
   --dur-fast: 90ms;
   --dur-base: 160ms;
   --dur-slow: 240ms;
@@ -109,13 +161,14 @@
   --ease-linear: linear;
   --touch-min: 48px;
   --tabbar-height: 64px;
-  --icon-stroke: 2;
-  --stretch-condensed: 62.5%;
-  --stretch-expanded: 125%;
-  /* Fuentes: next/font inyecta --font-archivo y --font-space-mono en <html>. */
-  --sn-font-display: var(--font-archivo), "Arial Narrow", sans-serif;
-  --sn-font-sans: var(--font-archivo), system-ui, sans-serif;
-  --sn-font-mono: var(--font-space-mono), ui-monospace, monospace;
+  --icon-stroke: 1.75;
+  --stretch-condensed: 100%;
+  --stretch-expanded: 100%;
+  /* Una sola tipografía (Plus Jakarta Sans) en toda la app. */
+  --sn-font-poster: var(--font-jakarta), system-ui, sans-serif;
+  --sn-font-display: var(--font-jakarta), system-ui, sans-serif;
+  --sn-font-sans: var(--font-jakarta), system-ui, sans-serif;
+  --sn-font-mono: var(--font-jakarta), system-ui, sans-serif;
 }
 
 /* ---- Mapeo a Tailwind: los nombres semánticos que ya usa toda la app
@@ -149,19 +202,19 @@
   --color-danger: var(--danger);
   --color-danger-soft: color-mix(in srgb, var(--danger) 14%, transparent);
 
-  /* Esquinas 0 en todo el sistema (rounded-full se conserva para avatares/puntos). */
-  --radius-xs: 0px;
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --radius-2xl: 0px;
-  --radius-3xl: 0px;
-  --radius-4xl: 0px;
-  --radius-card: 0px;
-  --radius-control: 0px;
+  /* Esquinas redondeadas (iOS). */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 22px;
+  --radius-2xl: 26px;
+  --radius-3xl: 30px;
+  --radius-4xl: 34px;
+  --radius-card: 22px;
+  --radius-control: 999px;
 
-  /* Sombras duras (sin blur) */
+  /* Sombras suaves */
   --shadow-hard: var(--sn-shadow-hard);
   --shadow-hard-sm: var(--sn-shadow-hard-sm);
 }
@@ -170,13 +223,6 @@
 *::before,
 *::after {
   box-sizing: border-box;
-}
-
-/* Esquinas 0 también para valores arbitrarios (rounded-[13px]); solo se
-   exceptúan los elementos explícitamente circulares. Va sin capa para ganar
-   a las utilidades de Tailwind. */
-*:not([class*="rounded-full"]):not(.sn-seal):not(.sn-avatar):not([class*="pn-"]) {
-  border-radius: 0;
 }
 
 html {

@@ -2,10 +2,9 @@ import type { CitaDelDia, ResumenDia } from "@/app/panel/dashboard-actions";
 import type { DatosResumenSuave } from "@/app/panel/resumen-datos";
 import { formatCOP } from "@/lib/utils";
 import { Bell, CalendarClock, CalendarDays, CalendarPlus, ChevronRight, Gift, MessageCircle, ShieldCheck, Users, Wallet, type LucideIcon } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import type { LealtadResumen } from "./resumen-barberia";
+
 
 /**
  * Resumen del panel de spa, salón y uñas (diseño unificado, referencia «Resumen»).
@@ -34,11 +33,16 @@ const NEGOCIO_ESTADO: Record<string, string> = {
   RECHAZADO: "Rechazado",
   CANCELADO: "Cancelado",
 };
-const HERO: Record<string, { img: string; texto: string; pos: string }> = {
-  spa: { img: "/img/auth/spa.webp", texto: "Gestiona tu spa, agenda tus citas y haz crecer tu negocio desde un solo lugar.", pos: "50% 50%" },
-  salon: { img: "/img/auth/salon.webp", texto: "Gestiona tu salón, agenda tus citas y haz crecer tu negocio desde un solo lugar.", pos: "50% 40%" },
-  unas: { img: "/img/auth/unas.webp", texto: "Gestiona tu negocio de uñas, agenda tus citas y haz crecer tu negocio desde un solo lugar.", pos: "30% 50%" },
-};
+
+export interface LealtadResumen {
+  membresiasActivas: number;
+  miembrosVip: number;
+  sellosCampanasActivas: number;
+  cashbackOtorgadoMes: number;
+  referidosCompletadosMes: number;
+}
+
+const HERO_TEXTO = "Gestiona tu negocio, agenda tus citas y haz crecer tu negocio desde un solo lugar.";
 
 const hora = (iso: string) => new Date(iso).toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit", timeZone: "America/Bogota" });
 const DIAS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
@@ -195,7 +199,6 @@ function Barras({ puntos }: { puntos: { etiqueta: string; valor: number }[] }) {
 
 export function ResumenSuave({
   nombre,
-  vertical,
   estadoNegocio,
   resumen,
   citas,
@@ -205,7 +208,6 @@ export function ResumenSuave({
   tareas,
 }: {
   nombre: string;
-  vertical: string;
   estadoNegocio: string;
   resumen: ResumenDia | null;
   citas: CitaDelDia[];
@@ -218,7 +220,6 @@ export function ResumenSuave({
   const activo = estadoNegocio === "ACTIVO";
   const semana = semanaActual();
   const proximas = citas.filter((c) => c.estado !== "COMPLETADA" && c.estado !== "NO_SHOW").slice(0, 4);
-  const hero = HERO[vertical] ?? HERO.salon;
   const dif = resumen && datos.citasAyer !== null ? resumen.citasHoy - datos.citasAyer : null;
   const ing = datos.ingresos;
   const variacion = ing.mesAnterior !== null && ing.mesAnterior > 0 ? Math.round(((ing.mesActual - ing.mesAnterior) / ing.mesAnterior) * 100) : null;
@@ -236,22 +237,13 @@ export function ResumenSuave({
         <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
           {/* Bienvenida */}
           <header className="pn-card relative isolate min-h-[168px] overflow-hidden bg-[image:var(--hero-gradient)] p-5 text-[var(--hero-text)] shadow-[var(--sn-shadow-hard)] sm:p-7">
-            <Image
-              src={hero.img}
-              alt=""
-              fill
-              sizes="(min-width: 1280px) 40vw, 60vw"
-              className="-z-10 hidden object-cover opacity-90 [mask-image:linear-gradient(to_right,transparent_35%,#000_85%)] sm:block"
-              style={{ objectPosition: hero.pos }}
-              aria-hidden
-            />
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0 sm:max-w-[58%]">
                 <p className="truncate text-[13px] font-semibold opacity-80">{nombre}</p>
                 <h1 className="mt-1 text-[clamp(26px,6vw,36px)] font-extrabold leading-tight" style={{ color: "inherit" }}>
                   ¡Bienvenido a StylerNow!
                 </h1>
-                <p className="mt-2 max-w-md text-[14px] leading-snug opacity-90">{hero.texto}</p>
+                <p className="mt-2 max-w-md text-[14px] leading-snug opacity-90">{HERO_TEXTO}</p>
               </div>
               <Link
                 href="/panel/verificacion"

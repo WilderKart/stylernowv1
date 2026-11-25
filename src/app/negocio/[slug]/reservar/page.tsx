@@ -87,7 +87,7 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
 
   if (!aceptaReservas || !sedes?.length || !servicios?.length) {
     return (
-      <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-app">
+      <div className="mx-auto flex min-h-dvh w-full max-w-none flex-col bg-app">
         <div className="p-top">
           <Link href={`/negocio/${slug}`} aria-label={t("comun.volver")} className="sn-iconbtn">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true">
@@ -106,7 +106,7 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-app">
+    <div className="mx-auto flex min-h-dvh w-full max-w-none flex-col bg-app">
       <FlujoReserva
         negocio={{ ...negocio, cobra_en_linea: cobraEnLinea !== false }}
         saldoPendiente={Number(saldoPendiente ?? 0)}

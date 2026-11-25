@@ -104,7 +104,7 @@ export function VistaOlvide({ siguiente }: { siguiente: string }) {
         />
         <Turnstile ref={controlTs} accion="recuperar" onToken={setTokenTs} />
         {error ? <ErrorForm>{error}</ErrorForm> : null}
-        <Button type="submit" size="lg" loading={loading} className="w-full justify-between">
+        <Button type="submit" size="lg" loading={loading} className="w-full">
           <span>{t("auth.enviar_enlace")}</span>
           <ArrowUpRight className="size-[18px]" aria-hidden />
         </Button>

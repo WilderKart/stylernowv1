@@ -127,7 +127,7 @@ export function CompletarPerfil({ email, siguiente, pedirAceptacion }: { email: 
         {pedirAceptacion ? <CasillaLegal checked={acepta} onChange={setAcepta} /> : null}
         <Casilla caja checked={marketing} onChange={setMarketing} etiqueta={t("login.opcional")} descripcion={t("login.marketing")} className="mt-1" />
         {error ? <ErrorForm>{error}</ErrorForm> : null}
-        <Button type="submit" size="lg" loading={loading} className="w-full justify-between">
+        <Button type="submit" size="lg" loading={loading} className="w-full">
           <span>{t("auth.guardar_continuar")}</span>
           <ArrowUpRight className="size-[18px]" aria-hidden />
         </Button>

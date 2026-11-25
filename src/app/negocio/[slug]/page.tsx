@@ -1,6 +1,6 @@
-import { verticalDeCategorias } from "@/lib/tema/vertical";
+import { NavSuperiorCliente } from "@/components/layout/nav-superior-cliente";
 import { Label, Marquee, Meta, Num, Photo, ProCard, Stars, Status } from "@/components/brutal";
-import { FOTOS_RESPALDO, FOTO_NEGOCIO_RESPALDO, nivelATier } from "@/components/negocio/nivel";
+import { nivelATier } from "@/components/negocio/nivel";
 import { horarioDeHoy } from "@/components/negocio/horario";
 import { duracion, TZ_POR_DEFECTO } from "@/lib/formato";
 import { resumenPoliticaCancelacion } from "@/lib/pagos/sena";
@@ -202,16 +202,14 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
   const nombreVisible = marca?.nombreMarca ?? negocio.nombre;
   const partesNombre = nombreVisible.split(" ");
   const mitad = Math.ceil(partesNombre.length / 2);
-  // Los temas suaves (spa, salón, uñas) no usan las fotos de stock de barbería cuando el negocio aún no sube las suyas.
-  const vertical = verticalDeCategorias(negocio.categoria);
 
   return (
     <div
-      className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-app"
-      data-vertical={vertical ?? undefined}
+      className="flex min-h-dvh w-full flex-col bg-app"
       // Mi Marca (add-on): el negocio redefine su acento y su tinta; los colores ya vienen validados #RRGGBB.
       style={marca ? ({ "--signal": marca.colorPrimario, "--ink": marca.colorSecundario } as React.CSSProperties) : undefined}
     >
+      <NavSuperiorCliente />
       {marca?.slogan ? (
         <p className="sn-label bg-signal px-4 py-2 text-ink">{marca.slogan}</p>
       ) : null}
@@ -222,7 +220,8 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
 
-      <main className="flex-1">
+      <main className="mx-auto w-full max-w-[1280px] flex-1 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-8 lg:px-8">
+        <div className="min-w-0">
         {!aceptaReservas ? (
           <div role="status" className="body-sm m-4 border-2 border-current p-3 font-semibold">
             {t("res.pausado")}
@@ -231,9 +230,9 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
         {/* ── Portada ───────────────────────────────────────────────── */}
         <div className="relative">
           <Photo
-            src={marca?.logoUrl ?? negocio.foto_principal_url ?? negocio.logo_url ?? (vertical ? null : FOTO_NEGOCIO_RESPALDO)}
+            src={marca?.logoUrl ?? negocio.foto_principal_url ?? negocio.logo_url ?? null}
             alt={nombreVisible}
-            className="h-[250px] w-full"
+            className="h-[250px] w-full lg:mt-4 lg:h-[380px] lg:overflow-hidden lg:rounded-3xl"
           />
           <Link
             href="/"
@@ -354,7 +353,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
             <Meta>{t("neg.sin_servicios")}</Meta>
           </div>
         ) : (
-          <ul className="m-0 list-none border-t-2 border-line p-0">
+          <ul className="m-0 list-none border-t border-line p-0 lg:grid lg:grid-cols-2 lg:gap-x-6">
             {servicios.map((s) => (
               <li key={s.id} className="flex gap-3 border-b border-grid-soft px-4 py-3">
                 {s.imagen_url ? (
@@ -382,7 +381,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
             <div className="p-sec">
               <Num>{t("neg.sec_equipo")}</Num>
             </div>
-            <div className="p-stack px-4">
+            <div className="p-stack px-4 lg:grid lg:grid-cols-2 lg:gap-3">
               {staff.map((p, i) => (
                 <ProCard
                   key={p.staff_id}
@@ -390,7 +389,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
                   name={p.nombre}
                   role={p.especialidad ?? undefined}
                   tier={nivelATier(p.nivel)}
-                  photo={p.foto_url ?? (vertical ? null : FOTOS_RESPALDO[i % FOTOS_RESPALDO.length])}
+                  photo={p.foto_url ?? null}
                 />
               ))}
             </div>
@@ -406,7 +405,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
             <Meta>{t("neg.sin_resenas")}</Meta>
           </div>
         ) : (
-          <div className="p-stack px-4">
+          <div className="p-stack px-4 lg:grid lg:grid-cols-2 lg:gap-3">
             {resenas.map((r) => (
               <div key={r.id} className="sn-review">
                 <div className="sn-review__head">
@@ -438,10 +437,42 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
             <li key={linea}>{linea}</li>
           ))}
         </ul>
+        </div>
+        <aside className="hidden lg:sticky lg:top-24 lg:mt-4 lg:block">
+          <div className="flex flex-col gap-4 rounded-3xl border border-border bg-bg p-5 shadow-hard">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <p className="m-0 text-xs font-semibold text-text-muted">{t("neg.rating")}</p>
+                <p className="m-0 text-3xl font-extrabold">{resenas.length > 0 ? `★ ${promedio.toFixed(1).replace(".", ",")}` : "—"}</p>
+              </div>
+              <p className="m-0 text-sm text-text-muted">{resenas.length} {t("neg.resenas")}</p>
+            </div>
+            {sede ? (
+              <p className="m-0 text-sm leading-snug text-text-muted">
+                {sede.direccion} · {sede.ciudad}
+              </p>
+            ) : null}
+            {horarioHoy ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-semibold">{horarioHoy.etiqueta}</span>
+                {horarioHoy.abiertoAhora ? <Status tone="ok">{t("neg.abierto_ahora")}</Status> : null}
+              </div>
+            ) : null}
+            {sinDisponibilidad || !aceptaReservas ? (
+              <span className="sn-btn sn-btn--secondary w-full justify-center" aria-disabled="true">
+                {aceptaReservas ? t("neg.sin_disponibilidad") : t("res.pausado")}
+              </span>
+            ) : (
+              <Link href={`/negocio/${negocio.slug}/reservar`} className="sn-btn sn-btn--primary w-full no-underline">
+                {t("neg.reservar_turno")}
+              </Link>
+            )}
+          </div>
+        </aside>
       </main>
 
       {/* CTA principal fijo (02-UX/04_Marketplace.md). */}
-      <div className="p-foot">
+      <div className="p-foot lg:hidden">
         {sinDisponibilidad || !aceptaReservas ? (
           <span className="sn-btn sn-btn--secondary w-full justify-center" aria-disabled="true">
             {aceptaReservas ? t("neg.sin_disponibilidad") : t("res.pausado")}

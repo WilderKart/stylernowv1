@@ -1,5 +1,4 @@
 import { patronSinTildes } from "@/lib/busqueda/sin-tildes";
-import { verticalDeCategorias } from "@/lib/tema/vertical";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
 import { BloquesLanzamiento } from "@/components/inicio/bloques-lanzamiento";
@@ -37,6 +36,7 @@ export default async function HomePage(props: PageProps<"/">) {
   const categoria = primerValor(params.categoria);
   const orden = primerValor(params.orden);
   const soloHoy = primerValor(params.hoy) === "1";
+  const verTodos = primerValor(params.todos) === "1";
   const lat = primerValor(params.lat);
   const lng = primerValor(params.lng);
   const vista = primerValor(params.vista) === "mapa" ? "mapa" : "lista";
@@ -116,14 +116,7 @@ export default async function HomePage(props: PageProps<"/">) {
   const hayPaginaSiguiente = vista === "lista" && todosLosResultados.length > TAM_PAGINA;
   const negocios = hayPaginaSiguiente ? todosLosResultados.slice(0, TAM_PAGINA) : todosLosResultados;
 
-  let interes: string[] | null = null;
-  if (user) {
-    const { data: p } = await supabase.from("perfil").select("categorias_interes").eq("id", user.id).maybeSingle();
-    interes = p?.categorias_interes ?? null;
-  }
-  const verticalCliente = verticalDeCategorias(interes);
-
-  const hayFiltros = Boolean(texto || ciudad || categoria || avanzado);
+  const hayFiltros = Boolean(texto || ciudad || categoria || avanzado || verTodos);
   // Portada (maqueta 2026-11-15): sin filtros ni mapa. Los filtros no se muestran ahí a quien aún no
   // ingresa; siguen intactos en resultados, en el mapa y para quien ya tiene sesión.
   const portada = !hayFiltros && vista === "lista";
@@ -134,7 +127,6 @@ export default async function HomePage(props: PageProps<"/">) {
   const UMBRAL_LISTADO = Number(process.env.UMBRAL_LISTADO_PORTADA) > 0 ? Number(process.env.UMBRAL_LISTADO_PORTADA) : 6;
   const hayError = Boolean(error);
   const sinCatalogo = portada && !hayError && (negocios.length === 0 || (!user && negocios.length < UMBRAL_LISTADO));
-  const catalogoCorto = portada && !hayError && !sinCatalogo && negocios.length < UMBRAL_LISTADO;
   const mostrarFiltros = (!portada || Boolean(user)) && !sinCatalogo;
 
   function urlConVista(nuevaVista: "lista" | "mapa") {
@@ -160,17 +152,17 @@ export default async function HomePage(props: PageProps<"/">) {
 
   const patrocinados = vista === "lista" && !hayFiltros ? negocios.filter((n) => n.patrocinado) : [];
   const resto = patrocinados.length > 0 ? negocios.filter((n) => !n.patrocinado) : negocios;
-  const grilla = "grid grid-cols-1 gap-4 px-[14px] sm:grid-cols-2 sm:px-6 lg:grid-cols-3";
+  const grilla = `${e.grilla} ${portada ? e.carrusel : ""}`;
 
   return (
     <div className={`flex min-h-dvh flex-col bg-app ${user || !portada ? "pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom))]" : "pb-8"}`}>
       <Header autenticado={Boolean(user)} etiqueta={t("home.etiqueta")} />
 
       <SeleccionMapaProvider>
-      <main className="mx-auto w-full max-w-5xl flex-1">
+      <main className="w-full flex-1">
         {portada ? <Portada /> : null}
 
-        <div data-tema-vista={verticalCliente ?? undefined}>
+        <div>
 
         {banners && banners.length > 0 ? (
           <div className="grid grid-cols-1 gap-3 px-4 pt-4 sm:grid-cols-2 sm:px-6">
@@ -196,7 +188,7 @@ export default async function HomePage(props: PageProps<"/">) {
         ) : null}
 
         {mostrarFiltros ? (
-          <div className={`px-4 sm:px-6 ${portada ? "pt-8" : "pt-4"}`}>
+          <div className={`mx-auto w-full max-w-[1680px] px-[clamp(16px,3.4vw,56px)] ${portada ? "pt-8" : "pt-4"}`}>
             {/* Con un negocio tocado en el mapa, su tarjeta ocupa el lugar de los filtros (X para volver). */}
             <ZonaFiltros>
               <Suspense fallback={<div className="mb-6 h-12 animate-pulse border-2 border-border bg-surface-2" aria-hidden />}>
@@ -212,15 +204,18 @@ export default async function HomePage(props: PageProps<"/">) {
         <>
         <div className={e.seccion}>
           {portada ? (
-            <h2 className={e.titulo}>
-              <span className={e.numero}>{t("home.num_destacados")}</span> {t("home.destacados")}
-            </h2>
+            <h2 className={e.titulo}>{t("home.explora")}</h2>
           ) : (
             <span className="sn-num">{hayFiltros ? t("home.sec_resultados") : t("home.sec_mapa")}</span>
           )}
           {/* Vista alternable lista/mapa (02-UX/04_Marketplace.md) — el resto
               de los filtros de la URL se conservan al alternar. */}
-          <div className={e.vistas} role="group" aria-label={t("home.vista")}>
+          {portada ? (
+            <Link href="/?todos=1" className={e.verTodos}>
+              {t("home.ver_todos")} →
+            </Link>
+          ) : null}
+          <div className={e.vistas} role="group" aria-label={t("home.vista")} hidden={portada}>
             <Link
               href={urlConVista("lista")}
               aria-current={vista === "lista" ? "true" : undefined}
@@ -239,11 +234,11 @@ export default async function HomePage(props: PageProps<"/">) {
         </div>
 
         {error ? (
-          <div className="px-4 sm:px-6">
+          <div className="mx-auto w-full max-w-[1680px] px-[clamp(16px,3.4vw,56px)]">
             <EmptyState big={t("home.error_big")} title={t("home.error_listado")} hint={error.message} action={<Link href="/" className="sn-chip !min-h-12 no-underline">{t("comun.reintentar")}</Link>} />
           </div>
         ) : negocios.length === 0 ? (
-          <div className="px-4 sm:px-6">
+          <div className="mx-auto w-full max-w-[1680px] px-[clamp(16px,3.4vw,56px)]">
             <EmptyState
               big="0"
               title={hayFiltros ? t("home.sin_resultados") : t("home.sin_negocios")}
@@ -306,7 +301,7 @@ export default async function HomePage(props: PageProps<"/">) {
             ) : null}
           </>
         )}
-        {catalogoCorto ? <BloquesLanzamiento variante="negocios" conSesion={Boolean(user)} /> : null}
+        {portada ? <BloquesLanzamiento variante="resto" conSesion={Boolean(user)} /> : null}
         </>
         ) : null}
         </div>

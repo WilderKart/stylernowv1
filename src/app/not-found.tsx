@@ -18,7 +18,7 @@ export default async function NotFound() {
         <p className="body text-text-muted">
           {t("nf.txt")}
         </p>
-        <Button asChild variant="secondary" size="lg" className="w-full justify-between">
+        <Button asChild variant="secondary" size="lg" className="w-full">
           <Link href="/">
             <span>{t("err.volver_inicio")}</span>
             <ArrowUpRight className="size-[18px]" aria-hidden />

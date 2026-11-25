@@ -2,14 +2,14 @@
 .pagina {
   --naranja: var(--brand, #fe5400);
   --naranja-texto: var(--brand-text, #fe5400);
-  --linea: var(--text);
-  --gris: #f2f2f2;
+  --linea: var(--line);
+  --gris: #eef3fd;
   background: var(--app-bg);
   color: var(--text);
   overflow-x: clip;
 }
 :global([data-theme="dark"]) .pagina {
-  --gris: #161616;
+  --gris: #172044;
 }
 .ancho {
   width: 100%;
@@ -19,9 +19,9 @@
 }
 .condensada {
   font-family: var(--sn-font-display);
-  font-stretch: 62.5%;
-  font-weight: 900;
-  text-transform: uppercase;
+  font-stretch: 100%;
+  font-weight: 800;
+  text-transform: none;
   line-height: 0.95;
 }
 .naranja {
@@ -33,7 +33,7 @@
   position: sticky;
   top: 0;
   z-index: 30;
-  border-bottom: 2px solid var(--linea);
+  border-bottom: 1px solid var(--linea);
   background: var(--app-bg);
 }
 .encabezado .ancho {
@@ -51,20 +51,20 @@
 }
 .logo b {
   font-family: var(--sn-font-display);
-  font-stretch: 62.5%;
-  font-weight: 900;
+  font-stretch: 100%;
+  font-weight: 800;
   font-size: 30px;
   line-height: 1;
   letter-spacing: -0.8px;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .logo > span {
   font-family: var(--sn-font-display);
-  font-stretch: 62.5%;
+  font-stretch: 100%;
   font-weight: 800;
   font-size: 14px;
   letter-spacing: 0.3px;
-  text-transform: uppercase;
+  text-transform: none;
   white-space: nowrap;
 }
 .navAncha {
@@ -75,10 +75,10 @@
 }
 .navAncha a {
   font-family: var(--sn-font-display);
-  font-stretch: 62.5%;
+  font-stretch: 100%;
   font-weight: 800;
   font-size: 16px;
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--text);
   text-decoration: none;
 }
@@ -125,9 +125,9 @@
   display: flex;
   flex-direction: column;
   min-width: 230px;
-  border: 2px solid var(--linea);
+  border: 1px solid var(--linea);
   background: var(--app-bg);
-  box-shadow: 5px 6px 0 var(--linea);
+  box-shadow: var(--sn-shadow-hard);
 }
 .menuPanel a {
   display: flex;
@@ -136,17 +136,17 @@
   padding: 0 16px;
   border-bottom: 1px solid var(--grid, #e5e5e5);
   font-family: var(--sn-font-display);
-  font-stretch: 62.5%;
+  font-stretch: 100%;
   font-weight: 800;
   font-size: 18px;
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--text);
   text-decoration: none;
 }
 .menuPanel a:last-child {
   border-bottom: 0;
   background: var(--naranja);
-  color: #0a0a0a;
+  color: #ffffff;
 }
 
 /* ── Botones ── */
@@ -158,19 +158,19 @@
   gap: 12px;
   min-height: 52px;
   padding: 0 16px 0 20px;
-  border: 2px solid var(--linea);
-  border-radius: 8px !important;
+  border: 1px solid var(--linea);
+  border-radius: 999px !important;
   font-family: var(--sn-font-display);
-  font-stretch: 72%;
-  font-weight: 900;
-  font-size: 21px;
+  font-stretch: 100%;
+  font-weight: 800;
+  font-size: 16px;
   letter-spacing: 0.2px;
   word-spacing: 1px;
   line-height: 1;
-  text-transform: uppercase;
+  text-transform: none;
   text-decoration: none;
   white-space: nowrap;
-  box-shadow: 0 4px 0 #0a0a0a, 0 7px 10px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 10px 22px -10px rgba(11, 99, 246, 0.7);
   transition: transform 120ms ease, box-shadow 120ms ease;
 }
 .btn svg {
@@ -180,7 +180,7 @@
 }
 .btn:active {
   transform: translateY(3px);
-  box-shadow: 0 1px 0 #0a0a0a;
+  box-shadow: var(--sn-shadow-hard-sm);
 }
 .btn:focus-visible {
   outline: 3px solid var(--focus);
@@ -189,7 +189,7 @@
 .btnNaranja {
   border-color: var(--naranja);
   background: var(--naranja);
-  color: #0a0a0a;
+  color: #ffffff;
 }
 .btnBlanco {
   justify-content: center;
@@ -198,8 +198,8 @@
 }
 .btnNegro {
   width: 100%;
-  border-color: #0a0a0a;
-  background: #0a0a0a;
+  border-color: #0a1230;
+  background: #0a1230;
   color: #fff;
   box-shadow: none;
 }
@@ -262,7 +262,7 @@
   min-height: 41px;
   padding: 0 10px 0 14px;
   font-size: 18px;
-  font-stretch: 66%;
+  font-stretch: 100%;
   letter-spacing: 0.3px;
 }
 .heroeBotones .btn svg {
@@ -298,7 +298,7 @@
 }
 .funcion b {
   font-family: var(--sn-font-display);
-  font-stretch: 66%;
+  font-stretch: 100%;
   font-weight: 800;
   font-size: 19px;
   line-height: 1.02;
@@ -319,11 +319,11 @@
 .tituloSeccion {
   margin: 0;
   font-family: var(--sn-font-display);
-  font-stretch: 80%;
-  font-weight: 900;
+  font-stretch: 100%;
+  font-weight: 800;
   font-size: 28px;
   line-height: 1;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .subtitulo {
   margin: 6px 0 0;
@@ -339,8 +339,8 @@
   margin-top: 20px;
 }
 .item {
-  border: 2px solid var(--linea);
-  border-radius: 10px !important;
+  border: 1px solid var(--linea);
+  border-radius: 999px !important;
   background: var(--app-bg);
   overflow: hidden;
 }
@@ -389,19 +389,19 @@ details[open] > summary .signo::after {
 }
 .itemNumero {
   font-family: var(--sn-font-display);
-  font-stretch: 66%;
-  font-weight: 900;
+  font-stretch: 100%;
+  font-weight: 800;
   font-size: 27px;
   line-height: 1;
   color: var(--naranja-texto);
 }
 .itemTitulo {
   font-family: var(--sn-font-display);
-  font-stretch: 62.5%;
-  font-weight: 900;
+  font-stretch: 100%;
+  font-weight: 800;
   font-size: 25px;
   line-height: 1;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .itemCuerpo {
   display: flex;
@@ -466,12 +466,12 @@ details[open] > summary .signo::after {
   gap: 14px;
   margin-top: 26px;
   padding: 10px 14px;
-  border: 2px solid var(--border, #d4d4d4);
-  border-radius: 8px !important;
+  border: 1px solid var(--border, #d4d4d4);
+  border-radius: 16px !important;
 }
 .pais label {
   font-family: var(--sn-font-display);
-  font-stretch: 66%;
+  font-stretch: 100%;
   font-weight: 800;
   font-size: 18px;
 }
@@ -485,16 +485,16 @@ details[open] > summary .signo::after {
   height: 40px;
   padding: 0 40px 0 22px;
   border: 0;
-  border-radius: 6px !important;
+  border-radius: 16px !important;
   appearance: none;
-  background: #0a0a0a;
+  background: #0a1230;
   color: #fff;
   font-family: var(--sn-font-display);
-  font-stretch: 66%;
+  font-stretch: 100%;
   font-weight: 800;
   font-size: 18px;
   letter-spacing: 0.4px;
-  text-transform: uppercase;
+  text-transform: none;
   cursor: pointer;
 }
 .paisSelect select:focus-visible {
@@ -516,11 +516,11 @@ details[open] > summary .signo::after {
   gap: 14px;
   margin-top: 14px;
   padding: 10px 16px;
-  border-radius: 8px !important;
+  border-radius: 16px !important;
   background: #ffea00;
-  color: #0a0a0a;
+  color: #0a1230;
   font: 700 14.5px/19px var(--sn-font-mono);
-  text-transform: uppercase;
+  text-transform: none;
 }
 .fundador svg {
   flex: none;
@@ -552,8 +552,8 @@ details[open] > summary .signo::after {
   flex-direction: column;
   min-width: 0;
   padding: 20px 16px 18px 18px;
-  border: 2px solid var(--linea);
-  border-radius: 10px !important;
+  border: 1px solid var(--linea);
+  border-radius: 16px !important;
   background: var(--app-bg);
 }
 .ranura {
@@ -578,11 +578,11 @@ details[open] > summary .signo::after {
 .planFundador {
   margin: 10px 0 0;
   padding: 6px 10px;
-  border-radius: 6px !important;
+  border-radius: 16px !important;
   background: #ffea00;
-  color: #0a0a0a;
+  color: #0a1230;
   font: 700 12.5px/16px var(--sn-font-mono);
-  text-transform: uppercase;
+  text-transform: none;
 }
 .planCabeza {
   display: flex;
@@ -611,14 +611,14 @@ details[open] > summary .signo::after {
 }
 .planPrecio span {
   font: 400 12px/16px var(--sn-font-mono);
-  text-transform: uppercase;
+  text-transform: none;
   white-space: nowrap;
 }
 .planLimites {
   margin: 8px 0 0;
   font: 400 12px/16px var(--sn-font-mono);
   color: var(--text-muted);
-  text-transform: uppercase;
+  text-transform: none;
 }
 .planLista {
   display: flex;
@@ -653,7 +653,7 @@ details[open] > summary .signo::after {
   list-style: none;
   cursor: pointer;
   font-family: var(--sn-font-display);
-  font-stretch: 75%;
+  font-stretch: 100%;
   font-weight: 800;
   font-size: 16px;
   text-decoration: underline;
@@ -772,7 +772,7 @@ details[open] > summary .signo::after {
   align-items: center;
   min-height: 44px;
   font: 400 12px/16px var(--sn-font-mono);
-  text-transform: uppercase;
+  text-transform: none;
   text-decoration: underline;
   text-underline-offset: 2px;
   color: var(--text);

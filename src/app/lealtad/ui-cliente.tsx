@@ -1,4 +1,5 @@
 import { EnlaceVolver, EstadoReservaStatus, PantallaCargandoCliente, VerDetalle } from "./ui-cliente-t";
+import { NavSuperiorCliente } from "@/components/layout/nav-superior-cliente";
 import { cn } from "@/lib/utils";
 import { ChevronRight, TriangleAlert } from "lucide-react";
 import Link from "next/link";
@@ -10,9 +11,17 @@ import * as React from "react";
  * .p-foot, .sn-ticket) sin tocar src/components/brutal. Son server-safe (sin estado).
  */
 
-/** Contenedor de pantalla: columna fluida, centrada en pantallas anchas. */
+/**
+ * Contenedor de pantalla del cliente. Móvil: columna fluida con barra inferior. Tablet y escritorio: barra superior con
+ * enlaces y contenido que aprovecha el ancho de la pantalla (ya no es una columna de teléfono centrada).
+ */
 export function Pantalla({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("mx-auto flex min-h-dvh w-full max-w-xl flex-1 flex-col bg-app", className)} {...props} />;
+  return (
+    <div className="flex min-h-dvh w-full flex-col bg-app">
+      <NavSuperiorCliente />
+      <div className={cn("mx-auto flex w-full max-w-xl flex-1 flex-col md:max-w-3xl lg:max-w-5xl 2xl:max-w-[1280px]", className)} {...props} />
+    </div>
+  );
 }
 
 /** Barra superior del prototipo (.p-top): volver + título mono en numeración editorial. */

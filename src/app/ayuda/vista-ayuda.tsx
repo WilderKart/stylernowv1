@@ -122,7 +122,7 @@ export function VistaAyuda({ tickets, errorTickets }: { tickets: TicketResumen[]
             {t("ay.ticket_enviado", { codigo: creado })}
           </p>
         ) : null}
-        <Button type="submit" size="lg" loading={enviando} disabled={mensaje.trim().length < 5} className="w-full justify-between">
+        <Button type="submit" size="lg" loading={enviando} disabled={mensaje.trim().length < 5} className="w-full">
           <span>{t("ay.enviar")}</span>
           <ArrowUpRight aria-hidden className="size-[18px]" />
         </Button>

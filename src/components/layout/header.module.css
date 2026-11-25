@@ -1,86 +1,93 @@
-/* Barra superior del recorrido del Cliente (maqueta 2026-11-15). Medidas de la maqueta de 392 px;
-   en móviles más angostos todo se reduce en proporción (1u = 100vw/392, máximo 1 px). */
+/* Barra superior del cliente: sobre el degradado azul claro de la referencia, ocupa todo el ancho. */
 .barra {
-  /* 450 (y no 392): deja sitio al botón de modo oscuro sin que «Crear cuenta» se salga en móviles. */
-  --u: min(1px, calc(100vw / 450));
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 30;
+  background: color-mix(in srgb, var(--app-bg) 88%, transparent);
+  backdrop-filter: saturate(1.4) blur(14px);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+}
+.interior {
   display: flex;
   align-items: center;
-  gap: calc(var(--u) * 15);
-  height: 56px;
-  padding: 0 calc(var(--u) * 10) 0 calc(var(--u) * 16);
-  border-bottom: 2px solid var(--text);
-  background: var(--app-bg);
+  gap: 12px;
+  min-height: 64px;
+  width: 100%;
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 3.4vw, 56px);
 }
 .logo {
   display: flex;
   align-items: center;
   min-height: 48px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.nav {
+  display: none;
+  align-items: center;
+  gap: clamp(14px, 2vw, 34px);
+  margin-left: clamp(20px, 4vw, 72px);
+}
+.nav a {
+  font: 600 14px/1 var(--sn-font-sans);
   color: var(--text);
   text-decoration: none;
+  padding: 10px 2px;
 }
-.marca {
-  font-family: var(--sn-font-display);
-  font-stretch: 62.5%;
-  font-weight: 900;
-  font-size: calc(var(--u) * 37);
-  line-height: 1;
-  letter-spacing: calc(var(--u) * -1.6);
-  text-transform: uppercase;
+.nav a:hover {
+  color: var(--accent-text);
 }
-.now {
-  color: var(--brand-text, #fe5400);
-}
-.etiqueta {
-  flex: 1;
-  text-align: center;
-}
-.separador {
-  flex: none;
-  width: 2px;
-  height: 33px;
+.derecha {
   margin-left: auto;
-  margin-right: calc(var(--u) * 4);
-  background: var(--text);
-}
-.etiqueta + .separador {
-  margin-left: 0;
-}
-.accion {
   display: flex;
   align-items: center;
-  min-height: 48px;
-  font-family: var(--sn-font-display);
-  font-stretch: 62.5%;
-  font-weight: 800;
-  font-size: calc(var(--u) * 15.5);
-  line-height: 1;
-  letter-spacing: calc(var(--u) * -0.6);
-  word-spacing: calc(var(--u) * 3);
-  text-transform: uppercase;
-  color: var(--text);
+  gap: 8px;
+}
+.accion,
+.caja {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 18px;
+  font: 600 14px/1 var(--sn-font-sans);
   text-decoration: none;
   white-space: nowrap;
+  border-radius: 999px !important;
+  color: var(--text);
+  background: var(--bg);
+  box-shadow: var(--sn-shadow-hard-sm);
+  border: 1px solid var(--line);
 }
 .caja {
-  position: relative;
-  padding: 0 calc(var(--u) * 13);
+  background: var(--signal);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 10px 22px -10px rgba(11, 99, 246, 0.7);
 }
-.caja::before {
-  content: "";
-  position: absolute;
-  inset: 9px 0;
-  border: 2px solid var(--text);
-}
-
-/* «Para negocios» solo en pantallas anchas (en móvil no cabe junto al resto). */
-.ancho {
+.solo-pc {
   display: none;
 }
-@media (min-width: 640px) {
-  .ancho {
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px !important;
+  background: var(--surface-2);
+  color: var(--accent-text);
+  border: 1px solid var(--line);
+}
+@media (min-width: 900px) {
+  .nav {
     display: flex;
+  }
+  .solo-pc {
+    display: inline-flex;
+  }
+  .solo-movil {
+    display: none;
   }
 }

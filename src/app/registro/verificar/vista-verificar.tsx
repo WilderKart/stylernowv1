@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { OtpInput } from "@/components/ui/otp-input";
 import { useT } from "@/lib/i18n/proveedor";
-import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { Aviso, borrarVerificacion, enmascararCorreo, leerVerificacion } from "../../login/_componentes/campos";
@@ -106,27 +106,23 @@ export function VistaVerificar({ siguiente }: { siguiente: string }) {
             onChange={(e) => setEmail(e.target.value)}
           />
         ) : null}
-        <Input
-          label={t("auth.codigo")}
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          maxLength={10}
-          required
-          autoFocus={conocido}
-          placeholder="000000"
-          value={codigo}
-          onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ""))}
-          className="h-16 text-center font-display text-[32px] leading-none font-black tracking-[0.3em] [font-stretch:var(--stretch-condensed)]"
-        />
+        <div className="flex flex-col gap-2">
+          <span className="text-[13px] leading-4 font-semibold text-text">{t("auth.codigo")}</span>
+          <div className="min-[400px]:hidden">
+            <OtpInput length={6} size="sm" value={codigo} onChange={setCodigo} status={error ? "error" : "idle"} aria-label={t("auth.codigo")} />
+          </div>
+          <div className="hidden min-[400px]:block">
+            <OtpInput length={6} size="md" value={codigo} onChange={setCodigo} status={error ? "error" : "idle"} aria-label={t("auth.codigo")} />
+          </div>
+        </div>
         {aviso ? <Aviso>{aviso}</Aviso> : null}
         {error ? <ErrorForm>{error}</ErrorForm> : null}
 
-        <Button type="submit" size="lg" loading={loading} className="w-full justify-between">
-          <span>{t("auth.verificar")}</span>
-          <ArrowUpRight className="size-[18px]" aria-hidden />
+        <Button type="submit" size="lg" loading={loading} className="w-full">
+          {t("auth.verificar")}
         </Button>
 
-        <div className="flex flex-col gap-1 border-t-2 border-border pt-3">
+        <div className="flex flex-col gap-1 border-t border-border pt-3">
           <button type="button" onClick={onReenviar} disabled={espera > 0 || !email} className={`${claseEnlace} disabled:text-text-muted disabled:no-underline`}>
             {espera > 0 ? t("auth.reenviar_en", { s: String(espera) }) : `${t("auth.reenviar")} ↗`}
           </button>

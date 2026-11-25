@@ -45,7 +45,7 @@ export function VistaRecuperar() {
         <Coincidencia password={password} confirmar={confirmar} />
       </div>
       {error ? <ErrorForm>{error}</ErrorForm> : null}
-      <Button type="submit" size="lg" loading={loading} className="w-full justify-between">
+      <Button type="submit" size="lg" loading={loading} className="w-full">
         <span>{t("login.guardar_pw")}</span>
         <ArrowUpRight className="size-[18px]" aria-hidden />
       </Button>

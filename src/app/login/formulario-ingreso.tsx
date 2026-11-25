@@ -2,18 +2,18 @@
 
 import { Turnstile, type ControlTurnstile } from "@/components/seguridad/turnstile";
 
-import { Num, Poster } from "@/components/brutal";
+import { Poster } from "@/components/brutal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/i18n/proveedor";
-import { ArrowUpRight, ChevronLeft, Scissors, User } from "lucide-react";
+import { Scissors, User } from "lucide-react";
 import { AuthDividido } from "@/components/auth/auth-dividido";
 import type { CategoriaRegistro } from "@/lib/tema/vertical";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useSyncExternalStore } from "react";
 import { Aviso, BotonGoogle, CampoContrasena, guardarVerificacion } from "./_componentes/campos";
-import { ErrorForm, Hot, Separador, claseEnlace } from "./_componentes/pantalla-auth";
+import { BarraVolverAuth, ErrorForm, Hot, Separador, claseEnlace } from "./_componentes/pantalla-auth";
 import { iniciarSesionConContrasena, iniciarSesionConGoogle, reenviarCodigoVerificacion } from "./actions";
 
 /**
@@ -110,17 +110,12 @@ export function FormularioIngreso({
   return (
     <AuthDividido categoria={categoria}>
       {/* Panel de formulario */}
-      <div className="flex min-h-dvh flex-col bg-app">
-        <div className="sticky top-0 z-[3] flex min-h-[52px] items-center gap-2 border-b border-[var(--grid)] bg-app py-1 pr-2 pl-1">
-          <Link href="/" className="sn-iconbtn" aria-label={t("comun.volver")}>
-            <ChevronLeft />
-          </Link>
-          <Num className="flex-1">{t("auth.i_ingresar")}</Num>
-        </div>
+      <div className="flex min-h-dvh flex-col">
+        <BarraVolverAuth />
 
-        <div className={`flex flex-1 flex-col px-4 pt-3 lg:pt-0 ${bannerCookies ? "pb-80 lg:pb-60" : "pb-16 lg:pb-0"}`}>
+        <div className={`flex flex-1 flex-col px-5 pt-3 sm:px-8 lg:pt-0 ${bannerCookies ? "pb-80 lg:pb-60" : "pb-16 lg:pb-10"}`}>
           <div className="mx-auto flex w-full max-w-lg flex-col lg:my-auto lg:max-w-md">
-            <Poster as="h1" size={3} className="pt-1 pb-4 break-words lg:pb-6 lg:text-[56px]">
+            <Poster as="h1" size={3} className="pt-1 pb-3 break-words lg:pb-4 lg:text-[44px]">
               {t("auth.ing_t1")}
               <br />
               {t("auth.ing_t2")}
@@ -155,7 +150,7 @@ export function FormularioIngreso({
               <Turnstile ref={controlTs} accion="ingreso" onToken={setTokenTs} />
               {error ? <ErrorForm>{error}</ErrorForm> : null}
               {sinVerificar ? (
-                <div className="flex flex-col gap-2 border-2 border-danger p-3">
+                <div className="flex flex-col gap-2 rounded-2xl border border-danger/40 bg-danger/5 p-3">
                   <p className="text-[14px] text-text">{t("auth.sin_verificar")}</p>
                   <button type="button" onClick={onVerificarAhora} disabled={loading} className={`${claseEnlace} self-start`}>
                     {t("auth.verificar_ahora")}
@@ -163,9 +158,8 @@ export function FormularioIngreso({
                 </div>
               ) : null}
 
-              <Button type="submit" size="lg" loading={loading} className="w-full justify-between">
-                <span>{t("auth.ingresar")}</span>
-                <ArrowUpRight className="size-[18px]" aria-hidden />
+              <Button type="submit" size="lg" loading={loading} className="w-full">
+                {t("auth.ingresar")}
               </Button>
 
               <Separador>{t("login.o")}</Separador>
@@ -174,11 +168,11 @@ export function FormularioIngreso({
               {/* ¿Todavía no tienes cuenta? — tarjeta secundaria destacada */}
               <Link
                 href={`/registro${qs}`}
-                className="flex items-center justify-between gap-3 border-2 border-[var(--grid-soft)] bg-[var(--surface)] px-4 py-3.5 transition-colors hover:bg-[var(--surface-2)]"
+                className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-bg px-4 py-3.5 no-underline shadow-hard-sm transition-colors hover:bg-surface"
               >
                 <span className="flex min-w-0 flex-col gap-0.5">
                   <span className="body-sm text-text-muted">{t("auth.sin_cuenta")}</span>
-                  <span className="sn-label text-text">{t("auth.crea_una")}</span>
+                  <span className="text-[15px] font-semibold text-accent-text">{t("auth.crea_una")}</span>
                 </span>
                 <User className="size-5 shrink-0 text-text" aria-hidden />
               </Link>
@@ -186,15 +180,15 @@ export function FormularioIngreso({
               {/* Registro de negocios */}
               <Link
                 href="/para-negocios"
-                className="flex items-center justify-between gap-3 border-2 border-ink bg-signal px-4 py-3.5 text-ink shadow-hard transition-transform duration-100 ease-[cubic-bezier(0.2,0,0,1)] hover:-translate-y-0.5"
+                className="flex items-center justify-between gap-3 rounded-2xl bg-signal px-4 py-3.5 text-white no-underline shadow-[0_10px_22px_-10px_rgba(11,99,246,0.7)] transition-transform duration-150 hover:-translate-y-0.5"
               >
                 <span className="flex min-w-0 flex-col gap-0.5">
-                  <span className="font-mono text-xs leading-4 font-bold tracking-[0.72px] uppercase">{t("login.negocio_q")}</span>
-                  <span className="flex items-center gap-2 font-mono text-sm leading-4 font-bold tracking-[0.72px] text-white uppercase">
+                  <span className="text-[13px] font-medium text-white/85">{t("login.negocio_q")}</span>
+                  <span className="flex items-center gap-2 text-[15px] font-semibold text-white">
                     {t("login.negocio_cta")}
                   </span>
                 </span>
-                <Scissors className="size-6 shrink-0 text-ink" aria-hidden />
+                <Scissors className="size-6 shrink-0 text-white" aria-hidden />
               </Link>
             </form>
           </div>

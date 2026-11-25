@@ -11,8 +11,6 @@ import type { Metadata, Viewport } from "next";
 import { Archivo, Cormorant_Garamond, Fraunces, Italiana, Jost, Plus_Jakarta_Sans, Sacramento, Space_Mono } from "next/font/google";
 import { SincronizarTema } from "@/components/tema/tema-cliente";
 import { obtenerModoTema, obtenerTemaEfectivo } from "@/lib/tema/servidor";
-import { obtenerCategoriaAspecto } from "@/lib/tema/categoria-cookie";
-import { verticalDeCategorias } from "@/lib/tema/vertical";
 import "./globals.css";
 
 // Archivo variable: eje de ancho (62–125 %) para títulos condensados y secciones
@@ -93,13 +91,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const idioma = await obtenerIdioma();
   const tema = await obtenerTemaEfectivo();
   const modoTema = await obtenerModoTema();
-  // Aspecto elegido (cookie decorativa validada en el servidor): spa, salón y uñas rediseñan toda la app.
-  const vertical = verticalDeCategorias([(await obtenerCategoriaAspecto()) ?? ""]);
   return (
     <html
       lang={idioma}
       data-theme={tema}
-      data-vertical={vertical ?? undefined}
       suppressHydrationWarning
       className={`${archivo.variable} ${spaceMono.variable} ${fraunces.variable} ${cormorant.variable} ${jost.variable} ${sacramento.variable} ${italiana.variable} ${jakarta.variable} h-full antialiased`}
     >
