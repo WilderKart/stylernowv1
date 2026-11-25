@@ -61,7 +61,7 @@ const T = {
   faq: [
     { q: "¿Cuánto dura la prueba?", a: "Tienes **14 días gratis** con todas las funciones del plan que elijas. Sin tarjeta y sin compromiso." },
     { q: "¿Mis clientes pagan por usar la app?", a: "No. Buscar y reservar en StylerNow es gratis para tus clientes." },
-    { q: "¿Qué es el cupo fundador?", a: "Un descuento para los primeros negocios de cada país, en planes mensuales y durante un periodo limitado. El porcentaje, la duración y los cupos que quedan se muestran arriba, en Planes y precios." },
+    { q: "¿Qué es el cupo fundador?", a: "Un descuento para los primeros negocios de cada país. En el plan mensual dura los primeros 3 meses; en el anual se aplica una sola vez, solo al primer mes, y luego se cobra el precio normal. Los cupos que quedan se muestran arriba, en Planes y precios. Los «2 meses gratis» del plan anual son una promoción de lanzamiento y pueden cambiar sin previo aviso." },
     { q: "¿Puedo cambiar de plan?", a: "Sí. Puedes subir de plan cuando quieras y bajar al inicio del siguiente ciclo." },
     { q: "¿Cómo se pagan las reservas?", a: "Si conectas tu cuenta de Mercado Pago y activas el anticipo, tu cliente lo paga en línea al reservar y el dinero llega directo a tu cuenta. El resto del servicio lo cobras en tu local y lo registras en la caja." },
     { q: "¿Qué puedo gestionar desde el panel?", a: "Agenda y reservas, equipo y turnos, caja diaria, clientes (CRM), inventario y reportes. El alcance de cada función depende del plan: lo ves en «Ver todo lo que incluye» de cada tarjeta." },

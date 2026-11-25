@@ -35,7 +35,7 @@ export function SelectorPlanes({
   diasPrueba?: number;
 }) {
   const { pais, planes } = catalogo;
-  const hayCupos = pais.cuposFundadorRestantes > 0 && ciclo === "MENSUAL";
+  const hayCupos = pais.cuposFundadorRestantes > 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -51,12 +51,19 @@ export function SelectorPlanes({
         />
         {pais.cuposFundadorRestantes > 0 ? (
           <Status tone="warn">
-            Fundador −{pais.fundadorDescuentoPct}% · {pais.fundadorMeses} meses · quedan {pais.cuposFundadorRestantes} cupos
+            {ciclo === "ANUAL"
+              ? `Fundador −${pais.fundadorDescuentoPct}% solo el primer mes`
+              : `Fundador −${pais.fundadorDescuentoPct}% · ${pais.fundadorMeses} meses`}{" "}
+            · quedan {pais.cuposFundadorRestantes} cupos
           </Status>
         ) : (
           <span className="sn-meta">Cupos fundador agotados en {pais.nombre}</span>
         )}
       </div>
+
+      {ciclo === "ANUAL" && pais.mesesPagadosAnual < 12 ? (
+        <p className="sn-meta">Promoción de lanzamiento: puede cambiar o retirarse sin previo aviso. No cambia lo ya pagado.</p>
+      ) : null}
 
       <div className="grid gap-3">
         {planes.map((p) => {

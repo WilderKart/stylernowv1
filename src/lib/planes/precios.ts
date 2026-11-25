@@ -4,8 +4,9 @@
  *
  * Reglas del negocio:
  *  - Anual: paga `mesesPagadosAnual` (10) y usa 12 meses.
- *  - Fundador: porcentaje de descuento (30 %) sobre el 100 % del precio, solo a la
- *    suscripción mensual; add-ons, publicidad y WhatsApp extra se cobran completos.
+ *  - Fundador: porcentaje de descuento (30 %). Mensual: sobre el precio del mes durante los meses fundador (3).
+ *    Anual: una sola vez y solo sobre un mes (el primero); luego precio normal. Add-ons, publicidad y WhatsApp extra se cobran completos.
+ *  - Los «2 meses gratis» del anual son una promoción de lanzamiento modificable sin previo aviso (Términos 8(f)).
  *  - Precios de ES y MX se publican + IVA (`precioMasImpuesto`).
  */
 export type CicloFacturacion = "MENSUAL" | "ANUAL";
@@ -34,8 +35,10 @@ const redondear = (n: number) => Math.round(n * 100) / 100;
 export function calcularPrecio(e: EntradaPrecio): PrecioCalculado {
   const anual = e.ciclo === "ANUAL";
   const lista = redondear(anual ? e.precioMensual * e.mesesPagadosAnual : e.precioMensual);
-  // El descuento fundador no se combina con el ciclo anual.
-  const pct = anual ? 0 : Math.min(Math.max(e.descuentoFundadorPct, 0), 100);
-  const final = redondear(lista * (1 - pct / 100));
+  const pct = Math.min(Math.max(e.descuentoFundadorPct, 0), 100);
+  // Mensual: el descuento fundador se aplica al cobro del mes (la duración, 3 meses, la controla la suscripción fundador).
+  // Anual: no hay 3 meses; el descuento se aplica UNA sola vez y solo sobre el valor de un mes (el primero); la renovación va a precio normal.
+  const descuento = anual ? e.precioMensual * (pct / 100) : lista * (pct / 100);
+  const final = redondear(lista - descuento);
   return { lista, final, ahorro: redondear(lista - final), mesesCubiertos: anual ? 12 : 1 };
 }

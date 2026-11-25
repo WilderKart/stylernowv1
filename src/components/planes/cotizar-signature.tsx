@@ -3,15 +3,16 @@ import Link from "next/link";
 
 /**
  * Cotización del plan Signature (cadenas y franquicias): tres vías con el mensaje ya escrito.
- * WhatsApp usa NEXT_PUBLIC_WHATSAPP_VENTAS (solo dígitos con indicativo, p. ej. 573001234567): si no está
- * configurado, ese botón no se muestra (nunca se inventa un número). El correo se abre en el programa de correo
+ * WhatsApp usa el número de ventas (o NEXT_PUBLIC_WHATSAPP_VENTAS si se define, solo dígitos con indicativo). El correo se abre en el programa de correo
  * del dispositivo (mailto:) con asunto y cuerpo listos.
  */
+/** Número de ventas de StylerNow (+57 318 394 3465). NEXT_PUBLIC_WHATSAPP_VENTAS lo reemplaza si se define. */
+const NUMERO_VENTAS = "573183943465";
 const CORREO_VENTAS = "equipo@stylernow.com";
 const MENSAJE = "Hola, quiero cotizar el plan Signature de StylerNow para mi cadena o franquicia. Mi negocio tiene ___ sedes y ___ profesionales.";
 
 export function CotizarSignature({ negocio }: { negocio?: string }) {
-  const numero = (process.env.NEXT_PUBLIC_WHATSAPP_VENTAS ?? "").replace(/\D/g, "");
+  const numero = (process.env.NEXT_PUBLIC_WHATSAPP_VENTAS || NUMERO_VENTAS).replace(/\D/g, "");
   const texto = negocio ? `${MENSAJE} Negocio: ${negocio}.` : MENSAJE;
   const wa = numero.length >= 10 ? `https://wa.me/${numero}?text=${encodeURIComponent(texto)}` : null;
   const correo = `mailto:${CORREO_VENTAS}?subject=${encodeURIComponent("Cotización plan Signature")}&body=${encodeURIComponent(texto)}`;
