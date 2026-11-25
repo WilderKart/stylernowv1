@@ -6,7 +6,7 @@ import { Badge, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { duracion, hora, sumarDias } from "@/lib/formato";
 import { formatCOP } from "@/lib/utils";
-import { Fragment, useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useEnLinea } from "@/lib/hooks/use-en-linea";
 import {
@@ -52,6 +52,34 @@ function lunesDeLaSemana(fecha: string) {
   const offset = dow === 0 ? -6 : 1 - dow;
   return sumarDias(fecha, offset);
 }
+const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+type Vista = "dia" | "semana" | "mes";
+
+function inicioMes(fecha: string) {
+  return `${fecha.slice(0, 7)}-01`;
+}
+function sumarMeses(fecha: string, n: number) {
+  const [a, m] = fecha.split("-").map(Number);
+  return new Date(Date.UTC(a, m - 1 + n, 1)).toISOString().slice(0, 10);
+}
+/** Cuadrícula del mes completo: de lunes a domingo, solo las semanas necesarias (4 a 6). */
+function cuadriculaMes(fecha: string) {
+  const primero = inicioMes(fecha);
+  const desde = lunesDeLaSemana(primero);
+  const dias = Math.round((new Date(`${primero}T12:00:00Z`).getTime() - new Date(`${desde}T12:00:00Z`).getTime()) / 86400000);
+  const [a, m] = primero.split("-").map(Number);
+  const enMes = new Date(Date.UTC(a, m, 0)).getUTCDate();
+  const semanas = Math.ceil((dias + enMes) / 7);
+  return { desde, hasta: sumarDias(desde, semanas * 7), semanas };
+}
+function etiquetaSemana(lunes: string) {
+  const dom = sumarDias(lunes, 6);
+  const [, m1, d1] = lunes.split("-").map(Number);
+  const [a2, m2, d2] = dom.split("-").map(Number);
+  const mes = (m: number) => MESES[m - 1].slice(0, 3);
+  return m1 === m2 ? `${d1} – ${d2} ${mes(m2)} ${a2}` : `${d1} ${mes(m1)} – ${d2} ${mes(m2)} ${a2}`;
+}
+
 function ventanaDelDia(horarioBase: unknown, fecha: string): { inicio: number; fin: number } {
   const dow = new Date(`${fecha}T12:00:00Z`).getUTCDay();
   const clave = DIAS_SEMANA[dow];
@@ -88,7 +116,7 @@ export function VistaAgenda({
 }) {
   const hoy = new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
   const [fecha, setFecha] = useState(hoy);
-  const [vista, setVista] = useState<"dia" | "semana">("dia");
+  const [vista, setVista] = useState<Vista>("dia");
   const [citas, setCitas] = useState<CitaAgenda[]>([]);
   const [bloqueos, setBloqueos] = useState<BloqueoAgenda[]>([]);
   const [cargando, setCargando] = useState(false);
@@ -103,7 +131,13 @@ export function VistaAgenda({
   const rango =
     vista === "dia"
       ? { desde: fecha, hasta: sumarDias(fecha, 1) }
-      : { desde: lunesDeLaSemana(fecha), hasta: sumarDias(lunesDeLaSemana(fecha), 7) };
+      : vista === "semana"
+        ? { desde: lunesDeLaSemana(fecha), hasta: sumarDias(lunesDeLaSemana(fecha), 7) }
+        : cuadriculaMes(fecha);
+
+  function mover(sentido: 1 | -1) {
+    setFecha((f) => (vista === "dia" ? sumarDias(f, sentido) : vista === "semana" ? sumarDias(f, 7 * sentido) : sumarMeses(f, sentido)));
+  }
 
   const cargar = useCallback(async () => {
     setCargando(true);
@@ -188,36 +222,35 @@ export function VistaAgenda({
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <Button size="sm" variant="secondary" onClick={() => setFecha((f) => sumarDias(f, vista === "dia" ? -1 : -7))}>
+          <Button size="sm" variant="secondary" onClick={() => mover(-1)} aria-label="Anterior">
             ←
           </Button>
           <Button size="sm" variant="secondary" onClick={() => setFecha(hoy)}>
             Hoy
           </Button>
-          <Button size="sm" variant="secondary" onClick={() => setFecha((f) => sumarDias(f, vista === "dia" ? 1 : 7))}>
+          <Button size="sm" variant="secondary" onClick={() => mover(1)} aria-label="Siguiente">
             →
           </Button>
-          <p className="ml-2 text-[13px] font-semibold text-text">
+          <p className="ml-2 text-[13px] font-semibold capitalize text-text">
             {vista === "dia"
               ? new Date(`${fecha}T12:00:00Z`).toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" })
-              : `Semana del ${lunesDeLaSemana(fecha)}`}
+              : vista === "semana"
+                ? etiquetaSemana(lunesDeLaSemana(fecha))
+                : `${MESES[Number(fecha.slice(5, 7)) - 1]} ${fecha.slice(0, 4)}`}
           </p>
         </div>
-        <div className="flex gap-1 rounded-none border border-border p-1">
-          <button
-            type="button"
-            onClick={() => setVista("dia")}
-            className={`rounded-none px-3 py-1 text-[11.5px] font-bold ${vista === "dia" ? "bg-accent text-ink" : "text-text-muted"}`}
-          >
-            Día
-          </button>
-          <button
-            type="button"
-            onClick={() => setVista("semana")}
-            className={`rounded-none px-3 py-1 text-[11.5px] font-bold ${vista === "semana" ? "bg-accent text-ink" : "text-text-muted"}`}
-          >
-            Semana
-          </button>
+        <div role="group" aria-label="Vista de la agenda" className="flex gap-1 rounded-none border border-border p-1">
+          {(["dia", "semana", "mes"] as const).map((v) => (
+            <button
+              key={v}
+              type="button"
+              aria-pressed={vista === v}
+              onClick={() => setVista(v)}
+              className={`rounded-none px-3 py-1 text-[11.5px] font-bold ${vista === v ? "bg-accent text-ink" : "text-text-muted"}`}
+            >
+              {v === "dia" ? "Día" : v === "semana" ? "Semana" : "Mes"}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -244,10 +277,21 @@ export function VistaAgenda({
           onReasignar={onReasignar}
           onQuitarBloqueo={onQuitarBloqueo}
         />
-      ) : (
-        <SemanaGrid
+      ) : vista === "semana" ? (
+        <SemanaCalendario
           lunes={lunesDeLaSemana(fecha)}
+          hoy={hoy}
           staff={staff}
+          citas={citas}
+          onSeleccionarDia={(f) => {
+            setFecha(f);
+            setVista("dia");
+          }}
+        />
+      ) : (
+        <MesCalendario
+          fecha={fecha}
+          hoy={hoy}
           citas={citas}
           onSeleccionarDia={(f) => {
             setFecha(f);
@@ -459,67 +503,132 @@ function DiaGrid({
 }
 
 // ════════════════════════════════════════════════════════════════════════
-// Vista Semana — columnas por Staff, una fila por día (02-UX/09_Business_
-// Panel.md: "Vista semanal por Staff (columnas)").
+// Vista Semana — calendario de 7 días (lunes a domingo) con las citas de cada día.
+// Móvil: una fila por día. Escritorio: siete columnas.
+// Vista Mes — mes completo en cuadrícula de semanas.
+// Tocar un día abre la vista Día de esa fecha.
 // ════════════════════════════════════════════════════════════════════════
 
-function SemanaGrid({
+function citasPorDia(citas: CitaAgenda[]) {
+  const mapa = new Map<string, CitaAgenda[]>();
+  for (const c of [...citas].sort((x, y) => x.horaInicio.localeCompare(y.horaInicio))) {
+    const d = localDia(c.horaInicio);
+    mapa.set(d, [...(mapa.get(d) ?? []), c]);
+  }
+  return mapa;
+}
+
+function SemanaCalendario({
   lunes,
+  hoy,
   staff,
   citas,
   onSeleccionarDia,
 }: {
   lunes: string;
+  hoy: string;
   staff: StaffSede[];
   citas: CitaAgenda[];
   onSeleccionarDia: (fecha: string) => void;
 }) {
   const dias = Array.from({ length: 7 }, (_, i) => sumarDias(lunes, i));
+  const porDia = citasPorDia(citas);
+  const nombreStaff = (id: string | null) => staff.find((s) => s.staffId === id)?.nombre.split(" ")[0] ?? "";
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-border-subtle bg-surface">
-      <div className="grid min-w-[640px]" style={{ gridTemplateColumns: `72px repeat(${staff.length}, minmax(140px, 1fr))` }}>
-        <div className="border-b border-r border-border-subtle bg-surface-2 p-2" />
-        {staff.map((s) => (
-          <div key={s.vinculoId} className="truncate border-b border-l border-border-subtle bg-surface-2 p-2 text-center text-[12px] font-bold text-text">
-            {s.nombre}
+    <div className="grid gap-2 md:grid-cols-7 md:gap-0 md:overflow-hidden md:rounded-2xl md:border md:border-border md:bg-surface">
+      {dias.map((d, i) => {
+        const delDia = porDia.get(d) ?? [];
+        const esHoy = d === hoy;
+        const etiqueta = DIAS_ETIQUETA[new Date(`${d}T12:00:00Z`).getUTCDay()];
+        return (
+          <button
+            key={d}
+            type="button"
+            onClick={() => onSeleccionarDia(d)}
+            aria-label={`${etiqueta} ${Number(d.slice(8, 10))}: ${delDia.length} ${delDia.length === 1 ? "cita" : "citas"}`}
+            className={`flex min-h-[72px] flex-row items-start gap-3 rounded-2xl border border-border bg-surface p-2.5 text-left hover:bg-surface-2 md:min-h-[280px] md:flex-col md:gap-2 md:!rounded-none md:border-0 md:bg-transparent ${i > 0 ? "md:border-l" : ""}`}
+          >
+            <span className="flex w-12 shrink-0 flex-col items-center md:w-full md:flex-row md:justify-between">
+              <span className="text-[11px] font-semibold uppercase text-text-muted">{etiqueta}</span>
+              <span className={`flex size-8 items-center justify-center rounded-full text-[14px] font-bold ${esHoy ? "bg-accent text-ink" : "text-text"}`}>
+                {Number(d.slice(8, 10))}
+              </span>
+            </span>
+            <span className="flex min-w-0 flex-1 flex-col gap-1 self-stretch">
+              {delDia.length === 0 ? <span className="text-[11px] text-text-faint">Libre</span> : null}
+              {delDia.slice(0, 6).map((c) => (
+                <span key={c.id} className="truncate rounded bg-accent-soft px-1.5 py-1 text-[11px] font-semibold text-accent">
+                  {hora(c.horaInicio)} · {c.clienteNombre}
+                  {staff.length > 1 && nombreStaff(c.staffId) ? <span className="font-normal"> · {nombreStaff(c.staffId)}</span> : null}
+                </span>
+              ))}
+              {delDia.length > 6 ? <span className="text-[11px] text-text-faint">+{delDia.length - 6} más</span> : null}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function MesCalendario({
+  fecha,
+  hoy,
+  citas,
+  onSeleccionarDia,
+}: {
+  fecha: string;
+  hoy: string;
+  citas: CitaAgenda[];
+  onSeleccionarDia: (fecha: string) => void;
+}) {
+  const { desde, semanas } = cuadriculaMes(fecha);
+  const mes = fecha.slice(0, 7);
+  const dias = Array.from({ length: semanas * 7 }, (_, i) => sumarDias(desde, i));
+  const porDia = citasPorDia(citas);
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+      <div className="grid grid-cols-7 border-b border-border bg-surface-2">
+        {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((n) => (
+          <div key={n} className="p-1.5 text-center text-[10.5px] font-bold uppercase text-text-muted sm:text-[11px]">
+            {n}
           </div>
         ))}
-        {dias.map((d) => (
-          <Fragment key={d}>
+      </div>
+      <div className="grid grid-cols-7">
+        {dias.map((d, i) => {
+          const delDia = porDia.get(d) ?? [];
+          const fuera = d.slice(0, 7) !== mes;
+          const esHoy = d === hoy;
+          return (
             <button
+              key={d}
               type="button"
               onClick={() => onSeleccionarDia(d)}
-              className="border-b border-r border-border-subtle p-2 text-center text-[11px] font-semibold text-text-muted hover:bg-surface-2"
+              aria-label={`${Number(d.slice(8, 10))} de ${MESES[Number(d.slice(5, 7)) - 1]}: ${delDia.length} ${delDia.length === 1 ? "cita" : "citas"}`}
+              className={`!rounded-none flex min-h-[58px] flex-col items-center gap-1 border-b border-border p-1 text-left hover:bg-surface-2 sm:min-h-[104px] sm:items-stretch sm:p-1.5 ${i % 7 > 0 ? "border-l" : ""} ${fuera ? "opacity-45" : ""}`}
             >
-              {DIAS_ETIQUETA[new Date(`${d}T12:00:00Z`).getUTCDay()]}
-              <br />
-              {Number(d.slice(8, 10))}
-            </button>
-            {staff.map((s) => {
-              const citasDelDia = citas.filter((c) => c.staffId === s.staffId && localDia(c.horaInicio) === d);
-              return (
-                <button
-                  key={`${d}-${s.vinculoId}`}
-                  type="button"
-                  onClick={() => onSeleccionarDia(d)}
-                  className="min-h-[64px] border-b border-l border-border-subtle p-1 text-left align-top hover:bg-surface-2"
-                >
-                  <div className="flex flex-col gap-1">
-                    {citasDelDia.slice(0, 3).map((c) => (
-                      <span key={c.id} className="truncate rounded bg-accent-soft px-1 py-0.5 text-[9.5px] font-semibold text-accent">
+              <span className={`flex size-6 items-center justify-center rounded-full text-[12px] font-bold sm:size-7 sm:text-[13px] ${esHoy ? "bg-accent text-ink" : "text-text"}`}>
+                {Number(d.slice(8, 10))}
+              </span>
+              {delDia.length > 0 ? (
+                <>
+                  <span className="rounded-full bg-accent-soft px-1.5 text-[10.5px] font-bold text-accent sm:hidden">{delDia.length}</span>
+                  <span className="hidden min-w-0 flex-col gap-0.5 sm:flex">
+                    {delDia.slice(0, 3).map((c) => (
+                      <span key={c.id} className="truncate rounded bg-accent-soft px-1 py-0.5 text-[10.5px] font-semibold text-accent">
                         {hora(c.horaInicio)} {c.clienteNombre}
                       </span>
                     ))}
-                    {citasDelDia.length > 3 ? (
-                      <span className="text-[9.5px] text-text-faint">+{citasDelDia.length - 3} más</span>
-                    ) : null}
-                  </div>
-                </button>
-              );
-            })}
-          </Fragment>
-        ))}
+                    {delDia.length > 3 ? <span className="text-[10.5px] text-text-faint">+{delDia.length - 3} más</span> : null}
+                  </span>
+                </>
+              ) : null}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

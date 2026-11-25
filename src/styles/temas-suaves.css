@@ -534,6 +534,11 @@ html:has([data-vertical]) {
   border-radius: 0;
 }
 
+/* La barra lateral del panel llega de borde a borde: sin esquinas redondeadas. */
+:is([data-vertical], [data-tema-vista], html:has([data-vertical])) aside[aria-label="Navegación del panel"] {
+  border-radius: 0 !important;
+}
+
 /* ───────── «¿Qué tipo de cuenta quieres crear?»: tarjetas suaves (en barbería y tattoo siguen inclinadas y naranja) ───────── */
 :is([data-vertical], [data-tema-vista], html:has([data-vertical])) {
   & .sn-tipo-tarjeta {
