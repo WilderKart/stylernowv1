@@ -11,6 +11,16 @@ import { useCallback, useEffect, useState } from "react";
 import { enviarMensajeChat, marcarChatLeido, obtenerChatSoporte, prepararAdjuntosChat, type ChatSoporte } from "./chat-actions";
 
 const AVATAR_SOPORTE = "/avatars/soporte-stylernow.png";
+/** Cada cuánto se consulta si hay mensajes nuevos como respaldo del tiempo real. */
+const RESPALDO_MS = 4000;
+
+/** ¿El chat ya mostrado es idéntico al recién consultado? (mismo último mensaje, estado y no leídos) */
+function mismoChat(a: ChatSoporte | null, b: ChatSoporte) {
+  if (!a) return false;
+  const ua = a.mensajes[a.mensajes.length - 1]?.id;
+  const ub = b.mensajes[b.mensajes.length - 1]?.id;
+  return a.conversacionId === b.conversacionId && a.mensajes.length === b.mensajes.length && ua === ub && a.estado === b.estado && a.noLeidosNegocio === b.noLeidosNegocio && a.chatIncluido === b.chatIncluido && a.mensajes.every((m, i) => m.leido === b.mensajes[i]?.leido);
+}
 const CHIPS_INICIO = ["Configurar pagos / Nequi", "Duda sobre mi plan", "Verificación de mi negocio", "Reportar un error"];
 
 /** Chat en vivo con el equipo de StylerNow (Studio, Prestige y Signature). Essential ve un aviso con el camino alternativo. */
@@ -20,7 +30,8 @@ export function ChatSoportePanel({ inicial, errorInicial, alIrATickets }: { inic
 
   const recargar = useCallback(async () => {
     const res = await obtenerChatSoporte();
-    if (res.ok) setChat(res.data);
+    // Solo se actualiza si algo cambió: así el respaldo periódico no repinta ni mueve el scroll sin necesidad.
+    if (res.ok) setChat((prev) => (mismoChat(prev, res.data) ? prev : res.data));
   }, []);
 
   // Tiempo real: cualquier mensaje o cambio de estado de ESTE negocio vuelve a cargar el hilo (RLS filtra lo demás).
@@ -28,13 +39,37 @@ export function ChatSoportePanel({ inicial, errorInicial, alIrATickets }: { inic
     if (!chat?.negocioId || !chat.chatIncluido) return;
     const supabase = createClient();
     const filtro = `negocio_id=eq.${chat.negocioId}`;
-    const canal = supabase
-      .channel(`soporte-panel-${chat.negocioId}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "soporte_mensaje", filter: filtro }, () => void recargar())
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "soporte_conversacion", filter: filtro }, () => void recargar())
-      .subscribe();
+    // El canal debe conectarse YA autenticado con la sesión: si se suscribe antes de que Realtime tenga el token, la base
+    // rechaza la suscripción con filtro ("Unable to subscribe…") y los mensajes de soporte no llegan hasta recargar.
+    let cancelado = false;
+    let canal: ReturnType<typeof supabase.channel> | null = null;
+    const negocioId = chat.negocioId;
+    void (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (cancelado) return;
+      if (data.session?.access_token) await supabase.realtime.setAuth(data.session.access_token);
+      if (cancelado) return;
+      canal = supabase
+        .channel(`soporte-panel-${negocioId}`)
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "soporte_mensaje", filter: filtro }, () => void recargar())
+        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "soporte_conversacion", filter: filtro }, () => void recargar())
+        .subscribe();
+    })();
+    // Respaldo por si el canal en tiempo real se cae: consulta cada pocos segundos con la pestaña visible y al volver a ella.
+    const siVisible = () => {
+      if (document.visibilityState === "visible") void recargar();
+    };
+    const temporizador = window.setInterval(siVisible, RESPALDO_MS);
+    document.addEventListener("visibilitychange", siVisible);
+    window.addEventListener("online", siVisible);
+    window.addEventListener("focus", siVisible);
     return () => {
-      void supabase.removeChannel(canal);
+      window.clearInterval(temporizador);
+      document.removeEventListener("visibilitychange", siVisible);
+      window.removeEventListener("online", siVisible);
+      window.removeEventListener("focus", siVisible);
+      cancelado = true;
+      if (canal) void supabase.removeChannel(canal);
     };
   }, [chat?.negocioId, chat?.chatIncluido, recargar]);
 

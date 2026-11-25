@@ -540,3 +540,220 @@
     padding: 8px 10px 12px;
   }
 }
+
+/* ───── Bandeja de SuperSU (/admin/soporte): estilo lila claro con acento violeta ─────
+ * Todo cuelga de .adminSoporte o de clases propias de la bandeja; la vista de la barbería no se ve afectada. */
+.adminSoporte {
+  --nm-bg: #f1effb;
+  --nm-card: #fcfbff;
+  --nm-borde: #e2ddf4;
+  --nm-sombra: #d3cdea;
+  --nm-luz: #ffffff;
+  --nm-burbuja: #ebe8f6;
+  --nm-campo: #f0eef9;
+  --nm-azul-1: #8f70f2;
+  --nm-azul-2: #6a3fe0;
+  --nm-acento: #6a3fe0;
+  --nm-acento-suave: #ece6ff;
+}
+:global([data-theme="dark"]) .adminSoporte {
+  --nm-bg: #171428;
+  --nm-card: #1e1a33;
+  --nm-borde: #342e55;
+  --nm-sombra: #0e0c1b;
+  --nm-luz: #29234a;
+  --nm-burbuja: #29234a;
+  --nm-campo: #151225;
+  --nm-acento: #b7a3ff;
+  --nm-acento-suave: #2d2552;
+}
+.adminSoporte.marco {
+  background: var(--nm-bg);
+  border-radius: 28px !important;
+  padding: clamp(10px, 1.6vw, 16px);
+}
+.adminSoporte .tarjeta {
+  border: 1px solid var(--nm-borde);
+  box-shadow: 0 14px 30px -18px var(--nm-sombra), 0 2px 6px rgba(70, 50, 140, 0.06);
+}
+.adminSoporte .cabecera {
+  border-bottom: 1px solid var(--nm-borde);
+  padding-bottom: 14px;
+}
+.adminSoporte .burbujaYo {
+  box-shadow: 0 10px 22px rgba(106, 63, 224, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+.adminSoporte .enviar {
+  box-shadow: 0 10px 20px rgba(106, 63, 224, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.adminSoporte .campo:focus-visible {
+  box-shadow: inset 4px 4px 9px var(--nm-sombra), inset -4px -4px 9px var(--nm-luz), 0 0 0 3px rgba(143, 112, 242, 0.45);
+}
+.adminSoporte .pestanaActiva {
+  color: var(--nm-acento);
+}
+.adminSoporte .atajo {
+  color: var(--nm-acento);
+}
+.adminSoporte .rapidaActiva,
+.adminSoporte .rapida:hover {
+  background: var(--nm-acento-suave);
+}
+.adminSoporte .boton:not(.enviar) {
+  color: var(--nm-acento);
+}
+
+.listaBandeja {
+  margin: 0;
+  padding: 10px;
+  list-style: none;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.itemBandeja {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  width: 100%;
+  padding: 12px 14px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--nm-texto);
+  background: var(--nm-card);
+  border: 1px solid var(--nm-borde);
+  border-radius: 18px !important;
+  box-shadow: 0 6px 14px -10px var(--nm-sombra);
+}
+.itemBandeja:hover {
+  background: var(--nm-acento-suave);
+}
+.itemActivo {
+  background: var(--nm-acento-suave);
+  border-color: var(--nm-acento);
+  box-shadow: inset 4px 0 0 var(--nm-acento), 0 8px 18px -12px rgba(106, 63, 224, 0.5);
+}
+.avatarLista {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50% !important;
+  object-fit: cover;
+  box-shadow: 0 3px 8px -3px var(--nm-sombra);
+}
+.itemCuerpo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.itemLinea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.itemNombre {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+  font-weight: 800;
+}
+.itemHora {
+  flex: none;
+  font-size: 12px;
+  color: var(--nm-suave);
+}
+.itemChips {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.itemCiudad {
+  font-size: 12px;
+  color: var(--nm-suave);
+  white-space: nowrap;
+}
+.itemPreview {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13.5px;
+  color: var(--nm-suave);
+}
+.chipPlan {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 999px !important;
+  font-size: 11.5px;
+  font-weight: 800;
+  white-space: nowrap;
+  color: #4a5568;
+  background: #e3e6ec;
+}
+:global([data-theme="dark"]) .chipPlan {
+  color: #c9d1e0;
+  background: #2c3550;
+}
+.chipPrioritario {
+  color: #7a4b00;
+  background: #fde7a8;
+}
+:global([data-theme="dark"]) .chipPrioritario {
+  color: #ffd978;
+  background: #4a3a10;
+}
+.planSignature {
+  color: #fff;
+  background: linear-gradient(145deg, #9a6cf5, #6a3fe0);
+}
+.planPrestige {
+  color: #6b4a00;
+  background: #f6dc9a;
+}
+.chipJuntoTitulo {
+  margin-left: 10px;
+  vertical-align: middle;
+}
+.detalles {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+.detalleFila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 0;
+  font-size: 14px;
+  border-bottom: 1px solid var(--nm-borde);
+}
+.detalleFila dt {
+  color: var(--nm-suave);
+}
+.detalleFila dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 700;
+}
+.detalleNegocio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.avatarMini {
+  width: 26px;
+  height: 26px;
+  border-radius: 50% !important;
+  object-fit: cover;
+}
