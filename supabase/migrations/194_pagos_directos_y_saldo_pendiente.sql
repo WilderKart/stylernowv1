@@ -451,7 +451,7 @@ declare
   v_a3 constant text := 'v_saldo_final := greatest(v_saldo_servicio - v_descuento_puntos, 0);';
   v_a4 constant text := '''saldo_cobrado'', v_saldo_final,';
 begin
-  v_def := pg_get_functiondef('public.completar_venta_pos(uuid, jsonb, text, numeric, text, integer)'::regprocedure);
+  v_def := replace(pg_get_functiondef('public.completar_venta_pos(uuid, jsonb, text, numeric, text, integer)'::regprocedure), chr(13) || chr(10), chr(10));   -- normaliza CRLF (en produccion algunas funciones lo traen)
   if position('_anticipo_descontado_reserva' in v_def) > 0 then return; end if;     -- ya migrada
   if position(v_a1 in v_def) = 0 or position(v_a2 in v_def) = 0 or position(v_a3 in v_def) = 0 or position(v_a4 in v_def) = 0 then
     raise exception 'ANCLA_NO_ENCONTRADA completar_venta_pos';
@@ -470,7 +470,7 @@ declare
   v_def text;
   v_a1 constant text := '''monto_sena'', coalesce(v_reserva.monto_sena, 0),';
 begin
-  v_def := pg_get_functiondef('public.completar_reserva_sin_pos(uuid)'::regprocedure);
+  v_def := replace(pg_get_functiondef('public.completar_reserva_sin_pos(uuid)'::regprocedure), chr(13) || chr(10), chr(10));   -- normaliza CRLF (en produccion algunas funciones lo traen)
   if position('_anticipo_descontado_reserva' in v_def) > 0 then return; end if;
   if position(v_a1 in v_def) = 0 then raise exception 'ANCLA_NO_ENCONTRADA completar_reserva_sin_pos'; end if;
   execute replace(v_def, v_a1, v_a1 || E' ''anticipo_descontado'', public._anticipo_descontado_reserva(p_reserva_id), ''saldo_pendiente_vigente'', coalesce((select saldo_actual from public.cliente_saldo_pendiente where negocio_id = v_reserva.negocio_id and cliente_id = v_reserva.cliente_id), 0),');
@@ -492,8 +492,8 @@ returns boolean language sql stable security definer set search_path = public as
       or exists (select 1 from public.negocio_medio_pago_directo m where m.negocio_id = p_negocio_id and m.activo);
 $$;
 revoke all on function public.negocio_acepta_anticipo(uuid) from public, anon, authenticated;
--- La pantalla de reserva (anon/authenticated) solo necesita saber si hay anticipo posible; no expone cuentas.
-grant execute on function public.negocio_acepta_anticipo(uuid) to anon, authenticated;
+-- La pantalla de reserva exige sesión: solo authenticated (nada nuevo ejecutable por anon/public).
+grant execute on function public.negocio_acepta_anticipo(uuid) to authenticated;
 
 do $$
 declare
@@ -504,7 +504,7 @@ begin
   for r in select p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
              from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in ('calcular_sena', 'calcular_sena_servicios')
   loop
-    v_def := pg_get_functiondef(r.oid);
+    v_def := replace(pg_get_functiondef(r.oid), chr(13) || chr(10), chr(10));   -- normaliza CRLF (en produccion algunas funciones lo traen)
     if position(v_nuevo in v_def) > 0 then continue; end if;                       -- ya migrada
     if position(v_viejo in v_def) = 0 then raise exception 'ANCLA_NO_ENCONTRADA %', r.proname; end if;
     execute replace(v_def, v_viejo, v_nuevo);
@@ -545,7 +545,7 @@ declare
   v_a3 constant text := '  if v_tiene_pago and v_pct > 0 then';
   v_a4 constant text := E'    ''motivo_catalogo'', v_motivo_catalogo);';
 begin
-  v_def := pg_get_functiondef('public.cancelar_reserva(uuid, text)'::regprocedure);
+  v_def := replace(pg_get_functiondef('public.cancelar_reserva(uuid, text)'::regprocedure), chr(13) || chr(10), chr(10));   -- normaliza CRLF (en produccion algunas funciones lo traen)
   if position('v_pago_directo' in v_def) > 0 then return; end if;    -- ya migrada
   if position(v_a1 in v_def) = 0 or position(v_a2 in v_def) = 0 or position(v_a3 in v_def) = 0 or position(v_a4 in v_def) = 0 then
     raise exception 'ANCLA_NO_ENCONTRADA cancelar_reserva';
