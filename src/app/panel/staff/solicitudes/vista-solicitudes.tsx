@@ -1,5 +1,7 @@
 "use client";
 
+import { useTerminologia } from "@/components/panel/terminologia-contexto";
+import { aplicarTerminologia } from "@/lib/terminologia";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -12,6 +14,7 @@ const TIPOS: Record<string, string> = { PERMISO: "Permiso", VACACIONES: "Vacacio
 const fecha = (iso: string) => new Date(iso).toLocaleString("es-CO", { dateStyle: "medium", timeStyle: "short" });
 
 export function VistaSolicitudes({ ausencias, horarios, disponible }: { ausencias: SolicitudAusenciaFila[]; horarios: SolicitudHorarioFila[]; disponible: boolean }) {
+  const tm = useTerminologia();
   const router = useRouter();
   const [ocupado, setOcupado] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +41,7 @@ export function VistaSolicitudes({ ausencias, horarios, disponible }: { ausencia
   }
   async function rechazar() {
     if (!rechazando) return;
-    if (motivo.trim().length < 3) return setError("Escribe un motivo para rechazar (lo verá el barbero).");
+    if (motivo.trim().length < 3) return setError(aplicarTerminologia("Escribe un motivo para rechazar (lo verá el barbero).", tm));
     setOcupado(rechazando.id);
     setError(null);
     const r = rechazando.tipo === "ausencia" ? await decidirAusencia(rechazando.id, false, motivo.trim()) : await decidirHorario(rechazando.id, false, motivo.trim());
@@ -152,7 +155,7 @@ export function VistaSolicitudes({ ausencias, horarios, disponible }: { ausencia
           if (!a) setConfirmarCitas(null);
         }}
         title="Hay citas en ese rango"
-        description={`Este barbero tiene ${confirmarCitas?.citas ?? 0} cita(s) agendada(s) en esas fechas. Las citas NO se cancelan solas: tendrás que reagendarlas o reasignarlas. ¿Aprobar de todos modos?`}
+        description={aplicarTerminologia(`Este barbero tiene ${confirmarCitas?.citas ?? 0} cita(s) agendada(s) en esas fechas. Las citas NO se cancelan solas: tendrás que reagendarlas o reasignarlas. ¿Aprobar de todos modos?`, tm)}
         confirmLabel="Aprobar de todos modos"
         cancelLabel="Volver"
         onConfirm={() => {

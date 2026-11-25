@@ -1,5 +1,7 @@
 "use client";
 
+import { useTerminologia } from "@/components/panel/terminologia-contexto";
+import { aplicarTerminologia } from "@/lib/terminologia";
 import { confirmar } from "@/components/ui/confirmar";
 import { Button } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/card";
@@ -84,6 +86,7 @@ export function ListaStaff({
   errorInicial: string | null;
   autorizaciones?: Record<string, AutorizacionStaff>;
 }) {
+  const tm = useTerminologia();
   const enLinea = useEnLinea();
   const [items, setItems] = useState(itemsIniciales);
   const [total, setTotal] = useState(totalInicial);
@@ -197,7 +200,7 @@ export function ListaStaff({
         <Card className="mb-4 border-accent bg-app">
           <p className="text-[12.5px] leading-relaxed text-text-muted">{avisoCupo}</p>
           <Link href={puedeContratarAdicionales ? "/panel/staff/adicionales" : "/panel/suscripcion"} className="mt-2 inline-block text-[12px] font-bold uppercase text-accent">
-            {puedeContratarAdicionales ? "Agregar barberos adicionales" : "Ver mi plan"}
+            {puedeContratarAdicionales ? aplicarTerminologia("Agregar barberos adicionales", tm) : "Ver mi plan"}
           </Link>
         </Card>
       ) : null}

@@ -1,3 +1,4 @@
+import { terminologiaDe } from "@/lib/terminologia";
 import { EmptyState } from "@/components/brutal";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -31,7 +32,7 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
   const { data: negocio } = await supabase
     .from("negocio")
     .select(
-      "id, nombre, slug, pago_completo_en_app, sena_pct, sena_monto_fijo, sena_minimo, sena_maximo, ventana_reembolso_total_horas, ventana_reembolso_parcial_horas, reembolso_parcial_pct, anticipo_modo"
+      "id, nombre, slug, pago_completo_en_app, sena_pct, sena_monto_fijo, sena_minimo, sena_maximo, ventana_reembolso_total_horas, ventana_reembolso_parcial_horas, reembolso_parcial_pct, anticipo_modo, categoria"
     )
     .eq("slug", slug)
     .eq("estado", "ACTIVO")
@@ -108,6 +109,7 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-app">
       <FlujoReserva
+        terminos={terminologiaDe(negocio.categoria)}
         negocio={{ ...negocio, cobra_en_linea: cobraEnLinea !== false }}
         saldoPendiente={Number(saldoPendiente ?? 0)}
         sedes={sedes}

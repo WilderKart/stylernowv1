@@ -1,3 +1,4 @@
+import { sustituirProfesional, terminologiaDe } from "@/lib/terminologia";
 import { verticalDeCategorias } from "@/lib/tema/vertical";
 import { Label, Marquee, Meta, Num, Photo, ProCard, Stars, Status } from "@/components/brutal";
 import { FOTOS_RESPALDO, FOTO_NEGOCIO_RESPALDO, nivelATier } from "@/components/negocio/nivel";
@@ -200,6 +201,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
   const marca = await obtenerMarcaPublica(negocio.id);
   // Mi Marca publicada: el nombre y el logo de marca sustituyen a los del negocio en la portada.
   const nombreVisible = marca?.nombreMarca ?? negocio.nombre;
+  const tm = terminologiaDe(negocio.categoria);
   const partesNombre = nombreVisible.split(" ");
   const mitad = Math.ceil(partesNombre.length / 2);
   // Los temas suaves (spa, salón, uñas) no usan las fotos de stock de barbería cuando el negocio aún no sube las suyas.
@@ -297,7 +299,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
           </div>
         </div>
 
-        <Marquee tone="signal" text={t("neg.marquee", { ciudad: negocio.ciudad })} />
+        <Marquee tone="signal" text={sustituirProfesional(t("neg.marquee", { ciudad: negocio.ciudad }), tm)} />
 
         {negocio.descripcion ? (
           <p className="body-sm m-0 px-4 pt-4 break-words">{negocio.descripcion}</p>
@@ -380,7 +382,7 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
         {staff.length > 0 ? (
           <>
             <div className="p-sec">
-              <Num>{t("neg.sec_equipo")}</Num>
+              <Num>{sustituirProfesional(t("neg.sec_equipo"), tm)}</Num>
             </div>
             <div className="p-stack px-4">
               {staff.map((p, i) => (

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTextos } from "@/components/panel/terminologia-contexto";
 import { EmptyState, Panel, Poster, Status } from "@/components/brutal";
 import { SelectorPlanes } from "@/components/planes/selector-planes";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ import { iniciarPrueba } from "./prueba";
 import type { ConfigPrueba } from "./config-prueba";
 
 // Textos centralizados para facilitar la traducción posterior.
-const T = {
+const T0 = {
   titulo: "Plan y facturación",
   intro: "Upgrade inmediato con cobro prorrateado. Downgrade programado para tu próximo ciclo de facturación.",
   estados: {
@@ -130,6 +131,7 @@ export function VistaSuscripcion({
   configPrueba: ConfigPrueba;
   pagos: PagoSuscripcion[];
 }) {
+  const T = useTextos(T0);
   const router = useRouter();
   const [suscripcion, setSuscripcion] = useState(suscripcionInicial);
   const [procesando, setProcesando] = useState<string | null>(null);

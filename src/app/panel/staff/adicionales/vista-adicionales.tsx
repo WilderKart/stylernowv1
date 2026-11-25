@@ -1,5 +1,6 @@
 "use client";
 
+import { useTextos } from "@/components/panel/terminologia-contexto";
 import { Button } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,7 +25,7 @@ import {
 
 type Aviso = { tipo: "ok" | "error"; texto: string } | null;
 
-const T = {
+const T0 = {
   capacidad: "Capacidad de profesionales",
   incluidos: "Incluidos en tu plan",
   adicionales: "Adicionales activos",
@@ -94,6 +95,7 @@ function Condiciones({ c }: { c: Pick<Cotizacion, "periodo_dias" | "gracia_dias"
 }
 
 function TarjetaLote({ l, ocupado, onRenovar, onCancelar }: { l: LoteAdicional; ocupado: boolean; onRenovar: (id: string) => void; onCancelar: (id: string) => void }) {
+  const T = useTextos(T0);
   const [verPagos, setVerPagos] = useState(false);
   return (
     <Card className="flex flex-col gap-3 p-4">
@@ -173,6 +175,7 @@ function TarjetaLote({ l, ocupado, onRenovar, onCancelar }: { l: LoteAdicional; 
 }
 
 export function VistaAdicionales({ negocioId, inicial }: { negocioId: string; inicial: PanelAdicionales }) {
+  const T = useTextos(T0);
   const params = useSearchParams();
   const [panel, setPanel] = useState(inicial);
   const [cantidad, setCantidad] = useState("1");

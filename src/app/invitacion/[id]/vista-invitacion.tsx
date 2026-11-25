@@ -88,7 +88,7 @@ export function VistaInvitacion({ modo, invitacionId, negocio, emailEnmascarado,
   }
 
   return (
-    <div data-vertical="salon" data-panel="suave" className="flex min-h-dvh flex-col bg-[var(--app-bg)] text-[var(--text)]">
+    <div className="flex min-h-dvh flex-col bg-[var(--app-bg)] text-[var(--text)]">
       <header className="flex items-center gap-2 px-3 py-3 sm:px-6">
         <Link href="/" className="grid size-11 place-items-center rounded-full bg-[var(--bg)] text-[var(--text)] shadow-[var(--sn-shadow-hard-sm)]" aria-label="Volver al inicio">
           <ChevronLeft className="size-5" aria-hidden />

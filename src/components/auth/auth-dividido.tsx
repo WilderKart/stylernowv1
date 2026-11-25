@@ -1,7 +1,7 @@
 "use client";
 
 import { useT } from "@/lib/i18n/proveedor";
-import type { CategoriaRegistro } from "@/lib/tema/vertical";
+import { TEMAS_POR_CATEGORIA_ACTIVOS, type CategoriaRegistro } from "@/lib/tema/vertical";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import s from "./auth-dividido.module.css";
@@ -34,7 +34,7 @@ export function AuthDividido({ categoria, viva = false, children }: { categoria:
 
   // Aspecto en vivo: pone el tema de la categoría en <html> mientras se elige y restaura el original al salir.
   useEffect(() => {
-    if (!viva) return;
+    if (!viva || !TEMAS_POR_CATEGORIA_ACTIVOS) return;
     const html = document.documentElement;
     delete html.dataset.aspectoFijo;
     const original = html.getAttribute("data-vertical");

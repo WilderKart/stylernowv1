@@ -1,5 +1,6 @@
 "use client";
 
+import { useTerminologia } from "@/components/panel/terminologia-contexto";
 import { actualizarServicio, crearServicio } from "@/app/panel/servicios/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,7 @@ export function FormularioServicio({
   textoBoton: string;
   onGuardado: (id: string) => void;
 }) {
+  const tm = useTerminologia();
   const [nombre, setNombre] = useState(servicioExistente?.nombre ?? "");
   const [descripcion, setDescripcion] = useState(servicioExistente?.descripcion ?? "");
   const [duracionMinutos, setDuracionMinutos] = useState(String(servicioExistente?.duracion_minutos ?? 30));
@@ -158,7 +160,7 @@ export function FormularioServicio({
         />
       </div>
       <p className="text-[11px] text-text-faint">
-        Son minutos extra para preparar el puesto antes y limpiarlo después. Bloquean la agenda del barbero, pero no se cobran ni los ve el cliente.
+        Son minutos extra para preparar el puesto antes y limpiarlo después. Bloquean la agenda del {tm.profesional}, pero no se cobran ni los ve el cliente.
       </p>
 
       {error ? <p className="text-[12.5px] text-danger">{error}</p> : null}
