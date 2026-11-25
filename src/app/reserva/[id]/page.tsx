@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { duracion, fechaHoraLarga } from "@/lib/formato";
 import { obtenerDetalleCita } from "@/lib/cliente/citas";
 import { sincronizarPago } from "@/lib/pagos/sincronizar";
+import { tabla } from "@/lib/pagos-directos/sin-tipos";
 import { createClient } from "@/lib/supabase/server";
 import { formatCOP } from "@/lib/utils";
 import type { Traductor } from "@/lib/i18n/diccionario";
@@ -128,6 +129,9 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
 
   const { data: reserva } = await cargar(id);
   if (!reserva) notFound();
+  // Pago directo al negocio (migración 194): estado visible para el cliente (RLS: solo su propio pago).
+  const pagoDirecto = (await tabla(supabase, "pago_reserva").select("estado, monto_reportado").eq("reserva_id", id).eq("metodo", "TRANSFERENCIA_DIRECTA").order("created_at", { ascending: false }).limit(1)) as unknown as { data: { estado: string; monto_reportado: number }[] | null };
+  const estadoPagoDirecto = pagoDirecto.data?.[0]?.estado ?? null;
 
   const negocio = reserva.negocio as unknown as {
     nombre: string;
@@ -343,6 +347,17 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
           <BotonCancelar reservaId={reserva.id} reembolsoEstimado={reembolsoEstimado} reembolsoPct={pct} />
         ) : null}
       </Filas>
+
+      {estadoPagoDirecto && estadoPagoDirecto !== "RECHAZADO" ? (
+        <Bloque etiqueta="Pago del anticipo">
+          <p className="m-0 font-bold">
+            {estadoPagoDirecto === "VERIFICADO" ? "Pago verificado" : "Pago reportado (en revisión)"} · {formatCOP(Number(pagoDirecto.data?.[0]?.monto_reportado ?? 0))}
+          </p>
+          <p className="m-0 mt-1 text-[12px]">
+            {estadoPagoDirecto === "VERIFICADO" ? "El negocio confirmó que recibió tu transferencia." : "Tu cita ya está agendada. El negocio confirmará que recibió tu transferencia."}
+          </p>
+        </Bloque>
+      ) : null}
 
       {confirmada ? (
         <Bloque etiqueta={t("rv.politica")}>

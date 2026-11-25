@@ -72,7 +72,9 @@ export function FlujoReserva({
   servicios,
   staff,
   combos,
+  saldoPendiente = 0,
 }: {
+  saldoPendiente?: number;
   negocio: DatosNegocio;
   sedes: Sede[];
   servicios: Servicio[];
@@ -619,13 +621,28 @@ export function FlujoReserva({
                 <span className="sn-meta">{t("res.total_servicio")}</span>
                 <span className="sn-price">{formatCOP(montoTotal)}</span>
               </div>
+              {saldoPendiente > 0 ? (
+                <>
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-grid-soft px-4 py-3">
+                    <span className="sn-meta">Saldo pendiente anterior</span>
+                    <span className="sn-price">{formatCOP(saldoPendiente)}</span>
+                  </div>
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-grid-soft px-4 py-3">
+                    <span className="sn-meta">Total (servicio + saldo pendiente)</span>
+                    <span className="sn-price">{formatCOP(montoTotal + saldoPendiente)}</span>
+                  </div>
+                </>
+              ) : null}
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b-2 border-line bg-signal px-4 py-3 text-ink">
                 <span className="sn-label">{t("res.anticipo_ahora")}</span>
                 <span className="sn-fig text-[22px]">{formatCOP(sena)}</span>
               </div>
             </div>
-            {sena < montoTotal ? (
-              <p className="sn-meta m-0 px-4 pt-2">{t("res.saldo_local", { monto: formatCOP(montoTotal - sena) })}</p>
+            {sena < montoTotal || saldoPendiente > 0 ? (
+              <p className="sn-meta m-0 px-4 pt-2">{t("res.saldo_local", { monto: formatCOP(montoTotal - sena + saldoPendiente) })}</p>
+            ) : null}
+            {saldoPendiente > 0 ? (
+              <p className="sn-meta m-0 px-4 pt-1">Tu saldo pendiente anterior en este negocio se cobra en el local junto con el servicio; no te impide reservar.</p>
             ) : null}
 
             {/* Nunca se paga sin ver antes la política de cancelación. */}

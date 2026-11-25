@@ -2,6 +2,7 @@
 
 import { crearPreferenciaDePago } from "@/lib/pagos/cobro";
 import { sincronizarPago } from "@/lib/pagos/sincronizar";
+import { rpcSinTipos, traducirErrorPagos } from "@/lib/pagos-directos/sin-tipos";
 import { createClient } from "@/lib/supabase/server";
 
 /** Base pública del sitio, usada por back_urls y notification_url de la pasarela. */
@@ -220,5 +221,38 @@ export async function confirmarSinAnticipo(reservaId: string): Promise<{ ok: tru
     if (error.message.includes("PAGO_YA_PROCESADO")) return { ok: false, mensaje: "Esta reserva ya está pagada." };
     return { ok: false, mensaje: "No pudimos confirmar la reserva. Intenta de nuevo." };
   }
+  return { ok: true };
+}
+
+/**
+ * Pago DIRECTO al negocio (migración 194). El comprobante ya se subió desde el navegador a Storage (bucket privado,
+ * ruta <negocio>/<reserva>/…). Aquí solo se registra: la base valida dueño de la reserva, monto, ruta y hash único, y
+ * confirma la cita al instante. Nada de esto pasa por Wompi/Mercado Pago.
+ */
+export async function registrarPagoDirecto(datos: {
+  reservaId: string;
+  monto: number;
+  rutaComprobante: string;
+  hashComprobante: string;
+  aceptaPolitica: boolean;
+}): Promise<{ ok: true } | { ok: false; mensaje: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, mensaje: "Inicia sesión para continuar." };
+  if (datos.aceptaPolitica !== true) return { ok: false, mensaje: "Debes aceptar la política de cancelación para continuar." };
+  if (!Number.isFinite(datos.monto) || datos.monto <= 0) return { ok: false, mensaje: "Escribe el monto que transferiste." };
+
+  const { error: eAcepta } = await supabase.rpc("aceptar_politica_reserva", { p_reserva_id: datos.reservaId });
+  if (eAcepta) {
+    if (eAcepta.message.includes("RESERVA_NO_PAGABLE")) return { ok: false, mensaje: "La reserva expiró o cambió de estado. Elige un horario de nuevo." };
+    return { ok: false, mensaje: "No pudimos registrar tu aceptación. Intenta de nuevo." };
+  }
+  const { error } = await rpcSinTipos(supabase, "registrar_pago_directo_reserva", {
+    p_reserva_id: datos.reservaId,
+    p_monto_reportado: Math.round(datos.monto),
+    p_comprobante_url: datos.rutaComprobante,
+    p_comprobante_hash: datos.hashComprobante,
+  });
+  if (error) return { ok: false, mensaje: traducirErrorPagos(error.message) };
   return { ok: true };
 }

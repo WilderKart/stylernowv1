@@ -1,5 +1,6 @@
 "use client";
 
+import { VerComprobante } from "@/components/pagos/ver-comprobante";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { hora } from "@/lib/formato";
@@ -79,7 +80,7 @@ export function ListaPOS({
                     {r.servicios} {r.staffNombre ? `· ${r.staffNombre}` : ""}
                   </p>
                 </div>
-                <p className="shrink-0 text-[13px] font-bold text-text">{formatCOP(r.montoTotal - r.montoSena)}</p>
+                <p className="shrink-0 text-[13px] font-bold text-text">{formatCOP(Math.max(r.montoTotal - r.montoSena, 0) + r.saldoPendiente)}</p>
               </button>
             </li>
           ))}
@@ -131,8 +132,8 @@ function ModalCobro({
   }, [negocioId, reserva.clienteId]);
 
   const totalProductos = productos.reduce((acc, p) => acc + (cantidades[p.id] ?? 0) * p.precio, 0);
-  const saldoServicio = reserva.montoTotal - reserva.montoSena;
-  const totalEstimado = saldoServicio + totalProductos;
+  const saldoServicio = Math.max(reserva.montoTotal - reserva.montoSena, 0);
+  const totalEstimado = saldoServicio + totalProductos + reserva.saldoPendiente;
 
   async function onCobrar() {
     setProcesando(true);
@@ -183,7 +184,20 @@ function ModalCobro({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center" onClick={onCerrar}>
       <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-app p-5 sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
         <p className="mb-1 text-[15px] font-bold text-text">{reserva.clienteNombre}</p>
-        <p className="mb-4 text-[12px] text-text-faint">{reserva.servicios} · Saldo del servicio {formatCOP(saldoServicio)}</p>
+        <p className="mb-2 text-[12px] text-text-faint">{reserva.servicios} · Saldo del servicio {formatCOP(saldoServicio)}</p>
+        {reserva.pagoDirecto ? (
+          <div className="mb-3 border-l-4 border-accent bg-accent-soft px-3 py-2 text-[12px] text-text">
+            <p className="font-bold">
+              Anticipo descontado: {formatCOP(reserva.montoSena)} — {reserva.pagoDirecto.estado === "VERIFICADO" ? "pago verificado" : reserva.pagoDirecto.estado === "REPORTADO" ? "pago reportado (en revisión)" : "pago NO recibido: no se descuenta"}
+            </p>
+            <VerComprobante reservaId={reserva.id} />
+          </div>
+        ) : null}
+        {reserva.saldoPendiente > 0 ? (
+          <p className="mb-3 border-l-4 border-danger bg-surface px-3 py-2 text-[12px] font-bold text-text">
+            Saldo pendiente anterior de este cliente: +{formatCOP(reserva.saldoPendiente)} (se cobra ahora y queda en cero).
+          </p>
+        ) : null}
 
         {productos.length > 0 ? (
           <div className="mb-4">

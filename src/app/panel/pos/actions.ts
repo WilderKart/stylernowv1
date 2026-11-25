@@ -2,6 +2,7 @@
 
 import { avisoPorFallosDePipeline } from "@/lib/pipeline/fallos";
 import { MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
+import { tabla } from "@/lib/pagos-directos/sin-tipos";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -114,7 +115,11 @@ export interface ReservaParaCobrar {
   staffNombre: string | null;
   servicios: string;
   montoTotal: number;
+  /** Anticipo que se descuenta: el monto REPORTADO si hay pago directo vigente; si no, el anticipo del motor. */
   montoSena: number;
+  /** Saldo pendiente anterior del cliente en ESTE negocio (se suma al cobro y se liquida al completar). */
+  saldoPendiente: number;
+  pagoDirecto: { estado: "REPORTADO" | "VERIFICADO" | "RECHAZADO"; monto: number } | null;
 }
 
 export async function listarReservasParaCobrar(negocioId: string, sedeId?: string | null): Promise<Resultado<ReservaParaCobrar[]>> {
@@ -140,6 +145,17 @@ export async function listarReservasParaCobrar(negocioId: string, sedeId?: strin
     const { data, error } = await q;
     if (error) return { ok: false, error: error.message };
 
+    const ids = (data ?? []).map((r) => r.id);
+    const clientes = [...new Set((data ?? []).map((r) => (r.cliente as unknown as { id: string } | null)?.id).filter((x): x is string => !!x))];
+    const pagos = new Map<string, { estado: "REPORTADO" | "VERIFICADO" | "RECHAZADO"; monto: number }>();
+    const saldos = new Map<string, number>();
+    if (ids.length > 0) {
+      const rp = (await tabla(supabase, "pago_reserva").select("reserva_id, estado, monto_reportado").eq("negocio_id", negocioId).eq("metodo", "TRANSFERENCIA_DIRECTA").in("reserva_id", ids).order("created_at", { ascending: true })) as unknown as { data: { reserva_id: string; estado: "REPORTADO" | "VERIFICADO" | "RECHAZADO"; monto_reportado: number }[] | null };
+      for (const p of rp.data ?? []) pagos.set(p.reserva_id, { estado: p.estado, monto: Number(p.monto_reportado) });
+      const rs = (await tabla(supabase, "cliente_saldo_pendiente").select("cliente_id, saldo_actual").eq("negocio_id", negocioId).in("cliente_id", clientes)) as unknown as { data: { cliente_id: string; saldo_actual: number }[] | null };
+      for (const x of rs.data ?? []) saldos.set(x.cliente_id, Number(x.saldo_actual));
+    }
+
     return {
       ok: true,
       data: (data ?? []).map((r) => ({
@@ -149,7 +165,10 @@ export async function listarReservasParaCobrar(negocioId: string, sedeId?: strin
         clienteNombre: (r.cliente as unknown as { id: string; nombre: string } | null)?.nombre ?? "Cliente",
         staffNombre: (r.staff as unknown as { nombre: string } | null)?.nombre ?? null,
         montoTotal: r.monto_total,
-        montoSena: r.monto_sena,
+        // Misma regla que la base (_anticipo_descontado_reserva): pago directo vigente → monto reportado; RECHAZADO → 0.
+        montoSena: pagos.get(r.id) ? (pagos.get(r.id)!.estado === "RECHAZADO" ? 0 : Math.min(pagos.get(r.id)!.monto, r.monto_total)) : r.monto_sena,
+        saldoPendiente: saldos.get((r.cliente as unknown as { id: string } | null)?.id ?? "") ?? 0,
+        pagoDirecto: pagos.get(r.id) ?? null,
         servicios: (r.reserva_servicio ?? [])
           .map((rs) => (rs.servicio as unknown as { nombre: string } | null)?.nombre)
           .filter(Boolean)

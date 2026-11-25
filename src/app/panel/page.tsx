@@ -13,6 +13,7 @@ import { createClient } from "@/lib/supabase/server";
 import { obtenerEstadoOperativo } from "@/lib/suscripcion/estado-operativo";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { contarPagosPorRevisar } from "./pagos/actions";
 import { obtenerLineaTiempoDia, obtenerMetricasLealtadNegocio, obtenerRankingSemana, obtenerResumenDia } from "./dashboard-actions";
 
 export const metadata = { title: "Panel" };
@@ -182,6 +183,7 @@ export default async function PanelPage() {
     negocio.estado === "ACTIVO" ? await cargarDashboard(negocio.id, null) : null;
   const metricasLealtadRes = negocio.estado === "ACTIVO" ? await obtenerMetricasLealtadNegocio(negocio.id) : null;
   const metricasLealtad = metricasLealtadRes?.ok ? metricasLealtadRes.data : null;
+  const pagosPorRevisar = negocio.estado === "ACTIVO" ? await contarPagosPorRevisar(negocio.id) : 0;
 
   return (
     <div className="flex min-h-dvh flex-col bg-app">
@@ -194,6 +196,18 @@ export default async function PanelPage() {
           citas={dashboardBarberia?.timeline ?? []}
           lealtad={metricasLealtad}
         />
+
+        {pagosPorRevisar > 0 ? (
+          <Link
+            href="/panel/pagos"
+            className="flex items-center justify-between gap-3 border-2 border-accent bg-accent-soft p-4 text-[14px] font-bold text-text"
+          >
+            <span>
+              Pagos por revisar: {pagosPorRevisar} {pagosPorRevisar === 1 ? "transferencia espera" : "transferencias esperan"} tu verificación
+            </span>
+            <span aria-hidden>→</span>
+          </Link>
+        ) : null}
 
         <AsistenteBienvenida datos={datosAsistente} />
 

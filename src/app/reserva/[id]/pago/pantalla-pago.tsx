@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { confirmarSinAnticipo, consultarEstadoPago, iniciarPagoSena } from "./actions";
 import { useT } from "@/lib/i18n/proveedor";
+import { PagoDirecto, type MediosDirectosVista } from "./pago-directo";
 
 /** Tras este tiempo sin confirmación se avisa que puede cerrar la app (02-UX/06_Payments.md). */
 const TIMEOUT_UX_MS = 30_000;
@@ -39,6 +40,10 @@ export interface ResumenPago {
   expiraAt: string | null;
   politica: string[];
   anticipoOpcional?: boolean;
+  cobraEnLinea?: boolean;
+  negocioId?: string;
+  saldoPendiente?: number;
+  directo?: MediosDirectosVista | null;
 }
 
 function Cuenta({ expiraAt }: { expiraAt: string }) {
@@ -144,6 +149,8 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
   const dm = diaYMes(resumen.horaInicio, resumen.zonaHoraria);
   const hora = horaCorta(resumen.horaInicio, resumen.zonaHoraria);
   const saldoLocal = resumen.montoTotal - resumen.montoSena;
+  // Mercado Pago solo si el negocio lo tiene conectado; el pago directo es una alternativa (o la única opción).
+  const mostrarMp = resumen.cobraEnLinea !== false;
 
   // Esperando la confirmación de la pasarela (C10): bloque tinta a pantalla completa.
   if (esperando) {
@@ -212,6 +219,14 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
           meta={t("pago.se_descuenta")}
           derecha={<span className="sn-price">{formatCOP(resumen.montoSena)}</span>}
         />
+        {(resumen.saldoPendiente ?? 0) > 0 ? (
+          <Fila
+            icono={<Wallet aria-hidden className="size-5" />}
+            titulo="Saldo pendiente anterior"
+            meta="De una cita anterior en este negocio. Se cobra en el local junto con tu servicio."
+            derecha={<span className="sn-price">{formatCOP(resumen.saldoPendiente ?? 0)}</span>}
+          />
+        ) : null}
         {saldoLocal > 0 ? (
           <Fila
             icono={<Wallet aria-hidden className="size-5" />}
@@ -221,7 +236,8 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
         ) : null}
       </Filas>
 
-      <Sec>{t("pago.sec_metodo")}</Sec>
+      {mostrarMp ? <Sec>{t("pago.sec_metodo")}</Sec> : null}
+      {mostrarMp ? (
       <Filas>
         <Fila
           icono={<ShieldCheck aria-hidden className="size-5" />}
@@ -234,9 +250,12 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
           }
         />
       </Filas>
+      ) : null}
+      {mostrarMp ? (
       <Bloque etiqueta={t("pago.sec_seguridad")}>
         {t("pago.seguridad_txt")}
       </Bloque>
+      ) : null}
 
       <Bloque etiqueta={t("pago.sec_politica")}>
         <ul className="m-0 list-disc space-y-1 pl-5">
@@ -255,6 +274,10 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
         </label>
       </Bloque>
 
+      {resumen.directo && resumen.negocioId ? (
+        <PagoDirecto reservaId={resumen.reservaId} negocioId={resumen.negocioId} montoSena={resumen.montoSena} medios={resumen.directo} acepta={acepta} />
+      ) : null}
+
       {error ? (
         <div className="px-4 pt-4">
           <ErrorAviso>{error}</ErrorAviso>
@@ -264,9 +287,11 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
       <div className="flex-1" />
       {/* Un solo botón de pago, deshabilitado tras el primer tap (05-API/01_Standards.md). */}
       <Pie>
+        {mostrarMp ? (
         <Button size="lg" className="w-full" loading={iniciando} disabled={iniciando || !acepta} onClick={pagar}>
           {t("pago.pagar_anticipo", { monto: formatCOP(resumen.montoSena) })}
         </Button>
+        ) : null}
         {resumen.anticipoOpcional ? (
           <Button variant="secondary" size="lg" className="mt-2 w-full" disabled={iniciando} onClick={reservarSinAnticipo}>
             {t("pago.sin_anticipo")}

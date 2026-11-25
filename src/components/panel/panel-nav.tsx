@@ -98,6 +98,7 @@ export function PanelNav({ rol, prestaServicios = false }: { rol: RolPanel; /** 
                     { href: "/panel/wallet", etiqueta: "Wallet" },
                     { href: "/panel/reportes", etiqueta: "Reportes" },
                     { href: "/panel/politica", etiqueta: "Anticipo y cancelaciones" },
+                    { href: "/panel/pagos", etiqueta: "Pagos directos" },
                     { href: "/panel/suscripcion", etiqueta: "Mi Plan" },
                   ],
                 },

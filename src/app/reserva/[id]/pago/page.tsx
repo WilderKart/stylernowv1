@@ -1,4 +1,5 @@
 import { resumenPoliticaCancelacion } from "@/lib/pagos/sena";
+import { rpcSinTipos } from "@/lib/pagos-directos/sin-tipos";
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { PantallaPago } from "./pantalla-pago";
@@ -7,6 +8,11 @@ import { obtenerT } from "@/lib/i18n/servidor";
 export async function generateMetadata() {
   const t = await obtenerT();
   return { title: t("pago.meta"), robots: { index: false, follow: false } };
+}
+
+interface MediosDirectos {
+  activo: boolean; llave_breb?: string | null; nequi?: string | null; daviplata?: string | null; link_pago?: string | null;
+  qr_path?: string | null; instrucciones?: string | null; referencia?: string; saldo_pendiente?: number;
 }
 
 export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
@@ -23,7 +29,7 @@ export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
   const { data: reserva } = await supabase
     .from("reserva")
     .select(
-      `id, estado, hora_inicio, monto_total, monto_sena, expira_at,
+      `id, negocio_id, estado, hora_inicio, monto_total, monto_sena, expira_at,
        negocio:negocio_id (nombre, slug, ventana_reembolso_total_horas, ventana_reembolso_parcial_horas, reembolso_parcial_pct, anticipo_modo),
        sede:sede_id (zona_horaria),
        staff:staff_id (nombre),
@@ -36,6 +42,16 @@ export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
 
   // Una Reserva ya confirmada o cancelada no vuelve a la pantalla de cobro.
   if (reserva.estado !== "PENDIENTE_PAGO") redirect(`/reserva/${id}`);
+
+  const [{ data: medios }, { data: cobraEnLinea }] = await Promise.all([
+    rpcSinTipos<MediosDirectos>(supabase, "medios_pago_directo_para_reserva", { p_reserva_id: id }),
+    rpcSinTipos<boolean>(supabase, "negocio_cobra_en_linea", { p_negocio_id: reserva.negocio_id }),
+  ]);
+  let qrUrl: string | null = null;
+  if (medios?.activo && medios.qr_path) {
+    const { data: firmada } = await supabase.storage.from("pagos-directos").createSignedUrl(medios.qr_path, 1800);
+    qrUrl = firmada?.signedUrl ?? null;
+  }
 
   const negocio = reserva.negocio as unknown as {
     nombre: string;
@@ -69,6 +85,20 @@ export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
         politica: negocio ? resumenPoliticaCancelacion(negocio) : [],
         // Solo para mostrar el botón; la base lo vuelve a verificar al confirmar.
         anticipoOpcional: negocio?.anticipo_modo === "OPCIONAL",
+        cobraEnLinea: cobraEnLinea !== false,
+        negocioId: reserva.negocio_id,
+        saldoPendiente: Number(medios?.saldo_pendiente ?? 0),
+        directo: medios?.activo
+          ? {
+              llaveBreb: medios.llave_breb ?? null,
+              nequi: medios.nequi ?? null,
+              daviplata: medios.daviplata ?? null,
+              linkPago: medios.link_pago ?? null,
+              instrucciones: medios.instrucciones ?? null,
+              referencia: medios.referencia ?? "",
+              qrUrl,
+            }
+          : null,
       }}
     />
   );

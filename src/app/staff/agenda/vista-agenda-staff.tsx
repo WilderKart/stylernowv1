@@ -1,5 +1,6 @@
 "use client";
 
+import { VerComprobante } from "@/components/pagos/ver-comprobante";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/card";
@@ -159,6 +160,8 @@ export function VistaAgendaStaff({
                   </div>
                   <Badge tone={ESTADO_TONO[c.estado] ?? "neutral"}>{c.estado.replace("_", " ")}</Badge>
                 </div>
+
+                {c.estado === "CONFIRMADA" || c.estado === "EN_CURSO" ? <VerComprobante reservaId={c.id} /> : null}
 
                 {proximoANoShow ? (
                   <p className="mt-2 text-[11.5px] font-bold text-danger">

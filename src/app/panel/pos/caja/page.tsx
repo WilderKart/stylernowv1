@@ -2,6 +2,7 @@ import { BarraSuperior } from "@/components/layout/header";
 import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { createClient } from "@/lib/supabase/server";
 import { obtenerCierreCaja } from "../actions";
+import { AnticiposDirectosDelDia } from "./anticipos-directos";
 import { VistaCierreCaja } from "./vista-cierre-caja";
 
 export const metadata = { title: "Cierre de caja" };
@@ -27,6 +28,7 @@ export default async function CierreCajaPage() {
     <div className="flex min-h-dvh flex-col bg-app">
       <BarraSuperior titulo="Cierre de caja" volverA="/panel/pos" />
       <main className="mx-auto w-full max-w-md flex-1 px-5 py-6 sm:px-10">
+        <AnticiposDirectosDelDia negocioId={negocioId} sedeId={sedeId} />
         <VistaCierreCaja
           negocioId={negocioId}
           sedeId={sedeId}
