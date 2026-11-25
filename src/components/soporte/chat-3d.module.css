@@ -541,31 +541,31 @@
   }
 }
 
-/* ───── Bandeja de SuperSU (/admin/soporte): estilo lila claro con acento violeta ─────
+/* ───── Bandeja de SuperSU (/admin/soporte): estilo azul claro, igual al de la barbería ─────
  * Todo cuelga de .adminSoporte o de clases propias de la bandeja; la vista de la barbería no se ve afectada. */
 .adminSoporte {
-  --nm-bg: #f1effb;
-  --nm-card: #fcfbff;
-  --nm-borde: #e2ddf4;
-  --nm-sombra: #d3cdea;
+  --nm-bg: #ebf0f5;
+  --nm-card: #f8fafd;
+  --nm-borde: #d9e0ea;
+  --nm-sombra: #c9d1dd;
   --nm-luz: #ffffff;
-  --nm-burbuja: #ebe8f6;
-  --nm-campo: #f0eef9;
-  --nm-azul-1: #8f70f2;
-  --nm-azul-2: #6a3fe0;
-  --nm-acento: #6a3fe0;
-  --nm-acento-suave: #ece6ff;
+  --nm-burbuja: #e4e9f0;
+  --nm-campo: #e7ecf3;
+  --nm-azul-1: #3b86ff;
+  --nm-azul-2: #0a55cf;
+  --nm-acento: #0a55cf;
+  --nm-acento-suave: #e3edff;
 }
 :global([data-theme="dark"]) .adminSoporte {
-  --nm-bg: #171428;
-  --nm-card: #1e1a33;
-  --nm-borde: #342e55;
-  --nm-sombra: #0e0c1b;
-  --nm-luz: #29234a;
-  --nm-burbuja: #29234a;
-  --nm-campo: #151225;
-  --nm-acento: #b7a3ff;
-  --nm-acento-suave: #2d2552;
+  --nm-bg: #161b25;
+  --nm-card: #1c2230;
+  --nm-borde: #313b55;
+  --nm-sombra: #0d1018;
+  --nm-luz: #262e40;
+  --nm-burbuja: #262e40;
+  --nm-campo: #141925;
+  --nm-acento: #8db8ff;
+  --nm-acento-suave: #1f2a45;
 }
 .adminSoporte.marco {
   background: var(--nm-bg);
@@ -574,20 +574,20 @@
 }
 .adminSoporte .tarjeta {
   border: 1px solid var(--nm-borde);
-  box-shadow: 0 14px 30px -18px var(--nm-sombra), 0 2px 6px rgba(70, 50, 140, 0.06);
+  box-shadow: 0 14px 30px -18px var(--nm-sombra), 0 2px 6px rgba(31, 42, 58, 0.06);
 }
 .adminSoporte .cabecera {
   border-bottom: 1px solid var(--nm-borde);
   padding-bottom: 14px;
 }
 .adminSoporte .burbujaYo {
-  box-shadow: 0 10px 22px rgba(106, 63, 224, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  box-shadow: 0 10px 22px rgba(15, 90, 220, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 .adminSoporte .enviar {
-  box-shadow: 0 10px 20px rgba(106, 63, 224, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 20px rgba(15, 90, 220, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 .adminSoporte .campo:focus-visible {
-  box-shadow: inset 4px 4px 9px var(--nm-sombra), inset -4px -4px 9px var(--nm-luz), 0 0 0 3px rgba(143, 112, 242, 0.45);
+  box-shadow: inset 4px 4px 9px var(--nm-sombra), inset -4px -4px 9px var(--nm-luz), 0 0 0 3px rgba(59, 134, 255, 0.45);
 }
 .adminSoporte .pestanaActiva {
   color: var(--nm-acento);
@@ -633,7 +633,7 @@
 .itemActivo {
   background: var(--nm-acento-suave);
   border-color: var(--nm-acento);
-  box-shadow: inset 4px 0 0 var(--nm-acento), 0 8px 18px -12px rgba(106, 63, 224, 0.5);
+  box-shadow: inset 4px 0 0 var(--nm-acento), 0 8px 18px -12px rgba(15, 90, 220, 0.4);
 }
 .avatarLista {
   flex: none;
@@ -713,7 +713,7 @@
 }
 .planSignature {
   color: #fff;
-  background: linear-gradient(145deg, #9a6cf5, #6a3fe0);
+  background: linear-gradient(145deg, #3b86ff, #0a55cf);
 }
 .planPrestige {
   color: #6b4a00;
