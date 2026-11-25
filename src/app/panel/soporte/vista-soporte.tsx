@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useState } from "react";
 import { crearTicket, type TicketResumen } from "./actions";
+import { cn } from "@/lib/utils";
+import s from "@/components/soporte/chat-3d.module.css";
 import { ChatSoportePanel } from "./chat-soporte";
 import type { ChatSoporte } from "./chat-actions";
 
@@ -29,11 +31,13 @@ export function VistaSoporte({
   errorChatInicial: string | null;
 }) {
   const [tickets, setTickets] = useState(ticketsIniciales);
+  const [pestana, setPestana] = useState<"chat" | "tickets">("chat");
   const [creando, setCreando] = useState(false);
   const [asunto, setAsunto] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState(errorInicial);
+  const abiertos = tickets.filter((t) => t.estado !== "RESUELTO").length;
 
   async function crear() {
     if (!asunto.trim() || !mensaje.trim()) return setError("Completa el asunto y el mensaje.");
@@ -52,16 +56,35 @@ export function VistaSoporte({
   }
 
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-8 sm:px-10">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="font-display text-[22px] font-bold uppercase text-text">Soporte</h1>
-        <Button size="sm" variant="secondary" onClick={() => setCreando((v) => !v)}>
-          {creando ? "Cancelar" : "Nuevo ticket"}
-        </Button>
-      </div>
+    <main className="mx-auto w-full max-w-4xl flex-1 px-3 pb-24 pt-5 sm:px-8 sm:py-8">
+      <div className={cn(s.raiz, s.marco)}>
+        <div className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-3 px-1">
+          <h1 className="m-0 text-[clamp(26px,5vw,34px)] font-extrabold" style={{ fontFamily: "inherit", textTransform: "none", letterSpacing: "-0.01em" }}>
+            Soporte
+          </h1>
+          <div className={s.pestanas} role="tablist" aria-label="Soporte">
+            <button type="button" role="tab" aria-selected={pestana === "chat"} className={cn(s.pestana, pestana === "chat" && s.pestanaActiva)} onClick={() => setPestana("chat")}>
+              Chat en vivo
+            </button>
+            <button type="button" role="tab" aria-selected={pestana === "tickets"} className={cn(s.pestana, pestana === "tickets" && s.pestanaActiva)} onClick={() => setPestana("tickets")}>
+              Mis tickets
+              {abiertos > 0 ? <span className={s.contador}>{abiertos}</span> : null}
+            </button>
+          </div>
+        </div>
 
-      <ChatSoportePanel inicial={chatInicial} errorInicial={errorChatInicial} />
+        {pestana === "chat" ? <ChatSoportePanel inicial={chatInicial} errorInicial={errorChatInicial} alIrATickets={() => { setPestana("tickets"); setCreando(true); }} /> : null}
 
+        {pestana === "tickets" ? (
+          <div className={s.tarjeta} style={{ padding: "18px" }}>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="m-0 text-[18px] font-extrabold" style={{ textTransform: "none" }}>
+                Mis tickets
+              </h2>
+              <Button size="sm" variant="secondary" onClick={() => setCreando((v) => !v)}>
+                {creando ? "Cancelar" : "Nuevo ticket"}
+              </Button>
+            </div>
       {creando ? (
         <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-border-subtle bg-surface p-4">
           <Input label="Asunto" value={asunto} onChange={(e) => setAsunto(e.target.value)} placeholder="¿En qué te podemos ayudar?" />
@@ -104,6 +127,9 @@ export function VistaSoporte({
           ))}
         </ul>
       )}
+          </div>
+        ) : null}
+      </div>
     </main>
   );
 }

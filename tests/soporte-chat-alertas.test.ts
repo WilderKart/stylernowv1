@@ -36,7 +36,8 @@ beforeEach(() => {
         if (tabla === "perfil" && consulta.filtros.es_supersu === "true") {
           return { data: { email: "admin@stylernow.test", nombre: "SuperSU" } };
         }
-        if (tabla === "negocio") return { data: { owner_user_id: "u-1" } };
+        if (tabla === "negocio") return { data: { owner_user_id: "u-1", nombre: "Barbería Test", plan_codigo: "PRESTIGE" } };
+        if (tabla === "soporte_mensaje") return { data: { cuerpo: "necesito ayuda con Nequi", adjunto_tipo: null } };
         if (tabla === "perfil" && consulta.filtros.id === "u-1") {
           return { data: { email: "dueno@stylernow.test", nombre: "Dueño" } };
         }
@@ -58,22 +59,25 @@ const BASE: DatosAlertaSoporte = {
 };
 
 describe("soporte chat · alertas", () => {
-  it("el webhook recibe solo identificadores, nunca el cuerpo", async () => {
-    const datos = { ...BASE, alertaWebhook: true, cuerpo: "contenido privado" } as DatosAlertaSoporte & { cuerpo: string };
-    await procesarAlertasSoporte(datos);
+  it("el webhook interno recibe negocio, plan, extracto y enlace directo (el correo nunca lleva el texto)", async () => {
+    await procesarAlertasSoporte({ ...BASE, alertaWebhook: true, prioritario: true });
     expect(mocks.webhook).toHaveBeenCalledWith({
       tipo: "SOPORTE",
-      titulo: "Nuevo mensaje de soporte",
+      titulo: "[PRIORITARIO] Nuevo mensaje de soporte",
       detalle: {
         conversacion_id: "conv-1",
         negocio_id: "neg-1",
         mensaje_id: "msg-1",
         remitente_rol: "BARBERIA",
+        negocio: "Barbería Test",
+        plan: "PRESTIGE",
+        extracto: "necesito ayuda con Nequi",
+        prioritario: true,
+        con_adjunto: false,
+        enlace: "/admin/soporte?c=conv-1",
       },
       severidad: "info",
     });
-    expect(mocks.from).not.toHaveBeenCalled();
-    expect(JSON.stringify(mocks.webhook.mock.calls)).not.toContain("contenido privado");
   });
 
   it("avisa a SuperSU y a la barbería sin incluir el mensaje en el correo", async () => {
@@ -90,7 +94,7 @@ describe("soporte chat · alertas", () => {
     expect(mocks.enviar).toHaveBeenCalledTimes(2);
     const correos = mocks.enviar.mock.calls.map(([m]) => m);
     expect(correos.map((m) => m.email)).toEqual(["admin@stylernow.test", "dueno@stylernow.test"]);
-    expect(correos.map((m) => m.ruta)).toEqual(["/admin/soporte", "/panel/soporte"]);
+    expect(correos.map((m) => m.ruta)).toEqual(["/admin/soporte?c=conv-1", "/panel/soporte"]);
     for (const correo of correos) {
       expect(JSON.stringify(correo)).not.toContain("contenido privado");
       expect(correo.texto).toContain("no se incluye");

@@ -7170,6 +7170,9 @@ export type Database = {
       }
       soporte_mensaje: {
         Row: {
+          adjunto_nombre: string | null
+          adjunto_tipo: string | null
+          adjunto_url: string | null
           conversacion_id: string
           created_at: string
           cuerpo: string
@@ -7180,6 +7183,9 @@ export type Database = {
           remitente_rol: string
         }
         Insert: {
+          adjunto_nombre?: string | null
+          adjunto_tipo?: string | null
+          adjunto_url?: string | null
           conversacion_id: string
           created_at?: string
           cuerpo: string
@@ -7190,6 +7196,9 @@ export type Database = {
           remitente_rol: string
         }
         Update: {
+          adjunto_nombre?: string | null
+          adjunto_tipo?: string | null
+          adjunto_url?: string | null
           conversacion_id?: string
           created_at?: string
           cuerpo?: string
@@ -7215,6 +7224,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      soporte_respuesta_rapida: {
+        Row: {
+          activo: boolean
+          atajo: string
+          created_at: string
+          cuerpo: string
+          id: string
+          orden: number
+          titulo: string
+        }
+        Insert: {
+          activo?: boolean
+          atajo: string
+          created_at?: string
+          cuerpo: string
+          id?: string
+          orden?: number
+          titulo: string
+        }
+        Update: {
+          activo?: boolean
+          atajo?: string
+          created_at?: string
+          cuerpo?: string
+          id?: string
+          orden?: number
+          titulo?: string
+        }
+        Relationships: []
       }
       staff: {
         Row: {
@@ -9525,11 +9564,13 @@ export type Database = {
         Args: { p_pendiente: boolean; p_usuario: string }
         Returns: undefined
       }
+      _soporte_plan_codigo: { Args: { p_negocio_id: string }; Returns: string }
       _soporte_plan_incluye: {
         Args: { p_clave: string; p_negocio_id: string }
         Returns: boolean
       }
       _soporte_rol: { Args: { p_negocio_id: string }; Returns: string }
+      _soporte_ruta_negocio: { Args: { p_ruta: string }; Returns: string }
       _staff_ultima_autorizacion: {
         Args: { p_documento: string; p_negocio: string; p_staff: string }
         Returns: {
@@ -15241,6 +15282,26 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      soporte_asegurar_conversacion: {
+        Args: { p_negocio_id: string }
+        Returns: string
+      }
+      soporte_bandeja_admin: {
+        Args: never
+        Returns: {
+          ciudad: string
+          created_at: string
+          estado: string
+          id: string
+          negocio_id: string
+          negocio_nombre: string
+          no_leidos_admin: number
+          plan_codigo: string
+          prioritario: boolean
+          ultimo_mensaje_at: string
+          ultimo_mensaje_preview: string
+        }[]
+      }
       soporte_cambiar_estado: {
         Args: { p_conversacion_id: string; p_estado: string }
         Returns: {
@@ -15263,7 +15324,13 @@ export type Database = {
         }
       }
       soporte_enviar_mensaje: {
-        Args: { p_cuerpo: string; p_negocio_id: string }
+        Args: {
+          p_adjunto_nombre?: string
+          p_adjunto_tipo?: string
+          p_adjunto_url?: string
+          p_cuerpo: string
+          p_negocio_id: string
+        }
         Returns: {
           alerta_email_admin: boolean
           alerta_email_negocio: boolean
@@ -15273,13 +15340,16 @@ export type Database = {
           cuerpo: string
           id: string
           negocio_id: string
+          prioritario: boolean
           remitente_rol: string
+          tiene_adjunto: boolean
         }[]
       }
       soporte_marcar_leido: {
         Args: { p_conversacion_id: string }
         Returns: boolean
       }
+      soporte_ruta_autorizada: { Args: { p_ruta: string }; Returns: boolean }
       staff_de_sede: {
         Args: { p_sede_id: string }
         Returns: {
@@ -15941,6 +16011,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       campana_estado: [
@@ -16087,3 +16160,4 @@ export const Constants = {
     },
   },
 } as const
+

@@ -2,6 +2,8 @@
 
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
 import { procesarAlertasSoporte } from "@/lib/soporte/alertas";
+import { COLUMNAS_MENSAJE, mapearMensajes } from "@/lib/soporte/mensajes";
+import type { AdjuntoSubido, MensajeChat } from "@/lib/soporte/tipos";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -9,17 +11,10 @@ type Resultado<T = undefined> =
   | ({ ok: true } & (T extends undefined ? object : { data: T }))
   | { ok: false; error: string };
 
-export type MensajeChat = {
-  id: string;
-  conversacionId: string;
-  negocioId: string;
-  remitenteRol: "BARBERIA" | "SUPERSU";
-  cuerpo: string;
-  createdAt: string;
-  leido: boolean;
-};
-
 export type ChatSoporte = {
+  /** El plan incluye el chat en vivo (desde Studio). */
+  chatIncluido: boolean;
+  prioritario: boolean;
   conversacionId: string | null;
   negocioId: string;
   estado: "ABIERTA" | "CERRADA";
@@ -36,6 +31,8 @@ const MENSAJES_ERROR: Record<string, string> = {
   MENSAJE_REQUERIDO: "Escribe un mensaje antes de enviarlo.",
   MENSAJE_LARGO: "El mensaje no puede superar los 2000 caracteres.",
   CONVERSACION_NO_ENCONTRADA: "No encontramos la conversación.",
+  ADJUNTO_INVALIDO: "El archivo adjunto no es válido. Inténtalo de nuevo.",
+  NO_AUTENTICADO: "Tu sesión expiró. Vuelve a iniciar sesión.",
 };
 
 function traducirError(mensaje: string) {
@@ -54,6 +51,14 @@ export async function obtenerChatSoporte(): Promise<Resultado<ChatSoporte>> {
     const negocioId = await contextoBarberia();
     if (!negocioId) return { ok: false, error: "No tienes permiso para usar este chat." };
     const supabase = await createClient();
+    const rpcFuncion = async (clave: string) => {
+      const { data } = await supabase.rpc("negocio_tiene_funcion", { p_negocio_id: negocioId, p_clave: clave });
+      return data === true;
+    };
+    const [chatIncluido, prioritario] = await Promise.all([rpcFuncion("soporte_chat"), rpcFuncion("soporte_prioritario")]);
+    const base = { chatIncluido, prioritario, negocioId, estado: "ABIERTA" as const, noLeidosNegocio: 0, ultimoMensajeAt: null, ultimoMensajePreview: null, conversacionId: null, mensajes: [] };
+    // Essential no tiene chat: no se consulta nada (la base tampoco lo permitiría).
+    if (!chatIncluido) return { ok: true, data: base };
     const { data: conversacion, error: errorConv } = await supabase
       .from("soporte_conversacion")
       .select("id, negocio_id, estado, no_leidos_negocio, ultimo_mensaje_at, ultimo_mensaje_preview")
@@ -61,23 +66,12 @@ export async function obtenerChatSoporte(): Promise<Resultado<ChatSoporte>> {
       .maybeSingle();
     if (errorConv) return { ok: false, error: errorConv.message };
     if (!conversacion) {
-      return {
-        ok: true,
-        data: {
-          conversacionId: null,
-          negocioId,
-          estado: "ABIERTA",
-          noLeidosNegocio: 0,
-          ultimoMensajeAt: null,
-          ultimoMensajePreview: null,
-          mensajes: [],
-        },
-      };
+      return { ok: true, data: base };
     }
 
     const { data: mensajes, error: errorMensajes } = await supabase
       .from("soporte_mensaje")
-      .select("id, conversacion_id, negocio_id, remitente_rol, cuerpo, created_at, leido_at")
+      .select(COLUMNAS_MENSAJE)
       .eq("conversacion_id", conversacion.id)
       .order("created_at", { ascending: true })
       .limit(200);
@@ -86,21 +80,15 @@ export async function obtenerChatSoporte(): Promise<Resultado<ChatSoporte>> {
     return {
       ok: true,
       data: {
+        chatIncluido,
+        prioritario,
         conversacionId: conversacion.id,
         negocioId: conversacion.negocio_id,
         estado: conversacion.estado as "ABIERTA" | "CERRADA",
         noLeidosNegocio: conversacion.no_leidos_negocio,
         ultimoMensajeAt: conversacion.ultimo_mensaje_at,
         ultimoMensajePreview: conversacion.ultimo_mensaje_preview,
-        mensajes: (mensajes ?? []).map((m) => ({
-          id: m.id,
-          conversacionId: m.conversacion_id,
-          negocioId: m.negocio_id,
-          remitenteRol: m.remitente_rol as "BARBERIA" | "SUPERSU",
-          cuerpo: m.cuerpo,
-          createdAt: m.created_at,
-          leido: m.leido_at !== null,
-        })),
+        mensajes: await mapearMensajes(supabase, mensajes ?? []),
       },
     };
   } catch (e) {
@@ -124,7 +112,21 @@ export async function contarNoLeidosSoporte(): Promise<number> {
   }
 }
 
-export async function enviarMensajeChat(cuerpo: string): Promise<Resultado> {
+/** Garantiza la conversación del negocio y devuelve su id: el navegador lo necesita para armar la ruta de subida del adjunto. */
+export async function prepararAdjuntosChat(): Promise<Resultado<{ conversacionId: string; negocioId: string }>> {
+  try {
+    const negocioId = await contextoBarberia();
+    if (!negocioId) return { ok: false, error: "No tienes permiso para usar este chat." };
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("soporte_asegurar_conversacion", { p_negocio_id: negocioId });
+    if (error || !data) return { ok: false, error: traducirError(error?.message ?? "CONVERSACION_NO_ENCONTRADA") };
+    return { ok: true, data: { conversacionId: data, negocioId } };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
+export async function enviarMensajeChat(cuerpo: string, adjunto?: AdjuntoSubido | null): Promise<Resultado> {
   try {
     const negocioId = await contextoBarberia();
     if (!negocioId) return { ok: false, error: "No tienes permiso para usar este chat." };
@@ -132,6 +134,7 @@ export async function enviarMensajeChat(cuerpo: string): Promise<Resultado> {
     const { data, error } = await supabase.rpc("soporte_enviar_mensaje", {
       p_negocio_id: negocioId,
       p_cuerpo: cuerpo,
+      ...(adjunto ? { p_adjunto_url: adjunto.ruta, p_adjunto_tipo: adjunto.tipo, p_adjunto_nombre: adjunto.nombre } : {}),
     });
     if (error) return { ok: false, error: traducirError(error.message) };
     const fila = Array.isArray(data) ? data[0] : null;
@@ -146,6 +149,8 @@ export async function enviarMensajeChat(cuerpo: string): Promise<Resultado> {
         alertaWebhook: fila.alerta_webhook,
         alertaEmailAdmin: fila.alerta_email_admin,
         alertaEmailNegocio: fila.alerta_email_negocio,
+        prioritario: fila.prioritario,
+        tieneAdjunto: fila.tiene_adjunto,
       });
     } catch {
       void 0;

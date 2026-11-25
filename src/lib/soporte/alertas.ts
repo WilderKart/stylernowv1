@@ -11,6 +11,8 @@ export type DatosAlertaSoporte = {
   alertaWebhook: boolean;
   alertaEmailAdmin: boolean;
   alertaEmailNegocio: boolean;
+  prioritario?: boolean;
+  tieneAdjunto?: boolean;
 };
 
 async function enviarCorreo(params: {
@@ -39,14 +41,34 @@ export async function procesarAlertasSoporte(datos: DatosAlertaSoporte): Promise
   const esBarberia = datos.remitenteRol === "BARBERIA";
 
   if (datos.alertaWebhook) {
+    // Contexto para quien atiende desde el webhook interno: negocio, plan y extracto (el correo, en cambio, nunca lleva el texto).
+    let contexto: { negocio?: string; plan?: string; extracto?: string } = {};
+    try {
+      const admin = createAdminClient();
+      const [{ data: neg }, { data: msg }] = await Promise.all([
+        admin.from("negocio").select("nombre, plan_codigo").eq("id", datos.negocioId).maybeSingle(),
+        admin.from("soporte_mensaje").select("cuerpo, adjunto_tipo").eq("id", datos.mensajeId).maybeSingle(),
+      ]);
+      contexto = {
+        negocio: neg?.nombre,
+        plan: neg?.plan_codigo ?? undefined,
+        extracto: msg ? (msg.cuerpo.trim() ? msg.cuerpo.trim().slice(0, 140) : msg.adjunto_tipo === "PDF" ? "📄 PDF" : "📷 Imagen") : undefined,
+      };
+    } catch {
+      contexto = {};
+    }
     await enviarAlertaOperativa({
       tipo: "SOPORTE",
-      titulo: esBarberia ? "Nuevo mensaje de soporte" : "Nueva respuesta de soporte",
+      titulo: esBarberia ? `${datos.prioritario ? "[PRIORITARIO] " : ""}Nuevo mensaje de soporte` : "Nueva respuesta de soporte",
       detalle: {
         conversacion_id: datos.conversacionId,
         negocio_id: datos.negocioId,
         mensaje_id: datos.mensajeId,
         remitente_rol: datos.remitenteRol,
+        ...contexto,
+        prioritario: datos.prioritario ?? false,
+        con_adjunto: datos.tieneAdjunto ?? false,
+        enlace: `/admin/soporte?c=${datos.conversacionId}`,
       },
       severidad: "info",
     });
@@ -70,7 +92,7 @@ export async function procesarAlertasSoporte(datos: DatosAlertaSoporte): Promise
           id: `${datos.mensajeId}-admin`,
           email: perfil.email,
           asunto: "Nuevo mensaje en el chat de soporte",
-          ruta: "/admin/soporte",
+          ruta: `/admin/soporte?c=${datos.conversacionId}`,
           destinatario: perfil.nombre || "SuperSU",
         }),
       );
