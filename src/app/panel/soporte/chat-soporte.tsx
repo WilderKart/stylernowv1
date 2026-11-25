@@ -80,9 +80,19 @@ export function ChatSoportePanel({ inicial, errorInicial, alIrATickets }: { inic
 
   const onEnviar = useCallback(
     async (cuerpo: string, adjunto: AdjuntoSubido | null) => {
+      // El mensaje aparece al instante (optimista); la consulta que sigue lo reemplaza por el real sin hacer esperar a quien escribe.
+      const idTemporal = `tmp-${Date.now()}`;
+      setChat((prev) =>
+        prev
+          ? { ...prev, mensajes: [...prev.mensajes, { id: idTemporal, conversacionId: prev.conversacionId ?? "", negocioId: prev.negocioId, remitenteRol: "BARBERIA", cuerpo, createdAt: new Date().toISOString(), leido: false, adjunto: adjunto ? { tipo: adjunto.tipo, nombre: adjunto.nombre, url: null } : null }] }
+          : prev,
+      );
       const res = await enviarMensajeChat(cuerpo, adjunto);
-      if (!res.ok) return res.error;
-      await recargar();
+      if (!res.ok) {
+        setChat((prev) => (prev ? { ...prev, mensajes: prev.mensajes.filter((m) => m.id !== idTemporal) } : prev));
+        return res.error;
+      }
+      void recargar();
       return null;
     },
     [recargar],

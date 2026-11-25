@@ -3,7 +3,7 @@
 import { HiloChat, type RespuestaRapidaChat } from "@/components/soporte/hilo-chat";
 import s from "@/components/soporte/chat-3d.module.css";
 import { normalizar } from "@/lib/busqueda/difuso";
-import type { AdjuntoSubido } from "@/lib/soporte/tipos";
+import type { AdjuntoSubido, MensajeChat } from "@/lib/soporte/tipos";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ExternalLink, Search, Star, X } from "lucide-react";
@@ -155,9 +155,17 @@ export function ChatAdmin({ conversacionesIniciales, errorInicial, seleccionInic
   const onEnviar = useCallback(
     async (cuerpo: string, adjunto: AdjuntoSubido | null) => {
       if (!negocioId || !seleccion) return "Selecciona una conversación.";
+      // El mensaje aparece al instante (optimista); la consulta que sigue lo reemplaza por el real sin hacer esperar a quien escribe.
+      const idTemporal = `tmp-${Date.now()}`;
+      const temporal: MensajeChat = { id: idTemporal, conversacionId: seleccion, negocioId, remitenteRol: "SUPERSU", cuerpo, createdAt: new Date().toISOString(), leido: false, adjunto: adjunto ? { tipo: adjunto.tipo, nombre: adjunto.nombre, url: null } : null };
+      setChat((prev) => (prev && prev.conversacion.id === seleccion ? { ...prev, mensajes: [...prev.mensajes, temporal] } : prev));
       const res = await enviarMensajeChatAdmin(negocioId, cuerpo, adjunto);
-      if (!res.ok) return res.error;
-      await Promise.all([recargarChat(seleccion), recargarLista()]);
+      if (!res.ok) {
+        setChat((prev) => (prev ? { ...prev, mensajes: prev.mensajes.filter((m) => m.id !== idTemporal) } : prev));
+        return res.error;
+      }
+      void recargarChat(seleccion);
+      void recargarLista();
       return null;
     },
     [negocioId, seleccion, recargarChat, recargarLista],

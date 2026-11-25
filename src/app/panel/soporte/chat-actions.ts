@@ -1,11 +1,11 @@
 "use server";
 
+import { after } from "next/server";
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
 import { procesarAlertasSoporte } from "@/lib/soporte/alertas";
 import { COLUMNAS_MENSAJE, mapearMensajes } from "@/lib/soporte/mensajes";
 import type { AdjuntoSubido, MensajeChat } from "@/lib/soporte/tipos";
 import { createClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
 
 type Resultado<T = undefined> =
   | ({ ok: true } & (T extends undefined ? object : { data: T }))
@@ -140,23 +140,25 @@ export async function enviarMensajeChat(cuerpo: string, adjunto?: AdjuntoSubido 
     const fila = Array.isArray(data) ? data[0] : null;
     if (!fila) return { ok: false, error: "No se pudo registrar el mensaje." };
 
-    try {
-      await procesarAlertasSoporte({
-        negocioId: fila.negocio_id,
-        conversacionId: fila.conversacion_id,
-        mensajeId: fila.id,
-        remitenteRol: fila.remitente_rol as "BARBERIA" | "SUPERSU",
-        alertaWebhook: fila.alerta_webhook,
-        alertaEmailAdmin: fila.alerta_email_admin,
-        alertaEmailNegocio: fila.alerta_email_negocio,
-        prioritario: fila.prioritario,
-        tieneAdjunto: fila.tiene_adjunto,
-      });
-    } catch {
-      void 0;
-    }
+    // Las alertas (webhook y correos) se envían DESPUÉS de responder: quien escribe no espera a esos servicios externos.
+    after(async () => {
+      try {
+        await procesarAlertasSoporte({
+          negocioId: fila.negocio_id,
+          conversacionId: fila.conversacion_id,
+          mensajeId: fila.id,
+          remitenteRol: fila.remitente_rol as "BARBERIA" | "SUPERSU",
+          alertaWebhook: fila.alerta_webhook,
+          alertaEmailAdmin: fila.alerta_email_admin,
+          alertaEmailNegocio: fila.alerta_email_negocio,
+          prioritario: fila.prioritario,
+          tieneAdjunto: fila.tiene_adjunto,
+        });
+      } catch {
+        void 0;
+      }
+    });
 
-    revalidatePath("/panel/soporte");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
@@ -170,7 +172,6 @@ export async function marcarChatLeido(conversacionId: string): Promise<Resultado
     const supabase = await createClient();
     const { error } = await supabase.rpc("soporte_marcar_leido", { p_conversacion_id: conversacionId });
     if (error) return { ok: false, error: traducirError(error.message) };
-    revalidatePath("/panel/soporte");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
