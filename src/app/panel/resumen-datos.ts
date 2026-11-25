@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { listarActividadPanel } from "./buscador-actions";
 import { obtenerFuncionesReportes, obtenerIngresosPeriodo, obtenerServiciosTop } from "./reportes/actions";
 
 /**
@@ -19,7 +20,7 @@ export interface Notificacion {
   detalle: string;
   cuando: string;
   href: string;
-  tono: "violet" | "amber" | "blue";
+  tono: "violet" | "green" | "amber" | "rose" | "blue";
 }
 export interface DatosResumenSuave {
   equipo: { total: number; miembros: MiembroEquipo[] };
@@ -58,7 +59,7 @@ export async function cargarDatosResumenSuave(negocioId: string, activo: boolean
 
   const rpc = supabase.rpc as unknown as (n: string, a: Record<string, unknown>) => Promise<{ data: { total: number | string }[] | null; error: unknown }>;
 
-  const [equipoRes, activosRes, ayerRes, funciones, recientesRes] = await Promise.all([
+  const [equipoRes, activosRes, ayerRes, funciones] = await Promise.all([
     supabase
       .from("vista_staff_negocio")
       .select("nombre, foto_url, especialidad", { count: "exact" })
@@ -95,15 +96,6 @@ export async function cargarDatosResumenSuave(negocioId: string, activo: boolean
           .neq("estado", "CANCELADA")
       : Promise.resolve({ count: null }),
     obtenerFuncionesReportes(negocioId),
-    activo
-      ? supabase
-          .from("reserva")
-          .select("id, created_at, hora_inicio, cliente:cliente_id (nombre)")
-          .eq("negocio_id", negocioId)
-          .neq("estado", "CANCELADA")
-          .order("created_at", { ascending: false })
-          .limit(3)
-      : Promise.resolve({ data: [] }),
   ]);
 
   // Servicios e ingresos dependen del plan (Reportes): se piden solo si la bandera lo permite.
@@ -126,19 +118,9 @@ export async function cargarDatosResumenSuave(negocioId: string, activo: boolean
     return { etiqueta: MESES[d.getUTCMonth()], valor: porMes.get(d.toISOString().slice(0, 7)) ?? 0 };
   });
 
-  const notificaciones: Notificacion[] = [];
-  for (const r of (recientesRes.data ?? []) as { id: string; created_at: string; hora_inicio: string; cliente: { nombre: string } | null }[]) {
-    const dia = new Date(r.hora_inicio).toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short", timeZone: "America/Bogota" });
-    const hora = new Date(r.hora_inicio).toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit", timeZone: "America/Bogota" });
-    notificaciones.push({
-      clave: r.id,
-      titulo: "Nueva reserva",
-      detalle: `${r.cliente?.nombre ?? "Un cliente"} reservó para ${dia} a las ${hora}.`,
-      cuando: hace(r.created_at),
-      href: "/panel/agenda",
-      tono: "violet",
-    });
-  }
+  // La misma actividad que muestra la campana (reservas y, para el dueño, la auditoría del negocio).
+  const actividad = activo ? await listarActividadPanel() : null;
+  const notificaciones: Notificacion[] = actividad && actividad.ok ? actividad.data.slice(0, 4).map((n) => ({ clave: n.clave, titulo: n.titulo, detalle: n.detalle, cuando: hace(n.fecha), href: n.href, tono: n.tono })) : [];
 
   return {
     equipo: { total: equipoRes.count ?? miembros.length, miembros },

@@ -232,3 +232,24 @@ html[data-theme="dark"]:has([data-panel="suave"]) {
   text-transform: none;
   letter-spacing: 0;
 }
+
+/* ───────────── Tarjetas: todas iguales (referencia «Fidelidad y lealtad») ─────────────
+ * Blanca, borde fino, esquinas de 24 px y sombra suave, sin importar el borde grueso o la sombra dura de cada pantalla.
+ * Aplica al componente Card y a los bloques `rounded-2xl border` del panel (enlaces-tarjeta, avisos, estados vacíos).
+ */
+[data-panel="suave"] :is(.sn-card, .rounded-2xl.border:is(.bg-surface, .bg-app), .rounded-2xl.border-dashed) {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--sn-shadow-hard-sm);
+}
+[data-panel="suave"] a.rounded-2xl.border:hover {
+  box-shadow: var(--sn-shadow-hard);
+}
+
+/* Tarjeta dentro de otra tarjeta: sin sombra ni borde propio, para no apilar marcos. */
+[data-panel="suave"] :is(.sn-card, .rounded-2xl.border) :is(.sn-card, .rounded-2xl.border:is(.bg-surface, .bg-app)) {
+  background: var(--surface);
+  border-color: transparent;
+  box-shadow: none;
+}

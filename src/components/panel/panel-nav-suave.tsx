@@ -3,6 +3,7 @@
 import { cerrarSesion } from "@/app/perfil/actions";
 import { SoporteNavBadge } from "@/components/panel/soporte-nav-badge";
 import { BotonTema } from "@/components/tema/tema-cliente";
+import { BuscadorPanel, CampanaPanel } from "./barra-superior-panel";
 import type { RolPanel } from "@/lib/auth/resolver-contexto";
 import { cn } from "@/lib/utils";
 import {
@@ -416,6 +417,14 @@ export function PanelNavSuave({ rol, prestaServicios = false }: { rol: RolPanel;
         </div>
       </aside>
 
+      {/* Escritorio: buscador y notificaciones */}
+      <div className="sticky top-0 z-30 hidden w-full lg:block">
+        <div className="pointer-events-none mx-auto flex w-full max-w-[1680px] items-center justify-end gap-3 px-8 pt-4">
+          <BuscadorPanel className="pointer-events-auto" />
+          <CampanaPanel className="pointer-events-auto" />
+        </div>
+      </div>
+
       {/* Escritorio: banner de la categoría y módulos hermanos (como en la referencia de Finanzas). */}
       {grupoActivo && grupoActivo.items.length > 1 ? (
         <div className="mx-auto hidden w-full max-w-6xl flex-wrap items-center gap-4 px-4 pt-6 sm:px-8 lg:flex">
@@ -446,7 +455,7 @@ export function PanelNavSuave({ rol, prestaServicios = false }: { rol: RolPanel;
       ) : null}
 
       {/* ───────── Móvil: cabecera ligera ───────── */}
-      <header className="sticky top-0 z-30 flex items-center justify-between gap-2 bg-[color-mix(in_srgb,var(--app-bg)_88%,transparent)] px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md lg:hidden">
+      <header className="sticky top-0 z-30 flex items-center justify-between gap-2 bg-[var(--app-bg)] px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] lg:hidden">
         <Link href="/panel" className="flex items-center gap-2.5 text-[var(--text)]" aria-label="StylerNow, ir al resumen">
           <span aria-hidden className="grid size-9 place-items-center rounded-full bg-[var(--text)] text-[15px] font-extrabold text-[var(--bg)]">
             S
@@ -455,7 +464,11 @@ export function PanelNavSuave({ rol, prestaServicios = false }: { rol: RolPanel;
             Styler<span className="text-[var(--brand)]">Now</span>
           </span>
         </Link>
-        <BotonTema className="pn-pill grid size-11 place-items-center bg-[var(--bg)] text-[var(--text)] shadow-[var(--sn-shadow-hard-sm)]" />
+        <div className="flex items-center gap-2">
+          <BuscadorPanel />
+          <CampanaPanel />
+          <BotonTema className="pn-pill grid size-11 place-items-center bg-[var(--bg)] text-[var(--text)] shadow-[var(--sn-shadow-hard-sm)]" />
+        </div>
       </header>
 
       {/* ───────── Móvil: barra inferior flotante ───────── */}

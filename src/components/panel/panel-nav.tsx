@@ -6,6 +6,7 @@ import { CalendarDays, Gift, LayoutDashboard, Menu, Scissors, Settings, ShieldCh
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { BuscadorPanel, CampanaPanel } from "./barra-superior-panel";
 import { BotonTema } from "@/components/tema/tema-cliente";
 import { SoporteNavBadge } from "@/components/panel/soporte-nav-badge";
 import { PanelNavSuave } from "./panel-nav-suave";
@@ -211,12 +212,24 @@ function PanelNavClasica({ rol, prestaServicios = false }: { rol: RolPanel; pres
         {rol === "GUARDIAN" ? <p className="border-t border-[var(--side-borde)] px-5 py-3 text-[11px] font-bold uppercase tracking-wide text-[var(--side-accent)]">Guardian</p> : null}
       </aside>
 
+      {/* Escritorio: buscador y notificaciones (diseño clásico). */}
+      <div className="sticky top-0 z-20 hidden w-full lg:block">
+        <div className="pointer-events-none mx-auto flex w-full max-w-6xl items-center justify-end gap-3 px-10 pt-4">
+          <BuscadorPanel estilo="clasico" className="pointer-events-auto" />
+          <CampanaPanel estilo="clasico" className="pointer-events-auto" />
+        </div>
+      </div>
+
       {/* Móvil: barra superior con botón de menú. */}
       <header className="sticky top-0 z-30 flex items-center justify-between gap-2 bg-[var(--nav-bg)] px-4 py-2.5 text-[var(--nav-text)] lg:hidden">
         <Link href="/panel" className="font-display text-[20px] font-bold uppercase leading-none tracking-tight">
           STYLER<span className="text-[var(--nav-accent)]">NOW</span>
         </Link>
-        <BotonTema className="ml-auto flex size-11 items-center justify-center border-2 border-[var(--nav-borde)]" />
+        <div className="ml-auto flex items-center gap-2">
+          <BuscadorPanel estilo="clasico" />
+          <CampanaPanel estilo="clasico" />
+        </div>
+        <BotonTema className="flex size-11 items-center justify-center border-2 border-[var(--nav-borde)]" />
         <button
           type="button"
           onClick={() => setAbierto(true)}
