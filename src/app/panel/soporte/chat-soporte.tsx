@@ -2,7 +2,7 @@
 
 import { HiloChat } from "@/components/soporte/hilo-chat";
 import s from "@/components/soporte/chat-3d.module.css";
-import type { AdjuntoSubido } from "@/lib/soporte/tipos";
+import { mensajeDesdeEvento, type AdjuntoSubido } from "@/lib/soporte/tipos";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Lock } from "lucide-react";
@@ -12,7 +12,7 @@ import { enviarMensajeChat, marcarChatLeido, obtenerChatSoporte, prepararAdjunto
 
 const AVATAR_SOPORTE = "/avatars/soporte-stylernow.png";
 /** Cada cuánto se consulta si hay mensajes nuevos como respaldo del tiempo real. */
-const RESPALDO_MS = 4000;
+const RESPALDO_MS = 5000;
 
 /** ¿El chat ya mostrado es idéntico al recién consultado? (mismo último mensaje, estado y no leídos) */
 function mismoChat(a: ChatSoporte | null, b: ChatSoporte) {
@@ -44,6 +44,14 @@ export function ChatSoportePanel({ inicial, errorInicial, alIrATickets }: { inic
     let cancelado = false;
     let canal: ReturnType<typeof supabase.channel> | null = null;
     const negocioId = chat.negocioId;
+    // Las consultas son Server Actions y Next las ejecuta en fila: si llueven, el envío del usuario espera su turno y se
+    // siente trabado. Por eso se agrupan en una sola, medio segundo después del último evento.
+    let temporizadorRefresco: number | undefined;
+    let conectado = false;
+    const refrescar = () => {
+      window.clearTimeout(temporizadorRefresco);
+      temporizadorRefresco = window.setTimeout(() => void recargar(), 500);
+    };
     void (async () => {
       const { data } = await supabase.auth.getSession();
       if (cancelado) return;
@@ -51,20 +59,33 @@ export function ChatSoportePanel({ inicial, errorInicial, alIrATickets }: { inic
       if (cancelado) return;
       canal = supabase
         .channel(`soporte-panel-${negocioId}`)
-        .on("postgres_changes", { event: "INSERT", schema: "public", table: "soporte_mensaje", filter: filtro }, () => void recargar())
-        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "soporte_conversacion", filter: filtro }, () => void recargar())
-        .subscribe();
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "soporte_mensaje", filter: filtro }, (p) => {
+          // Respuesta de soporte: se pinta ya, con los datos del propio evento; la consulta confirma después.
+          const nuevo = mensajeDesdeEvento(p.new);
+          if (nuevo && nuevo.remitenteRol !== "BARBERIA") {
+            setChat((prev) => (prev && !prev.mensajes.some((m) => m.id === nuevo.id) ? { ...prev, mensajes: [...prev.mensajes, nuevo] } : prev));
+          }
+          refrescar();
+        })
+        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "soporte_conversacion", filter: filtro }, refrescar)
+        .subscribe((estado) => {
+          conectado = estado === "SUBSCRIBED";
+        });
     })();
     // Respaldo por si el canal en tiempo real se cae: consulta cada pocos segundos con la pestaña visible y al volver a ella.
     const siVisible = () => {
       if (document.visibilityState === "visible") void recargar();
     };
-    const temporizador = window.setInterval(siVisible, RESPALDO_MS);
+    // El sondeo solo trabaja si el canal en vivo está caído; con el canal conectado no hace falta y no compite con los envíos.
+    const temporizador = window.setInterval(() => {
+      if (!conectado) siVisible();
+    }, RESPALDO_MS);
     document.addEventListener("visibilitychange", siVisible);
     window.addEventListener("online", siVisible);
     window.addEventListener("focus", siVisible);
     return () => {
       window.clearInterval(temporizador);
+      window.clearTimeout(temporizadorRefresco);
       document.removeEventListener("visibilitychange", siVisible);
       window.removeEventListener("online", siVisible);
       window.removeEventListener("focus", siVisible);
@@ -92,10 +113,10 @@ export function ChatSoportePanel({ inicial, errorInicial, alIrATickets }: { inic
         setChat((prev) => (prev ? { ...prev, mensajes: prev.mensajes.filter((m) => m.id !== idTemporal) } : prev));
         return res.error;
       }
-      void recargar();
+      // Sin recargar aquí: el evento en vivo de este mismo mensaje dispara la consulta (agrupada) y reemplaza el temporal.
       return null;
     },
-    [recargar],
+    [],
   );
 
   const prepararSubida = useCallback(async () => {

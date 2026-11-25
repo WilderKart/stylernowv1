@@ -3,7 +3,7 @@
 import { HiloChat, type RespuestaRapidaChat } from "@/components/soporte/hilo-chat";
 import s from "@/components/soporte/chat-3d.module.css";
 import { normalizar } from "@/lib/busqueda/difuso";
-import type { AdjuntoSubido, MensajeChat } from "@/lib/soporte/tipos";
+import { mensajeDesdeEvento, type AdjuntoSubido, type MensajeChat } from "@/lib/soporte/tipos";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ExternalLink, Search, Star, X } from "lucide-react";
@@ -26,7 +26,7 @@ import {
 const AVATAR_NEGOCIO = "/avatars/negocio.svg";
 const AVATAR_SOPORTE = "/avatars/soporte-stylernow.png";
 /** Cada cuánto se consulta si hay mensajes nuevos como respaldo del tiempo real (solo con la pestaña visible). */
-const RESPALDO_MS = 4000;
+const RESPALDO_MS = 5000;
 type Filtro = "todos" | "abiertas" | "cerradas" | "sin_leer";
 
 const hora = (iso: string) => new Date(iso).toLocaleString("es-CO", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true, timeZone: "America/Bogota" });
@@ -98,9 +98,16 @@ export function ChatAdmin({ conversacionesIniciales, errorInicial, seleccionInic
   // la bandeja Y el hilo abierto. Además hay un respaldo periódico y al volver a la pestaña, por si el canal se cae.
   useEffect(() => {
     const supabase = createClient();
+    // Las consultas son Server Actions y Next las ejecuta en fila: si llueven (3 eventos por mensaje + sondeo), el envío del
+    // usuario espera su turno y se siente trabado. Por eso se agrupan en una sola, medio segundo después del último evento.
+    let temporizadorRefresco: number | undefined;
+    let conectado = false;
     const refrescar = () => {
-      void recargarLista();
-      if (seleccionRef.current) void recargarChat(seleccionRef.current);
+      window.clearTimeout(temporizadorRefresco);
+      temporizadorRefresco = window.setTimeout(() => {
+        void recargarLista();
+        if (seleccionRef.current) void recargarChat(seleccionRef.current);
+      }, 500);
     };
     // El canal debe conectarse YA autenticado con la sesión: si se suscribe antes de que Realtime tenga el token, la base
     // lo trata como anónimo, la RLS rechaza los eventos ("401 Unauthorized") y los mensajes no llegan hasta recargar.
@@ -113,19 +120,32 @@ export function ChatAdmin({ conversacionesIniciales, errorInicial, seleccionInic
       if (cancelado) return;
       canal = supabase
         .channel("soporte-admin")
-        .on("postgres_changes", { event: "INSERT", schema: "public", table: "soporte_mensaje" }, refrescar)
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "soporte_mensaje" }, (p) => {
+          // Mensaje de la barbería en el hilo abierto: se pinta ya, con los datos del propio evento; la consulta confirma después.
+          const nuevo = mensajeDesdeEvento(p.new);
+          if (nuevo && nuevo.remitenteRol !== "SUPERSU" && nuevo.conversacionId === seleccionRef.current) {
+            setChat((prev) => (prev && prev.conversacion.id === nuevo.conversacionId && !prev.mensajes.some((m) => m.id === nuevo.id) ? { ...prev, mensajes: [...prev.mensajes, nuevo] } : prev));
+          }
+          refrescar();
+        })
         .on("postgres_changes", { event: "*", schema: "public", table: "soporte_conversacion" }, refrescar)
-        .subscribe();
+        .subscribe((estado) => {
+          conectado = estado === "SUBSCRIBED";
+        });
     })();
     const siVisible = () => {
       if (document.visibilityState === "visible") refrescar();
     };
-    const temporizador = window.setInterval(siVisible, RESPALDO_MS);
+    // El sondeo solo trabaja si el canal en vivo está caído; con el canal conectado no hace falta y no compite con los envíos.
+    const temporizador = window.setInterval(() => {
+      if (!conectado) siVisible();
+    }, RESPALDO_MS);
     document.addEventListener("visibilitychange", siVisible);
     window.addEventListener("online", siVisible);
     window.addEventListener("focus", siVisible);
     return () => {
       window.clearInterval(temporizador);
+      window.clearTimeout(temporizadorRefresco);
       document.removeEventListener("visibilitychange", siVisible);
       window.removeEventListener("online", siVisible);
       window.removeEventListener("focus", siVisible);
@@ -164,11 +184,10 @@ export function ChatAdmin({ conversacionesIniciales, errorInicial, seleccionInic
         setChat((prev) => (prev ? { ...prev, mensajes: prev.mensajes.filter((m) => m.id !== idTemporal) } : prev));
         return res.error;
       }
-      void recargarChat(seleccion);
-      void recargarLista();
+      // Sin recargar aquí: el evento en vivo de este mismo mensaje dispara la consulta (agrupada) y reemplaza el temporal.
       return null;
     },
-    [negocioId, seleccion, recargarChat, recargarLista],
+    [negocioId, seleccion],
   );
 
   const prepararSubida = useCallback(async () => {
