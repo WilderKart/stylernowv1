@@ -120,6 +120,7 @@ export function ChatSoportePanel({ inicial, errorInicial, alIrATickets }: { inic
         miRol="BARBERIA"
         nombreOtro="Soporte StylerNow"
         avatarOtro={AVATAR_SOPORTE}
+        avatarYo="/avatars/negocio.svg"
         cerrada={cerrada}
         chipsInicio={CHIPS_INICIO}
         onEnviar={onEnviar}

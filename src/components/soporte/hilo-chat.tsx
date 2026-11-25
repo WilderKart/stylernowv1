@@ -23,6 +23,8 @@ type Props = {
   miRol: "BARBERIA" | "SUPERSU";
   nombreOtro: string;
   avatarOtro: string;
+  /** Avatar propio junto a los mensajes enviados (opcional: SuperSU no lo usa). */
+  avatarYo?: string;
   cerrada?: boolean;
   placeholder?: string;
   chipsInicio?: string[];
@@ -47,7 +49,7 @@ function etiquetaDia(iso: string) {
   return new Date(iso).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Bogota" });
 }
 
-export function HiloChat({ mensajes, miRol, nombreOtro, avatarOtro, cerrada = false, placeholder, chipsInicio, onEnviar, prepararSubida, respuestasRapidas, onGestionarRespuestas }: Props) {
+export function HiloChat({ mensajes, miRol, nombreOtro, avatarOtro, avatarYo, cerrada = false, placeholder, chipsInicio, onEnviar, prepararSubida, respuestasRapidas, onGestionarRespuestas }: Props) {
   const [texto, setTexto] = useState("");
   const [pendiente, setPendiente] = useState<Pendiente | null>(null);
   const [enviando, setEnviando] = useState(false);
@@ -245,7 +247,7 @@ export function HiloChat({ mensajes, miRol, nombreOtro, avatarOtro, cerrada = fa
                 const yo = m.remitenteRol === miRol;
                 return (
                   <div key={m.id} className={cn(s.fila, yo && s.filaYo)}>
-                    {!yo ? <img src={avatarOtro} alt="" className={s.miniAvatar} /> : null}
+                    {!yo ? <img src={avatarOtro} alt="" className={s.miniAvatar} /> : avatarYo ? <img src={avatarYo} alt="" className={s.miniAvatar} /> : null}
                     <div className={cn(s.columna, yo && s.columnaYo)}>
                       <span className={s.meta}>
                         {yo ? (
