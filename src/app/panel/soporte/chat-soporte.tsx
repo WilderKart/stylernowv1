@@ -187,6 +187,7 @@ export function ChatSoportePanel({ inicial, errorInicial, alIrATickets }: { inic
         nombreOtro="Soporte StylerNow"
         avatarOtro={AVATAR_SOPORTE}
         avatarYo="/avatars/negocio.svg"
+        negocioIdCanal={chat?.negocioId}
         cerrada={cerrada}
         chipsInicio={CHIPS_INICIO}
         onEnviar={onEnviar}

@@ -306,7 +306,8 @@ export function ChatAdmin({ conversacionesIniciales, errorInicial, seleccionInic
                 nombreOtro={actual.conversacion.negocioNombre ?? "Negocio"}
                 avatarOtro={AVATAR_NEGOCIO}
                 avatarYo={AVATAR_SOPORTE}
-                placeholder="Escribe una respuesta… (usa / para respuestas rápidas)"
+                negocioIdCanal={actual.conversacion.negocioId}
+                placeholder="Escribe una respuesta… (/ para plantillas)"
                 onEnviar={onEnviar}
                 prepararSubida={prepararSubida}
                 respuestasRapidas={rapidasActivas}

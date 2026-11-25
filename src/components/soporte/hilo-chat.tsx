@@ -5,6 +5,7 @@
 import { comprimirImagen } from "@/lib/soporte/comprimir-imagen";
 import { BUCKET_ADJUNTOS, LIMITE_PDF_BYTES, TIPOS_IMAGEN, type AdjuntoSubido, type MensajeChat } from "@/lib/soporte/tipos";
 import { createClient } from "@/lib/supabase/client";
+import { useEscritura } from "./use-escritura";
 import { cn } from "@/lib/utils";
 import { Check, CheckCheck, FileText, Paperclip, Send, X, Zap } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -25,6 +26,8 @@ type Props = {
   avatarOtro: string;
   /** Avatar propio junto a los mensajes enviados (opcional: SuperSU no lo usa). */
   avatarYo?: string;
+  /** Negocio al que pertenece el hilo: con él se abre el canal privado del indicador «está escribiendo…». */
+  negocioIdCanal?: string | null;
   cerrada?: boolean;
   placeholder?: string;
   chipsInicio?: string[];
@@ -49,7 +52,7 @@ function etiquetaDia(iso: string) {
   return new Date(iso).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Bogota" });
 }
 
-export function HiloChat({ mensajes, miRol, nombreOtro, avatarOtro, avatarYo, cerrada = false, placeholder, chipsInicio, onEnviar, prepararSubida, respuestasRapidas, onGestionarRespuestas }: Props) {
+export function HiloChat({ mensajes, miRol, nombreOtro, avatarOtro, avatarYo, negocioIdCanal, cerrada = false, placeholder, chipsInicio, onEnviar, prepararSubida, respuestasRapidas, onGestionarRespuestas }: Props) {
   const [texto, setTexto] = useState("");
   const [pendiente, setPendiente] = useState<Pendiente | null>(null);
   const [enviando, setEnviando] = useState(false);
@@ -59,13 +62,15 @@ export function HiloChat({ mensajes, miRol, nombreOtro, avatarOtro, avatarYo, ce
   const [rapidasAbierto, setRapidasAbierto] = useState(false);
   const [indiceRapida, setIndiceRapida] = useState(0);
   const finRef = useRef<HTMLDivElement>(null);
+  const { otroEscribe, avisar } = useEscritura(negocioIdCanal, miRol, mensajes.filter((m) => m.remitenteRol !== miRol).length);
+  const escribiendo = otroEscribe && !cerrada;
   const campoRef = useRef<HTMLTextAreaElement>(null);
   const archivoRef = useRef<HTMLInputElement>(null);
 
   // Mantiene el hilo al final cuando llegan mensajes.
   useEffect(() => {
     finRef.current?.scrollIntoView({ block: "end" });
-  }, [mensajes.length]);
+  }, [mensajes.length, escribiendo]);
 
   // El campo crece solo con el texto.
   useEffect(() => {
@@ -155,6 +160,7 @@ export function HiloChat({ mensajes, miRol, nombreOtro, avatarOtro, avatarYo, ce
     const pendientePrevio = pendiente;
     setTexto("");
     setPendiente(null);
+    avisar(false);
     const err = await onEnviar(cuerpo, adjunto);
     setEnviando(false);
     if (err) {
@@ -292,6 +298,17 @@ export function HiloChat({ mensajes, miRol, nombreOtro, avatarOtro, avatarYo, ce
             </div>
           ))
         )}
+        {escribiendo ? (
+          <div className={cn(s.fila, s.filaEscribiendo)} role="status" aria-live="polite">
+            <img src={avatarOtro} alt="" className={s.miniAvatar} />
+            <div className={cn(s.burbuja, s.burbujaOtro, s.burbujaEscribiendo)}>
+              <span className="sr-only">{nombreOtro} está escribiendo…</span>
+              <span className={s.punto} aria-hidden />
+              <span className={s.punto} aria-hidden />
+              <span className={s.punto} aria-hidden />
+            </div>
+          </div>
+        ) : null}
         <div ref={finRef} />
       </div>
 
@@ -354,7 +371,9 @@ export function HiloChat({ mensajes, miRol, nombreOtro, avatarOtro, avatarYo, ce
             onChange={(e) => {
               setTexto(e.target.value);
               setIndiceRapida(0);
+              avisar(e.target.value.trim().length > 0);
             }}
+            onBlur={() => avisar(false)}
             onKeyDown={alTeclear}
             onPaste={alPegar}
             placeholder={cerrada ? "Esta conversación está cerrada." : (placeholder ?? "Escribe un mensaje o pega un pantallazo (Ctrl + V)…")}
