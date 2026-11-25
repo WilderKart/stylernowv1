@@ -79,9 +79,12 @@ export function VistaInvitacion({ modo, invitacionId, negocio, emailEnmascarado,
 
   async function onSalir() {
     setCargando("salir");
+    setError(null);
     await salirParaCambiarCuenta();
-    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- navegación completa a propósito: se cerró la sesión
-    window.location.assign(`/invitacion/${invitacionId}`);
+    // Ya sin sesión, pasa directo a ingresar (o registrarse) con el correo invitado: sin un segundo clic perdido.
+    const res = await continuarInvitacion(invitacionId);
+    // Navegación completa a propósito: se cerró la sesión.
+    window.location.assign(res.ok ? res.data.destino : `/invitacion/${invitacionId}`);
   }
 
   return (
@@ -124,9 +127,12 @@ export function VistaInvitacion({ modo, invitacionId, negocio, emailEnmascarado,
         ) : modo === "otra-cuenta" ? (
           <>
             <Aviso>Estás usando una cuenta con otro correo. Esta invitación es para {emailEnmascarado}.</Aviso>
+            <p className="m-0 text-[14px] leading-relaxed text-[var(--text-muted)]">
+              Para unirte debes entrar con ese correo. Cerraremos esta sesión y te llevamos a ingresar o a crear tu cuenta con el correo invitado.
+            </p>
             {error ? <ErrorForm>{error}</ErrorForm> : null}
             <Button size="lg" className="w-full justify-between" loading={cargando === "salir"} onClick={onSalir}>
-              <span>Cambiar de cuenta</span>
+              <span>Cerrar sesión y continuar con mi invitación</span>
               <ArrowUpRight className="size-[18px]" aria-hidden />
             </Button>
           </>
