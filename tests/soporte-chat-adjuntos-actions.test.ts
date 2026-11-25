@@ -9,6 +9,8 @@ const estado = vi.hoisted(() => ({
 
 vi.mock("server-only", () => ({}));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+// `after` solo existe dentro de una petición real; en la prueba se ejecuta al momento.
+vi.mock("next/server", () => ({ after: (fn: () => unknown) => void fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ rpc: estado.rpc, from: vi.fn() }) }));
 vi.mock("@/lib/auth/resolver-contexto", () => ({ resolverContexto: async () => estado.contexto }));
 vi.mock("@/lib/auth/autorizar-supersu", () => ({ autorizarSuperSU: async () => estado.autorizacion }));

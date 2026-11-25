@@ -4,7 +4,7 @@ import { autorizarSuperSU } from "@/lib/auth/autorizar-supersu";
 import { procesarAlertasSoporte } from "@/lib/soporte/alertas";
 import { COLUMNAS_MENSAJE, mapearMensajes } from "@/lib/soporte/mensajes";
 import type { AdjuntoSubido, MensajeChat } from "@/lib/soporte/tipos";
-import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 
 type Resultado<T = undefined> =
@@ -137,23 +137,25 @@ export async function enviarMensajeChatAdmin(negocioId: string, cuerpo: string, 
     const fila = Array.isArray(data) ? data[0] : null;
     if (!fila) return { ok: false, error: "No se pudo registrar el mensaje." };
 
-    try {
-      await procesarAlertasSoporte({
-        negocioId: fila.negocio_id,
-        conversacionId: fila.conversacion_id,
-        mensajeId: fila.id,
-        remitenteRol: fila.remitente_rol as "BARBERIA" | "SUPERSU",
-        alertaWebhook: fila.alerta_webhook,
-        alertaEmailAdmin: fila.alerta_email_admin,
-        alertaEmailNegocio: fila.alerta_email_negocio,
-        prioritario: fila.prioritario,
-        tieneAdjunto: fila.tiene_adjunto,
-      });
-    } catch {
-      void 0;
-    }
+    // Las alertas (webhook y correos) se envían DESPUÉS de responder: quien escribe no espera a esos servicios externos.
+    after(async () => {
+      try {
+        await procesarAlertasSoporte({
+          negocioId: fila.negocio_id,
+          conversacionId: fila.conversacion_id,
+          mensajeId: fila.id,
+          remitenteRol: fila.remitente_rol as "BARBERIA" | "SUPERSU",
+          alertaWebhook: fila.alerta_webhook,
+          alertaEmailAdmin: fila.alerta_email_admin,
+          alertaEmailNegocio: fila.alerta_email_negocio,
+          prioritario: fila.prioritario,
+          tieneAdjunto: fila.tiene_adjunto,
+        });
+      } catch {
+        void 0;
+      }
+    });
 
-    revalidatePath("/admin/soporte");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
@@ -166,7 +168,6 @@ export async function marcarChatLeidoAdmin(conversacionId: string): Promise<Resu
     if (!g.ok) return { ok: false, error: g.error };
     const { error } = await g.supabase.rpc("soporte_marcar_leido", { p_conversacion_id: conversacionId });
     if (error) return { ok: false, error: traducirError(error.message) };
-    revalidatePath("/admin/soporte");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
@@ -185,7 +186,6 @@ export async function cambiarEstadoChatAdmin(
       p_estado: estado,
     });
     if (error) return { ok: false, error: traducirError(error.message) };
-    revalidatePath("/admin/soporte");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
@@ -229,7 +229,6 @@ export async function guardarRespuestaRapida(entrada: z.input<typeof esquemaResp
       ? await g.supabase.from("soporte_respuesta_rapida").update({ titulo, atajo, cuerpo, activo }).eq("id", id)
       : await g.supabase.from("soporte_respuesta_rapida").insert({ titulo, atajo, cuerpo, activo, orden: 100 });
     if (error) return { ok: false, error: traducirError(error.message) };
-    revalidatePath("/admin/soporte");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };

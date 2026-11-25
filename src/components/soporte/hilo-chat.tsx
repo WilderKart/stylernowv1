@@ -150,11 +150,18 @@ export function HiloChat({ mensajes, miRol, nombreOtro, avatarOtro, avatarYo, ce
       const base = pendiente.archivo.name.replace(/\.[^.]+$/, "").slice(0, 120) || "adjunto";
       adjunto = { ruta, tipo, nombre: `${base}.${extension}` };
     }
-    const err = await onEnviar(cuerpo, adjunto);
-    setEnviando(false);
-    if (err) return setError(err);
+    // El campo se vacía de inmediato (no espera a recargar el hilo); si el envío falla, se devuelve lo escrito.
+    const textoPrevio = texto;
+    const pendientePrevio = pendiente;
     setTexto("");
     setPendiente(null);
+    const err = await onEnviar(cuerpo, adjunto);
+    setEnviando(false);
+    if (err) {
+      setTexto(textoPrevio);
+      setPendiente(pendientePrevio);
+      return setError(err);
+    }
     campoRef.current?.focus();
   }
 

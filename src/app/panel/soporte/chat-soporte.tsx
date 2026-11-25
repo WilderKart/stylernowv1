@@ -2,7 +2,7 @@
 
 import { HiloChat } from "@/components/soporte/hilo-chat";
 import s from "@/components/soporte/chat-3d.module.css";
-import type { AdjuntoSubido } from "@/lib/soporte/tipos";
+import { mensajeDesdeEvento, type AdjuntoSubido } from "@/lib/soporte/tipos";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Lock } from "lucide-react";
@@ -11,6 +11,16 @@ import { useCallback, useEffect, useState } from "react";
 import { enviarMensajeChat, marcarChatLeido, obtenerChatSoporte, prepararAdjuntosChat, type ChatSoporte } from "./chat-actions";
 
 const AVATAR_SOPORTE = "/avatars/soporte-stylernow.png";
+/** Cada cuánto se consulta si hay mensajes nuevos como respaldo del tiempo real. */
+const RESPALDO_MS = 5000;
+
+/** ¿El chat ya mostrado es idéntico al recién consultado? (mismo último mensaje, estado y no leídos) */
+function mismoChat(a: ChatSoporte | null, b: ChatSoporte) {
+  if (!a) return false;
+  const ua = a.mensajes[a.mensajes.length - 1]?.id;
+  const ub = b.mensajes[b.mensajes.length - 1]?.id;
+  return a.conversacionId === b.conversacionId && a.mensajes.length === b.mensajes.length && ua === ub && a.estado === b.estado && a.noLeidosNegocio === b.noLeidosNegocio && a.chatIncluido === b.chatIncluido && a.mensajes.every((m, i) => m.leido === b.mensajes[i]?.leido);
+}
 const CHIPS_INICIO = ["Configurar pagos / Nequi", "Duda sobre mi plan", "Verificación de mi negocio", "Reportar un error"];
 
 /** Chat en vivo con el equipo de StylerNow (Studio, Prestige y Signature). Essential ve un aviso con el camino alternativo. */
@@ -20,7 +30,8 @@ export function ChatSoportePanel({ inicial, errorInicial, alIrATickets }: { inic
 
   const recargar = useCallback(async () => {
     const res = await obtenerChatSoporte();
-    if (res.ok) setChat(res.data);
+    // Solo se actualiza si algo cambió: así el respaldo periódico no repinta ni mueve el scroll sin necesidad.
+    if (res.ok) setChat((prev) => (mismoChat(prev, res.data) ? prev : res.data));
   }, []);
 
   // Tiempo real: cualquier mensaje o cambio de estado de ESTE negocio vuelve a cargar el hilo (RLS filtra lo demás).
@@ -28,13 +39,58 @@ export function ChatSoportePanel({ inicial, errorInicial, alIrATickets }: { inic
     if (!chat?.negocioId || !chat.chatIncluido) return;
     const supabase = createClient();
     const filtro = `negocio_id=eq.${chat.negocioId}`;
-    const canal = supabase
-      .channel(`soporte-panel-${chat.negocioId}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "soporte_mensaje", filter: filtro }, () => void recargar())
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "soporte_conversacion", filter: filtro }, () => void recargar())
-      .subscribe();
+    // El canal debe conectarse YA autenticado con la sesión: si se suscribe antes de que Realtime tenga el token, la base
+    // rechaza la suscripción con filtro ("Unable to subscribe…") y los mensajes de soporte no llegan hasta recargar.
+    let cancelado = false;
+    let canal: ReturnType<typeof supabase.channel> | null = null;
+    const negocioId = chat.negocioId;
+    // Las consultas son Server Actions y Next las ejecuta en fila: si llueven, el envío del usuario espera su turno y se
+    // siente trabado. Por eso se agrupan en una sola, medio segundo después del último evento.
+    let temporizadorRefresco: number | undefined;
+    let conectado = false;
+    const refrescar = () => {
+      window.clearTimeout(temporizadorRefresco);
+      temporizadorRefresco = window.setTimeout(() => void recargar(), 500);
+    };
+    void (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (cancelado) return;
+      if (data.session?.access_token) await supabase.realtime.setAuth(data.session.access_token);
+      if (cancelado) return;
+      canal = supabase
+        .channel(`soporte-panel-${negocioId}`)
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "soporte_mensaje", filter: filtro }, (p) => {
+          // Respuesta de soporte: se pinta ya, con los datos del propio evento; la consulta confirma después.
+          const nuevo = mensajeDesdeEvento(p.new);
+          if (nuevo && nuevo.remitenteRol !== "BARBERIA") {
+            setChat((prev) => (prev && !prev.mensajes.some((m) => m.id === nuevo.id) ? { ...prev, mensajes: [...prev.mensajes, nuevo] } : prev));
+          }
+          refrescar();
+        })
+        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "soporte_conversacion", filter: filtro }, refrescar)
+        .subscribe((estado) => {
+          conectado = estado === "SUBSCRIBED";
+        });
+    })();
+    // Respaldo por si el canal en tiempo real se cae: consulta cada pocos segundos con la pestaña visible y al volver a ella.
+    const siVisible = () => {
+      if (document.visibilityState === "visible") void recargar();
+    };
+    // El sondeo solo trabaja si el canal en vivo está caído; con el canal conectado no hace falta y no compite con los envíos.
+    const temporizador = window.setInterval(() => {
+      if (!conectado) siVisible();
+    }, RESPALDO_MS);
+    document.addEventListener("visibilitychange", siVisible);
+    window.addEventListener("online", siVisible);
+    window.addEventListener("focus", siVisible);
     return () => {
-      void supabase.removeChannel(canal);
+      window.clearInterval(temporizador);
+      window.clearTimeout(temporizadorRefresco);
+      document.removeEventListener("visibilitychange", siVisible);
+      window.removeEventListener("online", siVisible);
+      window.removeEventListener("focus", siVisible);
+      cancelado = true;
+      if (canal) void supabase.removeChannel(canal);
     };
   }, [chat?.negocioId, chat?.chatIncluido, recargar]);
 
@@ -45,12 +101,22 @@ export function ChatSoportePanel({ inicial, errorInicial, alIrATickets }: { inic
 
   const onEnviar = useCallback(
     async (cuerpo: string, adjunto: AdjuntoSubido | null) => {
+      // El mensaje aparece al instante (optimista); la consulta que sigue lo reemplaza por el real sin hacer esperar a quien escribe.
+      const idTemporal = `tmp-${Date.now()}`;
+      setChat((prev) =>
+        prev
+          ? { ...prev, mensajes: [...prev.mensajes, { id: idTemporal, conversacionId: prev.conversacionId ?? "", negocioId: prev.negocioId, remitenteRol: "BARBERIA", cuerpo, createdAt: new Date().toISOString(), leido: false, adjunto: adjunto ? { tipo: adjunto.tipo, nombre: adjunto.nombre, url: null } : null }] }
+          : prev,
+      );
       const res = await enviarMensajeChat(cuerpo, adjunto);
-      if (!res.ok) return res.error;
-      await recargar();
+      if (!res.ok) {
+        setChat((prev) => (prev ? { ...prev, mensajes: prev.mensajes.filter((m) => m.id !== idTemporal) } : prev));
+        return res.error;
+      }
+      // Sin recargar aquí: el evento en vivo de este mismo mensaje dispara la consulta (agrupada) y reemplaza el temporal.
       return null;
     },
-    [recargar],
+    [],
   );
 
   const prepararSubida = useCallback(async () => {

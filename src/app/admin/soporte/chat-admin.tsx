@@ -3,7 +3,7 @@
 import { HiloChat, type RespuestaRapidaChat } from "@/components/soporte/hilo-chat";
 import s from "@/components/soporte/chat-3d.module.css";
 import { normalizar } from "@/lib/busqueda/difuso";
-import type { AdjuntoSubido } from "@/lib/soporte/tipos";
+import { mensajeDesdeEvento, type AdjuntoSubido, type MensajeChat } from "@/lib/soporte/tipos";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ExternalLink, Search, Star, X } from "lucide-react";
@@ -24,6 +24,9 @@ import {
 } from "./chat-actions";
 
 const AVATAR_NEGOCIO = "/avatars/negocio.svg";
+const AVATAR_SOPORTE = "/avatars/soporte-stylernow.png";
+/** Cada cuánto se consulta si hay mensajes nuevos como respaldo del tiempo real (solo con la pestaña visible). */
+const RESPALDO_MS = 5000;
 type Filtro = "todos" | "abiertas" | "cerradas" | "sin_leer";
 
 const hora = (iso: string) => new Date(iso).toLocaleString("es-CO", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true, timeZone: "America/Bogota" });
@@ -35,6 +38,13 @@ const horaCorta = (iso: string | null) => {
     ? d.toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "America/Bogota" })
     : d.toLocaleDateString("es-CO", { day: "numeric", month: "short", timeZone: "America/Bogota" });
 };
+/** ¿El hilo ya mostrado es idéntico al recién consultado? (mismo último mensaje, estado y no leídos) */
+function mismoHilo(a: DatosChat | null, b: DatosChat) {
+  if (!a || a.conversacion.id !== b.conversacion.id) return false;
+  const ua = a.mensajes[a.mensajes.length - 1]?.id;
+  const ub = b.mensajes[b.mensajes.length - 1]?.id;
+  return a.mensajes.length === b.mensajes.length && ua === ub && a.conversacion.estado === b.conversacion.estado && a.conversacion.noLeidosAdmin === b.conversacion.noLeidosAdmin && a.mensajes.every((m, i) => m.leido === b.mensajes[i]?.leido);
+}
 const PLAN: Record<string, string> = { ESSENTIAL: "Essential", STUDIO: "Studio", PRESTIGE: "Prestige", SIGNATURE: "Signature" };
 
 export function ChatAdmin({ conversacionesIniciales, errorInicial, seleccionInicial }: { conversacionesIniciales: ConversacionAdmin[]; errorInicial: string | null; seleccionInicial?: string | null }) {
@@ -53,14 +63,15 @@ export function ChatAdmin({ conversacionesIniciales, errorInicial, seleccionInic
 
   const recargarLista = useCallback(async () => {
     const res = await listarChatsAdmin();
-    if (res.ok) setLista(res.data);
+    // Solo se actualiza si algo cambió: así el respaldo periódico no repinta ni mueve el scroll sin necesidad.
+    if (res.ok) setLista((prev) => (JSON.stringify(prev) === JSON.stringify(res.data) ? prev : res.data));
   }, []);
 
   const recargarChat = useCallback(async (id: string) => {
     const res = await obtenerChatAdmin(id);
     if (!res.ok) return setError(res.error);
     setError(null);
-    setChat(res.data);
+    setChat((prev) => (mismoHilo(prev, res.data) ? prev : res.data));
     if (res.data.conversacion.noLeidosAdmin > 0) {
       void marcarChatLeidoAdmin(id).then(() => listarChatsAdmin().then((r) => r.ok && setLista(r.data)));
     }
@@ -83,20 +94,63 @@ export function ChatAdmin({ conversacionesIniciales, errorInicial, seleccionInic
     void recargarChat(seleccion);
   }, [seleccion, recargarChat]);
 
-  // Tiempo real: SuperSU ve todos los negocios (RLS). Cada evento refresca la bandeja y, si aplica, el hilo abierto.
+  // Tiempo real: SuperSU ve todos los negocios (RLS). Cualquier evento (mensaje nuevo o cambio de la conversación) refresca
+  // la bandeja Y el hilo abierto. Además hay un respaldo periódico y al volver a la pestaña, por si el canal se cae.
   useEffect(() => {
     const supabase = createClient();
-    const canal = supabase
-      .channel("soporte-admin")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "soporte_mensaje" }, (p) => {
+    // Las consultas son Server Actions y Next las ejecuta en fila: si llueven (3 eventos por mensaje + sondeo), el envío del
+    // usuario espera su turno y se siente trabado. Por eso se agrupan en una sola, medio segundo después del último evento.
+    let temporizadorRefresco: number | undefined;
+    let conectado = false;
+    const refrescar = () => {
+      window.clearTimeout(temporizadorRefresco);
+      temporizadorRefresco = window.setTimeout(() => {
         void recargarLista();
-        const conv = (p.new as { conversacion_id?: string }).conversacion_id;
-        if (conv && conv === seleccionRef.current) void recargarChat(conv);
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "soporte_conversacion" }, () => void recargarLista())
-      .subscribe();
+        if (seleccionRef.current) void recargarChat(seleccionRef.current);
+      }, 500);
+    };
+    // El canal debe conectarse YA autenticado con la sesión: si se suscribe antes de que Realtime tenga el token, la base
+    // lo trata como anónimo, la RLS rechaza los eventos ("401 Unauthorized") y los mensajes no llegan hasta recargar.
+    let cancelado = false;
+    let canal: ReturnType<typeof supabase.channel> | null = null;
+    void (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (cancelado) return;
+      if (data.session?.access_token) await supabase.realtime.setAuth(data.session.access_token);
+      if (cancelado) return;
+      canal = supabase
+        .channel("soporte-admin")
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "soporte_mensaje" }, (p) => {
+          // Mensaje de la barbería en el hilo abierto: se pinta ya, con los datos del propio evento; la consulta confirma después.
+          const nuevo = mensajeDesdeEvento(p.new);
+          if (nuevo && nuevo.remitenteRol !== "SUPERSU" && nuevo.conversacionId === seleccionRef.current) {
+            setChat((prev) => (prev && prev.conversacion.id === nuevo.conversacionId && !prev.mensajes.some((m) => m.id === nuevo.id) ? { ...prev, mensajes: [...prev.mensajes, nuevo] } : prev));
+          }
+          refrescar();
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "soporte_conversacion" }, refrescar)
+        .subscribe((estado) => {
+          conectado = estado === "SUBSCRIBED";
+        });
+    })();
+    const siVisible = () => {
+      if (document.visibilityState === "visible") refrescar();
+    };
+    // El sondeo solo trabaja si el canal en vivo está caído; con el canal conectado no hace falta y no compite con los envíos.
+    const temporizador = window.setInterval(() => {
+      if (!conectado) siVisible();
+    }, RESPALDO_MS);
+    document.addEventListener("visibilitychange", siVisible);
+    window.addEventListener("online", siVisible);
+    window.addEventListener("focus", siVisible);
     return () => {
-      void supabase.removeChannel(canal);
+      window.clearInterval(temporizador);
+      window.clearTimeout(temporizadorRefresco);
+      document.removeEventListener("visibilitychange", siVisible);
+      window.removeEventListener("online", siVisible);
+      window.removeEventListener("focus", siVisible);
+      cancelado = true;
+      if (canal) void supabase.removeChannel(canal);
     };
   }, [recargarLista, recargarChat]);
 
@@ -121,12 +175,19 @@ export function ChatAdmin({ conversacionesIniciales, errorInicial, seleccionInic
   const onEnviar = useCallback(
     async (cuerpo: string, adjunto: AdjuntoSubido | null) => {
       if (!negocioId || !seleccion) return "Selecciona una conversación.";
+      // El mensaje aparece al instante (optimista); la consulta que sigue lo reemplaza por el real sin hacer esperar a quien escribe.
+      const idTemporal = `tmp-${Date.now()}`;
+      const temporal: MensajeChat = { id: idTemporal, conversacionId: seleccion, negocioId, remitenteRol: "SUPERSU", cuerpo, createdAt: new Date().toISOString(), leido: false, adjunto: adjunto ? { tipo: adjunto.tipo, nombre: adjunto.nombre, url: null } : null };
+      setChat((prev) => (prev && prev.conversacion.id === seleccion ? { ...prev, mensajes: [...prev.mensajes, temporal] } : prev));
       const res = await enviarMensajeChatAdmin(negocioId, cuerpo, adjunto);
-      if (!res.ok) return res.error;
-      await Promise.all([recargarChat(seleccion), recargarLista()]);
+      if (!res.ok) {
+        setChat((prev) => (prev ? { ...prev, mensajes: prev.mensajes.filter((m) => m.id !== idTemporal) } : prev));
+        return res.error;
+      }
+      // Sin recargar aquí: el evento en vivo de este mismo mensaje dispara la consulta (agrupada) y reemplaza el temporal.
       return null;
     },
-    [negocioId, seleccion, recargarChat, recargarLista],
+    [negocioId, seleccion],
   );
 
   const prepararSubida = useCallback(async () => {
@@ -146,13 +207,13 @@ export function ChatAdmin({ conversacionesIniciales, errorInicial, seleccionInic
   const filtros: [Filtro, string][] = [["todos", "Todos"], ["abiertas", "Abiertas"], ["sin_leer", "Sin leer"], ["cerradas", "Cerradas"]];
 
   return (
-    <div className={cn(s.raiz, s.marco)} style={{ padding: "clamp(8px,1.6vw,16px)" }}>
+    <div className={cn(s.raiz, s.marco, s.adminSoporte)}>
       {error ? (
         <p role="alert" className={s.error}>
           {error}
         </p>
       ) : null}
-      <div className="grid gap-3 lg:grid-cols-[minmax(260px,330px)_minmax(0,1fr)] xl:grid-cols-[minmax(260px,330px)_minmax(0,1fr)_280px]" style={{ height: "min(78dvh, 780px)", minHeight: 520 }}>
+      <div className="grid gap-3 lg:grid-cols-[minmax(260px,330px)_minmax(0,1fr)] xl:grid-cols-[minmax(260px,330px)_minmax(0,1fr)_280px]" style={{ height: "clamp(520px, calc(100dvh - 330px), 780px)" }}>
         {/* Bandeja */}
         <section className={cn(s.tarjeta, seleccion && "max-lg:hidden")} aria-label="Conversaciones">
           <div style={{ padding: "14px 14px 8px" }}>
@@ -169,7 +230,7 @@ export function ChatAdmin({ conversacionesIniciales, errorInicial, seleccionInic
               ))}
             </div>
           </div>
-          <ul className="m-0 flex-1 list-none overflow-y-auto p-2.5" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <ul className={s.listaBandeja}>
             {visibles.length === 0 ? (
               <li className="px-3 py-8 text-center text-sm" style={{ color: "var(--nm-suave)" }}>
                 {lista.length === 0 ? "Aún no hay conversaciones." : "No hay conversaciones que coincidan."}
@@ -177,36 +238,28 @@ export function ChatAdmin({ conversacionesIniciales, errorInicial, seleccionInic
             ) : (
               visibles.map((c) => (
                 <li key={c.id}>
-                  <button
-                    type="button"
-                    onClick={() => setSeleccion(c.id)}
-                    aria-current={c.id === seleccion}
-                    className="w-full text-left"
-                    style={{
-                      border: 0,
-                      cursor: "pointer",
-                      padding: "12px 14px",
-                      borderRadius: 20,
-                      color: "var(--nm-texto)",
-                      background: c.id === seleccion ? "var(--nm-bg)" : "var(--nm-card)",
-                      boxShadow: c.id === seleccion ? "inset 3px 3px 8px var(--nm-sombra), inset -3px -3px 8px var(--nm-luz), inset 4px 0 0 var(--nm-azul-1)" : "4px 4px 10px var(--nm-sombra), -3px -3px 8px var(--nm-luz)",
-                    }}
-                  >
-                    <span className="flex items-center gap-2">
-                      <span className="min-w-0 flex-1 truncate text-[14.5px] font-extrabold">{c.negocioNombre ?? "Negocio"}</span>
-                      {c.prioritario ? (
-                        <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-extrabold" style={{ background: "#fde7a8", color: "#7a4b00" }}>
-                          <Star className="size-3" aria-hidden /> Prioritario
+                  <button type="button" onClick={() => setSeleccion(c.id)} aria-current={c.id === seleccion} className={cn(s.itemBandeja, c.id === seleccion && s.itemActivo)}>
+                    {/* eslint-disable-next-line @next/next/no-img-element -- avatar estático local */}
+                    <img src={AVATAR_NEGOCIO} alt="" className={s.avatarLista} />
+                    <span className={s.itemCuerpo}>
+                      <span className={s.itemLinea}>
+                        <span className={s.itemNombre}>{c.negocioNombre ?? "Negocio"}</span>
+                        <span className={s.itemHora}>{horaCorta(c.ultimoMensajeAt)}</span>
+                      </span>
+                      <span className={s.itemLinea}>
+                        <span className={s.itemChips}>
+                          {c.prioritario ? (
+                            <span className={cn(s.chipPlan, s.chipPrioritario)}>
+                              <Star className="size-3" aria-hidden /> Prioritario
+                            </span>
+                          ) : (
+                            <span className={cn(s.chipPlan, c.plan === "SIGNATURE" && s.planSignature, c.plan === "PRESTIGE" && s.planPrestige)}>{c.plan ? (PLAN[c.plan] ?? c.plan) : "Sin plan"}</span>
+                          )}
+                          {c.ciudad ? <span className={s.itemCiudad}>{c.ciudad}</span> : null}
                         </span>
-                      ) : null}
-                      {c.noLeidosAdmin > 0 ? <span className={s.contador}>{c.noLeidosAdmin}</span> : null}
-                    </span>
-                    <span className="mt-1 block truncate text-[13px]" style={{ color: "var(--nm-suave)" }}>
-                      {c.ultimoMensajePreview ?? "Sin mensajes"}
-                    </span>
-                    <span className="mt-0.5 flex items-center justify-between text-[12px]" style={{ color: "var(--nm-suave)" }}>
-                      <span>{[c.ciudad, c.plan ? PLAN[c.plan] : null].filter(Boolean).join(" · ")}</span>
-                      <span>{horaCorta(c.ultimoMensajeAt)}</span>
+                        {c.noLeidosAdmin > 0 ? <span className={s.contador}>{c.noLeidosAdmin}</span> : null}
+                      </span>
+                      <span className={s.itemPreview}>{c.ultimoMensajePreview ?? "Sin mensajes"}</span>
                     </span>
                   </button>
                 </li>
@@ -236,11 +289,13 @@ export function ChatAdmin({ conversacionesIniciales, errorInicial, seleccionInic
                 <div className="min-w-0">
                   <h2 className={s.titulo} style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {actual.conversacion.negocioNombre ?? "Negocio"}
+                    {actual.conversacion.prioritario ? (
+                      <span className={cn(s.chipPlan, s.chipPrioritario, s.chipJuntoTitulo)}>
+                        <Star className="size-3" aria-hidden /> Prioritario
+                      </span>
+                    ) : null}
                   </h2>
-                  <p className={s.subtitulo}>
-                    {[actual.conversacion.ciudad, actual.conversacion.plan ? `Plan ${PLAN[actual.conversacion.plan] ?? actual.conversacion.plan}` : null].filter(Boolean).join(" · ")}
-                    {actual.conversacion.prioritario ? " · Prioritario" : ""}
-                  </p>
+                  <p className={s.subtitulo}>{[actual.conversacion.ciudad, actual.conversacion.plan ? `Plan ${PLAN[actual.conversacion.plan] ?? actual.conversacion.plan}` : null].filter(Boolean).join(" · ")}</p>
                 </div>
                 <span className={cn(s.estado, actual.conversacion.estado === "CERRADA" && s.estadoCerrada)}>{actual.conversacion.estado === "ABIERTA" ? "Abierta" : "Cerrada"}</span>
               </header>
@@ -250,6 +305,7 @@ export function ChatAdmin({ conversacionesIniciales, errorInicial, seleccionInic
                 miRol="SUPERSU"
                 nombreOtro={actual.conversacion.negocioNombre ?? "Negocio"}
                 avatarOtro={AVATAR_NEGOCIO}
+                avatarYo={AVATAR_SOPORTE}
                 placeholder="Escribe una respuesta… (usa / para respuestas rápidas)"
                 onEnviar={onEnviar}
                 prepararSubida={prepararSubida}
@@ -264,18 +320,33 @@ export function ChatAdmin({ conversacionesIniciales, errorInicial, seleccionInic
         <aside className={cn(s.tarjeta, "max-xl:hidden")} aria-label="Detalles de la conversación" style={{ padding: 18, gap: 14, overflowY: "auto" }}>
           <h2 className="m-0 text-[17px] font-extrabold">Detalles</h2>
           {actual ? (
-            <dl className="m-0 grid gap-3 text-[14px]">
+            <dl className={s.detalles}>
+              <div className={s.detalleFila}>
+                <dt>Estado</dt>
+                <dd>
+                  <span className={cn(s.estado, actual.conversacion.estado === "CERRADA" && s.estadoCerrada)} style={{ margin: 0 }}>
+                    {actual.conversacion.estado === "ABIERTA" ? "Abierta" : "Cerrada"}
+                  </span>
+                </dd>
+              </div>
+              <div className={s.detalleFila}>
+                <dt>Negocio</dt>
+                <dd className={s.detalleNegocio}>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- avatar estático local */}
+                  <img src={AVATAR_NEGOCIO} alt="" className={s.avatarMini} />
+                  <span className="truncate">{actual.conversacion.negocioNombre ?? "—"}</span>
+                </dd>
+              </div>
               {[
-                ["Estado", actual.conversacion.estado === "ABIERTA" ? "Abierta" : "Cerrada"],
                 ["Plan", actual.conversacion.plan ? (PLAN[actual.conversacion.plan] ?? actual.conversacion.plan) : "—"],
                 ["Prioridad", actual.conversacion.prioritario ? "Prioritario" : "Normal"],
                 ["Ciudad", actual.conversacion.ciudad ?? "—"],
                 ["Creada", hora(actual.conversacion.createdAt)],
                 ["Último mensaje", actual.conversacion.ultimoMensajeAt ? hora(actual.conversacion.ultimoMensajeAt) : "—"],
               ].map(([k, v]) => (
-                <div key={k} className="flex items-baseline justify-between gap-3">
-                  <dt style={{ color: "var(--nm-suave)" }}>{k}</dt>
-                  <dd className="m-0 text-right font-bold">{v}</dd>
+                <div key={k} className={s.detalleFila}>
+                  <dt>{k}</dt>
+                  <dd>{v}</dd>
                 </div>
               ))}
             </dl>
