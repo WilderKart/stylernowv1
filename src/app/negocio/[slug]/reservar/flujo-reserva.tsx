@@ -355,7 +355,7 @@ export function FlujoReserva({
               </div>
             ) : null}
 
-            <ul className="m-0 list-none border-t-2 border-line p-0">
+            <ul className="m-0 flex list-none flex-col gap-3 p-0 px-4">
               {servicios.map((s) => {
                 const activo = servicioIds.includes(s.id);
                 return (
@@ -365,11 +365,11 @@ export function FlujoReserva({
                       onClick={() => alternarServicio(s.id)}
                       aria-pressed={activo}
                       className={cn(
-                        "flex min-h-[64px] w-full items-center gap-3 border-0 border-b border-grid-soft px-4 py-3.5 text-left text-text",
-                        activo && "bg-signal text-ink"
+                        "flex min-h-[64px] w-full items-center gap-3 rounded-2xl border border-border bg-bg px-4 py-3.5 text-left text-text shadow-hard-sm",
+                        activo && "border-signal bg-[var(--pn-violet-soft)] ring-2 ring-signal"
                       )}
                     >
-                      <span className="grid size-[26px] shrink-0 place-items-center border-2 border-current" aria-hidden="true">
+                      <span className="grid size-[26px] shrink-0 place-items-center rounded-full border-2 border-current" aria-hidden="true">
                         {activo ? (
                           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="square" strokeLinejoin="miter">
                             <path d="M4 12l5 5L20 6" />
