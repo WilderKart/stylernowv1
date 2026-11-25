@@ -54,7 +54,7 @@ export function FormularioRegistro({
   const [acepta, setAcepta] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleCargando, setGoogleCargando] = useState(false);
-  const [error, setError] = useState<{ campo?: Campo; texto: string } | null>(null);
+  const [error, setError] = useState<{ campo?: Campo; texto: string; yaRegistrado?: boolean } | null>(null);
   const [tokenTs, setTokenTs] = useState<string | null>(null);
   const controlTs = useRef<ControlTurnstile>(null);
 
@@ -94,7 +94,7 @@ export function FormularioRegistro({
     controlTs.current?.reiniciar();
     if (!res.ok) {
       setLoading(false);
-      setError({ campo: res.campo, texto: res.error });
+      setError({ campo: res.campo, texto: res.error, yaRegistrado: res.yaRegistrado });
       return;
     }
     // El destino lo devuelve el servidor (negocio → onboarding); viaja por sessionStorage, no por la URL.
@@ -124,7 +124,7 @@ export function FormularioRegistro({
     window.location.href = res.url;
   }
 
-  const errorDe = (c: Campo) => (error?.campo === c ? <ErrorForm>{error.texto}</ErrorForm> : null);
+  const errorDe = (c: Campo) => (error?.campo === c && !error.yaRegistrado ? <ErrorForm>{error.texto}</ErrorForm> : null);
 
   return (
     <AuthDividido categoria={categoria} viva>
@@ -223,7 +223,17 @@ export function FormularioRegistro({
         </div>
 
         <Turnstile ref={controlTs} accion="registro" onToken={setTokenTs} />
-        {error && !error.campo ? <ErrorForm>{error.texto}</ErrorForm> : null}
+        {error?.yaRegistrado ? (
+          <div role="alert">
+            <CambioPantalla
+              pregunta={t("auth.ya_registrado")}
+              accion={t("auth.ir_iniciar_sesion")}
+              href={`/login${qs}`}
+            />
+          </div>
+        ) : error && !error.campo ? (
+          <ErrorForm>{error.texto}</ErrorForm>
+        ) : null}
 
         <Button type="submit" size="lg" loading={loading} className="w-full justify-between">
           <span>{t("auth.crear_cuenta")}</span>
