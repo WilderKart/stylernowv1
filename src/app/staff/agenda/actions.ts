@@ -122,8 +122,7 @@ export async function completarCitaSinPos(reservaId: string): Promise<Resultado>
   try {
     const id = z.string().uuid("Cita inválida.").parse(reservaId);
     const { supabase } = await usuarioActual();
-    const rpc = supabase.rpc.bind(supabase) as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data?: unknown; error: { message: string } | null }>;
-    const { data, error } = await rpc("completar_reserva_sin_pos", { p_reserva_id: id });
+    const { data, error } = await supabase.rpc("completar_reserva_sin_pos", { p_reserva_id: id });
     if (error) return { ok: false, error: traducirError(error.message) };
     revalidatePath("/staff/agenda");
     revalidatePath("/panel/agenda");
@@ -145,8 +144,7 @@ export async function listarHorariosParaReprogramar(reservaId: string, fecha: st
     const id = z.string().uuid().parse(reservaId);
     const dia = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).parse(fecha);
     const { supabase } = await usuarioActual();
-    const rpc = supabase.rpc.bind(supabase) as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data: { hora_inicio: string; hora_fin: string }[] | null; error: { message: string } | null }>;
-    const { data, error } = await rpc("slots_para_reagendar", { p_reserva_id: id, p_fecha: dia });
+    const { data, error } = await supabase.rpc("slots_para_reagendar", { p_reserva_id: id, p_fecha: dia });
     if (error) return { ok: false, error: traducirError(error.message) };
     return { ok: true, data: (data ?? []).map((x) => ({ horaInicio: x.hora_inicio, horaFin: x.hora_fin })) };
   } catch (e) {
@@ -164,8 +162,7 @@ export async function reprogramarCitaPorSolicitudDelCliente(reservaId: string, h
     if (!clienteSolicito) return { ok: false, error: traducirError("CLIENTE_DEBE_SOLICITARLO") };
     const hora = z.string().datetime({ offset: true }).parse(horaISO);
     const { supabase } = await usuarioActual();
-    const rpc = supabase.rpc.bind(supabase) as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
-    const { error } = await rpc("reagendar_reserva", { p_reserva_id: id, p_nuevo_inicio: hora, p_cliente_solicito: true });
+    const { error } = await supabase.rpc("reagendar_reserva", { p_reserva_id: id, p_nuevo_inicio: hora, p_cliente_solicito: true });
     if (error) return { ok: false, error: traducirError(error.message) };
     revalidatePath("/staff/agenda");
     revalidatePath("/panel/agenda");
