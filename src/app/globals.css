@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "../styles/brutalist.css" layer(components);
 @import "../styles/temas-suaves.css";
+@import "../styles/panel-suave.css";
 
 /* StylerNow — sistema de diseño brutalista (blanco #FFF / negro #0A0A0A / naranja señal #FF4D00).
    Fuente de verdad: stylernow-prototipo/css/tokens.css. Tema claro por defecto;
@@ -174,7 +175,7 @@
 /* Esquinas 0 también para valores arbitrarios (rounded-[13px]); solo se
    exceptúan los elementos explícitamente circulares. Va sin capa para ganar
    a las utilidades de Tailwind. */
-*:not([class*="rounded-full"]):not(.sn-seal):not(.sn-avatar) {
+*:not([class*="rounded-full"]):not(.sn-seal):not(.sn-avatar):not([class*="pn-"]) {
   border-radius: 0;
 }
 
