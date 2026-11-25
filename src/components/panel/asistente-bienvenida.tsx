@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { BadgeCheck, ChevronRight, Scissors, UserCircle2, Users } from "lucide-react";
+import { BadgeCheck, CheckCircle2, ChevronRight, Circle, Scissors, UserCircle2, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -37,7 +37,7 @@ function escribir(clave: string) {
  * Asistente de bienvenida del panel: tareas posteriores al alta. Ninguna bloquea el uso del panel.
  * Las tareas se calculan en el servidor; ocultarlas aquí es solo una preferencia visual de este navegador.
  */
-export function AsistenteBienvenida({ datos }: { datos: DatosAsistente }) {
+export function AsistenteBienvenida({ datos, suave = false }: { datos: DatosAsistente; suave?: boolean }) {
   const [oculto, setOculto] = useState(false);
   const [sinEquipo, setSinEquipo] = useState(false);
   useEffect(() => {
@@ -98,6 +98,62 @@ export function AsistenteBienvenida({ datos }: { datos: DatosAsistente }) {
   const hechas = tareas.filter((t) => t.hecha).length;
 
   if (oculto || hechas === tareas.length) return null;
+
+  if (suave) {
+    // Diseño unificado (spa, salón, uñas): «Tareas de configuración» como una tarjeta más del Resumen.
+    return (
+      <section aria-labelledby="asistente-titulo" className="pn-card min-w-0 bg-[var(--bg)] p-4 shadow-[var(--sn-shadow-hard-sm)] ring-1 ring-[var(--line)] sm:p-5">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 id="asistente-titulo" className="text-[16px] font-extrabold text-[var(--text)]">
+            Tareas de configuración
+          </h2>
+          <span className="shrink-0 text-[12px] font-semibold text-[var(--text-muted)]">
+            {hechas} de {tareas.length} completadas
+          </span>
+        </div>
+        <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-[var(--surface-2)]" role="progressbar" aria-valuemin={0} aria-valuemax={tareas.length} aria-valuenow={hechas}>
+          <div className="h-full rounded-full bg-[var(--pn-violet)]" style={{ width: (hechas / tareas.length) * 100 + "%" }} />
+        </div>
+        <ul className="mt-2 flex flex-col divide-y divide-[var(--line)]">
+          {tareas.map((t) => (
+            <li key={t.clave}>
+              <Link href={t.href} className="flex min-h-12 items-start gap-3 py-2.5">
+                {t.hecha ? <CheckCircle2 className="mt-0.5 !size-5 shrink-0 text-[var(--pn-green)]" aria-hidden /> : <Circle className="mt-0.5 !size-5 shrink-0 text-[var(--text-faint)]" aria-hidden />}
+                <span className="min-w-0 flex-1">
+                  <span className={cn("block text-[13.5px] font-semibold text-[var(--text)]", t.hecha && "text-[var(--text-muted)] line-through")}>{t.titulo}</span>
+                  {!t.hecha ? <span className="mt-0.5 block text-[12px] leading-snug text-[var(--text-muted)]">{t.detalle}</span> : null}
+                </span>
+                <span className="mt-0.5 shrink-0 text-[11.5px] font-medium text-[var(--text-faint)]">{t.estado}</span>
+                <ChevronRight className="mt-0.5 !size-4 shrink-0 text-[var(--text-faint)]" aria-hidden />
+              </Link>
+              {t.omitible && !t.hecha ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    escribir(CLAVE_SIN_EQUIPO);
+                    setSinEquipo(true);
+                  }}
+                  className="mb-2 ml-8 min-h-8 text-[12px] font-semibold text-[var(--accent-text)] underline underline-offset-4"
+                >
+                  Trabajo solo, omitir por ahora
+                </button>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+        <button
+          type="button"
+          onClick={() => {
+            escribir(CLAVE_OCULTO);
+            setOculto(true);
+          }}
+          className="mt-2 min-h-8 text-[12px] font-semibold text-[var(--text-muted)] underline underline-offset-4"
+        >
+          Ocultar asistente
+        </button>
+      </section>
+    );
+  }
 
   return (
     <section aria-labelledby="asistente-titulo" className="mb-8 overflow-hidden border-2 border-ink bg-app shadow-hard dark:border-border">

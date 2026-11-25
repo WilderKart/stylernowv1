@@ -7,6 +7,7 @@ import { verticalDeCategorias } from "@/lib/tema/vertical";
 import { PanelNav } from "@/components/panel/panel-nav";
 import { TarjetaPerfilProfesional } from "@/components/panel/tarjeta-perfil-profesional";
 import { TarjetaVisibilidadPublica } from "@/components/panel/tarjeta-visibilidad-publica";
+import { cargarDatosResumenSuave } from "./resumen-datos";
 import { obtenerEstadoPublicacion } from "./staff/publicacion-actions";
 import { Badge, Card } from "@/components/ui/card";
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
@@ -187,13 +188,26 @@ export default async function PanelPage() {
   const metricasLealtad = metricasLealtadRes?.ok ? metricasLealtadRes.data : null;
   const pagosPorRevisar = negocio.estado === "ACTIVO" ? await contarPagosPorRevisar(negocio.id) : 0;
 
+  const verticalSuave = verticalDeCategorias(negocio.categoria);
+  const datosSuave = verticalSuave !== null ? await cargarDatosResumenSuave(negocio.id, negocio.estado === "ACTIVO") : null;
+
   return (
     <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} prestaServicios={contexto.prestaServicios} />
-      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-5 py-6 sm:px-10 sm:py-8">
-        {verticalDeCategorias(negocio.categoria) !== null ? (
+      <div
+        className={
+          verticalSuave !== null
+            ? "mx-auto flex w-full max-w-[1680px] flex-1 flex-col gap-4 px-3 py-4 sm:gap-6 sm:px-6 sm:py-6 lg:px-8"
+            : "mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-5 py-6 sm:px-10 sm:py-8"
+        }
+      >
+        {verticalSuave !== null && datosSuave !== null ? (
           <ResumenSuave
             nombre={negocio.nombre}
+            vertical={verticalSuave}
+            datos={datosSuave}
+            pagosPorRevisar={pagosPorRevisar}
+            tareas={<AsistenteBienvenida datos={datosAsistente} suave />}
             estadoNegocio={negocio.estado}
             resumen={dashboardBarberia?.resumen ?? null}
             citas={dashboardBarberia?.timeline ?? []}
@@ -221,7 +235,7 @@ export default async function PanelPage() {
           </Link>
         ) : null}
 
-        <AsistenteBienvenida datos={datosAsistente} />
+        {verticalSuave === null ? <AsistenteBienvenida datos={datosAsistente} /> : null}
 
         <TarjetaPerfilProfesional
           negocioId={negocio.id}

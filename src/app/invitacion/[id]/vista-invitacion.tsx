@@ -2,12 +2,21 @@
 
 import { Button } from "@/components/ui/button";
 import { Casilla } from "@/components/privacidad/casilla";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { Aviso } from "../../login/_componentes/campos";
-import { ErrorForm, Hot, PantallaAuth } from "../../login/_componentes/pantalla-auth";
 import { continuarInvitacion, responderInvitacion, salirParaCambiarCuenta } from "./actions";
+
+function Aviso({ children }: { children: React.ReactNode }) {
+  return <p className="pn-card m-0 bg-[var(--surface)] px-4 py-3 text-[13.5px] leading-snug text-[var(--text)]">{children}</p>;
+}
+function ErrorForm({ children }: { children: React.ReactNode }) {
+  return (
+    <p role="alert" className="pn-card m-0 bg-[var(--pn-rose-soft)] px-4 py-3 text-[13px] font-semibold leading-snug text-[var(--pn-rose)]">
+      {children}
+    </p>
+  );
+}
 
 const ESTADO_TEXTO: Record<string, string> = {
   ACEPTADA: "Esta invitación ya fue aceptada.",
@@ -76,24 +85,33 @@ export function VistaInvitacion({ modo, invitacionId, negocio, emailEnmascarado,
   }
 
   return (
-    <PantallaAuth
-      indice="Invitación"
-      volver="/"
-      titulo={
-        <>
-          {negocio}
-          <br />
-          <Hot>te invitó a su equipo.</Hot>
-        </>
-      }
-      intro={`Invitación para ${emailEnmascarado}${sede ? ` · Sede ${sede}` : ""}. Te unes como profesional (Staff).`}
-    >
-      <div className="flex flex-col gap-4">
+    <div data-vertical="salon" data-panel="suave" className="flex min-h-dvh flex-col bg-[var(--app-bg)] text-[var(--text)]">
+      <header className="flex items-center gap-2 px-3 py-3 sm:px-6">
+        <Link href="/" className="grid size-11 place-items-center rounded-full bg-[var(--bg)] text-[var(--text)] shadow-[var(--sn-shadow-hard-sm)]" aria-label="Volver al inicio">
+          <ChevronLeft className="size-5" aria-hidden />
+        </Link>
+        <span className="text-[18px] font-extrabold">
+          Styler<span className="text-[var(--accent-text)]">Now</span>
+        </span>
+      </header>
+      <main className="flex flex-1 items-start justify-center px-3 pb-10 pt-2 sm:items-center sm:px-6">
+        <section className="pn-card w-full max-w-[480px] bg-[var(--bg)] p-5 shadow-[var(--sn-shadow-hard)] ring-1 ring-[var(--line)] sm:p-8">
+          <span className="pn-pill inline-flex items-center gap-2 bg-[var(--pn-violet-soft)] px-3 py-1.5 text-[12.5px] font-bold text-[var(--pn-violet)]">
+            <UserPlus className="size-4" aria-hidden /> Invitación al equipo
+          </span>
+          <h1 className="mt-4 break-words text-[clamp(26px,7vw,34px)] font-extrabold leading-tight">
+            {negocio}
+            <span className="block text-[var(--accent-text)]">te invitó a su equipo.</span>
+          </h1>
+          <p className="mt-3 break-words text-[14px] leading-relaxed text-[var(--text-muted)]">
+            {`Invitación para ${emailEnmascarado}${sede ? ` · Sede ${sede}` : ""}. Te unes como profesional (Staff).`}
+          </p>
+          <div className="mt-6 flex flex-col gap-4">
         {!pendiente ? (
           <Aviso>{rechazada ? "Rechazaste esta invitación." : (ESTADO_TEXTO[estado] ?? "Esta invitación ya no está disponible.")}</Aviso>
         ) : modo === "sin-sesion" ? (
           <>
-            <p className="body m-0">
+            <p className="m-0 text-[14px] leading-relaxed text-[var(--text-muted)]">
               Para unirte necesitas una cuenta de StylerNow con ese mismo correo. Si ya la tienes, solo ingresas; si no, la creas
               en un minuto.
             </p>
@@ -131,7 +149,7 @@ export function VistaInvitacion({ modo, invitacionId, negocio, emailEnmascarado,
                 </>
               }
             />
-            <p className="sn-meta m-0">
+            <p className="m-0 text-[12.5px] leading-relaxed text-[var(--text-faint)]">
               Después podrás decidir, aparte y cuando quieras, si tu perfil (nombre, foto, especialidad y descripción) se muestra
               a los clientes.
             </p>
@@ -145,7 +163,9 @@ export function VistaInvitacion({ modo, invitacionId, negocio, emailEnmascarado,
             </Button>
           </>
         )}
-      </div>
-    </PantallaAuth>
+          </div>
+        </section>
+      </main>
+    </div>
   );
 }
