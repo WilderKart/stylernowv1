@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { duracion, fechaHoraLarga } from "@/lib/formato";
 import { obtenerDetalleCita } from "@/lib/cliente/citas";
 import { sincronizarPago } from "@/lib/pagos/sincronizar";
-import { tabla } from "@/lib/pagos-directos/sin-tipos";
+import { AVISO_PAGO_DIRECTO_SIN_REEMBOLSO } from "@/lib/pagos-directos/aviso";
 import { createClient } from "@/lib/supabase/server";
 import { formatCOP } from "@/lib/utils";
 import type { Traductor } from "@/lib/i18n/diccionario";
@@ -130,8 +130,10 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
   const { data: reserva } = await cargar(id);
   if (!reserva) notFound();
   // Pago directo al negocio (migración 194): estado visible para el cliente (RLS: solo su propio pago).
-  const pagoDirecto = (await tabla(supabase, "pago_reserva").select("estado, monto_reportado").eq("reserva_id", id).eq("metodo", "TRANSFERENCIA_DIRECTA").order("created_at", { ascending: false }).limit(1)) as unknown as { data: { estado: string; monto_reportado: number }[] | null };
+  const pagoDirecto = await supabase.from("pago_reserva").select("estado, monto_reportado").eq("reserva_id", id).eq("metodo", "TRANSFERENCIA_DIRECTA").order("created_at", { ascending: false }).limit(1);
   const estadoPagoDirecto = pagoDirecto.data?.[0]?.estado ?? null;
+  // Con anticipo transferido directo al comercio, StylerNow no reembolsa nada: ni se calcula ni se ofrece (migración 194).
+  const pagoDirectoVigente = estadoPagoDirecto !== null && estadoPagoDirecto !== "RECHAZADO";
 
   const negocio = reserva.negocio as unknown as {
     nombre: string;
@@ -169,11 +171,9 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
       }
     : negocio;
 
-  const { pct, monto: reembolsoEstimado } = estimarReembolso(
-    reserva.hora_inicio,
-    Number(reserva.monto_sena),
-    politicaAplicable
-  );
+  const { pct, monto: reembolsoEstimado } = pagoDirectoVigente
+    ? { pct: 0, monto: 0 }
+    : estimarReembolso(reserva.hora_inicio, Number(reserva.monto_sena), politicaAplicable);
 
   const dm = diaYMes(reserva.hora_inicio, tz);
   const hora = horaCorta(reserva.hora_inicio, tz);
@@ -344,7 +344,7 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
           <Fila icono={<Check aria-hidden className="size-5" />} titulo={t("rv.ya_calificaste")} meta={t("rv.gracias_resena")} />
         ) : null}
         {confirmada ? (
-          <BotonCancelar reservaId={reserva.id} reembolsoEstimado={reembolsoEstimado} reembolsoPct={pct} />
+          <BotonCancelar reservaId={reserva.id} reembolsoEstimado={reembolsoEstimado} reembolsoPct={pct} pagoDirecto={pagoDirectoVigente} />
         ) : null}
       </Filas>
 
@@ -361,7 +361,9 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
 
       {confirmada ? (
         <Bloque etiqueta={t("rv.politica")}>
-          {pct === 0
+          {pagoDirectoVigente
+            ? AVISO_PAGO_DIRECTO_SIN_REEMBOLSO
+            : pct === 0
             ? t("rv.sin_reembolso")
             : t("rv.con_reembolso", { monto: formatCOP(reembolsoEstimado), pct })}
         </Bloque>

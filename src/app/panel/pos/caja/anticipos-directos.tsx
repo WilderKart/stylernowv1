@@ -1,4 +1,3 @@
-import { tabla } from "@/lib/pagos-directos/sin-tipos";
 import { createClient } from "@/lib/supabase/server";
 import { formatCOP } from "@/lib/utils";
 
@@ -25,12 +24,13 @@ export async function AnticiposDirectosDelDia({ negocioId, sedeId }: { negocioId
   const ids = (citas ?? []).map((c) => c.id);
   if (ids.length === 0) return null;
 
-  const r = (await tabla(supabase, "pago_reserva")
+  const { data: pagos } = await supabase
+    .from("pago_reserva")
     .select("estado, monto_reportado")
     .eq("negocio_id", negocioId)
     .eq("metodo", "TRANSFERENCIA_DIRECTA")
-    .in("reserva_id", ids)) as unknown as { data: { estado: string; monto_reportado: number }[] | null };
-  const filas = r.data ?? [];
+    .in("reserva_id", ids);
+  const filas = pagos ?? [];
   const suma = (estado: string) => filas.filter((f) => f.estado === estado).reduce((a, f) => a + Number(f.monto_reportado), 0);
   const cuenta = (estado: string) => filas.filter((f) => f.estado === estado).length;
   if (filas.length === 0) return null;

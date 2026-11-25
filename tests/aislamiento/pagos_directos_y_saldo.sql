@@ -107,5 +107,21 @@ insert into res select 'auditoría: eventos registrados', count(*) >= 8, count(*
 insert into res select 'auditoría SUPERSU con actor_tipo SUPERSU', count(*) = 1, count(*)::text from public.evento_auditoria where accion = 'SALDO_PENDIENTE_AJUSTE' and actor_tipo = 'SUPERSU';
 insert into res select 'anon NO ejecuta RPC', not has_function_privilege('anon','public.verificar_pago_reserva(uuid)','execute') and not has_function_privilege('public','public.ajustar_saldo_pendiente_cliente(uuid,uuid,numeric,text,text)','execute'), '';
 
+-- ── Cancelación del cliente con pago directo: NO hay reembolso de plataforma ni movimientos de libro/wallet; aviso al dueño ──
+insert into public.reserva (id, cliente_id, negocio_id, sede_id, staff_id, hora_inicio, hora_fin, monto_total, monto_sena, estado, expira_at)
+values ('20000000-0000-4000-8000-0000000000a3','10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000010','10000000-0000-4000-8000-000000000011','10000000-0000-4000-8000-000000000003', now()+interval '3 days', now()+interval '3 days 1 hour', 50000, 15000, 'PENDIENTE_PAGO', now()+interval '10 minutes');
+create temp table antes(reembolsos int, wallet int); grant all on antes to public;
+insert into antes select (select count(*) from public.reembolso), (select count(*) from public.wallet_movimiento);
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}', true);
+select pg_temp.intenta('cliente: registra pago cita a3', $$select public.registrar_pago_directo_reserva('20000000-0000-4000-8000-0000000000a3', 15000, '10000000-0000-4000-8000-000000000010/20000000-0000-4000-8000-0000000000a3/q.webp', repeat('d',64))$$, 'OK');
+create temp table canc(j jsonb); grant all on canc to public;
+insert into canc select public.cancelar_reserva('20000000-0000-4000-8000-0000000000a3', 'ya no puedo asistir');
+reset role;
+insert into res select 'cancelación con pago directo: 0% y pago_directo=true', (j->>'reembolso_pct')::numeric = 0 and (j->>'pago_directo')::boolean and (j->>'reembolso_id') is null, j::text from canc;
+insert into res select 'cancelación con pago directo: sin reembolso, sin wallet y sin movimiento monetario en el libro (solo eventos INFORMATIVOS)', (select count(*) from public.reembolso) = reembolsos and (select count(*) from public.wallet_movimiento) = wallet and not exists (select 1 from public.libro_movimiento where reserva_id = '20000000-0000-4000-8000-0000000000a3' and sentido <> 'INFORMATIVO'), '' from antes;
+-- PUSH solo se encola si el dueño tiene suscripción push (aquí no): se esperan EMAIL y PANEL.
+insert into res select 'aviso al dueño: EMAIL + PANEL encolados con cliente, monto y ruta /panel/pagos', count(*) = 2 and bool_and(datos->>'ruta' = '/panel/pagos') and bool_and(usuario_id = '10000000-0000-4000-8000-000000000002') and bool_and(datos->>'cliente' is not null) and bool_and(datos->>'monto' like '15.000%') and array_agg(canal order by canal) = array['EMAIL','PANEL'], count(*)::text from public.notificacion_outbox where evento = 'NEGOCIO_PAGO_DIRECTO_REPORTADO' and datos->>'reserva_id' = '20000000-0000-4000-8000-0000000000a3';
+
 select case when ok then 'PASA ' else 'FALLA ' end || paso || ' → ' || detalle from res order by ok, paso;
 rollback;

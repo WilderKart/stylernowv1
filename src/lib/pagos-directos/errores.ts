@@ -1,30 +1,3 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-
-/**
- * Las tablas/RPC de la migración 194 aún no están en `src/types/database.ts` (se regenera con `supabase gen types`).
- * Estos accesos tipados a mano evitan `any` suelto en cada llamada; la autorización real la imponen RLS y las RPC.
- */
-type Respuesta<T> = Promise<{ data: T | null; error: { message: string } | null }>;
-type Consulta = {
-  select: (columnas: string, opciones?: { count?: "exact"; head?: boolean }) => Consulta;
-  eq: (c: string, v: string | number | boolean) => Consulta;
-  in: (c: string, v: readonly string[]) => Consulta;
-  order: (c: string, o?: { ascending: boolean }) => Consulta;
-  limit: (n: number) => Consulta;
-  maybeSingle: <T>() => Respuesta<T>;
-  upsert: (fila: object, o?: { onConflict: string }) => Respuesta<null>;
-  update: (fila: object) => Consulta;
-  then: PromiseLike<{ data: unknown; error: { message: string } | null; count?: number | null }>["then"];
-};
-
-export function tabla(supabase: SupabaseClient, nombre: string): Consulta {
-  return (supabase as unknown as { from: (n: string) => Consulta }).from(nombre);
-}
-
-export function rpcSinTipos<T = unknown>(supabase: SupabaseClient, nombre: string, args: object): Respuesta<T> {
-  return (supabase as unknown as { rpc: (n: string, a: object) => Respuesta<T> }).rpc(nombre, args);
-}
-
 /** Códigos de error de las RPC de pagos directos → mensajes en español (Colombia). */
 export const MENSAJES_PAGOS_DIRECTOS: Record<string, string> = {
   NO_AUTENTICADO: "Inicia sesión para continuar.",

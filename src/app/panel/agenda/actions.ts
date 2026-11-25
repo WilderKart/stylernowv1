@@ -379,8 +379,7 @@ export async function marcarNoShow(reservaId: string, motivo?: string): Promise<
 export async function completarCitaSinPos(reservaId: string): Promise<Resultado> {
   try {
     const { supabase } = await usuarioActual();
-    const rpc = supabase.rpc.bind(supabase) as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data?: unknown; error: { message: string } | null }>;
-    const { data, error } = await rpc("completar_reserva_sin_pos", { p_reserva_id: reservaId });
+    const { data, error } = await supabase.rpc("completar_reserva_sin_pos", { p_reserva_id: reservaId });
     if (error) return { ok: false, error: traducirError(error.message) };
     revalidatePath("/panel/agenda");
     revalidatePath("/panel/lealtad");

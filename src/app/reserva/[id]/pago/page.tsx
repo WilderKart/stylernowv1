@@ -1,5 +1,4 @@
 import { resumenPoliticaCancelacion } from "@/lib/pagos/sena";
-import { rpcSinTipos } from "@/lib/pagos-directos/sin-tipos";
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { PantallaPago } from "./pantalla-pago";
@@ -43,10 +42,12 @@ export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
   // Una Reserva ya confirmada o cancelada no vuelve a la pantalla de cobro.
   if (reserva.estado !== "PENDIENTE_PAGO") redirect(`/reserva/${id}`);
 
-  const [{ data: medios }, { data: cobraEnLinea }] = await Promise.all([
-    rpcSinTipos<MediosDirectos>(supabase, "medios_pago_directo_para_reserva", { p_reserva_id: id }),
-    rpcSinTipos<boolean>(supabase, "negocio_cobra_en_linea", { p_negocio_id: reserva.negocio_id }),
+  const [{ data: mediosJson }, { data: cobraEnLinea }] = await Promise.all([
+    supabase.rpc("medios_pago_directo_para_reserva", { p_reserva_id: id }),
+    supabase.rpc("negocio_cobra_en_linea", { p_negocio_id: reserva.negocio_id }),
   ]);
+  // La RPC devuelve jsonb (`Json` en los tipos generados): se acota a la forma documentada en la migración 194.
+  const medios = mediosJson as unknown as MediosDirectos | null;
   let qrUrl: string | null = null;
   if (medios?.activo && medios.qr_path) {
     const { data: firmada } = await supabase.storage.from("pagos-directos").createSignedUrl(medios.qr_path, 1800);

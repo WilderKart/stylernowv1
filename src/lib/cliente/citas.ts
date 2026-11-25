@@ -64,6 +64,8 @@ export interface ResultadoCancelacion {
   reembolso_pct: number;
   reembolso_monto: number;
   motivo_catalogo: string | null;
+  /** true si el anticipo fue transferido directo al comercio: no hay reembolso de plataforma (migración 194). */
+  pago_directo?: boolean;
 }
 
 /**

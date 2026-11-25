@@ -12,6 +12,8 @@ export type ResultadoCancelacion =
       reembolsoPct: number;
       /** CONFIRMADA solo cuando la pasarela confirmó; EN_CURSO = solicitada, aún sin confirmar. */
       devolucion: "CONFIRMADA" | "EN_CURSO" | "NINGUNA";
+      /** Anticipo transferido directo al comercio: StylerNow no reembolsa; se gestiona con la barbería. */
+      pagoDirecto: boolean;
     }
   | { ok: false; mensaje: string };
 
@@ -48,6 +50,7 @@ export async function cancelarReservaAction(
     reembolso_id?: string | null;
     reembolso_monto?: number;
     reembolso_pct?: number;
+    pago_directo?: boolean;
   };
 
   const monto = Number(r.reembolso_monto ?? 0);
@@ -70,5 +73,5 @@ export async function cancelarReservaAction(
   revalidatePath(`/reserva/${reservaId}`);
   revalidatePath("/mis-reservas");
 
-  return { ok: true, reembolsoMonto: monto, reembolsoPct: pct, devolucion };
+  return { ok: true, reembolsoMonto: monto, reembolsoPct: pct, devolucion, pagoDirecto: r.pago_directo === true };
 }

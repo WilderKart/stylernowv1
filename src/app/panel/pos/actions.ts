@@ -2,7 +2,6 @@
 
 import { avisoPorFallosDePipeline } from "@/lib/pipeline/fallos";
 import { MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
-import { tabla } from "@/lib/pagos-directos/sin-tipos";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -150,9 +149,9 @@ export async function listarReservasParaCobrar(negocioId: string, sedeId?: strin
     const pagos = new Map<string, { estado: "REPORTADO" | "VERIFICADO" | "RECHAZADO"; monto: number }>();
     const saldos = new Map<string, number>();
     if (ids.length > 0) {
-      const rp = (await tabla(supabase, "pago_reserva").select("reserva_id, estado, monto_reportado").eq("negocio_id", negocioId).eq("metodo", "TRANSFERENCIA_DIRECTA").in("reserva_id", ids).order("created_at", { ascending: true })) as unknown as { data: { reserva_id: string; estado: "REPORTADO" | "VERIFICADO" | "RECHAZADO"; monto_reportado: number }[] | null };
-      for (const p of rp.data ?? []) pagos.set(p.reserva_id, { estado: p.estado, monto: Number(p.monto_reportado) });
-      const rs = (await tabla(supabase, "cliente_saldo_pendiente").select("cliente_id, saldo_actual").eq("negocio_id", negocioId).in("cliente_id", clientes)) as unknown as { data: { cliente_id: string; saldo_actual: number }[] | null };
+      const rp = await supabase.from("pago_reserva").select("reserva_id, estado, monto_reportado").eq("negocio_id", negocioId).eq("metodo", "TRANSFERENCIA_DIRECTA").in("reserva_id", ids).order("created_at", { ascending: true });
+      for (const p of rp.data ?? []) pagos.set(p.reserva_id, { estado: p.estado as "REPORTADO" | "VERIFICADO" | "RECHAZADO", monto: Number(p.monto_reportado) });
+      const rs = await supabase.from("cliente_saldo_pendiente").select("cliente_id, saldo_actual").eq("negocio_id", negocioId).in("cliente_id", clientes);
       for (const x of rs.data ?? []) saldos.set(x.cliente_id, Number(x.saldo_actual));
     }
 

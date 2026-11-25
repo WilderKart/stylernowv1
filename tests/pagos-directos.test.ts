@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { MENSAJES_PAGOS_DIRECTOS, traducirErrorPagos } from "@/lib/pagos-directos/sin-tipos";
+import { AVISO_PAGO_DIRECTO_SIN_REEMBOLSO } from "@/lib/pagos-directos/aviso";
+import { MENSAJES_PAGOS_DIRECTOS, traducirErrorPagos } from "@/lib/pagos-directos/errores";
 
 const leer = (ruta: string) => readFileSync(ruta, "utf8").replace(/\r\n/g, "\n");
 const sql = leer("supabase/migrations/194_pagos_directos_y_saldo_pendiente.sql");
@@ -118,5 +119,82 @@ describe("mensajes de error en español", () => {
     expect(traducirErrorPagos("COMPROBANTE_DUPLICADO")).toMatch(/otra cita/);
     expect(traducirErrorPagos("relation x does not exist")).toBe("No pudimos completar la acción. Intenta de nuevo.");
     for (const m of Object.values(MENSAJES_PAGOS_DIRECTOS)) expect(m).not.toMatch(/[A-Z_]{8,}/);
+  });
+});
+
+describe("cancelación con pago directo: StylerNow no reembolsa", () => {
+  it("el aviso al cliente es el texto acordado", () => {
+    expect(AVISO_PAGO_DIRECTO_SIN_REEMBOLSO).toBe(
+      "Este anticipo fue transferido directamente a la cuenta del comercio. StylerNow no custodia ni reembolsa ese dinero; cualquier devolución o acuerdo debes gestionarlo directamente con la barbería."
+    );
+  });
+  it("cancelar_reserva ignora el reembolso con pago directo vigente: pct 0, sin pago de pasarela y bandera pago_directo", () => {
+    const i = sql.indexOf("11. Cancelación con pago directo");
+    expect(i).toBeGreaterThan(-1);
+    const s = sql.slice(i);
+    expect(s).toMatch(/v_pago_directo := exists \(select 1 from public\.pago_reserva where reserva_id = p_reserva_id[\s\S]{0,40}and metodo = ''TRANSFERENCIA_DIRECTA'' and estado <> ''RECHAZADO''\)/);
+    expect(s).toMatch(/if v_pago_directo then v_pct := 0; v_tiene_pago := false; end if;/);
+    expect(s).toMatch(/''pago_directo'', v_pago_directo/);
+    // el guard queda ANTES de `if v_tiene_pago and v_pct > 0` (que es lo único que llama a _reembolso_crear)
+    expect(s.indexOf("v_pago_directo then v_pct := 0")).toBeGreaterThan(s.indexOf("v_pago_directo := exists"));
+    expect(sql).not.toMatch(/_reembolso_crear\(/);                    // 194 nunca crea reembolsos
+    expect(sql).not.toMatch(/insert into public\.(reembolso|libro_movimiento|wallet_movimiento)\b/i);
+  });
+  it("registrar un pago directo no puede convivir con un anticipo ya cobrado por pasarela", () => {
+    expect(cuerpoRpc("registrar_pago_directo_reserva")).toMatch(/tipo = 'SENA' and estado = 'APROBADO'\) then raise exception 'PAGO_YA_PROCESADO'/);
+  });
+  it("la pantalla de cancelación muestra el aviso en vez de un monto de reembolso", () => {
+    const boton = leer("src/app/reserva/[id]/boton-cancelar.tsx");
+    expect(boton).toMatch(/pagoDirecto\s*\n?\s*\?\s*AVISO_PAGO_DIRECTO_SIN_REEMBOLSO/);
+    expect(boton).toMatch(/pagoDirecto = false/);
+    const pagina = leer("src/app/reserva/[id]/page.tsx");
+    expect(pagina).toMatch(/pagoDirectoVigente\s*\n?\s*\?\s*\{ pct: 0, monto: 0 \}/);                // no se calcula reembolso
+    expect(pagina).toMatch(/pagoDirecto=\{pagoDirectoVigente\}/);
+    expect(pagina).toMatch(/pagoDirectoVigente\s*\n?\s*\?\s*AVISO_PAGO_DIRECTO_SIN_REEMBOLSO/);
+    expect(leer("src/app/reserva/[id]/pago/pago-directo.tsx")).toMatch(/AVISO_PAGO_DIRECTO_SIN_REEMBOLSO/);
+  });
+  it("la acción de cancelar informa pagoDirecto y no dispara el worker de reembolsos sin monto", () => {
+    const a = leer("src/app/reserva/[id]/actions.ts");
+    expect(a).toMatch(/pagoDirecto: r\.pago_directo === true/);
+    expect(a).toMatch(/if \(r\.reembolso_id && monto > 0\)\s*\{\s*await procesarReembolsosSinFallar/);
+  });
+});
+
+describe("aviso al dueño al llegar un comprobante", () => {
+  it("encola EMAIL, PUSH y PANEL con cliente, monto y enlace /panel/pagos, sin bloquear el registro", () => {
+    const c = cuerpoRpc("registrar_pago_directo_reserva");
+    expect(c).toMatch(/_notif_encolar_canales\('NEGOCIO_PAGO_DIRECTO_REPORTADO', v_owner, r\.negocio_id,/);
+    expect(c).toMatch(/_notif_datos_reserva\(r, true\)[\s\S]*'ruta', '\/panel\/pagos'/);
+    expect(c).toMatch(/_notif_monto\(p_monto_reportado, r\.negocio_id\)/);
+    expect(c).toMatch(/array\['EMAIL', 'PUSH', 'PANEL'\]/);
+    expect(c).toMatch(/exception when others then\s+null;/);                  // no bloqueante
+    expect(c).toMatch(/owner_user_id/);                                       // destinatario: el dueño
+    // la notificación va DESPUÉS de insertar y confirmar: un fallo de envío no revierte el pago
+    expect(c.indexOf("_notif_encolar_canales")).toBeGreaterThan(c.indexOf("PAGO_DIRECTO_REPORTADO"));
+  });
+  it("el evento y sus plantillas existen en español e inglés para los 3 canales", () => {
+    const i = sql.indexOf("10. Aviso al dueño");
+    expect(i).toBeGreaterThan(-1);
+    const s = sql.slice(i, sql.indexOf("11. Cancelación"));
+    expect(s).toMatch(/'NEGOCIO_PAGO_DIRECTO_REPORTADO', 'TRANSACCIONAL', 'NEGOCIO'/);
+    for (const canal of ["EMAIL", "PUSH", "PANEL"]) for (const idioma of ["es", "en"]) expect(s).toContain(`('${canal}', '${idioma}',`);
+    expect(s).toMatch(/\{\{cliente\}\}[\s\S]*\{\{monto\}\}/);
+  });
+});
+
+describe("tipos de base de datos regenerados", () => {
+  const tipos = leer("src/types/database.ts");
+  it("incluyen las tablas y RPC de la migración 194", () => {
+    for (const nombre of ["pago_reserva", "negocio_medio_pago_directo", "cliente_saldo_pendiente", "cliente_saldo_movimiento"]) {
+      expect(tipos).toContain(`      ${nombre}: {`);
+    }
+    for (const rpc of ["registrar_pago_directo_reserva", "verificar_pago_reserva", "anular_cita_por_pago_invalido", "marcar_pago_no_recibido_post_cita", "ajustar_saldo_pendiente_cliente", "saldo_pendiente_cliente", "medios_pago_directo_para_reserva"]) {
+      expect(tipos).toContain(`      ${rpc}: {`);
+    }
+  });
+  it("ya no quedan accesos tipados a mano (helpers sin-tipos retirados)", () => {
+    for (const f of ["src/app/panel/pagos/actions.ts", "src/lib/pagos-directos/comprobante-actions.ts", "src/app/panel/pos/actions.ts", "src/app/reserva/[id]/pago/actions.ts"]) {
+      expect(leer(f)).not.toMatch(/sin-tipos|rpcSinTipos|tabla\(supabase/);
+    }
   });
 });

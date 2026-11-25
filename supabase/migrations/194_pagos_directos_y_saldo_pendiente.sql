@@ -271,13 +271,15 @@ end $$;
 create or replace function public.registrar_pago_directo_reserva(
   p_reserva_id uuid, p_monto_reportado numeric, p_comprobante_url text, p_comprobante_hash text)
 returns uuid language plpgsql security definer set search_path = public as $$
-declare r public.reserva; m public.negocio_medio_pago_directo; v_id uuid; v_ref text;
+declare r public.reserva; m public.negocio_medio_pago_directo; v_id uuid; v_ref text; v_owner uuid;
 begin
   if auth.uid() is null then raise exception 'NO_AUTENTICADO'; end if;
   select * into r from public.reserva where id = p_reserva_id for update;
   if not found or r.cliente_id is distinct from auth.uid() then raise exception 'RESERVA_NO_ENCONTRADA'; end if;
   if r.estado <> 'PENDIENTE_PAGO' or (r.expira_at is not null and r.expira_at < now()) then raise exception 'RESERVA_NO_PAGABLE'; end if;
   perform public._exigir_operativo(r.negocio_id);
+  -- Una reserva que ya pagó por pasarela no se paga dos veces (evita reembolsos cruzados).
+  if exists (select 1 from public.pago where reserva_id = r.id and tipo = 'SENA' and estado = 'APROBADO') then raise exception 'PAGO_YA_PROCESADO'; end if;
 
   select * into m from public.negocio_medio_pago_directo where negocio_id = r.negocio_id;
   if not found or not m.activo then raise exception 'PAGO_DIRECTO_NO_DISPONIBLE'; end if;
@@ -312,6 +314,16 @@ begin
 
   perform public._auditar_pago('pago_reserva', v_id, 'PAGO_DIRECTO_REPORTADO', r.negocio_id, null, null,
     jsonb_build_object('reserva_id', r.id, 'monto_reportado', p_monto_reportado, 'monto_esperado', r.monto_sena, 'referencia', v_ref));
+
+  -- Aviso al dueño (in-app + push + correo vía outbox/Resend). NO bloqueante: cualquier fallo se descarta y el pago ya quedó registrado.
+  begin
+    select n.owner_user_id into v_owner from public.negocio n where n.id = r.negocio_id;
+    perform public._notif_encolar_canales('NEGOCIO_PAGO_DIRECTO_REPORTADO', v_owner, r.negocio_id,
+      public._notif_datos_reserva(r, true) || jsonb_build_object('monto', public._notif_monto(p_monto_reportado, r.negocio_id), 'ruta', '/panel/pagos'),
+      'pagodirecto:' || v_id::text, array['EMAIL', 'PUSH', 'PANEL']);
+  exception when others then
+    null;
+  end;
   return v_id;
 end $$;
 
@@ -498,3 +510,53 @@ begin
     execute replace(v_def, v_viejo, v_nuevo);
   end loop;
 end $$;
+
+-- ════════════════════════════════════════════════════════════════════════
+-- 10. Aviso al dueño cuando llega un comprobante (catálogo + plantillas del outbox de la 124)
+-- ════════════════════════════════════════════════════════════════════════
+insert into public.notificacion_evento (codigo, categoria, audiencia, esencial, descripcion_es, descripcion_en) values
+  ('NEGOCIO_PAGO_DIRECTO_REPORTADO', 'TRANSACCIONAL', 'NEGOCIO', false, 'Un cliente reportó un pago directo por revisar', 'A client reported a direct payment to review')
+on conflict (codigo) do nothing;
+
+with base(canal, idioma, asunto, cuerpo) as (values
+  ('EMAIL', 'es', 'Pago por revisar de {{cliente}}', '<p><strong>{{cliente}}</strong> reportó una transferencia de <strong>{{monto}}</strong> para su cita del {{fecha}} en {{negocio}}. La cita ya está agendada; verifica que el dinero llegó a tu cuenta.</p><p>Revisa el comprobante en «Pagos directos».</p>'),
+  ('EMAIL', 'en', 'Payment to review from {{cliente}}', '<p><strong>{{cliente}}</strong> reported a transfer of <strong>{{monto}}</strong> for their appointment on {{fecha}} at {{negocio}}. The booking is already confirmed; please check the money reached your account.</p><p>Review the receipt in "Direct payments".</p>'),
+  ('PUSH', 'es', 'Pago por revisar de {{cliente}}', '{{cliente}} reportó {{monto}}. Toca para verificar el comprobante.'),
+  ('PUSH', 'en', 'Payment to review from {{cliente}}', '{{cliente}} reported {{monto}}. Tap to check the receipt.'),
+  ('PANEL', 'es', 'Pago por revisar de {{cliente}}', '{{cliente}} reportó {{monto}} para el {{fecha}}. Verifica el comprobante.'),
+  ('PANEL', 'en', 'Payment to review from {{cliente}}', '{{cliente}} reported {{monto}} for {{fecha}}. Check the receipt.')
+)
+insert into public.notificacion_plantilla (codigo, canal, idioma, negocio_id, asunto, cuerpo, version, activa)
+select 'NEGOCIO_PAGO_DIRECTO_REPORTADO', b.canal, b.idioma, null, b.asunto, b.cuerpo, 1, true from base b
+where not exists (select 1 from public.notificacion_plantilla t
+                  where t.codigo = 'NEGOCIO_PAGO_DIRECTO_REPORTADO' and t.canal = b.canal and t.idioma = b.idioma and t.negocio_id is null);
+
+-- ════════════════════════════════════════════════════════════════════════
+-- 11. Cancelación con pago directo: la plataforma NO reembolsa ese dinero (nunca lo recibió)
+-- ════════════════════════════════════════════════════════════════════════
+-- cancelar_reserva solo crea reembolso cuando existe un pago de pasarela (tabla pago). Aquí se vuelve explícito y a prueba de
+-- futuros cambios: con un pago directo vigente jamás se llama _reembolso_crear, el porcentaje queda en 0 y se informa
+-- pago_directo = true. Así no hay reembolsos de pasarela, ni movimientos en el libro/wallet, por un dinero que no pasó por ahí.
+do $$
+declare
+  v_def text;
+  v_a1 constant text := E'  v_origen text;\nbegin';
+  v_a2 constant text := E'  v_tiene_pago := found;\n';
+  v_a3 constant text := '  if v_tiene_pago and v_pct > 0 then';
+  v_a4 constant text := E'    ''motivo_catalogo'', v_motivo_catalogo);';
+begin
+  v_def := pg_get_functiondef('public.cancelar_reserva(uuid, text)'::regprocedure);
+  if position('v_pago_directo' in v_def) > 0 then return; end if;    -- ya migrada
+  if position(v_a1 in v_def) = 0 or position(v_a2 in v_def) = 0 or position(v_a3 in v_def) = 0 or position(v_a4 in v_def) = 0 then
+    raise exception 'ANCLA_NO_ENCONTRADA cancelar_reserva';
+  end if;
+  v_def := replace(v_def, v_a1, E'  v_origen text;\n  v_pago_directo boolean := false;\nbegin');
+  v_def := replace(v_def, v_a2, v_a2
+    || E'  v_pago_directo := exists (select 1 from public.pago_reserva where reserva_id = p_reserva_id\n'
+    || E'    and metodo = ''TRANSFERENCIA_DIRECTA'' and estado <> ''RECHAZADO'');\n'
+    || E'  if v_pago_directo then v_pct := 0; v_tiene_pago := false; end if;\n');
+  v_def := replace(v_def, v_a4, E'    ''motivo_catalogo'', v_motivo_catalogo,\n    ''pago_directo'', v_pago_directo);');
+  execute v_def;
+end $$;
+revoke all on function public.cancelar_reserva(uuid, text) from public, anon, authenticated;
+grant execute on function public.cancelar_reserva(uuid, text) to authenticated;

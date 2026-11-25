@@ -55,7 +55,7 @@ export async function listarMisTickets(): Promise<Resultado<TicketResumen[]>> {
 
 export interface MensajeTicket {
   id: string;
-  autorId: string;
+  autorId: string | null;
   actorTipo: string;
   mensaje: string;
   createdAt: string;

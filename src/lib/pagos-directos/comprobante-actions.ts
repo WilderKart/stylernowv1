@@ -1,6 +1,5 @@
 "use server";
 
-import { tabla } from "@/lib/pagos-directos/sin-tipos";
 import { createClient } from "@/lib/supabase/server";
 
 export interface PagoDeReserva {
@@ -21,22 +20,21 @@ export async function obtenerPagoDeReserva(reservaId: string): Promise<PagoDeRes
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
-    const r = (await tabla(supabase, "pago_reserva")
+    const { data } = await supabase
+      .from("pago_reserva")
       .select("id, estado, monto_reportado, referencia_corta, comprobante_url")
       .eq("reserva_id", reservaId)
       .eq("metodo", "TRANSFERENCIA_DIRECTA")
       .order("created_at", { ascending: false })
-      .limit(1)) as unknown as {
-      data: { id: string; estado: PagoDeReserva["estado"]; monto_reportado: number; referencia_corta: string | null; comprobante_url: string | null }[] | null;
-    };
-    const p = r.data?.[0];
+      .limit(1);
+    const p = data?.[0];
     if (!p) return null;
     let url: string | null = null;
     if (p.comprobante_url) {
       const { data } = await supabase.storage.from("pagos-directos").createSignedUrl(p.comprobante_url, 600);
       url = data?.signedUrl ?? null;
     }
-    return { pagoId: p.id, estado: p.estado, montoReportado: Number(p.monto_reportado), referencia: p.referencia_corta, url };
+    return { pagoId: p.id, estado: p.estado as PagoDeReserva["estado"], montoReportado: Number(p.monto_reportado), referencia: p.referencia_corta, url };
   } catch {
     return null;
   }

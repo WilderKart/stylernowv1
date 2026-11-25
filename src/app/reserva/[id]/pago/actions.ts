@@ -2,7 +2,7 @@
 
 import { crearPreferenciaDePago } from "@/lib/pagos/cobro";
 import { sincronizarPago } from "@/lib/pagos/sincronizar";
-import { rpcSinTipos, traducirErrorPagos } from "@/lib/pagos-directos/sin-tipos";
+import { traducirErrorPagos } from "@/lib/pagos-directos/errores";
 import { createClient } from "@/lib/supabase/server";
 
 /** Base pública del sitio, usada por back_urls y notification_url de la pasarela. */
@@ -247,7 +247,7 @@ export async function registrarPagoDirecto(datos: {
     if (eAcepta.message.includes("RESERVA_NO_PAGABLE")) return { ok: false, mensaje: "La reserva expiró o cambió de estado. Elige un horario de nuevo." };
     return { ok: false, mensaje: "No pudimos registrar tu aceptación. Intenta de nuevo." };
   }
-  const { error } = await rpcSinTipos(supabase, "registrar_pago_directo_reserva", {
+  const { error } = await supabase.rpc("registrar_pago_directo_reserva", {
     p_reserva_id: datos.reservaId,
     p_monto_reportado: Math.round(datos.monto),
     p_comprobante_url: datos.rutaComprobante,

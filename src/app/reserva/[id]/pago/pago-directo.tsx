@@ -3,6 +3,7 @@
 import { Bloque, ErrorAviso } from "@/app/lealtad/ui-cliente";
 import { Button } from "@/components/ui/button";
 import { comprimirComprobante, sha256Hex } from "@/lib/imagen/comprimir";
+import { AVISO_PAGO_DIRECTO_SIN_REEMBOLSO } from "@/lib/pagos-directos/aviso";
 import { createClient } from "@/lib/supabase/client";
 import { formatCOP } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -174,6 +175,7 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, medios, acepta }:
         <p className="m-0 text-[12px] text-text-muted">
           El pago se realiza directamente a la cuenta del comercio. StylerNow solo facilita la reserva y no custodia ni valida transferencias.
         </p>
+        <p className="m-0 text-[12px] text-text-muted">{AVISO_PAGO_DIRECTO_SIN_REEMBOLSO}</p>
       </div>
     </Bloque>
   );

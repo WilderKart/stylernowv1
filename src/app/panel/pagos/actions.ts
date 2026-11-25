@@ -1,7 +1,7 @@
 "use server";
 
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
-import { rpcSinTipos, tabla, traducirErrorPagos } from "@/lib/pagos-directos/sin-tipos";
+import { traducirErrorPagos } from "@/lib/pagos-directos/errores";
 import { createClient } from "@/lib/supabase/server";
 import { exigirOperativo, MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
 import { revalidatePath } from "next/cache";
@@ -41,13 +41,11 @@ export interface MediosPago {
 export async function obtenerMediosPago(): Promise<Resultado<MediosPago>> {
   try {
     const { supabase, negocioId } = await contextoDueno();
-    const { data, error } = await tabla(supabase, "negocio_medio_pago_directo")
+    const { data, error } = await supabase
+      .from("negocio_medio_pago_directo")
       .select("activo, llave_breb, nequi, daviplata, link_pago, instrucciones, qr_path")
       .eq("negocio_id", negocioId)
-      .maybeSingle<{
-        activo: boolean; llave_breb: string | null; nequi: string | null; daviplata: string | null;
-        link_pago: string | null; instrucciones: string | null; qr_path: string | null;
-      }>();
+      .maybeSingle();
     if (error) return { ok: false, error: "No pudimos cargar tus medios de pago." };
     let qrUrl: string | null = null;
     if (data?.qr_path) {
@@ -89,13 +87,12 @@ export async function guardarMediosPago(f: {
     if ((link?.length ?? 0) > 300) return { ok: false, error: "El link de pago es demasiado largo." };
     if ((instrucciones?.length ?? 0) > 500) return { ok: false, error: "Las instrucciones no pueden superar 500 caracteres." };
 
-    const { data: actual } = await tabla(supabase, "negocio_medio_pago_directo")
-      .select("qr_path").eq("negocio_id", negocioId).maybeSingle<{ qr_path: string | null }>();
+    const { data: actual } = await supabase.from("negocio_medio_pago_directo").select("qr_path").eq("negocio_id", negocioId).maybeSingle();
     if (f.activo && !(llave || nequi || daviplata || link || actual?.qr_path)) {
       return { ok: false, error: "Para activar los pagos directos agrega al menos un medio: llave Bre-B, Nequi, Daviplata, link o QR." };
     }
 
-    const { error } = await tabla(supabase, "negocio_medio_pago_directo").upsert(
+    const { error } = await supabase.from("negocio_medio_pago_directo").upsert(
       {
         negocio_id: negocioId, activo: f.activo, llave_breb: llave, nequi, daviplata, link_pago: link,
         instrucciones, updated_by: userId, updated_at: new Date().toISOString(),
@@ -130,9 +127,8 @@ export async function subirQrPago(dataUrl: string): Promise<Resultado> {
     const { error: eUp } = await supabase.storage.from("pagos-directos").upload(ruta, bytes, { contentType: mime });
     if (eUp) return { ok: false, error: "No pudimos subir el QR. Intenta de nuevo." };
 
-    const { data: previo } = await tabla(supabase, "negocio_medio_pago_directo")
-      .select("qr_path").eq("negocio_id", negocioId).maybeSingle<{ qr_path: string | null }>();
-    const { error } = await tabla(supabase, "negocio_medio_pago_directo").upsert(
+    const { data: previo } = await supabase.from("negocio_medio_pago_directo").select("qr_path").eq("negocio_id", negocioId).maybeSingle();
+    const { error } = await supabase.from("negocio_medio_pago_directo").upsert(
       { negocio_id: negocioId, qr_path: ruta, updated_at: new Date().toISOString() },
       { onConflict: "negocio_id" }
     );
@@ -151,15 +147,17 @@ export async function subirQrPago(dataUrl: string): Promise<Resultado> {
 export async function quitarQrPago(): Promise<Resultado> {
   try {
     const { supabase, negocioId } = await contextoDueno();
-    const { data: previo } = await tabla(supabase, "negocio_medio_pago_directo")
+    const { data: previo } = await supabase
+      .from("negocio_medio_pago_directo")
       .select("qr_path, activo, llave_breb, nequi, daviplata, link_pago")
       .eq("negocio_id", negocioId)
-      .maybeSingle<{ qr_path: string | null; activo: boolean; llave_breb: string | null; nequi: string | null; daviplata: string | null; link_pago: string | null }>();
+      .maybeSingle();
     if (!previo?.qr_path) return { ok: true };
     if (previo.activo && !(previo.llave_breb || previo.nequi || previo.daviplata || previo.link_pago)) {
       return { ok: false, error: "Es tu único medio de pago activo. Agrega otro o desactiva los pagos directos antes de quitar el QR." };
     }
-    const { error } = await tabla(supabase, "negocio_medio_pago_directo")
+    const { error } = await supabase
+      .from("negocio_medio_pago_directo")
       .update({ qr_path: null, updated_at: new Date().toISOString() })
       .eq("negocio_id", negocioId);
     if (error) return { ok: false, error: "No pudimos quitar el QR." };
@@ -186,23 +184,23 @@ export interface PagoPorRevisar {
   creadoEn: string;
 }
 
-interface FilaPago {
-  id: string; reserva_id: string; monto_esperado: number; monto_reportado: number; referencia_corta: string | null;
-  comprobante_url: string | null; created_at: string;
-  reserva: { hora_inicio: string; estado: string; cliente: { nombre: string } | null } | null;
-}
-
 export async function listarPagosPorRevisar(): Promise<Resultado<PagoPorRevisar[]>> {
   try {
     const { supabase, negocioId } = await contextoDueno();
-    const { data, error } = await tabla(supabase, "pago_reserva")
+    const { data, error } = await supabase
+      .from("pago_reserva")
       .select("id, reserva_id, monto_esperado, monto_reportado, referencia_corta, comprobante_url, created_at, reserva:reserva_id (hora_inicio, estado, cliente:cliente_id (nombre))")
       .eq("negocio_id", negocioId)
       .eq("estado", "REPORTADO")
       .order("created_at", { ascending: true })
-      .limit(100) as unknown as { data: FilaPago[] | null; error: { message: string } | null };
+      .limit(100);
     if (error) return { ok: false, error: "No pudimos cargar los pagos por revisar." };
-    const filas = data ?? [];
+    // Embebidos reserva→cliente: el cliente de tipos los infiere como objeto, no lista (FK muchos-a-uno).
+    const filas = (data ?? []) as unknown as {
+      id: string; reserva_id: string; monto_esperado: number; monto_reportado: number; referencia_corta: string | null;
+      comprobante_url: string | null; created_at: string;
+      reserva: { hora_inicio: string; estado: string; cliente: { nombre: string } | null } | null;
+    }[];
     const rutas = filas.map((p) => p.comprobante_url).filter((r): r is string => !!r);
     const firmadas = new Map<string, string>();
     if (rutas.length > 0) {
@@ -234,11 +232,12 @@ export async function contarPagosPorRevisar(negocioId: string): Promise<number> 
     const contexto = await resolverContexto();
     if (contexto.rol !== "BARBERIA" || contexto.negocioId !== negocioId) return 0;
     const supabase = await createClient();
-    const r = (await tabla(supabase, "pago_reserva")
+    const { count } = await supabase
+      .from("pago_reserva")
       .select("id", { count: "exact", head: true })
       .eq("negocio_id", negocioId)
-      .eq("estado", "REPORTADO")) as unknown as { count: number | null };
-    return r.count ?? 0;
+      .eq("estado", "REPORTADO");
+    return count ?? 0;
   } catch {
     return 0;
   }
@@ -249,7 +248,7 @@ export async function contarPagosPorRevisar(negocioId: string): Promise<number> 
 export async function verificarPago(pagoId: string): Promise<Resultado> {
   try {
     const { supabase } = await contextoDueno();
-    const { error } = await rpcSinTipos(supabase, "verificar_pago_reserva", { p_pago_id: pagoId });
+    const { error } = await supabase.rpc("verificar_pago_reserva", { p_pago_id: pagoId });
     if (error) return falla(new Error(error.message));
     revalidatePath("/panel/pagos");
     revalidatePath("/panel");
@@ -262,7 +261,7 @@ export async function verificarPago(pagoId: string): Promise<Resultado> {
 export async function anularCitaPorPago(reservaId: string, motivo: string): Promise<Resultado> {
   try {
     const { supabase } = await contextoDueno();
-    const { error } = await rpcSinTipos(supabase, "anular_cita_por_pago_invalido", { p_reserva_id: reservaId, p_motivo: motivo });
+    const { error } = await supabase.rpc("anular_cita_por_pago_invalido", { p_reserva_id: reservaId, p_motivo: motivo });
     if (error) return falla(new Error(error.message));
     revalidatePath("/panel/pagos");
     revalidatePath("/panel/agenda");
@@ -275,7 +274,7 @@ export async function anularCitaPorPago(reservaId: string, motivo: string): Prom
 export async function marcarPagoNoRecibido(pagoId: string, motivo: string): Promise<Resultado<{ saldo: number }>> {
   try {
     const { supabase } = await contextoDueno();
-    const { data, error } = await rpcSinTipos<number>(supabase, "marcar_pago_no_recibido_post_cita", { p_pago_id: pagoId, p_motivo: motivo });
+    const { data, error } = await supabase.rpc("marcar_pago_no_recibido_post_cita", { p_pago_id: pagoId, p_motivo: motivo });
     if (error) return falla(new Error(error.message));
     revalidatePath("/panel/pagos");
     revalidatePath("/panel/crm");
@@ -291,7 +290,7 @@ export async function ajustarSaldoCliente(
   try {
     const { supabase, negocioId } = await contextoDueno();
     if (!Number.isFinite(nuevoSaldo) || nuevoSaldo < 0) return { ok: false, error: "El saldo no puede ser negativo." };
-    const { data, error } = await rpcSinTipos<number>(supabase, "ajustar_saldo_pendiente_cliente", {
+    const { data, error } = await supabase.rpc("ajustar_saldo_pendiente_cliente", {
       p_negocio_id: negocioId, p_cliente_id: clienteId, p_nuevo_saldo: nuevoSaldo, p_motivo: motivo, p_tipo: tipo,
     });
     if (error) return falla(new Error(error.message));
@@ -308,7 +307,7 @@ export async function obtenerSaldoCliente(clienteId: string): Promise<number> {
     const contexto = await resolverContexto();
     if (!contexto.userId || !contexto.negocioId || (contexto.rol !== "BARBERIA" && contexto.rol !== "GUARDIAN")) return 0;
     const supabase = await createClient();
-    const { data } = await rpcSinTipos<number>(supabase, "saldo_pendiente_cliente", { p_negocio_id: contexto.negocioId, p_cliente_id: clienteId });
+    const { data } = await supabase.rpc("saldo_pendiente_cliente", { p_negocio_id: contexto.negocioId, p_cliente_id: clienteId });
     return Number(data ?? 0);
   } catch {
     return 0;

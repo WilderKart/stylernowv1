@@ -2,6 +2,7 @@
 
 import { ErrorAviso, Fila } from "@/app/lealtad/ui-cliente";
 import { Button } from "@/components/ui/button";
+import { AVISO_PAGO_DIRECTO_SIN_REEMBOLSO } from "@/lib/pagos-directos/aviso";
 import { formatCOP } from "@/lib/utils";
 import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -17,10 +18,13 @@ export function BotonCancelar({
   reservaId,
   reembolsoEstimado,
   reembolsoPct,
+  pagoDirecto = false,
 }: {
   reservaId: string;
   reembolsoEstimado: number;
   reembolsoPct: number;
+  /** Anticipo transferido directo al comercio: StylerNow no reembolsa, se muestra el aviso en vez de un monto. */
+  pagoDirecto?: boolean;
 }) {
   const router = useRouter();
   const t = useT();
@@ -47,7 +51,9 @@ export function BotonCancelar({
         icono={<X aria-hidden className="size-5" />}
         titulo={t("canc.cancelar_cita")}
         meta={
-          reembolsoPct === 0
+          pagoDirecto
+            ? "Anticipo pagado directo al comercio: sin reembolso de StylerNow"
+            : reembolsoPct === 0
             ? t("canc.sin_reembolso_meta")
             : t("canc.devolvemos_meta", { monto: formatCOP(reembolsoEstimado) })
         }
@@ -61,7 +67,9 @@ export function BotonCancelar({
     <div className="m-4 border-2 border-danger p-4 shadow-hard">
       <h3 className="section">{t("canc.cancelamos")}</h3>
       <p className="body-sm mt-2 break-words">
-        {reembolsoPct === 0
+        {pagoDirecto
+          ? AVISO_PAGO_DIRECTO_SIN_REEMBOLSO
+          : reembolsoPct === 0
           ? t("canc.sin_reembolso")
           : t("canc.con_reembolso", { monto: formatCOP(reembolsoEstimado), pct: reembolsoPct })}
       </p>

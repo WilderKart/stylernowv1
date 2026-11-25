@@ -63,7 +63,7 @@ export async function listarTicketsAdmin(estado?: string): Promise<Resultado<Tic
 
 export interface MensajeTicketAdmin {
   id: string;
-  autorId: string;
+  autorId: string | null;
   actorTipo: string;
   mensaje: string;
   createdAt: string;
