@@ -497,3 +497,46 @@
     padding: 6px 12px;
   }
 }
+
+/* ───── Vista de la barbería (/panel/soporte) ─────
+ * Todo lo de abajo cuelga de .panelSoporte: el panel de SuperSU (/admin/soporte) no se ve afectado. */
+.panelSoporte {
+  --nm-card: #f8fafd;
+  --nm-borde: #d9e0ea;
+}
+:global([data-theme="dark"]) .panelSoporte {
+  --nm-card: #1c2230;
+  --nm-borde: #313b55;
+}
+/* Sin caja de fondo propia: el panel ya tiene su fondo, así no se ven sombras recortadas alrededor. */
+.panelSoporte.marco {
+  background: transparent;
+  border-radius: 0 !important;
+  padding: 0;
+}
+/* Borde nítido + sombra corta: la tarjeta se separa del fondo sin halos grandes. */
+.panelSoporte .tarjeta {
+  border: 1px solid var(--nm-borde);
+  box-shadow: 0 14px 30px -16px var(--nm-sombra), 0 2px 6px rgba(31, 42, 58, 0.06);
+}
+.panelSoporte .cabecera {
+  border-bottom: 1px solid var(--nm-borde);
+  padding-bottom: 14px;
+}
+.panelSoporte .hilo {
+  padding-top: 14px;
+}
+.alturaChat {
+  /* Escritorio: el chat completo (incluido el campo de escritura) cabe en la pantalla bajo el encabezado del panel. */
+  height: clamp(460px, calc(100dvh - 310px), 720px);
+}
+@media (max-width: 640px) {
+  /* Móvil: el chat cabe entre el título del panel y la barra inferior, para que el campo de escritura siempre se vea. */
+  .alturaChat {
+    height: calc(100dvh - 360px - env(safe-area-inset-bottom, 0px));
+    min-height: 400px;
+  }
+  .panelSoporte .compositor {
+    padding: 8px 10px 12px;
+  }
+}

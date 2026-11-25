@@ -57,7 +57,7 @@ export function VistaSoporte({
 
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-3 pb-24 pt-5 sm:px-8 sm:py-8">
-      <div className={cn(s.raiz, s.marco)}>
+      <div className={cn(s.raiz, s.marco, s.panelSoporte)}>
         <div className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-3 px-1">
           <h1 className="m-0 text-[clamp(26px,5vw,34px)] font-extrabold" style={{ fontFamily: "inherit", textTransform: "none", letterSpacing: "-0.01em" }}>
             Soporte

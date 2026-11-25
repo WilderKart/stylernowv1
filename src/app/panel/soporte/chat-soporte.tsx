@@ -98,7 +98,7 @@ export function ChatSoportePanel({ inicial, errorInicial, alIrATickets }: { inic
 
   const cerrada = chat?.estado === "CERRADA";
   return (
-    <section className={s.tarjeta} style={{ height: "min(74dvh, 720px)", minHeight: 460 }} aria-labelledby="titulo-chat-soporte">
+    <section className={cn(s.tarjeta, s.alturaChat)} aria-labelledby="titulo-chat-soporte">
       <header className={s.cabecera}>
         <span className={s.avatarMarco}>
           {/* eslint-disable-next-line @next/next/no-img-element -- avatar estático local */}
@@ -123,6 +123,7 @@ export function ChatSoportePanel({ inicial, errorInicial, alIrATickets }: { inic
         cerrada={cerrada}
         chipsInicio={CHIPS_INICIO}
         onEnviar={onEnviar}
+        placeholder="Escribe un mensaje…"
         prepararSubida={prepararSubida}
       />
     </section>
