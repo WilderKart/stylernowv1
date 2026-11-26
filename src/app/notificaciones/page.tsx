@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ListaNotificaciones } from "./lista-notificaciones";
 import { obtenerT } from "@/lib/i18n/servidor";
-import { cargarClavesVapid } from "@/lib/notificaciones/web-push";
+import { vapidPublica as obtenerVapidPublica } from "@/lib/notificaciones/claves-vapid";
 import { PreferenciasNotificaciones, type PreferenciaAviso } from "./preferencias-notificaciones";
 
 type RpcSinTipos = {
@@ -35,7 +35,7 @@ export default async function NotificacionesPage() {
     (supabase as unknown as RpcSinTipos).rpc("notif_preferencias_listar"),
   ]);
   // Solo la clave PÚBLICA llega al navegador, y solo si el par VAPID del servidor es coherente.
-  const vapidPublica = cargarClavesVapid(process.env)?.publicaB64 ?? null;
+  const vapidPublica = await obtenerVapidPublica();
 
   return (
     <Pantalla className="pb-24">

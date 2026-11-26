@@ -1,5 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { entornoConVapid } from "./claves-vapid";
 import { seleccionarAdaptador, type AdaptadorCanal } from "./adaptadores";
 import { armarMensaje, type FilaOutbox } from "./mensaje";
 
@@ -26,21 +27,26 @@ export interface ResumenOutbox {
   errores: string[];
 }
 
-export async function procesarOutbox(limite = 100): Promise<ResumenOutbox> {
+export async function procesarOutbox(limite = 100, opciones: { programadas?: boolean } = {}): Promise<ResumenOutbox> {
   const admin = createAdminClient() as unknown as RpcSinTipos;
   const base = process.env.NEXT_PUBLIC_SITE_URL?.startsWith("https://") ? process.env.NEXT_PUBLIC_SITE_URL : "https://stylernow.com";
   const lim = Math.min(Math.max(Math.trunc(limite) || 100, 1), 200);
   const resumen: ResumenOutbox = { programadas: null, panel_entregadas: 0, reencoladas: 0, tomadas: 0, por_estado: {}, errores: [] };
 
-  const prog = await admin.rpc("notif_generar_programadas", { p_ventana_horas: 24 });
-  resumen.programadas = prog.error ? { error: prog.error.message } : prog.data;
+  // El despacho inmediato (disparado por la base al encolar) no regenera los recordatorios: eso lo hace el cron diario.
+  if (opciones.programadas !== false) {
+    const prog = await admin.rpc("notif_generar_programadas", { p_ventana_horas: 24 });
+    resumen.programadas = prog.error ? { error: prog.error.message } : prog.data;
+  }
 
   const panel = await admin.rpc("notif_entregar_panel", { p_limite: lim * 2 });
   resumen.panel_entregadas = panel.error ? { error: panel.error.message } : Number(panel.data) || 0;
 
+  // Las claves VAPID salen del entorno o, si no están, de Vault (migración 198).
+  const entorno = await entornoConVapid();
   const adaptadores: Record<"EMAIL" | "PUSH", AdaptadorCanal> = {
-    EMAIL: seleccionarAdaptador("EMAIL"),
-    PUSH: seleccionarAdaptador("PUSH"),
+    EMAIL: seleccionarAdaptador("EMAIL", entorno),
+    PUSH: seleccionarAdaptador("PUSH", entorno),
   };
   for (const canal of ["EMAIL", "PUSH"] as const) {
     if (!adaptadores[canal].habilitado) continue;
