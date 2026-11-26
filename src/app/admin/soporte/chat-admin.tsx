@@ -1,5 +1,6 @@
 "use client";
 
+import { BotonSonido } from "@/components/soporte/boton-sonido";
 import { HiloChat, type RespuestaRapidaChat } from "@/components/soporte/hilo-chat";
 import s from "@/components/soporte/chat-3d.module.css";
 import { normalizar } from "@/lib/busqueda/difuso";
@@ -298,6 +299,7 @@ export function ChatAdmin({ conversacionesIniciales, errorInicial, seleccionInic
                   <p className={s.subtitulo}>{[actual.conversacion.ciudad, actual.conversacion.plan ? `Plan ${PLAN[actual.conversacion.plan] ?? actual.conversacion.plan}` : null].filter(Boolean).join(" · ")}</p>
                 </div>
                 <span className={cn(s.estado, actual.conversacion.estado === "CERRADA" && s.estadoCerrada)}>{actual.conversacion.estado === "ABIERTA" ? "Abierta" : "Cerrada"}</span>
+                <BotonSonido />
               </header>
               <HiloChat
                 key={actual.conversacion.id}

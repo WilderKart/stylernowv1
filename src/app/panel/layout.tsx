@@ -8,6 +8,7 @@ import { obtenerEstadoOperativo } from "@/lib/suscripcion/estado-operativo";
 import { verticalDeCategorias } from "@/lib/tema/vertical";
 import { categoriaRegistroDe } from "@/lib/auth/destino-inicial";
 import { PanelSuaveProvider } from "@/components/panel/panel-estilo";
+import { AlertaSonoraSoporte } from "@/components/soporte/alerta-sonora-soporte";
 
 export const metadata = {
   title: { template: "%s · Panel Negocio · StylerNow", default: "Panel Negocio" },
@@ -60,6 +61,7 @@ async function PanelGuardado({ children }: { children: React.ReactNode }) {
         data-panel={suave ? "suave" : undefined}
       >
         {estado ? <BannerSuscripcion estado={estado} puedePagar={contexto.rol === "BARBERIA"} /> : null}
+        {contexto.rol === "BARBERIA" && contexto.negocioId ? <AlertaSonoraSoporte rol="BARBERIA" negocioId={contexto.negocioId} /> : null}
         {children}
       </div>
     </PanelSuaveProvider>

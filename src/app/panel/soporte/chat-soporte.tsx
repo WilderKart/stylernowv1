@@ -1,5 +1,6 @@
 "use client";
 
+import { BotonSonido } from "@/components/soporte/boton-sonido";
 import { HiloChat } from "@/components/soporte/hilo-chat";
 import s from "@/components/soporte/chat-3d.module.css";
 import { mensajeDesdeEvento, type AdjuntoSubido } from "@/lib/soporte/tipos";
@@ -180,6 +181,7 @@ export function ChatSoportePanel({ inicial, errorInicial, alIrATickets }: { inic
           </p>
         </div>
         <span className={cn(s.estado, cerrada && s.estadoCerrada)}>{cerrada ? "Cerrada" : "Abierta"}</span>
+        <BotonSonido />
       </header>
       <HiloChat
         mensajes={chat?.mensajes ?? []}

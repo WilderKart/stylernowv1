@@ -1,5 +1,6 @@
 "use client";
 
+import { abrirCanalAutenticado } from "@/lib/soporte/canal-autenticado";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { contarNoLeidosSoporte } from "@/app/panel/soporte/chat-actions";
@@ -16,19 +17,21 @@ export function SoporteNavBadge() {
     void actualizar();
 
     const supabase = createClient();
-    const canal = supabase
-      .channel("soporte-badge-panel")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "soporte_mensaje" }, () => {
-        void actualizar();
-      })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "soporte_conversacion" }, () => {
-        void actualizar();
-      })
-      .subscribe();
+    const cerrar = abrirCanalAutenticado(supabase, () =>
+      supabase
+        .channel("soporte-badge-panel")
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "soporte_mensaje" }, () => {
+          void actualizar();
+        })
+        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "soporte_conversacion" }, () => {
+          void actualizar();
+        })
+        .subscribe(),
+    );
 
     return () => {
       activo = false;
-      void supabase.removeChannel(canal);
+      cerrar();
     };
   }, []);
 
