@@ -6,6 +6,8 @@ import { BannerSuscripcion } from "@/components/panel/banner-suscripcion";
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
 import { obtenerEstadoOperativo } from "@/lib/suscripcion/estado-operativo";
 import { verticalDeCategorias } from "@/lib/tema/vertical";
+import { terminologiaDe } from "@/lib/terminologia";
+import { TerminologiaProvider } from "@/components/panel/terminologia-contexto";
 import { categoriaRegistroDe } from "@/lib/auth/destino-inicial";
 import { PanelSuaveProvider } from "@/components/panel/panel-estilo";
 import { AlertaSonoraSoporte } from "@/components/soporte/alerta-sonora-soporte";
@@ -40,21 +42,20 @@ async function PanelGuardado({ children }: { children: React.ReactNode }) {
   const contexto = await resolverContexto();
   const estado = contexto.negocioId ? await obtenerEstadoOperativo(contexto.negocioId) : null;
 
-  // Tema visual según la categoría principal del negocio (barbería y tattoo conservan el diseño original).
-  let vertical: ReturnType<typeof verticalDeCategorias> = null;
+  // Identidad visual única: el panel usa siempre el diseño original. Solo cambia la terminología (barbero, masajista…).
+  let categorias: string[] | null = null;
   if (contexto.negocioId) {
     const { data: n } = await supabase.from("negocio").select("categoria").eq("id", contexto.negocioId).maybeSingle();
-    vertical = verticalDeCategorias(n?.categoria);
+    categorias = n?.categoria ?? null;
   } else {
-    // Aún sin negocio (alta en curso): el diseño sigue al tipo que eligió al crear su cuenta.
-    vertical = verticalDeCategorias([categoriaRegistroDe(user) ?? ""]);
+    categorias = [categoriaRegistroDe(user) ?? ""];
   }
-
-  // Spa, salón y uñas comparten un solo diseño de panel (barra lateral flotante, barra inferior móvil, tokens unificados).
+  const vertical = verticalDeCategorias(categorias);
   const suave = vertical !== null;
 
   return (
     <PanelSuaveProvider suave={suave}>
+      <TerminologiaProvider terminos={terminologiaDe(categorias)}>
       <div
         className={suave ? "min-h-dvh bg-app pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0 lg:pl-[112px]" : "min-h-dvh bg-app pb-16 lg:pb-0 lg:pl-60"}
         data-vertical={vertical ?? undefined}
@@ -64,6 +65,7 @@ async function PanelGuardado({ children }: { children: React.ReactNode }) {
         {contexto.rol === "BARBERIA" && contexto.negocioId ? <AlertaSonoraSoporte rol="BARBERIA" negocioId={contexto.negocioId} /> : null}
         {children}
       </div>
+      </TerminologiaProvider>
     </PanelSuaveProvider>
   );
 }

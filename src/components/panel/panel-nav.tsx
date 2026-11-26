@@ -1,5 +1,6 @@
 "use client";
 
+import { useTerminologia } from "@/components/panel/terminologia-contexto";
 import type { RolPanel } from "@/lib/auth/resolver-contexto";
 import { cn } from "@/lib/utils";
 import { CalendarDays, Gift, LayoutDashboard, Menu, Scissors, Settings, ShieldCheck, Users, X, type LucideIcon } from "lucide-react";
@@ -51,6 +52,7 @@ export function PanelNav(props: { rol: RolPanel; /** Perfil profesional activo: 
 }
 
 function PanelNavClasica({ rol, prestaServicios = false }: { rol: RolPanel; prestaServicios?: boolean }) {
+  const tm = useTerminologia();
   const pathname = usePathname();
   const [abierto, setAbierto] = useState(false);
 
@@ -152,7 +154,7 @@ function PanelNavClasica({ rol, prestaServicios = false }: { rol: RolPanel; pres
       : [
           { href: "/panel", etiqueta: "Inicio", Icono: LayoutDashboard },
           { href: "/panel/agenda", etiqueta: "Agenda", Icono: CalendarDays },
-          { href: "/panel/staff", etiqueta: "Barberos", Icono: Users },
+          { href: "/panel/staff", etiqueta: tm.Profesionales, Icono: Users },
           dueno ? { href: "/panel/perfil-publico", etiqueta: "Ajustes", Icono: Settings } : { href: "/panel/soporte", etiqueta: "Soporte", Icono: Settings },
         ];
 

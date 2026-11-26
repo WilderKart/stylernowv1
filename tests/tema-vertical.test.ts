@@ -1,25 +1,29 @@
 import { describe, expect, it } from "vitest";
-import { esCategoriaRegistro, OPCIONES_SERVICIO_REGISTRO, verticalDeCategorias } from "@/lib/tema/vertical";
+import { esCategoriaRegistro, OPCIONES_SERVICIO_REGISTRO, TEMAS_POR_CATEGORIA_ACTIVOS, verticalDeCategorias } from "@/lib/tema/vertical";
 import { temaEfectivo } from "@/lib/tema/preferencia";
 
 describe("verticalDeCategorias", () => {
+  it("identidad única: con los temas por categoría apagados ninguna categoría cambia el diseño", () => {
+    if (TEMAS_POR_CATEGORIA_ACTIVOS) return;
+    for (const cat of ["spa", "salon", "manicura", "barberia", "tatuajes"]) expect(verticalDeCategorias([cat])).toBeNull();
+  });
   it("barbería y tattoo conservan el diseño original", () => {
     expect(verticalDeCategorias(["barberia"])).toBeNull();
     expect(verticalDeCategorias(["tatuajes"])).toBeNull();
     expect(verticalDeCategorias(["grooming"])).toBeNull();
   });
-  it("spa, salón y uñas tienen tema propio", () => {
+  it.skipIf(!TEMAS_POR_CATEGORIA_ACTIVOS)("spa, salón y uñas tienen tema propio", () => {
     expect(verticalDeCategorias(["spa"])).toBe("spa");
     expect(verticalDeCategorias(["masajes"])).toBe("spa");
     expect(verticalDeCategorias(["salon"])).toBe("salon");
     expect(verticalDeCategorias(["manicura"])).toBe("unas");
     expect(verticalDeCategorias(["lashista"])).toBe("unas");
   });
-  it("manda la primera categoría", () => {
+  it.skipIf(!TEMAS_POR_CATEGORIA_ACTIVOS)("manda la primera categoría", () => {
     expect(verticalDeCategorias(["barberia", "manicura", "grooming"])).toBeNull();
     expect(verticalDeCategorias(["manicura", "barberia"])).toBe("unas");
   });
-  it("tolera vacío, nulo y mayúsculas", () => {
+  it.skipIf(!TEMAS_POR_CATEGORIA_ACTIVOS)("tolera vacío, nulo y mayúsculas", () => {
     expect(verticalDeCategorias(null)).toBeNull();
     expect(verticalDeCategorias([])).toBeNull();
     expect(verticalDeCategorias([" SPA "])).toBe("spa");
@@ -48,7 +52,7 @@ describe("categoría elegida al crear la cuenta", () => {
     expect(esCategoriaRegistro("<script>")).toBe(false);
     expect(esCategoriaRegistro(undefined)).toBe(false);
   });
-  it("cada opción de spa, salón y uñas tiene tema; barbería y tattoo no", () => {
+  it.skipIf(!TEMAS_POR_CATEGORIA_ACTIVOS)("cada opción de spa, salón y uñas tiene tema; barbería y tattoo no", () => {
     expect(OPCIONES_SERVICIO_REGISTRO.map((o) => verticalDeCategorias([o.valor]))).toEqual([null, null, "salon", "spa", "unas"]);
   });
 });

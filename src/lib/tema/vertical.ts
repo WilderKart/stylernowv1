@@ -5,6 +5,12 @@
  * Un negocio puede tener varias categorías (p. ej. «barbería, manicura»). Manda la PRIMERA: es la que el propietario
  * eligió como principal al registrarse.
  */
+/**
+ * Identidad visual ÚNICA (decisión 2026-11-25): todos los negocios se ven con el diseño original de StylerNow. Los temas
+ * suaves por categoría quedan desactivados; solo cambia la terminología (ver lib/terminologia.ts). Reactivar = true.
+ */
+export const TEMAS_POR_CATEGORIA_ACTIVOS = false;
+
 export type Vertical = "spa" | "salon" | "unas";
 
 const POR_CATEGORIA: Record<string, Vertical> = {
@@ -16,7 +22,8 @@ const POR_CATEGORIA: Record<string, Vertical> = {
   lashista: "unas",
 };
 
-export function verticalDeCategorias(categorias: readonly string[] | null | undefined): Vertical | null {
+/** Mapa categoría → grupo (sin tocar el diseño): sirve para afinidades como la preselección del registro. */
+function grupoDeCategorias(categorias: readonly string[] | null | undefined): Vertical | null {
   const principal = categorias?.[0]?.trim().toLowerCase();
   return (principal && POR_CATEGORIA[principal]) || null;
 }
@@ -39,10 +46,15 @@ export const esCategoriaRegistro = (v: unknown): v is CategoriaRegistro => OPCIO
 
 /** Lleva cualquier categoría de negocio a una de las cinco opciones de aspecto (p. ej. estilismo → salon). */
 export function categoriaDeAspecto(cat: string | null | undefined): CategoriaRegistro | null {
-  const v = verticalDeCategorias(cat ? [cat] : null);
+  const v = grupoDeCategorias(cat ? [cat] : null);
   if (v === "spa") return "spa";
   if (v === "salon") return "salon";
   if (v === "unas") return "manicura";
   const limpia = cat?.trim().toLowerCase();
   return esCategoriaRegistro(limpia) ? limpia : null;
+}
+
+/** Tema visual por categoría: apagado (identidad única). Con TEMAS_POR_CATEGORIA_ACTIVOS=false siempre es null. */
+export function verticalDeCategorias(categorias: readonly string[] | null | undefined): Vertical | null {
+  return TEMAS_POR_CATEGORIA_ACTIVOS ? grupoDeCategorias(categorias) : null;
 }

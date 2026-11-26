@@ -1,5 +1,6 @@
 "use client";
 
+import { sustituirProfesional, TERMINOLOGIA_GENERICA, type Terminologia } from "@/lib/terminologia";
 import { Button } from "@/components/ui/button";
 import { Chip, EmptyState, Label, Meta, Num, Photo, Status, Tier } from "@/components/brutal";
 import { SlotsPorFranja } from "@/components/negocio/horas-agrupadas";
@@ -73,8 +74,10 @@ export function FlujoReserva({
   staff,
   combos,
   saldoPendiente = 0,
+  terminos,
 }: {
   saldoPendiente?: number;
+  terminos?: Terminologia;
   negocio: DatosNegocio;
   sedes: Sede[];
   servicios: Servicio[];
@@ -82,7 +85,9 @@ export function FlujoReserva({
   combos: Combo[];
 }) {
   const router = useRouter();
-  const t = useT();
+  const t0 = useT();
+  const tm = terminos ?? TERMINOLOGIA_GENERICA;
+  const t = ((...a: Parameters<typeof t0>) => sustituirProfesional(t0(...a), tm)) as typeof t0;
   const staffInicial = useSearchParams().get("staff");
 
   const [paso, setPaso] = useState(1);

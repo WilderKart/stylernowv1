@@ -3,7 +3,6 @@
 import { useT } from "@/lib/i18n/proveedor";
 import type { CategoriaRegistro } from "@/lib/tema/vertical";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import s from "./auth-dividido.module.css";
 
 /** Deja el aspecto actual de la pantalla como definitivo para lo que sigue (p. ej. de «Crear cuenta» a «Verifica tu correo»). */
@@ -21,33 +20,14 @@ const FOTO: Record<CategoriaRegistro, { src: string | null; lado: "izq" | "der";
 };
 
 /**
- * Armazón de las pantallas de acceso en escritorio: imagen del negocio a un lado y el formulario al otro. Cambiar la
- * categoría (barbería → tattoo → salón…) intercambia los lados con una transición y funde las imágenes. Solo es
- * presentación: la categoría nunca decide permisos. Con `viva`, el aspecto de TODA la pantalla (colores, fuentes) sigue
- * a la categoría en tiempo real.
+ * Armazón de las pantallas de acceso en escritorio: imagen de StylerNow a un lado y el formulario al otro. Identidad
+ * única (decisión 2026-11-25): la imagen, el lado y los colores son siempre los originales de StylerNow y no cambian
+ * según el tipo de negocio ni de cuenta (sin temas, transiciones ni efectos por categoría).
  */
-export function AuthDividido({ categoria, viva = false, children }: { categoria: CategoriaRegistro | null; viva?: boolean; children: React.ReactNode }) {
+export function AuthDividido({ children }: { categoria?: CategoriaRegistro | null; viva?: boolean; children: React.ReactNode }) {
   const t = useT();
-  const activa: CategoriaRegistro = categoria ?? "barberia";
-  const [vistas, setVistas] = useState<CategoriaRegistro[]>([activa]);
-  if (!vistas.includes(activa)) setVistas([...vistas, activa]);
-
-  // Aspecto en vivo: pone el tema de la categoría en <html> mientras se elige y restaura el original al salir.
-  useEffect(() => {
-    if (!viva) return;
-    const html = document.documentElement;
-    delete html.dataset.aspectoFijo;
-    const original = html.getAttribute("data-vertical");
-    const v = { spa: "spa", salon: "salon", manicura: "unas" }[activa as string];
-    if (categoria && v) html.setAttribute("data-vertical", v);
-    else html.removeAttribute("data-vertical");
-    return () => {
-      // Tras crear la cuenta el aspecto elegido se conserva (verificación, onboarding): no se restaura el original.
-      if (html.dataset.aspectoFijo === "1") return;
-      if (original) html.setAttribute("data-vertical", original);
-      else html.removeAttribute("data-vertical");
-    };
-  }, [viva, activa, categoria]);
+  const activa: CategoriaRegistro = "barberia";
+  const vistas: CategoriaRegistro[] = [activa];
 
   const sinTexto = activa === "barberia"; // la imagen de barbería ya trae su propio lema
   return (
