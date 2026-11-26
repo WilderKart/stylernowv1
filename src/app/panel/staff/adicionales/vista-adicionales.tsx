@@ -13,6 +13,7 @@ import {
 } from "@/lib/adicionales/tipos";
 import { formatCOP } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
+import { ModalPagoMercadoPago, type CobroModal } from "@/components/pagos/modal-pago-mercadopago";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
@@ -179,6 +180,8 @@ export function VistaAdicionales({ negocioId, inicial }: { negocioId: string; in
   const params = useSearchParams();
   const [panel, setPanel] = useState(inicial);
   const [cantidad, setCantidad] = useState("1");
+  const [cobro, setCobro] = useState<CobroModal | null>(null);
+  const ultimaAccionPago = useRef<(() => void) | null>(null);
   const [cot, setCot] = useState<Cotizacion | null>(null);
   const [acepto, setAcepto] = useState(false);
   const [aviso, setAviso] = useState<Aviso>(null);
@@ -235,7 +238,8 @@ export function VistaAdicionales({ negocioId, inicial }: { negocioId: string; in
         setCot(null);
         return setAviso({ tipo: "error", texto: r.error });
       }
-      window.location.assign(r.data.url);
+      ultimaAccionPago.current = pagar;
+      setCobro({ pagoId: r.data.pagoId, preferenciaId: r.data.preferenciaId, url: r.data.url, titulo: `${cot.cantidad} adicional(es)` });
     });
   }
 
@@ -246,7 +250,8 @@ export function VistaAdicionales({ negocioId, inicial }: { negocioId: string; in
       const r = await renovarAdicional(id);
       setOcupadoLote(null);
       if (!r.ok) return setAviso({ tipo: "error", texto: r.error });
-      window.location.assign(r.data.url);
+      ultimaAccionPago.current = () => renovar(id);
+      setCobro({ pagoId: r.data.pagoId, preferenciaId: r.data.preferenciaId, url: r.data.url, titulo: "Renovación de adicionales" });
     });
   }
 
@@ -259,6 +264,16 @@ export function VistaAdicionales({ negocioId, inicial }: { negocioId: string; in
 
   return (
     <div className="flex flex-col gap-5">
+      <ModalPagoMercadoPago
+        key={cobro?.pagoId ?? "sin-cobro"}
+        cobro={cobro}
+        onCerrar={() => setCobro(null)}
+        onAprobado={() => window.location.reload()}
+        onReintentar={() => {
+          setCobro(null);
+          ultimaAccionPago.current?.();
+        }}
+      />
       {confirmOpen && (
         <ConfirmDialog
           isOpen={confirmOpen}

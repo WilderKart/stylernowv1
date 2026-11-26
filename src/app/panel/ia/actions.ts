@@ -88,7 +88,7 @@ export async function listarPaquetesDisponiblesIa(): Promise<Resultado<PaqueteDi
   };
 }
 
-export type ResultadoInicioCompra = { ok: true; url: string; pagoId: string } | { ok: false; mensaje: string };
+export type ResultadoInicioCompra = { ok: true; url: string; pagoId: string; preferenciaId: string } | { ok: false; mensaje: string };
 
 export async function comprarPaqueteIa(negocioId: string, paqueteId: string): Promise<ResultadoInicioCompra> {
   const supabase = await createClient();
@@ -118,7 +118,7 @@ export async function comprarPaqueteIa(negocioId: string, paqueteId: string): Pr
       urlRetorno: `${sitio}/panel/ia?desde=pago`,
     });
 
-    return { ok: true, url: preferencia.url, pagoId: pago.id };
+    return { ok: true, url: preferencia.url, pagoId: pago.id, preferenciaId: preferencia.id };
   } catch (e) {
     return { ok: false, mensaje: e instanceof Error ? e.message : "La pasarela no respondió. Intenta de nuevo." };
   }

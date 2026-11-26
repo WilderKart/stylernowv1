@@ -3,6 +3,7 @@
 import { useTextos } from "@/components/panel/terminologia-contexto";
 import { EmptyState, Panel, Poster, Status } from "@/components/brutal";
 import { SelectorPlanes } from "@/components/planes/selector-planes";
+import { ModalPagoMercadoPago, type CobroModal } from "@/components/pagos/modal-pago-mercadopago";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { CatalogoPais } from "@/lib/planes/catalogo";
@@ -10,11 +11,10 @@ import { formatearMoneda } from "@/lib/planes/moneda";
 import { calcularPrecio, type CicloFacturacion } from "@/lib/planes/precios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import {
   cancelarDowngradeProgramado,
   cancelarMiNegocio,
-  consultarEstadoUpgrade,
   iniciarPagoPlan,
   iniciarUpgrade,
   solicitarDowngrade,
@@ -138,8 +138,8 @@ export function VistaSuscripcion({
   const [error, setError] = useState<string | null>(null);
   const [downgradePendiente, setDowngradePendiente] = useState<PlanCodigo | null>(null);
   const [motivoBaja, setMotivoBaja] = useState("");
-  const [pagoPendienteId, setPagoPendienteId] = useState<string | null>(null);
-  const [urlCheckout, setUrlCheckout] = useState<string | null>(null);
+  const [cobro, setCobro] = useState<CobroModal | null>(null);
+  const ultimaAccionPago = useRef<(() => void) | null>(null);
 
   const esRequierePlan = suscripcion.estado === "REQUIERE_PLAN";
   const [seleccion, setSeleccion] = useState<PlanCodigo | null>(esRequierePlan ? null : (suscripcion.planCodigo as PlanCodigo));
@@ -155,35 +155,14 @@ export function VistaSuscripcion({
   const planSel = catalogo?.planes.find((p) => p.codigo === seleccion) ?? null;
   const estadoInfo = T.estados[suscripcion.estado] ?? { tono: "info" as const, texto: suscripcion.estado };
 
-  // Polling simple mientras hay un pago de upgrade pendiente de confirmación de la pasarela.
-  useEffect(() => {
-    if (!pagoPendienteId) return;
-    const intervalo = setInterval(async () => {
-      const res = await consultarEstadoUpgrade(pagoPendienteId);
-      if (res.pago === "APROBADO") {
-        setPagoPendienteId(null);
-        window.location.reload();
-      } else if (res.pago === "RECHAZADO") {
-        setPagoPendienteId(null);
-        setError(T.errorPago);
-      }
-    }, 4000);
-    return () => clearInterval(intervalo);
-  }, [pagoPendienteId]);
-
-  // Redirección al checkout de Mercado Pago aislada en un efecto (pureza de render).
-  useEffect(() => {
-    if (urlCheckout) window.location.href = urlCheckout;
-  }, [urlCheckout]);
-
   async function onUpgrade(planCodigo: PlanCodigo) {
     setProcesando(planCodigo);
     setError(null);
     const res = await iniciarUpgrade(negocioId, planCodigo);
     setProcesando(null);
     if (!res.ok) return setError(res.mensaje);
-    setPagoPendienteId(res.pagoId);
-    setUrlCheckout(res.url);
+    ultimaAccionPago.current = () => void onUpgrade(planCodigo);
+    setCobro({ pagoId: res.pagoId, preferenciaId: res.preferenciaId, url: res.url, titulo: `Upgrade a ${planCodigo}` });
   }
 
   async function onPagarPlan(planCodigo: PlanCodigo) {
@@ -192,8 +171,8 @@ export function VistaSuscripcion({
     const res = await iniciarPagoPlan(negocioId, planCodigo, ciclo);
     setProcesando(null);
     if (!res.ok) return setError(res.mensaje);
-    setPagoPendienteId(res.pagoId);
-    setUrlCheckout(res.url);
+    ultimaAccionPago.current = () => void onPagarPlan(planCodigo);
+    setCobro({ pagoId: res.pagoId, preferenciaId: res.preferenciaId, url: res.url, titulo: `Plan ${planCodigo}` });
   }
 
   function onDowngrade(planCodigo: PlanCodigo) { setDowngradePendiente(planCodigo); }
@@ -303,6 +282,16 @@ export function VistaSuscripcion({
 
   return (
     <main className="mx-auto w-full max-w-2xl min-w-0 flex-1 px-4 py-8 sm:px-8">
+      <ModalPagoMercadoPago
+        key={cobro?.pagoId ?? "sin-cobro"}
+        cobro={cobro}
+        onCerrar={() => setCobro(null)}
+        onAprobado={() => window.location.reload()}
+        onReintentar={() => {
+          setCobro(null);
+          ultimaAccionPago.current?.();
+        }}
+      />
       <Poster as="h1" size={3} className="mb-2 break-words">
         {T.titulo}
       </Poster>
@@ -504,12 +493,7 @@ export function VistaSuscripcion({
               <Panel className="flex flex-col gap-3 p-4">
                 <h3 className="section">{T.pagarTitulo(suscripcion.estado === "ACTIVA")}</h3>
                 <p className="sn-meta">{T.pagarIntro}</p>
-                {pagoPendienteId ? (
-                  <p role="status" className="border-2 border-border p-3 text-[13px] font-bold">
-                    {T.esperando}
-                  </p>
-                ) : null}
-                <Button className="w-full" loading={procesando === "pagar-plan"} disabled={Boolean(pagoPendienteId)} onClick={() => onPagarPlan(codigo)}>
+                <Button className="w-full" loading={procesando === "pagar-plan"} disabled={Boolean(cobro)} onClick={() => onPagarPlan(codigo)}>
                   {T.pagarBoton(p.nombre, monto)}
                 </Button>
               </Panel>

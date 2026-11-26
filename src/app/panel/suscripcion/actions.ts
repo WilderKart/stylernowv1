@@ -171,8 +171,38 @@ export async function obtenerMiSuscripcion(negocioId: string): Promise<Resultado
 }
 
 export type ResultadoInicioUpgrade =
-  | { ok: true; url: string; pagoId: string }
+  | { ok: true; url: string; pagoId: string; preferenciaId: string }
   | { ok: false; mensaje: string };
+
+/**
+ * Si ya hay un cobro de plan PENDIENTE (la persona cerró el modal antes de pagar), lo reanuda en vez de bloquearla:
+ * se vuelve a abrir su misma preferencia (la clave de idempotencia es el id del cobro). La lectura pasa por RLS: solo ve
+ * cobros de su negocio. Monto y cuenta de cobro siguen saliendo de la base.
+ */
+async function reanudarCobroPendiente(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  negocioId: string,
+  titulo: string,
+  email: string | null | undefined,
+  rutaRetorno: string
+): Promise<ResultadoInicioUpgrade | null> {
+  const { data: pendiente } = await supabase
+    .from("pago")
+    .select("id")
+    .eq("negocio_id", negocioId)
+    .eq("tipo", "SUSCRIPCION")
+    .eq("estado", "PENDIENTE")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!pendiente) return null;
+  try {
+    const preferencia = await crearPreferenciaDePago({ pagoId: pendiente.id, titulo, emailPagador: email, urlRetorno: `${urlSitio()}${rutaRetorno}` });
+    return { ok: true, url: preferencia.url, pagoId: pendiente.id, preferenciaId: preferencia.id };
+  } catch (e) {
+    return { ok: false, mensaje: e instanceof Error ? e.message : "La pasarela no respondió. Intenta de nuevo." };
+  }
+}
 
 /** Cobro único prorrateado (01-PRD/03_Monetization.md) — nunca reinicia el ciclo de facturación. */
 export async function iniciarUpgrade(negocioId: string, planCodigoNuevo: PlanCodigo): Promise<ResultadoInicioUpgrade> {
@@ -186,7 +216,13 @@ export async function iniciarUpgrade(negocioId: string, planCodigoNuevo: PlanCod
     p_negocio_id: negocioId,
     p_plan_codigo_nuevo: planCodigoNuevo,
   });
-  if (error) return { ok: false, mensaje: traducirError(error.message) };
+  if (error) {
+    if (error.message.includes("UPGRADE_YA_EN_PROCESO")) {
+      const r = await reanudarCobroPendiente(supabase, negocioId, `Upgrade de Plan a ${planCodigoNuevo}`, user.email, "/panel/suscripcion?desde=pago");
+      if (r) return r;
+    }
+    return { ok: false, mensaje: traducirError(error.message) };
+  }
   if (!pago) return { ok: false, mensaje: "No se pudo iniciar el upgrade." };
 
   const { data: negocio } = await supabase.from("negocio").select("nombre").eq("id", negocioId).single();
@@ -202,7 +238,7 @@ export async function iniciarUpgrade(negocioId: string, planCodigoNuevo: PlanCod
       urlRetorno: `${sitio}/panel/suscripcion?desde=pago`,
     });
 
-    return { ok: true, url: preferencia.url, pagoId: pago.id };
+    return { ok: true, url: preferencia.url, pagoId: pago.id, preferenciaId: preferencia.id };
   } catch (e) {
     return { ok: false, mensaje: e instanceof Error ? e.message : "La pasarela no respondió. Intenta de nuevo." };
   }
@@ -231,7 +267,13 @@ export async function iniciarPagoPlan(
     p_plan_codigo: planCodigo ?? null,
     p_ciclo: ciclo ?? null,
   });
-  if (error) return { ok: false, mensaje: traducirError(error.message) };
+  if (error) {
+    if (error.message.includes("PAGO_SUSCRIPCION_EN_PROCESO")) {
+      const r = await reanudarCobroPendiente(supabase, negocioId, `Plan StylerNow${planCodigo ? ` ${planCodigo}` : ""}`, user.email, "/panel/suscripcion?desde=pago");
+      if (r) return r;
+    }
+    return { ok: false, mensaje: traducirError(error.message) };
+  }
   if (!data) return { ok: false, mensaje: "No se pudo iniciar el pago." };
 
   const { data: negocio } = await supabase.from("negocio").select("nombre").eq("id", negocioId).single();
@@ -242,7 +284,7 @@ export async function iniciarPagoPlan(
       emailPagador: user.email,
       urlRetorno: `${urlSitio()}/panel/suscripcion?desde=pago`,
     });
-    return { ok: true, url: preferencia.url, pagoId: data.id };
+    return { ok: true, url: preferencia.url, pagoId: data.id, preferenciaId: preferencia.id };
   } catch (e) {
     return { ok: false, mensaje: e instanceof Error ? e.message : "La pasarela no respondió. Intenta de nuevo." };
   }

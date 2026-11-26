@@ -83,7 +83,7 @@ async function crearCheckout(pagoId: string, loteId: string, usuarioId: string, 
       emailPagador: email,
       urlRetorno: `${urlSitio()}/panel/staff/adicionales?desde=pago`,
     });
-    return preferencia.url;
+    return { url: preferencia.url, preferenciaId: preferencia.id };
   } catch (e) {
     await cerrarCobroFallido(loteId, usuarioId, "PREFERENCIA_NO_CREADA");
     throw e;
@@ -94,7 +94,7 @@ async function crearCheckout(pagoId: string, loteId: string, usuarioId: string, 
  * Pasos 4-6 del flujo: el propietario confirmó el detalle → la base crea el lote (CHECKOUT_INICIADO) y el pago pendiente por el
  * total que ELLA calcula → aquí se crea la preferencia de Checkout Pro reutilizando el flujo de pago del plan.
  */
-export async function contratarAdicionales(datos: { negocioId: string; cantidad: number; totalEsperado: number }): Promise<Resultado<{ url: string; pagoId: string; loteId: string }>> {
+export async function contratarAdicionales(datos: { negocioId: string; cantidad: number; totalEsperado: number }): Promise<Resultado<{ url: string; preferenciaId: string; pagoId: string; loteId: string }>> {
   try {
     const p = z.object({ negocioId: idSchema, cantidad: cantidadSchema, totalEsperado: z.number().positive() }).safeParse(datos);
     if (!p.success) return { ok: false, error: "Datos inválidos." };
@@ -102,25 +102,25 @@ export async function contratarAdicionales(datos: { negocioId: string; cantidad:
     const { data, error } = await rpc("adicional_iniciar", { p_negocio_id: p.data.negocioId, p_cantidad: p.data.cantidad, p_total_esperado: p.data.totalEsperado });
     if (error) throw new Error(error.message);
     const r = data as { lote_id: string; pago_id: string };
-    const url = await crearCheckout(r.pago_id, r.lote_id, user.id, user.email, `Barberos adicionales ×${p.data.cantidad} · StylerNow`);
+    const { url, preferenciaId } = await crearCheckout(r.pago_id, r.lote_id, user.id, user.email, `Barberos adicionales ×${p.data.cantidad} · StylerNow`);
     revalidatePath("/panel/staff/adicionales");
-    return { ok: true, data: { url, pagoId: r.pago_id, loteId: r.lote_id } };
+    return { ok: true, data: { url, preferenciaId, pagoId: r.pago_id, loteId: r.lote_id } };
   } catch (e) {
     return falla(e);
   }
 }
 
 /** Renovar un grupo (vencido, en gracia, suspendido o dentro de la ventana de renovación): nuevo periodo al precio congelado del lote. */
-export async function renovarAdicional(loteId: string): Promise<Resultado<{ url: string }>> {
+export async function renovarAdicional(loteId: string): Promise<Resultado<{ url: string; preferenciaId: string; pagoId: string }>> {
   try {
     if (!idSchema.safeParse(loteId).success) return { ok: false, error: "Datos inválidos." };
     const { rpc, user } = await sesion();
     const { data, error } = await rpc("adicional_renovar", { p_lote_id: loteId });
     if (error) throw new Error(error.message);
     const r = data as { pago_id: string; lote_id: string; periodo_n: number };
-    const url = await crearCheckout(r.pago_id, r.lote_id, user.id, user.email, `Renovación de barberos adicionales · StylerNow`);
+    const { url, preferenciaId } = await crearCheckout(r.pago_id, r.lote_id, user.id, user.email, `Renovación de barberos adicionales · StylerNow`);
     revalidatePath("/panel/staff/adicionales");
-    return { ok: true, data: { url } };
+    return { ok: true, data: { url, preferenciaId, pagoId: r.pago_id } };
   } catch (e) {
     return falla(e);
   }

@@ -128,7 +128,8 @@ export async function crearPreferencia(d: DatosPreferencia): Promise<Preferencia
     external_reference: d.pagoId,
     ...(d.emailPagador ? { payer: { email: d.emailPagador } } : {}),
     back_urls: { success: d.urlRetorno, failure: d.urlRetorno, pending: d.urlRetorno },
-    auto_return: "approved",
+    // Mercado Pago exige URLs https públicas para `auto_return` (con http://localhost responde 400): solo se envía con https.
+    ...(d.urlRetorno.startsWith("https://") ? { auto_return: "approved" } : {}),
     // Sin URL pública (desarrollo local) se omite: la confirmación llega por
     // `sincronizarPago`, que consulta la API de la pasarela directamente.
     ...(d.urlWebhook ? { notification_url: d.urlWebhook } : {}),

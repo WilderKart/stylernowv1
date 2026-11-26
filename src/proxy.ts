@@ -18,14 +18,15 @@ function construirCsp(nonce: string) {
   const dev = process.env.NODE_ENV === "development";
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com${dev ? " 'unsafe-eval'" : ""}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://sdk.mercadopago.com https://http2.mlstatic.com${dev ? " 'unsafe-eval'" : ""}`,
     // Cloudflare Turnstile (anti-bots de registro, ingreso y recuperación) se dibuja en un iframe propio.
-    "frame-src 'self' https://challenges.cloudflare.com",
+    // Mercado Pago (Checkout Pro en modal): SDK, iframes del checkout, imágenes y llamadas del propio checkout.
+    "frame-src 'self' https://challenges.cloudflare.com https://mercadopago.com https://mercadopago.com.co https://*.mercadopago.com https://*.mercadopago.com.co https://mercadolibre.com https://*.mercadolibre.com https://*.mercadolibre.com.co",
     "style-src 'self' 'unsafe-inline'",
     // res.cloudinary.com: fotos de Staff cuando el adaptador Cloudinary está configurado (decisión B).
-    "img-src 'self' blob: data: https://*.supabase.co https://res.cloudinary.com https://tile.openstreetmap.org https://*.tile.openstreetmap.org",
+    "img-src 'self' blob: data: https://*.supabase.co https://res.cloudinary.com https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://*.mlstatic.com https://*.mercadopago.com https://*.mercadolibre.com https://*.mercadolivre.com",
     "font-src 'self' data:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://tile.openstreetmap.org https://*.tile.openstreetmap.org",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.mercadopago.com https://*.mercadolibre.com https://*.mlstatic.com https://tile.openstreetmap.org https://*.tile.openstreetmap.org",
     "worker-src 'self' blob:",
     "child-src 'self' blob:",
     "manifest-src 'self'",

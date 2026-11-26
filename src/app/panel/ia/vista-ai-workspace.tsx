@@ -3,7 +3,8 @@
 import { confirmar } from "@/components/ui/confirmar";
 import { Badge, Card } from "@/components/ui/card";
 import { formatCOP } from "@/lib/utils";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { ModalPagoMercadoPago, type CobroModal } from "@/components/pagos/modal-pago-mercadopago";
 import { toast } from "sonner";
 import {
   aprobarMemoriaIa,
@@ -55,36 +56,17 @@ export function VistaAiWorkspace({
   funcionesHabilitadas: string[];
 }) {
   const [saldo] = useState(saldoInicial);
-  const [pagoPendienteId, setPagoPendienteId] = useState<string | null>(null);
-  const [urlCheckout, setUrlCheckout] = useState<string | null>(null);
+  const [cobro, setCobro] = useState<CobroModal | null>(null);
+  const ultimaCompra = useRef<string | null>(null);
   const [comprando, setComprando] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!pagoPendienteId) return;
-    const intervalo = setInterval(async () => {
-      const res = await consultarEstadoCompraIa(pagoPendienteId);
-      if (res.pago === "APROBADO") {
-        setPagoPendienteId(null);
-        window.location.reload();
-      } else if (res.pago === "RECHAZADO") {
-        setPagoPendienteId(null);
-        toast.error("El pago del paquete de créditos fue rechazado por la pasarela.");
-      }
-    }, 4000);
-    return () => clearInterval(intervalo);
-  }, [pagoPendienteId]);
-
-  useEffect(() => {
-    if (urlCheckout) window.location.href = urlCheckout;
-  }, [urlCheckout]);
 
   async function onComprar(paqueteId: string) {
     setComprando(paqueteId);
     const res = await comprarPaqueteIa(negocioId, paqueteId);
     setComprando(null);
     if (!res.ok) { toast.error(res.mensaje); return; }
-    setPagoPendienteId(res.pagoId);
-    setUrlCheckout(res.url);
+    ultimaCompra.current = paqueteId;
+    setCobro({ pagoId: res.pagoId, preferenciaId: res.preferenciaId, url: res.url, titulo: "Paquete de créditos de IA" });
   }
 
   function exportarConsumoCsv() {
@@ -103,6 +85,16 @@ export function VistaAiWorkspace({
 
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-8 sm:px-10">
+      <ModalPagoMercadoPago
+        key={cobro?.pagoId ?? "sin-cobro"}
+        cobro={cobro}
+        onCerrar={() => setCobro(null)}
+        onAprobado={() => window.location.reload()}
+        onReintentar={() => {
+          setCobro(null);
+          if (ultimaCompra.current) void onComprar(ultimaCompra.current);
+        }}
+      />
       <h1 className="font-display mb-1 text-[22px] font-bold uppercase text-text">IA</h1>
       <p className="mb-6 text-[12px] text-text-faint">
         Créditos, memoria y prompts de IA de tu Negocio — nunca compartidos con otra Barbería.
@@ -137,11 +129,11 @@ export function VistaAiWorkspace({
                 <p className="mb-2 text-[13px] font-semibold text-text">{formatCOP(p.precioCop)}</p>
                 <button
                   type="button"
-                  disabled={comprando === p.id || !!pagoPendienteId}
+                  disabled={comprando === p.id || !!cobro}
                   onClick={() => onComprar(p.id)}
                   className="w-full rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold uppercase text-ink disabled:opacity-50"
                 >
-                  {comprando === p.id ? "Abriendo..." : pagoPendienteId ? "Esperando pago..." : "Comprar"}
+                  {comprando === p.id ? "Abriendo..." : cobro ? "Esperando pago..." : "Comprar"}
                 </button>
               </Card>
             ))}
