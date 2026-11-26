@@ -1,5 +1,6 @@
 "use client";
 
+import { ModalPagoMercadoPago, type CobroModal } from "@/components/pagos/modal-pago-mercadopago";
 import { Button } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,10 +17,11 @@ import {
 import { traducirErrorWhatsApp } from "@/lib/whatsapp/errores";
 import { formatCOP } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import {
   cancelarCampana,
   cancelarRecarga,
+  iniciarPagoRecarga,
   contarSegmento,
   crearCampana,
   eliminarPlantilla,
@@ -199,9 +201,33 @@ function SeccionSaldo({ resumen }: { resumen: ResumenPanelWhatsApp }) {
 
 function SeccionRecargas({ resumen }: { resumen: ResumenPanelWhatsApp }) {
   const { pendiente, error, aviso, setAviso, ejecutar } = useAccion();
+  const [cobro, setCobro] = useState<CobroModal | null>(null);
+  const ultimaCompra = useRef<string | null>(null);
+
+  /** Abre el pago de una solicitud de recarga en el modal de Mercado Pago. */
+  function pagar(compraId: string) {
+    ejecutar(
+      () => iniciarPagoRecarga(compraId),
+      (r) => {
+        if (!r.ok) return;
+        ultimaCompra.current = compraId;
+        setCobro({ pagoId: r.data.pagoId, preferenciaId: r.data.preferenciaId, url: r.data.url, titulo: "Recarga de WhatsApp" });
+      }
+    );
+  }
 
   return (
     <section>
+      <ModalPagoMercadoPago
+        key={cobro?.pagoId ?? "sin-cobro"}
+        cobro={cobro}
+        onCerrar={() => setCobro(null)}
+        onAprobado={() => window.location.reload()}
+        onReintentar={() => {
+          setCobro(null);
+          if (ultimaCompra.current) pagar(ultimaCompra.current);
+        }}
+      />
       <Titulo>Recargas</Titulo>
       <p className="mb-3 text-[12px] text-text-faint">
         Las recargas son solo para WhatsApp, vencen a los {resumen.reglas.meses_vencimiento_recarga} meses y se usan después de la cuota del plan.
@@ -218,11 +244,14 @@ function SeccionRecargas({ resumen }: { resumen: ResumenPanelWhatsApp }) {
               onClick={() =>
                 ejecutar(
                   () => solicitarRecarga(p.id),
-                  () => setAviso("Solicitud creada. El pago en línea todavía no está habilitado; podrás completarlo desde aquí cuando lo activemos.")
+                  (r) => {
+                    setAviso("Solicitud creada. Completa el pago en Mercado Pago.");
+                    if (r.ok) pagar(r.data.compraId);
+                  }
                 )
               }
             >
-              Solicitar recarga
+              Comprar recarga
             </Button>
           </Card>
         ))}
@@ -245,9 +274,14 @@ function SeccionRecargas({ resumen }: { resumen: ResumenPanelWhatsApp }) {
                 <div className="flex items-center gap-2">
                   <Badge tone={e.tono}>{e.texto}</Badge>
                   {c.estado === "PENDIENTE_PAGO" ? (
-                    <Button size="sm" variant="ghost" loading={pendiente} onClick={() => ejecutar(() => cancelarRecarga(c.id))}>
-                      Cancelar
-                    </Button>
+                    <>
+                      <Button size="sm" loading={pendiente} onClick={() => pagar(c.id)}>
+                        Pagar
+                      </Button>
+                      <Button size="sm" variant="ghost" loading={pendiente} onClick={() => ejecutar(() => cancelarRecarga(c.id))}>
+                        Cancelar
+                      </Button>
+                    </>
                   ) : null}
                 </div>
               </li>

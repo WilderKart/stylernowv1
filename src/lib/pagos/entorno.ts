@@ -41,19 +41,18 @@ export function liveModeCoincide(liveMode: boolean | null | undefined, entorno: 
 }
 
 /**
- * Medios excluidos en los cobros cuyo beneficiario es el negocio (Split 1:1). Según la documentación
- * oficial, el split "sólo permite realizar pagos con dinero en cuenta entre cuentas de Mercado Pago. No se
- * permiten transferencias de instituciones financieras externas": PSE (bank_transfer) y Efecty (ticket)
- * quedan fuera hasta que Mercado Pago confirme por escrito su compatibilidad. "Dinero en cuenta" no se
+ * Medios excluidos en los cobros cuyo beneficiario es el negocio (cobro directo con el token del vendedor, sin comisión
+ * ni división de fondos). PSE (bank_transfer) y Efecty (ticket)
+ * quedan fuera hasta que Mercado Pago confirme por escrito su compatibilidad con este modelo. "Dinero en cuenta" no se
  * puede excluir (lo dice la documentación).
  */
-export const TIPOS_EXCLUIDOS_SPLIT = ["bank_transfer", "ticket"] as const;
+export const TIPOS_EXCLUIDOS_COBRO_NEGOCIO = ["bank_transfer", "ticket"] as const;
 
 /**
  * Medios excluidos en los cobros de un negocio (token OAuth del vendedor, sin comisión).
  *
  * Por defecto se excluyen PSE y Efecty (comportamiento vigente). Para VALIDAR en sandbox el modelo
- * "OAuth + Checkout Pro sin split" se puede habilitar PSE con `MERCADOPAGO_PSE_NEGOCIOS=probar`, y SOLO
+ * "OAuth + Checkout Pro directo al negocio" se puede habilitar PSE con `MERCADOPAGO_PSE_NEGOCIOS=probar`, y SOLO
  * tiene efecto en SANDBOX: en producción no cambia nada hasta que Mercado Pago confirme por escrito que
  * PSE es compatible con este modelo (y entonces se cambia este código, con revisión).
  */
@@ -64,13 +63,11 @@ export function tiposExcluidosCobroNegocio(
   if (entorno === "SANDBOX" && (env.MERCADOPAGO_PSE_NEGOCIOS ?? "").trim().toLowerCase() === "probar") {
     return ["ticket"]; // PSE habilitado solo para la prueba; Efecty sigue fuera (pago diferido)
   }
-  return TIPOS_EXCLUIDOS_SPLIT;
+  return TIPOS_EXCLUIDOS_COBRO_NEGOCIO;
 }
 
 /** Capacidades declaradas por proveedor y medio (no se habilita lo no verificado). */
 export const CAPACIDADES_MERCADOPAGO_CO = {
-  split_1_1: true,
-  marketplace_fee_cero: true,
   reembolso_total: true,
   reembolso_parcial: true,
   medios_anticipo_negocio: {

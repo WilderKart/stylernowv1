@@ -32,11 +32,13 @@ export async function obtenerMarcaPublica(negocioId: string): Promise<MarcaPubli
   // solo este booleano: la RLS de negocio_addon únicamente deja leerlo al dueño.
   const { data: addon } = await createAdminClient()
     .from("negocio_addon")
-    .select("activo")
+    .select("activo, hasta")
     .eq("negocio_id", negocioId)
     .eq("addon_codigo", "MI_MARCA")
     .maybeSingle();
   if (!addon?.activo) return null;
+  // Mi Marca se paga por meses: vencido deja de mostrarse (sin fecha de fin = activación manual vigente).
+  if (addon.hasta && new Date(addon.hasta).getTime() <= Date.now()) return null;
   return {
     nombreMarca: data.nombre_marca,
     slogan: data.slogan,

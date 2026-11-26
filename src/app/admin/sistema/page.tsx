@@ -57,7 +57,7 @@ export default async function AdminSistemaPage() {
 
   const base = db.valor && db.valor.ok ? db.valor.data : null;
   const nivelMs = (ms: number): Nivel => (ms > 1500 ? "alerta" : "ok");
-  const faltanMp = faltan("MERCADOPAGO_ACCESS_TOKEN", "MERCADOPAGO_WEBHOOK_SECRET", "MERCADOPAGO_CLIENT_ID", "MERCADOPAGO_CLIENT_SECRET");
+  const faltanMp = faltan("MERCADOPAGO_ACCESS_TOKEN", "NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY", "MERCADOPAGO_WEBHOOK_SECRET", "MERCADOPAGO_CLIENT_ID", "MERCADOPAGO_CLIENT_SECRET");
 
   const chequeos: Chequeo[] = [
     {
@@ -95,7 +95,7 @@ export default async function AdminSistemaPage() {
           ? "alerta"
           : "ok",
       detalle: faltanMp.length > 0
-        ? `Faltan en Vercel: ${faltanMp.join(", ")}${faltanMp.some((n) => n.includes("CLIENT")) ? " (sin ellas las barberías no pueden conectar su cuenta de Mercado Pago)" : ""}`
+        ? `Faltan en Vercel: ${faltanMp.join(", ")}${faltanMp.some((n) => n.includes("CLIENT")) ? " (sin ellas las barberías no pueden conectar su cuenta de Mercado Pago)" : ""}${faltanMp.includes("NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY") ? " (sin la clave pública el pago no se abre en el modal y se continúa en Mercado Pago)" : ""}`
         : base
           ? `${base.webhooks.recibidos_24h} avisos recibidos en 24 h (${base.webhooks.errores_24h} con error, ${base.webhooks.sin_procesar} sin procesar) · último ${hace(base.webhooks.ultimo)} · ${base.pagos.pendientes_viejos} pagos pendientes de más de 1 h`
           : "Configurado",

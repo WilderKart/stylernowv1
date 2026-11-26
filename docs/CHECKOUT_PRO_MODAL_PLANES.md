@@ -62,3 +62,31 @@ Webhook en el panel de Mercado Pago: URL `https://<tu-dominio>/api/webhooks/merc
 ## 5. Prueba hecha (sandbox, entorno local)
 
 Con las credenciales de prueba: la API respondió (cuenta de Colombia, activa), se creó una preferencia, y en la app local el botón *Hacer upgrade* abrió el modal de StylerNow y el checkout de Mercado Pago (`mercadopago.com.co/checkout/v1/modal?preference-id=…`). No se completó un pago real de prueba: lo harás tú. Para probar el webhook en local hace falta un túnel https (Mercado Pago no puede llamar a `localhost`); sin él, el estado se reconcilia por consulta cada 4 s mientras el modal está abierto.
+
+---
+
+## 6. Actualización: todo lo que la barbería paga a StylerNow, por Mercado Pago (cobro directo, sin split)
+
+**Split eliminado:** `crearPreferencia` ya no acepta ni envía `marketplace_fee`; `cobro.ts` no lo lee; se quitaron las banderas `split_1_1` / `marketplace_fee_cero` y el nombre `TIPOS_EXCLUIDOS_SPLIT` pasó a `TIPOS_EXCLUIDOS_COBRO_NEGOCIO`. Lo que se conserva y NO es split: la conexión OAuth del negocio con su propia cuenta de Mercado Pago (los anticipos de reservas se cobran directo al negocio con el token del vendedor, comisión 0). La columna `pago.marketplace_fee` queda en la base (sin uso desde el código; no se borra para no tocar datos).
+
+**Qué puede pagar la barbería ahora, todo por el mismo modal:**
+
+| Concepto | Estado |
+|---|---|
+| Plan (primer pago y renovación) y upgrade | ya existía; ahora en modal |
+| Barberos adicionales (contratar y renovar) | ya existía; ahora en modal |
+| Créditos de IA | ya existía; ahora en modal |
+| **Recargas de conversaciones de WhatsApp** | **nuevo** (botón «Comprar recarga» y «Pagar» en solicitudes pendientes) |
+| **Add-on Mi Marca (mensual)** | **nuevo** («Activar Mi Marca» / «Renovar un mes»); se activa un mes al aprobarse y vence a los 30 días |
+
+**Migración 198 (`supabase/migrations/198_pagos_whatsapp_y_mi_marca.sql`) — obligatoria para WhatsApp y Mi Marca.** Crea `whatsapp_iniciar_pago_recarga`, `mi_marca_iniciar_pago`, las funciones internas que aplican el pago (idempotentes, solo desde `aplicar_evento_pago`) y parchea `aplicar_evento_pago` con ruta propia para esos dos conceptos. Probada en la base local con `tests/sql/pagos_whatsapp_mi_marca.sql` (rechazo, reintento, aprobación una sola vez, webhook repetido, otro negocio no puede cobrar, Mi Marca no bloquea el upgrade, funciones internas no ejecutables por `authenticated`). **Sin la 198 aplicada, el código nuevo no rompe nada**: los botones muestran «se está activando» y el resto de pagos sigue igual. Orden: aplicar 198 → desplegar (o desplegar primero, es seguro).
+
+**No existen todavía como cobro (no hay producto que cobrar):** sedes adicionales (solo hay precio configurado, sin flujo ni límite), publicidad/destacado (se descuenta del Wallet de comisiones; no hay recarga del Wallet por Mercado Pago).
+
+### Pasar a producción: lo único que hay que hacer en Vercel
+1. `MERCADOPAGO_ACCESS_TOKEN` = Access Token **de producción** (secreto).
+2. `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY` = Public Key **de producción** de la misma aplicación (redesplegar para que se incruste).
+3. `MERCADOPAGO_ENTORNO` = `produccion` (solo funciona en el despliegue de producción de Vercel; con `sandbox` o sin la variable se queda en pruebas).
+4. `MERCADOPAGO_WEBHOOK_SECRET` = clave secreta del webhook de esa aplicación.
+5. En el panel de Mercado Pago (aplicación de producción): webhook `https://app.stylernow.com/api/webhooks/mercadopago`, eventos de Pagos.
+`NEXT_PUBLIC_SITE_URL` debe ser `https://app.stylernow.com`. `/admin/sistema` muestra qué variables faltan.

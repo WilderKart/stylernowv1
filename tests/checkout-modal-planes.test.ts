@@ -106,14 +106,14 @@ describe("cobro directo 1 a 1 de la plataforma (sin split)", () => {
     delete process.env.MERCADOPAGO_ACCESS_TOKEN;
   });
 
-  it("un cobro de la plataforma nunca envía marketplace_fee, aunque se le pase una comisión", async () => {
+  it("ningún cobro envía marketplace_fee: el cobro es directo 1 a 1, sin split", async () => {
     process.env.MERCADOPAGO_ACCESS_TOKEN = "APP_USR-ficticio-para-prueba";
     let cuerpo: Record<string, unknown> = {};
     globalThis.fetch = vi.fn(async (_u: unknown, init?: RequestInit) => {
       cuerpo = JSON.parse(String(init?.body));
       return new Response(JSON.stringify({ id: "pref-1", init_point: "https://mp/pay" }), { status: 201 });
     }) as typeof fetch;
-    const r = await crearPreferencia({ pagoId: ID, titulo: "Plan", monto: 100000, urlRetorno: "https://x", marketplaceFee: 5000 });
+    const r = await crearPreferencia({ pagoId: ID, titulo: "Plan", monto: 100000, urlRetorno: "https://x" });
     expect(r).toEqual({ id: "pref-1", url: "https://mp/pay" });
     expect(cuerpo).not.toHaveProperty("marketplace_fee");
     expect(cuerpo.external_reference).toBe(ID);

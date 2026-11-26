@@ -1,0 +1,9 @@
+-- Reversión de 198 (no es una migración: no se aplica sola). Solo quita lo que 198 añadió; no borra datos.
+-- Si hay cobros de WhatsApp o de Mi Marca ya aprobados, sus efectos (lotes acreditados, add-on activado) permanecen.
+drop function if exists public.whatsapp_iniciar_pago_recarga(uuid);
+drop function if exists public.mi_marca_iniciar_pago(uuid);
+-- Las dos funciones internas siguen referenciadas por aplicar_evento_pago: se quitan SOLO tras restaurar esa función
+-- a su versión de la migración 174 (re-ejecutar su bloque «aplicar_evento_pago»), o dejarían de existir sus ramas.
+-- drop function if exists public._whatsapp_recarga_aplicar_pago(public.pago, text, public.pago_estado, jsonb);
+-- drop function if exists public._mi_marca_aplicar_pago(public.pago, text, public.pago_estado, jsonb);
+-- Las exclusiones «not in (STAFF_EXTRA, MI_MARCA)» de solicitar_pago_plan / solicitar_upgrade_plan son inocuas: pueden quedarse.

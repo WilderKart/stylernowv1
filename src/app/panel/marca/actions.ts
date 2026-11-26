@@ -3,6 +3,7 @@
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
 import { exigirOperativo } from "@/lib/suscripcion/estado-operativo";
 import { createClient } from "@/lib/supabase/server";
+import { crearPreferenciaDePago } from "@/lib/pagos/cobro";
 import { revalidatePath } from "next/cache";
 
 type Resultado<T = undefined> =
@@ -13,6 +14,7 @@ const MENSAJES_ERROR: Record<string, string> = {
   SUSCRIPCION_RESTRINGIDA: "Tu suscripci?n no permite esta acci?n en este momento.",
   NO_AUTORIZADO: "No tienes permiso sobre este negocio.",
   ADDON_MI_MARCA_REQUERIDO: "Tu negocio aún no tiene activo el add-on Mi Marca.",
+  ADDON_SIN_PRECIO: "Mi Marca todavía no tiene precio publicado en tu país.",
   ASUNTO_REQUERIDO: "Falta el asunto de la solicitud.",
   MENSAJE_REQUERIDO: "Falta el mensaje de la solicitud.",
 };
@@ -94,6 +96,38 @@ export async function subirLogoMarca(dataUrl: string): Promise<Resultado<{ url: 
 
     const { data: pub } = supabase.storage.from("negocio-media").getPublicUrl(ruta);
     return { ok: true, data: { url: `${pub.publicUrl}?v=${Date.now()}` } };
+  } catch (e) {
+    return { ok: false, error: traducirError(e instanceof Error ? e.message : "Error inesperado.") };
+  }
+}
+
+/**
+ * Cobro mensual de Mi Marca por Mercado Pago (cuenta de StylerNow, sin split). La base fija el precio vigente del país y crea
+ * (o reutiliza) el cobro pendiente (migración 198); al aprobarse activa o extiende un mes. Nada de esto lo decide el navegador.
+ */
+export async function iniciarPagoMiMarca(): Promise<Resultado<{ url: string; preferenciaId: string; pagoId: string }>> {
+  try {
+    const { supabase, negocioId } = await contextoBarberia();
+    const operativo = await exigirOperativo(negocioId);
+    if (!operativo.ok) return { ok: false, error: traducirError("SUSCRIPCION_RESTRINGIDA") };
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { data, error } = await (supabase as unknown as {
+      rpc: (n: string, a: object) => Promise<{ data: { id: string } | null; error: { message: string } | null }>;
+    }).rpc("mi_marca_iniciar_pago", { p_negocio_id: negocioId });
+    if (error && /could not find the function/i.test(error.message)) {
+      return { ok: false, error: "El pago en línea de Mi Marca se está activando. Intenta de nuevo en unos minutos." };
+    }
+    if (error || !data) return { ok: false, error: traducirError(error?.message ?? "No se pudo iniciar el pago.") };
+    const sitio = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+    const preferencia = await crearPreferenciaDePago({
+      pagoId: data.id,
+      titulo: "Add-on Mi Marca (1 mes) · StylerNow",
+      emailPagador: user?.email,
+      urlRetorno: `${sitio}/panel/marca?desde=pago`,
+    });
+    return { ok: true, data: { url: preferencia.url, preferenciaId: preferencia.id, pagoId: data.id } };
   } catch (e) {
     return { ok: false, error: traducirError(e instanceof Error ? e.message : "Error inesperado.") };
   }

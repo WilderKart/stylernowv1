@@ -8,7 +8,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { guardarMarca, solicitarActivacionMarca, subirLogoMarca } from "./actions";
+import { ModalPagoMercadoPago, type CobroModal } from "@/components/pagos/modal-pago-mercadopago";
+import { guardarMarca, iniciarPagoMiMarca, solicitarActivacionMarca, subirLogoMarca } from "./actions";
 
 export interface MarcaInicial {
   nombre: string;
@@ -23,15 +24,15 @@ const HEX = /^#[0-9A-Fa-f]{6}$/;
 
 export function VistaMarca({
   activo,
+  vigenteHasta,
   precioTexto,
-  cobroHabilitado,
   nombreNegocio,
   logoNegocio,
   marca,
 }: {
   activo: boolean;
+  vigenteHasta: string | null;
   precioTexto: string | null;
-  cobroHabilitado: boolean;
   nombreNegocio: string;
   logoNegocio: string | null;
   marca: MarcaInicial | null;
@@ -43,9 +44,12 @@ export function VistaMarca({
         Mi Marca
       </Poster>
       {activo ? (
-        <FormularioMarca nombreNegocio={nombreNegocio} logoNegocio={logoNegocio} marca={marca} />
+        <>
+          <RenovarMarca vigenteHasta={vigenteHasta} precioTexto={precioTexto} />
+          <FormularioMarca nombreNegocio={nombreNegocio} logoNegocio={logoNegocio} marca={marca} />
+        </>
       ) : (
-        <OfertaMarca precioTexto={precioTexto} cobroHabilitado={cobroHabilitado} />
+        <OfertaMarca precioTexto={precioTexto} />
       )}
     </main>
   );
@@ -53,12 +57,58 @@ export function VistaMarca({
 
 // ── Estado sin add-on: producto + solicitud ──────────────────────────────
 
-function OfertaMarca({ precioTexto, cobroHabilitado }: { precioTexto: string | null; cobroHabilitado: boolean }) {
+/** Botón de pago de Mi Marca (un mes) con el modal de Mercado Pago. */
+function useCobroMiMarca() {
   const [pendiente, iniciar] = useTransition();
+  const [cobro, setCobro] = useState<CobroModal | null>(null);
+
+  function pagar() {
+    iniciar(async () => {
+      const r = await iniciarPagoMiMarca();
+      if (!r.ok) return void toast.error(r.error);
+      setCobro({ pagoId: r.data.pagoId, preferenciaId: r.data.preferenciaId, url: r.data.url, titulo: "Mi Marca · 1 mes" });
+    });
+  }
+  const modal = (
+    <ModalPagoMercadoPago
+      key={cobro?.pagoId ?? "sin-cobro"}
+      cobro={cobro}
+      onCerrar={() => setCobro(null)}
+      onAprobado={() => window.location.reload()}
+      onReintentar={() => {
+        setCobro(null);
+        pagar();
+      }}
+    />
+  );
+  return { pendiente, pagar, modal };
+}
+
+function RenovarMarca({ vigenteHasta, precioTexto }: { vigenteHasta: string | null; precioTexto: string | null }) {
+  const { pendiente, pagar, modal } = useCobroMiMarca();
+  if (!vigenteHasta) return null; // activación manual sin vencimiento: no hay nada que renovar
+  return (
+    <Panel className="mb-4 min-w-0">
+      {modal}
+      <div className="p-card__b flex flex-wrap items-center justify-between gap-3">
+        <Meta className="break-words">
+          Mi Marca está activo hasta el {new Date(vigenteHasta).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })}.
+        </Meta>
+        <Button size="sm" variant="secondary" onClick={pagar} loading={pendiente}>
+          {precioTexto ? `Renovar un mes · ${precioTexto}` : "Renovar un mes"}
+        </Button>
+      </div>
+    </Panel>
+  );
+}
+
+function OfertaMarca({ precioTexto }: { precioTexto: string | null }) {
+  const { pendiente, pagar, modal } = useCobroMiMarca();
+  const [pendienteSoporte, iniciarSoporte] = useTransition();
   const [enviada, setEnviada] = useState(false);
 
-  function solicitar() {
-    iniciar(async () => {
+  function solicitarPorSoporte() {
+    iniciarSoporte(async () => {
       const r = await solicitarActivacionMarca();
       if (!r.ok) return void toast.error(r.error);
       setEnviada(true);
@@ -68,6 +118,7 @@ function OfertaMarca({ precioTexto, cobroHabilitado }: { precioTexto: string | n
 
   return (
     <Panel className="min-w-0">
+      {modal}
       <div className="p-card__h flex flex-wrap items-center justify-between gap-2">
         <SectionTitle>Haz que tu página sea tuya</SectionTitle>
         <Status tone={precioTexto ? "ok" : "warn"}>{precioTexto ? `${precioTexto} / mes` : "PENDIENTE"}</Status>
@@ -78,14 +129,13 @@ function OfertaMarca({ precioTexto, cobroHabilitado }: { precioTexto: string | n
           <li>Tu logo y tus colores en lugar de los de StylerNow.</li>
           <li>Borrador y publicación: tú decides cuándo se ve.</li>
         </ul>
-        <Meta className="break-words">
-          {cobroHabilitado
-            ? "El cobro del add-on se carga a tu suscripción."
-            : "El cobro del add-on se habilita junto con la pasarela de pago de tu país. Mientras tanto coordinamos la activación contigo por soporte."}
-        </Meta>
+        <Meta className="break-words">Pagas con Mercado Pago (tarjeta, PSE, Nequi o efectivo). Se activa por un mes apenas se aprueba el pago y puedes renovarlo aquí.</Meta>
         <div className="flex flex-wrap items-center gap-3">
-          <Button onClick={solicitar} loading={pendiente} disabled={enviada}>
-            {enviada ? "Solicitud enviada" : "Solicitar activación"}
+          <Button onClick={pagar} loading={pendiente} disabled={!precioTexto}>
+            {precioTexto ? `Activar Mi Marca · ${precioTexto}` : "Activar Mi Marca"}
+          </Button>
+          <Button variant="ghost" onClick={solicitarPorSoporte} loading={pendienteSoporte} disabled={enviada}>
+            {enviada ? "Solicitud enviada" : "Prefiero coordinarlo por soporte"}
           </Button>
           <Link href="/panel/soporte" className="sn-label underline">
             Ver mis tickets

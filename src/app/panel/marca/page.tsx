@@ -6,6 +6,11 @@ import { VistaMarca } from "./vista-marca";
 
 export const metadata = { title: "Mi Marca" };
 
+/** Vigente = sin fecha de fin (activación manual) o con fin en el futuro. */
+function estaVigente(hasta: string | null) {
+  return !hasta || new Date(hasta).getTime() > Date.now();
+}
+
 export default async function MarcaPage() {
   // Mi Marca es decisión del dueño del negocio: solo rol Barbería.
   const contexto = await verificarAccesoPanel(["BARBERIA"], "/panel/marca");
@@ -14,7 +19,7 @@ export default async function MarcaPage() {
 
   const [{ data: negocio }, { data: addon }, { data: marca }] = await Promise.all([
     supabase.from("negocio").select("nombre, logo_url, pais_codigo").eq("id", negocioId).single(),
-    supabase.from("negocio_addon").select("id").eq("negocio_id", negocioId).eq("addon_codigo", "MI_MARCA").eq("activo", true).limit(1),
+    supabase.from("negocio_addon").select("id, hasta").eq("negocio_id", negocioId).eq("addon_codigo", "MI_MARCA").eq("activo", true).limit(1),
     supabase
       .from("negocio_marca")
       .select("nombre_marca, slogan, logo_url, color_primario, color_secundario, estado")
@@ -28,6 +33,9 @@ export default async function MarcaPage() {
     supabase.from("addon_precio").select("precio_mensual").eq("addon_codigo", "MI_MARCA").eq("pais_codigo", paisCodigo).maybeSingle(),
   ]);
 
+  // Vigente: activo y sin vencer (una activación manual sin fecha de fin sigue vigente).
+  const vigente = (addon ?? []).some((a) => estaVigente(a.hasta));
+
   const precioTexto =
     precio?.precio_mensual != null && pais ? formatearMoneda(Number(precio.precio_mensual), pais.moneda, pais.locale) : null;
 
@@ -35,10 +43,10 @@ export default async function MarcaPage() {
     <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} />
       <VistaMarca
-        activo={(addon ?? []).length > 0}
+        activo={vigente}
+        vigenteHasta={addon?.[0]?.hasta ?? null}
         precioTexto={precioTexto}
-        cobroHabilitado={Boolean(pais?.cobro_recurrente_habilitado) && pais?.pasarela !== "MANUAL"}
-        nombreNegocio={negocio?.nombre ?? ""}
+                nombreNegocio={negocio?.nombre ?? ""}
         logoNegocio={negocio?.logo_url ?? null}
         marca={
           marca

@@ -9,7 +9,7 @@ import { crearPreferencia, type PreferenciaCreada } from "./mercadopago";
  * Único punto de creación de cobros en línea (Checkout Pro).
  *
  * Quien llama solo aporta textos de presentación y la URL de retorno. Monto, comisión
- * (`marketplace_fee`) y cuenta de cobro salen del `pago` que la base de datos ya fijó
+ * y cuenta de cobro salen del `pago` que la base de datos ya fijó
  * (migraciones 008/119): un cobro del negocio se crea con el token DE SU CUENTA y nunca
  * con el de StylerNow; un ingreso de StylerNow, con el de la plataforma.
  */
@@ -36,10 +36,10 @@ export async function crearPreferenciaDePago(d: DatosCobro): Promise<Preferencia
     };
   })
     .from("pago")
-    .select("id, monto, estado, marketplace_fee, entorno")
+    .select("id, monto, estado, entorno")
     .eq("id", d.pagoId)
     .single();
-  const pago = data as { id: string; monto: number; estado: string; marketplace_fee: number | null; entorno: string | null } | null;
+  const pago = data as { id: string; monto: number; estado: string; entorno: string | null } | null;
   if (!pago) throw new CobroNoDisponible("PAGO_NO_ENCONTRADO");
   if (pago.estado !== "PENDIENTE") throw new CobroNoDisponible("PAGO_YA_PROCESADO");
   const entorno = entornoPagos();
@@ -71,7 +71,6 @@ export async function crearPreferenciaDePago(d: DatosCobro): Promise<Preferencia
     urlWebhook: webhook,
     expiraEn: d.expiraEn ?? null,
     token: cuenta.token,
-    marketplaceFee: Number(pago.marketplace_fee ?? 0),
     // Cobro del negocio (token OAuth del vendedor): sin PSE ni Efecty salvo la prueba aislada de sandbox.
     excluirTiposPago: cuenta.conexionId ? tiposExcluidosCobroNegocio() : undefined,
   });

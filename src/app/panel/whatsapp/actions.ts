@@ -4,6 +4,8 @@ import { traducirErrorWhatsApp } from "@/lib/whatsapp/errores";
 import { normalizarSegmento } from "@/lib/whatsapp/reglas";
 import { llamarRpcWhatsApp, sesionDuenoWhatsApp } from "@/lib/whatsapp/servidor";
 import { CATEGORIAS, VARIABLES_PLANTILLA, type EstadoCampana, type ResumenPanelWhatsApp, type Resultado } from "@/lib/whatsapp/tipos";
+import { crearPreferenciaDePago } from "@/lib/pagos/cobro";
+import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -161,6 +163,39 @@ export async function solicitarRecarga(paqueteId: string): Promise<Resultado<{ c
     if (error || !data) return fallo(error ?? "SIN_DATOS");
     revalidatePath(RUTA);
     return { ok: true, data: { compraId: data } };
+  } catch (e) {
+    return fallo(e);
+  }
+}
+
+/**
+ * Cobro de una recarga por Mercado Pago (cuenta de StylerNow, sin split). La base crea (o reutiliza) el cobro pendiente por el
+ * precio de la solicitud (migración 198); el estado lo confirma el webhook o la conciliación, nunca el navegador.
+ */
+export async function iniciarPagoRecarga(compraId: string): Promise<Resultado<{ url: string; preferenciaId: string; pagoId: string }>> {
+  const id = z.uuid().safeParse(compraId);
+  if (!id.success) return { ok: false, error: "Solicitud inválida." };
+  try {
+    const { supabase } = await sesionDuenoWhatsApp({ requerirOperativo: true });
+    const {
+      data: { user },
+    } = await (await createClient()).auth.getUser();
+    const { data, error } = await llamarRpcWhatsApp<{ id: string; monto: number; metadata?: { conversaciones?: number } }>(supabase, "whatsapp_iniciar_pago_recarga", {
+      p_compra_id: id.data,
+    });
+    if (error && /could not find the function/i.test(error)) {
+      return { ok: false, error: "El pago en línea de recargas se está activando. Intenta de nuevo en unos minutos." };
+    }
+    if (error || !data) return fallo(error ?? "SIN_DATOS");
+    const conversaciones = data.metadata?.conversaciones;
+    const sitio = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+    const preferencia = await crearPreferenciaDePago({
+      pagoId: data.id,
+      titulo: `Recarga de ${conversaciones ?? ""} conversaciones de WhatsApp · StylerNow`.replace("  ", " "),
+      emailPagador: user?.email,
+      urlRetorno: `${sitio}${RUTA}?desde=pago`,
+    });
+    return { ok: true, data: { url: preferencia.url, preferenciaId: preferencia.id, pagoId: data.id } };
   } catch (e) {
     return fallo(e);
   }

@@ -107,9 +107,7 @@ export interface DatosPreferencia {
   expiraEn?: string | null;
   /** Token del vendedor (cobro directo al negocio). Ausente = cuenta de StylerNow. */
   token?: TokenPasarela;
-  /** Comisión de StylerNow que retiene Mercado Pago (split 1:1). La fija la base de datos. */
-  marketplaceFee?: number;
-  /** Tipos de medio excluidos (p. ej. PSE y Efecty en el split 1:1, no verificados). */
+  /** Tipos de medio excluidos (p. ej. PSE y Efecty en los cobros directos a un negocio, no verificados). */
   excluirTiposPago?: readonly string[];
 }
 
@@ -138,8 +136,7 @@ export async function crearPreferencia(d: DatosPreferencia): Promise<Preferencia
     ...(d.excluirTiposPago && d.excluirTiposPago.length > 0
       ? { payment_methods: { excluded_payment_types: d.excluirTiposPago.map((id) => ({ id })) } }
       : {}),
-    // Por defecto 0 (Mercado Pago lo trata igual que omitirlo); solo se envía si es > 0.
-    ...(d.token && d.marketplaceFee && d.marketplaceFee > 0 ? { marketplace_fee: Math.round(d.marketplaceFee) } : {}),
+    // Cobro directo 1 a 1: no hay división de fondos ni comisión retenida por Mercado Pago (sin split ni marketplace_fee).
   };
 
   const pref = await mp<{ id: string; init_point?: string; sandbox_init_point?: string }>(
