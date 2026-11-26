@@ -4,6 +4,7 @@ import { BotonSonido } from "@/components/soporte/boton-sonido";
 import { HiloChat } from "@/components/soporte/hilo-chat";
 import s from "@/components/soporte/chat-3d.module.css";
 import { mensajeDesdeEvento, type AdjuntoSubido } from "@/lib/soporte/tipos";
+import { nombreCanalUnico } from "@/lib/soporte/canal-autenticado";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Lock } from "lucide-react";
@@ -59,7 +60,7 @@ export function ChatSoportePanel({ inicial, errorInicial, alIrATickets }: { inic
       if (data.session?.access_token) await supabase.realtime.setAuth(data.session.access_token);
       if (cancelado) return;
       canal = supabase
-        .channel(`soporte-panel-${negocioId}`)
+        .channel(nombreCanalUnico(`soporte-panel-${negocioId}`))
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "soporte_mensaje", filter: filtro }, (p) => {
           // Respuesta de soporte: se pinta ya, con los datos del propio evento; la consulta confirma después.
           const nuevo = mensajeDesdeEvento(p.new);

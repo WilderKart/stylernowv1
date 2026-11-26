@@ -1,6 +1,6 @@
 "use client";
 
-import { abrirCanalAutenticado } from "@/lib/soporte/canal-autenticado";
+import { abrirCanalAutenticado, nombreCanalUnico } from "@/lib/soporte/canal-autenticado";
 import { prepararAudio, reproducirAviso } from "@/lib/soporte/sonido";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect } from "react";
@@ -18,7 +18,7 @@ export function AlertaSonoraSoporte({ rol, negocioId }: { rol: "BARBERIA" | "SUP
     const supabase = createClient();
     return abrirCanalAutenticado(supabase, () =>
       supabase
-        .channel(`soporte-sonido-${rol}`)
+        .channel(nombreCanalUnico(`soporte-sonido-${rol}`))
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "soporte_mensaje", ...(rol === "BARBERIA" && negocioId ? { filter: `negocio_id=eq.${negocioId}` } : {}) },
