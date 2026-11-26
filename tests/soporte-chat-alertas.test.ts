@@ -74,7 +74,7 @@ describe("soporte chat · alertas", () => {
         extracto: "necesito ayuda con Nequi",
         prioritario: true,
         con_adjunto: false,
-        enlace: "/admin/soporte?c=conv-1",
+        enlace: "https://app.stylernow.com/admin/soporte?c=conv-1",
       },
       severidad: "info",
     });
@@ -94,10 +94,28 @@ describe("soporte chat · alertas", () => {
     expect(mocks.enviar).toHaveBeenCalledTimes(2);
     const correos = mocks.enviar.mock.calls.map(([m]) => m);
     expect(correos.map((m) => m.email)).toEqual(["admin@stylernow.test", "dueno@stylernow.test"]);
-    expect(correos.map((m) => m.ruta)).toEqual(["/admin/soporte?c=conv-1", "/panel/soporte"]);
+    expect(correos.map((m) => m.ruta)).toEqual(["https://app.stylernow.com/admin/soporte?c=conv-1", "https://app.stylernow.com/panel/soporte"]);
     for (const correo of correos) {
       expect(JSON.stringify(correo)).not.toContain("contenido privado");
       expect(correo.texto).toContain("no se incluye");
+    }
+  });
+});
+
+describe("enlaces de los correos de soporte", () => {
+  it("siempre son absolutos (un enlace relativo en un correo se rompe como http:///admin/soporte)", async () => {
+    const { enlaceAbsoluto } = await import("@/lib/soporte/alertas");
+    const previo = process.env.NEXT_PUBLIC_SITE_URL;
+    try {
+      process.env.NEXT_PUBLIC_SITE_URL = "https://app.stylernow.com/";
+      expect(enlaceAbsoluto("/admin/soporte?c=1")).toBe("https://app.stylernow.com/admin/soporte?c=1");
+      process.env.NEXT_PUBLIC_SITE_URL = "http://localhost:3000"; // no https → dominio de producción
+      expect(enlaceAbsoluto("/panel/soporte")).toBe("https://app.stylernow.com/panel/soporte");
+      delete process.env.NEXT_PUBLIC_SITE_URL;
+      expect(enlaceAbsoluto("panel/soporte")).toBe("https://app.stylernow.com/panel/soporte");
+    } finally {
+      if (previo === undefined) delete process.env.NEXT_PUBLIC_SITE_URL;
+      else process.env.NEXT_PUBLIC_SITE_URL = previo;
     }
   });
 });

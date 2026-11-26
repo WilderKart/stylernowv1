@@ -15,6 +15,21 @@ export type DatosAlertaSoporte = {
   tieneAdjunto?: boolean;
 };
 
+/**
+ * Origen público de la app para los enlaces de los correos. Un enlace relativo (`/admin/soporte`) en un correo no lleva a ningún
+ * sitio: el cliente de correo lo convierte en `http:///admin/soporte`. Se corre en `after()`, sin cabeceras de la petición, así que
+ * se usa la variable de entorno y, si falta o no es https, el dominio de producción.
+ */
+function origenPublico(): string {
+  const definido = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
+  return definido && /^https:\/\//.test(definido) ? definido : "https://app.stylernow.com";
+}
+
+/** Enlace absoluto a una ruta de la app. Si la persona no tiene sesión, el proxy la lleva a /login y, al entrar, de vuelta a esta ruta. */
+export function enlaceAbsoluto(ruta: string): string {
+  return `${origenPublico()}${ruta.startsWith("/") ? ruta : `/${ruta}`}`;
+}
+
 async function enviarCorreo(params: {
   id: string;
   email: string;
@@ -24,15 +39,16 @@ async function enviarCorreo(params: {
 }) {
   const adaptador = seleccionarAdaptador("EMAIL");
   if (!adaptador.habilitado) return;
-  const texto = `Hola ${params.destinatario}, tienes una novedad en el chat de soporte de StylerNow. Ingresa a la plataforma para leerla. Por privacidad, el mensaje no se incluye en este correo.`;
+  const enlace = enlaceAbsoluto(params.ruta);
+  const texto = `Hola ${params.destinatario}, tienes una novedad en el chat de soporte de StylerNow. Ábrela aquí: ${enlace}. Por privacidad, el mensaje no se incluye en este correo.`;
   await adaptador.enviar({
     id: params.id,
     canal: "EMAIL",
     idioma: "es",
     asunto: params.asunto,
     texto,
-    html: `<p>Hola ${params.destinatario},</p><p>Tienes una novedad en el chat de soporte de StylerNow. Ingresa a la plataforma para leerla.</p><p>Por privacidad, el mensaje no se incluye en este correo.</p><p><a href="${params.ruta}">Abrir soporte</a></p>`,
-    ruta: params.ruta,
+    html: `<p>Hola ${params.destinatario},</p><p>Tienes una novedad en el chat de soporte de StylerNow. Ingresa a la plataforma para leerla.</p><p>Por privacidad, el mensaje no se incluye en este correo.</p><p><a href="${enlace}">Abrir soporte</a></p>`,
+    ruta: enlace,
     email: params.email,
   });
 }
@@ -68,7 +84,7 @@ export async function procesarAlertasSoporte(datos: DatosAlertaSoporte): Promise
         ...contexto,
         prioritario: datos.prioritario ?? false,
         con_adjunto: datos.tieneAdjunto ?? false,
-        enlace: `/admin/soporte?c=${datos.conversacionId}`,
+        enlace: enlaceAbsoluto(`/admin/soporte?c=${datos.conversacionId}`),
       },
       severidad: "info",
     });
