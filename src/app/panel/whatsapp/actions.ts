@@ -170,7 +170,7 @@ export async function solicitarRecarga(paqueteId: string): Promise<Resultado<{ c
 
 /**
  * Cobro de una recarga por Mercado Pago (cuenta de StylerNow, sin split). La base crea (o reutiliza) el cobro pendiente por el
- * precio de la solicitud (migración 198); el estado lo confirma el webhook o la conciliación, nunca el navegador.
+ * precio de la solicitud (migración 199); el estado lo confirma el webhook o la conciliación, nunca el navegador.
  */
 export async function iniciarPagoRecarga(compraId: string): Promise<Resultado<{ url: string; preferenciaId: string; pagoId: string }>> {
   const id = z.uuid().safeParse(compraId);

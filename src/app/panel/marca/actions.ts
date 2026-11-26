@@ -103,7 +103,7 @@ export async function subirLogoMarca(dataUrl: string): Promise<Resultado<{ url: 
 
 /**
  * Cobro mensual de Mi Marca por Mercado Pago (cuenta de StylerNow, sin split). La base fija el precio vigente del país y crea
- * (o reutiliza) el cobro pendiente (migración 198); al aprobarse activa o extiende un mes. Nada de esto lo decide el navegador.
+ * (o reutiliza) el cobro pendiente (migración 199); al aprobarse activa o extiende un mes. Nada de esto lo decide el navegador.
  */
 export async function iniciarPagoMiMarca(): Promise<Resultado<{ url: string; preferenciaId: string; pagoId: string }>> {
   try {

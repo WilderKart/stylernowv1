@@ -1,4 +1,4 @@
--- Prueba SQL de la migración 198 (cobros por Mercado Pago de recargas de WhatsApp y de Mi Marca). Ejecutar contra la base local:
+-- Prueba SQL de la migración 199 (cobros por Mercado Pago de recargas de WhatsApp y de Mi Marca). Ejecutar contra la base local:
 --   docker exec -i supabase_db_stylernow psql -U postgres -v ON_ERROR_STOP=1 < tests/sql/pagos_whatsapp_mi_marca.sql
 -- Todo ocurre en una transacción que se revierte al final.
 begin;

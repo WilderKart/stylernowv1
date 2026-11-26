@@ -1,4 +1,4 @@
--- 198 · Pagos de la barbería a StylerNow por Mercado Pago: recargas de WhatsApp y add-on «Mi Marca».
+-- 199 · Pagos de la barbería a StylerNow por Mercado Pago: recargas de WhatsApp y add-on «Mi Marca».
 --
 -- Hasta ahora solo se podían pagar por Mercado Pago el plan, los barberos adicionales y los créditos de IA.
 -- Esta migración deja pagables, con el mismo cobro directo 1 a 1 a la cuenta de la plataforma (sin split):
@@ -13,7 +13,7 @@
 --  4. aplicar_evento_pago: ruta propia para esos dos conceptos (antes un pago de WhatsApp caería en la lógica de reservas).
 --  5. Un cobro de Mi Marca pendiente no bloquea pagar ni mejorar el plan (mismo criterio que los barberos adicionales).
 --
--- Reversión: ver 198_pagos_whatsapp_y_mi_marca_REVERSION.sql.txt. No toca datos existentes.
+-- Reversión: ver 199_pagos_whatsapp_y_mi_marca_REVERSION.sql.txt. No toca datos existentes.
 
 -- ── 1. Iniciar el cobro de una recarga de WhatsApp ───────────────────────────────────────────────────
 create or replace function public.whatsapp_iniciar_pago_recarga(p_compra_id uuid)
@@ -158,7 +158,7 @@ begin
   if position('_whatsapp_recarga_aplicar_pago' in v_def) > 0 then return; end if;   -- ya migrada
   if position(v_a in v_def) = 0 then raise exception 'ANCLA_NO_ENCONTRADA aplicar_evento_pago'; end if;
   v_nuevo := replace(v_def, v_a,
-    E'  -- Recargas de WhatsApp y Mi Marca (migración 198): ruta propia, sin tocar la de reservas ni la del plan.\n'
+    E'  -- Recargas de WhatsApp y Mi Marca (migración 199): ruta propia, sin tocar la de reservas ni la del plan.\n'
     || E'  if v_pago.tipo = ''PAQUETE_CONVERSACIONES_WHATSAPP'' then\n'
     || E'    return public._whatsapp_recarga_aplicar_pago(v_pago, p_id_transaccion, p_estado, p_payload);\n'
     || E'  end if;\n'
