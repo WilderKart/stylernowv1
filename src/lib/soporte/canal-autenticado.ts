@@ -20,3 +20,14 @@ export function abrirCanalAutenticado(supabase: SupabaseClient, crear: () => Rea
     if (canal) void supabase.removeChannel(canal);
   };
 }
+
+let contador = 0;
+/**
+ * Nombre de canal único por instancia. `supabase.channel(nombre)` devuelve el canal EXISTENTE si ya hay uno con ese nombre, y
+ * añadirle `.on('postgres_changes')` a un canal ya suscrito lanza un error. Un mismo componente montado dos veces (menú de
+ * escritorio y de móvil, o el doble montaje de React en desarrollo) debe tener su propio canal.
+ */
+export function nombreCanalUnico(base: string): string {
+  contador += 1;
+  return `${base}-${contador}`;
+}

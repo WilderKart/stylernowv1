@@ -5,6 +5,7 @@ import { HiloChat, type RespuestaRapidaChat } from "@/components/soporte/hilo-ch
 import s from "@/components/soporte/chat-3d.module.css";
 import { normalizar } from "@/lib/busqueda/difuso";
 import { mensajeDesdeEvento, type AdjuntoSubido, type MensajeChat } from "@/lib/soporte/tipos";
+import { nombreCanalUnico } from "@/lib/soporte/canal-autenticado";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ExternalLink, Search, Star, X } from "lucide-react";
@@ -120,7 +121,7 @@ export function ChatAdmin({ conversacionesIniciales, errorInicial, seleccionInic
       if (data.session?.access_token) await supabase.realtime.setAuth(data.session.access_token);
       if (cancelado) return;
       canal = supabase
-        .channel("soporte-admin")
+        .channel(nombreCanalUnico("soporte-admin"))
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "soporte_mensaje" }, (p) => {
           // Mensaje de la barbería en el hilo abierto: se pinta ya, con los datos del propio evento; la consulta confirma después.
           const nuevo = mensajeDesdeEvento(p.new);

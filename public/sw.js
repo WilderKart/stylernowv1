@@ -119,7 +119,8 @@ self.addEventListener("fetch", (event) => {
         const cacheado = await cache.match(request);
         if (cacheado) return cacheado;
         const respuesta = await fetch(request);
-        if (respuesta.ok) cache.put(request, respuesta.clone());
+        // Solo respuestas completas: un 206 (parcial, p. ej. audio o video por rangos) no se puede guardar en caché.
+        if (respuesta.status === 200 && respuesta.type === "basic") cache.put(request, respuesta.clone()).catch(() => {});
         return respuesta;
       })
     );
@@ -130,9 +131,9 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     fetch(request)
       .then((respuesta) => {
-        if (respuesta.ok) {
+        if (respuesta.status === 200 && respuesta.type === "basic") {
           const copia = respuesta.clone();
-          caches.open(CACHE_SHELL).then((cache) => cache.put(request, copia));
+          caches.open(CACHE_SHELL).then((cache) => cache.put(request, copia)).catch(() => {});
         }
         return respuesta;
       })
