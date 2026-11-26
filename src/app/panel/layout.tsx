@@ -11,6 +11,8 @@ import { TerminologiaProvider } from "@/components/panel/terminologia-contexto";
 import { categoriaRegistroDe } from "@/lib/auth/destino-inicial";
 import { PanelSuaveProvider } from "@/components/panel/panel-estilo";
 import { AlertaSonoraSoporte } from "@/components/soporte/alerta-sonora-soporte";
+import { ActivarAvisos } from "@/components/notificaciones/activar-avisos";
+import { vapidPublica } from "@/lib/notificaciones/claves-vapid";
 
 export const metadata = {
   title: { template: "%s · Panel Negocio · StylerNow", default: "Panel Negocio" },
@@ -41,6 +43,7 @@ async function PanelGuardado({ children }: { children: React.ReactNode }) {
   // FASE 2B: aviso de suscripción restringida/gracia en TODO el panel. El estado lo decide la base (migración 164); aquí solo se muestra.
   const contexto = await resolverContexto();
   const estado = contexto.negocioId ? await obtenerEstadoOperativo(contexto.negocioId) : null;
+  const clavePush = await vapidPublica();
 
   // Identidad visual única: el panel usa siempre el diseño original. Solo cambia la terminología (barbero, masajista…).
   let categorias: string[] | null = null;
@@ -62,6 +65,7 @@ async function PanelGuardado({ children }: { children: React.ReactNode }) {
         data-panel={suave ? "suave" : undefined}
       >
         {estado ? <BannerSuscripcion estado={estado} puedePagar={contexto.rol === "BARBERIA"} /> : null}
+        <ActivarAvisos vapidPublica={clavePush} />
         {contexto.rol === "BARBERIA" && contexto.negocioId ? <AlertaSonoraSoporte rol="BARBERIA" negocioId={contexto.negocioId} /> : null}
         {children}
       </div>

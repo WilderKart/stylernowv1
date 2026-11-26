@@ -4,6 +4,8 @@ import { BarraLateralAdmin } from "./barra-lateral";
 import { BarraSuperiorAdmin } from "./barra-superior";
 import { contadoresAdmin } from "./tablero";
 import { AlertaSonoraSoporte } from "@/components/soporte/alerta-sonora-soporte";
+import { ActivarAvisos } from "@/components/notificaciones/activar-avisos";
+import { vapidPublica } from "@/lib/notificaciones/claves-vapid";
 import { Suspense } from "react";
 import CargandoAdmin from "./loading";
 
@@ -23,12 +25,13 @@ export const metadata = { title: "Super Admin" };
 async function AdminGuardado({ children }: { children: React.ReactNode }) {
   const { nombre } = await requireSuperSU();
   const supabase = await createClient();
-  const [{ data: { user } }, contadores] = await Promise.all([supabase.auth.getUser(), contadoresAdmin()]);
+  const [{ data: { user } }, contadores, clavePush] = await Promise.all([supabase.auth.getUser(), contadoresAdmin(), vapidPublica()]);
   return (
     <div className="flex min-h-dvh flex-col bg-app lg:flex-row">
       <BarraLateralAdmin email={user?.email ?? ""} nombre={nombre ?? ""} contadores={contadores} />
       <div className="flex min-w-0 flex-1 flex-col">
         <BarraSuperiorAdmin contadores={contadores} />
+        <ActivarAvisos vapidPublica={clavePush} />
         <AlertaSonoraSoporte rol="SUPERSU" />
         {children}
       </div>

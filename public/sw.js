@@ -53,13 +53,31 @@ self.addEventListener("push", (event) => {
   }
   const titulo = typeof datos.titulo === "string" && datos.titulo ? datos.titulo.slice(0, 120) : "StylerNow";
   const cuerpo = typeof datos.cuerpo === "string" ? datos.cuerpo.slice(0, 300) : "";
+  const ruta = rutaSegura(datos.ruta);
   event.waitUntil(
-    self.registration.showNotification(titulo, {
-      body: cuerpo,
-      icon: "/icons/icon-192.png",
-      badge: "/icons/icon-192.png",
-      tag: typeof datos.id === "string" ? datos.id : undefined,
-      data: { ruta: rutaSegura(datos.ruta) },
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((ventanas) => {
+      // Si ya estás mirando justo esa pantalla, la app te lo muestra y suena sola: no se duplica con otra notificación.
+      const viendola = ventanas.some((v) => {
+        if (v.visibilityState !== "visible" || !v.url.startsWith(self.location.origin)) return false;
+        try {
+          return new URL(v.url).pathname === ruta;
+        } catch {
+          return false;
+        }
+      });
+      if (viendola) return undefined;
+      return self.registration.showNotification(titulo, {
+        body: cuerpo,
+        icon: "/icons/icon-192.png",
+        badge: "/icons/icon-192.png",
+        // Con tag, el sistema agrupa; renotify hace que vuelva a sonar y vibrar aunque ya hubiera una igual.
+        tag: typeof datos.id === "string" ? datos.id : undefined,
+        renotify: typeof datos.id === "string",
+        silent: false,
+        vibrate: [200, 100, 200],
+        timestamp: Date.now(),
+        data: { ruta },
+      });
     })
   );
 });
