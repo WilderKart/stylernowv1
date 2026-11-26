@@ -77,6 +77,7 @@ export const RUTAS: RutaRegistro[] = [
   { path: "/panel/soporte", publica: false, roles: ["barberia", "guardian"] },
   { path: "/panel/auditoria", publica: false, roles: ["barberia", "guardian"] },
   { path: "/panel/wallet", publica: false, roles: ["barberia", "guardian"] },
+  { path: "/panel/ganancias", publica: false, roles: ["barberia", "guardian"] },
   { path: "/panel/ads", publica: false, roles: ["barberia", "guardian"] },
   { path: "/panel/marca", publica: false, roles: ["barberia"] },
   { path: "/panel/suscripcion", publica: false, roles: ["barberia", "guardian"] },

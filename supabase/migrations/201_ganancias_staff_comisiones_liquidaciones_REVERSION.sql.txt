@@ -1,0 +1,47 @@
+-- Reversión de la migración 201 (ganancias del staff). SOLO si aún no hay liquidaciones ni pagos reales: borra el historial financiero del módulo.
+-- Antes de ejecutar: exportar staff_ganancia, ganancia_liquidacion, ganancia_pago y ganancia_ajuste.
+begin;
+drop trigger if exists trg_reserva_ganancia on public.reserva;
+drop trigger if exists trg_pago_reembolso_ganancia on public.pago;
+drop function if exists public._trg_reserva_ganancia();
+drop function if exists public._trg_pago_reembolso_ganancia();
+drop function if exists public.soporte_ganancias_disponibles();
+drop function if exists public.ganancia_mis_capacidades(uuid);
+drop function if exists public.ganancia_exportacion_registrar(uuid, text, jsonb, integer);
+drop function if exists public.soporte_ganancias_expirar();
+drop function if exists public.soporte_ganancias_revocar(uuid, text);
+drop function if exists public.soporte_ganancias_tomar(uuid);
+drop function if exists public.soporte_ganancias_autorizar(uuid, integer);
+drop function if exists public.soporte_ganancias_solicitar(uuid, text);
+drop function if exists public.revision_responder(uuid, text, text);
+drop function if exists public.revision_solicitar(text, uuid, text, text);
+drop function if exists public.ganancia_novedad_gestionar(uuid, text, text, uuid);
+drop function if exists public.ganancias_detectar_novedades(uuid);
+drop function if exists public.ganancia_ajustar(uuid, uuid, numeric, text, uuid);
+drop function if exists public.liquidacion_revertir(uuid, text);
+drop function if exists public.ganancia_pago_anular(uuid, text);
+drop function if exists public.liquidacion_registrar_pago(uuid, numeric, text, text, text, text, date, text);
+drop function if exists public.liquidacion_cerrar(uuid, uuid, uuid, text, date, date, uuid[]);
+drop function if exists public.liquidacion_previsualizar(uuid, uuid, uuid, date, date);
+drop function if exists public.liquidacion_comprobante(uuid);
+drop function if exists public.liquidaciones_listar(uuid, uuid, uuid, integer, integer);
+drop function if exists public.ganancias_resumen(uuid, uuid, uuid, date, date);
+drop function if exists public.ganancias_listar(uuid, uuid, uuid, date, date, uuid, text, text, text, text, text, uuid, integer, integer, text);
+drop function if exists public.ganancia_permiso_quitar(uuid, uuid);
+drop function if exists public.ganancia_permiso_definir(uuid, uuid, uuid, jsonb);
+drop function if exists public.comision_previsualizar(uuid, numeric, numeric, numeric, text);
+drop function if exists public.comision_regla_desactivar(uuid, text);
+drop function if exists public.comision_regla_crear(uuid, numeric, text, text, uuid, uuid, uuid, text, date, date, uuid);
+drop function if exists public._gan_modo_lectura(uuid, uuid);
+drop function if exists public._gan_estado_cobro(uuid);
+drop function if exists public._ganancia_generar(uuid);
+drop function if exists public._novedad_registrar(uuid, uuid, uuid, uuid, uuid, uuid, text, text, text, text, numeric);
+drop function if exists public._comision_resolver(uuid, uuid, uuid, uuid, text, date);
+drop table if exists public.soporte_acceso_ganancias, public.ganancia_revision, public.ganancia_novedad, public.ganancia_pago,
+  public.ganancia_liquidacion_item, public.ganancia_ajuste, public.ganancia_liquidacion, public.staff_ganancia, public.comision_regla, public.ganancia_permiso cascade;
+drop function if exists public._trg_regla_sin_solape();
+drop function if exists public._gan_puede_ver(uuid, uuid, uuid);
+drop function if exists public._gan_soporte_activo(uuid);
+drop function if exists public._gan_permiso(uuid, uuid, text);
+drop function if exists public._gan_inmutable();
+commit;

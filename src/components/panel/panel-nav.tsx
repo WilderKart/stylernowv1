@@ -112,6 +112,7 @@ function PanelNavClasica({ rol, prestaServicios = false }: { rol: RolPanel; pres
                     { href: "/panel/cobros", etiqueta: "Cobros" },
                     { href: "/panel/libro", etiqueta: "Libro" },
                     { href: "/panel/wallet", etiqueta: "Wallet" },
+                    { href: "/panel/ganancias", etiqueta: "Ganancias del equipo" },
                     { href: "/panel/reportes", etiqueta: "Reportes" },
                     { href: "/panel/politica", etiqueta: "Anticipo y cancelaciones" },
                     { href: "/panel/pagos", etiqueta: "Pagos directos" },
