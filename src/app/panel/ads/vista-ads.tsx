@@ -3,16 +3,19 @@
 import { Button } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { ModalPagoMercadoPago, type CobroModal } from "@/components/pagos/modal-pago-mercadopago";
 import { formatCOP } from "@/lib/utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   activarCampana,
   crearCampana,
   finalizarCampana,
+  iniciarRecargaAds,
   obtenerMetricasCampana,
   pausarCampana,
   type CampanaAdmin,
   type MetricasCampana,
+  type SaldoPublicitario,
 } from "./actions";
 
 const ESTADO_TONO: Record<string, "success" | "danger" | "neutral" | "accent"> = {
@@ -27,11 +30,13 @@ const FORMATO_ETIQUETA: Record<string, string> = { DESTACADO: "Destacado", PIN: 
 
 export function VistaAds({
   negocioId,
+  saldoInicial,
   planInsuficiente,
   campanasIniciales,
   errorInicial,
 }: {
   negocioId: string;
+  saldoInicial: SaldoPublicitario;
   planInsuficiente: boolean;
   campanasIniciales: CampanaAdmin[];
   errorInicial: string | null;
@@ -51,8 +56,10 @@ export function VistaAds({
         ) : null}
       </div>
       <p className="mb-6 text-[12px] text-text-faint">
-        Destaca tu negocio en el Marketplace. El gasto se descuenta de tu Wallet en tiempo real, nunca supera tu presupuesto diario.
+        Destaca tu negocio en el Marketplace. El gasto se descuenta de tu saldo publicitario en tiempo real y nunca supera tu presupuesto diario. Cuando el saldo se acaba, tus campañas se detienen hasta que lo recargues.
       </p>
+
+      {!planInsuficiente ? <SaldoPublicitarioPanel negocioId={negocioId} inicial={saldoInicial} /> : null}
 
       {planInsuficiente ? (
         <Card className="mb-6 border-accent/30 bg-accent-soft">
@@ -84,6 +91,56 @@ export function VistaAds({
         </ul>
       )}
     </main>
+  );
+}
+
+/** Saldo publicitario prepagado: se recarga por Mercado Pago (modal) y se consume por clic o impresión. */
+function SaldoPublicitarioPanel({ negocioId, inicial }: { negocioId: string; inicial: SaldoPublicitario }) {
+  const [cobro, setCobro] = useState<CobroModal | null>(null);
+  const [cargando, setCargando] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const ultimoPaquete = useRef<string | null>(null);
+
+  async function recargar(paqueteId: string) {
+    setCargando(paqueteId);
+    setError(null);
+    const r = await iniciarRecargaAds(negocioId, paqueteId);
+    setCargando(null);
+    if (!r.ok) return setError(r.error);
+    ultimoPaquete.current = paqueteId;
+    setCobro({ pagoId: r.data.pagoId, preferenciaId: r.data.preferenciaId, url: r.data.url, titulo: "Recarga de saldo publicitario" });
+  }
+
+  return (
+    <Card className="mb-6 flex flex-col gap-3">
+      <ModalPagoMercadoPago
+        key={cobro?.pagoId ?? "sin-cobro"}
+        cobro={cobro}
+        onCerrar={() => setCobro(null)}
+        onAprobado={() => window.location.reload()}
+        onReintentar={() => {
+          setCobro(null);
+          if (ultimoPaquete.current) void recargar(ultimoPaquete.current);
+        }}
+      />
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <div>
+          <p className="text-[12px] text-text-faint">Saldo publicitario</p>
+          <p className="text-[24px] font-bold text-text">{formatCOP(inicial.saldo)}</p>
+        </div>
+        <p className="max-w-[26ch] text-[11.5px] text-text-faint">No vence por mes: dura lo que tarde en consumirse. Cuando se acabe, recárgalo.</p>
+      </div>
+      {inicial.paquetes.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {inicial.paquetes.map((p) => (
+            <Button key={p.id} size="sm" variant="secondary" loading={cargando === p.id} disabled={cargando !== null && cargando !== p.id} onClick={() => recargar(p.id)}>
+              Recargar {formatCOP(p.monto)}
+            </Button>
+          ))}
+        </div>
+      ) : null}
+      {error ? <p className="text-[12.5px] font-semibold text-danger">{error}</p> : null}
+    </Card>
   );
 }
 
@@ -206,9 +263,9 @@ function TarjetaCampana({ campana, onActualizar }: { campana: CampanaAdmin; onAc
       {error ? <p className="mt-2 text-[11.5px] font-semibold text-danger">{error}</p> : null}
 
       <div className="mt-3 flex flex-wrap gap-2">
-        {campana.estado === "BORRADOR" || campana.estado === "PAUSADA" ? (
+        {campana.estado === "BORRADOR" || campana.estado === "PAUSADA" || campana.estado === "AGOTADA" ? (
           <Button size="sm" loading={accionando} onClick={() => ejecutar(() => activarCampana(campana.id), "ACTIVA")}>
-            {campana.estado === "BORRADOR" ? "Activar" : "Reanudar"}
+            {campana.estado === "BORRADOR" ? "Activar" : campana.estado === "AGOTADA" ? "Reactivar" : "Reanudar"}
           </Button>
         ) : null}
         {campana.estado === "ACTIVA" ? (

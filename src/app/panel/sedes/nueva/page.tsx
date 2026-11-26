@@ -2,6 +2,8 @@ import { BarraSuperior } from "@/components/layout/header";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { FormularioNuevaSede } from "./formulario-nueva-sede";
+import { obtenerOfertaSedeExtra } from "../actions";
+import { OfertaSedeExtra } from "../oferta-sede-extra";
 
 export const metadata = { title: "Nueva sede" };
 
@@ -27,24 +29,19 @@ export default async function NuevaSedePage() {
       .eq("cerrada_permanente", false),
     supabase.from("plan").select("limite_sedes, nombre").eq("codigo", negocio.plan_codigo).single(),
   ]);
+  // Límite efectivo = sedes del plan + sedes adicionales vigentes (de pago). La base lo calcula.
+  const { data: limiteEfectivo } = await (supabase as unknown as { rpc: (n: string, a: object) => Promise<{ data: number | null }> }).rpc("limite_sedes_negocio", { p_negocio_id: negocio.id });
+  const limite = limiteEfectivo === undefined ? (plan?.limite_sedes ?? null) : limiteEfectivo;
+  const oferta = await obtenerOfertaSedeExtra(negocio.id);
 
-  const limiteAlcanzado = plan?.limite_sedes != null && (sedesActuales ?? 0) >= plan.limite_sedes;
+  const limiteAlcanzado = limite != null && (sedesActuales ?? 0) >= limite;
 
   return (
     <div className="flex min-h-dvh flex-col bg-app">
       <BarraSuperior titulo="Nueva sede" volverA="/panel/sedes" />
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-6 sm:px-10">
         {limiteAlcanzado ? (
-          <div className="rounded-2xl border border-danger/40 bg-danger-soft p-4">
-            <p className="text-[13.5px] font-bold text-text">
-              Tu plan {plan?.nombre} permite hasta {plan?.limite_sedes} sede
-              {plan?.limite_sedes === 1 ? "" : "s"}
-            </p>
-            <p className="mt-1 text-[12.5px] text-text-muted">
-              Haz un upgrade de plan para agregar otra sede
-              (01-PRD/03_Monetization.md).
-            </p>
-          </div>
+          <OfertaSedeExtra negocioId={negocio.id} oferta={oferta} planNombre={plan?.nombre ?? negocio.plan_codigo} limite={plan?.limite_sedes ?? null} modo="limite" />
         ) : (
           <FormularioNuevaSede negocioId={negocio.id} />
         )}

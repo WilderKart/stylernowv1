@@ -90,3 +90,13 @@ Con las credenciales de prueba: la API respondió (cuenta de Colombia, activa), 
 4. `MERCADOPAGO_WEBHOOK_SECRET` = clave secreta del webhook de esa aplicación.
 5. En el panel de Mercado Pago (aplicación de producción): webhook `https://app.stylernow.com/api/webhooks/mercadopago`, eventos de Pagos.
 `NEXT_PUBLIC_SITE_URL` debe ser `https://app.stylernow.com`. `/admin/sistema` muestra qué variables faltan.
+
+---
+
+## 7. Publicidad prepagada y sedes adicionales (migración 200, aplicada en producción)
+
+**Publicidad.** El gasto de las campañas ya no sale del Wallet de comisiones (ese dinero no entra a StylerNow). Ahora es un **saldo publicitario prepagado**: la barbería recarga (50.000 / 100.000 / 200.000, tabla `ads_paquete_recarga`, editable por SQL) pagando por Mercado Pago en el modal, y las campañas consumen de ese saldo por clic o impresión. **No vence por mes**: dura lo que tarde en consumirse; cuando no alcanza para el siguiente clic la campaña pasa a AGOTADA y, al recargar, se reactiva con «Reactivar». El saldo solo se acredita cuando el pago se aprueba (webhook firmado o conciliación) y por lo que se cobró.
+
+**Sedes adicionales.** Pasadas las sedes que cubre el plan, cada sede extra se paga al mes por Mercado Pago: **Essential 90.000, Studio 90.000, Prestige 50.000**, con tope de extras por plan (**Essential 1, Studio 2, Prestige 5**; más allá, subir de plan). Se ofrece en «Nueva sede» al llegar al límite, y en «Sedes» aparece la vigencia con «Renovar un mes». Límite efectivo = sedes del plan + extras vigentes (`limite_sedes_negocio`); `crear_sede` y el cupo lo respetan. Si la sede extra vence, deja de poder crearse una nueva; las ya creadas no se cierran solas (limitación conocida: un proceso de cierre automático queda pendiente).
+
+Pruebas: `tests/sql/publicidad_saldo_y_sedes_extra.sql` (saldo, consumo sin tocar el Wallet, agotada/reactivar, idempotencia del webhook, topes, vigencia, aislamiento entre negocios y funciones internas no ejecutables).

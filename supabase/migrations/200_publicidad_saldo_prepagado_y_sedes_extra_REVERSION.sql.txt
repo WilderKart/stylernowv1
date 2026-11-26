@@ -1,0 +1,11 @@
+-- Reversión de 200 (no se aplica sola). No borra datos de recargas ni de pagos ya hechos.
+-- 1) Volver las campañas al Wallet: re-ejecutar las definiciones de activar_campana, registrar_clic_patrocinado y
+--    registrar_impresion_patrocinada de la migración 043/184 (consumían de public.wallet).
+-- 2) Quitar el límite efectivo de sedes: re-ejecutar crear_sede (migración 049/…) y cupo_plan_negocio (migración 157) originales.
+-- 3) aplicar_evento_pago conserva ramas inofensivas (ADS_RECARGA / SEDE_EXTRA): pueden quedarse.
+-- 4) Opcional si no habrá más recargas ni sedes extra:
+--    drop function if exists public.ads_iniciar_recarga(uuid, uuid);
+--    drop function if exists public.sede_extra_iniciar_pago(uuid, text);
+--    drop function if exists public.limite_sedes_negocio(uuid);
+--    update public.plan set sede_addon_precio = null where codigo in ('ESSENTIAL','STUDIO');   -- Prestige estaba en 50000
+-- Las tablas ads_saldo, ads_saldo_movimiento y ads_paquete_recarga NO se borran mientras haya saldo de clientes.

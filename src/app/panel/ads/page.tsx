@@ -1,7 +1,7 @@
 import { PanelNav } from "@/components/panel/panel-nav";
 import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { createClient } from "@/lib/supabase/server";
-import { listarMisCampanas } from "./actions";
+import { listarMisCampanas, obtenerSaldoPublicitario } from "./actions";
 import { VistaAds } from "./vista-ads";
 
 export const metadata = { title: "Publicidad" };
@@ -12,7 +12,7 @@ export default async function AdsPage() {
   const contexto = await verificarAccesoPanel(["BARBERIA"], "/panel/ads");
 
   const negocioId = contexto.negocioId!;
-  const campanasRes = await listarMisCampanas(negocioId);
+  const [campanasRes, saldoRes] = await Promise.all([listarMisCampanas(negocioId), obtenerSaldoPublicitario(negocioId)]);
 
   const supabase = await createClient();
   const { data: planOk, error: planErr } = await supabase.rpc("negocio_tiene_funcion", {
@@ -26,6 +26,7 @@ export default async function AdsPage() {
       <PanelNav rol={contexto.rol} />
       <VistaAds
         negocioId={negocioId}
+        saldoInicial={saldoRes.ok ? saldoRes.data : { saldo: 0, paquetes: [] }}
         planInsuficiente={planInsuficiente}
         campanasIniciales={campanasRes.ok ? campanasRes.data : []}
         errorInicial={campanasRes.ok ? null : campanasRes.error}

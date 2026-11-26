@@ -1,5 +1,6 @@
 "use server";
 
+import { crearPreferenciaDePago } from "@/lib/pagos/cobro";
 import { MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
@@ -240,6 +241,71 @@ export async function eliminarExcepcion(id: string, sedeId: string): Promise<Res
     if (error) return { ok: false, error: error.message };
     revalidatePath(`/panel/sedes/${sedeId}`);
     return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
+export interface OfertaSedeExtra {
+  /** Precio mensual de UNA sede extra en este plan (null = el plan no admite sedes extra: toca subir de plan). */
+  precio: number | null;
+  extrasVigentes: number;
+  tope: number;
+  vigenteHasta: string | null;
+}
+
+const TOPE_SEDES_EXTRA: Record<string, number> = { ESSENTIAL: 1, STUDIO: 2, PRESTIGE: 5 };
+
+/** Lo que el propietario ve al llegar al límite de sedes de su plan (lectura por RLS; el cobro lo fija la base). */
+export async function obtenerOfertaSedeExtra(negocioId: string): Promise<OfertaSedeExtra> {
+  const supabase = await createClient();
+  const [{ data: negocio }, { data: addon }] = await Promise.all([
+    supabase.from("negocio").select("plan_codigo").eq("id", negocioId).maybeSingle(),
+    supabase.from("negocio_addon").select("cantidad, activo, hasta").eq("negocio_id", negocioId).eq("addon_codigo", "SEDE_EXTRA").maybeSingle(),
+  ]);
+  const plan = negocio?.plan_codigo ?? "";
+  const { data: p } = await supabase.from("plan").select("sede_addon_precio").eq("codigo", plan as "ESSENTIAL").maybeSingle();
+  const vigente = addon?.activo && (!addon.hasta || new Date(addon.hasta).getTime() > Date.now());
+  return {
+    precio: p?.sede_addon_precio != null ? Number(p.sede_addon_precio) : null,
+    extrasVigentes: vigente ? addon!.cantidad : 0,
+    tope: TOPE_SEDES_EXTRA[plan] ?? 0,
+    vigenteHasta: addon?.hasta ?? null,
+  };
+}
+
+/**
+ * Cobro de una sede adicional (AGREGAR) o de la renovación mensual de las que ya tiene (RENOVAR) por Mercado Pago, cuenta de
+ * StylerNow. Precio, tope y negocio los decide la base; la sede extra solo se activa cuando el pago se aprueba.
+ */
+export async function iniciarPagoSedeExtra(negocioId: string, modo: "AGREGAR" | "RENOVAR"): Promise<{ ok: true; url: string; preferenciaId: string; pagoId: string } | { ok: false; error: string }> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { ok: false, error: "Inicia sesión de nuevo." };
+    const { data, error } = await (supabase as unknown as {
+      rpc: (n: string, a: object) => Promise<{ data: { id: string } | null; error: { message: string } | null }>;
+    }).rpc("sede_extra_iniciar_pago", { p_negocio_id: negocioId, p_modo: modo });
+    if (error) {
+      const m = error.message;
+      if (/could not find the function/i.test(m)) return { ok: false, error: "El pago de sedes adicionales se está activando. Intenta de nuevo en unos minutos." };
+      if (m.includes("TOPE_SEDES_EXTRA")) return { ok: false, error: "Llegaste al máximo de sedes adicionales de tu plan. Sube de plan para tener más sedes." };
+      if (m.includes("PLAN_SIN_SEDES_EXTRA")) return { ok: false, error: "Tu plan no admite sedes adicionales. Sube de plan." };
+      if (m.includes("SIN_SEDES_EXTRA_QUE_RENOVAR")) return { ok: false, error: "No tienes sedes adicionales para renovar." };
+      if (m.includes("NO_AUTORIZADO")) return { ok: false, error: "No tienes permiso sobre este negocio." };
+      return { ok: false, error: "No se pudo iniciar el pago. Intenta de nuevo." };
+    }
+    if (!data) return { ok: false, error: "No se pudo iniciar el pago." };
+    const sitio = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+    const preferencia = await crearPreferenciaDePago({
+      pagoId: data.id,
+      titulo: modo === "AGREGAR" ? "Sede adicional (1 mes) · StylerNow" : "Renovación de sedes adicionales (1 mes) · StylerNow",
+      emailPagador: user.email,
+      urlRetorno: `${sitio}/panel/sedes?desde=pago`,
+    });
+    return { ok: true, url: preferencia.url, preferenciaId: preferencia.id, pagoId: data.id };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
   }

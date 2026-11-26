@@ -1,4 +1,6 @@
 import { PanelNav } from "@/components/panel/panel-nav";
+import { obtenerOfertaSedeExtra } from "./actions";
+import { OfertaSedeExtra } from "./oferta-sede-extra";
 import { Badge, Card } from "@/components/ui/card";
 import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { createClient } from "@/lib/supabase/server";
@@ -32,9 +34,12 @@ export default async function SedesPage() {
       .order("created_at"),
     supabase.from("plan").select("limite_sedes").eq("codigo", negocio.plan_codigo).single(),
   ]);
+  const { data: limiteEfectivo } = await (supabase as unknown as { rpc: (n: string, a: object) => Promise<{ data: number | null }> }).rpc("limite_sedes_negocio", { p_negocio_id: negocioId });
+  const limite = limiteEfectivo === undefined ? (plan?.limite_sedes ?? null) : limiteEfectivo;
+  const oferta = await obtenerOfertaSedeExtra(negocioId);
 
   const sedesOperativas = (sedes ?? []).filter((s) => !s.cerrada_permanente);
-  const limiteAlcanzado = plan?.limite_sedes != null && sedesOperativas.length >= plan.limite_sedes;
+  const limiteAlcanzado = limite != null && sedesOperativas.length >= limite;
 
   return (
     <div className="flex min-h-dvh flex-col bg-app">
@@ -44,7 +49,7 @@ export default async function SedesPage() {
           <div>
             <h1 className="font-display text-[22px] font-bold uppercase text-text">Sedes</h1>
             <p className="mt-1 text-[12.5px] text-text-muted">
-              {sedesOperativas.length} de {plan?.limite_sedes ?? "∞"} sedes de tu plan{" "}
+              {sedesOperativas.length} de {limite ?? "∞"} sedes de tu plan{" "}
               {negocio.plan_codigo}
             </p>
           </div>
@@ -61,6 +66,8 @@ export default async function SedesPage() {
             </Link>
           )}
         </div>
+
+        <OfertaSedeExtra negocioId={negocioId} oferta={oferta} planNombre={negocio.plan_codigo} limite={plan?.limite_sedes ?? null} modo="renovar" />
 
         {!sedes || sedes.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-border px-4 py-10 text-center text-[12.5px] text-text-faint">

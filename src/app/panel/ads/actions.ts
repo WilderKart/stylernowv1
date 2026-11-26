@@ -2,6 +2,7 @@
 
 import { resolverContexto } from "@/lib/auth/resolver-contexto";
 import { exigirOperativo, MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
+import { crearPreferenciaDePago } from "@/lib/pagos/cobro";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -22,7 +23,8 @@ const MENSAJES_ERROR: Record<string, string> = {
   PLAN_INSUFICIENTE: "Tu plan actual no incluye campañas publicitarias. Actualiza tu plan para continuar.",
   CAMPANA_NO_ENCONTRADA: "No encontramos esa campaña.",
   TRANSICION_INVALIDA: "Esa campaña no está en un estado que permita esta acción.",
-  SALDO_INSUFICIENTE: "Tu Wallet no tiene saldo suficiente para cubrir al menos un día de presupuesto.",
+  SALDO_INSUFICIENTE: "Tu saldo publicitario no alcanza para cubrir al menos un día de presupuesto. Recárgalo para continuar.",
+  PAQUETE_NO_DISPONIBLE: "Ese monto de recarga ya no está disponible.",
 };
 
 function traducirError(mensaje: string) {
@@ -59,6 +61,77 @@ async function sesionAds(negocioId: string, opciones?: { requerirOperativo?: boo
     if (!operativo.ok) throw new Error("SUSCRIPCION_RESTRINGIDA");
   }
   return { supabase };
+}
+
+export interface PaqueteRecargaAds {
+  id: string;
+  nombre: string;
+  monto: number;
+}
+
+export interface SaldoPublicitario {
+  saldo: number;
+  paquetes: PaqueteRecargaAds[];
+}
+
+/** Saldo publicitario prepagado del negocio y montos de recarga disponibles (lectura por RLS). */
+export async function obtenerSaldoPublicitario(negocioId: string): Promise<Resultado<SaldoPublicitario>> {
+  try {
+    const { supabase } = await sesionAds(negocioId);
+    const db = supabase as unknown as {
+      from: (t: string) => {
+        select: (c: string) => {
+          eq: (c: string, v: string) => { maybeSingle: () => Promise<{ data: { saldo_disponible: number } | null; error: { message: string } | null }> };
+          order: (c: string) => Promise<{ data: { id: string; nombre: string; monto_cop: number }[] | null; error: { message: string } | null }>;
+        };
+      };
+    };
+    const [{ data: saldo }, { data: paquetes }] = await Promise.all([
+      db.from("ads_saldo").select("saldo_disponible").eq("negocio_id", negocioId).maybeSingle(),
+      db.from("ads_paquete_recarga").select("id, nombre, monto_cop").order("orden"),
+    ]);
+    return {
+      ok: true,
+      data: {
+        saldo: Number(saldo?.saldo_disponible ?? 0),
+        paquetes: (paquetes ?? []).map((p) => ({ id: p.id, nombre: p.nombre, monto: Number(p.monto_cop) })),
+      },
+    };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
+/**
+ * Recarga del saldo publicitario por Mercado Pago (cuenta de StylerNow, cobro directo). La base fija el monto y crea (o reutiliza)
+ * el cobro pendiente; el saldo solo se acredita cuando el pago se aprueba (webhook o conciliación), nunca desde el navegador.
+ */
+export async function iniciarRecargaAds(negocioId: string, paqueteId: string): Promise<Resultado<{ url: string; preferenciaId: string; pagoId: string }>> {
+  try {
+    const ids = z.object({ n: z.string().uuid(), p: z.string().uuid() }).safeParse({ n: negocioId, p: paqueteId });
+    if (!ids.success) return { ok: false, error: "Datos inválidos." };
+    const { supabase } = await sesionAds(ids.data.n, { requerirOperativo: true });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { data, error } = await (supabase as unknown as {
+      rpc: (n: string, a: object) => Promise<{ data: { id: string } | null; error: { message: string } | null }>;
+    }).rpc("ads_iniciar_recarga", { p_negocio_id: ids.data.n, p_paquete_id: ids.data.p });
+    if (error && /could not find the function/i.test(error.message)) {
+      return { ok: false, error: "La recarga de publicidad se está activando. Intenta de nuevo en unos minutos." };
+    }
+    if (error || !data) return { ok: false, error: traducirError(error?.message ?? "No se pudo iniciar la recarga.") };
+    const sitio = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+    const preferencia = await crearPreferenciaDePago({
+      pagoId: data.id,
+      titulo: "Recarga de saldo publicitario · StylerNow",
+      emailPagador: user?.email,
+      urlRetorno: `${sitio}/panel/ads?desde=pago`,
+    });
+    return { ok: true, data: { url: preferencia.url, preferenciaId: preferencia.id, pagoId: data.id } };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? traducirError(e.message) : "Error inesperado." };
+  }
 }
 
 export interface CampanaAdmin {
