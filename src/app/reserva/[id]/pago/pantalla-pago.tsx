@@ -48,6 +48,7 @@ export interface ResumenPago {
 
 function Cuenta({ expiraAt }: { expiraAt: string }) {
   const t = useT();
+  const router = useRouter();
   const [restante, setRestante] = useState(() =>
     Math.max(0, new Date(expiraAt).getTime() - Date.now())
   );
@@ -64,7 +65,19 @@ function Cuenta({ expiraAt }: { expiraAt: string }) {
   const seg = Math.floor((restante % 60000) / 1000);
 
   if (restante <= 0) {
-    return <ErrorAviso>{t("pago.expiro")}</ErrorAviso>;
+    // El bloqueo terminó, pero el turno puede seguir libre: se ofrece revisarlo. NO se recarga sola la pantalla para no perder un comprobante
+    // que el cliente esté subiendo; y si ya transfirió, puede enviarlo igual (el servidor lo conserva).
+    return (
+      <div role="status" className="flex flex-col gap-2 border-2 border-ink bg-surface p-3">
+        <p className="m-0 text-[13px] font-bold">Tu tiempo de reserva terminó</p>
+        <p className="m-0 text-[12.5px]">
+          Si ya transferiste, sube tu comprobante igual: lo conservamos. Si aún no pagaste, revisa si tu horario sigue disponible.
+        </p>
+        <Button size="sm" variant="secondary" onClick={() => router.refresh()}>
+          Revisar mi horario
+        </Button>
+      </div>
+    );
   }
 
   return (
@@ -123,7 +136,10 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
     setError(null);
     const r = await confirmarSinAnticipo(resumen.reservaId);
     setIniciando(false);
-    if (!r.ok) return setError(r.mensaje);
+    if (!r.ok) {
+      if (r.expirada) return router.refresh();   // el servidor vuelve a evaluar la disponibilidad real
+      return setError(r.mensaje);
+    }
     router.replace(`/reserva/${resumen.reservaId}`);
   }
 
@@ -137,6 +153,10 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
       setIniciando(false);
       if (r.yaPagada) {
         router.replace(`/reserva/${resumen.reservaId}`);
+        return;
+      }
+      if (r.expirada) {
+        router.refresh();
         return;
       }
       setError(r.mensaje);

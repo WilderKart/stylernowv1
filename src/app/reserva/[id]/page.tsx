@@ -129,6 +129,8 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
 
   const { data: reserva } = await cargar(id);
   if (!reserva) notFound();
+  // Cancelada solo por vencer su bloqueo temporal: no es el final; la pantalla de pago revisa la disponibilidad real y permite retomarla.
+  if (reserva.estado === "CANCELADA" && reserva.cancelado_motivo === "PAGO_EXPIRADO") redirect(`/reserva/${id}/pago`);
   // Pago directo al negocio (migración 194): estado visible para el cliente (RLS: solo su propio pago).
   const pagoDirecto = await supabase.from("pago_reserva").select("estado, monto_reportado").eq("reserva_id", id).eq("metodo", "TRANSFERENCIA_DIRECTA").order("created_at", { ascending: false }).limit(1);
   const estadoPagoDirecto = pagoDirecto.data?.[0]?.estado ?? null;

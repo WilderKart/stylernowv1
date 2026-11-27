@@ -17,7 +17,7 @@ function isoConOffset(fecha: string) {
 
 export type ResultadoInicioPago =
   | { ok: true; url: string; pagoId: string; expiraAt: string | null }
-  | { ok: false; mensaje: string; yaPagada?: boolean };
+  | { ok: false; mensaje: string; yaPagada?: boolean; expirada?: boolean };
 
 /**
  * POST /v1/reservas/{id}/pagos/sena (05-API/04_Payments.md).
@@ -48,7 +48,7 @@ export async function iniciarPagoSena(
   });
   if (errorAceptacion) {
     if (errorAceptacion.message.includes("RESERVA_NO_PAGABLE")) {
-      return { ok: false, mensaje: "La reserva expiró o cambió de estado. Elige un horario de nuevo." };
+      return { ok: false, mensaje: "El bloqueo temporal de tu turno terminó. Vamos a revisar si el horario sigue disponible.", expirada: true };
     }
     return { ok: false, mensaje: "No pudimos registrar tu aceptación. Intenta de nuevo." };
   }
@@ -64,7 +64,8 @@ export async function iniciarPagoSena(
     if (error.message.includes("RESERVA_NO_PAGABLE")) {
       return {
         ok: false,
-        mensaje: "La reserva expiró o cambió de estado. Elige un horario de nuevo.",
+        mensaje: "El bloqueo temporal de tu turno terminó. Vamos a revisar si el horario sigue disponible.",
+        expirada: true,
       };
     }
     if (error.message.includes("NEGOCIO_SIN_CUENTA_PAGO")) {
@@ -206,7 +207,7 @@ async function consultarEstadoLocal(reservaId: string): Promise<EstadoPago> {
  * Anticipo OPCIONAL (migración 129): el cliente confirma sin pagar. La base verifica que sea su reserva,
  * que siga pendiente y que el negocio permita el anticipo opcional; el navegador no decide nada.
  */
-export async function confirmarSinAnticipo(reservaId: string): Promise<{ ok: true } | { ok: false; mensaje: string }> {
+export async function confirmarSinAnticipo(reservaId: string): Promise<{ ok: true } | { ok: false; mensaje: string; expirada?: boolean }> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -217,7 +218,7 @@ export async function confirmarSinAnticipo(reservaId: string): Promise<{ ok: tru
   }).rpc("confirmar_reserva_sin_anticipo", { p_reserva_id: reservaId });
   if (error) {
     if (error.message.includes("ANTICIPO_OBLIGATORIO")) return { ok: false, mensaje: "Este negocio exige el anticipo para confirmar." };
-    if (error.message.includes("RESERVA_NO_PAGABLE")) return { ok: false, mensaje: "La reserva expiró o cambió de estado. Elige un horario de nuevo." };
+    if (error.message.includes("RESERVA_NO_PAGABLE")) return { ok: false, mensaje: "El bloqueo temporal de tu turno terminó. Vamos a revisar si el horario sigue disponible.", expirada: true };
     if (error.message.includes("PAGO_YA_PROCESADO")) return { ok: false, mensaje: "Esta reserva ya está pagada." };
     return { ok: false, mensaje: "No pudimos confirmar la reserva. Intenta de nuevo." };
   }
@@ -235,7 +236,7 @@ export async function registrarPagoDirecto(datos: {
   rutaComprobante: string;
   hashComprobante: string;
   aceptaPolitica: boolean;
-}): Promise<{ ok: true } | { ok: false; mensaje: string }> {
+}): Promise<{ ok: true } | { ok: false; mensaje: string; expirada?: boolean }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, mensaje: "Inicia sesión para continuar." };
@@ -244,7 +245,7 @@ export async function registrarPagoDirecto(datos: {
 
   const { error: eAcepta } = await supabase.rpc("aceptar_politica_reserva", { p_reserva_id: datos.reservaId });
   if (eAcepta) {
-    if (eAcepta.message.includes("RESERVA_NO_PAGABLE")) return { ok: false, mensaje: "La reserva expiró o cambió de estado. Elige un horario de nuevo." };
+    if (eAcepta.message.includes("RESERVA_NO_PAGABLE")) return { ok: false, mensaje: "El bloqueo temporal de tu turno terminó. Vamos a revisar si el horario sigue disponible.", expirada: true };
     return { ok: false, mensaje: "No pudimos registrar tu aceptación. Intenta de nuevo." };
   }
   const { error } = await supabase.rpc("registrar_pago_directo_reserva", {
