@@ -123,7 +123,15 @@ export default async function HomePage(props: PageProps<"/">) {
     const { data: fotos } = await supabase.from("negocio").select("id, foto_principal_url").in("id", negociosBase.map((n) => n.id));
     for (const f of fotos ?? []) if (f.foto_principal_url) fotosPrincipales.set(f.id, f.foto_principal_url);
   }
-  const negocios = negociosBase.map((n) => ({ ...n, logo_url: fotosPrincipales.get(n.id) ?? n.logo_url }));
+  // Insignia de verificación: una consulta en lote devuelve solo los ids verificados (dato público).
+  const verificados = new Set<string>();
+  if (negociosBase.length > 0) {
+    const { data: ids } = await (supabase as unknown as { rpc: (n: string, a: object) => Promise<{ data: string[] | null }> }).rpc("negocios_verificados", {
+      p_ids: negociosBase.map((n) => n.id),
+    });
+    for (const id of ids ?? []) verificados.add(id);
+  }
+  const negocios = negociosBase.map((n) => ({ ...n, logo_url: fotosPrincipales.get(n.id) ?? n.logo_url, verificado: verificados.has(n.id) }));
 
   let interes: string[] | null = null;
   if (user) {

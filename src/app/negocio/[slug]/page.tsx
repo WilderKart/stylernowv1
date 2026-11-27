@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatCOP } from "@/lib/utils";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { TituloNegocioVerificado } from "@/components/negocio/titulo-negocio-verificado";
 import { notFound } from "next/navigation";
 import { obtenerMarcaPublica } from "@/lib/marca/obtener-marca";
 import { esFavorito } from "./actions";
@@ -276,17 +277,12 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
             {negocio.categoria.join(" · ") || t("cat.negocio")} · {negocio.ciudad}
           </Num>
         </div>
-        <h1 className="poster-1 px-4 pb-3 break-words">
+        <TituloNegocioVerificado verificado={verificado}>
           {partesNombre.slice(0, mitad).join(" ")}
           {partesNombre.length > 1 ? <br /> : null}
           {partesNombre.slice(mitad).join(" ")}
           {"."}
-        </h1>
-        {verificado ? (
-          <div className="px-4 pb-3">
-            <Status tone="ok">Negocio verificado por StylerNow</Status>
-          </div>
-        ) : null}
+        </TituloNegocioVerificado>
         {miNivelVip ? (
           <div className="px-4 pb-3">
             <Status tone="ok">{t("neg.eres_vip", { nivel: miNivelVip })}</Status>
