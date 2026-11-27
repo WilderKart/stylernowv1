@@ -308,9 +308,9 @@ function Movil({ paso, dir, ir }: { paso: number; dir: "der" | "izq"; ir: (n: nu
   const pos = MOVIL[paso];
   const ultima = paso === TOTAL - 1;
   return (
-    <main className="relative mx-auto h-dvh min-h-[600px] w-full max-w-[480px] overflow-hidden bg-white" style={{ touchAction: "pan-y" }}>
+    <main className="relative h-dvh min-h-[600px] w-full overflow-hidden bg-white" style={{ touchAction: "pan-y" }}>
       <div key={paso} className={`${dir === "der" ? s.entraDer : s.entraIzq} absolute inset-0`}>
-        <Image src={sl.fondo} alt="" fill priority sizes="480px" className={`${s.fondoEntra} object-cover object-top`} />
+        <Image src={sl.fondo} alt="" fill priority sizes="100vw" className={`${s.fondoEntra} object-cover object-top`} />
         <div className="absolute inset-x-0 top-[11%] z-10 px-6">
           <Titulo i={paso} escritorio={false} />
           <Descripcion i={paso} escritorio={false} />
@@ -323,7 +323,7 @@ function Movil({ paso, dir, ir }: { paso: number; dir: "der" | "izq"; ir: (n: nu
           priority
           sizes="480px"
           className={`${s.persona} absolute h-auto max-w-none`}
-          style={{ ...pos.modelo, ...(paso === 2 ? SIN_FONDO_ABAJO : null) }}
+          style={{ ...pos.modelo, ...SIN_FONDO_ABAJO }}
         />
         {paso === 0 ? <IconoTienda style={pos.extra} /> : null}
                 {paso === 2 ? <Chips style={pos.extra} /> : null}
@@ -433,7 +433,7 @@ export default function OnboardingPage() {
 
   return (
     <div
-      className="min-h-dvh bg-[#eef0f3]"
+      className="min-h-dvh bg-white"
       onPointerDown={(e) => {
         inicioX.current = e.clientX;
       }}
