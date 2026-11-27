@@ -85,6 +85,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
   const [demorado, setDemorado] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [acepta, setAcepta] = useState(false);
+  const [pagaTodoDirecto, setPagaTodoDirecto] = useState(false);
   const yaRedirigido = useRef(false);
 
   // Polling del estado: la confirmación de la pasarela es asíncrona, así que la pantalla
@@ -148,7 +149,9 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
 
   const dm = diaYMes(resumen.horaInicio, resumen.zonaHoraria);
   const hora = horaCorta(resumen.horaInicio, resumen.zonaHoraria);
-  const saldoLocal = resumen.montoTotal - resumen.montoSena;
+  // Si el cliente elige «Pagar todo» en el pago directo, el resumen refleja que no queda nada por pagar en el local.
+  const aPagarAhora = pagaTodoDirecto ? resumen.montoTotal : resumen.montoSena;
+  const saldoLocal = resumen.montoTotal - aPagarAhora;
   // Mercado Pago solo si el negocio lo tiene conectado; el pago directo es una alternativa (o la única opción).
   const mostrarMp = resumen.cobraEnLinea !== false;
 
@@ -215,9 +218,9 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
       <Filas>
         <Fila
           icono={<Ticket aria-hidden className="size-5" />}
-          titulo={t("pago.anticipo_pagar")}
-          meta={t("pago.se_descuenta")}
-          derecha={<span className="sn-price">{formatCOP(resumen.montoSena)}</span>}
+          titulo={pagaTodoDirecto ? "Pagas ahora (servicio completo)" : t("pago.anticipo_pagar")}
+          meta={pagaTodoDirecto ? "Pago completo: no queda nada por pagar en el local" : t("pago.se_descuenta")}
+          derecha={<span className="sn-price">{formatCOP(aPagarAhora)}</span>}
         />
         {(resumen.saldoPendiente ?? 0) > 0 ? (
           <Fila
@@ -227,7 +230,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
             derecha={<span className="sn-price">{formatCOP(resumen.saldoPendiente ?? 0)}</span>}
           />
         ) : null}
-        {saldoLocal > 0 ? (
+        {saldoLocal > 0 || pagaTodoDirecto ? (
           <Fila
             icono={<Wallet aria-hidden className="size-5" />}
             titulo={t("pago.pagas_local")}
@@ -275,7 +278,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
       </Bloque>
 
       {resumen.directo && resumen.negocioId ? (
-        <PagoDirecto reservaId={resumen.reservaId} negocioId={resumen.negocioId} montoSena={resumen.montoSena} montoTotal={resumen.montoTotal} medios={resumen.directo} acepta={acepta} />
+        <PagoDirecto reservaId={resumen.reservaId} negocioId={resumen.negocioId} montoSena={resumen.montoSena} montoTotal={resumen.montoTotal} medios={resumen.directo} acepta={acepta} onModoChange={setPagaTodoDirecto} />
       ) : null}
 
       {error ? (

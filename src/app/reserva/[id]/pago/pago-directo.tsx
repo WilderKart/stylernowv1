@@ -57,8 +57,10 @@ function FilaCopiar({ etiqueta, valor }: { etiqueta: string; valor: string }) {
  * comprobante (comprimido a <300 KB en el navegador y subido directo a Storage, sin pasar por una Server Action).
  * Al registrar el soporte, la cita queda agendada al instante.
  */
-export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medios, acepta }: {
+export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medios, acepta, onModoChange }: {
   reservaId: string; negocioId: string; montoSena: number; /** Total del servicio: permite pagar todo de una vez. */ montoTotal: number; medios: MediosDirectosVista; acepta: boolean;
+  /** Avisa a la pantalla cuando el cliente elige pagar todo o solo el anticipo (para actualizar el resumen de arriba). */
+  onModoChange?: (pagaTodo: boolean) => void;
 }) {
   const router = useRouter();
   const puedePagarTodo = montoTotal > montoSena;
@@ -68,6 +70,7 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
   function elegirModo(m: "ANTICIPO" | "TOTAL") {
     setModo(m);
     setMonto(String(Math.round(m === "TOTAL" ? montoTotal : montoSena)));
+    onModoChange?.(m === "TOTAL");
   }
   const [archivo, setArchivo] = useState<File | null>(null);
   const [vista, setVista] = useState<string | null>(null);
