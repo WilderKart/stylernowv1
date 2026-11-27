@@ -352,7 +352,7 @@ export async function cancelarCita(reservaId: string, motivo?: string): Promise<
   }
 }
 
-/** No presentación: solo después de la hora de inicio; el anticipo no se devuelve (0 %). */
+/** No presentación: solo después de la hora de inicio; el anticipo no se devuelve (0 %); si el cliente pagó el servicio completo, el resto se le devuelve (migración 207). */
 export async function marcarNoShow(reservaId: string, motivo?: string): Promise<Resultado> {
   try {
     const { supabase } = await usuarioActual();

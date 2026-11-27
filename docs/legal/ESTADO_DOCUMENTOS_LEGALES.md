@@ -38,3 +38,10 @@ Nota sobre numeración: los nombres de archivo conservan «v4» (términos) y «
 
 ## 5. Documento de referencia recibido
 El PDF `_política de tratamiento y protección datos personales.pdf` (carpeta `docs/politica tratamiento de datos/`) es la Guía G-IC-16 del Ministerio de Justicia y del Derecho (2020), una política **institucional** de una entidad pública. Se usó solo como lista de comprobación de estructura (glosario, principios, derechos, deberes, procedimientos, seguridad e incidentes). No se copiaron sus finalidades, canales ni procedimientos.
+
+## 6. Actualización 2026-11-27: cancelación del Negocio con mínimo 2 h y devolución con pago completo (migraciones 207 y 208)
+- **Código (207):** el Negocio solo cancela con 2 h o más de anticipación; si el Cliente pagó el Servicio completo, devolución = Resto del Servicio + Anticipo × % de la política (ejemplo $30.000 / Anticipo $10.000: $30.000, $25.000 o $20.000).
+- **Términos (208):** publica TERMINOS versión siguiente (4 en producción → 5) con `cambio_material = true` (reaceptación en el próximo ingreso). Reemplaza siete fragmentos: definiciones (nace «Resto del Servicio»), 6(c), derecho al 100 % de lo pagado, regla de 2 h del Negocio (sección 6 y responsabilidades del Negocio), cobros directos al Negocio y terminación. Aborta si el texto vigente cambió; es idempotente.
+- **Interfaz alineada:** `rv.neg_cancelo`, `pago.acepto_politica`, `devol.*` (diccionario), resumen de política (`sena.ts`), pantalla de configuración del anticipo y la agenda.
+- **Verificación:** `tests/terminos-208.test.ts` comprueba que el ejemplo y la regla de horas de los Términos coincidan con el código. Los archivos fuente `TERMINOS_v4_borrador.txt` y la migración 150 son historial y no se editan (la 193 ya había cambiado la cláusula 8 sin reflejarse aquí); la fuente vigente es la tabla `texto_legal`.
+- **Pendiente:** revisión de abogado colombiano de la redacción nueva; el orden de aplicación en producción es 207 → 208 → código.
