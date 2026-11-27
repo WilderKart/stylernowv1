@@ -29,7 +29,7 @@ export default async function ClientesStaffPage() {
                 <p className="text-[11.5px] font-semibold text-text-muted">{c.visitas} visitas</p>
               </div>
               <p className="mt-2 text-[11.5px] text-text-faint">
-                {c.servicios.slice(0, 3).join(" · ")} · Última visita {new Date(c.ultimaVisita).toLocaleDateString("es-CO")}
+                {c.servicios.slice(0, 3).join(" · ")} · Última visita {new Date(c.ultimaVisita).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })}
               </p>
             </li>
           ))}

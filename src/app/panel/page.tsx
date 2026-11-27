@@ -17,15 +17,17 @@ import { obtenerEstadoOperativo } from "@/lib/suscripcion/estado-operativo";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { contarPagosPorRevisar } from "./pagos/actions";
-import { obtenerLineaTiempoDia, obtenerMetricasLealtadNegocio, obtenerRankingSemana, obtenerResumenDia } from "./dashboard-actions";
+import { obtenerLineaTiempoDia, obtenerMetricasLealtadNegocio, obtenerProximasCitas, obtenerRankingSemana, obtenerResumenDia } from "./dashboard-actions";
+import { ActualizarEnVivo } from "@/components/panel/actualizar-en-vivo";
 
 export const metadata = { title: "Panel" };
 
 async function cargarDashboard(negocioId: string, sedeId: string | null) {
-  const [resResumen, resRanking, resTimeline] = await Promise.all([
+  const [resResumen, resRanking, resTimeline, resProximas] = await Promise.all([
     obtenerResumenDia(negocioId, sedeId),
     obtenerRankingSemana(negocioId, sedeId),
     obtenerLineaTiempoDia(negocioId, sedeId),
+    obtenerProximasCitas(negocioId, sedeId),
   ]);
   const erroresParciales = [resResumen, resRanking, resTimeline]
     .filter((r): r is { ok: false; error: string } => !r.ok)
@@ -34,6 +36,7 @@ async function cargarDashboard(negocioId: string, sedeId: string | null) {
     resumen: resResumen.ok ? resResumen.data : null,
     ranking: resRanking.ok ? resRanking.data : [],
     timeline: resTimeline.ok ? resTimeline.data : [],
+    proximas: resProximas.ok ? resProximas.data : [],
     erroresParciales:
       erroresParciales.length > 0 ? ["No pudimos cargar todo el resumen del día — prueba recargar."] : [],
   };
@@ -194,6 +197,8 @@ export default async function PanelPage() {
   return (
     <div className="flex min-h-dvh flex-col bg-app">
       <PanelNav rol={contexto.rol} prestaServicios={contexto.prestaServicios} />
+      {/* Apenas se agenda o se paga una reserva, el resumen se actualiza solo. */}
+      {negocio.estado === "ACTIVO" ? <ActualizarEnVivo negocioId={negocio.id} /> : null}
       <div
         className={
           verticalSuave !== null
@@ -219,6 +224,7 @@ export default async function PanelPage() {
             estadoNegocio={negocio.estado}
             resumen={dashboardBarberia?.resumen ?? null}
             citas={dashboardBarberia?.timeline ?? []}
+            proximas={dashboardBarberia?.proximas ?? []}
             lealtad={metricasLealtad}
           />
         )}

@@ -92,7 +92,7 @@ export default async function AdminVerificacionesPage({ searchParams }: PageProp
                   <span className="block truncate text-[14px] font-bold text-text">{f.nombre}</span>
                   <span className="block text-[12px] text-text-faint">
                     {f.ciudad ?? "—"} · {f.documentos} {f.documentos === 1 ? "documento" : "documentos"}
-                    {f.enviada_at ? " · enviada " + new Date(f.enviada_at).toLocaleDateString("es-CO") : ""}
+                    {f.enviada_at ? " · enviada " + new Date(f.enviada_at).toLocaleDateString("es-CO", { timeZone: "America/Bogota" }) : ""}
                   </span>
                 </span>
                 <span

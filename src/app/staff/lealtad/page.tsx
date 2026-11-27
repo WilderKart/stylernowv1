@@ -25,7 +25,7 @@ export default async function StaffLealtadPage() {
           <ul className="flex flex-col gap-2">
             {referidosRes.data.map((r) => (
               <li key={r.id} className="flex items-center justify-between rounded-2xl border border-border-subtle bg-surface p-3.5">
-                <p className="text-[11.5px] text-text-faint">{new Date(r.createdAt).toLocaleDateString("es-CO")}</p>
+                <p className="text-[11.5px] text-text-faint">{new Date(r.createdAt).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })}</p>
                 <div className="flex items-center gap-2">
                   <Badge tone={r.estado === "COMPLETADO" ? "success" : "neutral"}>{r.estado}</Badge>
                   {r.recompensaMonto ? <p className="text-[12px] font-bold text-text">{formatCOP(r.recompensaMonto)}</p> : null}

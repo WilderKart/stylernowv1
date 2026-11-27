@@ -91,7 +91,7 @@ export function VistaHiloTicketAdmin({
             }`}
           >
             <p className="mb-1 text-[10.5px] font-bold uppercase tracking-wide text-text-faint">
-              {ETIQUETA_ACTOR[m.actorTipo] ?? m.actorTipo} · {new Date(m.createdAt).toLocaleString("es-CO")}
+              {ETIQUETA_ACTOR[m.actorTipo] ?? m.actorTipo} · {new Date(m.createdAt).toLocaleString("es-CO", { timeZone: "America/Bogota" })}
             </p>
             <p className="leading-relaxed whitespace-pre-wrap">{m.mensaje}</p>
           </div>

@@ -1,7 +1,9 @@
 import { EmptyState } from "@/components/brutal";
 import { PanelNav } from "@/components/panel/panel-nav";
 import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
+import { listarPagosPorRevisar, obtenerMediosPago } from "../pagos/actions";
 import { obtenerConexionCobros } from "./actions";
+import { MediosDirectos } from "./medios-directos";
 import { VistaCobros } from "./vista-cobros";
 
 export const metadata = { title: "Cobros en línea" };
@@ -20,7 +22,7 @@ export default async function CobrosPage(props: { searchParams: Promise<Record<s
   // La cuenta donde entra el dinero del negocio la decide solo su dueño.
   const contexto = await verificarAccesoPanel(["BARBERIA"], "/panel/cobros");
   const q = await props.searchParams;
-  const r = await obtenerConexionCobros();
+  const [r, medios, pagos] = await Promise.all([obtenerConexionCobros(), obtenerMediosPago(), listarPagosPorRevisar()]);
   const codigo = typeof q.error === "string" ? q.error : null;
 
   return (
@@ -41,6 +43,13 @@ export default async function CobrosPage(props: { searchParams: Promise<Record<s
         ) : (
           <EmptyState big="Error" title="No pudimos cargar tus cobros" hint={r.error} />
         )}
+        {r.ok ? (
+          <MediosDirectos
+            medios={medios.ok ? medios.data : null}
+            mercadoPagoConectado={r.data.estado === "CONECTADA"}
+            porRevisar={pagos.ok ? pagos.data.length : 0}
+          />
+        ) : null}
       </main>
     </div>
   );

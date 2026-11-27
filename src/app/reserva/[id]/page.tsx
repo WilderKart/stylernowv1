@@ -238,8 +238,8 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
           lineas={[cita ? t("rv.ticket", { codigo: cita.codigo }) : null, `${staff?.nombre ?? t("rv.por_asignar")} · ${hora} – ${horaFin}`, negocio?.nombre ?? "—"].filter((l): l is string => Boolean(l))}
           pie={
             <>
-              <span className="sn-label">{confirmada ? t("rv.anticipo_pagada") : t("rv.anticipo")}</span>
-              <span className="sn-price">{formatCOP(Number(reserva.monto_sena))}</span>
+              <span className="sn-label">{Number(reserva.monto_sena) <= 0 ? t("rv.sin_anticipo") : confirmada ? t("rv.anticipo_pagada") : t("rv.anticipo")}</span>
+              <span className="sn-price">{Number(reserva.monto_sena) <= 0 ? t("rv.sin_anticipo_valor") : formatCOP(Number(reserva.monto_sena))}</span>
             </>
           }
         />
@@ -305,15 +305,19 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
         />
         <Fila
           icono={<Wallet aria-hidden className="size-5" />}
-          titulo={t("rv.anticipo")}
+          titulo={Number(reserva.monto_sena) <= 0 ? t("rv.sin_anticipo") : t("rv.anticipo")}
           meta={confirmada && saldoLocal > 0 ? t("rv.pagas_local", { monto: formatCOP(saldoLocal) }) : undefined}
           derecha={
-            <>
-              <span className="sn-price">{formatCOP(Number(reserva.monto_sena))}</span>
-              <Status tone={confirmada ? "ok" : "warn"} icon={confirmada ? <Check aria-hidden className="size-3.5" /> : undefined}>
-                {confirmada ? t("rv.pagada") : t("rv.pendiente")}
-              </Status>
-            </>
+            Number(reserva.monto_sena) <= 0 ? (
+              <span className="sn-price">{t("rv.sin_anticipo_valor")}</span>
+            ) : (
+              <>
+                <span className="sn-price">{formatCOP(Number(reserva.monto_sena))}</span>
+                <Status tone={confirmada ? "ok" : "warn"} icon={confirmada ? <Check aria-hidden className="size-3.5" /> : undefined}>
+                  {confirmada ? t("rv.pagada") : t("rv.pendiente")}
+                </Status>
+              </>
+            )
           }
         />
         {confirmada ? (
@@ -344,7 +348,7 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
           <Fila icono={<Check aria-hidden className="size-5" />} titulo={t("rv.ya_calificaste")} meta={t("rv.gracias_resena")} />
         ) : null}
         {confirmada ? (
-          <BotonCancelar reservaId={reserva.id} reembolsoEstimado={reembolsoEstimado} reembolsoPct={pct} pagoDirecto={pagoDirectoVigente} />
+          <BotonCancelar reservaId={reserva.id} reembolsoEstimado={reembolsoEstimado} reembolsoPct={pct} pagoDirecto={pagoDirectoVigente} sinAnticipo={Number(reserva.monto_sena) <= 0} />
         ) : null}
       </Filas>
 

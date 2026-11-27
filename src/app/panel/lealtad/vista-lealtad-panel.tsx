@@ -536,7 +536,7 @@ function TabCorporativo({ negocioId, cuentasIniciales }: { negocioId: string; cu
             <li key={c.id} className="flex items-center justify-between rounded-2xl border border-border-subtle bg-surface p-3.5">
               <div>
                 <p className="text-[13px] font-semibold text-text">{c.nombreEmpresa}</p>
-                <p className="text-[11px] text-text-faint">{c.cuposTotales} cupos · vigente hasta {new Date(c.vigenciaFin).toLocaleDateString("es-CO")}</p>
+                <p className="text-[11px] text-text-faint">{c.cuposTotales} cupos · vigente hasta {new Date(c.vigenciaFin).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })}</p>
               </div>
               <Badge tone={c.activo ? "success" : "neutral"}>{c.activo ? "Activa" : "Inactiva"}</Badge>
             </li>
@@ -679,7 +679,7 @@ function TabAntifraude({ alertas }: { alertas: EventoFraudeNegocio[] }) {
               <p className="text-[12.5px] font-semibold text-text">{a.tipo.replaceAll("_", " ")}</p>
               <Badge tone={a.severidad === "ALTA" ? "danger" : a.severidad === "MEDIA" ? "accent" : "neutral"}>{a.severidad}</Badge>
             </div>
-            <p className="mt-1 text-[10.5px] text-text-faint">{new Date(a.createdAt).toLocaleString("es-CO")}</p>
+            <p className="mt-1 text-[10.5px] text-text-faint">{new Date(a.createdAt).toLocaleString("es-CO", { timeZone: "America/Bogota" })}</p>
           </li>
         ))}
       </ul>

@@ -53,7 +53,7 @@ export function VistaLealtadAdmin({ metricas, errorMetricas, eventosIniciales }:
                     <p className="text-[12.5px] font-semibold text-text">{e.tipo.replaceAll("_", " ")}</p>
                     <Badge tone={SEVERIDAD_TONO[e.severidad] ?? "neutral"}>{e.severidad}</Badge>
                   </div>
-                  <p className="mt-1 text-[10.5px] text-text-faint">{new Date(e.createdAt).toLocaleString("es-CO")}</p>
+                  <p className="mt-1 text-[10.5px] text-text-faint">{new Date(e.createdAt).toLocaleString("es-CO", { timeZone: "America/Bogota" })}</p>
                   <pre className="mt-1.5 whitespace-pre-wrap text-[10.5px] text-text-faint">{JSON.stringify(e.payload)}</pre>
                 </div>
                 <Button size="sm" variant="ghost" onClick={() => onRevisar(e.id)}>

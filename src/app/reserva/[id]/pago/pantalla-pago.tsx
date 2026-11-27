@@ -275,7 +275,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
       </Bloque>
 
       {resumen.directo && resumen.negocioId ? (
-        <PagoDirecto reservaId={resumen.reservaId} negocioId={resumen.negocioId} montoSena={resumen.montoSena} medios={resumen.directo} acepta={acepta} />
+        <PagoDirecto reservaId={resumen.reservaId} negocioId={resumen.negocioId} montoSena={resumen.montoSena} montoTotal={resumen.montoTotal} medios={resumen.directo} acepta={acepta} />
       ) : null}
 
       {error ? (

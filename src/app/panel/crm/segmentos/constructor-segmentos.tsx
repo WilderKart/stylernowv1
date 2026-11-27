@@ -173,7 +173,7 @@ export function ConstructorSegmentos({
                         {c.esVip ? <Badge tone="accent">VIP</Badge> : null}
                       </div>
                       <p className="text-[11px] text-text-faint">
-                        {c.visitas} visitas · {c.ultimaVisita ? new Date(c.ultimaVisita).toLocaleDateString("es-CO") : "sin visitas"}
+                        {c.visitas} visitas · {c.ultimaVisita ? new Date(c.ultimaVisita).toLocaleDateString("es-CO", { timeZone: "America/Bogota" }) : "sin visitas"}
                       </p>
                     </div>
                     <p className="shrink-0 text-[12.5px] font-bold text-text">{formatCOP(c.ltv)}</p>

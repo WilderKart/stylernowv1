@@ -162,7 +162,7 @@ export function ListaNegocios({
                 <div>
                   <p className="text-[14px] font-bold text-text">{n.nombre}</p>
                   <p className="text-[11.5px] text-text-faint">
-                    {n.ciudad} · {n.planCodigo} · {new Date(n.createdAt).toLocaleDateString("es-CO")}
+                    {n.ciudad} · {n.planCodigo} · {new Date(n.createdAt).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })}
                   </p>
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1">

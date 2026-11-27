@@ -178,7 +178,7 @@ export function VistaAiWorkspace({
               <li key={c.id} className="flex items-center justify-between rounded-xl border border-border-subtle bg-surface px-3.5 py-2 text-[12px]">
                 <div>
                   <p className="font-semibold text-text">{c.funcion}</p>
-                  <p className="text-[10.5px] text-text-faint">{new Date(c.createdAt).toLocaleString("es-CO")}</p>
+                  <p className="text-[10.5px] text-text-faint">{new Date(c.createdAt).toLocaleString("es-CO", { timeZone: "America/Bogota" })}</p>
                 </div>
                 <span className="font-bold text-danger">-{c.creditosConsumidos}</span>
               </li>
@@ -320,7 +320,7 @@ function SeccionMemoria({ negocioId, memoriaInicial }: { negocioId: string; memo
                 <ul className="mt-2 flex flex-col gap-1 border-t border-border-subtle pt-2">
                   {historial.items.map((h) => (
                     <li key={h.id} className="flex items-center justify-between text-[11px]">
-                      <span className="text-text-muted">v{h.version} — {new Date(h.createdAt).toLocaleDateString("es-CO")}</span>
+                      <span className="text-text-muted">v{h.version} — {new Date(h.createdAt).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })}</span>
                       {h.version !== actual?.version ? (
                         <button type="button" disabled={pendiente} onClick={() => restaurar(h.id)} className="font-bold uppercase text-accent">
                           Restaurar

@@ -19,12 +19,15 @@ export function BotonCancelar({
   reembolsoEstimado,
   reembolsoPct,
   pagoDirecto = false,
+  sinAnticipo = false,
 }: {
   reservaId: string;
   reembolsoEstimado: number;
   reembolsoPct: number;
   /** Anticipo transferido directo al comercio: StylerNow no reembolsa, se muestra el aviso en vez de un monto. */
   pagoDirecto?: boolean;
+  /** La reserva no tiene anticipo: no hay nada que devolver y se cancela sin cargo. */
+  sinAnticipo?: boolean;
 }) {
   const router = useRouter();
   const t = useT();
@@ -53,6 +56,8 @@ export function BotonCancelar({
         meta={
           pagoDirecto
             ? "Anticipo pagado directo al comercio: sin reembolso de StylerNow"
+            : sinAnticipo
+            ? "Sin anticipo: puedes cancelar sin ningún cargo"
             : reembolsoPct === 0
             ? t("canc.sin_reembolso_meta")
             : t("canc.devolvemos_meta", { monto: formatCOP(reembolsoEstimado) })

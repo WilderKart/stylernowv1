@@ -57,11 +57,18 @@ function FilaCopiar({ etiqueta, valor }: { etiqueta: string; valor: string }) {
  * comprobante (comprimido a <300 KB en el navegador y subido directo a Storage, sin pasar por una Server Action).
  * Al registrar el soporte, la cita queda agendada al instante.
  */
-export function PagoDirecto({ reservaId, negocioId, montoSena, medios, acepta }: {
-  reservaId: string; negocioId: string; montoSena: number; medios: MediosDirectosVista; acepta: boolean;
+export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medios, acepta }: {
+  reservaId: string; negocioId: string; montoSena: number; /** Total del servicio: permite pagar todo de una vez. */ montoTotal: number; medios: MediosDirectosVista; acepta: boolean;
 }) {
   const router = useRouter();
+  const puedePagarTodo = montoTotal > montoSena;
+  const [modo, setModo] = useState<"ANTICIPO" | "TOTAL">("ANTICIPO");
+  const aTransferir = Math.round(modo === "TOTAL" ? montoTotal : montoSena);
   const [monto, setMonto] = useState(String(Math.round(montoSena)));
+  function elegirModo(m: "ANTICIPO" | "TOTAL") {
+    setModo(m);
+    setMonto(String(Math.round(m === "TOTAL" ? montoTotal : montoSena)));
+  }
   const [archivo, setArchivo] = useState<File | null>(null);
   const [vista, setVista] = useState<string | null>(null);
   const [estado, setEstado] = useState<"" | "preparando" | "enviando">("");
@@ -128,13 +135,37 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, medios, acepta }:
   return (
     <Bloque etiqueta="Paga directo al negocio">
       <div className="flex flex-col gap-3">
+        {puedePagarTodo ? (
+          <div role="radiogroup" aria-label="¿Cuánto quieres pagar ahora?" className="grid grid-cols-2 gap-2">
+            {(
+              [
+                { id: "ANTICIPO", titulo: "Solo el anticipo", monto: montoSena, nota: "El resto lo pagas en el local" },
+                { id: "TOTAL", titulo: "Pagar todo", monto: montoTotal, nota: "Sin saldo pendiente en el local" },
+              ] as const
+            ).map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                role="radio"
+                aria-checked={modo === o.id}
+                disabled={ocupado}
+                onClick={() => elegirModo(o.id)}
+                className={`flex flex-col items-start gap-0.5 border-2 p-3 text-left ${modo === o.id ? "border-ink bg-signal text-ink" : "border-border"}`}
+              >
+                <span className="text-[12px] font-bold uppercase">{o.titulo}</span>
+                <span className="text-[17px] font-bold tabular-nums">{formatCOP(o.monto)}</span>
+                <span className="text-[11px] opacity-80">{o.nota}</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
         <p className="m-0">
-          Transfiere <b>{formatCOP(montoSena)}</b> a la cuenta del negocio y sube tu comprobante. Tu cita queda agendada al instante.
+          Transfiere <b>{formatCOP(aTransferir)}</b> a la cuenta del negocio y sube tu comprobante. Tu cita queda agendada al instante; el negocio confirma después que el dinero llegó.
         </p>
         {medios.llaveBreb ? <FilaCopiar etiqueta="Llave Bre-B" valor={medios.llaveBreb} /> : null}
         {medios.nequi ? <FilaCopiar etiqueta="Nequi" valor={medios.nequi} /> : null}
         {medios.daviplata ? <FilaCopiar etiqueta="Daviplata" valor={medios.daviplata} /> : null}
-        <FilaCopiar etiqueta="Monto exacto" valor={String(Math.round(montoSena))} />
+        <FilaCopiar etiqueta="Monto exacto" valor={String(aTransferir)} />
         {medios.referencia ? <FilaCopiar etiqueta="Referencia sugerida" valor={medios.referencia} /> : null}
         {medios.linkPago ? (
           <a href={medios.linkPago} target="_blank" rel="noopener noreferrer" className="border-2 border-border p-3 text-center text-[13px] font-bold uppercase underline">
