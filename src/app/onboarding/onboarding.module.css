@@ -1,0 +1,81 @@
+/* Onboarding de 3 pantallas (identidad naranja #FF6600, fondo claro). Todas las animaciones se apagan con prefers-reduced-motion. */
+
+.raya {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, transparent 0 46%, rgba(255, 102, 0, 0.12) 46% 48%, transparent 48% 52%, rgba(255, 102, 0, 0.2) 52% 54%, transparent 54%),
+    linear-gradient(115deg, transparent 0 58%, #ff8a2a 58%, #ff6600 100%);
+  clip-path: polygon(38% 0, 100% 0, 100% 100%, 0 100%);
+  opacity: 0.95;
+  animation: rayaEntra 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.rayaFina {
+  position: absolute;
+  right: -10%;
+  top: 4%;
+  width: 70%;
+  height: 46%;
+  pointer-events: none;
+  background: repeating-linear-gradient(115deg, transparent 0 14px, rgba(255, 102, 0, 0.35) 14px 17px, transparent 17px 30px);
+  mask-image: linear-gradient(to bottom left, #000, transparent 75%);
+  -webkit-mask-image: linear-gradient(to bottom left, #000, transparent 75%);
+  animation: rayaDeriva 6s ease-in-out infinite alternate;
+}
+@keyframes rayaEntra {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 0.95; transform: none; }
+}
+@keyframes rayaDeriva {
+  from { transform: translate(0, 0); }
+  to { transform: translate(-14px, 10px); }
+}
+
+/* Entrada de la pantalla (dirección según avance/retroceso) */
+.entraDer { animation: entraDer 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.entraIzq { animation: entraIzq 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes entraDer { from { opacity: 0; transform: translateX(36px); } to { opacity: 1; transform: none; } }
+@keyframes entraIzq { from { opacity: 0; transform: translateX(-36px); } to { opacity: 1; transform: none; } }
+
+.sube { animation: sube 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.persona { animation: personaEntra 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both; }
+@keyframes sube { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+@keyframes personaEntra { from { opacity: 0; transform: translateY(40px) scale(0.97); } to { opacity: 1; transform: none; } }
+
+.flota { animation: flota 3.2s ease-in-out infinite; }
+.flotaLenta { animation: flota 4.4s ease-in-out 0.6s infinite; }
+@keyframes flota { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+
+.latido { animation: latido 2.4s ease-in-out infinite; }
+@keyframes latido {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 102, 0, 0.45); }
+  50% { box-shadow: 0 0 0 12px rgba(255, 102, 0, 0); }
+}
+
+/* Agenda de hoy: la fila nueva entra, y el check «se completa» con un pequeño rebote */
+.filaEntra { animation: filaEntra 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes filaEntra { from { opacity: 0; transform: translateY(18px) scale(0.97); } to { opacity: 1; transform: none; } }
+.check { transform: scale(0); opacity: 0; transition: transform 0.45s cubic-bezier(0.3, 1.8, 0.5, 1), opacity 0.2s; }
+.checkOk { transform: scale(1); opacity: 1; }
+.pendiente { animation: pendiente 0.9s ease-in-out infinite; }
+@keyframes pendiente { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+
+/* Chispas junto al teléfono */
+.chispa { transform-origin: 0 100%; animation: chispa 1.8s ease-in-out infinite; }
+@keyframes chispa { 0%, 100% { opacity: 0.25; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1.1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .raya, .rayaFina, .entraDer, .entraIzq, .sube, .persona, .flota, .flotaLenta, .latido, .filaEntra, .pendiente, .chispa {
+    animation: none !important;
+  }
+  .check { transition: none; }
+}
+
+/* El sistema fuerza esquinas 0 (globals.css); este onboarding usa esquinas suaves por diseño de la maqueta. */
+.r3 { border-radius: 3px !important; }
+.r12 { border-radius: 12px !important; }
+.r16 { border-radius: 16px !important; }
+.r22 { border-radius: 22px !important; }
+@media (min-width: 640px) { .r40 { border-radius: 40px !important; } }
+.titulo { word-spacing: 0.08em; letter-spacing: -0.035em; }

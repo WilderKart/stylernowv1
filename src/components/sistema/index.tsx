@@ -1,5 +1,6 @@
 import { AvisoSinConexion } from "./aviso-sin-conexion";
 import { EstadoSistema } from "./estado-sistema";
+import { OnboardingPrimeraVisita } from "./onboarding-primera-visita";
 import { RecargaPorVersion } from "./recarga-por-version";
 import { SplashArranque } from "./splash-arranque";
 
@@ -8,6 +9,7 @@ export function SistemaCliente() {
   return (
     <>
       <SplashArranque />
+      <OnboardingPrimeraVisita />
       <AvisoSinConexion />
       <EstadoSistema />
       <RecargaPorVersion />
