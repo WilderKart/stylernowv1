@@ -176,9 +176,11 @@ export function CalendarioReserva({
                 "relative mx-auto flex h-12 w-full max-w-[56px] flex-col items-center justify-center gap-0.5 border-2 text-[16px] leading-none font-bold tabular-nums sm:h-14",
                 elegido ? "border-ink bg-signal text-ink" : "border-transparent",
                 !elegido && festivo && enRango && !sinDisp && "bg-[#dbeafe] text-[#1d4ed8]",
-                !elegido && festivo && (!enRango || sinDisp) && "bg-[#eef2fb] text-[#8b9ccc]",
-                !elegido && !festivo && esDomingo && enRango && !sinDisp && delMes && "text-[#c8102e]",
-                !elegido && !festivo && deshabilitado && "text-[var(--text-disabled)]",
+                !elegido && festivo && !enRango && "bg-[#eef2fb] text-[#8b9ccc]",
+                !elegido && festivo && enRango && sinDisp && "bg-[#eef2fb] text-[#ff0000]",
+                !elegido && !festivo && esDomingo && enRango && !sinDisp && delMes && "text-signal",
+                !elegido && !festivo && !enRango && "text-[var(--text-disabled)]",
+                !elegido && !festivo && sinDisp && "text-[#ff0000]",
                 !elegido && !festivo && !deshabilitado && !delMes && "text-[var(--text-faint)]",
                 !elegido && !festivo && !deshabilitado && delMes && !esDomingo && "text-ink",
                 !elegido && !deshabilitado && "hover:border-ink",
@@ -190,8 +192,8 @@ export function CalendarioReserva({
                 {dia}
               </span>
               {/* Indicadores que no dependen solo del color: punto = hay horarios libres; raya = sin disponibilidad */}
-              {libres && libres > 0 && !elegido ? <span className="size-1.5 rounded-full bg-signal" aria-hidden /> : null}
-              {sinDisp && !elegido ? <span className="h-[2px] w-3 bg-[var(--text-disabled)]" aria-hidden /> : null}
+              {libres && libres > 0 && !elegido ? <span className="size-1.5 rounded-full bg-[#16a34a]" aria-hidden /> : null}
+              {sinDisp && !elegido ? <span className="h-[2px] w-3 bg-[#ff0000]" aria-hidden /> : null}
               {elegido && festivo ? <span className="absolute top-0.5 right-0.5 size-1.5 bg-[#1d4ed8]" aria-hidden /> : null}
             </button>
           );
@@ -201,16 +203,16 @@ export function CalendarioReserva({
       {/* Leyenda */}
       <ul className="m-0 mt-3 flex list-none flex-wrap items-center gap-x-3 gap-y-1.5 p-0 text-[10.5px] font-bold tracking-wide text-ink uppercase sm:text-[11px]">
         <li className="flex items-center gap-1.5">
-          <span className="size-2.5 rounded-full bg-signal" aria-hidden /> Disponible
+          <span className="size-2.5 rounded-full bg-[#16a34a]" aria-hidden /> Disponible
         </li>
         <li className="flex items-center gap-1.5">
-          <span className="size-2.5 rounded-full bg-[var(--text-disabled)]" aria-hidden /> Sin disponibilidad
+          <span className="size-2.5 rounded-full bg-[#ff0000]" aria-hidden /> Sin disponibilidad
         </li>
         <li className="flex items-center gap-1.5">
           <span className="size-3 bg-[#dbeafe]" aria-hidden /> Festivo
         </li>
         <li className="flex items-center gap-1.5">
-          <span className="size-3 bg-[#c8102e]" aria-hidden /> Domingo
+          <span className="size-3 bg-signal" aria-hidden /> Domingo
         </li>
         <li className="flex items-center gap-1.5">
           <span className="size-2.5 rounded-full bg-[#cfcfcf]" aria-hidden /> Otro mes
