@@ -65,10 +65,19 @@ export const metadata: Metadata = {
     title: "StylerNow",
     description: "Encuentra barberías, salones y spas cerca de ti y reserva tu turno en segundos.",
     locale: "es_CO",
-    images: [{ url: "/icons/icon-512.png", width: 512, height: 512, alt: "StylerNow" }],
+    images: [{ url: "/og-stylernow.png", width: 1200, height: 630, type: "image/png", alt: "StylerNow" }],
   },
-  twitter: { card: "summary", title: "StylerNow", images: ["/icons/icon-512.png"] },
-  icons: { apple: "/icons/icon-192.png" },
+  twitter: { card: "summary_large_image", title: "StylerNow", images: ["/og-stylernow.png"] },
+  icons: {
+    // ?v=2: los navegadores guardan el favicon durante semanas; el parámetro fuerza a descargar el nuevo logo.
+    icon: [
+      { url: "/favicon.ico?v=2", sizes: "any" },
+      { url: "/icons/favicon-32.png?v=2", type: "image/png", sizes: "32x32" },
+      { url: "/icons/icon-192.png?v=2", type: "image/png", sizes: "192x192" },
+    ],
+    shortcut: "/favicon.ico?v=2",
+    apple: [{ url: "/icons/apple-touch-icon.png?v=2", sizes: "180x180", type: "image/png" }],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

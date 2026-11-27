@@ -12,7 +12,7 @@
  * nombre (_next/static, inmutables por definición de Next.js).
  */
 
-const VERSION = "v1";
+const VERSION = "v2";
 const CACHE_SHELL = `stylernow-shell-${VERSION}`;
 
 // Nunca cachear estas rutas, aunque coincidan por método/origen: son siempre

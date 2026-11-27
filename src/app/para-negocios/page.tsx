@@ -82,7 +82,9 @@ export async function generateMetadata(): Promise<Metadata> {
     title: T.seo.titulo,
     description: T.seo.descripcion,
     alternates: { canonical: "/para-negocios" },
-    openGraph: { title: T.seo.titulo, description: T.seo.descripcion, type: "website" },
+    // Una página que define su propio openGraph REEMPLAZA el del layout (no se mezclan): hay que repetir la imagen.
+    openGraph: { title: T.seo.titulo, description: T.seo.descripcion, type: "website", images: [{ url: "/og-stylernow.png", width: 1200, height: 630, alt: "StylerNow" }] },
+    twitter: { card: "summary_large_image", title: T.seo.titulo, description: T.seo.descripcion, images: ["/og-stylernow.png"] },
   };
 }
 

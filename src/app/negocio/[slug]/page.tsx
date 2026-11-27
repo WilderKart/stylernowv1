@@ -115,7 +115,8 @@ export async function generateMetadata(
       description: descripcion,
       type: "website",
       url: `/negocio/${negocio.slug}`,
-      images: negocio.logo_url ? [negocio.logo_url] : undefined,
+      // Si el negocio no tiene logo, se comparte el de StylerNow (nunca queda sin imagen ni con una genérica).
+      images: negocio.logo_url ? [negocio.logo_url] : [{ url: "/og-stylernow.png", width: 1200, height: 630, alt: "StylerNow" }],
     },
   };
 }
