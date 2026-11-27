@@ -585,19 +585,19 @@ export function FlujoReserva({
               />
             </div>
 
-            <div className="grid gap-2 px-4 pb-3 sm:grid-cols-2">
-              <div className="flex items-center gap-3 border-2 border-ink p-3">
-                <CalendarDays className="size-8 flex-none text-signal" aria-hidden />
+            <div className="grid grid-cols-2 items-stretch gap-2 px-4 pb-3">
+              <div className="flex min-w-0 items-center gap-2 border-2 border-ink p-2.5 sm:gap-3 sm:p-3">
+                <CalendarDays className="size-6 flex-none text-signal sm:size-8" aria-hidden />
                 <div className="min-w-0">
-                  <p className="sn-meta m-0 uppercase">{t("res.fecha_sel")}</p>
-                  <p className="m-0 font-mono text-[15px] font-bold tracking-wide break-words uppercase">{fechaEtiqueta(fecha)}</p>
+                  <p className="sn-meta m-0 text-[10px] uppercase sm:text-[11px]">{t("res.fecha_sel")}</p>
+                  <p className="m-0 font-mono text-[13px] leading-tight font-bold tracking-wide break-words uppercase sm:text-[15px]">{fechaEtiqueta(fecha)}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 border-2 border-ink p-3">
-                <Clock className="size-8 flex-none text-signal" aria-hidden />
+              <div className="flex min-w-0 items-center gap-2 border-2 border-ink p-2.5 sm:gap-3 sm:p-3">
+                <Clock className="size-6 flex-none text-signal sm:size-8" aria-hidden />
                 <div className="min-w-0">
-                  <p className="sn-meta m-0 uppercase">{t("res.duracion_serv")}</p>
-                  <p className="m-0 font-mono text-[15px] font-bold tracking-wide uppercase">{duracionEtiqueta(minutosTotal)}</p>
+                  <p className="sn-meta m-0 text-[10px] uppercase sm:text-[11px]">{t("res.duracion_serv")}</p>
+                  <p className="m-0 font-mono text-[13px] leading-tight font-bold tracking-wide uppercase sm:text-[15px]">{duracionEtiqueta(minutosTotal)}</p>
                 </div>
               </div>
             </div>
