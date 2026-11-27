@@ -207,6 +207,27 @@ export async function subirImagenServicio(servicioId: string, dataUrl: string): 
   }
 }
 
+/**
+ * Ofrecer o dejar de ofrecer un servicio en UNA sede (el servicio y su historial se conservan). La base valida que quien llama sea el
+ * propietario/administrador del negocio o el guardián de esa sede (migración 202).
+ */
+export async function definirServicioSede(servicioId: string, sedeId: string, ofrece: boolean): Promise<Resultado> {
+  try {
+    if (!/^[0-9a-f-]{36}$/i.test(servicioId) || !/^[0-9a-f-]{36}$/i.test(sedeId)) return { ok: false, error: "Datos inválidos." };
+    const { supabase } = await usuarioActual();
+    const { error } = await (supabase as unknown as { rpc: (n: string, a: object) => Promise<{ error: { message: string } | null }> }).rpc(
+      "servicio_sede_definir",
+      { p_servicio: servicioId, p_sede: sedeId, p_activo: ofrece }
+    );
+    if (error) return { ok: false, error: error.message.includes("NO_AUTORIZADO") ? "No tienes permiso para cambiar esta sede." : "No pudimos guardar el cambio. Intenta de nuevo." };
+    revalidatePath("/panel/servicios");
+    revalidatePath(`/panel/servicios/${servicioId}`);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
 // Alias retrocompatible del wizard de onboarding (2.1) — "eliminar" ahí
 // siempre significó desactivar, nunca borrado físico.
 export async function eliminarServicio(servicioId: string): Promise<Resultado> {

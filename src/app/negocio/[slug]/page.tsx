@@ -63,6 +63,17 @@ async function cargarNegocio(slug: string) {
     .eq("negocio_id", negocio.id)
     .order("orden");
 
+  // Un servicio que TODAS las sedes abiertas tienen desactivado no se muestra (migración 202); si al menos una lo ofrece, sí.
+  let serviciosVisibles = servicios ?? [];
+  if (serviciosVisibles.length && (sedes ?? []).length) {
+    const { data: filas } = await (supabase as unknown as { from: (t: string) => { select: (c: string) => { in: (c: string, v: string[]) => { eq: (c: string, v: boolean) => Promise<{ data: Array<{ servicio_id: string; sede_id: string }> | null }> } } } })
+      .from("servicio_sede").select("servicio_id, sede_id").in("servicio_id", serviciosVisibles.map((s) => s.id)).eq("activo", false);
+    const porServicio = new Map<string, Set<string>>();
+    for (const f of filas ?? []) porServicio.set(f.servicio_id, (porServicio.get(f.servicio_id) ?? new Set()).add(f.sede_id));
+    const idsSedes = (sedes ?? []).map((s) => s.id);
+    serviciosVisibles = serviciosVisibles.filter((s) => !idsSedes.every((id) => porServicio.get(s.id)?.has(id)));
+  }
+
   const calificaciones = (resenas ?? []).map((r) => r.calificacion);
   const promedio =
     calificaciones.length > 0
@@ -72,7 +83,7 @@ async function cargarNegocio(slug: string) {
   return {
     negocio,
     sedes: sedes ?? [],
-    servicios: servicios ?? [],
+    servicios: serviciosVisibles,
     staff: staff ?? [],
     resenas: resenas ?? [],
     promedio,

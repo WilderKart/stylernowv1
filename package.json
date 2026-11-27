@@ -20,7 +20,8 @@
     "check:legal": "node scripts/legal/verificar-sincronizacion.mjs",
     "e2e:preparar": "node tools/preparar-e2e.mjs",
     "e2e": "playwright test",
-    "docs:routes": "node tools/generar-route-registry-doc.mjs"
+    "docs:routes": "node tools/generar-route-registry-doc.mjs",
+    "catalogo:servicios": "node tools/generar-catalogo-servicios.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

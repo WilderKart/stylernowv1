@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import type { ResumenAlta } from "./actions";
 
 const SIGUIENTES = [
-  "Configura tus servicios (con 2 ya puedes recibir reservas).",
+  "Elige tus servicios del catálogo (con 2 ya puedes recibir reservas).",
   "Invita a tu equipo, según el límite de tu plan.",
   "Personaliza tu perfil público.",
   "Verifica tu negocio para generar más confianza.",

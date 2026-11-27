@@ -1,4 +1,5 @@
 import { PanelNav } from "@/components/panel/panel-nav";
+import { ImagenServicio } from "@/components/servicios/imagen-servicio";
 import { Badge, Card } from "@/components/ui/card";
 import { verificarAccesoPanel } from "@/lib/auth/verificar-acceso-panel";
 import { createClient } from "@/lib/supabase/server";
@@ -23,7 +24,7 @@ export default async function ServiciosPage() {
   const [{ data: servicios }, { data: combos }] = await Promise.all([
     supabase
       .from("servicio")
-      .select("id, nombre, descripcion, duracion_minutos, precio_base, categoria_puntaje, estado")
+      .select("id, nombre, descripcion, duracion_minutos, precio_base, categoria_puntaje, estado, imagen_url")
       .eq("negocio_id", negocioId)
       .order("estado")
       .order("nombre"),
@@ -34,6 +35,18 @@ export default async function ServiciosPage() {
       .order("estado")
       .order("nombre"),
   ]);
+
+  // Sedes donde NO se ofrece cada servicio (sin fila = se ofrece en todas).
+  const [{ data: sedesNeg }, { data: excepciones }] = await Promise.all([
+    supabase.from("sede").select("id, nombre").eq("negocio_id", negocioId).eq("cerrada_permanente", false),
+    (servicios ?? []).length
+      ? (supabase as unknown as { from: (t: string) => { select: (c: string) => { in: (c: string, v: string[]) => { eq: (c: string, v: boolean) => Promise<{ data: Array<{ servicio_id: string; sede_id: string }> | null }> } } } })
+          .from("servicio_sede").select("servicio_id, sede_id").in("servicio_id", (servicios ?? []).map((s) => s.id)).eq("activo", false)
+      : Promise.resolve({ data: [] as Array<{ servicio_id: string; sede_id: string }> }),
+  ]);
+  const nombreSede = new Map((sedesNeg ?? []).map((s) => [s.id, s.nombre]));
+  const sedesOcultas = new Map<string, string[]>();
+  for (const e of excepciones ?? []) sedesOcultas.set(e.servicio_id, [...(sedesOcultas.get(e.servicio_id) ?? []), nombreSede.get(e.sede_id) ?? "Sede"]);
 
   const activos = (servicios ?? []).filter((s) => s.estado === "ACTIVO");
   const inactivos = (servicios ?? []).filter((s) => s.estado !== "ACTIVO");
@@ -62,14 +75,34 @@ export default async function ServiciosPage() {
             </p>
           </div>
           {contexto.permisos.crearServicio ? (
-            <Link
-              href="/panel/servicios/nuevo"
-              className="shrink-0 rounded-none bg-accent px-4 py-2.5 text-[12.5px] font-bold text-ink hover:bg-accent-hover"
-            >
-              + NUEVO SERVICIO
-            </Link>
+            <div className="flex shrink-0 flex-col items-stretch gap-2 sm:flex-row">
+              <Link
+                href="/panel/servicios/catalogo"
+                className="rounded-none border-2 border-ink bg-accent px-4 py-2.5 text-center text-[12.5px] font-bold uppercase text-ink hover:bg-accent-hover"
+              >
+                ✦ Elegir del catálogo
+              </Link>
+              <Link
+                href="/panel/servicios/nuevo"
+                className="rounded-none border-2 border-border px-4 py-2.5 text-center text-[12.5px] font-bold uppercase text-text hover:bg-surface"
+              >
+                + Servicio propio
+              </Link>
+            </div>
           ) : null}
         </div>
+
+        {contexto.permisos.crearServicio && activos.length === 0 ? (
+          <Card className="mb-6 border-2 border-ink bg-surface">
+            <p className="text-[13.5px] font-bold text-text">Empieza con servicios ya listos</p>
+            <p className="mt-1 text-[12.5px] text-text-muted">
+              Tenemos un catálogo con cortes, barba, cuidado facial, uñas y más, con su imagen incluida. Elige los que ofreces y solo pones el precio y la duración.
+            </p>
+            <Link href="/panel/servicios/catalogo" className="mt-3 inline-block border-2 border-ink bg-accent px-4 py-2 text-[12.5px] font-bold uppercase text-ink">
+              Ver el catálogo
+            </Link>
+          </Card>
+        ) : null}
 
         {sinStaff.length > 0 ? (
           <Card className="mb-6 border-danger/30 bg-danger-soft">
@@ -98,15 +131,19 @@ export default async function ServiciosPage() {
                   className="block rounded-2xl border border-border-subtle bg-surface p-4 transition-colors hover:border-accent/40"
                 >
                   <Card className="border-none bg-transparent p-0">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
+                    <div className="flex items-start gap-3">
+                      <ImagenServicio url={s.imagen_url} nombre={s.nombre} className="size-14" />
+                      <div className="min-w-0 flex-1">
                         <p className="truncate text-[14px] font-bold text-text">{s.nombre}</p>
                         <p className="mt-1 truncate text-[12px] text-text-faint">
                           {duracion(s.duracion_minutos)} · {formatCOP(s.precio_base)} ·{" "}
                           {CATEGORIA_TEXTO[s.categoria_puntaje] ?? s.categoria_puntaje}
                         </p>
+                        {s.estado === "ACTIVO" && sedesOcultas.get(s.id)?.length ? (
+                          <p className="mt-1 truncate text-[11.5px] font-semibold text-text-muted">No se ofrece en: {sedesOcultas.get(s.id)!.join(", ")}</p>
+                        ) : null}
                       </div>
-                      <Badge tone={s.estado === "ACTIVO" ? "success" : "neutral"}>{s.estado}</Badge>
+                      <Badge tone={s.estado === "ACTIVO" ? "success" : "neutral"}>{s.estado === "ACTIVO" ? "Se ofrece" : "No se ofrece"}</Badge>
                     </div>
                   </Card>
                 </Link>

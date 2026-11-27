@@ -83,6 +83,14 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
     }))
     .filter((c) => c.servicio_ids.length >= 2 && c.servicio_ids.every((id) => idsServiciosActivos.has(id)));
 
+  // Servicios que cada sede NO ofrece (migración 202). Sin filas = todas las sedes ofrecen todo.
+  const ocultosPorSede: Record<string, string[]> = {};
+  if (servicios?.length) {
+    const { data: filas } = await (supabase as unknown as { from: (t: string) => { select: (c: string) => { in: (c: string, v: string[]) => { eq: (c: string, v: boolean) => Promise<{ data: Array<{ servicio_id: string; sede_id: string }> | null }> } } } })
+      .from("servicio_sede").select("servicio_id, sede_id").in("servicio_id", servicios.map((s) => s.id)).eq("activo", false);
+    for (const f of filas ?? []) (ocultosPorSede[f.sede_id] ??= []).push(f.servicio_id);
+  }
+
   // FASE 2B: negocio con la suscripción restringida (la base lo decide, ver migración 164): no ofrece el flujo de reserva.
   const aceptaReservas = await negocioAceptaReservas(negocio.id);
 
@@ -116,6 +124,7 @@ export default async function ReservarPage(props: PageProps<"/negocio/[slug]/res
         servicios={servicios}
         staff={(staff ?? []).map((p) => ({ ...p, nivel: p.nivel }))}
         combos={combos}
+        ocultosPorSede={ocultosPorSede}
       />
     </div>
   );
