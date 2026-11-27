@@ -63,7 +63,9 @@ export function ResumenBarberia({
   return (
     <div className="flex flex-col gap-5">
       {/* Encabezado */}
-      <header className="border-2 border-border bg-[image:var(--hero-gradient)] p-5 text-[var(--hero-text)] shadow-hard sm:p-6">
+      <header
+        className="border-2 border-border bg-paper bg-[linear-gradient(90deg,rgba(255,255,255,0.92)_0%,rgba(255,255,255,0.7)_50%,rgba(255,255,255,0)_85%),url(/images/resumen-hero.jpg)] bg-cover bg-[position:78%_center] p-5 text-ink shadow-hard sm:p-6 sm:bg-[position:center_30%]"
+      >
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="font-mono text-[11px] font-bold uppercase tracking-[0.66px] opacity-80">{nombre}</p>
