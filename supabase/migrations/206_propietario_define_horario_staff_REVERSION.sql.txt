@@ -1,0 +1,2 @@
+-- Reversión de la migración 206 (solo agregó una función; no hay tablas ni columnas nuevas).
+drop function if exists public.propietario_definir_horario_staff(uuid, uuid, jsonb);

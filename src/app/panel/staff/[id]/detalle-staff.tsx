@@ -52,9 +52,11 @@ export function DetalleStaff({
   puedeCambiarRol,
   sinCupoDisponible,
   bloqueServicios = null,
+  bloqueHorario = null,
 }: {
   /** Sección «Servicios que presta» (solo el propietario, y solo si la persona atiende clientes). */
   bloqueServicios?: React.ReactNode;
+  bloqueHorario?: React.ReactNode;
   staff: StaffVista;
   permisos: PermisosPanel;
   otrasSedes: { id: string; nombre: string }[];
@@ -241,6 +243,8 @@ export function DetalleStaff({
       </Card>
 
       {bloqueServicios}
+
+      {bloqueHorario}
 
       {/* ── Acciones ──────────────────────────────────────────────────── */}
       {(permisos.promoverGuardian || permisos.suspenderStaff || permisos.retirarStaff) && !retirado ? (

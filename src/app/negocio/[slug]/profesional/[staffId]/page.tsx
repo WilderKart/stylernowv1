@@ -52,7 +52,7 @@ async function cargarProfesional(slug: string, staffId: string) {
   };
 }
 
-/** Próximos horarios libres del profesional (hoy + 2 días) con la misma RPC del flujo de reserva. */
+/** Próximos horarios libres del profesional (hoy y los próximos 6 días) con la misma RPC del flujo de reserva. */
 async function cargarHorarios(negocioId: string, staffId: string, servicioId: string | undefined, t: Traductor) {
   if (!servicioId) return [];
   try {
@@ -68,7 +68,7 @@ async function cargarHorarios(negocioId: string, staffId: string, servicioId: st
     if (!sede) return [];
     const tz = sede.zona_horaria || undefined;
     const hoy = hoyISO(tz);
-    const dias = [hoy, sumarDias(hoy, 1), sumarDias(hoy, 2)];
+    const dias = Array.from({ length: 7 }, (_, i) => sumarDias(hoy, i));
     const resp = await Promise.all(
       dias.map((fecha) =>
         supabase.rpc("slots_disponibles", { p_sede_id: sede.id, p_servicio_ids: [servicioId], p_fecha: fecha, p_staff_id: staffId })

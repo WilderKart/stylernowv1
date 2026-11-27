@@ -13,8 +13,8 @@ import { calcularSenaServiciosEstimada, resumenPoliticaCancelacion, type ConfigS
 import { cn, formatCOP } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
-import { crearReservaAction, obtenerSlots, unirseListaEspera, type Slot } from "./actions";
+import { useEffect, useState, useTransition } from "react";
+import { crearReservaAction, obtenerSlots, primerHorarioLibre, unirseListaEspera, type Slot } from "./actions";
 
 const DIAS_VISIBLES = 14;
 const DIAS_POR_VENTANA = 6;
@@ -101,9 +101,10 @@ export function FlujoReserva({
   const [fecha, setFecha] = useState(() => hoyISO(sedes[0]?.zona_horaria));
   const [slot, setSlot] = useState<Slot | null>(null);
   const [inicioDias, setInicioDias] = useState(0);
-  // Mientras el cliente no toque el selector de día, se salta solo al primer día con horas libres
-  // (si hoy ya cerró, abrir en un día todo tachado parece que el negocio no tiene disponibilidad).
-  const diaElegidoManualmente = useRef(false);
+  // Al entrar a «¿Cuándo vienes?» con un profesional/servicios nuevos, el calendario se abre en el día más cercano que tenga un horario libre
+  // y sugiere ese horario (la disponibilidad sigue siendo la misma RPC; solo se elige dónde empezar). El cliente decide y puede navegar.
+  const [claveResuelta, setClaveResuelta] = useState<string | null>(null);
+  const [sugerido, setSugerido] = useState<string | null>(null);
 
   const [slots, setSlots] = useState<Slot[]>([]);
   const [cargandoSlots, iniciarCarga] = useTransition();
@@ -134,28 +135,53 @@ export function FlujoReserva({
   // La carga corre dentro de una transición: el estado se actualiza al resolver la
   // consulta, nunca de forma síncrona dentro del efecto. Volver al paso 3 (p. ej. tras
   // SLOT_NO_DISPONIBLE) re-dispara el efecto y refresca el grid.
+  const clave = `${sedeId}|${servicioIds.join(",")}|${staffId ?? ""}`;
+  const buscandoPrimero = paso === 3 && claveResuelta !== clave;
+
+  // 1) Primer horario libre: se resuelve una vez por combinación sede + servicios + profesional.
   useEffect(() => {
-    if (paso !== 3 || !sede || servicioIds.length === 0) return;
+    if (paso !== 3 || !sede || servicioIds.length === 0 || claveResuelta === clave) return;
+    let vigente = true;
+    const hoy = hoyISO(sede.zona_horaria);
+    const fechas = Array.from({ length: DIAS_VISIBLES }, (_, i) => sumarDias(hoy, i));
+    primerHorarioLibre({ sedeId: sede.id, servicioIds, staffId, fechas })
+      .then((r) => {
+        if (!vigente) return;
+        if (r) {
+          setFecha(r.fecha);
+          setInicioDias(Math.max(0, Math.min(fechas.indexOf(r.fecha), DIAS_VISIBLES - DIAS_POR_VENTANA)));
+          setSlot(r.slot);
+          setSugerido(r.slot.hora_inicio);
+        } else {
+          setFecha(hoy);
+          setInicioDias(0);
+          setSugerido(null);
+        }
+        setClaveResuelta(clave);
+      })
+      .catch(() => {
+        if (vigente) setClaveResuelta(clave);
+      });
+    return () => {
+      vigente = false;
+    };
+  }, [paso, sede, servicioIds, staffId, clave, claveResuelta]);
+
+  // 2) Horarios del día mostrado. La carga corre dentro de una transición (el estado se actualiza al resolver la consulta).
+  useEffect(() => {
+    if (paso !== 3 || !sede || servicioIds.length === 0 || claveResuelta !== clave) return;
     iniciarCarga(async () => {
       try {
         const nuevos = await obtenerSlots({ sedeId: sede.id, servicioIds, fecha, staffId });
         setSlots(nuevos);
         setError(null);
-        if (!diaElegidoManualmente.current && !nuevos.some((x) => x.disponible)) {
-          const rango = Array.from({ length: DIAS_VISIBLES }, (_, i) => sumarDias(hoyISO(sede.zona_horaria), i));
-          const idx = rango.indexOf(fecha);
-          if (idx >= 0 && idx < rango.length - 1) {
-            setFecha(rango[idx + 1]);
-            setInicioDias(Math.max(0, Math.min(idx + 1 - 1, DIAS_VISIBLES - DIAS_POR_VENTANA)));
-          }
-        }
       } catch (e) {
         setError(e instanceof Error ? e.message : t("res.err_horarios"));
         setSlots([]);
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- t es estable por idioma
-  }, [paso, sede, servicioIds, fecha, staffId]);
+  }, [paso, sede, servicioIds, fecha, staffId, claveResuelta, clave]);
 
   /** Cambiar los Servicios cambia la duración: el horario elegido deja de ser válido. */
   function alternarServicio(id: string) {
@@ -518,7 +544,6 @@ export function FlujoReserva({
                       key={d}
                       type="button"
                       onClick={() => {
-                        diaElegidoManualmente.current = true;
                         setFecha(d);
                         setSlot(null);
                       }}
@@ -540,7 +565,7 @@ export function FlujoReserva({
             </div>
 
             <div className="px-4 pb-4">
-              {cargandoSlots ? (
+              {cargandoSlots || buscandoPrimero ? (
                 <div className="sn-slots" aria-busy="true" aria-label={t("res.cargando_horarios")}>
                   {Array.from({ length: 8 }, (_, i) => (
                     <div key={i} className="sn-slot animate-pulse bg-surface" />
@@ -564,6 +589,11 @@ export function FlujoReserva({
                 </div>
               ) : (
                 <>
+                  {sugerido && fechaISO(sugerido, tz) === fecha ? (
+                    <p className="sn-meta mb-3 mt-0" role="status">
+                      {t("res.sugerido", { dia: fechaCorta(fecha, tz), hora: hora(sugerido, tz) })}
+                    </p>
+                  ) : null}
                   {/* Los ocupados se muestran tachados, no ausentes (02-UX/05_Booking.md). */}
                   <SlotsPorFranja slots={slots} tz={tz} elegido={slot?.hora_inicio ?? null} onElegir={setSlot} />
 

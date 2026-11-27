@@ -51,6 +51,38 @@ export async function obtenerSlots(args: {
   return data ?? [];
 }
 
+/**
+ * Primer horario libre (hoy o el día más cercano) para esa sede, servicios y profesional. NO cambia la lógica de disponibilidad: usa la misma
+ * RPC `slots_disponibles` que el resto del flujo, día por día, y se queda con el primer cupo libre a futuro. Solo lectura.
+ */
+export async function primerHorarioLibre(args: {
+  sedeId: string;
+  servicioIds: string[];
+  staffId: string | null;
+  fechas: string[];
+}): Promise<{ fecha: string; slot: Slot } | null> {
+  if (args.servicioIds.length === 0 || args.fechas.length === 0 || args.fechas.length > 31) return null;
+  const supabase = await createClient();
+  const respuestas = await Promise.all(
+    args.fechas.map((fecha) =>
+      supabase.rpc("slots_disponibles", {
+        p_sede_id: args.sedeId,
+        p_servicio_ids: args.servicioIds,
+        p_fecha: fecha,
+        p_staff_id: args.staffId ?? undefined,
+      })
+    )
+  );
+  const ahora = Date.now();
+  for (let i = 0; i < respuestas.length; i++) {
+    const libres = (respuestas[i].data ?? []).filter((s) => s.disponible && new Date(s.hora_inicio).getTime() > ahora);
+    if (libres.length === 0) continue;
+    libres.sort((a, b) => new Date(a.hora_inicio).getTime() - new Date(b.hora_inicio).getTime());
+    return { fecha: args.fechas[i], slot: libres[0] };
+  }
+  return null;
+}
+
 export async function crearReservaAction(args: {
   sedeId: string;
   servicioIds: string[];

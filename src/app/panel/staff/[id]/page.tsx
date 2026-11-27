@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { obtenerHistorialStaff } from "../actions";
 import { DetalleStaff } from "./detalle-staff";
+import { HorarioDelStaff, type TramoDia } from "./horario-del-staff";
 import { ServiciosDelStaff, type ServicioAsignable } from "./servicios-del-staff";
 
 export const metadata = { title: "Detalle de Staff" };
@@ -78,6 +79,31 @@ export default async function StaffDetallePage(props: PageProps<"/panel/staff/[i
     serviciosAsignables = (servicios ?? []).map((s) => ({ id: s.id, nombre: s.nombre, imagen_url: s.imagen_url, precio_base: s.precio_base, asignado: mios.has(s.id) }));
   }
 
+  // Horario semanal: solo el propietario lo define por la persona (la base lo exige de nuevo) y solo si atiende clientes.
+  let bloqueHorario: React.ReactNode = null;
+  if (contexto.rol === "BARBERIA" && (staff.presta_servicios ?? true) && staff.estado === "ACTIVO") {
+    const [{ data: sedesNegocio }, { data: filas }] = await Promise.all([
+      supabase.from("sede").select("id, nombre").eq("negocio_id", staff.negocio_id!).eq("cerrada_permanente", false).order("nombre"),
+      supabase.from("disponibilidad").select("sede_id, dia_semana, hora_inicio, hora_fin").eq("vinculo_id", id),
+    ]);
+    // Si la persona está fijada a una sede, solo esa; si no, todas las del negocio.
+    const sedesHorario = (sedesNegocio ?? []).filter((s) => !staff.sede_id || s.id === staff.sede_id);
+    if (sedesHorario.length > 0) {
+      const porSede: Record<string, TramoDia[]> = {};
+      for (const f of filas ?? []) (porSede[f.sede_id] ??= []).push({ dia: f.dia_semana, inicio: f.hora_inicio.slice(0, 5), fin: f.hora_fin.slice(0, 5) });
+      bloqueHorario = (
+        <HorarioDelStaff
+          vinculoId={id}
+          nombre={staff.nombre ?? "Esta persona"}
+          sedes={sedesHorario}
+          sedeInicial={sedesHorario[0].id}
+          porSede={porSede}
+          serviciosAsignados={serviciosAsignables ? serviciosAsignables.filter((s) => s.asignado).length : null}
+        />
+      );
+    }
+  }
+
   return (
     <div className="flex min-h-dvh flex-col bg-app pb-16">
       <BarraSuperior titulo={staff.nombre!} volverA="/panel/staff" />
@@ -89,6 +115,7 @@ export default async function StaffDetallePage(props: PageProps<"/panel/staff/[i
         rolEquipo={rolEquipo}
         puedeCambiarRol={puedeCambiarRol}
         sinCupoDisponible={sinCupoDisponible}
+        bloqueHorario={bloqueHorario}
         bloqueServicios={
           serviciosAsignables ? (
             <ServiciosDelStaff staffId={staff.staff_id!} nombre={staff.nombre ?? "Esta persona"} inicial={serviciosAsignables} puedeCatalogo />
