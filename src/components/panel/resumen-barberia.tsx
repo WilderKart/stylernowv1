@@ -1,4 +1,4 @@
-import type { CitaDelDia, ResumenDia } from "@/app/panel/dashboard-actions";
+import type { CitaDelDia, CitaProxima, ResumenDia } from "@/app/panel/dashboard-actions";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { Badge, Card } from "@/components/ui/card";
 import { formatCOP } from "@/lib/utils";
@@ -27,8 +27,12 @@ const NEGOCIO_BADGE: Record<string, { texto: string; tono: "success" | "accent" 
   CANCELADO: { texto: "Cancelado", tono: "danger" },
 };
 
+// Siempre en la hora de Colombia: el servidor corre en UTC y mostraría 5 horas de más.
 function hora(iso: string) {
-  return new Date(iso).toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit" });
+  return new Date(iso).toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit", timeZone: "America/Bogota" });
+}
+function diaCorto(iso: string) {
+  return new Date(iso).toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short", timeZone: "America/Bogota" });
 }
 
 export interface LealtadResumen {
@@ -49,8 +53,11 @@ export function ResumenBarberia({
   estadoNegocio,
   resumen,
   citas,
+  proximas = [],
   lealtad,
 }: {
+  /** Reservas vivas de mañana en adelante (las de hoy van en `citas`). */
+  proximas?: CitaProxima[];
   nombre: string;
   estadoNegocio: string;
   resumen: ResumenDia | null;
@@ -63,7 +70,9 @@ export function ResumenBarberia({
   return (
     <div className="flex flex-col gap-5">
       {/* Encabezado */}
-      <header className="border-2 border-border bg-[image:var(--hero-gradient)] p-5 text-[var(--hero-text)] shadow-hard sm:p-6">
+      <header
+        className="border-2 border-border bg-paper bg-[linear-gradient(90deg,rgba(255,255,255,0.92)_0%,rgba(255,255,255,0.7)_50%,rgba(255,255,255,0)_85%),url(/images/resumen-hero.jpg)] bg-cover bg-[position:78%_center] p-5 text-ink shadow-hard sm:p-6 sm:bg-[position:center_30%]"
+      >
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="font-mono text-[11px] font-bold uppercase tracking-[0.66px] opacity-80">{nombre}</p>
@@ -125,6 +134,27 @@ export function ResumenBarberia({
               ))}
             </ul>
           )}
+          {activo && proximas.length > 0 ? (
+            <div className="mt-4 border-t-2 border-border pt-3">
+              <h3 className="mb-1 font-mono text-[11px] font-bold uppercase tracking-wide text-text-muted">Próximos días</h3>
+              <ul className="flex flex-col divide-y-2 divide-border-subtle">
+                {proximas.slice(0, 5).map((c) => (
+                  <li key={c.id} className="flex items-center justify-between gap-3 py-2.5">
+                    <div className="min-w-0">
+                      <p className="truncate text-[13px] font-bold text-text">
+                        {diaCorto(c.horaInicio)} · {hora(c.horaInicio)} · {c.clienteNombre}
+                      </p>
+                      <p className="truncate text-[11.5px] text-text-faint">
+                        {c.servicios || "Sin servicio registrado"}
+                        {c.staffNombre ? ` · ${c.staffNombre}` : ""}
+                      </p>
+                    </div>
+                    <Badge tone={ESTADO_CITA_TONO[c.estado] ?? "neutral"}>{ESTADO_CITA_TEXTO[c.estado] ?? c.estado}</Badge>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </Card>
 
         {/* Fidelidad y lealtad */}

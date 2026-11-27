@@ -33,10 +33,12 @@ Fuente de verdad ejecutable: el archivo `.ts`, nunca este documento.
 | `/gift-cards` | No | cliente | proxy.ts |
 | `/checkout/membresia` | No | cliente | proxy.ts |
 | `/reserva` | No | cliente | proxy.ts |
-| `/invitacion` | No | staff, cliente | proxy.ts |
+| `/invitacion` | Sí | staff, cliente | proxy.ts |
 | `/panel` | No | barberia, guardian | proxy.ts |
 | `/panel/onboarding` | No | barberia | proxy.ts |
 | `/panel/sedes` | No | barberia, guardian | proxy.ts |
+| `/panel/perfil-publico` | No | barberia | proxy.ts |
+| `/panel/verificacion` | No | barberia | proxy.ts |
 | `/panel/staff` | No | barberia, guardian | proxy.ts |
 | `/panel/servicios` | No | barberia, guardian | proxy.ts |
 | `/panel/promociones` | No | barberia | proxy.ts |
@@ -47,9 +49,11 @@ Fuente de verdad ejecutable: el archivo `.ts`, nunca este documento.
 | `/panel/soporte` | No | barberia, guardian | proxy.ts |
 | `/panel/auditoria` | No | barberia, guardian | proxy.ts |
 | `/panel/wallet` | No | barberia, guardian | proxy.ts |
+| `/panel/ganancias` | No | barberia, guardian | proxy.ts |
 | `/panel/ads` | No | barberia, guardian | proxy.ts |
 | `/panel/marca` | No | barberia | proxy.ts |
 | `/panel/suscripcion` | No | barberia, guardian | proxy.ts |
+| `/panel/cumplimiento` | No | barberia, guardian | proxy.ts |
 | `/panel/reportes` | No | barberia, guardian | proxy.ts |
 | `/panel/lealtad` | No | barberia, guardian | proxy.ts |
 | `/panel/ia` | No | barberia, guardian | proxy.ts |

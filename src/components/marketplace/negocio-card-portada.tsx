@@ -3,6 +3,7 @@ import { obtenerT } from "@/lib/i18n/servidor";
 import { formatCOP } from "@/lib/utils";
 import Link from "next/link";
 import { fotoNegocio } from "./foto-respaldo";
+import { InsigniaEstatica } from "@/components/negocio/insignia-verificado";
 import type { NegocioTarjeta } from "./negocio-card";
 import s from "./negocio-card-portada.module.css";
 
@@ -27,7 +28,10 @@ export async function NegocioCardPortada({ negocio }: { negocio: NegocioTarjeta 
       {negocio.patrocinado ? <span className={s.patrocinado}>{t("card.patrocinado")}</span> : null}
       {negocio.ciudad ? <span className={s.ciudad}>{negocio.ciudad}</span> : null}
       <div className={s.panel}>
-        <h3 className={s.nombre}>{negocio.nombre}</h3>
+        <h3 className={s.nombre}>
+          {negocio.nombre}
+          {negocio.verificado ? <InsigniaEstatica etiqueta={t("neg.verificado_aria")} /> : null}
+        </h3>
         {hoy ? <span className={s.disponible}>{t("card.disponible_hoy")}</span> : null}
         <div className={s.pie}>
           <span>

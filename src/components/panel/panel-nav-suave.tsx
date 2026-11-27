@@ -137,6 +137,7 @@ function construirMenu(rol: RolPanel, prestaServicios: boolean): Grupo[] {
           { href: "/panel/cobros", etiqueta: "Cobros", Icono: CreditCard },
           { href: "/panel/libro", etiqueta: "Libro", Icono: BookOpen },
           { href: "/panel/wallet", etiqueta: "Wallet", Icono: Wallet },
+          { href: "/panel/ganancias", etiqueta: "Ganancias del equipo", Icono: HandCoins },
           { href: "/panel/reportes", etiqueta: "Reportes", Icono: ChartColumn },
           { href: "/panel/politica", etiqueta: "Anticipo y cancelaciones", Icono: CalendarX2 },
           { href: "/panel/pagos", etiqueta: "Pagos directos", Icono: HandCoins },

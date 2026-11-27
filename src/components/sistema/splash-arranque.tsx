@@ -54,13 +54,13 @@ export function SplashArranque() {
             <path id="sn-sello" d="M100,100 m-80,0 a80,80 0 1,1 160,0 a80,80 0 1,1 -160,0" />
           </defs>
           <circle cx="100" cy="100" r="98" fill="#0A0A0A" stroke="#FFFFFF" strokeWidth="2" />
-          <circle cx="100" cy="100" r="62" fill="none" stroke="#FF4D00" strokeWidth="2" />
+          <circle cx="100" cy="100" r="62" fill="none" stroke="#ff6600" strokeWidth="2" />
           <g className="sn-splash-giro">
             <text fontFamily="var(--font-space-mono), monospace" fontSize="17" fontWeight="700" letterSpacing="5.6" fill="#FFFFFF">
               <textPath href="#sn-sello">STYLERNOW · BARBER CULTURE · </textPath>
             </text>
           </g>
-          <text x="100" y="124" textAnchor="middle" fontFamily="var(--font-archivo), sans-serif" fontWeight="900" fontSize="72" fill="#FF4D00">
+          <text x="100" y="124" textAnchor="middle" fontFamily="var(--font-archivo), sans-serif" fontWeight="900" fontSize="72" fill="#ff6600">
             S.
           </text>
         </svg>

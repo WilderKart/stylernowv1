@@ -11,6 +11,7 @@ import { BuscadorPanel, CampanaPanel } from "./barra-superior-panel";
 import { BotonTema } from "@/components/tema/tema-cliente";
 import { SoporteNavBadge } from "@/components/panel/soporte-nav-badge";
 import { PanelNavSuave } from "./panel-nav-suave";
+import { BotonCerrarSesion } from "@/components/auth/boton-cerrar-sesion";
 import { usePanelSuave } from "./panel-estilo";
 
 /** Iconos de la barra lateral y del menú. Los módulos sin icono propio usan un cuadro de la marca. */
@@ -112,6 +113,7 @@ function PanelNavClasica({ rol, prestaServicios = false }: { rol: RolPanel; pres
                     { href: "/panel/cobros", etiqueta: "Cobros" },
                     { href: "/panel/libro", etiqueta: "Libro" },
                     { href: "/panel/wallet", etiqueta: "Wallet" },
+                    { href: "/panel/ganancias", etiqueta: "Ganancias del equipo" },
                     { href: "/panel/reportes", etiqueta: "Reportes" },
                     { href: "/panel/politica", etiqueta: "Anticipo y cancelaciones" },
                     { href: "/panel/pagos", etiqueta: "Pagos directos" },
@@ -207,6 +209,7 @@ function PanelNavClasica({ rol, prestaServicios = false }: { rol: RolPanel; pres
           STYLER<span className="text-[var(--side-accent)]">NOW</span>
         </Link>
         <nav className="flex-1 overflow-y-auto px-2 pb-4">{listaGrupos(true)}</nav>
+        <BotonCerrarSesion className="w-full border-t border-[var(--side-borde)] px-5 py-3 text-[12.5px] font-bold uppercase tracking-wide text-[var(--side-muted)] hover:bg-[var(--side-active-bg)] hover:text-[var(--side-text)]" />
         <div className="flex items-center justify-between border-t border-[var(--side-borde)] px-4 py-2">
           <span className="font-mono text-[10px] font-bold uppercase tracking-[0.66px] text-[var(--side-muted)]">Apariencia</span>
           <BotonTema className="flex size-10 items-center justify-center border-2 border-[var(--side-borde)]" />
@@ -257,7 +260,8 @@ function PanelNavClasica({ rol, prestaServicios = false }: { rol: RolPanel; pres
                 <X className="size-5" aria-hidden />
               </button>
             </div>
-            <nav className="flex-1 overflow-y-auto px-2 pb-6">{listaGrupos(true, () => setAbierto(false))}</nav>
+            <nav className="flex-1 overflow-y-auto px-2 pb-3">{listaGrupos(true, () => setAbierto(false))}</nav>
+            <BotonCerrarSesion alSalir={() => setAbierto(false)} className="w-full border-t border-[var(--side-borde)] px-5 py-3 text-[12.5px] font-bold uppercase tracking-wide text-[var(--side-muted)] hover:text-[var(--side-text)]" />
           </div>
         </div>
       ) : null}

@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 import Link from "next/link";
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { fotoNegocio } from "./foto-respaldo";
+import { InsigniaEstatica } from "@/components/negocio/insignia-verificado";
 import { etiquetaCategoria, IconoCategoria } from "./icono-categoria";
 import type { NegocioTarjeta } from "./negocio-card";
 
@@ -64,7 +65,10 @@ function TarjetaSeleccion({ negocio: n, onCerrar }: { negocio: NegocioTarjeta; o
       <Link href={href} className="grid grid-cols-[104px_minmax(0,1fr)] text-text no-underline">
         <Photo src={fotoNegocio(n.id, n.logo_url)} className="min-h-[112px] border-r-2 border-border" />
         <div className="flex min-w-0 flex-col gap-1.5 p-3">
-          <span className="poster-5 break-words">{n.nombre}</span>
+          <span className="poster-5 break-words">
+            {n.nombre}
+            {n.verificado ? <InsigniaEstatica etiqueta={t("neg.verificado_aria")} /> : null}
+          </span>
           <span className="sn-meta truncate">{n.ciudad}</span>
           <span className="sn-price">
             {n.total_resenas > 0 ? `★ ${n.calificacion.toFixed(1).replace(".", ",")}` : t("card.nuevo_min")}

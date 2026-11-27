@@ -1,0 +1,22 @@
+-- Reversión de la migración 202. Ojo: al quitar servicio_sede, TODOS los servicios vuelven a ofrecerse en todas las sedes.
+begin;
+-- slots_disponibles: restaurar la versión anterior (sin el filtro por sede) quitando la condición añadida.
+do $$
+declare v_def text; v_nuevo text;
+  v_b constant text := E'\n    and not exists (select 1 from public.servicio_sede ssd where ssd.servicio_id = s.id and ssd.sede_id = p_sede_id and not ssd.activo)';
+begin
+  v_def := replace(pg_get_functiondef('public.slots_disponibles(uuid,uuid[],date,uuid,integer)'::regprocedure), E'\r', '');
+  if position(v_b in v_def) > 0 then execute replace(v_def, v_b, ''); end if;
+end $$;
+drop function if exists public.servicio_crear_desde_catalogo(uuid, text, text, text, public.categoria_puntaje, int, numeric, text, uuid[], uuid[]);
+drop function if exists public.servicio_sede_definir(uuid, uuid, boolean);
+drop table if exists public.servicio_sede;
+drop index if exists public.servicio_catalogo_unico_activo;
+-- Rutas del catálogo no cumplen la regla anterior: se anulan antes de restaurarla.
+update public.servicio set imagen_url = null where imagen_url like '/servicios/%';
+alter table public.servicio drop constraint if exists servicio_imagen_url_valida;
+alter table public.servicio add constraint servicio_imagen_url_valida check (imagen_url is null or (imagen_url ~ '^https?://' and length(imagen_url) <= 600));
+alter table public.servicio drop column if exists catalogo_ref;
+-- Política de borrado (si se desea volver al comportamiento anterior):
+-- create policy servicio_delete_barberia on public.servicio for delete using (public.is_barberia_de(negocio_id)); grant delete on public.servicio to authenticated;
+commit;

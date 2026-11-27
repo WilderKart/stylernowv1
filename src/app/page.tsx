@@ -114,7 +114,24 @@ export default async function HomePage(props: PageProps<"/">) {
   // "Abierto hoy" lo resuelve la BD con disponibilidad real (marketplace_buscar_filtrado).
   const todosLosResultados = resultados ?? [];
   const hayPaginaSiguiente = vista === "lista" && todosLosResultados.length > TAM_PAGINA;
-  const negocios = hayPaginaSiguiente ? todosLosResultados.slice(0, TAM_PAGINA) : todosLosResultados;
+  const negociosBase = hayPaginaSiguiente ? todosLosResultados.slice(0, TAM_PAGINA) : todosLosResultados;
+
+  // La tarjeta debe mostrar la FOTO PRINCIPAL del negocio (la fachada que elige en su perfil público), igual que su página; el logo
+  // solo es el respaldo cuando aún no tiene foto principal. El buscador devuelve el logo, así que se completa en una consulta en lote.
+  const fotosPrincipales = new Map<string, string>();
+  if (negociosBase.length > 0) {
+    const { data: fotos } = await supabase.from("negocio").select("id, foto_principal_url").in("id", negociosBase.map((n) => n.id));
+    for (const f of fotos ?? []) if (f.foto_principal_url) fotosPrincipales.set(f.id, f.foto_principal_url);
+  }
+  // Insignia de verificación: una consulta en lote devuelve solo los ids verificados (dato público).
+  const verificados = new Set<string>();
+  if (negociosBase.length > 0) {
+    const { data: ids } = await (supabase as unknown as { rpc: (n: string, a: object) => Promise<{ data: string[] | null }> }).rpc("negocios_verificados", {
+      p_ids: negociosBase.map((n) => n.id),
+    });
+    for (const id of ids ?? []) verificados.add(id);
+  }
+  const negocios = negociosBase.map((n) => ({ ...n, logo_url: fotosPrincipales.get(n.id) ?? n.logo_url, verificado: verificados.has(n.id) }));
 
   let interes: string[] | null = null;
   if (user) {

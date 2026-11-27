@@ -3,7 +3,7 @@
 @import "../styles/temas-suaves.css";
 @import "../styles/panel-suave.css";
 
-/* StylerNow — sistema de diseño brutalista (blanco #FFF / negro #0A0A0A / naranja señal #FF4D00).
+/* StylerNow — sistema de diseño brutalista (blanco #FFF / negro #0A0A0A / naranja señal #ff6600).
    Fuente de verdad: stylernow-prototipo/css/tokens.css. Tema claro por defecto;
    oscuro con data-theme="dark" en <html>, igual que el prototipo. */
 
@@ -16,18 +16,18 @@
   --surface-2: #e6e6e6;
   --ink: #0a0a0a;
   --paper: #ffffff;
-  --signal: #ff4d00;
-  --signal-pressed: #e04400;
+  --signal: #ff6600;
+  --signal-pressed: #e65c00;
   --text: #0a0a0a;
   --text-muted: #5c5c5c;
   --text-faint: #6b6b6b; /* 4.76:1 sobre #f2f2f2 (antes #767676: 4.06) */
   --text-disabled: #8a8a8a;
-  --accent-text: #c23a00;
+  --accent-text: #ff6600;
   --line: #0a0a0a;
   --grid: #0a0a0a;
   --grid-soft: #d4d4d4;
   --shadow-ink: #0a0a0a;
-  --focus: #ff4d00;
+  --focus: #ff6600;
   --success: #00e07a;
   --warning: #ffd400;
   --danger: #ff1f1f;
@@ -45,21 +45,21 @@
   --surface-2: #1e1e1e;
   --ink: #0a0a0a;
   --paper: #ffffff;
-  --signal: #ff4d00;
-  --signal-pressed: #e04400;
+  --signal: #ff6600;
+  --signal-pressed: #e65c00;
   --text: #ffffff;
   --text-muted: #a3a3a3;
   --text-faint: #8a8a8a;
   --text-disabled: #6b6b6b;
-  --accent-text: #ff4d00;
+  --accent-text: #ff6600;
   --line: #ffffff;
   --grid: #ffffff;
   --grid-soft: #2e2e2e;
-  --shadow-ink: #ff4d00;
-  --focus: #ff4d00;
+  --shadow-ink: #ff6600;
+  --focus: #ff6600;
   --scrim: rgba(0, 0, 0, 0.8);
-  --sn-shadow-hard: 4px 4px 0 0 #ff4d00;
-  --sn-shadow-hard-sm: 2px 2px 0 0 #ff4d00;
+  --sn-shadow-hard: 4px 4px 0 0 #ff6600;
+  --sn-shadow-hard-sm: 2px 2px 0 0 #ff6600;
   color-scheme: dark;
 }
 
@@ -68,7 +68,7 @@
   --nav-bg: #0a0a0a;
   --nav-text: #ffffff;
   --nav-muted: rgba(255, 255, 255, 0.7);
-  --nav-accent: #ff4d00;
+  --nav-accent: #ff6600;
   --nav-active-bg: rgba(255, 255, 255, 0.1);
   --nav-borde: rgba(255, 255, 255, 0.1);
   --side-bg: var(--nav-bg);
@@ -77,8 +77,8 @@
   --side-accent: var(--nav-accent);
   --side-active-bg: var(--nav-active-bg);
   --side-borde: var(--nav-borde);
-  --hero-gradient: radial-gradient(120% 140% at 85% 0%, #ff4d00 0%, #7a2600 45%, #0a0a0a 100%);
-  --kpi-gradient: linear-gradient(135deg, #ff4d00 0%, #a33300 100%);
+  --hero-gradient: radial-gradient(120% 140% at 85% 0%, #ff6600 0%, #7a2600 45%, #0a0a0a 100%);
+  --kpi-gradient: linear-gradient(135deg, #ff6600 0%, #ff6600 100%);
   --hero-text: #ffffff;
   --line-input: var(--line);
   --sombra-banner: 4px 4px 0 0 var(--signal);

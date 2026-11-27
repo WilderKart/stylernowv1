@@ -389,7 +389,7 @@ function SeccionBloqueos({ vinculoId, bloqueosIniciales }: { vinculoId: string; 
             <li key={x.id} className="flex items-center justify-between gap-3 border-2 border-border px-3.5 py-2.5">
               <div className="min-w-0">
                 <p className="text-[12.5px] font-semibold text-text">
-                  {new Date(x.fechaInicio).toLocaleDateString("es-CO")} — {new Date(x.fechaFin).toLocaleDateString("es-CO")}{" "}
+                  {new Date(x.fechaInicio).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })} — {new Date(x.fechaFin).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })}{" "}
                   <span className={x.estado === "PENDIENTE" ? "text-accent" : "text-danger"}>
                     · {x.estado === "PENDIENTE" ? "Pendiente de aprobación" : "No aprobada"}
                   </span>
@@ -414,7 +414,7 @@ function SeccionBloqueos({ vinculoId, bloqueosIniciales }: { vinculoId: string; 
             <li key={b.id} className="flex items-center justify-between rounded-xl border border-border-subtle bg-surface px-3.5 py-2.5">
               <div>
                 <p className="text-[12.5px] font-semibold text-text">
-                  {new Date(b.fechaInicio).toLocaleDateString("es-CO")} — {new Date(b.fechaFin).toLocaleDateString("es-CO")}
+                  {new Date(b.fechaInicio).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })} — {new Date(b.fechaFin).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })}
                 </p>
                 {b.motivo ? <p className="text-[11px] text-text-faint">{b.motivo}</p> : null}
               </div>

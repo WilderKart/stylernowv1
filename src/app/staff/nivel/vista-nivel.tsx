@@ -67,7 +67,7 @@ export function VistaNivel({
               <li key={i} className="flex items-center justify-between rounded-xl border border-border-subtle bg-surface px-3.5 py-2.5">
                 <div>
                   <p className="text-[12.5px] font-semibold text-text">{e.motivo ?? e.evento.replaceAll("_", " ")}</p>
-                  <p className="text-[11px] text-text-faint">{new Date(e.createdAt).toLocaleDateString("es-CO")}</p>
+                  <p className="text-[11px] text-text-faint">{new Date(e.createdAt).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })}</p>
                 </div>
                 <p className={`text-[13px] font-bold ${e.puntosDelta >= 0 ? "text-success" : "text-danger"}`}>
                   {e.puntosDelta >= 0 ? "+" : ""}

@@ -492,7 +492,7 @@ function SeccionTextosLegales({ textosIniciales }: { textosIniciales: TextoLegal
 
       {vigente ? (
         <p className="mb-3 text-[11.5px] text-text-faint">
-          Versión vigente: {vigente.version} · publicada {new Date(vigente.publicadoAt).toLocaleDateString("es-CO")}
+          Versión vigente: {vigente.version} · publicada {new Date(vigente.publicadoAt).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })}
         </p>
       ) : (
         <p className="mb-3 text-[11.5px] text-text-faint">Todavía no hay ninguna versión publicada de este texto.</p>

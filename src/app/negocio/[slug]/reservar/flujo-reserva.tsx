@@ -70,12 +70,15 @@ const PASOS = ["res.paso_servicio", "res.paso_profesional", "res.paso_hora", "re
 export function FlujoReserva({
   negocio,
   sedes,
-  servicios,
+  servicios: serviciosTodos,
   staff,
-  combos,
+  combos: combosTodos,
+  ocultosPorSede = {},
   saldoPendiente = 0,
   terminos,
 }: {
+  /** Servicios que NO se ofrecen en cada sede (id de sede → ids de servicio). Sin entrada = se ofrecen todos. */
+  ocultosPorSede?: Record<string, string[]>;
   saldoPendiente?: number;
   terminos?: Terminologia;
   negocio: DatosNegocio;
@@ -111,6 +114,10 @@ export function FlujoReserva({
 
   const sede = sedes.find((s) => s.id === sedeId) ?? sedes[0];
   const tz = sede?.zona_horaria;
+  // Solo se ofrece lo que esa sede presta; un combo se ofrece si TODOS sus servicios se ofrecen allí.
+  const ocultosSede = new Set(ocultosPorSede[sede?.id ?? ""] ?? []);
+  const servicios = serviciosTodos.filter((s) => !ocultosSede.has(s.id));
+  const combos = combosTodos.filter((c) => c.servicio_ids.every((id) => !ocultosSede.has(id)));
 
   const seleccionados = servicios.filter((s) => servicioIds.includes(s.id));
   const montoTotal = seleccionados.reduce((a, s) => a + s.precio_base, 0);
@@ -320,6 +327,9 @@ export function FlujoReserva({
                   value={sedeId}
                   onChange={(e) => {
                     setSedeId(e.target.value);
+                    // Lo ya elegido que la nueva sede no ofrece se quita de la selección.
+                    const ocultosNueva = new Set(ocultosPorSede[e.target.value] ?? []);
+                    setServicioIds((prev) => prev.filter((id) => !ocultosNueva.has(id)));
                     setSlot(null);
                   }}
                   className="min-h-12 w-full min-w-0 border-2 border-border bg-bg px-3 text-[15px] text-text outline-none focus:shadow-hard"

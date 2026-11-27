@@ -47,7 +47,7 @@ export function ColaModeracion({ resenasIniciales, errorInicial }: { resenasInic
             <Badge tone="accent">{"★".repeat(r.calificacion)}</Badge>
           </div>
           {r.comentario ? <p className="mt-1.5 text-[12.5px] text-text-muted">{r.comentario}</p> : null}
-          <p className="mt-1 text-[11px] text-text-faint">{new Date(r.createdAt).toLocaleDateString("es-CO")}</p>
+          <p className="mt-1 text-[11px] text-text-faint">{new Date(r.createdAt).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })}</p>
           <div className="mt-3 flex gap-2">
             <Button size="sm" variant="secondary" loading={accionando === r.id} onClick={() => onModerar(r.id, "MANTENER")}>
               Mantener

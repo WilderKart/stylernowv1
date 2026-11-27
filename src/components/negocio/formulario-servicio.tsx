@@ -1,7 +1,8 @@
 "use client";
 
 import { useTerminologia } from "@/components/panel/terminologia-contexto";
-import { actualizarServicio, crearServicio } from "@/app/panel/servicios/actions";
+import { actualizarServicio, crearServicio, subirImagenServicio } from "@/app/panel/servicios/actions";
+import { SelectorImagen } from "@/components/servicios/selector-imagen";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -15,6 +16,10 @@ export interface ServicioExistente {
   categoria_puntaje: "ESTANDAR" | "PREMIUM" | "COMPLEMENTARIO";
   buffer_previo_minutos: number;
   buffer_posterior_minutos: number;
+  /** Imagen ya guardada (si hay). */
+  imagen_url?: string | null;
+  /** Clave del catálogo: si existe, la imagen es la predeterminada y no se cambia. */
+  catalogo_ref?: string | null;
 }
 
 const CATEGORIAS: { valor: ServicioExistente["categoria_puntaje"]; etiqueta: string; ayuda: string }[] = [
@@ -56,6 +61,8 @@ export function FormularioServicio({
   const [bufferPosterior, setBufferPosterior] = useState(String(servicioExistente?.buffer_posterior_minutos ?? 0));
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [imagenNueva, setImagenNueva] = useState<string | null>(null);
+  const esDelCatalogo = !!servicioExistente?.catalogo_ref;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -74,15 +81,27 @@ export function FormularioServicio({
 
     if (servicioExistente) {
       const res = await actualizarServicio(servicioExistente.id, datos);
+      if (!res.ok) {
+        setGuardando(false);
+        return setError(res.error);
+      }
+      const img = imagenNueva ? await subirImagenServicio(servicioExistente.id, imagenNueva) : null;
       setGuardando(false);
-      if (!res.ok) return setError(res.error);
+      if (img && !img.ok) return setError(`Los datos se guardaron, pero la imagen no: ${img.error}`);
+      setImagenNueva(null);
       onGuardado(servicioExistente.id);
       return;
     }
 
     const res = await crearServicio({ negocioId, ...datos });
+    if (!res.ok) {
+      setGuardando(false);
+      return setError(res.error);
+    }
+    // La imagen es opcional: si falla, el servicio ya existe y se puede reintentar desde su ficha.
+    const img = imagenNueva ? await subirImagenServicio(res.data.id, imagenNueva) : null;
     setGuardando(false);
-    if (!res.ok) return setError(res.error);
+    if (img && !img.ok) return setError(`El servicio se creó, pero la imagen no se pudo subir: ${img.error} Puedes subirla desde su ficha.`);
     onGuardado(res.data.id);
   }
 
@@ -162,6 +181,12 @@ export function FormularioServicio({
       <p className="text-[11px] text-text-faint">
         Son minutos extra para preparar el puesto antes y limpiarlo después. Bloquean la agenda del {tm.profesional}, pero no se cobran ni los ve el cliente.
       </p>
+
+      {esDelCatalogo ? (
+        <p className="text-[11.5px] text-text-faint">Este servicio viene del catálogo de StylerNow y mantiene su imagen predeterminada.</p>
+      ) : puedeEditarPrecio ? (
+        <SelectorImagen actual={servicioExistente?.imagen_url} nuevo={imagenNueva} onCambio={setImagenNueva} />
+      ) : null}
 
       {error ? <p className="text-[12.5px] text-danger">{error}</p> : null}
       <Button type="submit" loading={guardando} className="w-full">

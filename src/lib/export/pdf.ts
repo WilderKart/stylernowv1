@@ -70,7 +70,7 @@ export async function generarReportePdf(input: ReportePdfInput): Promise<Uint8Ar
 
   function dibujarPie(paginaActual: typeof page, pagina: number) {
     paginaActual.drawImage(qrImage, { x: ANCHO_PAGINA - MARGEN - 40, y: MARGEN - 5, width: 40, height: 40 });
-    paginaActual.drawText(`Reporte N.º ${numeroReporte} · Generado ${generadoEn.toLocaleString("es-CO")}`, {
+    paginaActual.drawText(`Reporte N.º ${numeroReporte} · Generado ${generadoEn.toLocaleString("es-CO", { timeZone: "America/Bogota" })}`, {
       x: MARGEN, y: MARGEN + 10, size: 7.5, font: fontRegular, color: rgb(0.55, 0.52, 0.48),
     });
     paginaActual.drawText(`Página ${pagina}`, { x: MARGEN, y: MARGEN - 5, size: 7.5, font: fontRegular, color: rgb(0.55, 0.52, 0.48) });

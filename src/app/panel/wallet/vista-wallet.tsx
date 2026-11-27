@@ -60,7 +60,7 @@ export function VistaWallet({
                     <p className="text-[12.5px] font-semibold text-text">{TIPO_ETIQUETA[m.tipo] ?? m.tipo}</p>
                     <Badge tone={TIPO_TONO[m.tipo] ?? "neutral"}>{m.tipo.replaceAll("_", " ")}</Badge>
                   </div>
-                  <p className="text-[11px] text-text-faint">{new Date(m.createdAt).toLocaleString("es-CO")}</p>
+                  <p className="text-[11px] text-text-faint">{new Date(m.createdAt).toLocaleString("es-CO", { timeZone: "America/Bogota" })}</p>
                 </div>
                 <p className={`shrink-0 text-[13px] font-bold ${m.monto >= 0 ? "text-success" : "text-danger"}`}>
                   {m.monto >= 0 ? "+" : ""}

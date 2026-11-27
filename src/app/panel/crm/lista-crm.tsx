@@ -202,7 +202,7 @@ export function ListaCRM({
                       </div>
                       <p className="mt-1 truncate text-[12px] text-text-faint">
                         {c.visitas} visita{c.visitas === 1 ? "" : "s"} ·{" "}
-                        {c.ultimaVisita ? `última ${new Date(c.ultimaVisita).toLocaleDateString("es-CO")}` : "sin visitas completadas"}
+                        {c.ultimaVisita ? `última ${new Date(c.ultimaVisita).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })}` : "sin visitas completadas"}
                       </p>
                     </div>
                     <p className="shrink-0 text-[13px] font-bold text-text">{formatCOP(c.ltv)}</p>

@@ -295,7 +295,7 @@ export function VistaPromociones({ promociones, historial }: { promociones: Prom
             {historial.map((h) => (
               <li key={h.id}>
                 {ACCION_TEXTO[h.accion] ?? h.accion}
-                {h.titulo ? ` · ${h.titulo}` : ""} · {new Date(h.fecha).toLocaleString("es-CO")}
+                {h.titulo ? ` · ${h.titulo}` : ""} · {new Date(h.fecha).toLocaleString("es-CO", { timeZone: "America/Bogota" })}
               </li>
             ))}
           </ul>

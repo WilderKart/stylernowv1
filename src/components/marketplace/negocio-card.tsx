@@ -5,6 +5,7 @@ import type { Traductor } from "@/lib/i18n/diccionario";
 import { cn, formatCOP } from "@/lib/utils";
 import Link from "next/link";
 import { fotoNegocio } from "./foto-respaldo";
+import { InsigniaEstatica } from "@/components/negocio/insignia-verificado";
 
 export interface NegocioTarjeta {
   id: string;
@@ -18,6 +19,8 @@ export interface NegocioTarjeta {
   precio_desde: number | null;
   proxima_disponibilidad: string | null;
   patrocinado?: boolean;
+  /** Negocio con verificación aprobada: muestra la insignia azul junto al nombre. */
+  verificado?: boolean;
   campana_id?: string | null;
   sede_latitud?: number | null;
   sede_longitud?: number | null;
@@ -64,7 +67,10 @@ export async function NegocioCard({
       <div className="sn-shop__body">
         {index != null ? <Num>{String(index).padStart(2, "0")} /</Num> : <span />}
         <span className="sn-meta truncate">{negocio.ciudad}</span>
-        <h3 className="sn-shop__name poster-4 break-words">{negocio.nombre}</h3>
+        <h3 className="sn-shop__name poster-4 break-words">
+          {negocio.nombre}
+          {negocio.verificado ? <InsigniaEstatica etiqueta={t("neg.verificado_aria")} /> : null}
+        </h3>
         {negocio.categoria.length > 0 ? (
           <span className="sn-meta col-span-full break-words">{negocio.categoria.slice(0, 2).join(" · ")}</span>
         ) : null}

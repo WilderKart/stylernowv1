@@ -129,6 +129,8 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
 
   const { data: reserva } = await cargar(id);
   if (!reserva) notFound();
+  // Cancelada solo por vencer su bloqueo temporal: no es el final; la pantalla de pago revisa la disponibilidad real y permite retomarla.
+  if (reserva.estado === "CANCELADA" && reserva.cancelado_motivo === "PAGO_EXPIRADO") redirect(`/reserva/${id}/pago`);
   // Pago directo al negocio (migración 194): estado visible para el cliente (RLS: solo su propio pago).
   const pagoDirecto = await supabase.from("pago_reserva").select("estado, monto_reportado").eq("reserva_id", id).eq("metodo", "TRANSFERENCIA_DIRECTA").order("created_at", { ascending: false }).limit(1);
   const estadoPagoDirecto = pagoDirecto.data?.[0]?.estado ?? null;
@@ -238,8 +240,8 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
           lineas={[cita ? t("rv.ticket", { codigo: cita.codigo }) : null, `${staff?.nombre ?? t("rv.por_asignar")} · ${hora} – ${horaFin}`, negocio?.nombre ?? "—"].filter((l): l is string => Boolean(l))}
           pie={
             <>
-              <span className="sn-label">{confirmada ? t("rv.anticipo_pagada") : t("rv.anticipo")}</span>
-              <span className="sn-price">{formatCOP(Number(reserva.monto_sena))}</span>
+              <span className="sn-label">{Number(reserva.monto_sena) <= 0 ? t("rv.sin_anticipo") : confirmada ? t("rv.anticipo_pagada") : t("rv.anticipo")}</span>
+              <span className="sn-price">{Number(reserva.monto_sena) <= 0 ? t("rv.sin_anticipo_valor") : formatCOP(Number(reserva.monto_sena))}</span>
             </>
           }
         />
@@ -305,15 +307,19 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
         />
         <Fila
           icono={<Wallet aria-hidden className="size-5" />}
-          titulo={t("rv.anticipo")}
+          titulo={Number(reserva.monto_sena) <= 0 ? t("rv.sin_anticipo") : t("rv.anticipo")}
           meta={confirmada && saldoLocal > 0 ? t("rv.pagas_local", { monto: formatCOP(saldoLocal) }) : undefined}
           derecha={
-            <>
-              <span className="sn-price">{formatCOP(Number(reserva.monto_sena))}</span>
-              <Status tone={confirmada ? "ok" : "warn"} icon={confirmada ? <Check aria-hidden className="size-3.5" /> : undefined}>
-                {confirmada ? t("rv.pagada") : t("rv.pendiente")}
-              </Status>
-            </>
+            Number(reserva.monto_sena) <= 0 ? (
+              <span className="sn-price">{t("rv.sin_anticipo_valor")}</span>
+            ) : (
+              <>
+                <span className="sn-price">{formatCOP(Number(reserva.monto_sena))}</span>
+                <Status tone={confirmada ? "ok" : "warn"} icon={confirmada ? <Check aria-hidden className="size-3.5" /> : undefined}>
+                  {confirmada ? t("rv.pagada") : t("rv.pendiente")}
+                </Status>
+              </>
+            )
           }
         />
         {confirmada ? (
@@ -344,7 +350,7 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
           <Fila icono={<Check aria-hidden className="size-5" />} titulo={t("rv.ya_calificaste")} meta={t("rv.gracias_resena")} />
         ) : null}
         {confirmada ? (
-          <BotonCancelar reservaId={reserva.id} reembolsoEstimado={reembolsoEstimado} reembolsoPct={pct} pagoDirecto={pagoDirectoVigente} />
+          <BotonCancelar reservaId={reserva.id} reembolsoEstimado={reembolsoEstimado} reembolsoPct={pct} pagoDirecto={pagoDirectoVigente} sinAnticipo={Number(reserva.monto_sena) <= 0} />
         ) : null}
       </Filas>
 

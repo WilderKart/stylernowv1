@@ -119,7 +119,7 @@ export function VistaSoporte({
               >
                 <div>
                   <p className="text-[13.5px] font-semibold text-text">{t.asunto}</p>
-                  <p className="text-[11px] text-text-faint">Actualizado {new Date(t.updatedAt).toLocaleDateString("es-CO")}</p>
+                  <p className="text-[11px] text-text-faint">Actualizado {new Date(t.updatedAt).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })}</p>
                 </div>
                 <Badge tone={ESTADO_TONO[t.estado] ?? "accent"}>{t.estado.replace("_", " ")}</Badge>
               </Link>

@@ -1,6 +1,7 @@
 "use client";
 
-import { alternarStaffServicio, cambiarEstadoServicio, type StaffAsignable } from "@/app/panel/servicios/actions";
+import { alternarStaffServicio, cambiarEstadoServicio, definirServicioSede, type StaffAsignable } from "@/app/panel/servicios/actions";
+import { ImagenServicio } from "@/components/servicios/imagen-servicio";
 import { Button } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/card";
 import { FormularioServicio, type ServicioExistente } from "@/components/negocio/formulario-servicio";
@@ -12,11 +13,17 @@ export function DetalleServicio({
   servicio,
   permisos,
   staffAsignableInicial,
+  sedes: sedesIniciales,
+  sedePropiaId,
 }: {
   servicio: ServicioExistente & { negocio_id: string; estado: "ACTIVO" | "INACTIVO" };
   permisos: PermisosPanel;
   staffAsignableInicial: StaffAsignable[];
+  sedes: Array<{ id: string; nombre: string; ofrece: boolean }>;
+  /** Si quien mira es guardián, solo puede cambiar SU sede (la base lo exige igual). */
+  sedePropiaId: string | null;
 }) {
+  const [sedes, setSedes] = useState(sedesIniciales);
   const router = useRouter();
   const [staffAsignable, setStaffAsignable] = useState(staffAsignableInicial);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +38,16 @@ export function DetalleServicio({
     setAccionando(false);
     if (!res.ok) return setError(res.error);
     router.refresh();
+  }
+
+  async function onAlternarSede(sedeId: string, ofrece: boolean) {
+    const anterior = sedes;
+    setSedes((prev) => prev.map((s) => (s.id === sedeId ? { ...s, ofrece } : s)));
+    const res = await definirServicioSede(servicio.id, sedeId, ofrece);
+    if (!res.ok) {
+      setSedes(anterior);
+      setError(res.error);
+    } else setError(null);
   }
 
   async function onAlternarStaff(staffId: string, asignarAhora: boolean) {
@@ -52,16 +69,52 @@ export function DetalleServicio({
       ) : null}
 
       <Card className="mb-6">
-        <div className="flex items-center justify-between">
-          <p className="text-[13px] font-bold text-text">Estado</p>
-          <Badge tone={activo ? "success" : "neutral"}>{servicio.estado}</Badge>
+        <div className="flex items-start gap-3">
+          <ImagenServicio url={servicio.imagen_url} nombre={servicio.nombre} className="size-20" />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[13px] font-bold text-text">Estado</p>
+              <Badge tone={activo ? "success" : "neutral"}>{activo ? "Se ofrece" : "No se ofrece"}</Badge>
+            </div>
+            {permisos.activarDesactivarServicio ? (
+              <>
+                <Button size="sm" variant="secondary" loading={accionando} onClick={onCambiarEstado} className="mt-3">
+                  {activo ? "Dejar de ofrecer" : "Volver a ofrecer"}
+                </Button>
+                <p className="mt-2 text-[11.5px] text-text-faint">
+                  Los servicios no se borran: si ya no lo prestas, déjalo de ofrecer y deja de aparecer a tus clientes. Tus reservas y tu historial se conservan, y puedes reactivarlo cuando quieras.
+                </p>
+              </>
+            ) : null}
+          </div>
         </div>
-        {permisos.activarDesactivarServicio ? (
-          <Button size="sm" variant="secondary" loading={accionando} onClick={onCambiarEstado} className="mt-3">
-            {activo ? "Desactivar" : "Activar"}
-          </Button>
-        ) : null}
       </Card>
+
+      {sedes.length > 0 ? (
+        <section className="mb-6">
+          <h2 className="font-display mb-1 text-[15px] font-bold uppercase text-text">Sedes donde se ofrece</h2>
+          <p className="mb-3 text-[12px] text-text-muted">Activa o desactiva este servicio en cada sede. En una sede desactivada no se puede reservar.</p>
+          <ul className="flex flex-col gap-2">
+            {sedes.map((s) => {
+              const puede = permisos.activarDesactivarServicio && (sedePropiaId === null || sedePropiaId === s.id);
+              return (
+                <li key={s.id} className="flex items-center justify-between gap-3 border-2 border-border bg-surface p-3">
+                  <p className="truncate text-[13px] font-semibold text-text">{s.nombre}</p>
+                  <button
+                    type="button"
+                    disabled={!puede}
+                    aria-pressed={s.ofrece}
+                    onClick={() => onAlternarSede(s.id, !s.ofrece)}
+                    className={`min-h-9 shrink-0 border-2 px-3 text-[11.5px] font-bold uppercase disabled:opacity-50 ${s.ofrece ? "border-ink bg-signal text-ink" : "border-border text-text-muted"}`}
+                  >
+                    {s.ofrece ? "Se ofrece" : "No se ofrece"}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
 
       {permisos.asignarStaffServicio ? (
         <section className="mb-6">
@@ -112,7 +165,11 @@ export function DetalleServicio({
           servicioExistente={servicio}
           puedeEditarPrecio={permisos.cambiarPrecioServicio}
           textoBoton="GUARDAR CAMBIOS"
-          onGuardado={() => router.refresh()}
+          onGuardado={() => {
+            // Tras guardar, se vuelve al listado de servicios (ahí se ve el cambio).
+            router.push("/panel/servicios");
+            router.refresh();
+          }}
         />
       </section>
     </main>

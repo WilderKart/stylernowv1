@@ -2,6 +2,7 @@ import { resumenPoliticaCancelacion } from "@/lib/pagos/sena";
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { PantallaPago } from "./pantalla-pago";
+import { RecuperarReserva, type SituacionRecuperacion } from "./recuperar-reserva";
 import { obtenerT } from "@/lib/i18n/servidor";
 
 export async function generateMetadata() {
@@ -28,7 +29,7 @@ export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
   const { data: reserva } = await supabase
     .from("reserva")
     .select(
-      `id, negocio_id, estado, hora_inicio, monto_total, monto_sena, expira_at,
+      `id, negocio_id, estado, cancelado_motivo, hora_inicio, monto_total, monto_sena, expira_at,
        negocio:negocio_id (nombre, slug, ventana_reembolso_total_horas, ventana_reembolso_parcial_horas, reembolso_parcial_pct, anticipo_modo),
        sede:sede_id (zona_horaria),
        staff:staff_id (nombre),
@@ -39,7 +40,37 @@ export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
 
   if (!reserva) notFound();
 
-  // Una Reserva ya confirmada o cancelada no vuelve a la pantalla de cobro.
+  // Bloqueo vencido (aún figura pendiente) o reserva cancelada SOLO por expirar el bloqueo: no es un callejón. El servidor comprueba la
+  // disponibilidad real del turno (migración 205) y la pantalla ofrece continuar, otros horarios o retomar un pago ya reportado.
+  const venció = reserva.estado === "PENDIENTE_PAGO" && reserva.expira_at !== null && new Date(reserva.expira_at) < new Date();
+  const canceladaPorExpirar = reserva.estado === "CANCELADA" && reserva.cancelado_motivo === "PAGO_EXPIRADO";
+  if (venció || canceladaPorExpirar) {
+    const { data: diag } = await (supabase as unknown as { rpc: (n: string, a: object) => Promise<{ data: unknown }> }).rpc("reserva_estado_recuperacion", { p_reserva_id: id });
+    const d = diag as { situacion?: string; motivo?: string | null } | null;
+    if (d?.situacion === "YA_CONFIRMADA") redirect(`/reserva/${id}`);
+    if (d?.situacion === "VIGENTE") redirect(`/reserva/${id}/pago`);        // otra pestaña ya lo recuperó: se vuelve a leer
+    const n = reserva.negocio as unknown as { nombre: string; slug: string } | null;
+    const sedeRec = reserva.sede as unknown as { zona_horaria: string } | null;
+    const staffRec = reserva.staff as unknown as { nombre: string } | null;
+    return (
+      <RecuperarReserva
+        situacion={(d?.situacion as SituacionRecuperacion | undefined) ?? "NO_RECUPERABLE"}
+        motivo={d?.motivo ?? null}
+        resumen={{
+          reservaId: reserva.id,
+          negocio: n?.nombre ?? "StylerNow",
+          slug: n?.slug ?? "",
+          servicios: (reserva.reserva_servicio ?? []).map((rs) => (rs.servicio as unknown as { nombre: string } | null)?.nombre ?? t("rv.servicio")).join(" + "),
+          profesional: staffRec?.nombre ?? t("pago.profesional_asignado"),
+          horaInicio: reserva.hora_inicio,
+          zonaHoraria: sedeRec?.zona_horaria ?? "America/Bogota",
+          montoTotal: Number(reserva.monto_total),
+        }}
+      />
+    );
+  }
+
+  // Una Reserva ya confirmada o cancelada (por otro motivo) no vuelve a la pantalla de cobro.
   if (reserva.estado !== "PENDIENTE_PAGO") redirect(`/reserva/${id}`);
 
   const [{ data: mediosJson }, { data: cobraEnLinea }] = await Promise.all([

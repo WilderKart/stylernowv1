@@ -152,6 +152,62 @@ export async function obtenerLineaTiempoDia(negocioId: string, sedeId?: string |
   }
 }
 
+// ── Próximas reservas (de mañana en adelante) ───────────────────────────────
+
+export interface CitaProxima extends CitaDelDia {
+  sedeId: string | null;
+}
+
+/** Reservas vivas desde MAÑANA (hora de Colombia) hasta 14 días. Las de hoy ya salen en la línea de tiempo del día. */
+export async function obtenerProximasCitas(negocioId: string, sedeId?: string | null): Promise<Resultado<CitaProxima[]>> {
+  try {
+    const { supabase } = await usuarioActual();
+    const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Bogota" }).format(new Date());
+    const base = new Date(`${hoy}T12:00:00Z`);
+    base.setUTCDate(base.getUTCDate() + 1);
+    const manana = base.toISOString().slice(0, 10);
+    base.setUTCDate(base.getUTCDate() + 14);
+    const limite = base.toISOString().slice(0, 10);
+
+    let q = supabase
+      .from("reserva")
+      .select(
+        `id, estado, hora_inicio, hora_fin, sede_id,
+         cliente:cliente_id (nombre),
+         staff:staff_id (nombre),
+         reserva_servicio (servicio:servicio_id (nombre))`
+      )
+      .eq("negocio_id", negocioId)
+      .gte("hora_inicio", new Date(`${manana}T00:00:00-05:00`).toISOString())
+      .lt("hora_inicio", new Date(`${limite}T00:00:00-05:00`).toISOString())
+      .in("estado", ["CONFIRMADA", "PENDIENTE_PAGO", "EN_CURSO"])
+      .order("hora_inicio", { ascending: true })
+      .limit(8);
+    if (sedeId) q = q.eq("sede_id", sedeId);
+
+    const { data, error } = await q;
+    if (error) return { ok: false, error: error.message };
+    return {
+      ok: true,
+      data: (data ?? []).map((r) => ({
+        id: r.id,
+        horaInicio: r.hora_inicio,
+        horaFin: r.hora_fin,
+        estado: r.estado,
+        sedeId: r.sede_id,
+        clienteNombre: (r.cliente as unknown as { nombre: string } | null)?.nombre ?? "Cliente",
+        staffNombre: (r.staff as unknown as { nombre: string } | null)?.nombre ?? null,
+        servicios: (r.reserva_servicio ?? [])
+          .map((rs) => (rs.servicio as unknown as { nombre: string } | null)?.nombre)
+          .filter(Boolean)
+          .join(" + "),
+      })),
+    };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
 // ── Lealtad transversal (ADR-011 + extensión del fundador, 2026-09-16) ──
 
 export interface MetricasLealtadNegocio {

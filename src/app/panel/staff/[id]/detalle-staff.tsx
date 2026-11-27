@@ -51,7 +51,10 @@ export function DetalleStaff({
   rolEquipo,
   puedeCambiarRol,
   sinCupoDisponible,
+  bloqueServicios = null,
 }: {
+  /** Sección «Servicios que presta» (solo el propietario, y solo si la persona atiende clientes). */
+  bloqueServicios?: React.ReactNode;
   staff: StaffVista;
   permisos: PermisosPanel;
   otrasSedes: { id: string; nombre: string }[];
@@ -236,6 +239,8 @@ export function DetalleStaff({
           </div>
         ) : null}
       </Card>
+
+      {bloqueServicios}
 
       {/* ── Acciones ──────────────────────────────────────────────────── */}
       {(permisos.promoverGuardian || permisos.suspenderStaff || permisos.retirarStaff) && !retirado ? (

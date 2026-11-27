@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { obtenerHistorialStaff } from "../actions";
 import { DetalleStaff } from "./detalle-staff";
+import { ServiciosDelStaff, type ServicioAsignable } from "./servicios-del-staff";
 
 export const metadata = { title: "Detalle de Staff" };
 
@@ -66,6 +67,17 @@ export default async function StaffDetallePage(props: PageProps<"/panel/staff/[i
     obtenerHistorialStaff(id),
   ]);
 
+  // Servicios del negocio y cuáles presta esta persona (solo si atiende clientes y quien mira es el propietario).
+  let serviciosAsignables: ServicioAsignable[] | null = null;
+  if (contexto.rol === "BARBERIA" && (staff.presta_servicios ?? true) && staff.estado !== "RETIRADO") {
+    const [{ data: servicios }, { data: asignados }] = await Promise.all([
+      supabase.from("servicio").select("id, nombre, imagen_url, precio_base").eq("negocio_id", staff.negocio_id!).eq("estado", "ACTIVO").order("nombre"),
+      supabase.from("staff_servicio").select("servicio_id").eq("staff_id", staff.staff_id!),
+    ]);
+    const mios = new Set((asignados ?? []).map((a) => a.servicio_id));
+    serviciosAsignables = (servicios ?? []).map((s) => ({ id: s.id, nombre: s.nombre, imagen_url: s.imagen_url, precio_base: s.precio_base, asignado: mios.has(s.id) }));
+  }
+
   return (
     <div className="flex min-h-dvh flex-col bg-app pb-16">
       <BarraSuperior titulo={staff.nombre!} volverA="/panel/staff" />
@@ -77,6 +89,11 @@ export default async function StaffDetallePage(props: PageProps<"/panel/staff/[i
         rolEquipo={rolEquipo}
         puedeCambiarRol={puedeCambiarRol}
         sinCupoDisponible={sinCupoDisponible}
+        bloqueServicios={
+          serviciosAsignables ? (
+            <ServiciosDelStaff staffId={staff.staff_id!} nombre={staff.nombre ?? "Esta persona"} inicial={serviciosAsignables} puedeCatalogo />
+          ) : null
+        }
       />
     </div>
   );

@@ -134,7 +134,7 @@ export async function obtenerAnticipo(): Promise<Resultado<{ anticipo: ConfigAnt
     };
     const [{ data }, { data: enLinea }] = await Promise.all([
       sinTipos.from("negocio").select("anticipo_modo, sena_pct, sena_monto_fijo, sena_minimo, sena_maximo, pago_completo_en_app").eq("id", negocioId).single(),
-      sinTipos.rpc("negocio_cobra_en_linea", { p_negocio_id: negocioId }),
+      sinTipos.rpc("negocio_acepta_anticipo", { p_negocio_id: negocioId }),
     ]);
     const n = data as Record<string, unknown> | null;
     if (!n) return { ok: false, error: "No encontramos tu negocio." };

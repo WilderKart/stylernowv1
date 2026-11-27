@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatCOP } from "@/lib/utils";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { TituloNegocioVerificado } from "@/components/negocio/titulo-negocio-verificado";
 import { notFound } from "next/navigation";
 import { obtenerMarcaPublica } from "@/lib/marca/obtener-marca";
 import { esFavorito } from "./actions";
@@ -63,6 +64,17 @@ async function cargarNegocio(slug: string) {
     .eq("negocio_id", negocio.id)
     .order("orden");
 
+  // Un servicio que TODAS las sedes abiertas tienen desactivado no se muestra (migración 202); si al menos una lo ofrece, sí.
+  let serviciosVisibles = servicios ?? [];
+  if (serviciosVisibles.length && (sedes ?? []).length) {
+    const { data: filas } = await (supabase as unknown as { from: (t: string) => { select: (c: string) => { in: (c: string, v: string[]) => { eq: (c: string, v: boolean) => Promise<{ data: Array<{ servicio_id: string; sede_id: string }> | null }> } } } })
+      .from("servicio_sede").select("servicio_id, sede_id").in("servicio_id", serviciosVisibles.map((s) => s.id)).eq("activo", false);
+    const porServicio = new Map<string, Set<string>>();
+    for (const f of filas ?? []) porServicio.set(f.servicio_id, (porServicio.get(f.servicio_id) ?? new Set()).add(f.sede_id));
+    const idsSedes = (sedes ?? []).map((s) => s.id);
+    serviciosVisibles = serviciosVisibles.filter((s) => !idsSedes.every((id) => porServicio.get(s.id)?.has(id)));
+  }
+
   const calificaciones = (resenas ?? []).map((r) => r.calificacion);
   const promedio =
     calificaciones.length > 0
@@ -72,7 +84,7 @@ async function cargarNegocio(slug: string) {
   return {
     negocio,
     sedes: sedes ?? [],
-    servicios: servicios ?? [],
+    servicios: serviciosVisibles,
     staff: staff ?? [],
     resenas: resenas ?? [],
     promedio,
@@ -265,17 +277,12 @@ export default async function NegocioPage(props: PageProps<"/negocio/[slug]">) {
             {negocio.categoria.join(" · ") || t("cat.negocio")} · {negocio.ciudad}
           </Num>
         </div>
-        <h1 className="poster-1 px-4 pb-3 break-words">
+        <TituloNegocioVerificado verificado={verificado}>
           {partesNombre.slice(0, mitad).join(" ")}
           {partesNombre.length > 1 ? <br /> : null}
           {partesNombre.slice(mitad).join(" ")}
           {"."}
-        </h1>
-        {verificado ? (
-          <div className="px-4 pb-3">
-            <Status tone="ok">Negocio verificado por StylerNow</Status>
-          </div>
-        ) : null}
+        </TituloNegocioVerificado>
         {miNivelVip ? (
           <div className="px-4 pb-3">
             <Status tone="ok">{t("neg.eres_vip", { nivel: miNivelVip })}</Status>

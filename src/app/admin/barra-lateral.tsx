@@ -61,6 +61,7 @@ const GRUPOS: { titulo?: string; items: Item[] }[] = [
       { href: "/admin/verificaciones", etiqueta: "Verificaciones", icono: BadgeCheck },
       { href: "/admin/usuarios", etiqueta: "Usuarios", icono: Users },
       { href: "/admin/soporte", etiqueta: "Soporte", icono: LifeBuoy, contador: "ticketsAbiertos", contadorChat: "soporteChatNoLeidos" },
+      { href: "/admin/ganancias-soporte", etiqueta: "Soporte ganancias", icono: LifeBuoy },
       { href: "/admin/centro-cumplimiento", etiqueta: "Cumplimiento y PQRS", icono: Scale },
       { href: "/admin/moderacion", etiqueta: "Moderación", icono: ShieldAlert, contador: "resenasReportadas" },
     ],
@@ -98,7 +99,7 @@ function esActivo(pathname: string, href: string) {
 function Logo() {
   return (
     <Link href="/admin" className="font-display text-[26px] font-black uppercase leading-none tracking-tight text-white">
-      Styler<span className="text-[#ff4d00]">Now.</span>
+      Styler<span className="text-[#ff6600]">Now.</span>
     </Link>
   );
 }
@@ -123,7 +124,7 @@ function Contenido({
     <div className="flex h-full flex-col">
       <div className="px-5 pt-6">
         <Logo />
-        <div className="mt-5 flex items-center gap-2 bg-[#ff4d00] px-3 py-2.5 font-mono text-[12px] font-bold uppercase tracking-wider text-white">
+        <div className="mt-5 flex items-center gap-2 bg-[#ff6600] px-3 py-2.5 font-mono text-[12px] font-bold uppercase tracking-wider text-white">
           <Crown className="size-4" aria-hidden />
           Super Admin
         </div>
@@ -149,8 +150,8 @@ function Contenido({
                       aria-current={activo ? "page" : undefined}
                       className={cn(
                         "flex min-h-11 items-center gap-3 px-3 py-2 text-[14px] font-semibold transition-colors",
-                        "focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#ff4d00]",
-                        activo ? "bg-[#ff4d00] text-white" : "text-white/80 hover:bg-white/10 hover:text-white",
+                        "focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#ff6600]",
+                        activo ? "bg-[#ff6600] text-white" : "text-white/80 hover:bg-white/10 hover:text-white",
                       )}
                     >
                       <Icono className="size-[18px] shrink-0" aria-hidden />
@@ -159,7 +160,7 @@ function Contenido({
                         <span
                           className={cn(
                             "min-w-6 px-1.5 py-0.5 text-center font-mono text-[11px] font-bold",
-                            activo ? "bg-white text-[#0a0a0a]" : "bg-[#ff4d00] text-white",
+                            activo ? "bg-white text-[#0a0a0a]" : "bg-[#ff6600] text-white",
                           )}
                           aria-label={`${n} pendientes`}
                         >
@@ -170,7 +171,7 @@ function Contenido({
                         <span
                           className={cn(
                             "min-w-6 border px-1.5 py-0.5 text-center font-mono text-[11px] font-bold",
-                            activo ? "border-white bg-[#0a0a0a] text-white" : "border-[#ff4d00] text-[#ff4d00]",
+                            activo ? "border-white bg-[#0a0a0a] text-white" : "border-[#ff6600] text-[#ff6600]",
                           )}
                           aria-label={`${nChat} mensajes de soporte sin leer`}
                         >
@@ -188,7 +189,7 @@ function Contenido({
 
       <div className="border-t border-white/15 px-5 py-4">
         <div className="flex items-center gap-3">
-          <span className="grid size-10 shrink-0 place-items-center border-2 border-[#ff4d00] font-display text-[14px] font-black text-white">
+          <span className="grid size-10 shrink-0 place-items-center border-2 border-[#ff6600] font-display text-[14px] font-black text-white">
             {iniciales}
           </span>
           <div className="min-w-0 flex-1">
@@ -262,7 +263,7 @@ export function BarraLateralAdmin(props: { email: string; nombre: string; contad
           aria-controls="menu-admin-movil"
         >
           <Menu className="size-6" aria-hidden />
-          {pendientes > 0 && <span className="absolute right-2 top-2 size-2.5 bg-[#ff4d00]" aria-hidden />}
+          {pendientes > 0 && <span className="absolute right-2 top-2 size-2.5 bg-[#ff6600]" aria-hidden />}
         </button>
       </header>
 

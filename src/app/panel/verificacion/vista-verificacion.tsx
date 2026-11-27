@@ -117,7 +117,7 @@ export function VistaVerificacion({
           <p className="sn-label">Insignia de verificación (documentos)</p>
           <p className="mt-1 text-[15px] font-semibold text-text">{ETIQUETA_ESTADO[v.estado]}</p>
           {v.estado === "VERIFICADA" && v.decidida_at ? (
-            <p className="mt-0.5 text-[12px] text-text-faint">Aprobada el {new Date(v.decidida_at).toLocaleDateString("es-CO")}</p>
+            <p className="mt-0.5 text-[12px] text-text-faint">Aprobada el {new Date(v.decidida_at).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })}</p>
           ) : null}
         </div>
         <Badge tone={TONO[v.estado]}>{v.estado === "VERIFICADA" ? "APROBADA" : v.estado.replaceAll("_", " ")}</Badge>
@@ -170,7 +170,7 @@ export function VistaVerificacion({
                   <div className="min-w-0">
                     <p className="truncate text-[13px] font-semibold text-text">{ETIQUETA_TIPO[d.tipo] ?? d.tipo}</p>
                     <p className="text-[11.5px] text-text-faint">
-                      {d.formato.toUpperCase()} · {tamano(d.bytes)} · {new Date(d.subido_at).toLocaleDateString("es-CO")}
+                      {d.formato.toUpperCase()} · {tamano(d.bytes)} · {new Date(d.subido_at).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -253,7 +253,7 @@ export function VistaVerificacion({
           ) : null}
           {v.estado === "EN_REVISION" ? (
             <p className="text-[12.5px] text-text-muted">
-              Recibimos tu solicitud el {v.enviada_at ? new Date(v.enviada_at).toLocaleDateString("es-CO") : "—"}. Te avisaremos cuando haya una
+              Recibimos tu solicitud el {v.enviada_at ? new Date(v.enviada_at).toLocaleDateString("es-CO", { timeZone: "America/Bogota" }) : "—"}. Te avisaremos cuando haya una
               decisión.
             </p>
           ) : null}

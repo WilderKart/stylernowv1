@@ -262,7 +262,7 @@ function SeccionComision({ d }: { d: DatosReglas }) {
                   {c.aplicadoAt ? "Aplicado" : c.anuladoAt ? "Anulado" : "Programado"}
                 </Badge>
                 <span className="min-w-0 break-words">
-                  {c.pctNuevo} % · {c.negocioId ?? "todos"} · desde {new Date(c.efectivoDesde).toLocaleString("es-CO")} · {c.motivo}
+                  {c.pctNuevo} % · {c.negocioId ?? "todos"} · desde {new Date(c.efectivoDesde).toLocaleString("es-CO", { timeZone: "America/Bogota" })} · {c.motivo}
                 </span>
                 {!c.aplicadoAt && !c.anuladoAt ? (
                   <Button size="sm" variant="ghost" onClick={() => ejecutar(() => anularComisionProgramada(c.id, motivoAnular), "Cambio anulado.")}>

@@ -232,7 +232,7 @@ function FilaEvento({ evento: e, mostrarNegocio }: { evento: EventoAuditoriaDeta
       <p className="mt-1 text-[11px] break-words text-text-faint">
         {ACTORES[e.actorTipo] ?? e.actorTipo}
         {e.actorNombre ? ` (${e.actorNombre})` : ""}
-        {mostrarNegocio && e.negocioNombre ? ` · ${e.negocioNombre}` : ""} · {new Date(e.createdAt).toLocaleString("es-CO")}
+        {mostrarNegocio && e.negocioNombre ? ` · ${e.negocioNombre}` : ""} · {new Date(e.createdAt).toLocaleString("es-CO", { timeZone: "America/Bogota" })}
         {e.origen ? ` · ${ORIGENES[e.origen] ?? e.origen}` : ""}
       </p>
       {e.motivo ? <p className="mt-1 text-[12px] text-text">Motivo: {e.motivo}</p> : null}

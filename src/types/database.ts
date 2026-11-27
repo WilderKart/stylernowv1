@@ -6661,6 +6661,7 @@ export type Database = {
           estado: Database["public"]["Enums"]["servicio_estado"]
           id: string
           imagen_url: string | null
+          catalogo_ref: string | null
           negocio_id: string
           nombre: string
           precio_base: number
@@ -6679,6 +6680,7 @@ export type Database = {
           estado?: Database["public"]["Enums"]["servicio_estado"]
           id?: string
           imagen_url?: string | null
+          catalogo_ref?: string | null
           negocio_id: string
           nombre: string
           precio_base: number
@@ -6697,6 +6699,7 @@ export type Database = {
           estado?: Database["public"]["Enums"]["servicio_estado"]
           id?: string
           imagen_url?: string | null
+          catalogo_ref?: string | null
           negocio_id?: string
           nombre?: string
           precio_base?: number

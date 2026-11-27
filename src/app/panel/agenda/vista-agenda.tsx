@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { duracion, hora, sumarDias } from "@/lib/formato";
 import { formatCOP } from "@/lib/utils";
 import { useCallback, useEffect, useState, useTransition } from "react";
+import { ActualizarEnVivo } from "@/components/panel/actualizar-en-vivo";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useEnLinea } from "@/lib/hooks/use-en-linea";
 import {
@@ -185,6 +186,8 @@ export function VistaAgenda({
 
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-8">
+      {/* Una reserva nueva o un pago directo aparecen aquí sin recargar. */}
+      <ActualizarEnVivo negocioId={negocioId} alCambiar={() => void cargar()} />
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-[22px] font-bold uppercase text-text">Agenda</h1>

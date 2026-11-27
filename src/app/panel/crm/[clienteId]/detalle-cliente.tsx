@@ -124,7 +124,7 @@ export function DetalleCliente({
           <div>
             <p className="text-text-faint">Última visita</p>
             <p className="font-bold text-text">
-              {resumen.ultimaVisita ? new Date(resumen.ultimaVisita).toLocaleDateString("es-CO") : "—"}
+              {resumen.ultimaVisita ? new Date(resumen.ultimaVisita).toLocaleDateString("es-CO", { timeZone: "America/Bogota" }) : "—"}
             </p>
           </div>
           <div>
@@ -235,7 +235,7 @@ export function DetalleCliente({
                 <div className="mt-1.5 flex items-center justify-between">
                   <p className="text-[10.5px] text-text-faint">
                     {n.autorNombre ?? "Alguien del equipo"} ·{" "}
-                    {new Date(n.createdAt).toLocaleDateString("es-CO")}
+                    {new Date(n.createdAt).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })}
                   </p>
                   <button type="button" onClick={() => onEliminarNota(n.id)} className="text-[10.5px] font-semibold text-danger">
                     Quitar
@@ -357,7 +357,7 @@ function SeccionFotos({
             <option value="">¿De qué reserva es esta foto?</option>
             {reservas.map((r) => (
               <option key={r.id} value={r.id}>
-                {new Date(r.horaInicio).toLocaleDateString("es-CO")}
+                {new Date(r.horaInicio).toLocaleDateString("es-CO", { timeZone: "America/Bogota" })}
               </option>
             ))}
           </select>

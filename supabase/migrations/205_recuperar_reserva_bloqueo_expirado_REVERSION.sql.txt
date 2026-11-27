@@ -1,0 +1,22 @@
+-- Reversión de la migración 205.
+-- 1) Funciones nuevas (no hay tablas ni columnas nuevas):
+begin;
+drop function if exists public.reserva_alternativas(uuid, int);
+drop function if exists public.reserva_recuperar(uuid, timestamptz, uuid);
+drop function if exists public.reserva_estado_recuperacion(uuid);
+drop function if exists public._reserva_recuperar_interno(uuid, timestamptz, uuid);
+drop function if exists public._reserva_cupo(uuid, timestamptz, uuid);
+
+-- 2) Parches: se deshacen restaurando las condiciones originales (mismos anclajes, al revés).
+do $$
+declare v_def text;
+begin
+  -- aceptar_politica_reserva: volver a exigir PENDIENTE_PAGO
+  v_def := replace(pg_get_functiondef('public.aceptar_politica_reserva(uuid)'::regprocedure), E'\r', '');
+  v_def := replace(v_def,
+    E'  if v_reserva.estado <> ''PENDIENTE_PAGO'' and not (v_reserva.estado = ''CANCELADA'' and v_reserva.cancelado_motivo = ''PAGO_EXPIRADO'') then raise exception ''RESERVA_NO_PAGABLE''; end if;',
+    E'  if v_reserva.estado <> ''PENDIENTE_PAGO'' then raise exception ''RESERVA_NO_PAGABLE''; end if;');
+  execute v_def;
+end $$;
+-- registrar_pago_directo_reserva: volver a la versión de la migración 194 (re-ejecutar su definición original de supabase/migrations/194_pagos_directos_y_saldo_pendiente.sql, sección 7).
+commit;

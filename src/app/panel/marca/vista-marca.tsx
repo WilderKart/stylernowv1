@@ -157,7 +157,7 @@ function FormularioMarca({ nombreNegocio, logoNegocio, marca }: { nombreNegocio:
   const [nombre, setNombre] = useState(marca?.nombre ?? nombreNegocio);
   const [slogan, setSlogan] = useState(marca?.slogan ?? "");
   const [logoUrl, setLogoUrl] = useState<string | null>(marca?.logoUrl ?? logoNegocio);
-  const [primario, setPrimario] = useState(marca?.colorPrimario ?? "#FF4D00");
+  const [primario, setPrimario] = useState(marca?.colorPrimario ?? "#ff6600");
   const [secundario, setSecundario] = useState(marca?.colorSecundario ?? "#0A0A0A");
   const [publicada, setPublicada] = useState(marca?.publicada ?? false);
 
@@ -249,7 +249,7 @@ function FormularioMarca({ nombreNegocio, logoNegocio, marca }: { nombreNegocio:
 
       <div className="flex min-w-0 flex-col gap-2">
         <Label>Vista previa</Label>
-        <VistaPrevia nombre={nombre} slogan={slogan} logoUrl={logoUrl} primario={primarioOk ? primario : "#FF4D00"} secundario={secundarioOk ? secundario : "#0A0A0A"} />
+        <VistaPrevia nombre={nombre} slogan={slogan} logoUrl={logoUrl} primario={primarioOk ? primario : "#ff6600"} secundario={secundarioOk ? secundario : "#0A0A0A"} />
         <Meta>Así se verá tu página pública cuando la marca esté publicada.</Meta>
       </div>
     </div>

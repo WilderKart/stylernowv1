@@ -1,11 +1,13 @@
 "use client";
 
+import { BotonCerrarSesion } from "@/components/auth/boton-cerrar-sesion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const ITEMS = [
   { href: "/staff/agenda", etiqueta: "Agenda" },
+  { href: "/staff/ganancias", etiqueta: "Ganancias" },
   { href: "/staff/nivel", etiqueta: "Mi Nivel" },
   { href: "/staff/clientes", etiqueta: "Clientes" },
   { href: "/staff/lealtad", etiqueta: "Lealtad" },
@@ -36,6 +38,7 @@ export function StaffNav({ negocioNombre, esGuardian }: { negocioNombre: string;
           {negocioNombre}
           {esGuardian ? " · Guardian" : ""}
         </span>
+        <BotonCerrarSesion className="shrink-0 border-l border-border-subtle px-3 py-3 text-[11.5px] font-bold uppercase tracking-wide text-text-faint hover:text-text-muted" />
       </div>
     </nav>
   );

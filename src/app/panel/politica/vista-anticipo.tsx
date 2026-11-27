@@ -37,7 +37,12 @@ export function VistaAnticipo({ anticipo }: { anticipo: ConfigAnticipo }) {
         pagoCompleto,
       });
       if (!r.ok) return setMensaje({ tipo: "error", texto: r.error });
-      setMensaje({ tipo: "ok", texto: "Anticipo guardado. Aplica a las reservas nuevas." });
+      setMensaje({
+        tipo: "ok",
+        texto: anticipo.cobraEnLinea
+          ? "Anticipo guardado. Aplica a las reservas nuevas."
+          : "Anticipo guardado, pero todavía NO se está cobrando: falta conectar Mercado Pago o activar tu Nequi / llave Bre-B en Cobros.",
+      });
       router.refresh();
     });
   }
@@ -47,14 +52,18 @@ export function VistaAnticipo({ anticipo }: { anticipo: ConfigAnticipo }) {
       <header>
         <h2 className="section">Anticipo</h2>
         <p className="sn-meta mt-1">
-          El anticipo se cobra en tu propia cuenta de Mercado Pago. StylerNow no recibe ese dinero ni cobra comisión.
+          El anticipo se cobra en TU cuenta: Mercado Pago o, si prefieres, directo a tu Nequi, Daviplata o llave Bre-B. StylerNow no recibe ese dinero ni cobra comisión.
         </p>
       </header>
 
       {!anticipo.cobraEnLinea ? (
-        <p role="status" className="border-2 border-border p-3 text-[13px]">
-          Tu cuenta de Mercado Pago no está conectada: por ahora tus reservas se confirman sin anticipo. Conéctala en
-          «Cobros» para empezar a cobrarlo.
+        <p role="alert" className="border-2 border-danger p-3 text-[13px] font-semibold text-danger">
+          Todavía no tienes cómo cobrar el anticipo: por ahora tus reservas se confirman sin anticipo y el cliente paga todo en el local. Conecta Mercado Pago o
+          activa tu Nequi / llave Bre-B en{" "}
+          <a href="/panel/cobros" className="underline">
+            Cobros
+          </a>{" "}
+          para empezar a cobrarlo.
         </p>
       ) : null}
 
