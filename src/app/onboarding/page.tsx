@@ -4,6 +4,7 @@ import { ArrowRight, BarChart3, CalendarDays, Check, Scissors, Star, Store, Tren
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
+import { InsigniaEstatica } from "@/components/negocio/insignia-verificado";
 import s from "./onboarding.module.css";
 
 const NARANJA = "#ff6600";
@@ -92,9 +93,7 @@ function TarjetaNegocio() {
         <div>
           <div className="flex items-center gap-1.5 text-[20px] leading-none font-black text-[#16181d] min-[900px]:text-[26px]">
             MAFIA
-            <span className="grid size-[18px] place-items-center rounded-full bg-[#1d9bf0]" aria-label="Negocio verificado">
-              <Check className="size-3 text-white" strokeWidth={4} aria-hidden />
-            </span>
+            <InsigniaEstatica etiqueta="Negocio verificado por StylerNow" className="!ml-0 !size-[22px]" />
           </div>
           <div className="mt-1 flex items-center gap-1 text-[13px] text-[#23262d]">
             <Star className="size-3.5 fill-[#ff6600] text-[#ff6600]" aria-hidden /> Nuevo
@@ -253,14 +252,6 @@ function Chips({ style, className = "" }: { style?: CSSProperties; className?: s
   );
 }
 
-function Chispas({ style }: { style?: CSSProperties }) {
-  return (
-    <svg style={style} className={`${s.chispa} absolute z-10`} width="34" height="30" viewBox="0 0 34 30" aria-hidden>
-      <path d="M4 22l8-4M10 8l8 6M22 2l-2 10" stroke={NARANJA} strokeWidth="4" strokeLinecap="round" fill="none" />
-    </svg>
-  );
-}
-
 function TarjetaDe({ i }: { i: number }) {
   return i === 0 ? <TarjetaNegocio /> : i === 1 ? <Agenda /> : <TarjetaCrecimiento />;
 }
@@ -335,8 +326,7 @@ function Movil({ paso, dir, ir }: { paso: number; dir: "der" | "izq"; ir: (n: nu
           style={{ ...pos.modelo, ...(paso === 2 ? SIN_FONDO_ABAJO : null) }}
         />
         {paso === 0 ? <IconoTienda style={pos.extra} /> : null}
-        {paso === 2 ? <Chispas style={{ left: "38%", top: "47%" }} /> : null}
-        {paso === 2 ? <Chips style={pos.extra} /> : null}
+                {paso === 2 ? <Chips style={pos.extra} /> : null}
         <div className="absolute z-10" style={pos.tarjeta}>
           <TarjetaDe i={paso} />
         </div>
@@ -377,7 +367,6 @@ function Escritorio({ paso, dir, ir }: { paso: number; dir: "der" | "izq"; ir: (
         {paso === 2 ? (
           <>
             <Image src={sl.modelo} alt="" width={sl.mw} height={sl.mh} priority sizes="55vw" className={`${s.persona} absolute bottom-0 left-[6%] h-[88%] w-auto max-w-none`} style={SIN_FONDO_ABAJO} />
-            <Chispas style={{ left: "52%", top: "40%" }} />
             <Chips className="right-[5%] bottom-[14%] w-[40%]" />
           </>
         ) : null}
