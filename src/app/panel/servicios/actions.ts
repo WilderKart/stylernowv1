@@ -285,6 +285,47 @@ export async function alternarStaffServicio(
   }
 }
 
+/**
+ * Marca o desmarca VARIOS servicios para una persona del equipo (pantalla de la persona). Se verifica que la persona tenga vínculo en un
+ * negocio del que el usuario es PROPIETARIO, que preste servicios y que cada servicio sea de ese mismo negocio. La política de
+ * staff_servicio lo exige de nuevo en la base.
+ */
+export async function definirServiciosDeStaff(staffId: string, servicioIds: string[], asignar: boolean): Promise<Resultado> {
+  try {
+    const uuid = /^[0-9a-f-]{36}$/i;
+    if (!uuid.test(staffId) || servicioIds.length === 0 || servicioIds.length > 300 || !servicioIds.every((s) => uuid.test(s))) {
+      return { ok: false, error: "Datos inválidos." };
+    }
+    const { supabase, userId } = await usuarioActual();
+    const { data: propios } = await supabase.from("negocio").select("id").eq("owner_user_id", userId);
+    const negociosPropios = (propios ?? []).map((n) => n.id);
+    if (negociosPropios.length === 0) return { ok: false, error: "Solo el propietario puede asignar servicios." };
+    const { data: vinculo } = await supabase
+      .from("vinculo_staff_negocio")
+      .select("negocio_id, presta_servicios")
+      .eq("staff_id", staffId)
+      .in("negocio_id", negociosPropios)
+      .neq("estado", "RETIRADO")
+      .maybeSingle();
+    if (!vinculo) return { ok: false, error: "No encontramos a esa persona en tu equipo." };
+    if (!vinculo.presta_servicios) return { ok: false, error: "Esa persona no presta servicios (es solo administradora)." };
+    const unicos = [...new Set(servicioIds)];
+    const { data: validos } = await supabase.from("servicio").select("id").eq("negocio_id", vinculo.negocio_id).in("id", unicos);
+    const ids = (validos ?? []).map((s) => s.id);
+    if (ids.length !== unicos.length) return { ok: false, error: "Algún servicio no es de tu negocio." };
+
+    const { error } = asignar
+      ? await supabase.from("staff_servicio").upsert(ids.map((id) => ({ servicio_id: id, staff_id: staffId })), { onConflict: "staff_id,servicio_id", ignoreDuplicates: true })
+      : await supabase.from("staff_servicio").delete().eq("staff_id", staffId).in("servicio_id", ids);
+    if (error) return { ok: false, error: "No pudimos guardar el cambio. Intenta de nuevo." };
+    revalidatePath("/panel/servicios");
+    revalidatePath("/panel/staff");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
 // ── Combos ───────────────────────────────────────────────────────────────
 
 export interface DatosCombo {
