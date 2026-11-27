@@ -83,6 +83,37 @@ export async function primerHorarioLibre(args: {
   return null;
 }
 
+/**
+ * Cantidad de horarios libres por día (para los indicadores del calendario). Misma RPC `slots_disponibles` que el resto del flujo: no hay
+ * lógica de disponibilidad duplicada; solo se cuenta. Solo lectura.
+ */
+export async function disponibilidadDeDias(args: {
+  sedeId: string;
+  servicioIds: string[];
+  staffId: string | null;
+  fechas: string[];
+}): Promise<Record<string, number>> {
+  if (args.servicioIds.length === 0 || args.fechas.length === 0 || args.fechas.length > 42) return {};
+  const supabase = await createClient();
+  const respuestas = await Promise.all(
+    args.fechas.map((fecha) =>
+      supabase.rpc("slots_disponibles", {
+        p_sede_id: args.sedeId,
+        p_servicio_ids: args.servicioIds,
+        p_fecha: fecha,
+        p_staff_id: args.staffId ?? undefined,
+      })
+    )
+  );
+  const ahora = Date.now();
+  const out: Record<string, number> = {};
+  respuestas.forEach((r, i) => {
+    if (r.error) return; // sin dato: el calendario deja ese día sin marcar (no lo bloquea)
+    out[args.fechas[i]] = (r.data ?? []).filter((s) => s.disponible && new Date(s.hora_inicio).getTime() > ahora).length;
+  });
+  return out;
+}
+
 export async function crearReservaAction(args: {
   sedeId: string;
   servicioIds: string[];
