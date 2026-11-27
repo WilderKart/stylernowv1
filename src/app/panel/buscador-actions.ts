@@ -74,7 +74,7 @@ const SECCIONES: Seccion[] = [
   { href: "/panel/libro", titulo: "Libro contable", grupo: "Finanzas", claves: "libro contable movimientos ingresos egresos", nivel: "dueno" },
   { href: "/panel/wallet", titulo: "Wallet", grupo: "Finanzas", claves: "wallet saldo billetera retiros", nivel: "dueno" },
   { href: "/panel/reportes", titulo: "Reportes", grupo: "Finanzas", claves: "reportes estadisticas ingresos ranking servicios top resenas", nivel: "guardian" },
-  { href: "/panel/politica", titulo: "Anticipo y cancelaciones", grupo: "Finanzas", claves: "politica anticipo sena cancelacion reembolso no show", nivel: "dueno" },
+  { href: "/panel/politica", titulo: "Anticipo y cancelaciones", grupo: "Finanzas", claves: "politica anticipo sena cancelacion reembolso no show ventana reservas anticipacion dias calendario limite", nivel: "dueno" },
   { href: "/panel/suscripcion", titulo: "Mi Plan", grupo: "Finanzas", claves: "plan suscripcion facturacion mensual anual precio fundador", nivel: "dueno" },
   { href: "/panel/perfil-publico", titulo: "Perfil público", grupo: "Mi negocio", claves: "perfil publico descripcion fotos portada enlace de reserva", nivel: "dueno" },
   { href: "/panel/marca", titulo: "Mi Marca", grupo: "Mi negocio", claves: "marca logo colores identidad", nivel: "dueno" },

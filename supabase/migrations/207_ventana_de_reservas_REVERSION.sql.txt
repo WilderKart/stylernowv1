@@ -1,0 +1,3 @@
+-- Reversión de la migración 207 (solo agregó una función; no hay tablas ni columnas nuevas).
+-- Los valores que cada negocio haya guardado quedan en sus columnas; para volver al estándar: update negocio set min_anticipacion_minutos = 0, max_anticipacion_dias = 60;
+drop function if exists public.configurar_ventana_reservas(uuid, integer, integer);
