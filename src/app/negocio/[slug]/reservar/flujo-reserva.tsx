@@ -3,7 +3,12 @@
 import { sustituirProfesional, TERMINOLOGIA_GENERICA, type Terminologia } from "@/lib/terminologia";
 import { Button } from "@/components/ui/button";
 import { Chip, EmptyState, Label, Meta, Num, Photo, Status, Tier } from "@/components/brutal";
+import { CalendarioReserva } from "@/components/negocio/calendario-reserva";
 import { SlotsPorFranja } from "@/components/negocio/horas-agrupadas";
+import { festivoDe } from "@/lib/calendario/festivos-colombia";
+import { duracionEtiqueta, fechaEtiqueta } from "@/lib/calendario/etiquetas";
+import { semanasDelMes } from "@/lib/calendario/mes";
+import { CalendarDays, Clock } from "lucide-react";
 import { FOTOS_RESPALDO, nivelATier } from "@/components/negocio/nivel";
 import { duracion, fechaCorta, fechaHoraLarga, fechaISO, hora, hoyISO, sumarDias } from "@/lib/formato";
 import { AvisoDistancia } from "./aviso-distancia";
@@ -13,11 +18,13 @@ import { calcularSenaServiciosEstimada, resumenPoliticaCancelacion, type ConfigS
 import { cn, formatCOP } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
-import { crearReservaAction, obtenerSlots, unirseListaEspera, type Slot } from "./actions";
+import { useEffect, useState, useTransition } from "react";
+import { crearReservaAction, disponibilidadDeDias, obtenerSlots, primerHorarioLibre, unirseListaEspera, type Slot } from "./actions";
 
-const DIAS_VISIBLES = 14;
-const DIAS_POR_VENTANA = 6;
+/** Búsqueda del primer horario libre: de a 14 días, hasta el límite de anticipación del negocio (tope 90 días). */
+const BLOQUE_BUSQUEDA = 14;
+const MAX_DIAS_DEFECTO = 60;
+const MAX_DIAS_BUSQUEDA = 90;
 
 export interface DatosNegocio extends ConfigSena {
   id: string;
@@ -26,6 +33,8 @@ export interface DatosNegocio extends ConfigSena {
   ventana_reembolso_total_horas: number;
   ventana_reembolso_parcial_horas: number;
   reembolso_parcial_pct: number;
+  /** Hasta cuántos días adelante se puede reservar (configuración del negocio). */
+  max_anticipacion_dias?: number | null;
 }
 
 export interface Servicio {
@@ -100,10 +109,15 @@ export function FlujoReserva({
   const [staffInicialAplicado, setStaffInicialAplicado] = useState(false);
   const [fecha, setFecha] = useState(() => hoyISO(sedes[0]?.zona_horaria));
   const [slot, setSlot] = useState<Slot | null>(null);
-  const [inicioDias, setInicioDias] = useState(0);
-  // Mientras el cliente no toque el selector de día, se salta solo al primer día con horas libres
-  // (si hoy ya cerró, abrir en un día todo tachado parece que el negocio no tiene disponibilidad).
-  const diaElegidoManualmente = useRef(false);
+  // Calendario mensual: mes mostrado, horarios libres por día (por combinación sede+servicios+profesional+mes) y recarga manual.
+  const [mes, setMes] = useState(() => hoyISO(sedes[0]?.zona_horaria).slice(0, 7));
+  const [dispPorMes, setDispPorMes] = useState<Record<string, Record<string, number>>>({});
+  const [recarga, setRecarga] = useState(0);
+  const [errorSlots, setErrorSlots] = useState<string | null>(null);
+  // Al entrar a «¿Cuándo vienes?» con un profesional/servicios nuevos, el calendario se abre en el día más cercano que tenga un horario libre
+  // y sugiere ese horario (la disponibilidad sigue siendo la misma RPC; solo se elige dónde empezar). El cliente decide y puede navegar.
+  const [claveResuelta, setClaveResuelta] = useState<string | null>(null);
+  const [sugerido, setSugerido] = useState<string | null>(null);
 
   const [slots, setSlots] = useState<Slot[]>([]);
   const [cargandoSlots, iniciarCarga] = useTransition();
@@ -134,28 +148,92 @@ export function FlujoReserva({
   // La carga corre dentro de una transición: el estado se actualiza al resolver la
   // consulta, nunca de forma síncrona dentro del efecto. Volver al paso 3 (p. ej. tras
   // SLOT_NO_DISPONIBLE) re-dispara el efecto y refresca el grid.
+  const clave = `${sedeId}|${servicioIds.join(",")}|${staffId ?? ""}`;
+  const buscandoPrimero = paso === 3 && claveResuelta !== clave;
+
+  const hoyTz = hoyISO(tz);
+  const diasMax = Math.min(negocio.max_anticipacion_dias ?? MAX_DIAS_DEFECTO, 366);
+  const maxFecha = sumarDias(hoyTz, diasMax);
+  const claveMes = `${clave}|${mes}`;
+  const dispMes = dispPorMes[claveMes] ?? null;
+  const cargandoMes = paso === 3 && claveResuelta === clave && dispMes === null;
+
+  // 1) Primer horario libre: se resuelve una vez por combinación sede + servicios + profesional, de a 14 días hasta el límite del negocio.
   useEffect(() => {
-    if (paso !== 3 || !sede || servicioIds.length === 0) return;
+    if (paso !== 3 || !sede || servicioIds.length === 0 || claveResuelta === clave) return;
+    let vigente = true;
+    (async () => {
+      try {
+        const limite = Math.min(diasMax, MAX_DIAS_BUSQUEDA);
+        for (let desde = 0; desde <= limite; desde += BLOQUE_BUSQUEDA) {
+          const fechas = Array.from({ length: Math.min(BLOQUE_BUSQUEDA, limite - desde + 1) }, (_, i) => sumarDias(hoyTz, desde + i));
+          const r = await primerHorarioLibre({ sedeId: sede.id, servicioIds, staffId, fechas });
+          if (!vigente) return;
+          if (r) {
+            setFecha(r.fecha);
+            setMes(r.fecha.slice(0, 7));
+            setSlot(r.slot);
+            setSugerido(r.slot.hora_inicio);
+            setClaveResuelta(clave);
+            return;
+          }
+        }
+        setFecha(hoyTz);
+        setMes(hoyTz.slice(0, 7));
+        setSlot(null);
+        setSugerido(null);
+      } catch {
+        /* sin sugerencia: el calendario abre en hoy */
+      }
+      if (vigente) setClaveResuelta(clave);
+    })();
+    return () => {
+      vigente = false;
+    };
+  }, [paso, sede, servicioIds, staffId, clave, claveResuelta, diasMax, hoyTz]);
+
+  // 2) Horarios libres de cada día del mes mostrado (puntos del calendario). Una sola vez por mes y combinación.
+  useEffect(() => {
+    if (paso !== 3 || !sede || servicioIds.length === 0 || claveResuelta !== clave || dispPorMes[claveMes]) return;
+    let vigente = true;
+    const fechas = semanasDelMes(mes).flat().filter((d) => d >= hoyTz && d <= maxFecha);
+    const guardar = (r: Record<string, number>) => vigente && setDispPorMes((p) => ({ ...p, [claveMes]: r }));
+    if (fechas.length === 0) guardar({});
+    else disponibilidadDeDias({ sedeId: sede.id, servicioIds, staffId, fechas }).then(guardar).catch(() => guardar({}));
+    return () => {
+      vigente = false;
+    };
+  }, [paso, sede, servicioIds, staffId, clave, claveResuelta, claveMes, mes, hoyTz, maxFecha, dispPorMes]);
+
+  // 3) Horarios del día elegido. La carga corre dentro de una transición (el estado se actualiza al resolver la consulta).
+  useEffect(() => {
+    if (paso !== 3 || !sede || servicioIds.length === 0 || claveResuelta !== clave) return;
     iniciarCarga(async () => {
       try {
         const nuevos = await obtenerSlots({ sedeId: sede.id, servicioIds, fecha, staffId });
         setSlots(nuevos);
+        setErrorSlots(null);
         setError(null);
-        if (!diaElegidoManualmente.current && !nuevos.some((x) => x.disponible)) {
-          const rango = Array.from({ length: DIAS_VISIBLES }, (_, i) => sumarDias(hoyISO(sede.zona_horaria), i));
-          const idx = rango.indexOf(fecha);
-          if (idx >= 0 && idx < rango.length - 1) {
-            setFecha(rango[idx + 1]);
-            setInicioDias(Math.max(0, Math.min(idx + 1 - 1, DIAS_VISIBLES - DIAS_POR_VENTANA)));
-          }
-        }
-      } catch (e) {
-        setError(e instanceof Error ? e.message : t("res.err_horarios"));
+        // El calendario se mantiene coherente con lo que se acaba de consultar para ese día.
+        const n = nuevos.filter((x) => x.disponible).length;
+        setDispPorMes((p) => {
+          const sig = { ...p };
+          for (const k of [claveMes, `${clave}|${fecha.slice(0, 7)}`]) if (sig[k]) sig[k] = { ...sig[k], [fecha]: n };
+          return sig;
+        });
+      } catch {
         setSlots([]);
+        setErrorSlots(t("res.err_horarios"));
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- t es estable por idioma
-  }, [paso, sede, servicioIds, fecha, staffId]);
+  }, [paso, sede, servicioIds, fecha, staffId, claveResuelta, clave, recarga]);
+
+  function elegirFecha(d: string) {
+    setFecha(d);
+    setMes(d.slice(0, 7));
+    setSlot(null); // el horario elegido ya no corresponde a la fecha nueva
+  }
 
   /** Cambiar los Servicios cambia la duración: el horario elegido deja de ser válido. */
   function alternarServicio(id: string) {
@@ -212,6 +290,7 @@ export function FlujoReserva({
     if (resultado.codigo === "SLOT_NO_DISPONIBLE") {
       // El grid vuelve actualizado, no se deja al Cliente reintentando a ciegas.
       setSlot(null);
+      setDispPorMes({});
       setPaso(3);
     }
     if (resultado.codigo === "NO_AUTENTICADO") {
@@ -237,8 +316,7 @@ export function FlujoReserva({
     }
   }
 
-  const dias = Array.from({ length: DIAS_VISIBLES }, (_, i) => sumarDias(hoyISO(tz), i));
-  const diasVentana = dias.slice(inicioDias, inicioDias + DIAS_POR_VENTANA);
+  const festivoElegido = festivoDe(fecha);
   const libres = slots.filter((s) => s.disponible);
   const puedeAvanzar =
     (paso === 1 && servicioIds.length > 0) ||
@@ -493,58 +571,60 @@ export function FlujoReserva({
               </Label>
             </div>
 
-            <div className="flex items-center justify-between gap-2 px-4 pb-2">
-              <Chip
-                disabled={inicioDias === 0}
-                onClick={() => setInicioDias((i) => Math.max(0, i - DIAS_POR_VENTANA))}
-                aria-label={t("res.dias_anteriores")}
-              >
-                {t("res.antes")}
-              </Chip>
-              <Chip
-                disabled={inicioDias + DIAS_POR_VENTANA >= DIAS_VISIBLES}
-                onClick={() => setInicioDias((i) => Math.min(DIAS_VISIBLES - DIAS_POR_VENTANA, i + DIAS_POR_VENTANA))}
-                aria-label={t("res.dias_siguientes")}
-              >
-                {t("res.despues")}
-              </Chip>
-            </div>
-            <div className="px-4 pb-4">
-              <div className="sn-days">
-                {diasVentana.map((d) => {
-                  const [dSem, ...resto] = fechaCorta(d, tz).split(" ");
-                  return (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => {
-                        diaElegidoManualmente.current = true;
-                        setFecha(d);
-                        setSlot(null);
-                      }}
-                      aria-pressed={fecha === d}
-                      aria-label={fechaCorta(d, tz)}
-                      className={cn("sn-day", fecha === d && "is-selected")}
-                    >
-                      {dSem.replace(".", "")}
-                      <b>{resto[0]}</b>
-                    </button>
-                  );
-                })}
-              </div>
+            <p className="sn-meta m-0 px-4 pb-3 uppercase">{t("res.cal_ayuda")}</p>
+            <div className="px-4 pb-3">
+              <CalendarioReserva
+                fecha={fecha}
+                hoy={hoyTz}
+                maxFecha={maxFecha}
+                mes={mes}
+                onMes={setMes}
+                onElegir={elegirFecha}
+                disponibilidad={dispMes}
+                cargando={cargandoMes || buscandoPrimero}
+              />
             </div>
 
+            <div className="grid gap-2 px-4 pb-3 sm:grid-cols-2">
+              <div className="flex items-center gap-3 border-2 border-ink p-3">
+                <CalendarDays className="size-8 flex-none text-signal" aria-hidden />
+                <div className="min-w-0">
+                  <p className="sn-meta m-0 uppercase">{t("res.fecha_sel")}</p>
+                  <p className="m-0 font-mono text-[15px] font-bold tracking-wide break-words uppercase">{fechaEtiqueta(fecha)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 border-2 border-ink p-3">
+                <Clock className="size-8 flex-none text-signal" aria-hidden />
+                <div className="min-w-0">
+                  <p className="sn-meta m-0 uppercase">{t("res.duracion_serv")}</p>
+                  <p className="m-0 font-mono text-[15px] font-bold tracking-wide uppercase">{duracionEtiqueta(minutosTotal)}</p>
+                </div>
+              </div>
+            </div>
+            {festivoElegido ? (
+              <p className="m-0 px-4 pb-3 font-mono text-[12px] font-bold tracking-wide text-[#1d4ed8] uppercase" role="status">
+                {t("res.festivo")} · {festivoElegido}
+              </p>
+            ) : null}
+
             <div className="sn-row px-4 pb-2">
-              <Label>{t("res.horarios")}</Label>
+              <Label>{t("res.sel_horario")}</Label>
               <Meta>{t("res.tachado")}</Meta>
             </div>
 
             <div className="px-4 pb-4">
-              {cargandoSlots ? (
+              {cargandoSlots || buscandoPrimero ? (
                 <div className="sn-slots" aria-busy="true" aria-label={t("res.cargando_horarios")}>
                   {Array.from({ length: 8 }, (_, i) => (
                     <div key={i} className="sn-slot animate-pulse bg-surface" />
                   ))}
+                </div>
+              ) : errorSlots ? (
+                <div className="border-2 border-danger p-4 text-center" role="alert">
+                  <p className="body-sm m-0">{errorSlots}</p>
+                  <Button size="sm" variant="secondary" className="mt-3" onClick={() => setRecarga((n) => n + 1)}>
+                    {t("res.reintentar")}
+                  </Button>
                 </div>
               ) : slots.length === 0 ? (
                 <div className="border-2 border-dashed border-line p-6 text-center">
@@ -564,6 +644,11 @@ export function FlujoReserva({
                 </div>
               ) : (
                 <>
+                  {sugerido && fechaISO(sugerido, tz) === fecha ? (
+                    <p className="sn-meta mb-3 mt-0" role="status">
+                      {t("res.sugerido", { dia: fechaCorta(fecha, tz), hora: hora(sugerido, tz) })}
+                    </p>
+                  ) : null}
                   {/* Los ocupados se muestran tachados, no ausentes (02-UX/05_Booking.md). */}
                   <SlotsPorFranja slots={slots} tz={tz} elegido={slot?.hora_inicio ?? null} onElegir={setSlot} />
 

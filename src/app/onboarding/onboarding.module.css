@@ -1,36 +1,7 @@
 /* Onboarding de 3 pantallas (identidad naranja #FF6600, fondo claro). Todas las animaciones se apagan con prefers-reduced-motion. */
 
-.raya {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(115deg, transparent 0 46%, rgba(255, 102, 0, 0.12) 46% 48%, transparent 48% 52%, rgba(255, 102, 0, 0.2) 52% 54%, transparent 54%),
-    linear-gradient(115deg, transparent 0 58%, #ff8a2a 58%, #ff6600 100%);
-  clip-path: polygon(38% 0, 100% 0, 100% 100%, 0 100%);
-  opacity: 0.95;
-  animation: rayaEntra 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-.rayaFina {
-  position: absolute;
-  right: -10%;
-  top: 4%;
-  width: 70%;
-  height: 46%;
-  pointer-events: none;
-  background: repeating-linear-gradient(115deg, transparent 0 14px, rgba(255, 102, 0, 0.35) 14px 17px, transparent 17px 30px);
-  mask-image: linear-gradient(to bottom left, #000, transparent 75%);
-  -webkit-mask-image: linear-gradient(to bottom left, #000, transparent 75%);
-  animation: rayaDeriva 6s ease-in-out infinite alternate;
-}
-@keyframes rayaEntra {
-  from { opacity: 0; transform: translateX(40px); }
-  to { opacity: 0.95; transform: none; }
-}
-@keyframes rayaDeriva {
-  from { transform: translate(0, 0); }
-  to { transform: translate(-14px, 10px); }
-}
+.fondoEntra { animation: fondoEntra 0.7s ease both; }
+@keyframes fondoEntra { from { opacity: 0; } to { opacity: 1; } }
 
 /* Entrada de la pantalla (dirección según avance/retroceso) */
 .entraDer { animation: entraDer 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
@@ -66,7 +37,7 @@
 @keyframes chispa { 0%, 100% { opacity: 0.25; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1.1); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .raya, .rayaFina, .entraDer, .entraIzq, .sube, .persona, .flota, .flotaLenta, .latido, .filaEntra, .pendiente, .chispa {
+  .fondoEntra, .entraDer, .entraIzq, .sube, .persona, .flota, .flotaLenta, .latido, .filaEntra, .pendiente, .chispa {
     animation: none !important;
   }
   .check { transition: none; }

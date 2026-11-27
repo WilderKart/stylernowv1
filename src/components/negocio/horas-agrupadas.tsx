@@ -1,6 +1,7 @@
 "use client";
 
-import { Meta, Num } from "@/components/brutal";
+import { Meta } from "@/components/brutal";
+import { CloudSun, Moon, Sun } from "lucide-react";
 import { hora } from "@/lib/formato";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +11,7 @@ interface SlotHora {
 }
 
 type FranjaHora = "Mañana" | "Tarde" | "Noche";
+const ICONO = { Mañana: Sun, Tarde: CloudSun, Noche: Moon } as const;
 
 /** Corte por hora local de la Sede: <12 Mañana, 12–17:59 Tarde, ≥18 Noche. */
 function franjaDe(instante: string, tz?: string): FranjaHora {
@@ -40,8 +42,12 @@ export function SlotsPorFranja<T extends SlotHora>({
     <div className="flex flex-col gap-4">
       {agruparSlots(slots, tz).map((g) => (
         <div key={g.franja}>
-          <div className="sn-row pb-2">
-            <Num>{g.franja}</Num>
+          <div className="flex items-center gap-2 pb-2">
+            {(() => {
+              const Icono = ICONO[g.franja];
+              return <Icono className="size-6 flex-none text-signal" aria-hidden />;
+            })()}
+            <span className="font-mono text-[15px] font-bold tracking-wide text-signal uppercase">{g.franja}</span>
             <Meta>· {g.items.filter((x) => x.disponible).length} libres</Meta>
           </div>
           <div className="sn-slots">
