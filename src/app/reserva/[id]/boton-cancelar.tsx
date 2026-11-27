@@ -3,6 +3,8 @@
 import { ErrorAviso, Fila } from "@/app/lealtad/ui-cliente";
 import { Button } from "@/components/ui/button";
 import { AVISO_PAGO_DIRECTO_SIN_REEMBOLSO } from "@/lib/pagos-directos/aviso";
+import type { Devolucion } from "@/lib/pagos/devolucion";
+import { textoDevolucion } from "@/lib/pagos/devolucion-texto";
 import { formatCOP } from "@/lib/utils";
 import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -16,14 +18,13 @@ import { useT } from "@/lib/i18n/proveedor";
  */
 export function BotonCancelar({
   reservaId,
-  reembolsoEstimado,
-  reembolsoPct,
+  devolucion,
   pagoDirecto = false,
   sinAnticipo = false,
 }: {
   reservaId: string;
-  reembolsoEstimado: number;
-  reembolsoPct: number;
+  /** Cuánto se devuelve si cancela ahora (anticipo según la política + excedente del servicio, si pagó el total). */
+  devolucion: Devolucion;
   /** Anticipo transferido directo al comercio: StylerNow no reembolsa, se muestra el aviso en vez de un monto. */
   pagoDirecto?: boolean;
   /** La reserva no tiene anticipo: no hay nada que devolver y se cancela sin cargo. */
@@ -55,12 +56,14 @@ export function BotonCancelar({
         titulo={t("canc.cancelar_cita")}
         meta={
           pagoDirecto
-            ? "Anticipo pagado directo al comercio: sin reembolso de StylerNow"
+            ? devolucion.monto > 0
+              ? t("canc.devolvemos_meta", { monto: formatCOP(devolucion.monto) }) + " (a cargo del negocio)"
+              : "Anticipo pagado directo al comercio: sin reembolso de StylerNow"
             : sinAnticipo
             ? "Sin anticipo: puedes cancelar sin ningún cargo"
-            : reembolsoPct === 0
+            : devolucion.monto <= 0
             ? t("canc.sin_reembolso_meta")
-            : t("canc.devolvemos_meta", { monto: formatCOP(reembolsoEstimado) })
+            : t("canc.devolvemos_meta", { monto: formatCOP(devolucion.monto) })
         }
         peligro
         onClick={() => setConfirmando(true)}
@@ -73,10 +76,10 @@ export function BotonCancelar({
       <h3 className="section">{t("canc.cancelamos")}</h3>
       <p className="body-sm mt-2 break-words">
         {pagoDirecto
-          ? AVISO_PAGO_DIRECTO_SIN_REEMBOLSO
-          : reembolsoPct === 0
-          ? t("canc.sin_reembolso")
-          : t("canc.con_reembolso", { monto: formatCOP(reembolsoEstimado), pct: reembolsoPct })}
+          ? devolucion.monto > 0
+            ? t("devol.directo", { pagado: formatCOP(devolucion.anticipo + devolucion.exceso), monto: formatCOP(devolucion.monto) })
+            : AVISO_PAGO_DIRECTO_SIN_REEMBOLSO
+          : textoDevolucion(t, devolucion, "cancelar")}
       </p>
 
       {error ? (

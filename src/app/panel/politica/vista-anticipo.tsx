@@ -87,7 +87,11 @@ export function VistaAnticipo({ anticipo }: { anticipo: ConfigAnticipo }) {
               <input type="checkbox" checked={pagoCompleto} onChange={(e) => setPagoCompleto(e.target.checked)} />
               Cobrar el valor completo del servicio en la app
             </label>
-            {!pagoCompleto ? (
+            {pagoCompleto ? (
+              <p className="sn-meta">
+                El cliente paga el servicio completo al reservar. El anticipo que definas aquí es la parte que cuenta para tu política de cancelación: si el cliente cancela tarde o no llega, solo eso se queda en tu negocio; el resto del servicio se le devuelve siempre. Ejemplo: servicio de $30.000 con anticipo de $10.000: cancelando a tiempo se devuelven $30.000; con el 50 %, $25.000; sin derecho a reembolso, $20.000.
+              </p>
+            ) : null}
               <>
                 <fieldset className="flex flex-wrap gap-4 text-[13px]">
                   <legend className="sr-only">Tipo de anticipo</legend>
@@ -114,7 +118,7 @@ export function VistaAnticipo({ anticipo }: { anticipo: ConfigAnticipo }) {
                   <Input label="Anticipo máximo (COP)" type="number" min={0} required value={maximo} onChange={(e) => setMaximo(e.target.value)} />
                 </div>
               </>
-            ) : null}
+
           </Card>
         ) : null}
 

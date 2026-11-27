@@ -6221,6 +6221,7 @@ export type Database = {
           hora_inicio: string
           id: string
           idempotency_key: string | null
+          monto_anticipo_base: number | null
           monto_sena: number
           monto_total: number
           negocio_id: string
@@ -6247,6 +6248,7 @@ export type Database = {
           hora_inicio: string
           id?: string
           idempotency_key?: string | null
+          monto_anticipo_base?: number | null
           monto_sena: number
           monto_total: number
           negocio_id: string
@@ -6273,6 +6275,7 @@ export type Database = {
           hora_inicio?: string
           id?: string
           idempotency_key?: string | null
+          monto_anticipo_base?: number | null
           monto_sena?: number
           monto_total?: number
           negocio_id?: string

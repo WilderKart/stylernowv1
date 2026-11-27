@@ -19,7 +19,9 @@ import { sincronizarPago } from "@/lib/pagos/sincronizar";
 import { AVISO_PAGO_DIRECTO_SIN_REEMBOLSO } from "@/lib/pagos-directos/aviso";
 import { createClient } from "@/lib/supabase/server";
 import { formatCOP } from "@/lib/utils";
-import type { Traductor } from "@/lib/i18n/diccionario";
+import type { Traductor } from "@/lib/i18n/diccionario";
+import { calcularDevolucion } from "@/lib/pagos/devolucion";
+import { textoDevolucion } from "@/lib/pagos/devolucion-texto";
 import { CalendarPlus, Check, Clock, MapPin, MessageSquare, Navigation, Receipt, Star, Store, Wallet } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -51,16 +53,15 @@ const MOTIVOS = {
  * Anticipa lo que devolvería una cancelación ahora. Es el mismo cálculo de ventana que
  * hace `cancelar_reserva`; la cifra que manda sigue siendo la de la base de datos.
  */
-function estimarReembolso(
+function estimarPctReembolso(
   horaInicio: string,
-  montoSena: number,
   negocio: {
     ventana_reembolso_total_horas: number;
     ventana_reembolso_parcial_horas: number;
     reembolso_parcial_pct: number;
   } | null
 ) {
-  if (!negocio) return { pct: 0, monto: 0 };
+  if (!negocio) return { pct: 0 };
 
   const horasFaltantes = (new Date(horaInicio).getTime() - Date.now()) / 3_600_000;
   const pct =
@@ -70,7 +71,7 @@ function estimarReembolso(
         ? negocio.reembolso_parcial_pct
         : 0;
 
-  return { pct, monto: Math.round((montoSena * pct) / 100) };
+  return { pct };
 }
 
 /** "EN 1 H 04 MIN" hasta la cita, o null si ya empezó. */
@@ -86,7 +87,7 @@ async function cargar(id: string) {
   return supabase
     .from("reserva")
     .select(
-      `id, estado, hora_inicio, hora_fin, monto_total, monto_sena, cancelado_por, cancelado_motivo,
+      `id, estado, hora_inicio, hora_fin, monto_total, monto_sena, monto_anticipo_base, cancelado_por, cancelado_motivo,
        negocio:negocio_id (nombre, slug, ventana_reembolso_total_horas, ventana_reembolso_parcial_horas, reembolso_parcial_pct),
        sede:sede_id (nombre, direccion, zona_horaria),
        staff:staff_id (nombre),
@@ -173,9 +174,15 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
       }
     : negocio;
 
-  const { pct, monto: reembolsoEstimado } = pagoDirectoVigente
-    ? { pct: 0, monto: 0 }
-    : estimarReembolso(reserva.hora_inicio, Number(reserva.monto_sena), politicaAplicable);
+  // Lo pagado se reparte en anticipo (lo único que la política puede retener) y excedente del servicio, que siempre se devuelve (migración 207).
+  const { pct } = politicaAplicable ? estimarPctReembolso(reserva.hora_inicio, politicaAplicable) : { pct: 0 };
+  const pagadoDirecto = Number(pagoDirecto.data?.[0]?.monto_reportado ?? 0);
+  const devolucion = calcularDevolucion({
+    pagado: pagoDirectoVigente ? pagadoDirecto : Number(reserva.monto_sena),
+    anticipoBase: reserva.monto_anticipo_base == null ? null : Number(reserva.monto_anticipo_base),
+    pct,
+  });
+  const textoDirecto = t("devol.directo", { pagado: formatCOP(pagadoDirecto), monto: formatCOP(devolucion.monto) });
 
   const dm = diaYMes(reserva.hora_inicio, tz);
   const hora = horaCorta(reserva.hora_inicio, tz);
@@ -350,7 +357,7 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
           <Fila icono={<Check aria-hidden className="size-5" />} titulo={t("rv.ya_calificaste")} meta={t("rv.gracias_resena")} />
         ) : null}
         {confirmada ? (
-          <BotonCancelar reservaId={reserva.id} reembolsoEstimado={reembolsoEstimado} reembolsoPct={pct} pagoDirecto={pagoDirectoVigente} sinAnticipo={Number(reserva.monto_sena) <= 0} />
+          <BotonCancelar reservaId={reserva.id} devolucion={devolucion} pagoDirecto={pagoDirectoVigente} sinAnticipo={Number(reserva.monto_sena) <= 0} />
         ) : null}
       </Filas>
 
@@ -368,10 +375,8 @@ export default async function ReservaPage(props: PageProps<"/reserva/[id]">) {
       {confirmada ? (
         <Bloque etiqueta={t("rv.politica")}>
           {pagoDirectoVigente
-            ? AVISO_PAGO_DIRECTO_SIN_REEMBOLSO
-            : pct === 0
-            ? t("rv.sin_reembolso")
-            : t("rv.con_reembolso", { monto: formatCOP(reembolsoEstimado), pct })}
+            ? devolucion.monto > 0 ? textoDirecto : AVISO_PAGO_DIRECTO_SIN_REEMBOLSO
+            : textoDevolucion(t, devolucion, "reserva")}
         </Bloque>
       ) : null}
 

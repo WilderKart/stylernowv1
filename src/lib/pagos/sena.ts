@@ -36,17 +36,23 @@ export function resumenPoliticaCancelacion(negocio: {
   ventana_reembolso_total_horas: number;
   ventana_reembolso_parcial_horas: number;
   reembolso_parcial_pct: number;
+  /** Cobra el servicio completo en la app: la política solo aplica al anticipo y el resto se devuelve siempre (migración 207). */
+  pago_completo_en_app?: boolean;
 }) {
   // Mismos límites que `cancelar_reserva` (migración 116): ≥ total → 100 %;
   // parcial ≤ horas < total → pct; < parcial o no presentarse → 0 %.
   const total = negocio.ventana_reembolso_total_horas;
   const parcial = negocio.ventana_reembolso_parcial_horas;
-  return [
+  const lineas = [
     `Cancelas con ${total} h o más de anticipación: te devolvemos el 100% del anticipo.`,
     `Cancelas entre ${parcial} h y menos de ${total} h antes: te devolvemos el ${Number(negocio.reembolso_parcial_pct)}%.`,
     `Con menos de ${parcial} h, o si no te presentas: el anticipo queda para el negocio por el espacio reservado.`,
     "Si el negocio cancela, te devolvemos el 100% siempre, sin importar cuándo.",
   ];
+  if (negocio.pago_completo_en_app) {
+    lineas.splice(3, 0, "Pagas el servicio completo, pero estas reglas solo aplican al anticipo: el resto del servicio siempre te lo devolvemos si la cita no se presta.");
+  }
+  return lineas;
 }
 
 export interface ServicioSena {

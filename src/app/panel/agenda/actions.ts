@@ -31,6 +31,7 @@ const MENSAJES_ERROR: Record<string, string> = {
   RESERVA_NO_REPROGRAMABLE: "Solo se pueden reprogramar reservas confirmadas.",
   RESERVA_NO_REASIGNABLE: "Esa reserva ya no se puede reasignar.",
   RESERVA_NO_CANCELABLE: "Esa reserva ya no se puede cancelar.",
+  CANCELACION_NEGOCIO_MUY_TARDE: "Con menos de 2 horas de anticipación el negocio ya no puede cancelar. Si el cliente no llega, márcalo como «No se presentó».",
   FUERA_DE_VENTANA_REPROGRAMACION: "Ya pasó la ventana para reprogramar esta reserva tú mismo — contacta al negocio.",
 };
 

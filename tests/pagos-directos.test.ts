@@ -145,12 +145,13 @@ describe("cancelación con pago directo: StylerNow no reembolsa", () => {
   });
   it("la pantalla de cancelación muestra el aviso en vez de un monto de reembolso", () => {
     const boton = leer("src/app/reserva/[id]/boton-cancelar.tsx");
-    expect(boton).toMatch(/pagoDirecto\s*\n?\s*\?\s*AVISO_PAGO_DIRECTO_SIN_REEMBOLSO/);
+    expect(boton).toMatch(/AVISO_PAGO_DIRECTO_SIN_REEMBOLSO/);                // sin monto a devolver, el aviso de siempre
+    expect(boton).toMatch(/devol\.directo/);                                  // con pago completo: lo que debe devolver el negocio (207)
     expect(boton).toMatch(/pagoDirecto = false/);
     const pagina = leer("src/app/reserva/[id]/page.tsx");
-    expect(pagina).toMatch(/pagoDirectoVigente\s*\n?\s*\?\s*\{ pct: 0, monto: 0 \}/);                // no se calcula reembolso
+    expect(pagina).toMatch(/pagado: pagoDirectoVigente \? pagadoDirecto : Number\(reserva\.monto_sena\)/);   // solo se informa lo que debe devolver el negocio; StylerNow no mueve ese dinero
     expect(pagina).toMatch(/pagoDirecto=\{pagoDirectoVigente\}/);
-    expect(pagina).toMatch(/pagoDirectoVigente\s*\n?\s*\?\s*AVISO_PAGO_DIRECTO_SIN_REEMBOLSO/);
+    expect(pagina).toMatch(/pagoDirectoVigente\s*\n?\s*\?\s*devolucion\.monto > 0 \? textoDirecto : AVISO_PAGO_DIRECTO_SIN_REEMBOLSO/);
     expect(leer("src/app/reserva/[id]/pago/pago-directo.tsx")).toMatch(/AVISO_PAGO_DIRECTO_SIN_REEMBOLSO/);
   });
   it("la acción de cancelar informa pagoDirecto y no dispara el worker de reembolsos sin monto", () => {

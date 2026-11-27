@@ -15,6 +15,7 @@ const MENSAJES: Record<string, string> = {
   SUSCRIPCION_RESTRINGIDA: "Con la suscripción restringida no se pueden agregar productos ni operaciones nuevas a la cita.",
   NO_AUTORIZADO: "No tienes permiso sobre esta cita.",
   RESERVA_NO_ENCONTRADA: "No encontramos esa cita.",
+  CANCELACION_NEGOCIO_MUY_TARDE: "Con menos de 2 horas de anticipación el negocio ya no puede cancelar. Si el cliente no llega, márcalo como «No se presentó».",
 };
 
 function traducir(mensaje: string): string {

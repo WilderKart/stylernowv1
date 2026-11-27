@@ -6,6 +6,7 @@ import { Badge, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { duracion, hora, sumarDias } from "@/lib/formato";
 import { formatCOP } from "@/lib/utils";
+import { HORAS_MINIMAS_CANCELACION_NEGOCIO, negocioPuedeCancelar } from "@/lib/pagos/devolucion";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { ActualizarEnVivo } from "@/components/panel/actualizar-en-vivo";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -705,6 +706,8 @@ function PanelCita({
 
   // Hora de apertura del detalle (no en cada render): solo decide si se muestra el botón.
   const [yaEmpezo] = useState(() => new Date(cita.horaInicio).getTime() <= Date.now());
+  // El negocio solo cancela con 2 h o más de anticipación; la base de datos lo vuelve a validar (migración 207).
+  const [puedeCancelar] = useState(() => negocioPuedeCancelar(cita.horaInicio));
 
   async function onNoShow() {
     setCargando(true);
@@ -784,9 +787,20 @@ function PanelCita({
               </Button>
             ) : null}
             {cita.estado !== "COMPLETADA" && cita.estado !== "NO_SHOW" ? (
-              <Button variant="danger" onClick={() => setAccion("cancelar")}>
-                Cancelar reserva
-              </Button>
+              puedeCancelar ? (
+                <Button variant="danger" onClick={() => setAccion("cancelar")}>
+                  Cancelar reserva
+                </Button>
+              ) : (
+                <>
+                  <Button variant="danger" disabled>
+                    Cancelar reserva
+                  </Button>
+                  <p className="text-[11.5px] text-text-faint">
+                    Con menos de {HORAS_MINIMAS_CANCELACION_NEGOCIO} horas de anticipación el negocio ya no puede cancelar. Si el cliente no llega, márcalo como «No se presentó».
+                  </p>
+                </>
+              )
             ) : null}
             <Button variant="ghost" onClick={onCerrar}>
               Cerrar
@@ -857,7 +871,7 @@ function PanelCita({
           <div className="mt-5 flex flex-col gap-3">
             <Input label="Motivo (opcional)" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
             <p className="text-[11.5px] text-text-faint">
-              Cancelar desde el negocio siempre reembolsa el 100% del Anticipo al Cliente.
+              Cancelar desde el negocio siempre devuelve al Cliente el 100% de lo que pagó, anticipo y servicio.
             </p>
             <Button variant="danger" loading={cargando} onClick={onConfirmarCancelar}>
               Confirmar cancelaci?n
@@ -874,7 +888,7 @@ function PanelCita({
           onConfirm={onNoShow}
           onCancel={() => setConfirmarNoShow(false)}
           title="Marcar no se present?"
-          description="?Marcar que el cliente no se present?? El anticipo no se devuelve."
+          description="?Marcar que el cliente no se present?? El anticipo se queda en el negocio; si el cliente pagó el servicio completo, el resto se le devuelve."
           confirmLabel="Marcar no show"
           cancelLabel="Volver"
         />
