@@ -23,7 +23,7 @@ import { useEffect, useRef, useState } from "react";
 import { confirmarSinAnticipo, consultarEstadoPago, iniciarPagoSena } from "./actions";
 import { useT } from "@/lib/i18n/proveedor";
 import estilos from "./pago.module.css";
-import { AVISO_PAGO_DIRECTO_SIN_REEMBOLSO } from "@/lib/pagos-directos/aviso";
+import { AVISO_PAGO_DIRECTO_COMERCIO, AVISO_PAGO_DIRECTO_SIN_REEMBOLSO } from "@/lib/pagos-directos/aviso";
 import { PagoDirecto, SelectorModoPago, type MediosDirectosVista } from "./pago-directo";
 
 /** Tras este tiempo sin confirmación se avisa que puede cerrar la app (02-UX/06_Payments.md). */
@@ -100,6 +100,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
   const [demorado, setDemorado] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [acepta, setAcepta] = useState(false);
+  const [aceptaInfo, setAceptaInfo] = useState(false);
   const [pagaTodoDirecto, setPagaTodoDirecto] = useState(false);
   const yaRedirigido = useRef(false);
 
@@ -320,9 +321,13 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
             Información importante
           </div>
           <div className="flex flex-col gap-1.5 font-sans text-[12px] leading-snug normal-case">
-            <p className="m-0">El pago se realiza directamente a la cuenta del comercio. StylerNow solo facilita la reserva y no custodia ni valida transferencias.</p>
+            <p className="m-0">{AVISO_PAGO_DIRECTO_COMERCIO}</p>
             <p className="m-0">{AVISO_PAGO_DIRECTO_SIN_REEMBOLSO}</p>
           </div>
+          <label className="mt-3 flex cursor-pointer items-start gap-3 border-t border-border pt-3 text-[13px]">
+            <input type="checkbox" className={`mt-0.5 size-5 shrink-0 accent-current ${estilos.r8}`} checked={aceptaInfo} onChange={(e) => setAceptaInfo(e.target.checked)} />
+            <span>Leí y acepto la información importante: el dinero va directo al negocio y cualquier devolución me la gestiona el negocio.</span>
+          </label>
         </section>
       ) : null}
 
@@ -336,13 +341,12 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
           />
           <span>
             {t("pago.acepto_politica")}
-            {resumen.directo ? " También leí la información importante: el dinero va directo al negocio y cualquier devolución me la gestiona el negocio." : ""}
           </span>
         </label>
       </section>
 
       {resumen.directo && resumen.negocioId ? (
-        <PagoDirecto reservaId={resumen.reservaId} negocioId={resumen.negocioId} montoSena={resumen.montoSena} montoTotal={resumen.montoTotal} medios={resumen.directo} acepta={acepta} pagaTodo={pagaTodoDirecto} />
+        <PagoDirecto reservaId={resumen.reservaId} negocioId={resumen.negocioId} montoSena={resumen.montoSena} montoTotal={resumen.montoTotal} medios={resumen.directo} acepta={acepta} aceptaInfo={aceptaInfo} pagaTodo={pagaTodoDirecto} />
       ) : null}
 
       {error ? (

@@ -12,6 +12,7 @@ export const MENSAJES_PAGOS_DIRECTOS: Record<string, string> = {
   PAGO_YA_RECHAZADO: "Este pago ya estaba marcado como no recibido.",
   PAGO_YA_REGISTRADO: "Esta cita ya tiene un comprobante registrado.",
   PAGO_DIRECTO_NO_DISPONIBLE: "Este negocio no tiene activados los pagos directos.",
+  INFO_PAGO_DIRECTO_NO_ACEPTADA: "Debes aceptar la información importante del pago directo para continuar.",
   MONTO_INVALIDO: "El monto no es válido.",
   MONTO_MENOR_AL_ANTICIPO: "El monto es menor al anticipo que pide el negocio.",
   COMPROBANTE_INVALIDO: "El comprobante no es válido. Sube de nuevo la captura.",

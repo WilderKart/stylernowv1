@@ -109,8 +109,8 @@ export function SelectorModoPago({ modo, onChange, montoSena, montoTotal, deshab
  * comprobante (comprimido a <300 KB en el navegador y subido directo a Storage, sin pasar por una Server Action).
  * Al registrar el soporte, la cita queda agendada al instante. El botón de agendar es lo último de la pantalla.
  */
-export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medios, acepta, pagaTodo }: {
-  reservaId: string; negocioId: string; montoSena: number; /** Total del servicio. */ montoTotal: number; medios: MediosDirectosVista; acepta: boolean;
+export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medios, acepta, aceptaInfo, pagaTodo }: {
+  reservaId: string; negocioId: string; montoSena: number; /** Total del servicio. */ montoTotal: number; medios: MediosDirectosVista; acepta: boolean; /** Chulo de la «Información importante». */ aceptaInfo: boolean;
   /** Modo elegido en «Método de pago»: define cuánto se transfiere. */
   pagaTodo: boolean;
 }) {
@@ -167,6 +167,7 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
     if (!archivo) return setError("Sube la captura de tu comprobante.");
     if (!valor || valor < Math.round(montoSena)) return setError(`El monto debe ser al menos ${formatCOP(montoSena)}.`);
     if (!acepta) return setError("Acepta la política de cancelación para continuar.");
+    if (!aceptaInfo) return setError("Acepta la información importante del pago directo para continuar.");
     setEstado("enviando");
     try {
       const hash = await sha256Hex(archivo);
@@ -174,7 +175,7 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
       const ruta = `${negocioId}/${reservaId}/${hash.slice(0, 12)}-${Date.now().toString(36)}.${ext}`;
       const { error: eSubida } = await createClient().storage.from("pagos-directos").upload(ruta, archivo, { contentType: archivo.type });
       if (eSubida) throw new Error("subida");
-      const r = await registrarPagoDirecto({ reservaId, monto: valor, rutaComprobante: ruta, hashComprobante: hash, aceptaPolitica: acepta });
+      const r = await registrarPagoDirecto({ reservaId, monto: valor, rutaComprobante: ruta, hashComprobante: hash, aceptaPolitica: acepta, aceptaInfoPagoDirecto: aceptaInfo });
       if (!r.ok) {
         setEstado("");
         return setError(r.mensaje);
@@ -187,7 +188,7 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
   }
 
   const ocupado = estado !== "";
-  const deshabilitado = ocupado || !acepta || !archivo;
+  const deshabilitado = ocupado || !acepta || !aceptaInfo || !archivo;
   return (
     <>
       <Tarjeta icono={<Layers className="size-7" />} titulo="Datos de pago">

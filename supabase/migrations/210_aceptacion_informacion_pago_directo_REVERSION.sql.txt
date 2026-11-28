@@ -1,0 +1,10 @@
+-- Reversión de la migración 210. ATENCIÓN: borra la evidencia guardada en aceptacion_info_pago_directo (las copias ya enviadas al
+-- repositorio evidencia_legal permanecen). Hacer respaldo antes si ya hay aceptaciones reales.
+drop trigger if exists trg_pago_reserva_exige_info_directa on public.pago_reserva;
+drop function if exists public.trg_pago_reserva_exige_info_directa();
+drop function if exists public.aceptar_informacion_pago_directo(uuid);
+drop trigger if exists trg_ev_info_pago_directo on public.aceptacion_info_pago_directo;
+drop function if exists public.trg_ev_info_pago_directo();
+drop table if exists public.aceptacion_info_pago_directo;
+drop function if exists public.texto_info_pago_directo();
+alter table public.configuracion_plataforma drop column if exists exigir_info_pago_directo;
