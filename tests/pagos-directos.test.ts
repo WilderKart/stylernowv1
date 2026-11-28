@@ -105,8 +105,7 @@ describe("capa de aplicación", () => {
     const p = leer("src/app/reserva/[id]/pago/pago-directo.tsx");
     expect(p).toMatch(/storage\.from\("pagos-directos"\)\.upload/);
     expect(leer("src/lib/pagos-directos/aviso.ts")).toMatch(/no custodia ni valida transferencias/);
-    expect(leer("src/app/reserva/[id]/pago/pantalla-pago.tsx")).toMatch(/AVISO_PAGO_DIRECTO_COMERCIO/);   // «Información importante» visible
-    expect(leer("src/app/reserva/[id]/pago/pantalla-pago.tsx")).toMatch(/AVISO_PAGO_DIRECTO_SIN_REEMBOLSO/);
+    expect(leer("src/app/reserva/[id]/pago/pantalla-pago.tsx")).toMatch(/PUNTOS_SOBRE_TU_PAGO/);   // «Sobre tu pago» visible
     expect(p).toMatch(/Guardar en galería/);
     expect(p).toMatch(/aceptaInfoPagoDirecto/);                       // la aceptación de la información importante viaja con el pago
     expect(leer("src/app/reserva/[id]/pago/actions.ts")).toMatch(/aceptar_informacion_pago_directo/);
@@ -156,7 +155,7 @@ describe("cancelación con pago directo: StylerNow no reembolsa", () => {
     expect(pagina).toMatch(/pagado: pagoDirectoVigente \? pagadoDirecto : Number\(reserva\.monto_sena\)/);   // solo se informa lo que debe devolver el negocio; StylerNow no mueve ese dinero
     expect(pagina).toMatch(/pagoDirecto=\{pagoDirectoVigente\}/);
     expect(pagina).toMatch(/pagoDirectoVigente\s*\n?\s*\?\s*devolucion\.monto > 0 \? textoDirecto : AVISO_PAGO_DIRECTO_SIN_REEMBOLSO/);
-    expect(leer("src/app/reserva/[id]/pago/pantalla-pago.tsx")).toMatch(/AVISO_PAGO_DIRECTO_SIN_REEMBOLSO/);
+    expect(leer("src/app/reserva/[id]/pago/pantalla-pago.tsx")).toMatch(/PUNTOS_SOBRE_TU_PAGO/);
   });
   it("la acción de cancelar informa pagoDirecto y no dispara el worker de reembolsos sin monto", () => {
     const a = leer("src/app/reserva/[id]/actions.ts");
@@ -206,8 +205,9 @@ describe("tipos de base de datos regenerados", () => {
 
 describe("evidencia de la información importante del pago directo (migración 210)", () => {
   const m210 = leer("supabase/migrations/210_aceptacion_informacion_pago_directo.sql");
-  it("el texto que se acepta en pantalla es idéntico al que guarda la base", () => {
-    const enBase = m210.match(/select '(.*?)'\s*\n\s*\|\| '(.*?)'\s*\n\s*\|\| '(.*?)';/);
+  it("el texto que se acepta en pantalla es idéntico al que guarda la base (migración 211, la vigente)", () => {
+    const m211 = leer("supabase/migrations/211_texto_sobre_tu_pago_conciso.sql");
+    const enBase = m211.match(/select '(.*?)'\s*\n\s*\|\| '(.*?)'\s*\n\s*\|\| '(.*?)';/);
     expect(enBase).not.toBeNull();
     const texto = (enBase as RegExpMatchArray).slice(1, 4).join("");
     expect(texto).toBe(TEXTO_INFO_PAGO_DIRECTO);

@@ -1,4 +1,4 @@
-import { resumenPoliticaCancelacion } from "@/lib/pagos/sena";
+import { resumenPoliticaCompacta } from "@/lib/pagos/sena";
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { PantallaPago } from "./pantalla-pago";
@@ -83,6 +83,7 @@ export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
   if (medios?.activo && medios.qr_path) {
     const { data: firmada } = await supabase.storage.from("pagos-directos").createSignedUrl(medios.qr_path, 1800);
     qrUrl = firmada?.signedUrl ?? null;
+    if (!qrUrl) console.error("[pago] no se pudo firmar el QR del negocio", firmada === null ? "sin respuesta" : "sin url");
   }
 
   const negocio = reserva.negocio as unknown as {
@@ -114,7 +115,7 @@ export default async function PagoPage(props: PageProps<"/reserva/[id]/pago">) {
         expiraAt: reserva.expira_at,
         // Solo para mostrar: lo que queda como evidencia lo reconstruye la base de datos
         // (`aceptar_politica_reserva`) con los números del negocio, no este texto.
-        politica: negocio ? resumenPoliticaCancelacion(negocio) : [],
+        politica: negocio ? resumenPoliticaCompacta(negocio) : [],
         // Solo para mostrar el botón; la base lo vuelve a verificar al confirmar.
         anticipoOpcional: negocio?.anticipo_modo === "OPCIONAL",
         cobraEnLinea: cobraEnLinea !== false,

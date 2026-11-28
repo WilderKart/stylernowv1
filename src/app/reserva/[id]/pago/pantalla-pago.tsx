@@ -19,11 +19,11 @@ import { Button } from "@/components/ui/button";
 import { Check, ChevronDown, Clock, Info, ShieldCheck, Store, Wallet } from "lucide-react";
 import { formatCOP } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { confirmarSinAnticipo, consultarEstadoPago, iniciarPagoSena } from "./actions";
 import { useT } from "@/lib/i18n/proveedor";
 import estilos from "./pago.module.css";
-import { AVISO_PAGO_DIRECTO_COMERCIO, AVISO_PAGO_DIRECTO_SIN_REEMBOLSO } from "@/lib/pagos-directos/aviso";
+import { PUNTOS_SOBRE_TU_PAGO } from "@/lib/pagos-directos/aviso";
 import { PagoDirecto, SelectorModoPago, type MediosDirectosVista } from "./pago-directo";
 
 /** Tras este tiempo sin confirmación se avisa que puede cerrar la app (02-UX/06_Payments.md). */
@@ -46,6 +46,33 @@ export interface ResumenPago {
   negocioId?: string;
   saldoPendiente?: number;
   directo?: MediosDirectosVista | null;
+}
+
+/** Tarjeta plegable: llega siempre cerrada; el cliente la abre para leer y marcar su aceptación. */
+function TarjetaPlegable({ icono, titulo, abierta, onAlternar, aceptada, pendiente, children }: {
+  icono: ReactNode; titulo: string; abierta: boolean; onAlternar: () => void; aceptada: boolean; /** Falta aceptar tras un intento: destello en el borde. */ pendiente: boolean; children: ReactNode;
+}) {
+  return (
+    <section className={`mx-4 mt-3 border-2 border-ink ${estilos.r16} ${pendiente ? estilos.destello : ""}`}>
+      <button
+        type="button"
+        aria-expanded={abierta}
+        onClick={onAlternar}
+        className="flex h-auto min-h-0 w-full items-center gap-2 border-0 bg-transparent p-3 text-left text-[17px] leading-tight font-bold tracking-normal text-signal normal-case shadow-none"
+      >
+        <span className="flex-none" aria-hidden="true">{icono}</span>
+        <span className="flex-1">{titulo}</span>
+        {aceptada ? (
+          <span className="flex flex-none items-center gap-0.5 text-[11px] font-bold text-[#16a34a]">
+            <Check aria-hidden className="size-3.5" strokeWidth={3} />
+            Aceptado
+          </span>
+        ) : null}
+        <ChevronDown aria-hidden className={`size-6 flex-none transition-transform ${abierta ? "rotate-180" : ""}`} />
+      </button>
+      {abierta ? <div className="px-3 pb-3">{children}</div> : null}
+    </section>
+  );
 }
 
 function Cuenta({ expiraAt }: { expiraAt: string }) {
@@ -101,6 +128,10 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
   const [error, setError] = useState<string | null>(null);
   const [acepta, setAcepta] = useState(false);
   const [aceptaInfo, setAceptaInfo] = useState(false);
+  const [abiertaPol, setAbiertaPol] = useState(false);
+  const [abiertaInfo, setAbiertaInfo] = useState(false);
+  const [intento, setIntento] = useState(false);
+  const zonaAceptar = useRef<HTMLDivElement>(null);
   const [pagaTodoDirecto, setPagaTodoDirecto] = useState(false);
   const yaRedirigido = useRef(false);
 
@@ -146,7 +177,16 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
     router.replace(`/reserva/${resumen.reservaId}`);
   }
 
+  /** Se llama si intentan reservar sin marcar los chulos: abre lo que falta, lo señala con destello y lleva la pantalla hasta allí. */
+  function faltaAceptar() {
+    setIntento(true);
+    if (!acepta) setAbiertaPol(true);
+    if (resumen.directo && !aceptaInfo) setAbiertaInfo(true);
+    requestAnimationFrame(() => zonaAceptar.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  }
+
   async function pagar() {
+    if (!acepta) return faltaAceptar();
     setIniciando(true);
     setError(null);
 
@@ -177,6 +217,13 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
   const saldoLocal = resumen.montoTotal - aPagarAhora;
   // Mercado Pago solo si el negocio lo tiene conectado; el pago directo es una alternativa (o la única opción).
   const mostrarMp = resumen.cobraEnLinea !== false;
+  const faltaPol = !acepta;
+  const faltaInfo = Boolean(resumen.directo) && !aceptaInfo;
+  const avisoAceptar = faltaPol && faltaInfo
+    ? "Antes de reservar, acepta la política de cancelación y la información de «Sobre tu pago»."
+    : faltaPol
+      ? "Antes de reservar, acepta la política de cancelación."
+      : "Antes de reservar, acepta la información de «Sobre tu pago».";
 
   // Esperando la confirmación de la pasarela (C10): bloque tinta a pantalla completa.
   if (esperando) {
@@ -297,56 +344,63 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
       </Bloque>
       ) : null}
 
-      {/* Política de cancelación: cerrada por defecto para reducir el scroll; se despliega con un toque. */}
-      <details className={`group mx-4 mt-3 border-2 border-ink p-3 ${estilos.r16}`}>
-        <summary className="flex cursor-pointer list-none items-center gap-2 text-[18px] leading-tight font-bold text-signal [&::-webkit-details-marker]:hidden">
-          <ShieldCheck aria-hidden className="size-6 flex-none" />
-          <span className="flex-1">{t("pago.sec_politica")}</span>
-          <ChevronDown aria-hidden className="size-6 flex-none transition-transform group-open:rotate-180" />
-        </summary>
-        <ul className={`m-0 mt-2 flex list-none flex-col gap-1 border border-border bg-surface p-2.5 text-[13px] leading-snug ${estilos.r8}`}>
-          {resumen.politica.map((linea) => (
-            <li key={linea} className="flex items-start gap-2">
-              <Check aria-hidden className="mt-0.5 size-4 flex-none text-signal" strokeWidth={3} />
-              <span>{linea}</span>
-            </li>
-          ))}
-        </ul>
-      </details>
+      {/* Política y «Sobre tu pago»: dos tarjetas plegables, cerradas siempre; el chulo de cada una vive dentro. */}
+      <div ref={zonaAceptar} className="scroll-mt-16">
+        {intento && (faltaPol || faltaInfo) ? (
+          <div className="px-4 pt-3">
+            <ErrorAviso>{avisoAceptar}</ErrorAviso>
+          </div>
+        ) : null}
 
-      {resumen.directo ? (
-        <section className={`mx-4 mt-3 border-2 border-ink p-3 ${estilos.r16}`}>
-          <div role="heading" aria-level={2} className="m-0 mb-1.5 flex items-center gap-2 text-[18px] leading-tight font-bold text-signal">
-            <Info aria-hidden className="size-6 flex-none" />
-            Información importante
-          </div>
-          <div className="flex flex-col gap-1.5 font-sans text-[12px] leading-snug normal-case">
-            <p className="m-0">{AVISO_PAGO_DIRECTO_COMERCIO}</p>
-            <p className="m-0">{AVISO_PAGO_DIRECTO_SIN_REEMBOLSO}</p>
-          </div>
+        <TarjetaPlegable
+          icono={<ShieldCheck className="size-6" />}
+          titulo={t("pago.sec_politica")}
+          abierta={abiertaPol}
+          onAlternar={() => setAbiertaPol((v) => !v)}
+          aceptada={acepta}
+          pendiente={intento && faltaPol}
+        >
+          <ul className={`m-0 flex list-none flex-col gap-1 border border-border bg-surface p-2.5 text-[13px] leading-snug ${estilos.r8}`}>
+            {resumen.politica.map((linea) => (
+              <li key={linea} className="flex items-start gap-2">
+                <Check aria-hidden className="mt-0.5 size-4 flex-none text-signal" strokeWidth={3} />
+                <span>{linea}</span>
+              </li>
+            ))}
+          </ul>
           <label className="mt-3 flex cursor-pointer items-start gap-3 border-t border-border pt-3 text-[13px]">
-            <input type="checkbox" className={`mt-0.5 size-5 shrink-0 accent-current ${estilos.r8}`} checked={aceptaInfo} onChange={(e) => setAceptaInfo(e.target.checked)} />
-            <span>Leí y acepto la información importante: el dinero va directo al negocio y cualquier devolución me la gestiona el negocio.</span>
+            <input type="checkbox" className={`mt-0.5 size-5 shrink-0 accent-current ${estilos.r8}`} checked={acepta} onChange={(e) => setAcepta(e.target.checked)} />
+            <span>{t("pago.acepto_politica")}</span>
           </label>
-        </section>
-      ) : null}
+        </TarjetaPlegable>
 
-      <section className={`mx-4 mt-3 border-2 border-ink p-3 ${estilos.r16}`}>
-        <label className="flex cursor-pointer items-start gap-3 text-[13px]">
-          <input
-            type="checkbox"
-            className={`mt-0.5 size-5 shrink-0 accent-current ${estilos.r8}`}
-            checked={acepta}
-            onChange={(e) => setAcepta(e.target.checked)}
-          />
-          <span>
-            {t("pago.acepto_politica")}
-          </span>
-        </label>
-      </section>
+        {resumen.directo ? (
+          <TarjetaPlegable
+            icono={<Info className="size-6" />}
+            titulo="Sobre tu pago"
+            abierta={abiertaInfo}
+            onAlternar={() => setAbiertaInfo((v) => !v)}
+            aceptada={aceptaInfo}
+            pendiente={intento && faltaInfo}
+          >
+            <ul className="m-0 flex list-none flex-col gap-1.5 font-sans text-[12.5px] leading-snug normal-case">
+              {PUNTOS_SOBRE_TU_PAGO.map((p) => (
+                <li key={p} className="flex items-start gap-2">
+                  <Check aria-hidden className="mt-0.5 size-4 flex-none text-signal" strokeWidth={3} />
+                  <span>{p}</span>
+                </li>
+              ))}
+            </ul>
+            <label className="mt-3 flex cursor-pointer items-start gap-3 border-t border-border pt-3 text-[13px]">
+              <input type="checkbox" className={`mt-0.5 size-5 shrink-0 accent-current ${estilos.r8}`} checked={aceptaInfo} onChange={(e) => setAceptaInfo(e.target.checked)} />
+              <span>Leí y acepto: el dinero va directo al negocio y cualquier devolución la gestiono con él.</span>
+            </label>
+          </TarjetaPlegable>
+        ) : null}
+      </div>
 
       {resumen.directo && resumen.negocioId ? (
-        <PagoDirecto reservaId={resumen.reservaId} negocioId={resumen.negocioId} montoSena={resumen.montoSena} montoTotal={resumen.montoTotal} medios={resumen.directo} acepta={acepta} aceptaInfo={aceptaInfo} pagaTodo={pagaTodoDirecto} />
+        <PagoDirecto reservaId={resumen.reservaId} negocioId={resumen.negocioId} montoSena={resumen.montoSena} montoTotal={resumen.montoTotal} medios={resumen.directo} acepta={acepta} aceptaInfo={aceptaInfo} pagaTodo={pagaTodoDirecto} onFaltaAceptar={faltaAceptar} />
       ) : null}
 
       {error ? (
@@ -359,7 +413,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
       {/* Un solo botón de pago, deshabilitado tras el primer tap (05-API/01_Standards.md). */}
       <Pie>
         {mostrarMp ? (
-        <Button size="lg" className="w-full" loading={iniciando} disabled={iniciando || !acepta} onClick={pagar}>
+        <Button size="lg" className="w-full" loading={iniciando} disabled={iniciando} onClick={pagar}>
           {t("pago.pagar_anticipo", { monto: formatCOP(resumen.montoSena) })}
         </Button>
         ) : null}

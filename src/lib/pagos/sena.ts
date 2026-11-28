@@ -55,6 +55,22 @@ export function resumenPoliticaCancelacion(negocio: {
   return lineas;
 }
 
+/** Misma política en frases cortas para la pantalla de pago (no omite ninguna regla). */
+export function resumenPoliticaCompacta(negocio: Parameters<typeof resumenPoliticaCancelacion>[0]) {
+  const total = negocio.ventana_reembolso_total_horas;
+  const parcial = negocio.ventana_reembolso_parcial_horas;
+  const lineas = [
+    `${total} h o más antes: devolvemos el 100% del anticipo.`,
+    `Entre ${parcial} h y ${total} h antes: devolvemos el ${Number(negocio.reembolso_parcial_pct)}%.`,
+    `Menos de ${parcial} h o si no te presentas: el anticipo queda para el negocio.`,
+    "Si el negocio cancela: devolvemos el 100%, siempre.",
+  ];
+  if (negocio.pago_completo_en_app) {
+    lineas.splice(3, 0, "Si pagas todo, estas reglas aplican solo al anticipo: el resto siempre te lo devolvemos si la cita no se presta.");
+  }
+  return lineas;
+}
+
 export interface ServicioSena {
   precio_base: number;
   anticipo_pct?: number | null;

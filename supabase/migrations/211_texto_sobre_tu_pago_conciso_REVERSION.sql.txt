@@ -1,0 +1,9 @@
+-- Reversión de la 211: vuelve al texto largo de la 210.
+create or replace function public.texto_info_pago_directo()
+returns text language sql immutable set search_path = public as $$
+  select 'El pago se realiza directamente a la cuenta del comercio. StylerNow solo facilita la reserva y no custodia ni valida transferencias. '
+      || 'Este anticipo fue transferido directamente a la cuenta del comercio. StylerNow no custodia ni reembolsa ese dinero; '
+      || 'cualquier devolución o acuerdo debes gestionarlo directamente con la barbería.';
+$$;
+revoke all on function public.texto_info_pago_directo() from public, anon, authenticated;
+grant execute on function public.texto_info_pago_directo() to authenticated, service_role;

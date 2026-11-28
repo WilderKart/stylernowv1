@@ -31,16 +31,16 @@ async function copiar(texto: string): Promise<boolean> {
 }
 
 /** Celda compacta de «Datos de pago»: logo o icono + valor + botón de copiar en un toque (la etiqueta queda para lectores de pantalla). */
-function CeldaCopiar({ etiqueta, valor, icono }: { etiqueta: string; valor: string; icono: React.ReactNode }) {
+function CeldaCopiar({ etiqueta, valor, icono, ancha }: { etiqueta: string; valor: string; icono: React.ReactNode; /** Ocupa las dos columnas (valores largos que deben verse en una línea). */ ancha?: boolean }) {
   const [copiado, setCopiado] = useState(false);
   return (
-    <div className={`flex min-w-0 items-center gap-1.5 border-2 border-ink py-1.5 pr-0.5 pl-1.5 ${estilos.r12}`} title={etiqueta}>
+    <div className={`flex min-w-0 items-center gap-1.5 border-2 border-ink py-1.5 pr-0.5 pl-1.5 ${ancha ? "col-span-2" : ""} ${estilos.r12}`} title={etiqueta}>
       <span className="flex h-7 flex-none items-center justify-center" aria-hidden="true">
         {icono}
       </span>
       <span className="h-5 w-px flex-none bg-ink" aria-hidden="true" />
       <span className="sr-only">{etiqueta}</span>
-      <p className="m-0 min-w-0 flex-1 text-[12.5px] leading-tight font-bold tracking-tight tabular-nums break-all">{valor}</p>
+      <p className="m-0 min-w-0 flex-1 text-[12.5px] leading-tight font-bold tracking-tight whitespace-nowrap tabular-nums">{valor}</p>
       <button
         type="button"
         className="grid size-7 flex-none place-items-center border-0 bg-transparent"
@@ -109,10 +109,12 @@ export function SelectorModoPago({ modo, onChange, montoSena, montoTotal, deshab
  * comprobante (comprimido a <300 KB en el navegador y subido directo a Storage, sin pasar por una Server Action).
  * Al registrar el soporte, la cita queda agendada al instante. El botón de agendar es lo último de la pantalla.
  */
-export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medios, acepta, aceptaInfo, pagaTodo }: {
+export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medios, acepta, aceptaInfo, pagaTodo, onFaltaAceptar }: {
   reservaId: string; negocioId: string; montoSena: number; /** Total del servicio. */ montoTotal: number; medios: MediosDirectosVista; acepta: boolean; /** Chulo de la «Información importante». */ aceptaInfo: boolean;
   /** Modo elegido en «Método de pago»: define cuánto se transfiere. */
   pagaTodo: boolean;
+  /** Se llama cuando intentan reservar sin los dos chulos: la pantalla abre las tarjetas y lleva hasta ellas. */
+  onFaltaAceptar: () => void;
 }) {
   const router = useRouter();
   const aTransferir = Math.round(pagaTodo ? montoTotal : montoSena);
@@ -124,6 +126,7 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
     setMonto(String(aTransferir));
   }
   const [qrGrande, setQrGrande] = useState(false);
+  const [qrFallo, setQrFallo] = useState(false);
   const [archivo, setArchivo] = useState<File | null>(null);
   const [vista, setVista] = useState<string | null>(null);
   const [estado, setEstado] = useState<"" | "preparando" | "enviando">("");
@@ -164,10 +167,9 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
   async function enviar() {
     setError(null);
     const valor = Number(monto.replace(/\D/g, ""));
+    if (!acepta || !aceptaInfo) return onFaltaAceptar();
     if (!archivo) return setError("Sube la captura de tu comprobante.");
     if (!valor || valor < Math.round(montoSena)) return setError(`El monto debe ser al menos ${formatCOP(montoSena)}.`);
-    if (!acepta) return setError("Acepta la política de cancelación para continuar.");
-    if (!aceptaInfo) return setError("Acepta la información importante del pago directo para continuar.");
     setEstado("enviando");
     try {
       const hash = await sha256Hex(archivo);
@@ -188,13 +190,13 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
   }
 
   const ocupado = estado !== "";
-  const deshabilitado = ocupado || !acepta || !aceptaInfo || !archivo;
+  const deshabilitado = ocupado;
   return (
     <>
       <Tarjeta icono={<Layers className="size-7" />} titulo="Datos de pago">
         <div className="grid grid-cols-2 gap-2">
           {medios.llaveBreb ? (
-            <CeldaCopiar etiqueta="Llave Bre-B" valor={medios.llaveBreb} icono={<Image src="/pagos/breb.webp" alt="" width={40} height={20} className="h-5 w-auto" />} />
+            <CeldaCopiar ancha etiqueta="Llave Bre-B" valor={medios.llaveBreb} icono={<Image src="/pagos/breb.webp" alt="" width={40} height={20} className="h-5 w-auto" />} />
           ) : null}
           {medios.nequi ? (
             <CeldaCopiar etiqueta="Nequi" valor={medios.nequi} icono={<Image src="/pagos/nequi.webp" alt="" width={24} height={24} className="size-6" />} />
@@ -203,37 +205,48 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
           <CeldaCopiar etiqueta="Monto exacto" valor={String(aTransferir)} icono={<CircleDollarSign className="size-6" />} />
           {medios.referencia ? <CeldaCopiar etiqueta="Referencia" valor={medios.referencia} icono={<Tag className="size-6" />} /> : null}
         </div>
-        {medios.linkPago || medios.qrUrl ? (
-          <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
-            {medios.linkPago ? (
-              <a
-                href={medios.linkPago}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`flex min-h-12 min-w-0 flex-[0.9] items-center justify-center gap-1.5 border-2 border-ink px-1.5 text-center text-[13px] leading-tight font-bold ${estilos.r12}`}
-              >
-                <Link2 className="size-5 flex-none" aria-hidden />
-                Abrir link de pago
-              </a>
-            ) : null}
-            {medios.qrUrl ? (
-              <div className="flex min-w-0 flex-[1.5] items-center gap-1.5 border-l border-border pl-2">
-                {/* eslint-disable-next-line @next/next/no-img-element -- QR privado con URL firmada temporal */}
-                <img src={medios.qrUrl} alt="Código QR de pago del negocio" className={`size-20 flex-none border-[3px] border-signal bg-white object-contain p-1 ${estilos.r12}`} />
-                <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="text-[14px] leading-tight font-black uppercase">Escanea el QR</span>
-                  <button type="button" onClick={() => setQrGrande(true)} className="border-0 bg-transparent p-0 text-left text-[11px] font-bold underline">Ampliar QR</button>
-                  <button
-                    type="button"
-                    onClick={guardarQr}
-                    className={`flex items-center gap-1 border-2 border-ink bg-transparent px-1 py-1 text-left text-[10px] leading-tight font-bold uppercase ${estilos.r8}`}
-                  >
-                    <ImageDown className="size-5 flex-none" aria-hidden />
-                    Guardar en galería
-                  </button>
-                </div>
+        {medios.linkPago ? (
+          <a
+            href={medios.linkPago}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`mt-2 flex min-h-11 items-center justify-center gap-2 border-2 border-ink px-2 text-center text-[13px] leading-tight font-bold ${estilos.r12}`}
+          >
+            <Link2 className="size-5 flex-none" aria-hidden />
+            Abrir link de pago
+          </a>
+        ) : null}
+        {medios.qrUrl ? (
+          <div className={`mt-2 flex items-center gap-3 border-2 border-ink p-2 ${estilos.r12}`}>
+            {qrFallo ? (
+              <div className={`grid size-32 flex-none place-items-center border-[3px] border-signal bg-white p-2 text-center text-[11px] leading-tight font-bold text-ink ${estilos.r12}`} role="img" aria-label="No se pudo cargar el QR">
+                No se pudo cargar el QR. Paga con la llave o el link.
               </div>
-            ) : null}
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element -- QR privado con URL firmada temporal
+              <img
+                src={medios.qrUrl}
+                alt="Código QR de pago del negocio"
+                onError={() => setQrFallo(true)}
+                className={`size-32 flex-none border-[3px] border-signal bg-white object-contain p-1 ${estilos.r12}`}
+              />
+            )}
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <span className="text-[15px] leading-tight font-black uppercase">Escanea el QR</span>
+              {qrFallo ? null : (
+                <button type="button" onClick={() => setQrGrande(true)} className="border-0 bg-transparent p-0 text-left text-[12px] font-bold underline">
+                  Ampliar QR
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={guardarQr}
+                className={`flex items-center gap-1.5 border-2 border-ink bg-transparent px-2 py-1.5 text-left text-[11px] leading-tight font-bold uppercase ${estilos.r8}`}
+              >
+                <ImageDown className="size-5 flex-none" aria-hidden />
+                Guardar en galería
+              </button>
+            </div>
           </div>
         ) : null}
         {medios.instrucciones ? <p className="m-0 mt-3 border-l-4 border-accent bg-accent-soft px-3 py-2 text-[13px]">{medios.instrucciones}</p> : null}
