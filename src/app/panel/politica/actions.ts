@@ -198,7 +198,7 @@ export async function guardarAnticipo(entrada: z.input<typeof esquemaAnticipo>):
   }
 }
 
-// ── Ventana de reservas (migración 207) ─────────────────────────────────────
+// ── Ventana de reservas (migración 209) ─────────────────────────────────────
 
 export interface ConfigVentana {
   minMinutos: number;

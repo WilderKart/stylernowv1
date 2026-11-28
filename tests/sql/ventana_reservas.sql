@@ -1,4 +1,4 @@
--- Prueba SQL de la migración 207 (ventana de reservas).
+-- Prueba SQL de la migración 209 (ventana de reservas).
 --   docker exec -i supabase_db_stylernow psql -U postgres -v ON_ERROR_STOP=1 < tests/sql/ventana_reservas.sql
 -- Transacción que se revierte al final.
 begin;

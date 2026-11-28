@@ -1,4 +1,4 @@
--- 207 — El negocio define su «ventana de reservas»: con cuánta anticipación mínima y hasta cuántos días adelante puede reservar un cliente.
+-- 209 — El negocio define su «ventana de reservas»: con cuánta anticipación mínima y hasta cuántos días adelante puede reservar un cliente.
 -- Antes ambos valores existían (negocio.min_anticipacion_minutos / max_anticipacion_dias, por defecto 0 y 60) y los usa slots_disponibles, pero
 -- ninguna pantalla permitía cambiarlos: todos los negocios quedaron fijos en 60 días. Esta función es el único camino del panel; no toca
 -- slots_disponibles ni ninguna regla de disponibilidad. Aplica a reservas nuevas (las ya creadas no cambian).
