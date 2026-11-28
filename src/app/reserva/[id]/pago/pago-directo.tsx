@@ -5,7 +5,7 @@ import { comprimirComprobante, sha256Hex } from "@/lib/imagen/comprimir";
 import { createClient } from "@/lib/supabase/client";
 import { formatCOP } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { Check, CircleCheck, CircleDollarSign, Coins, Copy, CreditCard, ImageDown, Layers, Link2, Paperclip, Smartphone, Tag } from "lucide-react";
+import { Check, CircleCheck, CircleDollarSign, Coins, Copy, CreditCard, ImageDown, Layers, Link2, Paperclip, Tag } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { registrarPagoDirecto } from "./actions";
@@ -201,7 +201,7 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
           {medios.nequi ? (
             <CeldaCopiar etiqueta="Nequi" valor={medios.nequi} icono={<Image src="/pagos/nequi.webp" alt="" width={24} height={24} className="size-6" />} />
           ) : null}
-          {medios.daviplata ? <CeldaCopiar etiqueta="Daviplata" valor={medios.daviplata} icono={<Smartphone className="size-6" />} /> : null}
+          {medios.daviplata ? <CeldaCopiar etiqueta="Daviplata" valor={medios.daviplata} icono={<Image src="/pagos/daviplata.webp" alt="" width={26} height={24} className={`h-6 w-auto ${estilos.r8}`} />} /> : null}
           <CeldaCopiar etiqueta="Monto exacto" valor={String(aTransferir)} icono={<CircleDollarSign className="size-6" />} />
           {medios.referencia ? <CeldaCopiar etiqueta="Referencia" valor={medios.referencia} icono={<Tag className="size-6" />} /> : null}
         </div>
