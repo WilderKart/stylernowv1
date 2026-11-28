@@ -24,6 +24,8 @@ type Resultado<T = undefined> = ({ ok: true } & (T extends undefined ? object : 
 const MENSAJES: Record<string, string> = {
   POLITICA_FUERA_DE_LIMITES: "Esos valores están fuera de los límites que define StylerNow.",
   NO_AUTORIZADO: "Solo el dueño del negocio puede cambiar la política.",
+  VENTANA_INVALIDA: "Esos valores no son válidos: hasta 365 días adelante y como máximo 7 días de anticipación mínima, y la ventana máxima debe ser mayor que la mínima.",
+  SUSCRIPCION_RESTRINGIDA: "La suscripción del negocio está restringida; no se puede cambiar esta configuración por ahora.",
   NO_AUTENTICADO: "Inicia sesión para continuar.",
   negocio_ventanas_coherentes: "La ventana parcial no puede ser mayor que la ventana total.",
 };
@@ -189,6 +191,45 @@ export async function guardarAnticipo(entrada: z.input<typeof esquemaAnticipo>):
       p_pago_completo: d.pagoCompleto,
     });
     if (error) return { ok: false, error: "No pudimos guardar el anticipo. Revisa los valores." };
+    revalidatePath("/panel/politica");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: traducir(e instanceof Error ? e.message : "") };
+  }
+}
+
+// ── Ventana de reservas (migración 209) ─────────────────────────────────────
+
+export interface ConfigVentana {
+  minMinutos: number;
+  maxDias: number;
+}
+
+export async function obtenerVentana(): Promise<Resultado<{ ventana: ConfigVentana }>> {
+  try {
+    const { supabase, negocioId } = await sesionDueno();
+    const { data: n } = await supabase.from("negocio").select("min_anticipacion_minutos, max_anticipacion_dias").eq("id", negocioId).single();
+    if (!n) return { ok: false, error: "No encontramos tu negocio." };
+    return { ok: true, data: { ventana: { minMinutos: n.min_anticipacion_minutos, maxDias: n.max_anticipacion_dias } } };
+  } catch (e) {
+    return { ok: false, error: traducir(e instanceof Error ? e.message : "") };
+  }
+}
+
+const esquemaVentana = z.object({ minMinutos: z.number().int().min(0).max(10080), maxDias: z.number().int().min(1).max(365) }).strict();
+
+/** Guarda la ventana de reservas. La base vuelve a validar (solo la propietaria) y audita antes/después; aplica a reservas nuevas. */
+export async function guardarVentana(entrada: ConfigVentana): Promise<Resultado> {
+  try {
+    const parsed = esquemaVentana.safeParse(entrada);
+    if (!parsed.success) return { ok: false, error: traducir("VENTANA_INVALIDA") };
+    const { supabase, negocioId } = await sesionDueno();
+    const { error } = await (supabase as unknown as { rpc: (n: string, a: object) => Promise<{ error: { message: string } | null }> }).rpc("configurar_ventana_reservas", {
+      p_negocio_id: negocioId,
+      p_min_minutos: parsed.data.minMinutos,
+      p_max_dias: parsed.data.maxDias,
+    });
+    if (error) return { ok: false, error: traducir(error.message) };
     revalidatePath("/panel/politica");
     return { ok: true };
   } catch (e) {

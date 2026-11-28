@@ -8,7 +8,7 @@ import { SlotsPorFranja } from "@/components/negocio/horas-agrupadas";
 import { festivoDe } from "@/lib/calendario/festivos-colombia";
 import { duracionEtiqueta, fechaEtiqueta } from "@/lib/calendario/etiquetas";
 import { semanasDelMes } from "@/lib/calendario/mes";
-import { CalendarDays, Clock } from "lucide-react";
+import { CalendarDays, Clock, MapPin, Scissors, Tag, User } from "lucide-react";
 import { FOTOS_RESPALDO, nivelATier } from "@/components/negocio/nivel";
 import { duracion, fechaCorta, fechaHoraLarga, fechaISO, hora, hoyISO, sumarDias } from "@/lib/formato";
 import { AvisoDistancia } from "./aviso-distancia";
@@ -685,7 +685,7 @@ export function FlujoReserva({
               <div className="sn-ticket">
                 <div className="sn-ticket__top">
                   <div className="sn-ticket__date">
-                    <span className="sn-meta">{fechaCorta(fechaISO(slot.hora_inicio, tz), tz).split(" ")[2]?.replace(".", "")}</span>
+                    <span className="sn-meta">{fechaCorta(fechaISO(slot.hora_inicio, tz), tz).split(" ").filter((p) => p.toLowerCase() !== "de").pop()?.replace(".", "")}</span>
                     <b>{Number(fechaISO(slot.hora_inicio, tz).slice(8, 10))}</b>
                   </div>
                   <div className="sn-ticket__main min-w-0">
@@ -704,23 +704,30 @@ export function FlujoReserva({
               </div>
             </div>
 
-            <div className="border-t-2 border-line">
+            <div className="flex flex-col gap-2 px-4">
               {[
-                [t("res.k_servicios"), seleccionados.map((s) => s.nombre).join(" + ")],
-                [t("res.k_profesional"), profesional ? profesional.nombre : t("res.se_asigna")],
-                [t("res.k_sede"), sede?.nombre ?? ""],
-                [t("res.k_fecha"), fechaHoraLarga(slot.hora_inicio, tz)],
-                [t("res.k_duracion"), duracion(minutosTotal)],
-              ].map(([k, v]) => (
-                <div key={k} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-grid-soft px-4 py-3">
-                  <span className="sn-meta">{k}</span>
-                  <span className="body min-w-0 text-right font-bold break-words capitalize">{v}</span>
-                </div>
-              ))}
-              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-grid-soft px-4 py-3">
-                <span className="sn-meta">{t("res.total_servicio")}</span>
-                <span className="sn-price">{formatCOP(montoTotal)}</span>
+                [Scissors, t("res.k_servicios"), seleccionados.map((s) => s.nombre).join(" + ")],
+                [User, t("res.k_profesional"), profesional ? profesional.nombre : t("res.se_asigna")],
+                [MapPin, t("res.k_sede"), sede?.nombre ?? ""],
+                [CalendarDays, t("res.k_fecha"), fechaHoraLarga(slot.hora_inicio, tz)],
+                [Clock, t("res.k_duracion"), duracion(minutosTotal)],
+              ].map(([Icono, k, v]) => {
+                const I = Icono as typeof Scissors;
+                return (
+                  <div key={k as string} className="flex min-h-[56px] items-center gap-3 border-2 border-ink px-3 py-2.5">
+                    <I className="size-6 flex-none text-[var(--text-disabled)]" aria-hidden />
+                    <span className="poster-5 flex-none text-[15px] uppercase">{k as string}</span>
+                    <span className="body min-w-0 flex-1 text-right break-words capitalize">{v as string}</span>
+                  </div>
+                );
+              })}
+              <div className="flex min-h-[56px] items-center gap-3 border-2 border-ink px-3 py-2.5">
+                <Tag className="size-6 flex-none text-[var(--text-disabled)]" aria-hidden />
+                <span className="poster-5 flex-none text-[15px] uppercase">{t("res.total_servicio")}</span>
+                <span className="sn-price min-w-0 flex-1 text-right">{formatCOP(montoTotal)}</span>
               </div>
+            </div>
+            <div className="mt-2">
               {saldoPendiente > 0 ? (
                 <>
                   <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-grid-soft px-4 py-3">
