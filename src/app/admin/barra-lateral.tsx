@@ -11,6 +11,7 @@ import {
   Crown,
   HeartPulse,
   Megaphone,
+  CreditCard,
   Percent,
   Users,
   Gift,
@@ -70,6 +71,7 @@ const GRUPOS: { titulo?: string; items: Item[] }[] = [
     titulo: "Ingresos y producto",
     items: [
       { href: "/admin/planes", etiqueta: "Planes y suscripciones", icono: Layers },
+      { href: "/admin/mercadopago", etiqueta: "Mercado Pago (modo)", icono: CreditCard },
       { href: "/admin/adicionales", etiqueta: "Barberos adicionales", icono: UserPlus },
       { href: "/admin/comisiones", etiqueta: "Comisiones", icono: Percent },
       { href: "/admin/lealtad", etiqueta: "Lealtad", icono: Gift },

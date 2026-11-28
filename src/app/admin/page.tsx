@@ -4,6 +4,7 @@ import {
   ArrowRight,
   CalendarDays,
   CircleCheck,
+  CreditCard,
   Layers,
   LifeBuoy,
   Scale,
@@ -80,6 +81,7 @@ export default async function AdminDashboardPage(props: PageProps<"/admin">) {
     { href: "/admin/planes", etiqueta: "Gestionar planes", icono: Layers },
     { href: "/admin/reglas", etiqueta: "Editar reglas", icono: Scale },
     { href: "/admin/auditoria", etiqueta: "Ver auditoría", icono: Activity },
+    { href: "/admin/mercadopago", etiqueta: "Mercado Pago (modo)", icono: CreditCard },
     { href: "/admin/configuracion", etiqueta: "Configuración", icono: Settings },
   ];
 
