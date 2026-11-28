@@ -236,17 +236,26 @@ export async function registrarPagoDirecto(datos: {
   rutaComprobante: string;
   hashComprobante: string;
   aceptaPolitica: boolean;
+  /** Chulo independiente de la «Información importante» (el dinero va directo al negocio). */
+  aceptaInfoPagoDirecto: boolean;
 }): Promise<{ ok: true } | { ok: false; mensaje: string; expirada?: boolean }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, mensaje: "Inicia sesión para continuar." };
   if (datos.aceptaPolitica !== true) return { ok: false, mensaje: "Debes aceptar la política de cancelación para continuar." };
+  if (datos.aceptaInfoPagoDirecto !== true) return { ok: false, mensaje: "Debes aceptar la información importante del pago directo para continuar." };
   if (!Number.isFinite(datos.monto) || datos.monto <= 0) return { ok: false, mensaje: "Escribe el monto que transferiste." };
 
   const { error: eAcepta } = await supabase.rpc("aceptar_politica_reserva", { p_reserva_id: datos.reservaId });
   if (eAcepta) {
     if (eAcepta.message.includes("RESERVA_NO_PAGABLE")) return { ok: false, mensaje: "El bloqueo temporal de tu turno terminó. Vamos a revisar si el horario sigue disponible.", expirada: true };
     return { ok: false, mensaje: "No pudimos registrar tu aceptación. Intenta de nuevo." };
+  }
+  // Evidencia independiente de la «Información importante» (texto exacto, cuenta de destino y montos).
+  const { error: eInfo } = await supabase.rpc("aceptar_informacion_pago_directo", { p_reserva_id: datos.reservaId });
+  if (eInfo) {
+    if (eInfo.message.includes("RESERVA_NO_PAGABLE")) return { ok: false, mensaje: "El bloqueo temporal de tu turno terminó. Vamos a revisar si el horario sigue disponible.", expirada: true };
+    return { ok: false, mensaje: traducirErrorPagos(eInfo.message) };
   }
   const { error } = await supabase.rpc("registrar_pago_directo_reserva", {
     p_reserva_id: datos.reservaId,

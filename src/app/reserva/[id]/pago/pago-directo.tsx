@@ -2,7 +2,6 @@
 
 import { ErrorAviso } from "@/app/lealtad/ui-cliente";
 import { comprimirComprobante, sha256Hex } from "@/lib/imagen/comprimir";
-import { AVISO_PAGO_DIRECTO_SIN_REEMBOLSO } from "@/lib/pagos-directos/aviso";
 import { createClient } from "@/lib/supabase/client";
 import { formatCOP } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -72,30 +71,59 @@ function Tarjeta({ icono, titulo, children }: { icono: React.ReactNode; titulo: 
   );
 }
 
+/** «Método de pago»: el cliente elige pagar solo el anticipo o el servicio completo. El estado vive en la pantalla para que el resumen de abajo lo refleje. */
+export function SelectorModoPago({ modo, onChange, montoSena, montoTotal, deshabilitado }: {
+  modo: "ANTICIPO" | "TOTAL"; onChange: (m: "ANTICIPO" | "TOTAL") => void; montoSena: number; montoTotal: number; deshabilitado?: boolean;
+}) {
+  const opciones: { id: "ANTICIPO" | "TOTAL"; titulo: string; monto: number }[] = [
+    { id: "ANTICIPO", titulo: "Solo anticipo", monto: montoSena },
+    { id: "TOTAL", titulo: "Pago total", monto: montoTotal },
+  ];
+  return (
+    <Tarjeta icono={<CreditCard className="size-7" />} titulo="Método de pago">
+      <div role="radiogroup" aria-label="¿Cuánto quieres pagar ahora?" className="flex flex-col gap-1.5">
+        {opciones.map((o) => (
+          <button
+            key={o.id}
+            type="button"
+            role="radio"
+            aria-checked={modo === o.id}
+            disabled={deshabilitado}
+            onClick={() => onChange(o.id)}
+            className={`flex min-h-11 items-center gap-3 border px-3 text-left ${estilos.r8} ${modo === o.id ? "border-signal bg-[#ffd9b8] text-ink" : "border-border bg-bg"}`}
+          >
+            <span className={`grid size-6 flex-none place-items-center rounded-full border-2 ${modo === o.id ? "border-signal" : "border-ink"}`} aria-hidden="true">
+              {modo === o.id ? <span className="size-3 rounded-full bg-signal" /> : null}
+            </span>
+            <span className="flex-1 text-[17px] font-bold">{o.titulo}</span>
+            <span className="font-mono text-[17px] font-bold tabular-nums">{formatCOP(o.monto)}</span>
+          </button>
+        ))}
+      </div>
+    </Tarjeta>
+  );
+}
+
 /**
- * Pago directo a la cuenta del negocio: datos para transferir con copiado en un toque, QR descargable y subida del
+ * Pago directo a la cuenta del negocio: datos para transferir con copiado en un toque, QR escaneable y descargable y subida del
  * comprobante (comprimido a <300 KB en el navegador y subido directo a Storage, sin pasar por una Server Action).
- * Al registrar el soporte, la cita queda agendada al instante.
+ * Al registrar el soporte, la cita queda agendada al instante. El botón de agendar es lo último de la pantalla.
  */
-export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medios, acepta, onModoChange, despuesMetodo, antesConfirmar }: {
-  reservaId: string; negocioId: string; montoSena: number; /** Total del servicio: permite pagar todo de una vez. */ montoTotal: number; medios: MediosDirectosVista; acepta: boolean;
-  /** Avisa a la pantalla cuando el cliente elige pagar todo o solo el anticipo (para actualizar el resumen de arriba). */
-  onModoChange?: (pagaTodo: boolean) => void;
-  /** Se muestra justo debajo de «Método de pago» (resumen anticipo / en el local). */
-  despuesMetodo?: React.ReactNode;
-  /** Se muestra justo antes de «Confirma tu pago» (política de cancelación). */
-  antesConfirmar?: React.ReactNode;
+export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medios, acepta, aceptaInfo, pagaTodo }: {
+  reservaId: string; negocioId: string; montoSena: number; /** Total del servicio. */ montoTotal: number; medios: MediosDirectosVista; acepta: boolean; /** Chulo de la «Información importante». */ aceptaInfo: boolean;
+  /** Modo elegido en «Método de pago»: define cuánto se transfiere. */
+  pagaTodo: boolean;
 }) {
   const router = useRouter();
-  const puedePagarTodo = montoTotal > montoSena;
-  const [modo, setModo] = useState<"ANTICIPO" | "TOTAL">("ANTICIPO");
-  const aTransferir = Math.round(modo === "TOTAL" ? montoTotal : montoSena);
-  const [monto, setMonto] = useState(String(Math.round(montoSena)));
-  function elegirModo(m: "ANTICIPO" | "TOTAL") {
-    setModo(m);
-    setMonto(String(Math.round(m === "TOTAL" ? montoTotal : montoSena)));
-    onModoChange?.(m === "TOTAL");
+  const aTransferir = Math.round(pagaTodo ? montoTotal : montoSena);
+  const [monto, setMonto] = useState(String(aTransferir));
+  // Si el cliente cambia entre «solo anticipo» y «pago total», el monto sugerido se actualiza (ajuste de estado durante el render).
+  const [previo, setPrevio] = useState(aTransferir);
+  if (previo !== aTransferir) {
+    setPrevio(aTransferir);
+    setMonto(String(aTransferir));
   }
+  const [qrGrande, setQrGrande] = useState(false);
   const [archivo, setArchivo] = useState<File | null>(null);
   const [vista, setVista] = useState<string | null>(null);
   const [estado, setEstado] = useState<"" | "preparando" | "enviando">("");
@@ -139,6 +167,7 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
     if (!archivo) return setError("Sube la captura de tu comprobante.");
     if (!valor || valor < Math.round(montoSena)) return setError(`El monto debe ser al menos ${formatCOP(montoSena)}.`);
     if (!acepta) return setError("Acepta la política de cancelación para continuar.");
+    if (!aceptaInfo) return setError("Acepta la información importante del pago directo para continuar.");
     setEstado("enviando");
     try {
       const hash = await sha256Hex(archivo);
@@ -146,7 +175,7 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
       const ruta = `${negocioId}/${reservaId}/${hash.slice(0, 12)}-${Date.now().toString(36)}.${ext}`;
       const { error: eSubida } = await createClient().storage.from("pagos-directos").upload(ruta, archivo, { contentType: archivo.type });
       if (eSubida) throw new Error("subida");
-      const r = await registrarPagoDirecto({ reservaId, monto: valor, rutaComprobante: ruta, hashComprobante: hash, aceptaPolitica: acepta });
+      const r = await registrarPagoDirecto({ reservaId, monto: valor, rutaComprobante: ruta, hashComprobante: hash, aceptaPolitica: acepta, aceptaInfoPagoDirecto: aceptaInfo });
       if (!r.ok) {
         setEstado("");
         return setError(r.mensaje);
@@ -159,41 +188,9 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
   }
 
   const ocupado = estado !== "";
-  const opciones: { id: "ANTICIPO" | "TOTAL"; titulo: string; monto: number }[] = [
-    { id: "ANTICIPO" as const, titulo: "Solo anticipo", monto: montoSena },
-    ...(puedePagarTodo ? [{ id: "TOTAL" as const, titulo: "Pago total", monto: montoTotal }] : []),
-  ];
-  const deshabilitado = ocupado || !acepta || !archivo;
+  const deshabilitado = ocupado || !acepta || !aceptaInfo || !archivo;
   return (
     <>
-      {puedePagarTodo ? (
-        <Tarjeta icono={<CreditCard className="size-7" />} titulo="Método de pago">
-          <div role="radiogroup" aria-label="¿Cuánto quieres pagar ahora?" className="flex flex-col gap-1.5">
-            {opciones.map((o) => (
-              <button
-                key={o.id}
-                type="button"
-                role="radio"
-                aria-checked={modo === o.id}
-                disabled={ocupado}
-                onClick={() => elegirModo(o.id)}
-                className={`flex min-h-11 items-center gap-3 border px-3 text-left ${estilos.r8} ${modo === o.id ? "border-signal bg-[#ffd9b8] text-ink" : "border-border bg-bg"}`}
-              >
-                <span
-                  className={`grid size-6 flex-none place-items-center rounded-full border-2 ${modo === o.id ? "border-signal" : "border-ink"}`}
-                  aria-hidden="true"
-                >
-                  {modo === o.id ? <span className="size-3 rounded-full bg-signal" /> : null}
-                </span>
-                <span className="flex-1 text-[17px] font-bold">{o.titulo}</span>
-                <span className="font-mono text-[17px] font-bold tabular-nums">{formatCOP(o.monto)}</span>
-              </button>
-            ))}
-          </div>
-        </Tarjeta>
-      ) : null}
-      {despuesMetodo}
-
       <Tarjeta icono={<Layers className="size-7" />} titulo="Datos de pago">
         <div className="grid grid-cols-2 gap-2">
           {medios.llaveBreb ? (
@@ -213,22 +210,23 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
                 href={medios.linkPago}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`flex min-h-12 min-w-0 flex-[1.1] items-center justify-center gap-1.5 border-2 border-ink px-1.5 text-center text-[13px] leading-tight font-bold ${estilos.r12}`}
+                className={`flex min-h-12 min-w-0 flex-[0.9] items-center justify-center gap-1.5 border-2 border-ink px-1.5 text-center text-[13px] leading-tight font-bold ${estilos.r12}`}
               >
                 <Link2 className="size-5 flex-none" aria-hidden />
                 Abrir link de pago
               </a>
             ) : null}
             {medios.qrUrl ? (
-              <div className="flex min-w-0 flex-[1.4] items-center gap-2 border-l border-border pl-2">
+              <div className="flex min-w-0 flex-[1.5] items-center gap-1.5 border-l border-border pl-2">
                 {/* eslint-disable-next-line @next/next/no-img-element -- QR privado con URL firmada temporal */}
                 <img src={medios.qrUrl} alt="Código QR de pago del negocio" className={`size-20 flex-none border-[3px] border-signal bg-white object-contain p-1 ${estilos.r12}`} />
-                <div className="flex min-w-0 flex-col gap-1">
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
                   <span className="text-[14px] leading-tight font-black uppercase">Escanea el QR</span>
+                  <button type="button" onClick={() => setQrGrande(true)} className="border-0 bg-transparent p-0 text-left text-[11px] font-bold underline">Ampliar QR</button>
                   <button
                     type="button"
                     onClick={guardarQr}
-                    className={`flex items-center gap-1 border-2 border-ink bg-transparent px-1.5 py-1 text-left text-[11px] leading-tight font-bold uppercase ${estilos.r8}`}
+                    className={`flex items-center gap-1 border-2 border-ink bg-transparent px-1 py-1 text-left text-[10px] leading-tight font-bold uppercase ${estilos.r8}`}
                   >
                     <ImageDown className="size-5 flex-none" aria-hidden />
                     Guardar en galería
@@ -240,8 +238,6 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
         ) : null}
         {medios.instrucciones ? <p className="m-0 mt-3 border-l-4 border-accent bg-accent-soft px-3 py-2 text-[13px]">{medios.instrucciones}</p> : null}
       </Tarjeta>
-
-      {antesConfirmar}
 
       <Tarjeta icono={<Coins className="size-7" />} titulo="Confirma tu pago">
         <div className="grid grid-cols-2 gap-2">
@@ -270,9 +266,12 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
           <img src={vista} alt="Vista previa de tu comprobante" className={`mt-2 max-h-60 w-full border-2 border-border object-contain ${estilos.r8}`} />
         ) : null}
         {error ? <div className="mt-2"><ErrorAviso>{error}</ErrorAviso></div> : null}
+        <p className="m-0 mt-2 font-sans text-[12px] leading-snug text-text-muted normal-case">
+          Transfiere {formatCOP(aTransferir)} a la cuenta del negocio y sube tu comprobante. Tu cita queda agendada al instante; el negocio confirma después que el dinero llegó.
+        </p>
       </Tarjeta>
 
-      <div className="px-4 pt-3">
+      <div className="px-4 pt-3 pb-4">
         <button
           type="button"
           onClick={enviar}
@@ -283,16 +282,19 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
           <CircleCheck className="size-7 flex-none" aria-hidden />
           {estado === "enviando" ? "Enviando…" : "Ya pagué · agendar mi cita"}
         </button>
-        <div className="mt-3 flex flex-col gap-1.5 text-[11px] leading-snug text-text-muted normal-case">
-          <p className="m-0 font-sans normal-case">
-            Transfiere {formatCOP(aTransferir)} a la cuenta del negocio y sube tu comprobante. Tu cita queda agendada al instante; el negocio confirma después que el dinero llegó.
-          </p>
-          <p className="m-0 font-sans normal-case">
-            El pago se realiza directamente a la cuenta del comercio. StylerNow solo facilita la reserva y no custodia ni valida transferencias.
-          </p>
-          <p className="m-0 font-sans normal-case">{AVISO_PAGO_DIRECTO_SIN_REEMBOLSO}</p>
-        </div>
       </div>
+      {qrGrande && medios.qrUrl ? (
+        <div role="dialog" aria-modal="true" aria-label="Código QR de pago ampliado" className="fixed inset-0 z-50 grid place-items-center bg-black/80 p-4" onClick={() => setQrGrande(false)}>
+          <div className="flex w-full max-w-[420px] flex-col items-center gap-3" onClick={(e) => e.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- QR privado con URL firmada temporal */}
+            <img src={medios.qrUrl} alt="Código QR de pago del negocio, ampliado" className="w-full bg-white object-contain p-3" />
+            <p className="m-0 text-center text-[13px] text-white">Apunta la cámara de otro celular al código. Sube el brillo si no lo lee.</p>
+            <button type="button" onClick={() => setQrGrande(false)} className={`border-2 border-white bg-transparent px-6 py-2 text-[14px] font-bold text-white ${estilos.r8}`}>
+              Cerrar
+            </button>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

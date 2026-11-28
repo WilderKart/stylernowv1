@@ -9723,6 +9723,10 @@ export type Database = {
         Args: { p_autoriza_tratamiento: boolean; p_invitacion_id: string }
         Returns: Json
       }
+      aceptar_informacion_pago_directo: {
+        Args: { p_reserva_id: string }
+        Returns: string
+      }
       aceptar_politica_reserva: {
         Args: { p_reserva_id: string }
         Returns: string

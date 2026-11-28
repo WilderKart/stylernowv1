@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { AVISO_PAGO_DIRECTO_SIN_REEMBOLSO } from "@/lib/pagos-directos/aviso";
+import { AVISO_PAGO_DIRECTO_SIN_REEMBOLSO, TEXTO_INFO_PAGO_DIRECTO } from "@/lib/pagos-directos/aviso";
 import { MENSAJES_PAGOS_DIRECTOS, traducirErrorPagos } from "@/lib/pagos-directos/errores";
 
 const leer = (ruta: string) => readFileSync(ruta, "utf8").replace(/\r\n/g, "\n");
@@ -104,8 +104,12 @@ describe("capa de aplicación", () => {
   it("el comprobante se sube directo a Storage (no por Server Action) con aviso legal visible", () => {
     const p = leer("src/app/reserva/[id]/pago/pago-directo.tsx");
     expect(p).toMatch(/storage\.from\("pagos-directos"\)\.upload/);
-    expect(p).toMatch(/no custodia ni valida transferencias/);
+    expect(leer("src/lib/pagos-directos/aviso.ts")).toMatch(/no custodia ni valida transferencias/);
+    expect(leer("src/app/reserva/[id]/pago/pantalla-pago.tsx")).toMatch(/AVISO_PAGO_DIRECTO_COMERCIO/);   // «Información importante» visible
+    expect(leer("src/app/reserva/[id]/pago/pantalla-pago.tsx")).toMatch(/AVISO_PAGO_DIRECTO_SIN_REEMBOLSO/);
     expect(p).toMatch(/Guardar en galería/);
+    expect(p).toMatch(/aceptaInfoPagoDirecto/);                       // la aceptación de la información importante viaja con el pago
+    expect(leer("src/app/reserva/[id]/pago/actions.ts")).toMatch(/aceptar_informacion_pago_directo/);
     expect(leer("src/lib/imagen/comprimir.ts")).toMatch(/MAX_COMPROBANTE_BYTES = 300 \* 1024/);
   });
   it("no se redefinen los flujos de cobro de Wompi ni Mercado Pago", () => {
@@ -152,7 +156,7 @@ describe("cancelación con pago directo: StylerNow no reembolsa", () => {
     expect(pagina).toMatch(/pagado: pagoDirectoVigente \? pagadoDirecto : Number\(reserva\.monto_sena\)/);   // solo se informa lo que debe devolver el negocio; StylerNow no mueve ese dinero
     expect(pagina).toMatch(/pagoDirecto=\{pagoDirectoVigente\}/);
     expect(pagina).toMatch(/pagoDirectoVigente\s*\n?\s*\?\s*devolucion\.monto > 0 \? textoDirecto : AVISO_PAGO_DIRECTO_SIN_REEMBOLSO/);
-    expect(leer("src/app/reserva/[id]/pago/pago-directo.tsx")).toMatch(/AVISO_PAGO_DIRECTO_SIN_REEMBOLSO/);
+    expect(leer("src/app/reserva/[id]/pago/pantalla-pago.tsx")).toMatch(/AVISO_PAGO_DIRECTO_SIN_REEMBOLSO/);
   });
   it("la acción de cancelar informa pagoDirecto y no dispara el worker de reembolsos sin monto", () => {
     const a = leer("src/app/reserva/[id]/actions.ts");
@@ -197,5 +201,21 @@ describe("tipos de base de datos regenerados", () => {
     for (const f of ["src/app/panel/pagos/actions.ts", "src/lib/pagos-directos/comprobante-actions.ts", "src/app/panel/pos/actions.ts", "src/app/reserva/[id]/pago/actions.ts"]) {
       expect(leer(f)).not.toMatch(/sin-tipos|rpcSinTipos|tabla\(supabase/);
     }
+  });
+});
+
+describe("evidencia de la información importante del pago directo (migración 210)", () => {
+  const m210 = leer("supabase/migrations/210_aceptacion_informacion_pago_directo.sql");
+  it("el texto que se acepta en pantalla es idéntico al que guarda la base", () => {
+    const enBase = m210.match(/select '(.*?)'\s*\n\s*\|\| '(.*?)'\s*\n\s*\|\| '(.*?)';/);
+    expect(enBase).not.toBeNull();
+    const texto = (enBase as RegExpMatchArray).slice(1, 4).join("");
+    expect(texto).toBe(TEXTO_INFO_PAGO_DIRECTO);
+  });
+  it("la base exige la aceptación, la guarda inmutable y la copia al repositorio de evidencias", () => {
+    expect(m210).toMatch(/trg_aceptacion_info_pago_inmutable/);
+    expect(m210).toMatch(/_registrar_evidencia/);
+    expect(m210).toMatch(/INFO_PAGO_DIRECTO_NO_ACEPTADA/);
+    expect(m210).toMatch(/revoke all on function public\.aceptar_informacion_pago_directo\(uuid\) from public, anon, authenticated/);
   });
 });
