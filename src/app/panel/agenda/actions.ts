@@ -6,6 +6,7 @@ import { MENSAJE_RESTRINGIDA } from "@/lib/suscripcion/estado-operativo";
 import { procesarReembolsosSinFallar } from "@/lib/pagos/reembolsos";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { enviarMensaje, listarMensajes, marcarChatLeido, type MensajeChat } from "@/lib/cliente/chat";
 
 type Resultado<T = undefined> =
   | ({ ok: true; aviso?: string } & (T extends undefined ? object : { data: T }))
@@ -389,4 +390,23 @@ export async function completarCitaSinPos(reservaId: string): Promise<Resultado>
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
   }
+}
+
+// ── Chat de la reserva (el negocio habla con el cliente de la cita) ─────────────────────────────────
+// Reutiliza las funciones de la base (chat_listar / chat_enviar / chat_marcar_leido): ellas deciden por auth.uid() si el
+// usuario es dueño, guardián o el staff asignado a la cita. Nada de esto lo decide el navegador.
+
+export async function listarChatCita(reservaId: string): Promise<Resultado<MensajeChat[]>> {
+  const r = await listarMensajes(reservaId, { limite: 50 });
+  return r.ok ? { ok: true, data: r.data } : { ok: false, error: r.error };
+}
+
+export async function enviarChatCita(reservaId: string, cuerpo: string): Promise<Resultado<MensajeChat>> {
+  const r = await enviarMensaje(reservaId, cuerpo);
+  return r.ok ? { ok: true, data: r.data } : { ok: false, error: r.error };
+}
+
+export async function marcarChatCitaLeido(reservaId: string): Promise<Resultado<boolean>> {
+  const r = await marcarChatLeido(reservaId);
+  return r.ok ? { ok: true, data: r.data } : { ok: false, error: r.error };
 }

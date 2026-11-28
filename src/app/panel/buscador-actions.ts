@@ -302,6 +302,33 @@ export async function listarActividadPanel(): Promise<Resultado<ActividadItem[]>
       }
     }
 
+    // 1b) Mensajes que los clientes escriben en el chat de su cita (RLS: solo los de este negocio).
+    if (rol !== "ADMIN") {
+      const { data: msgs } = await (supabase as unknown as {
+        from: (t: string) => {
+          select: (c: string) => {
+            eq: (c: string, v: string) => { order: (c: string, o: object) => { limit: (n: number) => Promise<{ data: unknown }> } };
+          };
+        };
+      })
+        .from("chat_mensaje")
+        .select("id, cuerpo, created_at, conversacion:conversacion_id (reserva_id, negocio_id, cliente:cliente_id (nombre))")
+        .eq("autor_rol", "CLIENTE")
+        .order("created_at", { ascending: false })
+        .limit(15);
+      for (const m of (msgs ?? []) as { id: string; cuerpo: string; created_at: string; conversacion: { negocio_id: string; cliente: { nombre: string } | null } | null }[]) {
+        if (m.conversacion?.negocio_id !== negocioId) continue;
+        items.push({
+          clave: `chat-${m.id}`,
+          titulo: `Mensaje de ${m.conversacion?.cliente?.nombre ?? "un cliente"}`,
+          detalle: m.cuerpo.length > 90 ? `${m.cuerpo.slice(0, 90)}…` : m.cuerpo,
+          fecha: m.created_at,
+          href: "/panel/agenda",
+          tono: "violet",
+        });
+      }
+    }
+
     // 2) Auditoría del negocio (solo el dueño, igual que el módulo Auditoría): altas, cambios y retiros.
     if (rol === "BARBERIA") {
       const rpc = supabase as unknown as { rpc: (n: string, a?: object) => Promise<{ data: unknown; error: unknown }> };

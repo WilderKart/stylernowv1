@@ -6,6 +6,7 @@ import { EncabezadoAdmin } from "../_componentes/encabezado-admin";
 import { rpcAdmin } from "../_componentes/rpc";
 import { Caja, TituloCaja } from "../_componentes/ui-admin";
 import { ProbarAlertas } from "./probar-alertas";
+import { entornoPagos } from "@/lib/pagos/entorno";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,43 @@ const hay = (...nombres: string[]) => nombres.every((n) => !!process.env[n]?.tri
 const faltan = (...nombres: string[]) => nombres.filter((n) => !process.env[n]?.trim());
 
 /**
+ * Modo real de Mercado Pago, sin mostrar ningún valor secreto: entorno que decide el servidor, tipo de credencial (solo el
+ * prefijo) y, preguntándole a Mercado Pago de quién es el token, si la cuenta es de prueba o real.
+ */
+async function modoMercadoPago(): Promise<{ nivel: Nivel; detalle: string }> {
+  let entorno: string;
+  try {
+    entorno = entornoPagos();
+  } catch (e) {
+    return { nivel: "falla", detalle: e instanceof Error ? e.message : "Entorno inválido" };
+  }
+  const token = process.env.MERCADOPAGO_ACCESS_TOKEN?.trim() ?? "";
+  const clave = process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY?.trim() ?? "";
+  const tipo = (v: string) => (v.startsWith("TEST-") ? "TEST-" : v.startsWith("APP_USR-") ? "APP_USR-" : v ? "otro" : "falta");
+  let cuenta = "no se pudo consultar";
+  let esPrueba: boolean | null = null;
+  if (token) {
+    try {
+      const r = await fetch("https://api.mercadopago.com/users/me", { headers: { Authorization: `Bearer ${token}` }, cache: "no-store", signal: AbortSignal.timeout(5000) });
+      if (r.ok) {
+        const u = (await r.json()) as { nickname?: string; site_id?: string; tags?: string[] };
+        esPrueba = /^TEST/i.test(u.nickname ?? "") || (u.tags ?? []).includes("test_user");
+        cuenta = `${esPrueba ? "cuenta de PRUEBA" : "cuenta REAL"} (${u.site_id ?? "?"})`;
+      } else {
+        cuenta = `Mercado Pago respondió ${r.status} al validar el token`;
+      }
+    } catch {
+      cuenta = "sin respuesta de Mercado Pago";
+    }
+  }
+  const coherente = entorno === "SANDBOX" ? esPrueba !== false : esPrueba !== true;
+  return {
+    nivel: !token ? "falla" : coherente ? "ok" : "falla",
+    detalle: `Entorno del servidor: ${entorno} · token ${tipo(token)} · clave pública ${tipo(clave)} · ${cuenta}${coherente ? "" : " · NO COINCIDEN: los pagos se rechazarán"}`,
+  };
+}
+
+/**
  * Estado del sistema con comprobaciones en vivo (cada carga mide de verdad) y lo que registra la base.
  * Solo dice si cada variable de entorno EXISTE; nunca muestra su valor.
  */
@@ -49,10 +87,11 @@ export default async function AdminSistemaPage() {
   await requireSuperSU();
   const supabase = await createClient();
 
-  const [db, auth, storage] = await Promise.all([
+  const [db, auth, storage, modoMp] = await Promise.all([
     medir(() => rpcAdmin<EstadoBase>("admin_estado_sistema")),
     medir(() => supabase.auth.getUser()),
     medir(() => createAdminClient().storage.from("negocio-media").list("", { limit: 1 })),
+    modoMercadoPago(),
   ]);
 
   const base = db.valor && db.valor.ok ? db.valor.data : null;
@@ -100,6 +139,7 @@ export default async function AdminSistemaPage() {
           ? `${base.webhooks.recibidos_24h} avisos recibidos en 24 h (${base.webhooks.errores_24h} con error, ${base.webhooks.sin_procesar} sin procesar) · último ${hace(base.webhooks.ultimo)} · ${base.pagos.pendientes_viejos} pagos pendientes de más de 1 h`
           : "Configurado",
     },
+    { nombre: "Modo de Mercado Pago (prueba o real)", nivel: modoMp.nivel, detalle: modoMp.detalle },
     {
       nombre: "Monitoreo de errores (Sentry)",
       nivel: hay("NEXT_PUBLIC_SENTRY_DSN") ? "ok" : "alerta",

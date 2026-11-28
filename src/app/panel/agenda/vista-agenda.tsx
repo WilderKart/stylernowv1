@@ -10,6 +10,7 @@ import { HORAS_MINIMAS_CANCELACION_NEGOCIO, negocioPuedeCancelar } from "@/lib/p
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { ActualizarEnVivo } from "@/components/panel/actualizar-en-vivo";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { ChatCita } from "./chat-cita";
 import { useEnLinea } from "@/lib/hooks/use-en-linea";
 import {
   marcarNoShow,
@@ -661,7 +662,7 @@ function PanelCita({
   onCerrar: () => void;
   onCambio: () => void;
 }) {
-  const [accion, setAccion] = useState<"detalle" | "reprogramar" | "reasignar" | "cancelar">("detalle");
+  const [accion, setAccion] = useState<"detalle" | "reprogramar" | "reasignar" | "cancelar" | "chat">("detalle");
   const [nuevaFecha, setNuevaFecha] = useState(cita.horaInicio.slice(0, 10));
   const [slotsDisponibles, setSlotsDisponibles] = useState<{ horaInicio: string }[]>([]);
   const [horaElegida, setHoraElegida] = useState("");
@@ -759,6 +760,9 @@ function PanelCita({
 
         {accion === "detalle" ? (
           <div className="mt-5 flex flex-col gap-2">
+            <Button variant="secondary" onClick={() => setAccion("chat")}>
+              Mensajes con el cliente
+            </Button>
             {cita.estado === "CONFIRMADA" ? (
               <>
                 <Button
@@ -804,6 +808,13 @@ function PanelCita({
             ) : null}
             <Button variant="ghost" onClick={onCerrar}>
               Cerrar
+            </Button>
+          </div>
+        ) : accion === "chat" ? (
+          <div className="mt-5">
+            <ChatCita reservaId={cita.id} clienteNombre={cita.clienteNombre} cerrado={["CANCELADA", "PENDIENTE_PAGO", "NO_SHOW"].includes(cita.estado)} />
+            <Button variant="ghost" className="mt-3 w-full" onClick={() => setAccion("detalle")}>
+              Volver
             </Button>
           </div>
         ) : accion === "reprogramar" ? (
