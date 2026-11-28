@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { confirmarSinAnticipo, consultarEstadoPago, iniciarPagoSena } from "./actions";
 import { useT } from "@/lib/i18n/proveedor";
+import estilos from "./pago.module.css";
 import { PagoDirecto, type MediosDirectosVista } from "./pago-directo";
 
 /** Tras este tiempo sin confirmación se avisa que puede cerrar la app (02-UX/06_Payments.md). */
@@ -201,7 +202,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
   return (
     <Pantalla>
       <Top titulo={t("pago.top")} volverA={volverA} />
-      <div className="p-steps" aria-label={t("pago.pasos")}>
+      <div className={`p-steps ${estilos.pasos}`} aria-label={t("pago.pasos")}>
         <span className="is-done">{t("pago.p1")}</span>
         <span className="is-done">{t("pago.p2")}</span>
         <span className="is-done">{t("pago.p3")}</span>
@@ -210,7 +211,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
         </span>
       </div>
 
-      <div className="p-4">
+      <div className={`px-4 py-3 ${estilos.ticket}`}>
         <TicketCita
           dia={dm.dia}
           mes={dm.mes}
@@ -223,7 +224,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
           lineas={[`${resumen.profesional} · ${hora} · ${resumen.negocio}`]}
           pie={
             <>
-              <span className="sn-label">{t("res.total")}</span>
+              <span className="sn-label">Total del servicio</span>
               <span className="sn-fig text-[22px]">{formatCOP(resumen.montoTotal)}</span>
             </>
           }
@@ -237,14 +238,14 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
 
       {/* Resumen compacto: lo que se paga ahora y lo que queda para el local, lado a lado. */}
       <div className="grid grid-cols-2 gap-2 px-4 pb-3">
-        <div className="flex min-w-0 items-center gap-2 border-2 border-ink p-2.5 sm:gap-3 sm:p-3">
+        <div className={`flex min-w-0 items-center gap-3 border-2 border-ink p-3 ${estilos.r16}`}>
           <Wallet aria-hidden className="size-7 flex-none sm:size-9" />
           <div className="min-w-0">
             <p className="m-0 text-[13px] font-bold">{pagaTodoDirecto ? "Pagas ahora" : "Anticipo"}</p>
             <p className="m-0 font-mono text-[18px] leading-tight font-bold tabular-nums text-signal">{formatCOP(aPagarAhora)}</p>
           </div>
         </div>
-        <div className="flex min-w-0 items-center gap-2 border-2 border-ink p-2.5 sm:gap-3 sm:p-3">
+        <div className={`flex min-w-0 items-center gap-3 border-2 border-ink p-3 ${estilos.r16}`}>
           <Store aria-hidden className="size-7 flex-none sm:size-9" />
           <div className="min-w-0">
             <p className="m-0 text-[13px] font-bold">En el local</p>
@@ -284,12 +285,12 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
       </Bloque>
       ) : null}
 
-      <section className="mx-4 mt-3 border-2 border-ink p-3">
-        <div role="heading" aria-level={2} className="m-0 mb-2 flex items-center gap-2 font-mono text-[15px] font-bold text-signal">
+      <section className={`mx-4 mt-3 border-2 border-ink p-3 ${estilos.r16}`}>
+        <div role="heading" aria-level={2} className="m-0 mb-2 flex items-center gap-2 text-[18px] leading-tight font-bold text-signal">
           <ShieldCheck aria-hidden className="size-6 flex-none" />
           {t("pago.sec_politica")}
         </div>
-        <ul className="m-0 flex list-none flex-col gap-1.5 border-2 border-border bg-surface p-2.5 text-[13px]">
+        <ul className={`m-0 flex list-none flex-col gap-1 border border-border bg-surface p-2.5 text-[13px] leading-snug ${estilos.r8}`}>
           {resumen.politica.map((linea) => (
             <li key={linea} className="flex items-start gap-2">
               <Check aria-hidden className="mt-0.5 size-4 flex-none text-signal" strokeWidth={3} />
@@ -300,7 +301,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
         <label className="mt-3 flex cursor-pointer items-start gap-3 text-[13px]">
           <input
             type="checkbox"
-            className="mt-0.5 size-5 shrink-0 accent-current"
+            className={`mt-0.5 size-5 shrink-0 accent-current ${estilos.r8}`}
             checked={acepta}
             onChange={(e) => setAcepta(e.target.checked)}
           />
