@@ -84,13 +84,15 @@ export default async function StaffDetallePage(props: PageProps<"/panel/staff/[i
   if (contexto.rol === "BARBERIA" && (staff.presta_servicios ?? true) && staff.estado === "ACTIVO") {
     const [{ data: sedesNegocio }, { data: filas }] = await Promise.all([
       supabase.from("sede").select("id, nombre").eq("negocio_id", staff.negocio_id!).eq("cerrada_permanente", false).order("nombre"),
-      supabase.from("disponibilidad").select("sede_id, dia_semana, hora_inicio, hora_fin").eq("vinculo_id", id),
+      supabase.from("disponibilidad").select("sede_id, dia_semana, hora_inicio, hora_fin, heredado").eq("vinculo_id", id),
     ]);
     // Si la persona está fijada a una sede, solo esa; si no, todas las del negocio.
     const sedesHorario = (sedesNegocio ?? []).filter((s) => !staff.sede_id || s.id === staff.sede_id);
     if (sedesHorario.length > 0) {
       const porSede: Record<string, TramoDia[]> = {};
       for (const f of filas ?? []) (porSede[f.sede_id] ??= []).push({ dia: f.dia_semana, inicio: f.hora_inicio.slice(0, 5), fin: f.hora_fin.slice(0, 5) });
+      // Sedes donde todas las filas son heredadas: la persona no tiene horario propio allí.
+      const heredanDeSede = [...new Set((filas ?? []).map((f) => f.sede_id))].filter((sid) => (filas ?? []).filter((f) => f.sede_id === sid).every((f) => f.heredado));
       bloqueHorario = (
         <HorarioDelStaff
           vinculoId={id}
@@ -98,6 +100,7 @@ export default async function StaffDetallePage(props: PageProps<"/panel/staff/[i
           sedes={sedesHorario}
           sedeInicial={sedesHorario[0].id}
           porSede={porSede}
+          heredanDeSede={heredanDeSede}
           serviciosAsignados={serviciosAsignables ? serviciosAsignables.filter((s) => s.asignado).length : null}
         />
       );

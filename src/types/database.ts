@@ -2826,6 +2826,7 @@ export type Database = {
       disponibilidad: {
         Row: {
           dia_semana: number
+          heredado: boolean
           hora_fin: string
           hora_inicio: string
           id: string
@@ -2834,6 +2835,7 @@ export type Database = {
         }
         Insert: {
           dia_semana: number
+          heredado?: boolean
           hora_fin: string
           hora_inicio: string
           id?: string
@@ -2842,6 +2844,7 @@ export type Database = {
         }
         Update: {
           dia_semana?: number
+          heredado?: boolean
           hora_fin?: string
           hora_inicio?: string
           id?: string

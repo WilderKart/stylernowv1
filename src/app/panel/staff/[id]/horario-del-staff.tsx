@@ -37,6 +37,7 @@ export function HorarioDelStaff({
   sedes,
   sedeInicial,
   porSede,
+  heredanDeSede,
   serviciosAsignados,
 }: {
   vinculoId: string;
@@ -44,12 +45,15 @@ export function HorarioDelStaff({
   sedes: SedeHorario[];
   sedeInicial: string;
   porSede: Record<string, TramoDia[]>;
+  /** Sedes donde la persona no tiene horario propio y sigue el de la sede (migración 210). */
+  heredanDeSede: string[];
   /** null = no aplica (no se mide). */
   serviciosAsignados: number | null;
 }) {
   const router = useRouter();
   const [sedeId, setSedeId] = useState(sedeInicial);
   const [guardado, setGuardado] = useState(porSede);
+  const [heredan, setHeredan] = useState(() => new Set(heredanDeSede));
   const [filas, setFilas] = useState<Fila[]>(() => aFilas(porSede[sedeInicial] ?? []));
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,6 +100,11 @@ export function HorarioDelStaff({
       return;
     }
     setGuardado((g) => ({ ...g, [sedeId]: dias }));
+    setHeredan((h) => {
+      const n = new Set(h);
+      n.delete(sedeId);
+      return n;
+    });
     setOk(true);
     router.refresh();
   }
@@ -119,6 +128,12 @@ export function HorarioDelStaff({
           </select>
         ) : null}
       </div>
+
+      {heredan.has(sedeId) && diasGuardados > 0 ? (
+        <p role="status" className="mt-3 mb-0 border-2 border-border bg-surface p-2.5 text-[12px] text-text-muted">
+          {nombre} sigue el horario de esta sede: si la sede lo cambia, se actualiza solo. Cuando guardes un horario aquí, pasa a ser un horario propio.
+        </p>
+      ) : null}
 
       {diasGuardados === 0 || serviciosAsignados === 0 ? (
         <div role="alert" className="mt-3 border-2 border-danger bg-danger-soft p-2.5 text-[12.5px] text-text">
