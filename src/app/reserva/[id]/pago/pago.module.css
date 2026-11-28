@@ -1,0 +1,31 @@
+/* Esquinas suaves del paso 04 Pago. El CSS global fuerza border-radius: 0 con alta especificidad, por eso !important. */
+.r8 {
+  border-radius: 8px !important;
+}
+.r12 {
+  border-radius: 12px !important;
+}
+.r16 {
+  border-radius: 16px !important;
+}
+
+/* Barra de pasos con extremos redondeados y texto en una sola línea. */
+.pasos {
+  border-radius: 12px !important;
+  overflow: hidden;
+  margin-inline: 16px;
+  margin-top: 4px;
+  border: 2px solid var(--line) !important;
+}
+.pasos > span {
+  white-space: nowrap;
+  font-size: 12px !important;
+  font-family: inherit !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+/* Ticket de la cita con esquinas suaves (las muescas de la perforación se conservan). */
+.ticket :global(.sn-ticket) {
+  border-radius: 16px !important;
+}
