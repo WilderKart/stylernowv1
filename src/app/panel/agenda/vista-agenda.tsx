@@ -272,16 +272,24 @@ export function VistaAgenda({
       ) : cargando ? (
         <div className="h-[400px] animate-pulse rounded-2xl border border-border-subtle bg-surface" />
       ) : vista === "dia" ? (
-        <DiaGrid
-          fecha={fecha}
-          sede={sede}
-          staff={staff}
-          citas={citas}
-          bloqueos={bloqueos}
-          onSeleccionar={setCitaSeleccionada}
-          onReasignar={onReasignar}
-          onQuitarBloqueo={onQuitarBloqueo}
-        />
+        <>
+          {/* Celular: un barbero a la vez (chips) o lista de todos. Escritorio: columnas por barbero. */}
+          <div className="md:hidden">
+            <DiaMovil fecha={fecha} sede={sede} staff={staff} citas={citas} bloqueos={bloqueos} onSeleccionar={setCitaSeleccionada} />
+          </div>
+          <div className="hidden md:block">
+            <DiaGrid
+              fecha={fecha}
+              sede={sede}
+              staff={staff}
+              citas={citas}
+              bloqueos={bloqueos}
+              onSeleccionar={setCitaSeleccionada}
+              onReasignar={onReasignar}
+              onQuitarBloqueo={onQuitarBloqueo}
+            />
+          </div>
+        </>
       ) : vista === "semana" ? (
         <SemanaCalendario
           lunes={lunesDeLaSemana(fecha)}
@@ -513,6 +521,177 @@ function DiaGrid({
 // Vista Mes — mes completo en cuadrícula de semanas.
 // Tocar un día abre la vista Día de esa fecha.
 // ════════════════════════════════════════════════════════════════════════
+
+// ════════════════════════════════════════════════════════════════════════
+// Vista Día en celular — sin scroll horizontal.
+//   · «Todos»: lista cronológica de las citas del día, con el barbero de cada una (color propio).
+//   · Un barbero: su día completo en una sola columna a todo el ancho. Se cambia con los chips o deslizando de lado.
+// ════════════════════════════════════════════════════════════════════════
+
+const COLORES_STAFF = ["#f97316", "#3b82f6", "#10b981", "#a855f7", "#ef4444", "#eab308", "#06b6d4", "#ec4899"];
+
+function DiaMovil({
+  fecha,
+  sede,
+  staff,
+  citas,
+  bloqueos,
+  onSeleccionar,
+}: {
+  fecha: string;
+  sede: Sede;
+  staff: StaffSede[];
+  citas: CitaAgenda[];
+  bloqueos: BloqueoAgenda[];
+  onSeleccionar: (c: CitaAgenda) => void;
+}) {
+  const [sel, setSel] = useState<string>("todos"); // "todos" o staffId
+  const [toqueX, setToqueX] = useState<number | null>(null);
+  const { inicio, fin } = ventanaDelDia(sede.horarioBase, fecha);
+  const totalSlots = Math.max(1, Math.ceil((fin - inicio) / 30));
+  const orden = ["todos", ...staff.map((s) => s.staffId)];
+  const actual = orden.includes(sel) ? sel : "todos";
+  const color = (staffId: string | null) => COLORES_STAFF[Math.max(0, staff.findIndex((s) => s.staffId === staffId)) % COLORES_STAFF.length];
+  const nombre = (staffId: string | null) => staff.find((s) => s.staffId === staffId)?.nombre ?? "Sin asignar";
+  const cuenta = (staffId: string) => citas.filter((c) => c.staffId === staffId).length;
+  const diaIni = new Date(`${fecha}T00:00:00-05:00`).getTime();
+  const slotEnDia = (iso: string) => Math.floor(((new Date(iso).getTime() - diaIni) / 60000 - inicio) / 30);
+
+  const etiquetas: string[] = [];
+  for (let m = inicio; m < fin; m += 60) etiquetas.push(`${String(Math.floor(m / 60)).padStart(2, "0")}:00`);
+
+  function mover(sentido: 1 | -1) {
+    const i = orden.indexOf(actual) + sentido;
+    if (i >= 0 && i < orden.length) setSel(orden[i]);
+  }
+
+  const claseCita = (estado: string) =>
+    estado === "NO_SHOW" ? "border-danger bg-danger-soft" : estado === "CONFIRMADA" ? "border-accent bg-accent-soft" : "border-text-faint bg-surface-2";
+
+  return (
+    <div className="rounded-2xl border border-border-subtle bg-surface">
+      <div role="tablist" aria-label="Barbero" className="flex gap-1.5 overflow-x-auto border-b border-border-subtle p-2">
+        {orden.map((id) => {
+          const activo = id === actual;
+          const n = id === "todos" ? citas.length : cuenta(id);
+          return (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={activo}
+              onClick={() => setSel(id)}
+              className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-bold ${
+                activo ? "border-accent bg-accent text-ink" : "border-border text-text-muted"
+              }`}
+            >
+              {id !== "todos" ? <span className="size-2 rounded-full" style={{ background: color(id) }} /> : null}
+              {id === "todos" ? "Todos" : nombre(id).split(" ")[0]}
+              <span className={`rounded-full px-1.5 text-[10.5px] ${activo ? "bg-ink/15" : "bg-surface-2"}`}>{n}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {actual === "todos" ? (
+        citas.length === 0 ? (
+          <p className="px-4 py-10 text-center text-[12.5px] text-text-faint">No hay citas este día.</p>
+        ) : (
+          <ul className="flex flex-col gap-2 p-2">
+            {[...citas]
+              .sort((a, b) => a.horaInicio.localeCompare(b.horaInicio))
+              .map((c) => (
+                <li key={c.id}>
+                  <button
+                    type="button"
+                    onClick={() => onSeleccionar(c)}
+                    className={`flex w-full items-stretch gap-3 rounded-xl border-l-4 p-2.5 text-left ${claseCita(c.estado)}`}
+                  >
+                    <span className="flex w-12 shrink-0 flex-col text-[12px] font-bold text-text">
+                      {hora(c.horaInicio)}
+                      <span className="text-[10.5px] font-normal text-text-faint">{hora(c.horaFin)}</span>
+                    </span>
+                    <span className="flex min-w-0 flex-1 flex-col">
+                      <span className="truncate text-[13px] font-bold text-text">{c.clienteNombre}</span>
+                      <span className="truncate text-[11.5px] text-text-faint">{c.servicios}</span>
+                      <span className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-text-muted">
+                        <span className="size-2 rounded-full" style={{ background: color(c.staffId) }} />
+                        {nombre(c.staffId)}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+          </ul>
+        )
+      ) : (
+        <div
+          className="grid"
+          style={{ gridTemplateColumns: "48px 1fr" }}
+          onTouchStart={(e) => setToqueX(e.touches[0].clientX)}
+          onTouchEnd={(e) => {
+            if (toqueX === null) return;
+            const dx = e.changedTouches[0].clientX - toqueX;
+            setToqueX(null);
+            if (Math.abs(dx) > 70) mover(dx < 0 ? 1 : -1);
+          }}
+        >
+          <div className="relative border-r border-border-subtle" style={{ height: totalSlots * 24 }}>
+            {etiquetas.map((e, i) => (
+              <p key={e} className="absolute right-1.5 -translate-y-1/2 text-[10px] text-text-faint" style={{ top: i * 48 }}>
+                {e}
+              </p>
+            ))}
+          </div>
+          <div className="relative" style={{ height: totalSlots * 24 }}>
+            {etiquetas.map((e, i) => (
+              <div key={e} className="absolute inset-x-0 border-t border-border-subtle/60" style={{ top: i * 48 }} />
+            ))}
+            {bloqueos
+              .filter((b) => b.vinculoId === staff.find((s) => s.staffId === actual)?.vinculoId)
+              .map((b) => {
+                const ini = Math.max(0, slotEnDia(b.fechaInicio));
+                const f = Math.min(totalSlots, slotEnDia(b.fechaFin));
+                if (f <= ini) return null;
+                return (
+                  <div
+                    key={b.id}
+                    className="absolute inset-x-0 flex items-center justify-center bg-[repeating-linear-gradient(45deg,var(--color-border-subtle),var(--color-border-subtle)_6px,transparent_6px,transparent_12px)] text-[10px] text-text-faint"
+                    style={{ top: ini * 24, height: (f - ini) * 24 }}
+                  >
+                    {b.motivo ?? "Bloqueado"}
+                  </div>
+                );
+              })}
+            {citas
+              .filter((c) => c.staffId === actual)
+              .map((c) => {
+                const ini = slotEnDia(c.horaInicio);
+                const min = (new Date(c.horaFin).getTime() - new Date(c.horaInicio).getTime()) / 60000;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => onSeleccionar(c)}
+                    className={`absolute inset-x-1 overflow-hidden rounded-md border-l-4 p-1.5 text-left text-[11.5px] leading-tight shadow-sm ${claseCita(c.estado)}`}
+                    style={{ top: ini * 24 + 1, height: Math.max(24, (min / 30) * 24 - 2) }}
+                  >
+                    <span className="block truncate font-bold text-text">
+                      {hora(c.horaInicio)} {c.clienteNombre}
+                    </span>
+                    <span className="block truncate text-text-faint">{c.servicios}</span>
+                  </button>
+                );
+              })}
+          </div>
+        </div>
+      )}
+      <p className="border-t border-border-subtle p-2 text-center text-[11px] text-text-faint">
+        {actual === "todos" ? "Toca una cita para ver el detalle, escribirle al cliente o reasignarla." : "Desliza de lado o usa los chips para ver a otro barbero."}
+      </p>
+    </div>
+  );
+}
 
 function citasPorDia(citas: CitaAgenda[]) {
   const mapa = new Map<string, CitaAgenda[]>();
