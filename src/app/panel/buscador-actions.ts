@@ -312,18 +312,18 @@ export async function listarActividadPanel(): Promise<Resultado<ActividadItem[]>
         };
       })
         .from("chat_mensaje")
-        .select("id, cuerpo, created_at, conversacion:conversacion_id (reserva_id, negocio_id, cliente:cliente_id (nombre))")
-        .eq("autor_rol", "CLIENTE")
+        .select("id, cuerpo, created_at, conversacion:conversacion_id (reserva_id, negocio_id, cliente:cliente_id (nombre))")        .eq("autor_rol", "CLIENTE")
         .order("created_at", { ascending: false })
         .limit(15);
-      for (const m of (msgs ?? []) as { id: string; cuerpo: string; created_at: string; conversacion: { negocio_id: string; cliente: { nombre: string } | null } | null }[]) {
+      for (const m of (msgs ?? []) as { id: string; cuerpo: string; created_at: string; conversacion: { reserva_id: string; negocio_id: string; cliente: { nombre: string } | null } | null }[]) {
         if (m.conversacion?.negocio_id !== negocioId) continue;
         items.push({
           clave: `chat-${m.id}`,
           titulo: `Mensaje de ${m.conversacion?.cliente?.nombre ?? "un cliente"}`,
           detalle: m.cuerpo.length > 90 ? `${m.cuerpo.slice(0, 90)}…` : m.cuerpo,
           fecha: m.created_at,
-          href: "/panel/agenda",
+          // Directo al chat de esa cita.
+          href: m.conversacion?.reserva_id ? `/panel/agenda/chat/${m.conversacion.reserva_id}` : "/panel/agenda",
           tono: "violet",
         });
       }

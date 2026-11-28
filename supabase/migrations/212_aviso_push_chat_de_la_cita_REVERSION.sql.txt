@@ -1,0 +1,5 @@
+-- Reversión de 212 (ejecutar a mano si hiciera falta). Los avisos ya encolados no se tocan.
+drop trigger if exists notif_chat_cita on public.chat_mensaje;
+drop function if exists public.trg_notif_chat_cita();
+delete from public.notificacion_plantilla where codigo in ('CHAT_CITA_CLIENTE', 'CHAT_CITA_NEGOCIO') and negocio_id is null;
+-- Los eventos se dejan: pueden estar referenciados por avisos históricos del outbox.
