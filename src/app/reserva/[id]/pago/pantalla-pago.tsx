@@ -16,7 +16,7 @@ import {
 } from "@/app/lealtad/ui-cliente";
 import { Status } from "@/components/brutal";
 import { Button } from "@/components/ui/button";
-import { Check, Clock, ShieldCheck, Store, Wallet } from "lucide-react";
+import { Check, ChevronDown, Clock, ShieldCheck, Store, Wallet } from "lucide-react";
 import { formatCOP } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -99,6 +99,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
   const [demorado, setDemorado] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [acepta, setAcepta] = useState(false);
+  const [politicaAbierta, setPoliticaAbierta] = useState(false);
   const [pagaTodoDirecto, setPagaTodoDirecto] = useState(false);
   const yaRedirigido = useRef(false);
 
@@ -176,6 +177,65 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
   // Mercado Pago solo si el negocio lo tiene conectado; el pago directo es una alternativa (o la única opción).
   const mostrarMp = resumen.cobraEnLinea !== false;
 
+  // Con pago directo el orden es: método de pago → anticipo / en el local → datos de pago → política → confirmar.
+  const pagoDirectoActivo = !!(resumen.directo && resumen.negocioId);
+  const tarjetasResumen = (
+    <>
+      {/* Resumen compacto: lo que se paga ahora y lo que queda para el local, lado a lado. */}
+      <div className="grid grid-cols-2 gap-2 px-4 pb-3">
+        <div className={`flex min-w-0 items-center gap-3 border-2 border-ink p-3 ${estilos.r16}`}>
+          <Wallet aria-hidden className="size-7 flex-none sm:size-9" />
+          <div className="min-w-0">
+            <p className="m-0 text-[13px] font-bold">{pagaTodoDirecto ? "Pagas ahora" : "Anticipo"}</p>
+            <p className="m-0 font-mono text-[18px] leading-tight font-bold tabular-nums text-signal">{formatCOP(aPagarAhora)}</p>
+          </div>
+        </div>
+        <div className={`flex min-w-0 items-center gap-3 border-2 border-ink p-3 ${estilos.r16}`}>
+          <Store aria-hidden className="size-7 flex-none sm:size-9" />
+          <div className="min-w-0">
+            <p className="m-0 text-[13px] font-bold">En el local</p>
+            <p className="m-0 font-mono text-[18px] leading-tight font-bold tabular-nums">{formatCOP(saldoLocal)}</p>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+
+  const tarjetaPolitica = (
+    <section className={`mx-4 mt-3 border-2 border-ink p-3 ${estilos.r16}`}>
+      <button
+        type="button"
+        aria-expanded={politicaAbierta}
+        aria-controls="politica-detalle"
+        onClick={() => setPoliticaAbierta((v) => !v)}
+        className="m-0 flex w-full items-center gap-2 bg-transparent p-0 text-left text-[18px] leading-tight font-bold text-signal"
+      >
+        <ShieldCheck aria-hidden className="size-6 flex-none" />
+        <span className="flex-1">{t("pago.sec_politica")}</span>
+        <ChevronDown aria-hidden className={`size-6 flex-none transition-transform ${politicaAbierta ? "rotate-180" : ""}`} />
+      </button>
+      {politicaAbierta ? (
+        <ul id="politica-detalle" className={`m-0 mt-2 flex list-none flex-col gap-1 border border-border bg-surface p-2.5 text-[13px] leading-snug ${estilos.r8}`}>
+          {resumen.politica.map((linea) => (
+            <li key={linea} className="flex items-start gap-2">
+              <Check aria-hidden className="mt-0.5 size-4 flex-none text-signal" strokeWidth={3} />
+              <span>{linea}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      <label className="mt-3 flex cursor-pointer items-start gap-3 text-[13px]">
+        <input
+          type="checkbox"
+          className={`mt-0.5 size-5 shrink-0 accent-current ${estilos.r8}`}
+          checked={acepta}
+          onChange={(e) => setAcepta(e.target.checked)}
+        />
+        <span>{t("pago.acepto_politica")}</span>
+      </label>
+    </section>
+  );
+
   // Esperando la confirmación de la pasarela (C10): bloque tinta a pantalla completa.
   if (esperando) {
     return (
@@ -236,23 +296,7 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
         ) : null}
       </div>
 
-      {/* Resumen compacto: lo que se paga ahora y lo que queda para el local, lado a lado. */}
-      <div className="grid grid-cols-2 gap-2 px-4 pb-3">
-        <div className={`flex min-w-0 items-center gap-3 border-2 border-ink p-3 ${estilos.r16}`}>
-          <Wallet aria-hidden className="size-7 flex-none sm:size-9" />
-          <div className="min-w-0">
-            <p className="m-0 text-[13px] font-bold">{pagaTodoDirecto ? "Pagas ahora" : "Anticipo"}</p>
-            <p className="m-0 font-mono text-[18px] leading-tight font-bold tabular-nums text-signal">{formatCOP(aPagarAhora)}</p>
-          </div>
-        </div>
-        <div className={`flex min-w-0 items-center gap-3 border-2 border-ink p-3 ${estilos.r16}`}>
-          <Store aria-hidden className="size-7 flex-none sm:size-9" />
-          <div className="min-w-0">
-            <p className="m-0 text-[13px] font-bold">En el local</p>
-            <p className="m-0 font-mono text-[18px] leading-tight font-bold tabular-nums">{formatCOP(saldoLocal)}</p>
-          </div>
-        </div>
-      </div>
+      {!pagoDirectoActivo ? tarjetasResumen : null}
       <Filas>
         {(resumen.saldoPendiente ?? 0) > 0 ? (
           <Fila
@@ -285,32 +329,10 @@ export function PantallaPago({ resumen, volverA }: { resumen: ResumenPago; volve
       </Bloque>
       ) : null}
 
-      <section className={`mx-4 mt-3 border-2 border-ink p-3 ${estilos.r16}`}>
-        <div role="heading" aria-level={2} className="m-0 mb-2 flex items-center gap-2 text-[18px] leading-tight font-bold text-signal">
-          <ShieldCheck aria-hidden className="size-6 flex-none" />
-          {t("pago.sec_politica")}
-        </div>
-        <ul className={`m-0 flex list-none flex-col gap-1 border border-border bg-surface p-2.5 text-[13px] leading-snug ${estilos.r8}`}>
-          {resumen.politica.map((linea) => (
-            <li key={linea} className="flex items-start gap-2">
-              <Check aria-hidden className="mt-0.5 size-4 flex-none text-signal" strokeWidth={3} />
-              <span>{linea}</span>
-            </li>
-          ))}
-        </ul>
-        <label className="mt-3 flex cursor-pointer items-start gap-3 text-[13px]">
-          <input
-            type="checkbox"
-            className={`mt-0.5 size-5 shrink-0 accent-current ${estilos.r8}`}
-            checked={acepta}
-            onChange={(e) => setAcepta(e.target.checked)}
-          />
-          <span>{t("pago.acepto_politica")}</span>
-        </label>
-      </section>
+      {!pagoDirectoActivo ? tarjetaPolitica : null}
 
       {resumen.directo && resumen.negocioId ? (
-        <PagoDirecto reservaId={resumen.reservaId} negocioId={resumen.negocioId} montoSena={resumen.montoSena} montoTotal={resumen.montoTotal} medios={resumen.directo} acepta={acepta} onModoChange={setPagaTodoDirecto} />
+        <PagoDirecto reservaId={resumen.reservaId} negocioId={resumen.negocioId} montoSena={resumen.montoSena} montoTotal={resumen.montoTotal} medios={resumen.directo} acepta={acepta} onModoChange={setPagaTodoDirecto} despuesMetodo={tarjetasResumen} antesConfirmar={tarjetaPolitica} />
       ) : null}
 
       {error ? (

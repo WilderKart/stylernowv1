@@ -77,10 +77,14 @@ function Tarjeta({ icono, titulo, children }: { icono: React.ReactNode; titulo: 
  * comprobante (comprimido a <300 KB en el navegador y subido directo a Storage, sin pasar por una Server Action).
  * Al registrar el soporte, la cita queda agendada al instante.
  */
-export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medios, acepta, onModoChange }: {
+export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medios, acepta, onModoChange, despuesMetodo, antesConfirmar }: {
   reservaId: string; negocioId: string; montoSena: number; /** Total del servicio: permite pagar todo de una vez. */ montoTotal: number; medios: MediosDirectosVista; acepta: boolean;
   /** Avisa a la pantalla cuando el cliente elige pagar todo o solo el anticipo (para actualizar el resumen de arriba). */
   onModoChange?: (pagaTodo: boolean) => void;
+  /** Se muestra justo debajo de «Método de pago» (resumen anticipo / en el local). */
+  despuesMetodo?: React.ReactNode;
+  /** Se muestra justo antes de «Confirma tu pago» (política de cancelación). */
+  antesConfirmar?: React.ReactNode;
 }) {
   const router = useRouter();
   const puedePagarTodo = montoTotal > montoSena;
@@ -188,6 +192,7 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
           </div>
         </Tarjeta>
       ) : null}
+      {despuesMetodo}
 
       <Tarjeta icono={<Layers className="size-7" />} titulo="Datos de pago">
         <div className="grid grid-cols-2 gap-2">
@@ -235,6 +240,8 @@ export function PagoDirecto({ reservaId, negocioId, montoSena, montoTotal, medio
         ) : null}
         {medios.instrucciones ? <p className="m-0 mt-3 border-l-4 border-accent bg-accent-soft px-3 py-2 text-[13px]">{medios.instrucciones}</p> : null}
       </Tarjeta>
+
+      {antesConfirmar}
 
       <Tarjeta icono={<Coins className="size-7" />} titulo="Confirma tu pago">
         <div className="grid grid-cols-2 gap-2">

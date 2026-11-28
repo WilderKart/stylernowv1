@@ -105,7 +105,7 @@ describe("capa de aplicación", () => {
     const p = leer("src/app/reserva/[id]/pago/pago-directo.tsx");
     expect(p).toMatch(/storage\.from\("pagos-directos"\)\.upload/);
     expect(p).toMatch(/no custodia ni valida transferencias/);
-    expect(p).toMatch(/Guardar QR en galería/);
+    expect(p).toMatch(/Guardar en galería/);
     expect(leer("src/lib/imagen/comprimir.ts")).toMatch(/MAX_COMPROBANTE_BYTES = 300 \* 1024/);
   });
   it("no se redefinen los flujos de cobro de Wompi ni Mercado Pago", () => {
