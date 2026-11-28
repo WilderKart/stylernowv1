@@ -15,3 +15,9 @@
 - Migración 201 **aplicada en producción** (transacción única) y registrada como `20261126060000`. Verificado: 10 tablas con RLS, 2 triggers, `anon` sin ejecución, internas no invocables, sin INSERT directo, 1 SuperSU, 0 reservas completadas previas.
 - Pruebas: vitest 367 OK; SQL ganancias_staff OK; build y lint OK. Verificación visual local de panel, liquidaciones, reglas, novedades, permisos y vista del profesional.
 - No verificado en producción con pagos/servicios reales (aún no hay servicios completados).
+
+## Actualización 2026-11-26 (verificación final y cierre de documentación)
+- Ejecutado de nuevo en local: `ganancias_staff.sql` → OK; `npm test` → 367 OK (30 omitidas por entorno); `npm run lint` → 0 errores; `npm run typecheck` → OK; `npm run build` → OK (con el cambio local sin commitear en `next.config.ts`). Detalle en `EVIDENCIAS.md`.
+- Auditoría complementaria de la superficie (actions, exportación CSV, filtros y migración 201): sin hallazgos nuevos; registrada en `AUDITORIA_FINAL.md`. No reemplaza la revisión humana externa.
+- Creado `EVIDENCIAS.md`, que era referenciado por `PRUEBAS.md` pero faltaba. Rama local igual a `origin/main` (sin commits pendientes de push).
+- **Bloqueado**: verificación en producción con servicios/pagos reales (no hay servicios completados todavía) y revisión humana externa. Los límites funcionales conocidos siguen en `VULNERABILIDADES_Y_MEJORAS.md`.

@@ -18,5 +18,8 @@ Auditoría hecha por el mismo equipo que implementó (no independiente de verdad
 ## No cubierto (ver `VULNERABILIDADES_Y_MEJORAS.md`)
 Storage de evidencias, notificaciones, descuento por puntos, Excel/PDF nativos, IA, escritura excepcional de soporte, prueba de carga con volúmenes grandes.
 
+## Revisión complementaria (2026-11-26)
+Se revisó de nuevo la superficie expuesta con criterio independiente: Server Actions del panel y del profesional, ruta de exportación CSV, validación de filtros y los controles de la migración 201 (definer + `search_path`, `revoke`/`grant`, `_gan_permiso` con `p_sede is null`, trigger que no bloquea el POS). No aparecieron hallazgos nuevos; las evidencias y los comandos están en `EVIDENCIAS.md`. Esto **no sustituye** la revisión humana externa recomendada arriba.
+
 ## Veredicto
 **IMPLEMENTACIÓN COMPLETA, CON RESTRICCIONES** (las de arriba). Validada en local; el estado de producción se registra en `PROGRESO.md`.

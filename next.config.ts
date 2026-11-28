@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
   // una superficie ajena, en vez de redirigir silenciosamente a otra parte.
   experimental: {
     authInterrupts: true,
+    // Las fotos se comprimen en el navegador (≤1280 px WebP) y viajan en base64 dentro de la Server Action:
+    // con el límite por defecto (1 MB) una foto compleja lo superaba (Sentry STYLERNOW-APP-8). 4 MB < tope de Vercel (4,5 MB).
+    serverActions: { bodySizeLimit: "4mb" },
   },
   productionBrowserSourceMaps: false,
   poweredByHeader: false,
